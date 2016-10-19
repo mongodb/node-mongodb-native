@@ -72,64 +72,57 @@ MongoCR.prototype.auth = function(server, connections, db, username, password, c
         getnonce:1
       }, {
         numberToSkip: 0, numberToReturn: 1
-      }).toBin(), function(err, r) {
-      // // Let's start the process
-      // server.command(f("%s.$cmd", db)
-      //   , { getnonce: 1 }
-      //   , { connection: connection }, function(err, r) {
-          var nonce = null;
-          var key = null;
+      }), function(err, r) {
+        var nonce = null;
+        var key = null;
 
-          // Adjust the number of connections left
-          // Get nonce
-          if(err == null) {
-            nonce = r.result.nonce;
-            // Use node md5 generator
-            var md5 = crypto.createHash('md5');
-            // Generate keys used for authentication
-            md5.update(username + ":mongo:" + password, 'utf8');
-            var hash_password = md5.digest('hex');
-            // Final key
-            md5 = crypto.createHash('md5');
-            md5.update(nonce + username + hash_password, 'utf8');
-            key = md5.digest('hex');
+        // Adjust the number of connections left
+        // Get nonce
+        if(err == null) {
+          nonce = r.result.nonce;
+          // Use node md5 generator
+          var md5 = crypto.createHash('md5');
+          // Generate keys used for authentication
+          md5.update(username + ":mongo:" + password, 'utf8');
+          var hash_password = md5.digest('hex');
+          // Final key
+          md5 = crypto.createHash('md5');
+          md5.update(nonce + username + hash_password, 'utf8');
+          key = md5.digest('hex');
+        }
+
+        // Execute command
+        // Write the commmand on the connection
+        server(connection, new Query(self.bson, f("%s.$cmd", db), {
+          authenticate: 1, user: username, nonce: nonce, key:key
+        }, {
+          numberToSkip: 0, numberToReturn: 1
+        }), function(err, r) {
+          count = count - 1;
+
+          // If we have an error
+          if(err) {
+            errorObject = err;
+          } else if(r.result['$err']) {
+            errorObject = r.result;
+          } else if(r.result['errmsg']) {
+            errorObject = r.result;
+          } else {
+            credentialsValid = true;
+            numberOfValidConnections = numberOfValidConnections + 1;
           }
 
-          // Execute command
-          // Write the commmand on the connection
-          server(connection, new Query(self.bson, f("%s.$cmd", db), {
-            authenticate: 1, user: username, nonce: nonce, key:key
-          }, {
-            numberToSkip: 0, numberToReturn: 1
-          }).toBin(), function(err, r) {
-          // server.command(f("%s.$cmd", db)
-          //   , { authenticate: 1, user: username, nonce: nonce, key:key}
-          //   , { connection: connection }, function(err, r) {
-              count = count - 1;
-
-              // If we have an error
-              if(err) {
-                errorObject = err;
-              } else if(r.result['$err']) {
-                errorObject = r.result;
-              } else if(r.result['errmsg']) {
-                errorObject = r.result;
-              } else {
-                credentialsValid = true;
-                numberOfValidConnections = numberOfValidConnections + 1;
-              }
-
-              // We have authenticated all connections
-              if(count == 0 && numberOfValidConnections > 0) {
-                // Store the auth details
-                addAuthSession(self.authStore, new AuthSession(db, username, password));
-                // Return correct authentication
-                callback(null, true);
-              } else if(count == 0) {
-                if(errorObject == null) errorObject = new MongoError(f("failed to authenticate using mongocr"));
-                callback(errorObject, false);
-              }
-          });
+          // We have authenticated all connections
+          if(count == 0 && numberOfValidConnections > 0) {
+            // Store the auth details
+            addAuthSession(self.authStore, new AuthSession(db, username, password));
+            // Return correct authentication
+            callback(null, true);
+          } else if(count == 0) {
+            if(errorObject == null) errorObject = new MongoError(f("failed to authenticate using mongocr"));
+            callback(errorObject, false);
+          }
+        });
       });
     }
 

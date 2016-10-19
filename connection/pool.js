@@ -97,7 +97,11 @@ var Pool = function(options) {
   this.reconnectId = null;
   // No bson parser passed in
   if(!options.bson || (options.bson
-    && (typeof options.bson.serialize != 'function' || typeof options.bson.deserialize != 'function'))) throw new Error("must pass in valid bson parser");
+    && (typeof options.bson.serialize != 'function'
+    || typeof options.bson.deserialize != 'function'))) {
+      throw new Error("must pass in valid bson parser");
+  }
+
   // Logger instance
   this.logger = Logger('Pool', options);
   // Pool state
@@ -125,6 +129,8 @@ var Pool = function(options) {
   this.authenticatingTimestamp = null;
   // Number of consecutive timeouts caught
   this.numberOfConsecutiveTimeouts = 0;
+  // Current pool Index
+  this.connectionIndex = 0;
 }
 
 inherits(Pool, EventEmitter);
@@ -182,15 +188,20 @@ function authenticate(pool, auth, connection, cb) {
 
 // The write function used by the authentication mechanism (bypasses external)
 function write(self) {
-  return function(connection, buffer, callback) {
+  return function(connection, command, callback) {
+    // Get the raw buffer
     // Ensure we stop auth if pool was destroyed
     if(self.state == DESTROYED || self.state == DESTROYING) {
       return callback(new MongoError('pool destroyed'));
     }
+
     // Set the connection workItem callback
-    connection.workItem = {cb: callback, command: true};
+    connection.workItems.push({
+      cb: callback, command: true, requestId: command.requestId
+    });
+
     // Write the buffer out to the connection
-    connection.write(buffer);
+    connection.write(command.toBin());
   };
 }
 
@@ -226,11 +237,11 @@ function connectionFailureHandler(self, event) {
     // Remove the connection
     removeConnection(self, this);
 
-    // Flush out the callback if there is one
-    if(this.workItem && this.workItem.cb) {
-      var workItem = this.workItem;
-      this.workItem = null;
-      workItem.cb(err);
+    // Flush all work Items on this connection
+    while(this.workItems.length > 0) {
+      var workItem = this.workItems.shift();
+      // if(workItem.cb) workItem.cb(err);
+      if(workItem.cb) workItem.cb(err);
     }
 
     // Did we catch a timeout, increment the numberOfConsecutiveTimeouts
@@ -364,8 +375,29 @@ function moveConnectionBetween(connection, from, to) {
 
 function messageHandler(self) {
   return function(message, connection) {
-    // Get the callback
-    var workItem = connection.workItem;
+    // console.log(`============================== messageHandler ${connection.id}`)
+
+    // workItem to execute
+    var workItem = null;
+
+    // console.log("==== fine workItems responseTo " + message.responseTo)
+    // Locate the workItem
+    for(var i = 0; i < connection.workItems.length; i++) {
+      // console.log("  connection.workItems[i].requestId = " + connection.workItems[i].requestId)
+      if(connection.workItems[i].requestId == message.responseTo) {
+        // Get the callback
+        var workItem = connection.workItems[i];
+        // Remove from list of workItems
+        connection.workItems.splice(i, 1);
+      }
+    }
+
+    // console.dir(workItem.requestId)
+    // //  console.log(`${connection.id} = connection.requestId=${connection.workItems.map(x => { return x.requestId; })}`)
+    // //  console.log(`============================= workItem :: ${workItem.requestId}`)
+
+    // // Get the callback
+    // var workItem = connection.workItem;
     // Reset timeout counter
     self.numberOfConsecutiveTimeouts = 0;
 
@@ -392,15 +424,12 @@ function messageHandler(self) {
       // Add to authentication list if
       // 1. we were in an authentication process when the operation was executed
       // 2. our current authentication timestamp is from the workItem one, meaning an auth has happened
-      if(connection.workItem.authenticating == true
-        || (typeof connection.workItem.authenticatingTimestamp == 'number'
-            && connection.workItem.authenticatingTimestamp != self.authenticatingTimestamp)) {
+      if(connection.workItems.length == 1 && (connection.workItems[0].authenticating == true
+        || (typeof connection.workItems[0].authenticatingTimestamp == 'number'
+            && connection.workItems[0].authenticatingTimestamp != self.authenticatingTimestamp))) {
         // Add connection to the list
         connections.push(connection);
       }
-
-      // Clear out workItem
-      connection.workItem = null;
 
       // No connections need to be re-authenticated
       if(connections.length == 0) {
@@ -443,9 +472,11 @@ function messageHandler(self) {
 
     authenticateStragglers(self, connection, function(err) {
       // Keep executing, ensure current message handler does not stop execution
-      process.nextTick(function() {
-        _execute(self)();
-      });
+      if(!self.executing) {
+        process.nextTick(function() {
+          _execute(self)();
+        });
+      }
 
       // Time to dispatch the message if we have a callback
       if(!workItem.immediateRelease) {
@@ -554,7 +585,10 @@ Pool.prototype.isDisconnected = function() {
  * @method
  */
 Pool.prototype.connect = function(auth) {
-  if(this.state != DISCONNECTED) throw new MongoError('connection in unlawful state ' + this.state);
+  if(this.state != DISCONNECTED) {
+    throw new MongoError('connection in unlawful state ' + this.state);
+  }
+
   var self = this;
   // Transition to connecting state
   stateTransition(this, CONNECTING);
@@ -629,8 +663,6 @@ Pool.prototype.auth = function(mechanism, db) {
   var self = this;
   var args = Array.prototype.slice.call(arguments, 0);
   var callback = args.pop();
-  // If we are not connected don't allow additonal authentications to happen
-  // if(this.state != CONNECTED) throw new MongoError('connection in unlawful state ' + this.state);
 
   // If we don't have the mechanism fail
   if(self.authProviders[mechanism] == null && mechanism != 'default') {
@@ -711,8 +743,13 @@ Pool.prototype.auth = function(mechanism, db) {
  */
 Pool.prototype.logout = function(dbName, callback) {
   var self = this;
-  if(typeof dbName != 'string') throw new MongoError('logout method requires a db name as first argument');
-  if(typeof callback != 'function') throw new MongoError('logout method requires a callback');
+  if(typeof dbName != 'string') {
+    throw new MongoError('logout method requires a db name as first argument');
+  }
+
+  if(typeof callback != 'function') {
+    throw new MongoError('logout method requires a callback');
+  }
 
   // Indicate logout in process
   this.loggingout = true;
@@ -725,10 +762,9 @@ Pool.prototype.logout = function(dbName, callback) {
 
   // Send logout command over all the connections
   for(var i = 0; i < connections.length; i++) {
-    var query = new Query(this.options.bson
+    write(self)(connections[i], new Query(this.options.bson
       , f('%s.$cmd', dbName)
-      , {logout:1}, {numberToSkip: 0, numberToReturn: 1});
-    write(self)(connections[i], query.toBin(), function(err, r) {
+      , {logout:1}, {numberToSkip: 0, numberToReturn: 1}), function(err, r) {
       count = count - 1;
       if(err) error = err;
 
@@ -813,7 +849,7 @@ Pool.prototype.destroy = function(force) {
       for(var i = 0; i < connections.length; i++) {
         // There is an operation still in flight, reschedule a
         // check waiting for it to drain
-        if(connections[i].workItem) {
+        if(connections[i].workItems.length > 0) {
           return setTimeout(checkStatus, 1);
         }
       }
@@ -833,7 +869,8 @@ Pool.prototype.destroy = function(force) {
  * @method
  * @return {Connection}
  */
-Pool.prototype.write = function(buffer, options, cb) {
+Pool.prototype.write = function(commands, options, cb) {
+  var self = this;
   // Ensure we have a callback
   if(typeof options == 'function') {
     cb = options;
@@ -849,7 +886,9 @@ Pool.prototype.write = function(buffer, options, cb) {
       try {
         cb(new MongoError('pool destroyed'));
       } catch(err) {
-        process.nextTick(function() { throw err; });
+        process.nextTick(function() {
+          throw err;
+        });
       }
     }
 
@@ -872,8 +911,27 @@ Pool.prototype.write = function(buffer, options, cb) {
 
   // Do we have an operation
   var operation = {
-    buffer:buffer, cb: cb, raw: false, promoteLongs: true, promoteValues: true, promoteBuffers: false, fullResult: false
+    cb: cb, raw: false, promoteLongs: true, promoteValues: true, promoteBuffers: false, fullResult: false
   };
+
+  var buffer = null
+
+  if(Array.isArray(commands)) {
+    buffer = [];
+
+    for(var i = 0; i < commands.length; i++) {
+      buffer.push(commands[i].toBin());
+    }
+
+    // Get the requestId
+    operation.requestId = commands[commands.length - 1].requestId;
+  } else {
+    operation.requestId = commands.requestId;
+    buffer = commands.toBin();
+  }
+
+  // Set the buffers
+  operation.buffer = buffer;
 
   // Set the options for the parsing
   operation.promoteLongs = typeof options.promoteLongs == 'boolean' ? options.promoteLongs : true;
@@ -884,6 +942,7 @@ Pool.prototype.write = function(buffer, options, cb) {
   operation.documentsReturnedIn = options.documentsReturnedIn;
   operation.command = typeof options.command == 'boolean' ? options.command : false;
   operation.fullResult = typeof options.fullResult == 'boolean' ? options.fullResult : false;
+  // operation.requestId = options.requestId;
 
   // Optional per operation socketTimeout
   operation.socketTimeout = options.socketTimeout;
@@ -903,7 +962,11 @@ Pool.prototype.write = function(buffer, options, cb) {
   }
 
   // Attempt to execute the operation
-  _execute(this)();
+  if(!self.executing) {
+    process.nextTick(function() {
+      _execute(self)();
+    });
+  }
 }
 
 // Remove connection method
@@ -1042,18 +1105,6 @@ function _execute(self) {
           + self.connectingConnections.length
           + self.inUseConnections.length;
 
-        // Have we not reached the max connection size yet
-        if(self.availableConnections.length == 0
-          && self.connectingConnections.length == 0
-          && totalConnections < self.options.size
-          && self.queue.length > 0) {
-          // Create a new connection
-          _createConnection(self);
-          // Attempt to execute again
-          self.executing = false;
-          return;
-        }
-
         // No available connections available, flush any monitoring ops
         if(self.availableConnections.length == 0) {
           // Flush any monitoring operations
@@ -1067,7 +1118,9 @@ function _execute(self) {
         }
 
         // Get a connection
-        var connection = self.availableConnections.pop();
+        // var connection = self.availableConnections.pop();
+        var connection = self.availableConnections[self.connectionIndex++ % self.availableConnections.length];
+        // Is the connection connected
         if(connection.isConnected()) {
           // Get the next work item
           var workItem = self.queue.shift();
@@ -1075,15 +1128,13 @@ function _execute(self) {
           // Get actual binary commands
           var buffer = workItem.buffer;
 
-          // Add connection to workers in flight
-          self.inUseConnections.push(connection);
-
           // Set current status of authentication process
           workItem.authenticating = self.authenticating;
           workItem.authenticatingTimestamp = self.authenticatingTimestamp;
 
           // Add current associated callback to the connection
-          connection.workItem = workItem
+          // connection.workItem = workItem
+          connection.workItems.push(workItem);
 
           // We have a custom socketTimeout
           if(!workItem.immediateRelease && typeof workItem.socketTimeout == 'number') {
@@ -1099,13 +1150,15 @@ function _execute(self) {
             connection.write(buffer);
           }
 
-          // Fire and forgot message, release the socket
-          if(workItem.immediateRelease && !self.authenticating) {
-            self.inUseConnections.pop();
-            self.availableConnections.push(connection);
-          } else if(workItem.immediateRelease && self.authenticating) {
-            self.inUseConnections.pop();
+          if(workItem.immediateRelease && self.authenticating) {
             self.nonAuthenticatedConnections.push(connection);
+          }
+
+          // Have we not reached the max connection size yet
+          if(totalConnections < self.options.size
+            && self.queue.length > 0) {
+            // Create a new connection
+            _createConnection(self);
           }
         } else {
           flushMonitoringOperations(self.queue);
@@ -1117,6 +1170,7 @@ function _execute(self) {
   }
 }
 
+var connectionId = 0
 /**
  * A server connect event, used to verify that the connection is up and running
  *

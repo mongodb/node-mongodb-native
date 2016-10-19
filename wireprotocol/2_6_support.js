@@ -63,7 +63,7 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
     // Create write command
     var cmd = new Query(bson, f("%s.$cmd", d), writeCommand, queryOptions);
     // Execute command
-    pool.write(cmd.toBin(), opts, callback);
+    pool.write(cmd, opts, callback);
   } catch(err) {
     callback(err);
   }
@@ -90,7 +90,7 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callback)
   var killCursor = new KillCursor(bson, [cursorId]);
   // Execute the kill cursor command
   if(pool && pool.isConnected()) {
-    pool.write(killCursor.toBin(), {
+    pool.write(killCursor, {
       immediateRelease:true, noResponse: true
     });
   }
@@ -146,7 +146,7 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
   }
 
   // Write out the getMore command
-  connection.write(getMore.toBin(), queryCallback);
+  connection.write(getMore, queryCallback);
 }
 
 WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, options) {

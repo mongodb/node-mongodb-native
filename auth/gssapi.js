@@ -143,11 +143,7 @@ var MongoDBGSSAPIFirstStep = function(self, mongo_auth_process, payload, db, use
   // Write the commmand on the connection
   server(connection, new Query(self.bson, "$external.$cmd", command, {
     numberToSkip: 0, numberToReturn: 1
-  }).toBin(), function(err, r) {
-  // // Execute first sasl step
-  // server.command("$external.$cmd"
-  //   , command
-  //   , { connection: connection }, function(err, r) {
+  }), function(err, r) {
     if(err) return callback(err, false);
     var doc = r.result;
     // Execute mongodb transition
@@ -174,10 +170,7 @@ var MongoDBGSSAPISecondStep = function(self, mongo_auth_process, payload, doc, d
   // Write the commmand on the connection
   server(connection, new Query(self.bson, "$external.$cmd", command, {
     numberToSkip: 0, numberToReturn: 1
-  }).toBin(), function(err, r) {
-  // server.command("$external.$cmd"
-  //   , command
-  //   , { connection: connection }, function(err, r) {
+  }), function(err, r) {
     if(err) return callback(err, false);
     var doc = r.result;
     // Call next transition for kerberos
@@ -199,13 +192,9 @@ var MongoDBGSSAPIThirdStep = function(self, mongo_auth_process, payload, doc, db
   };
 
   // Execute the command
-  // server.command("$external.$cmd"
-  //   , command
-  //   , { connection: connection }, function(err, r) {
-  // Write the commmand on the connection
   server(connection, new Query(self.bson, "$external.$cmd", command, {
     numberToSkip: 0, numberToReturn: 1
-  }).toBin(), function(err, r) {
+  }), function(err, r) {
     if(err) return callback(err, false);
     mongo_auth_process.transition(null, function(err, payload) {
       if(err) return callback(err, null);

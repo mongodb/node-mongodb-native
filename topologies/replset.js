@@ -240,7 +240,7 @@ function attemptReconnect(self) {
     // Handle all events coming from servers
     function _handleEvent(self, event) {
       return function(err) {
-        // console.log(`_handleEvent() [${event}]-[${this.name}]`)
+        // //  console.log(`_handleEvent() [${event}]-[${this.name}]`)
         // Destroy the instance
         if(self.state == DESTROYED) {
           return this.destroy();
@@ -469,7 +469,9 @@ function topologyMonitor(self, options) {
 
   // Set momitoring timeout
   self.haTimeoutId = setTimeout(function() {
+    //  console.log("================= topologyMonitor 0")
     if(self.state == DESTROYED) return;
+    //  console.log("================= topologyMonitor 1")
 
     // Is this a on connect topology discovery
     // Schedule a proper topology monitoring to happen
@@ -501,11 +503,13 @@ function topologyMonitor(self, options) {
     }
     // Get the count
     var count = connectingServers.length;
+    //  console.log("================= topologyMonitor 2")
     // If we have no servers connected
     if(count == 0 && !options.haInterval) {
       if(self.listeners("close").length > 0) {
         self.emit('close', self);
       }
+      //  console.log("================= topologyMonitor 2:1")
 
       return attemptReconnect(self);
     }
@@ -517,12 +521,17 @@ function topologyMonitor(self, options) {
 
       // Emit the server heartbeat start
       emitSDAMEvent(self, 'serverHeartbeatStarted', { connectionId: _server.name });
+      //  console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MONITORING 1")
       // Execute ismaster
       _server.command('admin.$cmd', {ismaster:true}, {monitoring: true}, function(err, r) {
+        //  console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MONITORING 2")
         if(self.state == DESTROYED) {
           _server.destroy();
           return cb(err, r);
         }
+
+        //  console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!! MONITORING 3")
+        // if(r)console.dir(JSON.stringify(r.result))
 
         // Calculate latency
         var latencyMS = new Date().getTime() - start;
@@ -581,16 +590,19 @@ function topologyMonitor(self, options) {
     // Connect any missing servers
     function connectMissingServers() {
       if(self.state == DESTROYED) return;
+      //  console.log("================= topologyMonitor connectMissingServers 1")
 
-      // console.log("=========== connectMissingServers()")
+      // //  console.log("=========== connectMissingServers()")
       // console.dir(self.s.replicaSetState.unknownServers)
       // Attempt to connect to any unknown servers
       connectNewServers(self, self.s.replicaSetState.unknownServers, function(err, cb) {
+        //  console.log("================= topologyMonitor connectMissingServers 1:1")
         if(self.state == DESTROYED) return;
         // Check if we have an options.haInterval (meaning it was triggered from connect)
-        // console.log("================================ options.haInterval = " + options.haInterval)
+        // //  console.log("================================ options.haInterval = " + options.haInterval)
         // console.dir(options)
         if(options.haInterval) {
+          //  console.log("================= topologyMonitor connectMissingServers 1:2")
           // Do we have a primary and secondary
           if(self.state == CONNECTING
             && self.s.replicaSetState.hasPrimaryAndSecondary()) {
@@ -643,6 +655,7 @@ function topologyMonitor(self, options) {
           }
         }
 
+        //  console.log("================= topologyMonitor connectMissingServers 1:2")
         if(!options.haInterval) topologyMonitor(self);
       });
     }
@@ -650,12 +663,14 @@ function topologyMonitor(self, options) {
     // No connectingServers but unknown servers
     if(connectingServers.length == 0
       && self.s.replicaSetState.unknownServers.length > 0 && options.haInterval) {
+        //  console.log("================= topologyMonitor 3")
         return connectMissingServers();
     } else if(connectingServers.length == 0 && options.haInterval) {
-      // console.log("===================== current state")
-      // console.log(`primary = ${self.s.replicaSetState.primary != null}`)
-      // console.log(`secondaries = ${self.s.replicaSetState.secondaries.length}`)
-      // console.log(`arbiters = ${self.s.replicaSetState.arbiters.length}`)
+      //  console.log("================= topologyMonitor 4")
+      // //  console.log("===================== current state")
+      // //  console.log(`primary = ${self.s.replicaSetState.primary != null}`)
+      // //  console.log(`secondaries = ${self.s.replicaSetState.secondaries.length}`)
+      // //  console.log(`arbiters = ${self.s.replicaSetState.arbiters.length}`)
       self.destroy();
       return self.emit('error', new MongoError('no valid replicaset members found'));
     }
@@ -675,7 +690,7 @@ function topologyMonitor(self, options) {
 
 function handleEvent(self, event) {
   return function(err) {
-    // console.log(`handleEvent() [${event}]-[${this.name}]`)
+    // //  console.log(`handleEvent() [${event}]-[${this.name}]`)
     if(self.state == DESTROYED) return;
     // Debug log
     if(self.s.logger.isDebug()) {
@@ -688,8 +703,8 @@ function handleEvent(self, event) {
 
 function handleInitialConnectEvent(self, event) {
   return function(err) {
-    // console.log(`handleInitialConnectEvent [${event}]-[${this.name}]`)
-    // if(err) console.dir(err)
+    // //  console.log(`handleInitialConnectEvent [${event}]-[${this.name}]`)
+    // if(err) //  console.dir(err)
     // Debug log
     if(self.s.logger.isDebug()) {
       self.s.logger.debug(f('handleInitialConnectEvent %s from server %s in replset with id %s', event, this.name, self.id));

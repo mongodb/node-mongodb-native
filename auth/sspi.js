@@ -124,10 +124,7 @@ var SSIPAuthenticate = function(self, username, password, gssapiServiceName, ser
   // Execute first sasl step
   server(connection, new Query(self.bson, "$external.$cmd", command, {
     numberToSkip: 0, numberToReturn: 1
-  }).toBin(), function(err, r) {
-  // server.command("$external.$cmd"
-  //   , command
-  //   , { connection: connection }, function(err, r) {
+  }), function(err, r) {
     if(err) return callback(err, false);
     var doc = r.result;
 
@@ -147,10 +144,7 @@ var SSIPAuthenticate = function(self, username, password, gssapiServiceName, ser
         // Execute the command
         server(connection, new Query(self.bson, "$external.$cmd", command, {
           numberToSkip: 0, numberToReturn: 1
-        }).toBin(), function(err, r) {
-        // server.command("$external.$cmd"
-        //   , command
-        //   , { connection: connection }, function(err, r) {
+        }), function(err, r) {
           if(err) return callback(err, false);
           var doc = r.result;
 
@@ -167,10 +161,7 @@ var SSIPAuthenticate = function(self, username, password, gssapiServiceName, ser
             // Execute the command
             server(connection, new Query(self.bson, "$external.$cmd", command, {
               numberToSkip: 0, numberToReturn: 1
-            }).toBin(), function(err, r) {
-            // server.command("$external.$cmd"
-            //   , command
-            //   , { connection: connection }, function(err, r) {
+            }), function(err, r) {
               if(err) return callback(err, false);
               var doc = r.result;
 
@@ -185,10 +176,7 @@ var SSIPAuthenticate = function(self, username, password, gssapiServiceName, ser
                 // Execute the command
                 server(connection, new Query(self.bson, "$external.$cmd", command, {
                   numberToSkip: 0, numberToReturn: 1
-                }).toBin(), function(err, r) {
-                // server.command("$external.$cmd"
-                //   , command
-                //   , { connection: connection }, function(err, r) {
+                }), function(err, r) {
                   if(err) return callback(err, false);
                   var doc = r.result;
 
