@@ -559,7 +559,7 @@ function topologyMonitor(self, options) {
         // We had an error, remove it from the state
         if(err) {
           // Emit the server heartbeat failure
-          emitSDAMEvent(self, 'serverHearbeatFailed', { durationMS: latencyMS, failure: err, connectionId: _server.name });
+          emitSDAMEvent(self, 'serverHeartbeatFailed', { durationMS: latencyMS, failure: err, connectionId: _server.name });
         } else {
           // Update the server ismaster
           _server.ismaster = r.result;
@@ -1096,9 +1096,9 @@ Mongos.prototype.connections = function() {
  */
 
 /**
- * A topology serverHearbeatFailed SDAM event
+ * A topology serverHeartbeatFailed SDAM event
  *
- * @event Mongos#serverHearbeatFailed
+ * @event Mongos#serverHeartbeatFailed
  * @type {object}
  */
 
