@@ -131,7 +131,7 @@ var extend = function(template, fields) {
 //           }
 //         }
 //       }).catch(function(err) {
-//         console.log(err.stack);
+//         // console.log(err.stack);
 //       });
 
 //       // First secondary state machine
@@ -172,7 +172,7 @@ var extend = function(template, fields) {
 //           }
 //         }
 //       }).catch(function(err) {
-//         console.log(err.stack);
+//         // console.log(err.stack);
 //       });
 
 //       // Second secondary state machine
@@ -186,7 +186,7 @@ var extend = function(template, fields) {
 //           }
 //         }
 //       }).catch(function(err) {
-//         console.log(err.stack);
+//         // console.log(err.stack);
 //       });
 //     });
 

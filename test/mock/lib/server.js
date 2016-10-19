@@ -59,6 +59,7 @@ Server.prototype.start = function() {
   // Return start promise
   return new Promise(function(resolve, reject) {
     self.socket.on('error', function(err) {
+      console.log("!!!!!!!!!!!!!!!!!!!! error reject")
       reject(err);
     });
 
@@ -102,7 +103,10 @@ Server.prototype.receive = function() {
 
   return new Promise(function(resolve, reject) {
     var waiting = function() {
-      if(self.state == 'destroyed') return reject();
+      if(self.state == 'destroyed') {
+        return reject(new Error('mock server is in destroyed state'));
+      }
+
       // If we have a message return it
       if(self.messages.length > 0) {
         var message = self.messages.shift();

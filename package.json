@@ -20,7 +20,7 @@
     "require_optional": "~1.0.0"
   },
   "devDependencies": {
-    "co": "4.5.4",
+    "co": "^4.5.4",
     "coveralls": "^2.11.6",
     "es6-promise": "^3.0.2",
     "gleak": "0.5.0",

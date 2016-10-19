@@ -81,43 +81,43 @@ exports['Should correctly emit sdam monitoring events for single server'] = {
 
     // Add event listeners
     server.once('connect', function(_server) {
-      console.log("----------------------------- connect")
+      // console.log("----------------------------- connect")
       id = _server.id;
       _server.destroy({emitClose:true});
     });
 
     server.on('serverOpening', function(event) {
-      console.log("----------------------------- serverOpening")
+      // console.log("----------------------------- serverOpening")
       // console.log(JSON.stringify(event, null, 2))
       flags[0] = event;
     });
 
     server.on('serverClosed', function(event) {
-      console.log("----------------------------- serverClosed")
+      // console.log("----------------------------- serverClosed")
       // console.log(JSON.stringify(event, null, 2))
       flags[1] = event;
     });
 
     server.on('serverDescriptionChanged', function(event) {
-      console.log("----------------------------- serverDescriptionChanged")
+      // console.log("----------------------------- serverDescriptionChanged")
       // console.log(JSON.stringify(event, null, 2))
       flags[2] = event;
     });
 
     server.on('topologyOpening', function(event) {
-      console.log("----------------------------- topologyOpening")
+      // console.log("----------------------------- topologyOpening")
       // console.log(JSON.stringify(event, null, 2))
       flags[3] = event;
     });
 
     server.on('topologyClosed', function(event) {
-      console.log("----------------------------- topologyClosed")
+      // console.log("----------------------------- topologyClosed")
       // console.log(JSON.stringify(event, null, 2))
       flags[4] = event;
     });
 
     server.on('topologyDescriptionChanged', function(event) {
-      console.log("----------------------------- topologyDescriptionChanged")
+      // console.log("----------------------------- topologyDescriptionChanged")
       // console.log(JSON.stringify(event, null, 2))
       flags[5] = event;
     });
@@ -125,11 +125,11 @@ exports['Should correctly emit sdam monitoring events for single server'] = {
     server.on('error', function(){});
     server.on('close', function(){
       setTimeout(function() {
-        console.log("----------------------------------------- 0")
+        // console.log("----------------------------------------- 0")
         test.deepEqual({ topologyId: id, address: 'localhost:37018' }, flags[0]);
-        console.log("----------------------------------------- 1")
+        // console.log("----------------------------------------- 1")
         test.deepEqual({ topologyId: id, address: 'localhost:37018' }, flags[1]);
-        console.log("----------------------------------------- 2")
+        // console.log("----------------------------------------- 2")
         test.deepEqual({ "topologyId": id, "address": "localhost:37018",
           "previousDescription": {
             "address": "localhost:37018",
@@ -146,12 +146,12 @@ exports['Should correctly emit sdam monitoring events for single server'] = {
             "type": "Standalone"
           }
         }, flags[2]);
-        console.log("----------------------------------------- 3")
+        // console.log("----------------------------------------- 3")
         // console.dir(flags[0])
         test.deepEqual({ topologyId: id }, flags[3]);
-        console.log("----------------------------------------- 4")
+        // console.log("----------------------------------------- 4")
         test.deepEqual({ topologyId: id }, flags[4]);
-        console.log("----------------------------------------- 5")
+        // console.log("----------------------------------------- 5")
         test.deepEqual({ "topologyId": id, "address": "localhost:37018",
           "previousDescription": {
             "topologyType": "Unknown",
@@ -178,7 +178,7 @@ exports['Should correctly emit sdam monitoring events for single server'] = {
             ]
           }
         }, flags[5]);
-        console.log("----------------------------------------- 6")
+        // console.log("----------------------------------------- 6")
         test.done();
       }, 100);
     });

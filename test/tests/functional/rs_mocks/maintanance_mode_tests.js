@@ -93,7 +93,7 @@ exports['Successfully detect server in maintanance mode'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -107,7 +107,7 @@ exports['Successfully detect server in maintanance mode'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -121,7 +121,7 @@ exports['Successfully detect server in maintanance mode'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Arbiter state machine
@@ -135,7 +135,7 @@ exports['Successfully detect server in maintanance mode'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 

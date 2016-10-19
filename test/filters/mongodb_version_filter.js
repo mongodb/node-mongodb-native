@@ -17,7 +17,7 @@ var MongoDBVersionFilter = function(options) {
     // Get the MongoDB version
     configuration.newConnection({w:1}, function(err, topology) {
       if(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
         callback();
       }
 

@@ -73,6 +73,7 @@ exports['Should correctly print warning when non mongos proxy passed in seed lis
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
           }
         }
+      }).catch(function(err) {
       });
 
       // Mongos
@@ -88,6 +89,7 @@ exports['Should correctly print warning when non mongos proxy passed in seed lis
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
           }
         }
+      }).catch(function(err) {
       });
 
       // Attempt to connect
@@ -185,6 +187,7 @@ exports['Should correctly print warning and error when no mongos proxies in seed
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
           }
         }
+      }).catch(function(err) {
       });
 
       // Mongos
@@ -200,6 +203,7 @@ exports['Should correctly print warning and error when no mongos proxies in seed
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
           }
         }
+      }).catch(function(err) {
       });
 
       // Attempt to connect
@@ -240,6 +244,7 @@ exports['Should correctly print warning and error when no mongos proxies in seed
       });
 
       server.connect();
+    }).catch(function(err) {        
     });
   }
 }

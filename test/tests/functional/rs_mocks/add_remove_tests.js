@@ -95,7 +95,7 @@ exports['Successfully add a new secondary server to the set'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -109,7 +109,7 @@ exports['Successfully add a new secondary server to the set'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -123,7 +123,7 @@ exports['Successfully add a new secondary server to the set'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Arbiter state machine
@@ -137,7 +137,7 @@ exports['Successfully add a new secondary server to the set'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -291,7 +291,7 @@ exports['Successfully remove a secondary server from the set'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -305,7 +305,7 @@ exports['Successfully remove a secondary server from the set'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -319,7 +319,7 @@ exports['Successfully remove a secondary server from the set'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Arbiter state machine
@@ -333,7 +333,7 @@ exports['Successfully remove a secondary server from the set'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -521,7 +521,7 @@ exports['Successfully remove and re-add secondary server to the set'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -535,7 +535,7 @@ exports['Successfully remove and re-add secondary server to the set'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -549,7 +549,7 @@ exports['Successfully remove and re-add secondary server to the set'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Arbiter state machine
@@ -563,7 +563,7 @@ exports['Successfully remove and re-add secondary server to the set'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 

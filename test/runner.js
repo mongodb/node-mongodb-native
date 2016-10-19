@@ -117,10 +117,10 @@ var Configuration = function(options) {
             console.log("[connecting to topology]");
             server.connect();
           }).catch(function(err) {
-            console.log(err.stack);
+            // console.log(err.stack);
           });
         }).catch(function(err) {
-          console.log(err.stack);
+          // console.log(err.stack);
         });
       },
 

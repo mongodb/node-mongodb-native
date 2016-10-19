@@ -73,6 +73,7 @@ exports['Should correctly set query and readpreference field on wire protocol fo
             });
           }
         }
+      }).catch(function(err) {
       });
 
       // Start dropping the packets
@@ -80,6 +81,7 @@ exports['Should correctly set query and readpreference field on wire protocol fo
         stopRespondingPrimary = true;
         currentIsMasterState = 1;
       }, 5000);
+    }).catch(function(err) {
     });
 
     // Attempt to connect
@@ -201,6 +203,7 @@ exports['Should correctly set query and near readpreference field on wire protoc
             });
           }
         }
+      }).catch(function(err) {
       });
 
       // Start dropping the packets
@@ -208,6 +211,7 @@ exports['Should correctly set query and near readpreference field on wire protoc
         stopRespondingPrimary = true;
         currentIsMasterState = 1;
       }, 5000);
+    }).catch(function(err) {
     });
 
     // Attempt to connect
@@ -318,7 +322,9 @@ exports['Should correctly set query and readpreference field on wire protocol fo
             request.reply([]);
           }
         }
+      }).catch(function(err) {
       });
+    }).catch(function(err) {
     });
 
     // console.log("----------------------- -3")
@@ -435,6 +441,7 @@ exports['Should correctly set query and readpreference field on wire protocol fo
             request.reply([]);
           }
         }
+      }).catch(function(err) {
       });
 
       // Start dropping the packets
@@ -442,6 +449,7 @@ exports['Should correctly set query and readpreference field on wire protocol fo
         stopRespondingPrimary = true;
         currentIsMasterState = 1;
       }, 5000);
+    }).catch(function(err) {
     });
 
     // Attempt to connect

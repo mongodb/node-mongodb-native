@@ -78,7 +78,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -92,7 +92,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -106,7 +106,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -231,7 +231,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -245,7 +245,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -259,7 +259,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -376,7 +376,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary but missi
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -390,7 +390,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary but missi
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -501,7 +501,7 @@ exports['Fail to connect due to missing primary'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -600,7 +600,7 @@ exports['Successful connection to replicaset of 0 primary, 1 secondary and 1 arb
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -614,7 +614,7 @@ exports['Successful connection to replicaset of 0 primary, 1 secondary and 1 arb
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -731,7 +731,7 @@ exports['Should print socketTimeout warning due to socketTimeout < haInterval'] 
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -745,7 +745,7 @@ exports['Should print socketTimeout warning due to socketTimeout < haInterval'] 
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -759,7 +759,7 @@ exports['Should print socketTimeout warning due to socketTimeout < haInterval'] 
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -878,7 +878,7 @@ exports['Should connect with a replicaset with a single primary and secondary'] 
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -892,7 +892,7 @@ exports['Should connect with a replicaset with a single primary and secondary'] 
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -1008,7 +1008,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -1022,7 +1022,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -1036,7 +1036,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -1161,7 +1161,7 @@ exports['Successful connection to replicaset of 1 primary, 0 secondary and 1 arb
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -1175,7 +1175,7 @@ exports['Successful connection to replicaset of 1 primary, 0 secondary and 1 arb
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -1299,7 +1299,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -1313,7 +1313,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -1327,7 +1327,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 

@@ -69,6 +69,7 @@ exports['Should correctly failover due to proxy going away causing timeout'] = {
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
           }
         }
+      }).catch(function(err) {
       });
 
       // Mongos
@@ -84,6 +85,7 @@ exports['Should correctly failover due to proxy going away causing timeout'] = {
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
           }
         }
+      }).catch(function(err) {
       });
 
       // Start dropping the packets
@@ -91,6 +93,7 @@ exports['Should correctly failover due to proxy going away causing timeout'] = {
         stopRespondingPrimary = true;
         currentIsMasterState = 1;
       }, 5000);
+    }).catch(function(err) {
     });
 
     // Attempt to connect
@@ -193,6 +196,7 @@ exports['Should correctly bring back proxy and use it'] = {
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
           }
         }
+      }).catch(function(err) {
       });
 
       // Mongos
@@ -208,6 +212,7 @@ exports['Should correctly bring back proxy and use it'] = {
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
           }
         }
+      }).catch(function(err) {
       });
 
       // Start dropping the packets
@@ -215,6 +220,7 @@ exports['Should correctly bring back proxy and use it'] = {
         stopRespondingPrimary = true;
         currentIsMasterState = 1;
       }, 5000);
+    }).catch(function(err) {
     });
 
     // Attempt to connect
@@ -344,6 +350,7 @@ exports['Should correctly bring back both proxies and use it'] = {
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
           }
         }
+      }).catch(function(err) {
       });
 
       // Mongos
@@ -362,6 +369,7 @@ exports['Should correctly bring back both proxies and use it'] = {
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
           }
         }
+      }).catch(function(err) {
       });
 
       // Start dropping the packets
@@ -369,6 +377,7 @@ exports['Should correctly bring back both proxies and use it'] = {
         stopRespondingPrimary = true;
         currentIsMasterState = 1;
       }, 1000);
+    }).catch(function(err) {
     });
 
     // Attempt to connect

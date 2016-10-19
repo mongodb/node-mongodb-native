@@ -71,7 +71,7 @@ exports['Correctly execute count command against replicaset with a single member
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
