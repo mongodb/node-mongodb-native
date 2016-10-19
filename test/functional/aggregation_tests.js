@@ -768,3 +768,62 @@ exports['Ensure MaxTimeMS is correctly passed down into command execution when u
     // DOC_END
   }
 }
+
+/**
+ * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
+ *
+ * @ignore
+ */
+exports['Should correctly handle ISODate date matches in aggregation framework'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: {
+    requires: {
+        mongodb: ">=2.6.0"
+      , topology: 'single'
+      , node: ">0.10.0"
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var db = configure.newDbInstance({w:1}, {poolSize:1});
+
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
+    // DOC_START
+    db.open(function(err, db) {
+      var date1 = new Date();
+      date1.setHours(date1.getHours() - 1);
+
+      // Some docs for insertion
+      var docs = [{
+        a: date1, b: 1
+      }, {
+        a: new Date(), b: 2
+      }];
+
+      // Create a collection
+      var collection = db.collection('shouldCorrectlyQueryUsingISODate');
+      // Insert the docs
+      collection.insertMany(docs, {w: 1}, function(err, result) {
+
+        // Execute aggregate, notice the pipeline is expressed as an Array
+        var cursor = collection.aggregate([{
+          $match: {
+            "a": new Date(date1.toISOString())
+          }
+        }]);
+
+        // Iterate over all the items in the cursor
+        cursor.next(function(err, result) {
+          test.equal(null, err);
+          test.equal(1, result.b);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+    // DOC_END
+  }
+}
