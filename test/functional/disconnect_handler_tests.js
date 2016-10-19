@@ -17,7 +17,7 @@ exports['Should correctly recover when bufferMaxEntries: -1 and restart'] = {
       configuration.manager.stop(9).then(function() {
         db.collection('disconnect_handler_tests').update({a:1}, {$set: {b:1}}, function(err, r) {
           test.equal(null, err);
-          test.equal(0, r.result.nModified);
+          test.equal(0, r.result.n);
 
           db.close();
           test.done();

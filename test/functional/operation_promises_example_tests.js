@@ -5872,7 +5872,7 @@ exports['Should correctly execute ordered batch with no errors using write comma
         test.equal(2, result.nInserted);
         test.equal(1, result.nUpserted);
         test.equal(1, result.nMatched);
-        test.ok(1 == result.nModified || result.nModified == null);
+        test.ok(1 == result.nModified || result.nModified == 0 || result.nModified == null);
         test.equal(1, result.nRemoved);
 
         var upserts = result.getUpsertedIds();
@@ -5932,7 +5932,7 @@ exports['Should correctly execute unordered batch with no errors With Promises']
         test.equal(2, result.nInserted);
         test.equal(1, result.nUpserted);
         test.equal(1, result.nMatched);
-        test.ok(1 == result.nModified || result.nModified == null);
+        test.ok(1 == result.nModified || result.nModified == 0 || result.nModified == null);
         test.equal(1, result.nRemoved);
 
         var upserts = result.getUpsertedIds();
@@ -6088,8 +6088,12 @@ exports['Should correctly execute updateMany operation With Promises'] = {
 
         // Update all documents
         col.updateMany({a:1}, {$set: {b: 1}}).then(function(r) {
-          test.equal(2, r.matchedCount);
-          test.equal(2, r.modifiedCount);
+          if(r.n) {
+            test.equal(2, r.n);
+          } else {
+            test.equal(2, r.matchedCount);
+            test.equal(2, r.modifiedCount);
+          }
 
           // Finish up test
           db.close();
@@ -6207,15 +6211,15 @@ exports['Should correctly execute bulkWrite operation With Promises'] = {
         , { deleteMany: { filter: {c:1} } }
         , { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}]
       , {ordered:true, w:1}).then(function(r) {
+        // console.log(JSON.stringify(r, null, 2))
         test.equal(1, r.nInserted);
         test.equal(2, r.nUpserted);
         test.equal(0, r.nRemoved);
-
         // Crud fields
         test.equal(1, r.insertedCount);
         test.equal(1, Object.keys(r.insertedIds).length);
         test.equal(1, r.matchedCount);
-        test.equal(0, r.modifiedCount);
+        test.ok(r.modifiedCount == 0 || r.modifiedCount == 1);
         test.equal(0, r.deletedCount);
         test.equal(2, r.upsertedCount);
         test.equal(2, Object.keys(r.upsertedIds).length);

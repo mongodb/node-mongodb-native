@@ -8336,7 +8336,7 @@ exports['Should correctly execute bulkWrite operation'] = {
         test.equal(1, r.insertedCount);
         test.equal(1, Object.keys(r.insertedIds).length);
         test.equal(1, r.matchedCount);
-        test.equal(0, r.modifiedCount);
+        test.ok(r.modifiedCount == 0 || r.modifiedCount == 1);
         test.equal(0, r.deletedCount);
         test.equal(2, r.upsertedCount);
         test.equal(2, Object.keys(r.upsertedIds).length);
