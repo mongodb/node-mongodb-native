@@ -86,7 +86,7 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -102,7 +102,7 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // console.log("--------------------------------------------- -2")
@@ -264,7 +264,7 @@ exports['Should correctly connect to a replicaset and select the primary server'
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -280,7 +280,7 @@ exports['Should correctly connect to a replicaset and select the primary server'
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       Connection.enableConnectionAccounting();
@@ -425,7 +425,7 @@ exports['Should correctly round robin secondary reads'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -441,7 +441,7 @@ exports['Should correctly round robin secondary reads'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       Connection.enableConnectionAccounting();
@@ -603,7 +603,7 @@ exports['Should correctly fall back to a secondary server if the readPreference 
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // mock ops store from node-mongodb-native for handling repl set disconnects
@@ -779,7 +779,7 @@ exports['Should correctly fallback to secondaries when primary not available'] =
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -795,7 +795,7 @@ exports['Should correctly fallback to secondaries when primary not available'] =
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       Connection.enableConnectionAccounting();
@@ -960,7 +960,7 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -976,7 +976,7 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // console.log("--------------------------------------------- -2")
@@ -1145,7 +1145,7 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -1161,7 +1161,7 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // console.log("--------------------------------------------- -2")

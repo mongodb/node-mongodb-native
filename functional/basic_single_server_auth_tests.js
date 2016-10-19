@@ -82,7 +82,7 @@ exports['Should correctly authenticate server using scram-sha-1 using connect au
             }, { auth: [method, 'admin', 'root', 'root']}, function(err, r) {
               test.equal(null, err);
 
-              _server.destroy();
+              _server.destroy({force:true});
               // console.log("=================== " + Object.keys(Connection.connections()).length)
               test.equal(0, Object.keys(Connection.connections()).length);
               Connection.disableConnectionAccounting();
@@ -141,7 +141,7 @@ exports['Should correctly authenticate server using scram-sha-1 using connect au
               if(index == 100) {
                 test.equal(5, server.s.pool.socketCount());
 
-                server.destroy();
+                server.destroy({force:true});
                 // console.log("=================== " + Object.keys(Connection.connections()).length)
                 test.equal(0, Object.keys(Connection.connections()).length);
                 Connection.disableConnectionAccounting();
@@ -221,7 +221,7 @@ exports['Should correctly authenticate server using scram-sha-1 using auth metho
                 test.equal(5, server.s.pool.socketCount());
                 test.equal(false, error);
 
-                server.destroy();
+                server.destroy({force:true});
                 // console.log("=================== " + Object.keys(Connection.connections()).length)
                 test.equal(0, Object.keys(Connection.connections()).length);
                 Connection.disableConnectionAccounting();
@@ -304,7 +304,7 @@ exports['Should correctly authenticate server using scram-sha-1 using connect au
                   _server.insert('test.test', [{a:1}], function(err, r) {
                     test.ok(err != null);
 
-                    _server.destroy();
+                    _server.destroy({force:true});
                     // console.log("=================== " + Object.keys(Connection.connections()).length)
                     test.equal(0, Object.keys(Connection.connections()).length);
                     // console.log("============================ 5")
@@ -371,7 +371,7 @@ exports['Should correctly have server auth wait for logout to finish'] = {
                   _server.insert('test.test', [{a:1}], function(err, r) {
                     test.equal(null, err);
 
-                    _server.destroy();
+                    _server.destroy({force:true});
                     // console.log("=================== " + Object.keys(Connection.connections()).length)
                     test.equal(0, Object.keys(Connection.connections()).length);
                     Connection.disableConnectionAccounting();

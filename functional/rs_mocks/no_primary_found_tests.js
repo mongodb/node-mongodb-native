@@ -124,7 +124,7 @@ exports['Should correctly connect to a replicaset where the arbiter hangs no pri
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 

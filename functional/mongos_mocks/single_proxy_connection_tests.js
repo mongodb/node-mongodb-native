@@ -82,6 +82,7 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
           }
         }
+      }).catch(function(err) {
       });
 
       // Start dropping the packets
@@ -89,6 +90,7 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
         stopRespondingPrimary = true;
         currentIsMasterState = 1;
       }, 500);
+    }).catch(function(err) {
     });
 
     // console.log("--------------------------------------- 0")
@@ -229,7 +231,9 @@ exports['Should not fail due to available connections equal to 0 during ha proce
             });
           }
         }
+      }).catch(function(err) {
       });
+    }).catch(function(err) {
     });
 
     // Attempt to connect

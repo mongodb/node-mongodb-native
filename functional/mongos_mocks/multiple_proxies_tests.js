@@ -71,6 +71,7 @@ exports['Should correctly load-balance the operations'] = {
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
           }
         }
+      }).catch(function(err) {
       });
 
       // Mongos
@@ -86,6 +87,7 @@ exports['Should correctly load-balance the operations'] = {
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
           }
         }
+      }).catch(function(err) {
       });
 
       // Start dropping the packets
@@ -144,6 +146,7 @@ exports['Should correctly load-balance the operations'] = {
 
       server.on('error', function(){});
       server.connect();
+    }).catch(function(err) {
     });
   }
 }

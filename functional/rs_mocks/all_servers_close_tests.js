@@ -88,7 +88,8 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.dir(err)
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -106,7 +107,8 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.dir(err)
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -124,7 +126,8 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.dir(err)
+        // console.log(err.stack);
       });
 
       Connection.enableConnectionAccounting();
@@ -178,6 +181,8 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
 
               // console.log("------------------------------- step 3 ")
               _server.command('admin.$cmd', {ismaster:true}, function(err, r) {
+                // console.log("=============================")
+                // console.dir(err)
                 // console.dir(err)
                 // console.log("------------------------------- step 4 : 1")
                 // console.dir(err)
@@ -303,7 +308,7 @@ exports['Successfully come back from a dead replicaset that has been unavailable
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -322,7 +327,7 @@ exports['Successfully come back from a dead replicaset that has been unavailable
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -341,7 +346,7 @@ exports['Successfully come back from a dead replicaset that has been unavailable
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 

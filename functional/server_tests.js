@@ -375,6 +375,7 @@ exports['Should correctly reconnect to server with automatic reconnect enabled']
         host: configuration.host
       , port: configuration.port
       , reconnect: true
+      , size: 1
       , reconnectInterval: 50
     })
 
@@ -399,6 +400,7 @@ exports['Should correctly reconnect to server with automatic reconnect enabled']
         setTimeout(function() {
           // Attempt a proper command
           _server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
+            // console.dir(err)
             test.ok(err != null);
           });
         }, 100);
@@ -550,6 +552,7 @@ exports['Should correctly place new connections in available list on reconnect']
         host: configuration.host
       , port: configuration.port
       , reconnect: true
+      , size: 1
       , reconnectInterval: 50
     })
 
