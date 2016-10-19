@@ -20,6 +20,8 @@ The tutorials in this section provide examples of some frequently used operation
 
 [CRUD Operations]({{< relref "tutorials/crud.md" >}})
 
+[Collations]({{< relref "tutorials/collations.md" >}})
+
 [Projections]({{< relref "tutorials/projections.md" >}})
 
 [Aggregation]({{< relref "tutorials/aggregation.md" >}})
