@@ -2434,15 +2434,12 @@ exports['should execute query using limit of 101'] = {
           docs.push(clone(template));
         }
 
-        console.log("==================================== 0")
         // Insert some test documents
         collection.insertMany(docs, configuration.writeConcernMax(), function(err, r) {
-          console.log("==================================== 1")
           // Ensure correct insertion testing via the cursor and the count function
           collection.find().limit(200).toArray(function(err, documents) {
-            console.log("==================================== 2")
-            // test.equal(null, err);
-            // test.equal(3, documents.length);
+            test.equal(null, err);
+            test.equal(200, documents.length);
             // Let's close the db
             db.close();
             test.done();
