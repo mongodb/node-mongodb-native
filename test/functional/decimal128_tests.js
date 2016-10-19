@@ -28,7 +28,6 @@ exports['should correctly insert decimal128 value'] = {
         db.collection('decimal128').findOne({
           id: 1
         }, function(err, doc)  {
-          console.dir(doc)
           test.equal(null, err);
           test.ok(doc.value instanceof Decimal128);
           test.equal("1", doc.value.toString());
