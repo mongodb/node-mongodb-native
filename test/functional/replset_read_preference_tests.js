@@ -218,6 +218,79 @@ exports['Should Correctly vary read server when using readpreference NEAREST'] =
   }
 }
 
+exports['Should Correctly vary read server when using readpreference NEAREST passed at collection level'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , MongoClient = mongo.MongoClient
+      , ReadPreference = mongo.ReadPreference
+      , ReplSet = mongo.ReplSet
+      , Server = mongo.Server
+      , Db = mongo.Db;
+
+    var replicasetManager = configuration.manager;
+
+    // Replica configuration
+    var replSet = new ReplSet([
+        new Server(configuration.host, configuration.port),
+        new Server(configuration.host, configuration.port + 1),
+        new Server(configuration.host, configuration.port + 2)
+      ],
+      {rs_name:configuration.replicasetName, debug:true}
+    );
+
+    // Open the database
+    var db = new Db('integration_test_', replSet, {w:1, readPreference: ReadPreference.NEAREST});
+    db.on("fullsetup", function() {
+      // Servers viewed
+      var viewedServers = {};
+
+      // Pick the server
+      db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+        viewedServers[server.name] = server.name;
+      });
+
+      db.collection('nearest_collection_test', {
+        readPreference: 'nearest'
+      }).findOne({a:1}, function(err, doc) {
+        test.equal(null, err);
+
+        // Pick the server
+        db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+          viewedServers[server.name] = server.name;
+        });
+
+        db.collection('nearest_collection_test', {
+          readPreference: 'nearest'
+        }).findOne({a:1}, function(err, doc) {
+          test.equal(null, err);
+
+          // Pick the server
+          db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+            viewedServers[server.name] = server.name;
+          });
+
+          db.collection('nearest_collection_test', {
+            readPreference: 'nearest'
+          }).findOne({a:1}, function(err, doc) {
+            test.equal(null, err);
+            test.ok(Object.keys(viewedServers).length > 1);
+
+            db.close();
+            restartAndDone(configuration, test);
+          });
+        });
+      });
+    });
+
+    db.open(function(err, p_db) {
+      db = p_db;
+    });
+  }
+}
+
 /**
  * @ignore
  */
