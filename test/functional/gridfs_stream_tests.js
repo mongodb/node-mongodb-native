@@ -1192,3 +1192,63 @@ function applyArrange(db, command, callback) {
     callback(new Error(msg));
   }
 }
+
+/**
+ * NODE-822 GridFSBucketWriteStream end method does not handle optional parameters
+ *
+ * @ignore
+ */
+exports['should correctly handle calling end function with only a callback'] = {
+  metadata: { requires: { topology: ['single'], node: ">4.0.0" } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(error, db) {
+      var bucket = new GridFSBucket(db,
+        { bucketName: 'gridfsabort', chunkSizeBytes: 1 });
+      var CHUNKS_COLL = 'gridfsabort.chunks';
+      var FILES_COLL = 'gridfsabort.files';
+      var uploadStream = bucket.openUploadStream('test.dat');
+
+      var id = uploadStream.id;
+      var query = { files_id: id };
+      uploadStream.write('a', 'utf8', function(error) {
+        test.equal(error, null);
+
+        db.collection(CHUNKS_COLL).count(query, function(error, c) {
+          test.equal(error, null);
+          test.equal(c, 1);
+
+          uploadStream.abort(function(error) {
+            test.equal(error, null);
+
+            db.collection(CHUNKS_COLL).count(query, function(error, c) {
+              test.equal(error, null);
+              test.equal(c, 0);
+
+              uploadStream.write('b', 'utf8', function(error) {
+                test.equal(error.toString(),
+                  'Error: this stream has been aborted');
+
+                uploadStream.end(function(error) {
+                  test.equal(error.toString(),
+                    'Error: this stream has been aborted');
+
+                  // Fail if user tries to abort an aborted stream
+                  uploadStream.abort().then(null, function(error) {
+                    test.equal(error.toString(),
+                      'Error: Cannot call abort() on a stream twice');
+                    test.done();
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+};

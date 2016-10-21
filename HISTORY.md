@@ -9,6 +9,7 @@
   - Included cyclic dependency detection
 * Fix typo in serverHeartbeatFailed event name (Issue #1418, https://github.com/jakesjews).
 * NODE-824, readPreference "nearest" does not work when specified at collection level.
+* NODE-822, GridFSBucketWriteStream end method does not handle optional parameters.
 
 2.2.10 2016-09-15
 -----------------
