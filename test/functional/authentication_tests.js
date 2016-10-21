@@ -300,42 +300,53 @@ exports['Should correctly authenticate against normal db'] = {
       var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
       db1.open(function(err, db) {
         test.equal(null, err);
+        console.log("------------------- 0")
 
         // An admin user must be defined for db level authentication to work correctly
         db.admin().addUser('admin', 'admin', function(err, result) {
+          console.log("------------------- 1")
 
           // Authenticate against admin
           db.admin().authenticate('admin', 'admin', function(err, result) {
+            console.log("------------------- 2")
 
             db.addUser('user', 'user', function(err, result) {
+              console.log("------------------- 3")
               test.equal(null, err);
 
               // Logout admin
               db.admin().logout(function(err, result) {
+                console.log("------------------- 4")
 
                 // Attempt to save a document
                 db.collection('test').insert({a:1}, function(err, result) {
+                  console.log("------------------- 5")
                   test.ok(err != null);
 
                   // Login the user
                   db.authenticate("user", "user", function(err, result) {
+                    console.log("------------------- 6")
                     test.equal(null, err);
                     test.ok(result);
 
                     db.collection('test').insert({a:1}, function(err, result) {
+                      console.log("------------------- 7")
                       test.equal(null, err);
 
                       // Logout the user
                       db.logout(function(err, result) {
+                        console.log("------------------- 8")
                         test.equal(null, err);
 
                         // Attempt to save a document
                         db.collection('test').insert({a:1}, function(err, result) {
+                          console.log("------------------- 9")
                           test.ok(err != null);
                           db1.close();
 
                           // restart server
                           configuration.manager.restart(true).then(function() {
+                            console.log("------------------- 10")
                             test.done();
                           });
                         });
@@ -508,8 +519,10 @@ exports['Ordered bulk operation should fail correctly when not authenticated'] =
       var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
       db1.open(function(err, db) {
         test.equal(null, err);
+        console.log("------------------- 0")
 
         db.admin().addUser('admin', 'admin', function(err, result) {
+          console.log("------------------- 1")
           test.equal(null, err);
 
           // Attempt to save a document
@@ -527,11 +540,13 @@ exports['Ordered bulk operation should fail correctly when not authenticated'] =
 
           // Execute the operations
           batch.execute(function(err, result) {
+            console.log("------------------- 2")
             test.ok(err != null);
             test.ok(err.code != null);
             test.ok(err.errmsg != null);
 
             configuration.manager.restart(true).then(function() {
+              console.log("------------------- 3")
               db1.close();
               test.done();
             });

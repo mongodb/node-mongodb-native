@@ -1,3 +1,15 @@
+2.2.11 2016-10-21
+-----------------
+* Updated mongodb-core to 2.0.13.
+  - Fire callback when topology was destroyed (Issue #147, https://github.com/vkarpov15).
+  - Refactoring to support pipelining ala 1.4.x branch will retaining the benefits of the growing/shrinking pool (Issue #146).
+  - Fix typo in serverHeartbeatFailed event name (Issue #143, https://github.com/jakesjews).
+  - NODE-798 Driver hangs on count command in replica set with one member (Issue #141, https://github.com/isayme).
+* Updated bson library to 0.5.6.
+  - Included cyclic dependency detection
+* Fix typo in serverHeartbeatFailed event name (Issue #1418, https://github.com/jakesjews).
+* NODE-824, readPreference "nearest" does not work when specified at collection level.
+
 2.2.10 2016-09-15
 -----------------
 * Updated mongodb-core to 2.0.12.
