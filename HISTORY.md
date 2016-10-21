@@ -10,6 +10,8 @@
 * Fix typo in serverHeartbeatFailed event name (Issue #1418, https://github.com/jakesjews).
 * NODE-824, readPreference "nearest" does not work when specified at collection level.
 * NODE-822, GridFSBucketWriteStream end method does not handle optional parameters.
+* NODE-823, GridFSBucketWriteStream end: callback is invoked with invalid parameters.
+* NODE-829, Using Start/End offset option in GridFSBucketReadStream doesn't return the right sized buffer.
 
 2.2.10 2016-09-15
 -----------------
