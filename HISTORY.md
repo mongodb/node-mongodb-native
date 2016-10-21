@@ -1,3 +1,12 @@
+2.0.13 2016-10-21
+-----------------
+* Updated bson library to 0.5.6.
+  - Included cyclic dependency detection
+* Fire callback when topology was destroyed (Issue #147, https://github.com/vkarpov15).
+* Refactoring to support pipelining ala 1.4.x branch will retaining the benefits of the growing/shrinking pool (Issue #146).
+* Fix typo in serverHeartbeatFailed event name (Issue #143, https://github.com/jakesjews).
+* NODE-798 Driver hangs on count command in replica set with one member (Issue #141, https://github.com/isayme).
+
 2.0.12 2016-09-15
 -----------------
 * fix debug logging message not printing server name.
