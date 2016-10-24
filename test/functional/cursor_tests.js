@@ -3165,3 +3165,95 @@ exports['Should not emit any events after close event emitted due to cursor kill
     });
   }
 }
+
+/**
+ * @ignore
+ * @api private
+ */
+exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var docs = [];
+
+    for(var i = 0; i < 1; i++) {
+      var d = new Date().getTime() + i*1000;
+      docs[i] = {createdAt:new Date(d)};
+    }
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      // Create collection
+      db.createCollection('shouldCorrectlyExecuteEnsureIndexWithNoCallback', function(err, collection) {
+        // ensure index of createdAt index
+        collection.ensureIndex({createdAt:1}, function(err, result) {
+          // insert all docs
+          collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
+            test.equal(null, err);
+
+            // Find with sort
+            collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
+              test.equal(null, err);
+              test.equal(1, items.length);
+              db.close();
+              test.done();
+            })
+          })
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ * @api private
+ */
+exports['Should correctly execute count on cursor with limit and skip'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var docs = [];
+
+    for(var i = 0; i < 50; i++) {
+      var d = new Date().getTime() + i*1000;
+      docs[i] = {'a':i, createdAt:new Date(d)};
+    }
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      // Create collection
+      db.createCollection('Should_correctly_execute_count_on_cursor_1', function(err, collection) {
+        test.equal(null, err);
+
+        // insert all docs
+        collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
+          test.equal(null, err);
+          var total = 0;
+
+          // Create a cursor for the content
+          var cursor = collection.find({});
+          cursor.limit(100).skip(0).count(function(err, c) {
+            test.equal(null, err);
+            test.equal(50, c);
+
+            var cursor = collection.find({});
+            cursor.limit(100).skip(0).toArray(function(err, docs) {
+              test.equal(null, err);
+              test.equal(50, c);
+
+              db.close();
+              test.done();
+            });
+          })
+        })
+      });
+    });
+  }
+}
