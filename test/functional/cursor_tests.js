@@ -3229,7 +3229,7 @@ exports['Should correctly execute count on cursor with limit and skip'] = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       // Create collection
-      db.createCollection('Should_correctly_execute_count_on_cursor_1', function(err, collection) {
+      db.createCollection('Should_correctly_execute_count_on_cursor_1_', function(err, collection) {
         test.equal(null, err);
 
         // insert all docs
@@ -3240,11 +3240,13 @@ exports['Should correctly execute count on cursor with limit and skip'] = {
           // Create a cursor for the content
           var cursor = collection.find({});
           cursor.limit(100).skip(0).count(function(err, c) {
+            console.log("======================================= " + c)
             test.equal(null, err);
             test.equal(50, c);
 
             var cursor = collection.find({});
             cursor.limit(100).skip(0).toArray(function(err, docs) {
+              console.log("======================================= " + docs.length)
               test.equal(null, err);
               test.equal(50, c);
 
