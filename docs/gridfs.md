@@ -116,7 +116,7 @@ The function returns [read stream](http://nodejs.org/docs/v0.4.12/api/streams.ht
 GridStore files can be unlinked with `unlink`
 
 ```javascript
-  mongodb.GridStore.unlink(db, name, callback)
+  gs.unlink(callback)
 ```
 
 Where
