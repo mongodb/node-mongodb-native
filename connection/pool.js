@@ -59,7 +59,6 @@ var _id = 0;
  * @return {Pool} A cursor instance
  */
 var Pool = function(options) {
-  var self = this;
   // Add event listener
   EventEmitter.call(this);
   // Add the options
@@ -215,7 +214,7 @@ function reauthenticate(pool, connection, cb) {
     var provider = pool.authProviders[providers.pop()];
 
     // Auth provider
-    provider.reauthenticate(write(pool), [connection], function(err, r) {
+    provider.reauthenticate(write(pool), [connection], function(err) {
       // We got an error return immediately
       if(err) return cb(err);
       // Continue authenticating the connection
@@ -290,7 +289,7 @@ function attemptReconnect(self) {
     }
 
     // If we have failure schedule a retry
-    function _connectionFailureHandler(self, event) {
+    function _connectionFailureHandler(self) {
       return function() {
         if (this._connectionFailHandled) return;
         this._connectionFailHandled = true;
@@ -337,7 +336,7 @@ function attemptReconnect(self) {
         connection.on('parseError', connectionFailureHandler(self, 'parseError'));
 
         // Apply any auth to the connection
-        reauthenticate(self, this, function(err) {
+        reauthenticate(self, this, function() {
           // Reset retries
           self.retriesLeft = self.options.reconnectTries;
           // Push to available connections
@@ -382,7 +381,7 @@ function messageHandler(self) {
     for(var i = 0; i < connection.workItems.length; i++) {
       if(connection.workItems[i].requestId == message.responseTo) {
         // Get the callback
-        var workItem = connection.workItems[i];
+        workItem = connection.workItems[i];
         // Remove from list of workItems
         connection.workItems.splice(i, 1);
       }
@@ -433,7 +432,7 @@ function messageHandler(self) {
       var connectionCount = connections.length;
       // Authenticate all connections
       for(var i = 0; i < connectionCount; i++) {
-        reauthenticate(self, connections[i], function(err) {
+        reauthenticate(self, connections[i], function() {
           connectionCount = connectionCount - 1;
 
           if(connectionCount == 0) {
@@ -460,7 +459,7 @@ function messageHandler(self) {
       cb(err, result);
     }
 
-    authenticateStragglers(self, connection, function(err) {
+    authenticateStragglers(self, connection, function() {
       // Keep executing, ensure current message handler does not stop execution
       if(!self.executing) {
         process.nextTick(function() {
@@ -574,7 +573,7 @@ Pool.prototype.isDisconnected = function() {
  * Connect pool
  * @method
  */
-Pool.prototype.connect = function(auth) {
+Pool.prototype.connect = function() {
   if(this.state != DISCONNECTED) {
     throw new MongoError('connection in unlawful state ' + this.state);
   }
@@ -649,7 +648,7 @@ Pool.prototype.connect = function(auth) {
  * @param {...object} param Parameters for the specific mechanism
  * @param {authResultCallback} callback A callback function
  */
-Pool.prototype.auth = function(mechanism, db) {
+Pool.prototype.auth = function(mechanism) {
   var self = this;
   var args = Array.prototype.slice.call(arguments, 0);
   var callback = args.pop();
@@ -754,14 +753,14 @@ Pool.prototype.logout = function(dbName, callback) {
   for(var i = 0; i < connections.length; i++) {
     write(self)(connections[i], new Query(this.options.bson
       , f('%s.$cmd', dbName)
-      , {logout:1}, {numberToSkip: 0, numberToReturn: 1}), function(err, r) {
+      , {logout:1}, {numberToSkip: 0, numberToReturn: 1}), function(err) {
       count = count - 1;
       if(err) error = err;
 
       if(count == 0) {
         self.loggingout = false;
         callback(error);
-      };
+      }
     });
   }
 }
@@ -987,7 +986,7 @@ function _createConnection(self) {
 
   // Handle any errors
   var tempErrorHandler = function(_connection) {
-    return function(err) {
+    return function() {
       // Destroy the connection
       _connection.destroy();
       // Remove the connection from the connectingConnections list
@@ -1160,7 +1159,6 @@ function _execute(self) {
   }
 }
 
-var connectionId = 0
 /**
  * A server connect event, used to verify that the connection is up and running
  *

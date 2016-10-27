@@ -3,12 +3,10 @@
 var Insert = require('./commands').Insert
   , Update = require('./commands').Update
   , Remove = require('./commands').Remove
-  , Query = require('../connection/commands').Query
   , copy = require('../connection/utils').copy
   , KillCursor = require('../connection/commands').KillCursor
   , GetMore = require('../connection/commands').GetMore
   , Query = require('../connection/commands').Query
-  , ReadPreference = require('../topologies/read_preference')
   , f = require('util').format
   , CommandResult = require('../connection/command_result')
   , MongoError = require('../error')
@@ -28,7 +26,6 @@ WireProtocol.prototype.insert = function(pool, ismaster, ns, bson, ops, options,
   options = options || {};
   // Default is ordered execution
   var ordered = typeof options.ordered == 'boolean' ? options.ordered : true;
-  var legacy = typeof options.legacy == 'boolean' ? options.legacy : false;
   ops = Array.isArray(ops) ? ops :[ops];
 
   // If we have more than a 1000 ops fails
@@ -148,6 +145,7 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
   if(cmd.find) {
     return setupClassicFind(bson, ns, cmd, cursorState, topology, options)
   } else if(cursorState.cursorId != null) {
+    return;
   } else if(cmd) {
     return setupCommand(bson, ns, cmd, cursorState, topology, options);
   } else {
@@ -334,8 +332,7 @@ var aggregateWriteOperationResults = function(opType, ops, results, connection) 
   var finalResult = { ok: 1, n: 0 }
   if(opType == 'update') {
     finalResult.nModified = 0;
-    n: 0;
-  };
+  }
 
   // Map all the results coming back
   for(var i = 0; i < results.length; i++) {
@@ -470,10 +467,9 @@ var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, ops, op
       // Write both commands out at the same time
       pool.write(commands, getLastErrorCallback);
     } catch(err) {
-      if(typeof err == 'string') err = new MongoError(err);
       // We have a serialization error, rewrite as a write error to have same behavior as modern
       // write commands
-      getLastErrors.push({ ok: 1, errmsg: err.message, code: 14 });
+      getLastErrors.push({ ok: 1, errmsg: typeof err == 'string' ? err : err.message, code: 14 });
       // Return due to an error
       process.nextTick(function() {
         _callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, null));
@@ -546,12 +542,11 @@ var executeUnordered = function(opType, command, ismaster, ns, bson, pool, ops, 
         pool.write(commands, {immediateRelease:true, noResponse:true});
       }
     } catch(err) {
-      if(typeof err == 'string') err = new MongoError(err);
       // Update the number of operations executed
       totalOps = totalOps - 1;
       // We have a serialization error, rewrite as a write error to have same behavior as modern
       // write commands
-      getLastErrors[i] = { ok: 1, errmsg: err.message, code: 14 };
+      getLastErrors[i] = { ok: 1, errmsg: typeof err == 'string' ? err : err.message, code: 14 };
       // Check if we are done
       if(totalOps == 0) {
         callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, null));

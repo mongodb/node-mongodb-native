@@ -1,6 +1,7 @@
 "use strict"
 
-var ReadPreference = require('../topologies/read_preference');
+var ReadPreference = require('../topologies/read_preference'),
+  MongoError = require('../error');
 
 var getReadPreference = function(cmd, options) {
   // Default to command version of the readPreference

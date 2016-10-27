@@ -1,5 +1,7 @@
 "use strict";
 
+var f = require('util').format;
+
 // Set property function
 var setProperty = function(obj, prop, flag, values) {
   Object.defineProperty(obj, prop.name, {

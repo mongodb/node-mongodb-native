@@ -1,7 +1,6 @@
 "use strict";
 
 var f = require('util').format
-  , crypto = require('crypto')
   , Binary = require('bson').Binary
   , Query = require('../connection/commands').Query
   , MongoError = require('../error');
@@ -47,7 +46,6 @@ Plain.prototype.auth = function(server, connections, db, username, password, cal
 
   // Valid connections
   var numberOfValidConnections = 0;
-  var credentialsValid = false;
   var errorObject = null;
 
   // For each connection we need to authenticate
@@ -80,7 +78,6 @@ Plain.prototype.auth = function(server, connections, db, username, password, cal
         } else if(r.result['errmsg']) {
           errorObject = r.result;
         } else {
-          credentialsValid = true;
           numberOfValidConnections = numberOfValidConnections + 1;
         }
 
@@ -143,13 +140,11 @@ Plain.prototype.logout = function(dbName) {
  */
 Plain.prototype.reauthenticate = function(server, connections, callback) {
   var authStore = this.authStore.slice(0);
-  var err = null;
   var count = authStore.length;
   if(count == 0) return callback(null, null);
   // Iterate over all the auth details stored
   for(var i = 0; i < authStore.length; i++) {
-    this.auth(server, connections, authStore[i].db, authStore[i].username, authStore[i].password, function(err, r) {
-      if(err) err = err;
+    this.auth(server, connections, authStore[i].db, authStore[i].username, authStore[i].password, function(err) {
       count = count - 1;
       // Done re-authenticating
       if(count == 0) {

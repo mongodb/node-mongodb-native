@@ -1,10 +1,6 @@
 "use strict";
 
-var f = require('util').format
-  , Long = require('bson').Long
-  , setProperty = require('./utils').setProperty
-  , getProperty = require('./utils').getProperty
-  , getSingleProperty = require('./utils').getSingleProperty;
+var Long = require('bson').Long;
 
 // Incrementing request id
 var _requestId = 0;
@@ -15,7 +11,6 @@ var OP_GETMORE = 2005;
 var OP_KILL_CURSORS = 2007;
 
 // Query flags
-var OPTS_NONE = 0;
 var OPTS_TAILABLE_CURSOR = 2;
 var OPTS_SLAVE = 4;
 var OPTS_OPLOG_REPLAY = 8;
@@ -458,16 +453,6 @@ Response.prototype.isParsed = function() {
   return this.parsed;
 }
 
-// Validation buffers
-var firstBatch = new Buffer('firstBatch', 'utf8');
-var nextBatch = new Buffer('nextBatch', 'utf8');
-var cursorId = new Buffer('id', 'utf8').toString('hex');
-
-var documentBuffers = {
-  firstBatch: firstBatch.toString('hex'),
-  nextBatch: nextBatch.toString('hex')
-};
-
 Response.prototype.parse = function(options) {
   // Don't parse again if not needed
   if(this.parsed) return;
@@ -485,20 +470,21 @@ Response.prototype.parse = function(options) {
   var promoteBuffers = typeof options.promoteBuffers == 'boolean'
     ? options.promoteBuffers
     : this.opts.promoteBuffers
+  var bsonSize, _options;
 
   //
   // Single document and documentsReturnedIn set
   //
   if(this.numberReturned == 1 && documentsReturnedIn != null && raw) {
     // Calculate the bson size
-    var bsonSize = this.data[this.index] | this.data[this.index + 1] << 8 | this.data[this.index + 2] << 16 | this.data[this.index + 3] << 24;
+    bsonSize = this.data[this.index] | this.data[this.index + 1] << 8 | this.data[this.index + 2] << 16 | this.data[this.index + 3] << 24;
     // Slice out the buffer containing the command result document
     var document = this.data.slice(this.index, this.index + bsonSize);
     // Set up field we wish to keep as raw
     var fieldsAsRaw = {}
     fieldsAsRaw[documentsReturnedIn] = true;
     // Set up the options
-    var _options = {
+    _options = {
       promoteLongs: promoteLongs,
       promoteValues: promoteValues,
       promoteBuffers: promoteBuffers,
@@ -528,9 +514,9 @@ Response.prototype.parse = function(options) {
   // Parse Body
   //
   for(var i = 0; i < this.numberReturned; i++) {
-    var bsonSize = this.data[this.index] | this.data[this.index + 1] << 8 | this.data[this.index + 2] << 16 | this.data[this.index + 3] << 24;
+    bsonSize = this.data[this.index] | this.data[this.index + 1] << 8 | this.data[this.index + 2] << 16 | this.data[this.index + 3] << 24;
     // Parse options
-    var _options = {promoteLongs: promoteLongs, promoteValues: promoteValues, promoteBuffers: promoteBuffers};
+    _options = {promoteLongs: promoteLongs, promoteValues: promoteValues, promoteBuffers: promoteBuffers};
 
     // If we have raw results specified slice the return document
     if(raw) {

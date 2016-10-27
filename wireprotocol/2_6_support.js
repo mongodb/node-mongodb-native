@@ -1,16 +1,10 @@
 "use strict";
 
-var Insert = require('./commands').Insert
-  , Update = require('./commands').Update
-  , Remove = require('./commands').Remove
-  , Query = require('../connection/commands').Query
-  , copy = require('../connection/utils').copy
+var copy = require('../connection/utils').copy
   , KillCursor = require('../connection/commands').KillCursor
   , GetMore = require('../connection/commands').GetMore
   , Query = require('../connection/commands').Query
-  , ReadPreference = require('../topologies/read_preference')
   , f = require('util').format
-  , CommandResult = require('../connection/command_result')
   , MongoError = require('../error')
   , Long = require('bson').Long
   , getReadPreference = require('./shared').getReadPreference;
@@ -154,6 +148,7 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
   if(cmd.find) {
     return setupClassicFind(bson, ns, cmd, cursorState, topology, options)
   } else if(cursorState.cursorId != null) {
+    return;
   } else if(cmd) {
     return setupCommand(bson, ns, cmd, cursorState, topology, options);
   } else {

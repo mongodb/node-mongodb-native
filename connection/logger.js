@@ -26,7 +26,6 @@ var Logger = function(className, options) {
   options = options || {};
 
   // Current reference
-  var self = this;
   this.className = className;
 
   // Current logger

@@ -68,10 +68,6 @@ var Long = require('bson').Long
  */
 var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   options = options || {};
-  // Cursor reference
-  var self = this;
-  // Initial query
-  var query = null;
 
   // Cursor pool
   this.pool = null;
@@ -517,8 +513,6 @@ var setCursorNotified = function(self, callback) {
   handleCallback(callback, null, null);
 }
 
-var push = Array.prototype.push;
-
 var nextFunction = function(self, callback) {
   // We have notified about it
   if(self.cursorState.notified) {
@@ -585,7 +579,7 @@ var nextFunction = function(self, callback) {
     if(self.topology.isDestroyed()) return callback(new MongoError(f('connection destroyed, not possible to instantiate cursor')));
 
     // query, cmd, options, cursorState, callback
-    self._find(function(err, r) {
+    self._find(function(err) {
       if(err) return handleCallback(callback, err, null);
 
       if(self.cursorState.documents.length == 0

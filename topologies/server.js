@@ -83,9 +83,6 @@ var Server = function(options) {
   // Server instance id
   this.id = id++;
 
-  // Reconnect retries
-  var reconnectTries = options.reconnectTries || 30;
-
   // Internal state
   this.s = {
     // Options
@@ -429,7 +426,7 @@ Server.prototype.isDestroyed = function() {
   return this.s.pool.isDestroyed();
 }
 
-function basicWriteValidations(self, options) {
+function basicWriteValidations(self) {
   if(!self.s.pool) return MongoError.create('server instance is not connected');
   if(self.s.pool.isDestroyed()) return MongoError.create('server instance pool was destroyed');
 }

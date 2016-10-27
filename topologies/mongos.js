@@ -4,13 +4,10 @@ var inherits = require('util').inherits,
   f = require('util').format,
   EventEmitter = require('events').EventEmitter,
   BSON = require('bson').native().BSON,
-  ReadPreference = require('./read_preference'),
   BasicCursor = require('../cursor'),
   Logger = require('../connection/logger'),
-  debugOptions = require('../connection/utils').debugOptions,
   MongoError = require('../error'),
   Server = require('./server'),
-  ReplSetState = require('./replset_state'),
   assign = require('./shared').assign,
   clone = require('./shared').clone,
   createClientInfo = require('./shared').createClientInfo;
@@ -113,7 +110,6 @@ var handlers = ['connect', 'close', 'error', 'timeout', 'parseError'];
  * @fires Mongos#topologyDescriptionChanged
  */
 var Mongos = function(seedlist, options) {
-  var self = this;
   options = options || {};
 
   // Get replSet Id
@@ -230,8 +226,8 @@ Mongos.prototype.connect = function(options) {
   connectProxies(self, servers);
 }
 
-function handleEvent(self, event) {
-  return function(err) {
+function handleEvent(self) {
+  return function() {
     if(self.state == DESTROYED) return;
     // Move to list of disconnectedProxies
     moveServerFrom(self.connectedProxies, self.disconnectedProxies, this);
@@ -241,7 +237,7 @@ function handleEvent(self, event) {
 }
 
 function handleInitialConnectEvent(self, event) {
-  return function(err) {
+  return function() {
     // Destroy the instance
     if(self.state == DESTROYED) {
       // Move from connectingProxies
@@ -267,7 +263,7 @@ function handleInitialConnectEvent(self, event) {
         }
 
         // Remove the handlers
-        for(var i = 0; i < handlers.length; i++) {
+        for(i = 0; i < handlers.length; i++) {
           this.removeAllListeners(handlers[i]);
         }
 
@@ -407,7 +403,7 @@ function moveServerFrom(from, to, proxy) {
     }
   }
 
-  for(var i = 0; i < to.length; i++) {
+  for(i = 0; i < to.length; i++) {
     if(to[i].name == proxy.name) {
       to.splice(i, 1);
     }
@@ -430,7 +426,7 @@ function reconnectProxies(self, proxies, callback) {
 
   // Handle events
   var _handleEvent = function(self, event) {
-    return function(err, r) {
+    return function() {
       var _self = this;
       count = count - 1;
 
@@ -583,7 +579,7 @@ function topologyMonitor(self, options) {
       }
 
       // Attempt to connect to any unknown servers
-      return reconnectProxies(self, self.disconnectedProxies, function(err, cb) {
+      return reconnectProxies(self, self.disconnectedProxies, function() {
         if(self.state == DESTROYED) return;
 
         // Are we connected ? emit connect event
@@ -604,14 +600,14 @@ function topologyMonitor(self, options) {
 
     // Ping all servers
     for(var i = 0; i < proxies.length; i++) {
-      pingServer(self, proxies[i], function(err, r) {
+      pingServer(self, proxies[i], function() {
         count = count - 1;
 
         if(count == 0) {
           if(self.state == DESTROYED) return;
 
           // Attempt to connect to any unknown servers
-          reconnectProxies(self, self.disconnectedProxies, function(err, cb) {
+          reconnectProxies(self, self.disconnectedProxies, function() {
             if(self.state == DESTROYED) return;
             // Perform topology monitor
             topologyMonitor(self);
@@ -635,11 +631,11 @@ Mongos.prototype.lastIsMaster = function() {
  * Unref all connections belong to this server
  * @method
  */
-Mongos.prototype.unref = function(emitClose) {
+Mongos.prototype.unref = function() {
   // Transition state
   stateTransition(this, DISCONNECTED);
   // Get all proxies
-  var proxies = self.connectedProxies.concat(self.connectingProxies);
+  var proxies = this.connectedProxies.concat(this.connectingProxies);
   proxies.forEach(function(x) {
     x.unref();
   });
@@ -649,9 +645,10 @@ Mongos.prototype.unref = function(emitClose) {
 
 /**
  * Destroy the server connection
+ * @param {boolean} [options.force=false] Force destroy the pool
  * @method
  */
-Mongos.prototype.destroy = function(emitClose) {
+Mongos.prototype.destroy = function(options) {
   // Transition state
   stateTransition(this, DESTROYED);
   // Get all proxies
@@ -661,7 +658,7 @@ Mongos.prototype.destroy = function(emitClose) {
 
   // Destroy all connecting servers
   proxies.forEach(function(x) {
-    x.destroy();
+    x.destroy(options);
   });
 
   // Emit toplogy closing event
@@ -673,7 +670,7 @@ Mongos.prototype.destroy = function(emitClose) {
  * @method
  * @return {boolean}
  */
-Mongos.prototype.isConnected = function(options) {
+Mongos.prototype.isConnected = function() {
   return this.connectedProxies.length > 0;
 }
 
@@ -806,9 +803,6 @@ Mongos.prototype.command = function(ns, cmd, options, callback) {
   if(this.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
   var self = this;
 
-  // Establish readPreference
-  var readPreference = options.readPreference ? options.readPreference : ReadPreference.primary;
-
   // Pick a proxy
   var server = pickProxy(self);
 
@@ -893,7 +887,7 @@ Mongos.prototype.auth = function(mechanism, db) {
     // Arguments without a callback
     var argsWithoutCallback = [mechanism, db].concat(args.slice(0));
     // Create arguments
-    var finalArguments = argsWithoutCallback.concat([function(err, r) {
+    var finalArguments = argsWithoutCallback.concat([function(err) {
       count = count - 1;
       // Save all the errors
       if(err) errors.push({name: server.name, err: err});
@@ -954,11 +948,17 @@ Mongos.prototype.logout = function(dbName, callback) {
   if(count == 0) return callback();
   var errors = [];
 
+  function logoutServer(_server, cb) {
+    _server.logout(dbName, function(err) {
+      if(err) errors.push({name: _server.name, err: err});
+      cb();
+    });
+  }
+
   // Execute logout on all server instances
-  for(var i = 0; i < servers.length; i++) {
-    servers[i].logout(dbName, function(err) {
+  for(i = 0; i < servers.length; i++) {
+    logoutServer(servers[i], function() {
       count = count - 1;
-      if(err) errors.push({name: server.name, err: err});
 
       if(count == 0) {
         // Do not block new operations
@@ -971,7 +971,7 @@ Mongos.prototype.logout = function(dbName, callback) {
         // No errors
         callback();
       }
-    });
+    })
   }
 }
 

@@ -1,7 +1,6 @@
 "use strict";
 
 var f = require('util').format
-  , crypto = require('crypto')
   , require_optional = require('require_optional')
   , Query = require('../connection/commands').Query
   , MongoError = require('../error');
@@ -27,8 +26,9 @@ var MongoAuthProcess = null;
 try {
   Kerberos = require_optional('kerberos').Kerberos;
   // Authentication process for Mongo
-  MongoAuthProcess = require_optional('kerberos').processes.MongoAuthProcess
-} catch(err) {}
+  MongoAuthProcess = require_optional('kerberos').processes.MongoAuthProcess;
+} catch(err) {  
+}
 
 /**
  * Creates a new GSSAPI authentication mechanism
@@ -62,7 +62,6 @@ GSSAPI.prototype.auth = function(server, connections, db, username, password, op
 
   // Valid connections
   var numberOfValidConnections = 0;
-  var credentialsValid = false;
   var errorObject = null;
 
   // For each connection we need to authenticate
@@ -82,7 +81,6 @@ GSSAPI.prototype.auth = function(server, connections, db, username, password, op
         } else if(r.result['errmsg']) {
           errorObject = r.result;
         } else {
-          credentialsValid = true;
           numberOfValidConnections = numberOfValidConnections + 1;
         }
 
@@ -116,7 +114,7 @@ var GSSAPIInitialize = function(self, db, username, password, authdb, gssapiServ
   var mongo_auth_process = new MongoAuthProcess(connection.host, connection.port, gssapiServiceName, options);
 
   // Perform initialization
-  mongo_auth_process.init(username, password, function(err, context) {
+  mongo_auth_process.init(username, password, function(err) {
     if(err) return callback(err, false);
 
     // Perform the first step
@@ -196,7 +194,7 @@ var MongoDBGSSAPIThirdStep = function(self, mongo_auth_process, payload, doc, db
     numberToSkip: 0, numberToReturn: 1
   }), function(err, r) {
     if(err) return callback(err, false);
-    mongo_auth_process.transition(null, function(err, payload) {
+    mongo_auth_process.transition(null, function(err) {
       if(err) return callback(err, null);
       callback(null, r);
     });
@@ -239,13 +237,11 @@ GSSAPI.prototype.logout = function(dbName) {
  */
 GSSAPI.prototype.reauthenticate = function(server, connections, callback) {
   var authStore = this.authStore.slice(0);
-  var err = null;
   var count = authStore.length;
   if(count == 0) return callback(null, null);
   // Iterate over all the auth details stored
   for(var i = 0; i < authStore.length; i++) {
-    this.auth(server, connections, authStore[i].db, authStore[i].username, authStore[i].password, authStore[i].options, function(err, r) {
-      if(err) err = err;
+    this.auth(server, connections, authStore[i].db, authStore[i].username, authStore[i].password, authStore[i].options, function(err) {
       count = count - 1;
       // Done re-authenticating
       if(count == 0) {

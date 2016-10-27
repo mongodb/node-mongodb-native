@@ -1,16 +1,7 @@
 "use strict";
 
-var Insert = require('./commands').Insert
-  , Update = require('./commands').Update
-  , Remove = require('./commands').Remove
-  , Query = require('../connection/commands').Query
-  , copy = require('../connection/utils').copy
-  , KillCursor = require('../connection/commands').KillCursor
-  , GetMore = require('../connection/commands').GetMore
-  , Query = require('../connection/commands').Query
-  , ReadPreference = require('../topologies/read_preference')
+var Query = require('../connection/commands').Query
   , f = require('util').format
-  , CommandResult = require('../connection/command_result')
   , MongoError = require('../error')
   , Long = require('bson').Long
   , getReadPreference = require('./shared').getReadPreference;
@@ -134,7 +125,7 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callback)
 
     if(!Array.isArray(r.documents) || r.documents.length == 0) {
       if(typeof callback != 'function') return;
-      return callback(new MongoError(f('invalid killCursors result returned for cursor id %s', cursorState.cursorId)));
+      return callback(new MongoError(f('invalid killCursors result returned for cursor id %s', cursorId)));
     }
 
     // Return the result
@@ -157,9 +148,6 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
   var parts = ns.split(/\./);
   // Command namespace
   var commandns = f('%s.$cmd', parts.shift());
-
-  // Check if we have an maxTimeMS set
-  var maxTimeMS = typeof cursorState.cmd.maxTimeMS == 'number' ? cursorState.cmd.maxTimeMS : 3000;
 
   // Create getMore command
   var getMoreCmd = {
@@ -258,6 +246,7 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
     // Return the query
     return query;
   } else if(cursorState.cursorId != null) {
+    return;
   } else if(cmd) {
     return setupCommand(bson, ns, cmd, cursorState, topology, options);
   } else {
@@ -370,7 +359,7 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
       sortObject[sortValue[0]] = sortDirection;
     } else {
       for(var i = 0; i < sortValue.length; i++) {
-        var sortDirection = sortValue[i][1];
+        sortDirection = sortValue[i][1];
         // Translate the sort order text
         if(sortDirection == 'asc') {
           sortDirection = 1;
@@ -384,7 +373,7 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
     }
 
     sortValue = sortObject;
-  };
+  }
 
   // Add sort to command
   if(cmd.sort) findCmd.sort = sortValue;
