@@ -535,9 +535,9 @@ Pool.prototype.isConnected = function() {
   }
 
   // Get connections
-  var connections = this.availableConnections
-    .concat(this.inUseConnections);
+  var connections = this.availableConnections;
 
+  // Check if we have any connected connections
   for(var i = 0; i < connections.length; i++) {
     if(connections[i].isConnected()) return true;
   }
