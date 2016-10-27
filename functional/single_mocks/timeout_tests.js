@@ -109,7 +109,7 @@ exports['Should correctly timeout socket operation and then correctly re-execute
               if(r && !done) {
                 done = true;
                 test.equal(37019, r.connection.port);
-                replset.destroy();
+                replset.destroy({force:true});
                 running = false;
                 test.done();
               } else {
