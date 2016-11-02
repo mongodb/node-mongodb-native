@@ -35,7 +35,7 @@
     "mongodb-extended-json": "1.7.1",
     "mongodb-topology-manager": "1.0.x",
     "mongodb-version-manager": "^1.0.6",
-    "nyc": "^8.1.0",
+    "nyc": "^8.4.0",
     "optimist": "0.6.1",
     "rimraf": "2.5.4",
     "semver": "5.3.0",
