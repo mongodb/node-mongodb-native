@@ -44,7 +44,7 @@
   "author": "Christian Kvalheim",
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=0.10.3"
+    "node": ">= 4"
   },
   "bugs": {
     "url": "https://github.com/mongodb/node-mongodb-native/issues"
