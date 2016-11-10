@@ -931,6 +931,7 @@ Pool.prototype.write = function(commands, options, cb) {
   operation.documentsReturnedIn = options.documentsReturnedIn;
   operation.command = typeof options.command == 'boolean' ? options.command : false;
   operation.fullResult = typeof options.fullResult == 'boolean' ? options.fullResult : false;
+  operation.noResponse = typeof options.noResponse == 'boolean' ? options.noResponse : false;
   // operation.requestId = options.requestId;
 
   // Optional per operation socketTimeout
@@ -1123,7 +1124,12 @@ function _execute(self) {
 
           // Add current associated callback to the connection
           // connection.workItem = workItem
-          connection.workItems.push(workItem);
+
+          // Track the executing commands on the mongo server
+          // as long as there is an expected response
+          if (! workItem.noResponse) {
+            connection.workItems.push(workItem);
+          }
 
           // We have a custom socketTimeout
           if(!workItem.immediateRelease && typeof workItem.socketTimeout == 'number') {
