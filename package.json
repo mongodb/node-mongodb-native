@@ -30,7 +30,7 @@
     "event-stream": "^3.3.2",
     "gleak": "0.5.0",
     "integra": "0.1.8",
-    "jsdoc": "3.4.0",
+    "jsdoc": "3.4.3",
     "ldjson-stream": "^1.2.1",
     "mongodb-extended-json": "1.7.1",
     "mongodb-topology-manager": "1.0.x",
