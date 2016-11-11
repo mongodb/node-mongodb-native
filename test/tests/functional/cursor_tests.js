@@ -472,3 +472,61 @@ exports['Should finish cursor correctly after all sockets to pool destroyed'] = 
     server.connect();
   }
 };
+
+exports['Should not leak connnection workItem elements when using killCursor'] = {
+  metadata: {
+    requires: { topology: ["single", "replicaset", "mongos"] }
+  },
+
+  test: function(configuration, test) {
+    var Server = require('../../../lib/topologies/server')
+      , bson = require('bson').BSONPure.BSON;
+
+    // Attempt to connect
+    var server = new Server({
+      host: configuration.host, port: configuration.port, bson: new bson()
+    });
+
+    var ns = f("%s.cursor4", configuration.db);
+    // Add event listeners
+    server.on('connect', function(_server) {
+      // Execute the write
+      _server.insert(ns, [{a:1}, {a:2}, {a:3}], {
+        writeConcern: {w:1}, ordered:true
+      }, function(err, results) {
+        test.equal(null, err);
+        test.equal(3, results.result.n);
+
+        // Execute find
+        var cursor = _server.cursor(ns, { find: ns, query: {}, batchSize: 2 });
+
+        // Execute next
+        cursor.next(function(err, d) {
+          test.equal(null, err);
+          test.equal(1, d.a);
+
+          // Kill cursor
+          cursor.kill(function() {
+
+            // Add a small delay so that the work can be queued after the kill
+            // callback has executed
+            setImmediate(function () {
+              var connections = _server.s.pool.allConnections();
+              for(var i = 0; i < connections.length; i++) {
+                test.equal(0, connections[i].workItems.length);
+              };
+              
+              // Destroy the server connection
+              _server.destroy();
+              // Finish the test
+              test.done();
+            }, 100);
+          });
+        });
+      });
+    });
+
+    // Start connection
+    server.connect();
+  }
+};
