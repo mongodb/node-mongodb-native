@@ -604,3 +604,49 @@ exports['Should correctly place new connections in available list on reconnect']
     server.connect();
   }
 }
+
+exports['Should not overflow the poolSize due to concurrent operations'] = {
+  metadata: {
+    requires: {
+      topology: 'single'
+    },
+    ignore: { travis:true }
+  },
+
+  test: function(configuration, test) {
+    var Server = configuration.require.Server
+      , ReadPreference = configuration.require.ReadPreference
+      , manager = configuration.manager;
+
+    // Attempt to connect while server is down
+    var server = new Server({
+        host: configuration.host
+      , port: configuration.port
+      , reconnect: true
+      , reconnectTries: 2
+      , size: 50
+      , emitError: true
+    });
+
+    server.on('connect', function() {
+      var left = 5000;
+
+      for(var i = 0; i < 5000; i++) {
+        server.insert(f("%s.massInsertsTest", configuration.db), [{a:1}], {
+          writeConcern: {w:1}, ordered:true
+        }, function(err, results) {
+          left = left - 1;
+
+          if(!left) {
+            test.equal(50, server.connections().length);
+            
+            test.done();
+            server.destroy();
+          }
+        });
+      }
+    });
+
+    server.connect();
+  }
+}

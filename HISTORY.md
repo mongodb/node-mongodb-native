@@ -1,3 +1,10 @@
+2.0.14
+-----------------
+* Dont leak connection.workItems elments when killCursor is called (Issue #150, https://github.com/mdlavin).
+* Remove unnecessary errors formatting (Issue #149, https://github.com/akryvomaz).
+* Only check isConnected against availableConnections (Issue #142).
+* NODE-838 Provide better error message on failed to connect on first retry for Mongos topology.
+
 2.0.13 2016-10-21
 -----------------
 * Updated bson library to 0.5.6.
