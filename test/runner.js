@@ -451,15 +451,15 @@ if(argv.t == 'functional') {
       return runner.run(Configuration(_config));
     }
 
-    console.log("!!!!!!!!!!! RUN 0")
+    // console.log("!!!!!!!!!!! RUN 0")
     // Kill any running MongoDB processes and
     // `install $MONGODB_VERSION` || `use existing installation` || `install stable`
     m(function(err){
-      console.log("!!!!!!!!!!! RUN 1")
+      // console.log("!!!!!!!!!!! RUN 1")
       if(err) return console.error(err) && process.exit(1);
 
       m.current(function(err, version){
-        console.log("!!!!!!!!!!! RUN 2")
+        // console.log("!!!!!!!!!!! RUN 2")
         if(err) return console.error(err) && process.exit(1);
         console.log('Running tests against MongoDB version `%s`', version);
         // Run the configuration
