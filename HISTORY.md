@@ -1,4 +1,4 @@
-2.0.14
+2.0.14 
 -----------------
 * Dont leak connection.workItems elments when killCursor is called (Issue #150, https://github.com/mdlavin).
 * Remove unnecessary errors formatting (Issue #149, https://github.com/akryvomaz).
