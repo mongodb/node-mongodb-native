@@ -136,8 +136,7 @@ phases: [
                 ismaster: false,
                 secondary: true,
                 hosts: ["a:27017", "b:27017"],
-                setName: "rs",
-                setVersion: 2
+                setName: "rs"
             }]
         ],
         outcome: {

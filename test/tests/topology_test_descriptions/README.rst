@@ -20,7 +20,7 @@ One method to convert to JSON is with
     pip install PyYAML urwid jsonwidget
     make
 
-Or instead of "make":
+Or instead of "make"::
 
     for i in `find . -iname '*.yml'`; do
         echo "${i%.*}"
@@ -83,6 +83,9 @@ current TopologyDescription. It has the following keys:
 Use as unittests
 ----------------
 
+Mocking
+~~~~~~~
+
 Drivers should be able to test their server discovery and monitoring logic
 without any network I/O, by parsing ismaster responses from the test file
 and passing them into the driver code. Parts of the client and monitoring
@@ -90,7 +93,28 @@ code may need to be mocked or subclassed to achieve this. `A reference
 implementation for PyMongo 3.x is available here
 <https://github.com/mongodb/mongo-python-driver/blob/3.0-dev/test/test_discovery_and_monitoring.py>`_.
 
+Initialization
+~~~~~~~~~~~~~~
+
 For each file, create a fresh client object initialized with the file's "uri".
+
+All files in the "single" directory include a connection string with one host
+and no "replicaSet" option.
+Set the client's initial TopologyType to Single, however that is achieved using the client's API.
+(The spec says "The user MUST be able to set the initial TopologyType to Single"
+without specifying how.)
+
+All files in the "sharded" directory include a connection string with multiple hosts
+and no "replicaSet" option.
+Set the client's initial TopologyType to Unknown or Sharded, depending on the client's API.
+
+All files in the "rs" directory include a connection string with a "replicaSet" option.
+Set the client's initial TopologyType to ReplicaSetNoPrimary.
+(For most clients, parsing a connection string with a "replicaSet" option
+automatically sets the TopologyType to ReplicaSetNoPrimary.)
+
+Test Phases
+~~~~~~~~~~~
 
 For each phase in the file, parse the "responses" array.
 Pass in the responses in order to the driver code.

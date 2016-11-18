@@ -136,8 +136,7 @@ phases: [
                 ismaster: false,
                 secondary: true,
                 hosts: ["a:27017", "b:27017"],
-                setName: "rs",
-                setVersion: 2
+                setName: "rs"
             }]
         ],
         outcome: {
@@ -146,7 +145,7 @@ phases: [
                     type: "RSPrimary",
                     setName: "rs",
                     setVersion: 1,
-                    electionId: {"$oid": "000000000000000000000002"}
+                    electionId: {"$oid": "000000000000000000000003"}
                 },
                 "b:27017": {
                     type: "RSSecondary",

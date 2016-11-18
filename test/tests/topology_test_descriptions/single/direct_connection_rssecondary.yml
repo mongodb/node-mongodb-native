@@ -12,7 +12,7 @@ phases: [
                     ok: 1,
                     ismaster: false,
                     secondary: true,
-                    hosts: ["a:27017"],
+                    hosts: ["a:27017", "b:27017"],
                     setName: "rs"
                 }]
         ],

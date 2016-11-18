@@ -1,32 +1,33 @@
 {
-    "description": "Connect to RSSecondary", 
+    "description": "Connect to RSSecondary",
+    "uri": "mongodb://a",
     "phases": [
         {
-            "outcome": {
-                "servers": {
-                    "a:27017": {
-                        "setName": "rs", 
-                        "type": "RSSecondary"
-                    }
-                }, 
-                "setName": null, 
-                "topologyType": "Single"
-            }, 
             "responses": [
                 [
-                    "a:27017", 
+                    "a:27017",
                     {
+                        "ok": 1,
+                        "ismaster": false,
+                        "secondary": true,
                         "hosts": [
-                            "a:27017"
-                        ], 
-                        "ismaster": false, 
-                        "ok": 1, 
-                        "secondary": true, 
+                            "a:27017",
+                            "b:27017"
+                        ],
                         "setName": "rs"
                     }
                 ]
-            ]
+            ],
+            "outcome": {
+                "servers": {
+                    "a:27017": {
+                        "type": "RSSecondary",
+                        "setName": "rs"
+                    }
+                },
+                "topologyType": "Single",
+                "setName": null
+            }
         }
-    ], 
-    "uri": "mongodb://a"
+    ]
 }

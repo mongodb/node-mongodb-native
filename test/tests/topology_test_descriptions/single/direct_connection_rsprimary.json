@@ -1,31 +1,32 @@
 {
-    "description": "Connect to RSPrimary", 
+    "description": "Connect to RSPrimary",
+    "uri": "mongodb://a",
     "phases": [
         {
-            "outcome": {
-                "servers": {
-                    "a:27017": {
-                        "setName": "rs", 
-                        "type": "RSPrimary"
-                    }
-                }, 
-                "setName": null, 
-                "topologyType": "Single"
-            }, 
             "responses": [
                 [
-                    "a:27017", 
+                    "a:27017",
                     {
+                        "ok": 1,
+                        "ismaster": true,
                         "hosts": [
-                            "a:27017"
-                        ], 
-                        "ismaster": true, 
-                        "ok": 1, 
+                            "a:27017",
+                            "b:27017"
+                        ],
                         "setName": "rs"
                     }
                 ]
-            ]
+            ],
+            "outcome": {
+                "servers": {
+                    "a:27017": {
+                        "type": "RSPrimary",
+                        "setName": "rs"
+                    }
+                },
+                "topologyType": "Single",
+                "setName": null
+            }
         }
-    ], 
-    "uri": "mongodb://a"
+    ]
 }

@@ -108,5 +108,5 @@ phases:
                   arbiters: []
                   hosts: []
                   passives: []
-                  type: "Unknown"
+                  type: "PossiblePrimary"
 
