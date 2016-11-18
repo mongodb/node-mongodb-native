@@ -55,8 +55,12 @@ X509.prototype.auth = function(server, connections, db, username, password, call
       var command = {
           authenticate: 1
         , mechanism: 'MONGODB-X509'
-        , user: username
       };
+
+      // Add username if specified
+      if(username) {
+        command.user = username;
+      }
 
       // Let's start the process
       server(connection, new Query(self.bson, "$external.$cmd", command, {
