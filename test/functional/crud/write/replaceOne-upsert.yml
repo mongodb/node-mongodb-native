@@ -1,0 +1,48 @@
+data:
+    - {_id: 1, x: 11}
+    - {_id: 2, x: 22}
+    - {_id: 3, x: 33}
+minServerVersion: '2.6'
+# See SERVER-5289 for why the collection data is only checked for server versions >= 2.6
+
+tests:
+    -
+        description: "ReplaceOne with upsert when no documents match without an id specified"
+        operation:
+            name: "replaceOne"
+            arguments:
+                filter: {_id: 4}
+                replacement: {x: 1}
+                upsert: true
+
+        outcome:
+            result:
+                matchedCount: 0
+                modifiedCount: 0
+                upsertedId: 4
+            collection:
+                data:
+                    - {_id: 1, x: 11}
+                    - {_id: 2, x: 22}
+                    - {_id: 3, x: 33}
+                    - {_id: 4, x: 1}
+    -
+        description: "ReplaceOne with upsert when no documents match with an id specified"
+        operation:
+            name: "replaceOne"
+            arguments:
+                filter: {_id: 4}
+                replacement: {_id: 4, x: 1}
+                upsert: true
+
+        outcome:
+            result:
+                matchedCount: 0
+                modifiedCount: 0
+                upsertedId: 4
+            collection:
+                data:
+                    - {_id: 1, x: 11}
+                    - {_id: 2, x: 22}
+                    - {_id: 3, x: 33}
+                    - {_id: 4, x: 1}

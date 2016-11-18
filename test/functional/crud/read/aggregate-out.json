@@ -1,0 +1,70 @@
+{
+    "data": [
+        {
+            "_id": 1, 
+            "x": 11
+        }, 
+        {
+            "_id": 2, 
+            "x": 22
+        }, 
+        {
+            "_id": 3, 
+            "x": 33
+        }
+    ], 
+    "minServerVersion": "2.6", 
+    "tests": [
+        {
+            "description": "Aggregate with $out", 
+            "operation": {
+                "arguments": {
+                    "batchSize": 2, 
+                    "pipeline": [
+                        {
+                            "$sort": {
+                                "x": 1
+                            }
+                        }, 
+                        {
+                            "$match": {
+                                "_id": {
+                                    "$gt": 1
+                                }
+                            }
+                        }, 
+                        {
+                            "$out": "other_test_collection"
+                        }
+                    ]
+                }, 
+                "name": "aggregate"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 2, 
+                            "x": 22
+                        }, 
+                        {
+                            "_id": 3, 
+                            "x": 33
+                        }
+                    ], 
+                    "name": "other_test_collection"
+                }, 
+                "result": [
+                    {
+                        "_id": 2, 
+                        "x": 22
+                    }, 
+                    {
+                        "_id": 3, 
+                        "x": 33
+                    }
+                ]
+            }
+        }
+    ]
+}

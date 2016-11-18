@@ -1,0 +1,96 @@
+{
+    "data": [
+        {
+            "_id": 1, 
+            "x": 11
+        }, 
+        {
+            "_id": 2, 
+            "x": 22
+        }, 
+        {
+            "_id": 3, 
+            "x": 33
+        }
+    ], 
+    "tests": [
+        {
+            "description": "DeleteOne when many documents match", 
+            "operation": {
+                "arguments": {
+                    "filter": {
+                        "_id": {
+                            "$gt": 1
+                        }
+                    }
+                }, 
+                "name": "deleteOne"
+            }, 
+            "outcome": {
+                "result": {
+                    "deletedCount": 1
+                }
+            }
+        }, 
+        {
+            "description": "DeleteOne when one document matches", 
+            "operation": {
+                "arguments": {
+                    "filter": {
+                        "_id": 2
+                    }
+                }, 
+                "name": "deleteOne"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1, 
+                            "x": 11
+                        }, 
+                        {
+                            "_id": 3, 
+                            "x": 33
+                        }
+                    ]
+                }, 
+                "result": {
+                    "deletedCount": 1
+                }
+            }
+        }, 
+        {
+            "description": "DeleteOne when no documents match", 
+            "operation": {
+                "arguments": {
+                    "filter": {
+                        "_id": 4
+                    }
+                }, 
+                "name": "deleteOne"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1, 
+                            "x": 11
+                        }, 
+                        {
+                            "_id": 2, 
+                            "x": 22
+                        }, 
+                        {
+                            "_id": 3, 
+                            "x": 33
+                        }
+                    ]
+                }, 
+                "result": {
+                    "deletedCount": 0
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,52 @@
+{
+    "data": [
+        {
+            "_id": 1, 
+            "x": 11
+        }, 
+        {
+            "_id": 2, 
+            "x": "ping"
+        }
+    ], 
+    "minServerVersion": "3.4", 
+    "tests": [
+        {
+            "description": "ReplaceOne when one document matches with collation", 
+            "operation": {
+                "arguments": {
+                    "collation": {
+                        "locale": "en_US", 
+                        "strength": 2
+                    }, 
+                    "filter": {
+                        "x": "PING"
+                    }, 
+                    "replacement": {
+                        "_id": 2, 
+                        "x": "pong"
+                    }
+                }, 
+                "name": "replaceOne"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1, 
+                            "x": 11
+                        }, 
+                        {
+                            "_id": 2, 
+                            "x": "pong"
+                        }
+                    ]
+                }, 
+                "result": {
+                    "matchedCount": 1, 
+                    "modifiedCount": 1
+                }
+            }
+        }
+    ]
+}

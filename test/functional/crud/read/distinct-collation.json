@@ -1,0 +1,33 @@
+{
+    "data": [
+        {
+            "_id": 1, 
+            "string": "PING"
+        }, 
+        {
+            "_id": 2, 
+            "string": "ping"
+        }
+    ], 
+    "minServerVersion": "3.4", 
+    "tests": [
+        {
+            "description": "Distinct with a collation", 
+            "operation": {
+                "arguments": {
+                    "collation": {
+                        "locale": "en_US", 
+                        "strength": 2
+                    }, 
+                    "fieldName": "string"
+                }, 
+                "name": "distinct"
+            }, 
+            "outcome": {
+                "result": [
+                    "PING"
+                ]
+            }
+        }
+    ]
+}

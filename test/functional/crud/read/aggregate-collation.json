@@ -1,0 +1,38 @@
+{
+    "data": [
+        {
+            "_id": 1, 
+            "x": "ping"
+        }
+    ], 
+    "minServerVersion": "3.4", 
+    "tests": [
+        {
+            "description": "Aggregate with collation", 
+            "operation": {
+                "arguments": {
+                    "collation": {
+                        "locale": "en_US", 
+                        "strength": 2
+                    }, 
+                    "pipeline": [
+                        {
+                            "$match": {
+                                "x": "PING"
+                            }
+                        }
+                    ]
+                }, 
+                "name": "aggregate"
+            }, 
+            "outcome": {
+                "result": [
+                    {
+                        "_id": 1, 
+                        "x": "ping"
+                    }
+                ]
+            }
+        }
+    ]
+}

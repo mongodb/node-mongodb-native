@@ -1,0 +1,59 @@
+{
+    "data": [
+        {
+            "_id": 1, 
+            "x": 11
+        }, 
+        {
+            "_id": 2, 
+            "x": "ping"
+        }, 
+        {
+            "_id": 3, 
+            "x": "pINg"
+        }
+    ], 
+    "minServerVersion": "3.4", 
+    "tests": [
+        {
+            "description": "FindOneAndDelete when one document matches with collation", 
+            "operation": {
+                "arguments": {
+                    "collation": {
+                        "locale": "en_US", 
+                        "strength": 2
+                    }, 
+                    "filter": {
+                        "_id": 2, 
+                        "x": "PING"
+                    }, 
+                    "projection": {
+                        "_id": 0, 
+                        "x": 1
+                    }, 
+                    "sort": {
+                        "x": 1
+                    }
+                }, 
+                "name": "findOneAndDelete"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1, 
+                            "x": 11
+                        }, 
+                        {
+                            "_id": 3, 
+                            "x": "pINg"
+                        }
+                    ]
+                }, 
+                "result": {
+                    "x": "ping"
+                }
+            }
+        }
+    ]
+}

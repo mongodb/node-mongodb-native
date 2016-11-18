@@ -5981,7 +5981,7 @@ exports['Should correctly execute updateOne operation with Generators'] = {
       var r = yield col.updateOne({a:1}
         , {$set: {a:2}}
         , {upsert:true});
-      test.equal(1, r.matchedCount);
+      test.equal(0, r.matchedCount);
       test.equal(1, r.upsertedCount);
       // Finish up test
       db.close();

@@ -1,0 +1,39 @@
+{
+    "data": [
+        {
+            "_id": 1, 
+            "x": 11
+        }
+    ], 
+    "tests": [
+        {
+            "description": "InsertOne with a non-existing document", 
+            "operation": {
+                "arguments": {
+                    "document": {
+                        "_id": 2, 
+                        "x": 22
+                    }
+                }, 
+                "name": "insertOne"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1, 
+                            "x": 11
+                        }, 
+                        {
+                            "_id": 2, 
+                            "x": 22
+                        }
+                    ]
+                }, 
+                "result": {
+                    "insertedId": 2
+                }
+            }
+        }
+    ]
+}

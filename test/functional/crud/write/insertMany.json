@@ -1,0 +1,52 @@
+{
+    "data": [
+        {
+            "_id": 1, 
+            "x": 11
+        }
+    ], 
+    "tests": [
+        {
+            "description": "InsertMany with non-existing documents", 
+            "operation": {
+                "arguments": {
+                    "documents": [
+                        {
+                            "_id": 2, 
+                            "x": 22
+                        }, 
+                        {
+                            "_id": 3, 
+                            "x": 33
+                        }
+                    ]
+                }, 
+                "name": "insertMany"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1, 
+                            "x": 11
+                        }, 
+                        {
+                            "_id": 2, 
+                            "x": 22
+                        }, 
+                        {
+                            "_id": 3, 
+                            "x": 33
+                        }
+                    ]
+                }, 
+                "result": {
+                    "insertedIds": [
+                        2, 
+                        3
+                    ]
+                }
+            }
+        }
+    ]
+}

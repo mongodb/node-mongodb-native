@@ -356,6 +356,7 @@ try {
   testFiles.push('/test/functional/max_staleness_tests.js');
   testFiles.push('/test/functional/buffering_proxy_tests.js');
   testFiles.push('/test/functional/view_tests.js');
+  testFiles.push('/test/functional/crud_spec_tests.js');
 } catch(err) {}
 
 // Add all the tests to run

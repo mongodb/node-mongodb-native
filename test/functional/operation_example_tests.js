@@ -8164,7 +8164,7 @@ exports['Should correctly execute updateOne operation'] = {
         , {$set: {a:2}}
         , {upsert:true}, function(err, r) {
         test.equal(null, err);
-        test.equal(1, r.matchedCount);
+        test.equal(0, r.matchedCount);
         test.equal(1, r.upsertedCount);
         // Finish up test
         db.close();

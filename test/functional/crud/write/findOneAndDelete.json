@@ -1,0 +1,127 @@
+{
+    "data": [
+        {
+            "_id": 1, 
+            "x": 11
+        }, 
+        {
+            "_id": 2, 
+            "x": 22
+        }, 
+        {
+            "_id": 3, 
+            "x": 33
+        }
+    ], 
+    "tests": [
+        {
+            "description": "FindOneAndDelete when many documents match", 
+            "operation": {
+                "arguments": {
+                    "filter": {
+                        "_id": {
+                            "$gt": 1
+                        }
+                    }, 
+                    "projection": {
+                        "_id": 0, 
+                        "x": 1
+                    }, 
+                    "sort": {
+                        "x": 1
+                    }
+                }, 
+                "name": "findOneAndDelete"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1, 
+                            "x": 11
+                        }, 
+                        {
+                            "_id": 3, 
+                            "x": 33
+                        }
+                    ]
+                }, 
+                "result": {
+                    "x": 22
+                }
+            }
+        }, 
+        {
+            "description": "FindOneAndDelete when one document matches", 
+            "operation": {
+                "arguments": {
+                    "filter": {
+                        "_id": 2
+                    }, 
+                    "projection": {
+                        "_id": 0, 
+                        "x": 1
+                    }, 
+                    "sort": {
+                        "x": 1
+                    }
+                }, 
+                "name": "findOneAndDelete"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1, 
+                            "x": 11
+                        }, 
+                        {
+                            "_id": 3, 
+                            "x": 33
+                        }
+                    ]
+                }, 
+                "result": {
+                    "x": 22
+                }
+            }
+        }, 
+        {
+            "description": "FindOneAndDelete when no documents match", 
+            "operation": {
+                "arguments": {
+                    "filter": {
+                        "_id": 4
+                    }, 
+                    "projection": {
+                        "_id": 0, 
+                        "x": 1
+                    }, 
+                    "sort": {
+                        "x": 1
+                    }
+                }, 
+                "name": "findOneAndDelete"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1, 
+                            "x": 11
+                        }, 
+                        {
+                            "_id": 2, 
+                            "x": 22
+                        }, 
+                        {
+                            "_id": 3, 
+                            "x": 33
+                        }
+                    ]
+                }, 
+                "result": null
+            }
+        }
+    ]
+}

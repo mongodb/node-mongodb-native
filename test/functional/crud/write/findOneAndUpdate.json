@@ -1,0 +1,382 @@
+{
+    "data": [
+        {
+            "_id": 1, 
+            "x": 11
+        }, 
+        {
+            "_id": 2, 
+            "x": 22
+        }, 
+        {
+            "_id": 3, 
+            "x": 33
+        }
+    ], 
+    "tests": [
+        {
+            "description": "FindOneAndUpdate when many documents match returning the document before modification", 
+            "operation": {
+                "arguments": {
+                    "filter": {
+                        "_id": {
+                            "$gt": 1
+                        }
+                    }, 
+                    "projection": {
+                        "_id": 0, 
+                        "x": 1
+                    }, 
+                    "sort": {
+                        "x": 1
+                    }, 
+                    "update": {
+                        "$inc": {
+                            "x": 1
+                        }
+                    }
+                }, 
+                "name": "findOneAndUpdate"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1, 
+                            "x": 11
+                        }, 
+                        {
+                            "_id": 2, 
+                            "x": 23
+                        }, 
+                        {
+                            "_id": 3, 
+                            "x": 33
+                        }
+                    ]
+                }, 
+                "result": {
+                    "x": 22
+                }
+            }
+        }, 
+        {
+            "description": "FindOneAndUpdate when many documents match returning the document after modification", 
+            "operation": {
+                "arguments": {
+                    "filter": {
+                        "_id": {
+                            "$gt": 1
+                        }
+                    }, 
+                    "projection": {
+                        "_id": 0, 
+                        "x": 1
+                    }, 
+                    "returnDocument": "After", 
+                    "sort": {
+                        "x": 1
+                    }, 
+                    "update": {
+                        "$inc": {
+                            "x": 1
+                        }
+                    }
+                }, 
+                "name": "findOneAndUpdate"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1, 
+                            "x": 11
+                        }, 
+                        {
+                            "_id": 2, 
+                            "x": 23
+                        }, 
+                        {
+                            "_id": 3, 
+                            "x": 33
+                        }
+                    ]
+                }, 
+                "result": {
+                    "x": 23
+                }
+            }
+        }, 
+        {
+            "description": "FindOneAndUpdate when one document matches returning the document before modification", 
+            "operation": {
+                "arguments": {
+                    "filter": {
+                        "_id": 2
+                    }, 
+                    "projection": {
+                        "_id": 0, 
+                        "x": 1
+                    }, 
+                    "sort": {
+                        "x": 1
+                    }, 
+                    "update": {
+                        "$inc": {
+                            "x": 1
+                        }
+                    }
+                }, 
+                "name": "findOneAndUpdate"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1, 
+                            "x": 11
+                        }, 
+                        {
+                            "_id": 2, 
+                            "x": 23
+                        }, 
+                        {
+                            "_id": 3, 
+                            "x": 33
+                        }
+                    ]
+                }, 
+                "result": {
+                    "x": 22
+                }
+            }
+        }, 
+        {
+            "description": "FindOneAndUpdate when one document matches returning the document after modification", 
+            "operation": {
+                "arguments": {
+                    "filter": {
+                        "_id": 2
+                    }, 
+                    "projection": {
+                        "_id": 0, 
+                        "x": 1
+                    }, 
+                    "returnDocument": "After", 
+                    "sort": {
+                        "x": 1
+                    }, 
+                    "update": {
+                        "$inc": {
+                            "x": 1
+                        }
+                    }
+                }, 
+                "name": "findOneAndUpdate"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1, 
+                            "x": 11
+                        }, 
+                        {
+                            "_id": 2, 
+                            "x": 23
+                        }, 
+                        {
+                            "_id": 3, 
+                            "x": 33
+                        }
+                    ]
+                }, 
+                "result": {
+                    "x": 23
+                }
+            }
+        }, 
+        {
+            "description": "FindOneAndUpdate when no documents match returning the document before modification", 
+            "operation": {
+                "arguments": {
+                    "filter": {
+                        "_id": 4
+                    }, 
+                    "projection": {
+                        "_id": 0, 
+                        "x": 1
+                    }, 
+                    "sort": {
+                        "x": 1
+                    }, 
+                    "update": {
+                        "$inc": {
+                            "x": 1
+                        }
+                    }
+                }, 
+                "name": "findOneAndUpdate"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1, 
+                            "x": 11
+                        }, 
+                        {
+                            "_id": 2, 
+                            "x": 22
+                        }, 
+                        {
+                            "_id": 3, 
+                            "x": 33
+                        }
+                    ]
+                }, 
+                "result": null
+            }
+        }, 
+        {
+            "description": "FindOneAndUpdate when no documents match with upsert returning the document before modification", 
+            "operation": {
+                "arguments": {
+                    "filter": {
+                        "_id": 4
+                    }, 
+                    "projection": {
+                        "_id": 0, 
+                        "x": 1
+                    }, 
+                    "sort": {
+                        "x": 1
+                    }, 
+                    "update": {
+                        "$inc": {
+                            "x": 1
+                        }
+                    }, 
+                    "upsert": true
+                }, 
+                "name": "findOneAndUpdate"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1, 
+                            "x": 11
+                        }, 
+                        {
+                            "_id": 2, 
+                            "x": 22
+                        }, 
+                        {
+                            "_id": 3, 
+                            "x": 33
+                        }, 
+                        {
+                            "_id": 4, 
+                            "x": 1
+                        }
+                    ]
+                }, 
+                "result": null
+            }
+        }, 
+        {
+            "description": "FindOneAndUpdate when no documents match returning the document after modification", 
+            "operation": {
+                "arguments": {
+                    "filter": {
+                        "_id": 4
+                    }, 
+                    "projection": {
+                        "_id": 0, 
+                        "x": 1
+                    }, 
+                    "returnDocument": "After", 
+                    "sort": {
+                        "x": 1
+                    }, 
+                    "update": {
+                        "$inc": {
+                            "x": 1
+                        }
+                    }
+                }, 
+                "name": "findOneAndUpdate"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1, 
+                            "x": 11
+                        }, 
+                        {
+                            "_id": 2, 
+                            "x": 22
+                        }, 
+                        {
+                            "_id": 3, 
+                            "x": 33
+                        }
+                    ]
+                }, 
+                "result": null
+            }
+        }, 
+        {
+            "description": "FindOneAndUpdate when no documents match with upsert returning the document after modification", 
+            "operation": {
+                "arguments": {
+                    "filter": {
+                        "_id": 4
+                    }, 
+                    "projection": {
+                        "_id": 0, 
+                        "x": 1
+                    }, 
+                    "returnDocument": "After", 
+                    "sort": {
+                        "x": 1
+                    }, 
+                    "update": {
+                        "$inc": {
+                            "x": 1
+                        }
+                    }, 
+                    "upsert": true
+                }, 
+                "name": "findOneAndUpdate"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1, 
+                            "x": 11
+                        }, 
+                        {
+                            "_id": 2, 
+                            "x": 22
+                        }, 
+                        {
+                            "_id": 3, 
+                            "x": 33
+                        }, 
+                        {
+                            "_id": 4, 
+                            "x": 1
+                        }
+                    ]
+                }, 
+                "result": {
+                    "x": 1
+                }
+            }
+        }
+    ]
+}

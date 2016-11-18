@@ -1,0 +1,58 @@
+{
+    "data": [
+        {
+            "_id": 1, 
+            "x": 11
+        }, 
+        {
+            "_id": 2, 
+            "x": "ping"
+        }
+    ], 
+    "minServerVersion": "3.4", 
+    "tests": [
+        {
+            "description": "FindOneAndReplace when one document matches with collation returning the document after modification", 
+            "operation": {
+                "arguments": {
+                    "collation": {
+                        "locale": "en_US", 
+                        "strength": 2
+                    }, 
+                    "filter": {
+                        "x": "PING"
+                    }, 
+                    "projection": {
+                        "_id": 0, 
+                        "x": 1
+                    }, 
+                    "replacement": {
+                        "x": "pong"
+                    }, 
+                    "returnDocument": "After", 
+                    "sort": {
+                        "x": 1
+                    }
+                }, 
+                "name": "findOneAndReplace"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1, 
+                            "x": 11
+                        }, 
+                        {
+                            "_id": 2, 
+                            "x": "pong"
+                        }
+                    ]
+                }, 
+                "result": {
+                    "x": "pong"
+                }
+            }
+        }
+    ]
+}

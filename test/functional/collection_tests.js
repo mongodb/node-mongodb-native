@@ -73,8 +73,6 @@ exports['should correctly list back collection names containing .'] = {
         // Let's check that the collection was created correctly
         db1.listCollections().toArray(function(err, documents) {
           test.equal(null, err);
-          // console.log("--------------------------------------------------")
-          // console.dir(documents)
           var found = false;
           documents.forEach(function(x) {
             if(x.name == 'test.game') found = true;

@@ -1,0 +1,51 @@
+{
+    "data": [
+        {
+            "_id": 1, 
+            "x": 11
+        }, 
+        {
+            "_id": 2, 
+            "x": "ping"
+        }, 
+        {
+            "_id": 3, 
+            "x": "pINg"
+        }
+    ], 
+    "minServerVersion": "3.4", 
+    "tests": [
+        {
+            "description": "DeleteOne when many documents matches with collation", 
+            "operation": {
+                "arguments": {
+                    "collation": {
+                        "locale": "en_US", 
+                        "strength": 2
+                    }, 
+                    "filter": {
+                        "x": "PING"
+                    }
+                }, 
+                "name": "deleteOne"
+            }, 
+            "outcome": {
+                "collection": {
+                    "data": [
+                        {
+                            "_id": 1, 
+                            "x": 11
+                        }, 
+                        {
+                            "_id": 3, 
+                            "x": "pINg"
+                        }
+                    ]
+                }, 
+                "result": {
+                    "deletedCount": 1
+                }
+            }
+        }
+    ]
+}
