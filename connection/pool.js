@@ -1122,9 +1122,6 @@ function _execute(self) {
           workItem.authenticating = self.authenticating;
           workItem.authenticatingTimestamp = self.authenticatingTimestamp;
 
-          // Add current associated callback to the connection
-          // connection.workItem = workItem
-
           // Track the executing commands on the mongo server
           // as long as there is an expected response
           if (! workItem.noResponse) {

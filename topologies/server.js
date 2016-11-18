@@ -282,7 +282,6 @@ var eventHandler = function(self, event) {
     } else if(event == 'error' || event == 'parseError'
       || event == 'close' || event == 'timeout' || event == 'reconnect'
       || event == 'attemptReconnect' || 'reconnectFailed') {
-
       // Remove server instance from accounting
       if(serverAccounting && ['close', 'timeout', 'error', 'parseError', 'reconnectFailed'].indexOf(event) != -1) {
         // Emit toplogy opening event if not in topology
