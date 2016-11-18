@@ -131,6 +131,7 @@ phases: [
                 "a:27017": {
                     type: "RSPrimary",
                     setName: "rs",
+                    setVersion: 1,
                     electionId:
                 },
                 "b:27017": {

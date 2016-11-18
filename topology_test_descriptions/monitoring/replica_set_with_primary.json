@@ -121,7 +121,7 @@
                     "address": "a:27017",
                     "arbiters": [],
                     "hosts": [
-                      "a:27017"
+                      "a:27017", "b:27017"
                     ],
                     "passives": [],
                     "primary": "a:27017",

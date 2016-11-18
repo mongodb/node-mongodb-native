@@ -91,7 +91,7 @@ phases: [
                     type: "RSPrimary",
                     setName: "rs",
                     setVersion: 2,
-                    electionId: {"$oid": "000000000000000000000002"}
+                    electionId: {"$oid": "000000000000000000000001"}
                 }
             },
             topologyType: "ReplicaSetWithPrimary",

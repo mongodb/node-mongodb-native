@@ -159,11 +159,11 @@ function executePhase(test, state, phase) {
   }
 
   // // Check the topology type
-  // console.log("========================================")
-  // console.log("outcome.topologyType = " + outcome.topologyType)
-  // console.log("state.topologyType = " + state.topologyType)
-  // console.log("outcome.setName = " + outcome.setName)
-  // console.log("state.setName = " + state.setName)
+  console.log("========================================")
+  console.log("outcome.topologyType = " + outcome.topologyType)
+  console.log("state.topologyType = " + state.topologyType)
+  console.log("outcome.setName = " + outcome.setName)
+  console.log("state.setName = " + state.setName)
   test.equal(outcome.topologyType, state.topologyType);
   test.equal(outcome.setName, state.setName);
 

@@ -1,45 +1,45 @@
 {
-    "description": "Replica set case normalization",
+    "description": "Replica set case normalization", 
     "phases": [
         {
             "outcome": {
                 "servers": {
-                    "A:27017": {
-                        "setName": "rs",
+                    "a:27017": {
+                        "setName": "rs", 
                         "type": "RSPrimary"
-                    },
-                    "B:27017": {
-                        "setName": null,
+                    }, 
+                    "b:27017": {
+                        "setName": null, 
                         "type": "Unknown"
-                    },
-                    "C:27017": {
-                        "setName": null,
+                    }, 
+                    "c:27017": {
+                        "setName": null, 
                         "type": "Unknown"
                     }
-                },
-                "setName": "rs",
+                }, 
+                "setName": "rs", 
                 "topologyType": "ReplicaSetWithPrimary"
-            },
+            }, 
             "responses": [
                 [
-                    "A:27017",
+                    "a:27017", 
                     {
                         "arbiters": [
                             "C:27017"
-                        ],
+                        ], 
                         "hosts": [
                             "A:27017"
-                        ],
-                        "ismaster": true,
-                        "ok": 1,
+                        ], 
+                        "ismaster": true, 
+                        "ok": 1, 
                         "passives": [
                             "B:27017"
-                        ],
+                        ], 
                         "setName": "rs"
                     }
                 ]
             ]
         }
-    ],
+    ], 
     "uri": "mongodb://A/?replicaSet=rs"
 }
