@@ -318,6 +318,7 @@ var testFiles = [
   , '/test/functional/ssl_mongoclient_tests.js'
   , '/test/functional/ssl_validation_tests.js'
   , '/test/functional/ssl_x509_connect_tests.js'
+  , '/test/functional/sni_tests.js'
 
   // SCRAM tests
   , '/test/functional/scram_tests.js'
@@ -653,7 +654,7 @@ if(argv.t == 'functional') {
 
   //
   // Single server
-  if(!argv.e || argv.e == 'kerberos' || argv.e == 'ldap') {
+  if(!argv.e || (argv.e == 'kerberos' || argv.e == 'ldap' || argv.e == 'sni')) {
     config = {
         host: 'localhost'
       , port: 27017
