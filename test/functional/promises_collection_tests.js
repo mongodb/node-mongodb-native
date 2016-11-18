@@ -205,3 +205,53 @@ exports['Should correctly return failing Promise when array passed into insertOn
     });
   }
 }
+
+exports['Should correctly execute unordered bulk operation in promise form'] = {
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var url = configuration.url();
+    url = url.indexOf('?') != -1
+      ? f('%s&%s', url, 'maxPoolSize=100')
+      : f('%s?%s', url, 'maxPoolSize=100');
+
+    MongoClient.connect(url).then(function(db) {
+      var bulk = db.collection('unordered_bulk_promise_form').initializeUnorderedBulkOp({ w:1 });
+      bulk.insert({a:1});
+      bulk.execute().then(function(r) {
+        test.ok(r);
+        test.deepEqual({w:1}, bulk.s.writeConcern);
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+exports['Should correctly execute ordered bulk operation in promise form'] = {
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var url = configuration.url();
+    url = url.indexOf('?') != -1
+      ? f('%s&%s', url, 'maxPoolSize=100')
+      : f('%s?%s', url, 'maxPoolSize=100');
+
+    MongoClient.connect(url).then(function(db) {
+      var bulk = db.collection('unordered_bulk_promise_form').initializeOrderedBulkOp({ w:1 });
+      bulk.insert({a:1});
+      bulk.execute().then(function(r) {
+        test.ok(r);
+        test.deepEqual({w:1}, bulk.s.writeConcern);
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
