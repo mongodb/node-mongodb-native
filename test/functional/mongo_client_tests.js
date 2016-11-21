@@ -317,6 +317,9 @@ exports['Should correctly set MaxPoolSize on replicaset server'] = {
         var connections = db.serverConfig.connections();
 
         for(var i = 0; i < connections.length; i++) {
+          // console.log("=============================================")
+          // console.log(`connections[i].connectionTimeout = ${connections[i].connectionTimeout}`)
+          // console.log(`connections[i].socketTimeout = ${connections[i].socketTimeout}`)
           test.equal(30000, connections[i].connectionTimeout);
           test.equal(30000, connections[i].socketTimeout);
         }

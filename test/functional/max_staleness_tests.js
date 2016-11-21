@@ -14,7 +14,7 @@ var extend = function(template, fields) {
   return object;
 }
 
-exports['Should correctly set maxStalenessMS on Mongos query using MongoClient.connect'] = {
+exports['Should correctly set maxStalenessSeconds on Mongos query using MongoClient.connect'] = {
   metadata: {
     requires: {
       generators: true,
@@ -92,14 +92,14 @@ exports['Should correctly set maxStalenessMS on Mongos query using MongoClient.c
         }
       });
 
-      MongoClient.connect('mongodb://localhost:52000/test?readPreference=secondary&maxStalenessMS=25000', function(err, db) {
+      MongoClient.connect('mongodb://localhost:52000/test?readPreference=secondary&maxStalenessSeconds=250', function(err, db) {
         test.equal(null, err);
 
         db.collection('test').find({}).toArray(function(err, r) {
           test.equal(null, err);
           test.deepEqual({
             '$query':  { find: 'test', filter: {} },
-            '$readPreference': { mode: 'secondary', maxStalenessMS: 25000 }
+            '$readPreference': { mode: 'secondary', maxStalenessSeconds: 250 }
           }, command);
 
           db.close();
@@ -112,7 +112,7 @@ exports['Should correctly set maxStalenessMS on Mongos query using MongoClient.c
   }
 }
 
-exports['Should correctly set maxStalenessMS on Mongos query using db level readPreference'] = {
+exports['Should correctly set maxStalenessSeconds on Mongos query using db level readPreference'] = {
   metadata: {
     requires: {
       generators: true,
@@ -194,12 +194,12 @@ exports['Should correctly set maxStalenessMS on Mongos query using db level read
         test.equal(null, err);
 
         // Get a db with a new readPreference
-        var db1 = db.db('test', {readPreference: new ReadPreference('secondary', {maxStalenessMS: 25000})})
+        var db1 = db.db('test', {readPreference: new ReadPreference('secondary', {maxStalenessSeconds: 250})})
         db1.collection('test').find({}).toArray(function(err, r) {
           test.equal(null, err);
           test.deepEqual({
             '$query':  { find: 'test', filter: {} },
-            '$readPreference': { mode: 'secondary', maxStalenessMS: 25000 }
+            '$readPreference': { mode: 'secondary', maxStalenessSeconds: 250 }
           }, command);
 
           db.close();
@@ -212,7 +212,7 @@ exports['Should correctly set maxStalenessMS on Mongos query using db level read
   }
 }
 
-exports['Should correctly set maxStalenessMS on Mongos query using collection level readPreference'] = {
+exports['Should correctly set maxStalenessSeconds on Mongos query using collection level readPreference'] = {
   metadata: {
     requires: {
       generators: true,
@@ -294,11 +294,11 @@ exports['Should correctly set maxStalenessMS on Mongos query using collection le
         test.equal(null, err);
 
         // Get a db with a new readPreference
-        db.collection('test', {readPreference: new ReadPreference('secondary', {maxStalenessMS: 25000})}).find({}).toArray(function(err, r) {
+        db.collection('test', {readPreference: new ReadPreference('secondary', {maxStalenessSeconds: 250})}).find({}).toArray(function(err, r) {
           test.equal(null, err);
           test.deepEqual({
             '$query':  { find: 'test', filter: {} },
-            '$readPreference': { mode: 'secondary', maxStalenessMS: 25000 }
+            '$readPreference': { mode: 'secondary', maxStalenessSeconds: 250 }
           }, command);
 
           db.close();
@@ -311,7 +311,7 @@ exports['Should correctly set maxStalenessMS on Mongos query using collection le
   }
 }
 
-exports['Should correctly set maxStalenessMS on Mongos query using cursor level readPreference'] = {
+exports['Should correctly set maxStalenessSeconds on Mongos query using cursor level readPreference'] = {
   metadata: {
     requires: {
       generators: true,
@@ -393,11 +393,11 @@ exports['Should correctly set maxStalenessMS on Mongos query using cursor level 
         test.equal(null, err);
 
         // Get a db with a new readPreference
-        db.collection('test').find({}).setReadPreference(new ReadPreference('secondary', {maxStalenessMS: 25000})).toArray(function(err, r) {
+        db.collection('test').find({}).setReadPreference(new ReadPreference('secondary', {maxStalenessSeconds: 250})).toArray(function(err, r) {
           test.equal(null, err);
           test.deepEqual({
             '$query':  { find: 'test', filter: {} },
-            '$readPreference': { mode: 'secondary', maxStalenessMS: 25000 }
+            '$readPreference': { mode: 'secondary', maxStalenessSeconds: 250 }
           }, command);
 
           db.close();
