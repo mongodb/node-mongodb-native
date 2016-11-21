@@ -1,4 +1,4 @@
-# Driver doesn't validate maxStalenessMS for direct connection.
+# Driver doesn't validate maxStalenessSeconds for direct connection.
 ---
 heartbeatFrequencyMS: 10000
 topology_description:
@@ -13,7 +13,7 @@ topology_description:
     lastWrite: {lastWriteDate: {$numberLong: "1"}}
 read_preference:
   mode: Nearest
-  maxStalenessMS: 1
+  maxStalenessSeconds: 1
 suitable_servers:
 - *1
 in_latency_window:

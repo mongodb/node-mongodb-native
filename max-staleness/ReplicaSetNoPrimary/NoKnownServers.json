@@ -1,5 +1,4 @@
 {
-    "heartbeatFrequencyMS": 10000,
     "in_latency_window": [],
     "read_preference": {
         "maxStalenessSeconds": 1,
@@ -11,8 +10,12 @@
             {
                 "address": "a:27017",
                 "type": "Unknown"
+            },
+            {
+                "address": "b:27017",
+                "type": "Unknown"
             }
         ],
-        "type": "Unknown"
+        "type": "ReplicaSetNoPrimary"
     }
 }

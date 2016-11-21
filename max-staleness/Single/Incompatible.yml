@@ -1,5 +1,5 @@
 # During server selection,
-# clients (drivers or mongos) MUST raise an error if ``maxStalenessMS`` is not zero or null,
+# clients (drivers or mongos) MUST raise an error if ``maxStalenessSeconds`` is not zero or null,
 # and any server's ``maxWireVersion`` is less than 5 (`SERVER-23893`_).
 ---
 topology_description:
@@ -14,5 +14,5 @@ topology_description:
     lastWrite: {lastWriteDate: {$numberLong: "1"}}
 read_preference:
   mode: Nearest
-  maxStalenessMS: 120000
+  maxStalenessSeconds: 120
 error: true

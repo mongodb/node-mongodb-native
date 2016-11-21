@@ -1,3 +1,7 @@
+# maxStalenessSeconds is applied before tag sets. With tag sets
+# [{data_center: nyc}, {data_center: tokyo}], if the only secondary in NYC is
+# stale then use Tokyo.
+---
 heartbeatFrequencyMS: 25000  # 25 seconds.
 topology_description:
   type: ReplicaSetWithPrimary
@@ -5,31 +9,35 @@ topology_description:
   - &1
     address: a:27017
     type: RSPrimary
-    avg_rtt_ms: 50  # Too far.
-    lastUpdateTime: 1
-    lastWrite: {lastWriteDate: {$numberLong: "2"}}
+    avg_rtt_ms: 5
+    lastUpdateTime: 0
+    lastWrite: {lastWriteDate: {$numberLong: "125002"}}
     maxWireVersion: 5
   - &2
     address: b:27017
     type: RSSecondary
     avg_rtt_ms: 5
-    lastUpdateTime: 125001
-    # Updated 125 sec after primary, so 125 sec stale.
-    # 125 sec stale + 25 sec heartbeat <= 150 sec maxStaleness.
+    lastUpdateTime: 0
     lastWrite: {lastWriteDate: {$numberLong: "2"}}
     maxWireVersion: 5
+    tags:
+      data_center: tokyo
   - &3
     address: c:27017
     type: RSSecondary
     avg_rtt_ms: 5
-    lastUpdateTime: 125001
+    lastUpdateTime: 0
     lastWrite: {lastWriteDate: {$numberLong: "1"}}  # Too stale.
     maxWireVersion: 5
+    tags:
+      data_center: nyc
 read_preference:
-  mode: Nearest
+  mode: SecondaryPreferred
   maxStalenessSeconds: 150
+  tag_sets:
+  - data_center: nyc
+  - data_center: tokyo
 suitable_servers:
-- *1
 - *2
 in_latency_window:
 - *2

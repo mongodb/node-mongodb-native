@@ -1,7 +1,7 @@
 {
     "error": true,
     "read_preference": {
-        "maxStalenessMS": 50000,
+        "maxStalenessSeconds": 150,
         "mode": "PrimaryPreferred"
     },
     "topology_description": {
