@@ -1,6 +1,6 @@
 # Primary has wire version 5, secondary has 4, read preference primaryPreferred
-# with maxStalenessMS. The client must error, even though it uses primary and
-# never applies maxStalenessMS. Proves that the compatibility check precedes
+# with maxStalenessSeconds. The client must error, even though it uses primary and
+# never applies maxStalenessSeconds. Proves that the compatibility check precedes
 # filtration.
 ---
 topology_description:
@@ -22,6 +22,6 @@ topology_description:
     lastWrite: {lastWriteDate: {$numberLong: "1"}}
 read_preference:
   mode: PrimaryPreferred
-  maxStalenessMS: 50000
+  maxStalenessSeconds: 150
 error: true
 

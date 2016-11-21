@@ -18,7 +18,7 @@
         }
     ],
     "read_preference": {
-        "maxStalenessMS": 50000,
+        "maxStalenessSeconds": 150,
         "mode": "SecondaryPreferred",
         "tag_sets": [
             {
@@ -51,7 +51,7 @@
                 "lastUpdateTime": 0,
                 "lastWrite": {
                     "lastWriteDate": {
-                        "$numberLong": "25002"
+                        "$numberLong": "125002"
                     }
                 },
                 "maxWireVersion": 5,

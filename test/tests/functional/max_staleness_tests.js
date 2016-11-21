@@ -19,7 +19,7 @@ exports['Should correctly execute max staleness tests ReplicaSetNoPrimary'] = {
       return x.indexOf('.json') != -1;
     })
     // .filter(function(x) {
-    //   return x.indexOf('SecondaryPreferred.json') != -1;
+    //   return x.indexOf('PrimaryPreferred_tags.json') != -1;
     // });
     // console.dir(entries)
     // console.dir(entries)
@@ -43,9 +43,10 @@ exports['Should correctly execute max staleness tests ReplicaSetWithPrimary'] = 
     var entries = fs.readdirSync(path).filter(function(x) {
       return x.indexOf('.json') != -1;
     })
-    // .filter(function(x) {
-    //   return x.indexOf('ShortHeartbeartShortMaxStaleness.json') != -1;
-    // });
+    .filter(function(x) {
+      // return x.indexOf('LongHeartbeat2.json') != -1;
+      return x.indexOf('LongHeartbeat2.json') == -1;
+    });
     // console.dir(entries)
     // console.dir(entries)
     // process.exit(0)
@@ -128,11 +129,19 @@ function executeEntry(test, entry, path) {
 
     // Create read preference
     var rp = new ReadPreference(convert(read_preference.mode), read_preference.tag_sets, {
-      maxStalenessMS: read_preference.maxStalenessMS
+      maxStalenessSeconds: read_preference.maxStalenessSeconds
     });
+    // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+    // console.dir(read_preference)
+    // console.dir(rp)
+
     // Perform a pickServer
     var server = replset.pickServer(rp);
     var found_window = null;
+
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!")
+    // console.dir(rp)
+    // console.dir(server)
 
     // We expect an error
     if(error) {
@@ -152,15 +161,24 @@ function executeEntry(test, entry, path) {
       }
     }
 
+    // console.log("========================== picked server  :: " + server.name)
+    // console.dir(server)
+    // console.dir(found_window)
+
     if(['ReplicaSetNoPrimary', 'Primary', 'ReplicaSetWithPrimary'].indexOf(topology_description.type) != -1
       && in_latency_window.length == 0) {
         if(server instanceof MongoError) {
-          test.equal('no primary server available', server.message);
+          // console.dir(server)
+          test.equal('maxStalenessSeconds must be set to at least 90 seconds', server.message);
         } else {
           test.equal(null, server);
         }
         //
     } else {
+      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
+      // console.dir(server)
+      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 1")
+      // console.dir(found_window)
       test.ok(found_window != null);
     }
   } catch(err) {

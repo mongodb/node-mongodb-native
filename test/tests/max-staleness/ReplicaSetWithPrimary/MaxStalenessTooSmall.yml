@@ -1,7 +1,8 @@
 # A driver MUST raise an error
 # if the TopologyType is ReplicaSetWithPrimary or ReplicaSetNoPrimary
-# and ``maxStalenessMS`` is less than twice the client's `heartbeatFrequencyMS`.
+# and ``maxStalenessSeconds`` is less than 90.
 ---
+heartbeatFrequencyMS: 500
 topology_description:
   type: ReplicaSetWithPrimary
   servers:
@@ -21,5 +22,5 @@ topology_description:
     lastWrite: {lastWriteDate: {$numberLong: "1"}}
 read_preference:
   mode: Nearest
-  maxStalenessMS: 1  # Too small.
+  maxStalenessSeconds: 89  # Too small.
 error: true

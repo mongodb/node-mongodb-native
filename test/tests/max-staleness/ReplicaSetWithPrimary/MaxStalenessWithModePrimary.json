@@ -1,7 +1,7 @@
 {
     "error": true,
     "read_preference": {
-        "maxStalenessMS": 120000
+        "maxStalenessSeconds": 120
     },
     "topology_description": {
         "servers": [

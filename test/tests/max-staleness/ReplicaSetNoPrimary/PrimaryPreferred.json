@@ -15,7 +15,7 @@
         }
     ],
     "read_preference": {
-        "maxStalenessMS": 50000,
+        "maxStalenessSeconds": 90,
         "mode": "PrimaryPreferred"
     },
     "suitable_servers": [

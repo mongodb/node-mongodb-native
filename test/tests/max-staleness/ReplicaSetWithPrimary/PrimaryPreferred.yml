@@ -1,4 +1,4 @@
-# Ignore maxStalenessMS is primary is available.
+# Ignore maxStalenessSeconds if primary is available.
 ---
 heartbeatFrequencyMS: 25000  # 25 seconds.
 topology_description:
@@ -20,7 +20,7 @@ topology_description:
     lastWrite: {lastWriteDate: {$numberLong: "1"}}
 read_preference:
   mode: PrimaryPreferred
-  maxStalenessMS: 50000
+  maxStalenessSeconds: 150
 suitable_servers:
 - *1
 in_latency_window:

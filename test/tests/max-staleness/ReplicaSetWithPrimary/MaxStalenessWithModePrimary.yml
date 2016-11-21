@@ -1,4 +1,4 @@
-# Drivers MUST raise an error if ``maxStalenessMS`` is not zero or null
+# Drivers MUST raise an error if ``maxStalenessSeconds`` is not zero or null
 # and the ``mode`` field is 'primary'.
 ---
 topology_description:
@@ -19,5 +19,5 @@ topology_description:
     maxWireVersion: 5
     lastWrite: {lastWriteDate: {$numberLong: "1"}}
 read_preference:
-  maxStalenessMS: 120000
+  maxStalenessSeconds: 120
 error: true
