@@ -20,5 +20,5 @@ This section exposes how to use the MongoDB Node.js driver with ECMAScript 6, le
 For more information about ECMAScript 6 see the [ECMAScript 6 features](http://es6-features.org/).
 {{% /note %}}
 
-- [Connecting]({{<relref "reference/ecmascript6/connecting.md">}}): how to connect leveraging ECMASdcript 6.
+- [Connecting]({{<relref "reference/ecmascript6/connecting.md">}}): how to connect leveraging ECMAScript 6.
 - [CRUD]({{<relref "reference/ecmascript6/crud.md">}}): perform CRUD operations leveraging ECMAScript 6.
