@@ -32,11 +32,11 @@ var needSlaveOk = ['primaryPreferred', 'secondary', 'secondaryPreferred', 'neare
  * @param {string} preference A string describing the preference (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
  * @param {array} tags The tags object
  * @param {object} [options] Additional read preference options
- * @param {number} [options.maxStalenessMS] Max Secondary Read Stalleness in Miliseconds
+ * @param {number} [options.maxStalenessSeconds] Max Secondary Read Stalleness in Seconds, Minimum value is 90 seconds.
  * @property {string} preference The preference string (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
  * @property {array} tags The tags object
  * @property {object} options Additional read preference options
- * @property {number} maxStalenessMS MaxStalenessMS value for the read preference
+ * @property {number} maxStalenessSeconds MaxStalenessSeconds value for the read preference
  * @return {ReadPreference}
  */
 var ReadPreference = function(preference, tags, options) {
@@ -44,14 +44,13 @@ var ReadPreference = function(preference, tags, options) {
   this.tags = tags;
   this.options = options;
 
-  // If no tags were passed in
-  if(tags && typeof tags == 'object') {
+  // Add the maxStalenessSeconds value to the read Preference
+  if(this.options && this.options.maxStalenessSeconds) {
+    this.options = options;
+    this.maxStalenessSeconds = this.options.maxStalenessSeconds >= 0
+      ? this.options.maxStalenessSeconds : null;
+  } else if(tags && typeof tags == 'object') {
     this.options = tags, tags = null;
-  }
-
-  // Add the maxStalenessMS value to the read Preference
-  if(this.options && this.options.maxStalenessMS) {
-    this.maxStalenessMS = this.options.maxStalenessMS;
   }
 }
 
@@ -81,7 +80,7 @@ ReadPreference.prototype.equals = function(readPreference) {
 ReadPreference.prototype.toJSON = function() {
   var readPreference = {mode: this.preference};
   if(Array.isArray(this.tags)) readPreference.tags = this.tags;
-  if(this.maxStalenessMS) readPreference.maxStalenessMS = this.maxStalenessMS;
+  if(this.maxStalenessSeconds) readPreference.maxStalenessSeconds = this.maxStalenessSeconds;
   return readPreference;
 }
 
