@@ -30,6 +30,18 @@
             },
             "maxWireVersion": 5,
             "type": "Mongos"
+        },
+        {
+            "address": "b:27017",
+            "avg_rtt_ms": 50,
+            "lastUpdateTime": 0,
+            "lastWrite": {
+                "lastWriteDate": {
+                    "$numberLong": "1"
+                }
+            },
+            "maxWireVersion": 5,
+            "type": "Mongos"
         }
     ],
     "topology_description": {

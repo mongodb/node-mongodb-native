@@ -23,5 +23,6 @@ read_preference:
   maxStalenessSeconds: 1  # OK for sharding.
 suitable_servers:
 - *1
+- *2
 in_latency_window:
 - *1

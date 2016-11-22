@@ -24,5 +24,6 @@ read_preference:
   maxStalenessSeconds: 130  # OK, must be 120 + 10 = 130 seconds.
 suitable_servers:
 - *1
+- *2
 in_latency_window:
 - *1
