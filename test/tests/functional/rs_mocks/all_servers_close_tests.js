@@ -268,29 +268,29 @@ exports['Successfully come back from a dead replicaset that has been unavailable
       "setName": "rs", "setVersion": 1, "electionId": electionIds[0],
       "maxBsonObjectSize" : 16777216, "maxMessageSizeBytes" : 48000000,
       "maxWriteBatchSize" : 1000, "localTime" : new Date(), "maxWireVersion" : 4,
-      "minWireVersion" : 0, "ok" : 1, "hosts": ["localhost:32000", "localhost:32001", "localhost:32002"], "arbiters": ["localhost:32002"]
+      "minWireVersion" : 0, "ok" : 1, "hosts": ["localhost:34000", "localhost:34001", "localhost:34002"], "arbiters": ["localhost:34002"]
     }
 
     // Primary server states
     var primary = [extend(defaultFields, {
-      "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
+      "ismaster":true, "secondary":false, "me": "localhost:34000", "primary": "localhost:34000", "tags" : { "loc" : "ny" }
     })];
 
     // Primary server states
     var firstSecondary = [extend(defaultFields, {
-      "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
+      "ismaster":false, "secondary":true, "me": "localhost:34001", "primary": "localhost:34000", "tags" : { "loc" : "sf" }
     })];
 
     // Primary server states
     var arbiter = [extend(defaultFields, {
-      "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
+      "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:34002", "primary": "localhost:34000"
     })];
 
     // Boot the mock
     co(function*() {
-      primaryServer = yield mockupdb.createServer(32000, 'localhost');
-      firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
-      arbiterServer = yield mockupdb.createServer(32002, 'localhost');
+      primaryServer = yield mockupdb.createServer(34000, 'localhost');
+      firstSecondaryServer = yield mockupdb.createServer(34001, 'localhost');
+      arbiterServer = yield mockupdb.createServer(34002, 'localhost');
 
       // Primary state machine
       co(function*() {
@@ -353,9 +353,9 @@ exports['Successfully come back from a dead replicaset that has been unavailable
     Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
-      { host: 'localhost', port: 32000 },
-      { host: 'localhost', port: 32001 },
-      { host: 'localhost', port: 32002 }], {
+      { host: 'localhost', port: 34000 },
+      { host: 'localhost', port: 34001 },
+      { host: 'localhost', port: 34002 }], {
         setName: 'rs',
         connectionTimeout: 5000,
         socketTimeout: 5000,
@@ -408,6 +408,9 @@ exports['Successfully come back from a dead replicaset that has been unavailable
               running = false;
 
               setTimeout(function() {
+                // console.log("====================================================")
+                // console.dir(Object.keys(Connection.connections()))
+
                 test.equal(0, Object.keys(Connection.connections()).length);
                 Connection.disableConnectionAccounting();
                 test.done();

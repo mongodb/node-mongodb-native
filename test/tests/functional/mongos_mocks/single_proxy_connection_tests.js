@@ -156,8 +156,6 @@ exports['Should not fail due to available connections equal to 0 during ha proce
     // Contain mock server
     var server = null;
     var running = true;
-    // Current index for the ismaster
-    var currentStep = 0;
     // Primary stop responding
     var stopRespondingPrimary = false;
 
@@ -202,10 +200,10 @@ exports['Should not fail due to available connections equal to 0 during ha proce
           // Get the document
           var doc = request.document;
 
-          if(doc.ismaster && currentStep == 0) {
+          if(doc.ismaster) {
             request.reply(serverIsMaster[0]);
           } else if(doc.find) {
-            yield timeoutPromise(2000);
+            yield timeoutPromise(600);
             // Reply with first batch
             request.reply({
               "cursor" : {

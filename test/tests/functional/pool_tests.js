@@ -461,12 +461,14 @@ exports['Should correctly reclaim immediateRelease socket'] = {
     pool.on('connect', function(_pool) {
       // console.log("============================== 3")
       var query = new Query(new bson(), 'system.$cmd', {ismaster:true}, {numberToSkip: 0, numberToReturn: 1});
-      _pool.write(query, {immediateRelease: true}, function() {
-        // console.log("============================== 4")
+      _pool.write(query, {immediateRelease: true}, function(err, r) {
+        console.log("============================== 4")
+        console.dir(err)
         index = index + 1;
       });
 
-      test.equal(1, pool.availableConnections.length);
+
+      // test.equal(1, pool.availableConnections.length);
     })
 
     pool.on('timeout', function(err, _pool) {
@@ -858,8 +860,8 @@ exports['Should correctly exit _execute loop when single avialable connection is
       , bson = require('bson').BSONPure.BSON
       , Query = require('../../../lib/connection/commands').Query;
 
-    // // Enable connections accounting
-    // Connection.enableConnectionAccounting();
+    // Enable connections accounting
+    Connection.enableConnectionAccounting();
 
     // Attempt to connect
     var pool = new Pool({
@@ -873,18 +875,26 @@ exports['Should correctly exit _execute loop when single avialable connection is
 
     // Add event listeners
     pool.on('connect', function(_pool) {
-      // Mark available connection as broken
-      var con = pool.availableConnections[0];
-      pool.availableConnections[0].destroyed = true;
-
       // Execute ismaster should not cause cpu to start spinning
       var query = new Query(new bson(), 'system.$cmd', {ismaster:true}, {numberToSkip: 0, numberToReturn: 1});
       _pool.write(query, function(err, result) {
         test.equal(null, err);
-        con.destroy();
-        _pool.destroy();
-        // Connection.disableConnectionAccounting();
-        test.done();
+
+        // Mark available connection as broken
+        var con = pool.availableConnections[0];
+        pool.availableConnections[0].destroyed = true;
+
+        // Execute ismaster should not cause cpu to start spinning
+        var query = new Query(new bson(), 'system.$cmd', {ismaster:true}, {numberToSkip: 0, numberToReturn: 1});
+        _pool.write(query, function(err, result) {
+          test.equal(null, err);
+
+          con.destroy();
+          _pool.destroy();
+
+          Connection.disableConnectionAccounting();
+          test.done();
+        });
       });
     });
 

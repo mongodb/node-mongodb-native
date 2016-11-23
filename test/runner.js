@@ -237,6 +237,7 @@ try {
   testFiles.push('/test/tests/functional/rs_mocks/maintanance_mode_tests.js');
   testFiles.push('/test/tests/functional/rs_mocks/operation_tests.js');
   testFiles.push('/test/tests/functional/rs_mocks/no_primary_found_tests.js');
+  testFiles.push('/test/tests/functional/rs_mocks/primary_loses_network_tests.js');
 
   // SDAM Tests
   testFiles.push('/test/tests/functional/sdam_monitoring_mocks/single_topology_tests.js');
