@@ -142,7 +142,6 @@ exports['Should correctly connect to a replicaset where the arbiter hangs no pri
 
     // Add event listeners
     server.on('connect', function(_server) {
-      // console.log("=============================== connect")
       // Destroy mock
       primaryServer.destroy();
       firstSecondaryServer.destroy();
@@ -156,6 +155,7 @@ exports['Should correctly connect to a replicaset where the arbiter hangs no pri
     });
 
     server.on('error', function(err) {
+      console.dir(err)
       throw new Error('should not error out');
       // console.log("=============================== error")
       // console.dir(err)

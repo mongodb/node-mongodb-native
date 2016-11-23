@@ -1020,7 +1020,7 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
             //   console.dir(r.result)
             // }
 
-            // // console.dir(err)
+            console.dir(err)
             test.equal(err, null);
             test.ok(r.connection.port == 32000 || r.connection.port == 32001);
             // if(!r.connection.port == 32002) {

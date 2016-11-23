@@ -172,6 +172,10 @@ exports['Successfully failover to new primary'] = {
         // Keep the count of joined events
         var joinedEvents = 0;
 
+        server.on('left', function(_type, _server) {
+          // console.log("--------- left :: " + _type + " :: " + _server.name)
+        })
+
         // Add listener
         server.on('joined', function(_type, _server) {
           // console.log("--------- joined :: " + _type + " :: " + _server.name)
