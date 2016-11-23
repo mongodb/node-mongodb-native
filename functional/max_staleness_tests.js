@@ -19,7 +19,7 @@ exports['Should correctly execute max staleness tests ReplicaSetNoPrimary'] = {
       return x.indexOf('.json') != -1;
     })
     // .filter(function(x) {
-    //   return x.indexOf('PrimaryPreferred_tags.json') != -1;
+    //   return x.indexOf('ZeroMaxStaleness.json') != -1;
     // });
     // console.dir(entries)
     // console.dir(entries)
@@ -46,6 +46,7 @@ exports['Should correctly execute max staleness tests ReplicaSetWithPrimary'] = 
     .filter(function(x) {
       // return x.indexOf('LongHeartbeat2.json') != -1;
       return x.indexOf('LongHeartbeat2.json') == -1;
+      // return x.indexOf('ZeroMaxStaleness.json') == -1;
     });
     // console.dir(entries)
     // console.dir(entries)
@@ -140,6 +141,7 @@ function executeEntry(test, entry, path) {
     var found_window = null;
 
     // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!")
+    // console.dir(error)
     // console.dir(rp)
     // console.dir(server)
 

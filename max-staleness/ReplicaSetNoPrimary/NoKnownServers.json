@@ -1,10 +1,9 @@
 {
-    "in_latency_window": [],
+    "error": true,
     "read_preference": {
         "maxStalenessSeconds": 1,
         "mode": "Nearest"
     },
-    "suitable_servers": [],
     "topology_description": {
         "servers": [
             {
