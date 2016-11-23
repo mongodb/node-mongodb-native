@@ -516,8 +516,16 @@ function topologyMonitor(self, options) {
 
       // Emit the server heartbeat start
       emitSDAMEvent(self, 'serverHeartbeatStarted', { connectionId: _server.name });
+
       // Execute ismaster
-      _server.command('admin.$cmd', {ismaster:true}, {monitoring: true}, function(err, r) {
+      // Set the socketTimeout for a monitoring message to a low number
+      // Ensuring ismaster calls are timed out quickly
+      _server.command('admin.$cmd', {
+        ismaster:true
+      }, {
+        monitoring: true,
+        socketTimeout: self.s.options.connectionTimeout || 2000,
+      }, function(err, r) {
         if(self.state == DESTROYED) {
           _server.destroy();
           return cb(err, r);

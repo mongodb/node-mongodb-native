@@ -491,7 +491,8 @@ Server.prototype.command = function(ns, cmd, options, callback) {
     command: true,
     monitoring: typeof options.monitoring == 'boolean' ? options.monitoring : false,
     fullResult: typeof options.fullResult == 'boolean' ? options.fullResult : false,
-    requestId: query.requestId
+    requestId: query.requestId,
+    socketTimeout: typeof options.socketTimeout == 'number' ? options.socketTimeout : null,
   };
 
   // Write the operation to the pool
