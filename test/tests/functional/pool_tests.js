@@ -848,3 +848,47 @@ exports['Should correctly have auth wait for logout to finish'] = {
     });
   }
 }
+
+exports['Should correctly exit _execute loop when single avialable connection is destroyed'] = {
+  metadata: { requires: { topology: "single" } },
+
+  test: function(configuration, test) {
+    var Pool = require('../../../lib/connection/pool')
+      , Connection = require('../../../lib/connection/connection')
+      , bson = require('bson').BSONPure.BSON
+      , Query = require('../../../lib/connection/commands').Query;
+
+    // // Enable connections accounting
+    // Connection.enableConnectionAccounting();
+
+    // Attempt to connect
+    var pool = new Pool({
+        host: configuration.host
+      , port: configuration.port
+      , bson: new bson()
+      , size: 1
+      , socketTimeout: 500
+      , messageHandler: function() {}
+    });
+
+    // Add event listeners
+    pool.on('connect', function(_pool) {
+      // Mark available connection as broken
+      var con = pool.availableConnections[0];
+      pool.availableConnections[0].destroyed = true;
+
+      // Execute ismaster should not cause cpu to start spinning
+      var query = new Query(new bson(), 'system.$cmd', {ismaster:true}, {numberToSkip: 0, numberToReturn: 1});
+      _pool.write(query, function(err, result) {
+        test.equal(null, err);
+        con.destroy();
+        _pool.destroy();
+        // Connection.disableConnectionAccounting();
+        test.done();
+      });
+    });
+
+    // Start connection
+    pool.connect();
+  }
+}
