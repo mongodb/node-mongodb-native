@@ -3,8 +3,8 @@ Inserting and updating
 
 See also:
 
-  * [Database](database.md)
-  * [Collections](collections.md)
+  * [Database](database.html)
+  * [Collections](collections.html)
 
 ## Insert
 
@@ -60,7 +60,7 @@ Updates can be done with `update`
 
 Where
 
-  * `criteria` is a query object to find records that need to be updated (see [Queries](queries.md))
+  * `criteria` is a query object to find records that need to be updated (see [Queries](queries.html))
   * `update` is the replacement object
   * `options` is an options object (see below)
   * `callback` is the callback to be run after the records are updated. Has three parameters, the first is an error object (if error occured), the second is the count of records that were modified, the third is an object with the status of the operation.
@@ -102,7 +102,7 @@ To update and retrieve the contents for one single record you can use `findAndMo
 Where
 
   * `criteria` is the query object to find the record
-  * `sort` indicates the order of the matches if there's more than one matching record. The first record on the result set will be used. See [Queries->find->options->sort](queries.md) for the format.
+  * `sort` indicates the order of the matches if there's more than one matching record. The first record on the result set will be used. See [Queries->find->options->sort](queries.html) for the format.
   * `update` is the replacement object
   * `options` define the behavior of the function
   * `callback` is the function to run after the update is done. Has two parameters - error object (if error occured) and the record that was updated.
