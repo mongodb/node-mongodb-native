@@ -48,7 +48,11 @@ Shorthand for insert/update is `save` - if `_id` value set, the record is update
   collection.save({_id:"abc", user:"David"},{w:1}, callback)
 ```
     
-`callback` gets two parameters - an error object (if an error occured) and the record if it was inserted or `1` if the record was updated. 
+`callback` gets three parameters where
+
+* `error` is an `object` if an error occured or `null` if no error
+* `document` is an `object` if it was inserted or `1` if the record was updated
+* `info` is an `object` with technical information about the database transaction
 
 ## Update
 
