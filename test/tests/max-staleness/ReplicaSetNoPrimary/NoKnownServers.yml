@@ -1,4 +1,4 @@
-# A too-short maxStalenessSeconds isn't enforced until there are known servers.
+# maxStalenessSeconds must be at least 90 seconds, even with no known servers.
 ---
 topology_description:
   type: ReplicaSetNoPrimary
@@ -11,6 +11,5 @@ topology_description:
     type: Unknown
 read_preference:
   mode: Nearest
-  maxStalenessSeconds: 1
-suitable_servers: []
-in_latency_window: []
+  maxStalenessSeconds: 1  # Too small.
+error: true

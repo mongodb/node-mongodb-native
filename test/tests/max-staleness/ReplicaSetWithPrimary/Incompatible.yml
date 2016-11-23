@@ -1,6 +1,6 @@
-# During server selection,
-# clients (drivers or mongos) MUST raise an error if ``maxStalenessSeconds`` is not zero or null,
-# and any server's ``maxWireVersion`` is less than 5 (`SERVER-23893`_).
+# During server selection, clients (drivers or mongos) MUST raise an error if
+# maxStalenessSeconds is defined and not -1 and any server's ``maxWireVersion``
+# is less than 5 (`SERVER-23893`_).
 ---
 topology_description:
   type: ReplicaSetWithPrimary
