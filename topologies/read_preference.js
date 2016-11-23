@@ -45,7 +45,7 @@ var ReadPreference = function(preference, tags, options) {
   this.options = options;
 
   // Add the maxStalenessSeconds value to the read Preference
-  if(this.options && this.options.maxStalenessSeconds) {
+  if(this.options && this.options.maxStalenessSeconds != null) {
     this.options = options;
     this.maxStalenessSeconds = this.options.maxStalenessSeconds >= 0
       ? this.options.maxStalenessSeconds : null;

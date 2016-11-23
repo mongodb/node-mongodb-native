@@ -574,7 +574,7 @@ ReplSetState.prototype.pickServer = function(readPreference) {
   readPreference = readPreference || ReadPreference.primary;
 
   // maxStalenessSeconds is not allowed with a primary read
-  if(readPreference.preference == 'primary' && readPreference.maxStalenessSeconds) {
+  if(readPreference.preference == 'primary' && readPreference.maxStalenessSeconds != null) {
     return new MongoError('primary readPreference incompatible with maxStalenessSeconds');
   }
 
@@ -584,7 +584,7 @@ ReplSetState.prototype.pickServer = function(readPreference) {
 
   // Does any of the servers not support the right wire protocol version
   // for maxStalenessSeconds when maxStalenessSeconds specified on readPreference. Then error out
-  if(readPreference.maxStalenessSeconds) {
+  if(readPreference.maxStalenessSeconds != null) {
     for(var i = 0; i < allservers.length; i++) {
       if(allservers[i].ismaster.maxWireVersion < 5) {
         return new MongoError('maxStalenessSeconds not supported by at least one of the replicaset members');
@@ -593,9 +593,9 @@ ReplSetState.prototype.pickServer = function(readPreference) {
   }
 
   // Do we have the nearest readPreference
-  if(readPreference.preference == 'nearest' && !readPreference.maxStalenessSeconds) {
+  if(readPreference.preference == 'nearest' && readPreference.maxStalenessSeconds == null) {
     return pickNearest(this, readPreference);
-  } else if(readPreference.preference == 'nearest' && readPreference.maxStalenessSeconds) {
+  } else if(readPreference.preference == 'nearest' && readPreference.maxStalenessSeconds != null) {
     return pickNearestMaxStalenessSeconds(this, readPreference);
   }
 
@@ -623,14 +623,14 @@ ReplSetState.prototype.pickServer = function(readPreference) {
   if(readPreference.equals(ReadPreference.secondaryPreferred)
     || readPreference.equals(ReadPreference.secondary)) {
 
-    if(secondaries.length > 0 && !readPreference.maxStalenessSeconds) {
+    if(secondaries.length > 0 && readPreference.maxStalenessSeconds == null) {
       // Pick nearest of any other servers available
       var server = pickNearest(this, readPreference);
       // No server in the window return primary
       if(server) {
         return server;
       }
-    } else if(secondaries.length > 0 && readPreference.maxStalenessSeconds) {
+    } else if(secondaries.length > 0 && readPreference.maxStalenessSeconds != null) {
       // Pick nearest of any other servers available
       server = pickNearestMaxStalenessSeconds(this, readPreference);
       // No server in the window return primary
@@ -656,9 +656,9 @@ ReplSetState.prototype.pickServer = function(readPreference) {
     }
 
     // Pick a secondary
-    if(secondaries.length > 0 && !readPreference.maxStalenessSeconds) {
+    if(secondaries.length > 0 && readPreference.maxStalenessSeconds == null) {
       server = pickNearest(this, readPreference);
-    } else if(secondaries.length > 0 && readPreference.maxStalenessSeconds) {
+    } else if(secondaries.length > 0 && readPreference.maxStalenessSeconds != null) {
       server = pickNearestMaxStalenessSeconds(this, readPreference);
     }
 
