@@ -12,7 +12,7 @@ exports['Should correct connect to snitest1.10gen.cc'] = {
 
     // Let's write the actual connection code
     MongoClient.connect("mongodb://snitest2.mongodb.com:27777/?ssl=true", {
-      servername: 'snitest1.10gen.cc',
+      // servername: 'snitest1.10gen.cc',
     }, function(err, db) {
       test.equal(null, err);
       db.close();
@@ -33,7 +33,7 @@ exports['Should correct connect to snitest2.mongodb.com'] = {
 
     // Let's write the actual connection code
     MongoClient.connect("mongodb://snitest2.mongodb.com:27777/?ssl=true", {
-      servername: 'snitest2.mongodb.com',
+      // servername: 'snitest2.mongodb.com',
     }, function(err, db) {
       test.equal(null, err);
       db.close();
