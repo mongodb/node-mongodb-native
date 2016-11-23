@@ -18,6 +18,7 @@ rcover_html/
 results/
 gh-pages/
 .coverage_data/
+.idea/
 docs/sphinx-docs/source/driver-articles/
 public/
 docs/public
