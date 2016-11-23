@@ -431,6 +431,11 @@ Connection.prototype.connect = function(_options) {
       sslOptions.checkServerIdentity = self.checkServerIdentity;
     }
 
+    // Set default sni servername to be the same as host
+    if(sslOptions.servername == null) {
+      sslOptions.servername = self.host;
+    }
+
     // Attempt SSL connection
     self.connection = tls.connect(self.port, self.host, sslOptions, function() {
       // Error on auth or skip
