@@ -552,7 +552,7 @@
             
                 <li data-name="Mongos#event:serverDescriptionChanged"><a href="Mongos.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
             
-                <li data-name="Mongos#event:serverHearbeatFailed"><a href="Mongos.html#event:serverHearbeatFailed">serverHearbeatFailed</a></li>
+                <li data-name="Mongos#event:serverHeartbeatFailed"><a href="Mongos.html#event:serverHeartbeatFailed">serverHeartbeatFailed</a></li>
             
                 <li data-name="Mongos#event:serverHeartbeatStarted"><a href="Mongos.html#event:serverHeartbeatStarted">serverHeartbeatStarted</a></li>
             
@@ -711,7 +711,7 @@
             
                 <li data-name="ReplSet#event:serverDescriptionChanged"><a href="ReplSet.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
             
-                <li data-name="ReplSet#event:serverHearbeatFailed"><a href="ReplSet.html#event:serverHearbeatFailed">serverHearbeatFailed</a></li>
+                <li data-name="ReplSet#event:serverHeartbeatFailed"><a href="ReplSet.html#event:serverHeartbeatFailed">serverHeartbeatFailed</a></li>
             
                 <li data-name="ReplSet#event:serverHeartbeatStarted"><a href="ReplSet.html#event:serverHeartbeatStarted">serverHeartbeatStarted</a></li>
             
@@ -958,7 +958,6 @@ var inherits = require('util').inherits,
   ReadPreference = require('./read_preference'),
   BasicCursor = require('../cursor'),
   Logger = require('../connection/logger'),
-  debugOptions = require('../connection/utils').debugOptions,
   MongoError = require('../error'),
   Server = require('./server'),
   ReplSetState = require('./replset_state'),
@@ -1190,7 +1189,7 @@ function attemptReconnect(self) {
 
     // Handle all events coming from servers
     function _handleEvent(self, event) {
-      return function(err) {
+      return function() {
         // Destroy the instance
         if(self.state == DESTROYED) {
           return this.destroy();
@@ -1220,7 +1219,7 @@ function attemptReconnect(self) {
             // Do we have a primary
             if(self.s.replicaSetState.hasPrimary()) {
               // Connect any missing servers
-              connectNewServers(self, self.s.replicaSetState.unknownServers, function(err, cb) {
+              connectNewServers(self, self.s.replicaSetState.unknownServers, function() {
                 // Debug log
                 if(self.s.logger.isDebug()) {
                   self.s.logger.debug(f('attemptReconnect for replset with id successful resuming topologyMonitor', self.id));
@@ -1273,7 +1272,7 @@ function attemptReconnect(self) {
             }
 
             // Remove the handlers
-            for(var i = 0; i &lt; handlers.length; i++) {
+            for(i = 0; i &lt; handlers.length; i++) {
               _self.removeAllListeners(handlers[i]);
             }
 
@@ -1327,7 +1326,7 @@ function connectNewServers(self, servers, callback) {
 
   // Handle events
   var _handleEvent = function(self, event) {
-    return function(err, r) {
+    return function() {
       var _self = this;
       count = count - 1;
 
@@ -1421,6 +1420,14 @@ function topologyMonitor(self, options) {
   self.haTimeoutId = setTimeout(function() {
     if(self.state == DESTROYED) return;
 
+    // Is this a on connect topology discovery
+    // Schedule a proper topology monitoring to happen
+    // To ensure any discovered servers do not timeout
+    // while waiting for the initial discovery to happen.
+    if(options.haInterval) {
+      topologyMonitor(self);
+    }
+
     // If we have a primary and a disconnect handler, execute
     // buffered operations
     if(self.s.replicaSetState.hasPrimaryAndSecondary() &amp;&amp; self.s.disconnectHandler) {
@@ -1443,6 +1450,7 @@ function topologyMonitor(self, options) {
     }
     // Get the count
     var count = connectingServers.length;
+
     // If we have no servers connected
     if(count == 0 &amp;&amp; !options.haInterval) {
       if(self.listeners("close").length > 0) {
@@ -1459,8 +1467,16 @@ function topologyMonitor(self, options) {
 
       // Emit the server heartbeat start
       emitSDAMEvent(self, 'serverHeartbeatStarted', { connectionId: _server.name });
+
       // Execute ismaster
-      _server.command('admin.$cmd', {ismaster:true}, {monitoring: true}, function(err, r) {
+      // Set the socketTimeout for a monitoring message to a low number
+      // Ensuring ismaster calls are timed out quickly
+      _server.command('admin.$cmd', {
+        ismaster:true
+      }, {
+        monitoring: true,
+        socketTimeout: self.s.options.connectionTimeout || 2000,
+      }, function(err, r) {
         if(self.state == DESTROYED) {
           _server.destroy();
           return cb(err, r);
@@ -1477,7 +1493,9 @@ function topologyMonitor(self, options) {
         // We had an error, remove it from the state
         if(err) {
           // Emit the server heartbeat failure
-          emitSDAMEvent(self, 'serverHearbeatFailed', { durationMS: latencyMS, failure: err, connectionId: _server.name });
+          emitSDAMEvent(self, 'serverHeartbeatFailed', { durationMS: latencyMS, failure: err, connectionId: _server.name });
+          // Remove server from the state
+          _self.s.replicaSetState.remove(_server);
         } else {
           // Update the server ismaster
           _server.ismaster = r.result;
@@ -1506,7 +1524,7 @@ function topologyMonitor(self, options) {
             if(_server.lastIsMaster() &amp;&amp; _server.lastIsMaster().ismaster) {
               self.ismaster = _server.lastIsMaster();
             }
-          };
+          }
 
           // Server heart beat event
           emitSDAMEvent(self, 'serverHeartbeatSucceeded', { durationMS: latencyMS, reply: r.result, connectionId: _server.name });
@@ -1525,8 +1543,9 @@ function topologyMonitor(self, options) {
       if(self.state == DESTROYED) return;
 
       // Attempt to connect to any unknown servers
-      connectNewServers(self, self.s.replicaSetState.unknownServers, function(err, cb) {
+      connectNewServers(self, self.s.replicaSetState.unknownServers, function() {
         if(self.state == DESTROYED) return;
+
         // Check if we have an options.haInterval (meaning it was triggered from connect)
         if(options.haInterval) {
           // Do we have a primary and secondary
@@ -1581,7 +1600,7 @@ function topologyMonitor(self, options) {
           }
         }
 
-        topologyMonitor(self);
+        if(!options.haInterval) topologyMonitor(self);
       });
     }
 
@@ -1596,7 +1615,7 @@ function topologyMonitor(self, options) {
 
     // Ping all servers
     for(var i = 0; i &lt; connectingServers.length; i++) {
-      pingServer(self, connectingServers[i], function(err, r) {
+      pingServer(self, connectingServers[i], function() {
         count = count - 1;
 
         if(count == 0) {
@@ -1608,11 +1627,11 @@ function topologyMonitor(self, options) {
 }
 
 function handleEvent(self, event) {
-  return function(err) {
+  return function() {
     if(self.state == DESTROYED) return;
     // Debug log
     if(self.s.logger.isDebug()) {
-      self.s.logger.debug(f('handleEvent %s from server %s in replset with id %s', event, self.name, self.id));
+      self.s.logger.debug(f('handleEvent %s from server %s in replset with id %s', event, this.name, self.id));
     }
 
     self.s.replicaSetState.remove(this);
@@ -1620,7 +1639,7 @@ function handleEvent(self, event) {
 }
 
 function handleInitialConnectEvent(self, event) {
-  return function(err) {
+  return function() {
     // Debug log
     if(self.s.logger.isDebug()) {
       self.s.logger.debug(f('handleInitialConnectEvent %s from server %s in replset with id %s', event, this.name, self.id));
@@ -1671,7 +1690,7 @@ function handleInitialConnectEvent(self, event) {
     }
 
     // Remove from the list from connectingServers
-    for(var i = 0; i &lt; self.s.connectingServers.length; i++) {
+    for(i = 0; i &lt; self.s.connectingServers.length; i++) {
       if(self.s.connectingServers[i].equals(this)) {
         self.s.connectingServers.splice(i, 1);
       }
@@ -1762,19 +1781,21 @@ ReplSet.prototype.connect = function(options) {
 
 /**
  * Destroy the server connection
+ * @param {boolean} [options.force=false] Force destroy the pool
  * @method
  */
-ReplSet.prototype.destroy = function() {
+ReplSet.prototype.destroy = function(options) {
+  options = options || {};
   // Transition state
   stateTransition(this, DESTROYED);
   // Clear out any monitoring process
   if(this.haTimeoutId) clearTimeout(this.haTimeoutId);
   // Destroy the replicaset
-  this.s.replicaSetState.destroy();
+  this.s.replicaSetState.destroy(options);
 
   // Destroy all connecting servers
   this.s.connectingServers.forEach(function(x) {
-    x.destroy();
+    x.destroy(options);
   });
 
   // Emit toplogy closing event
@@ -1898,12 +1919,6 @@ ReplSet.prototype.getServers = function() {
   return this.s.replicaSetState.allServers();
 }
 
-function basicReadPreferenceValidation(self, options) {
-  if(options.readPreference &amp;&amp; !(options.readPreference instanceof ReadPreference)) {
-    throw new Error("readPreference must be an instance of ReadPreference");
-  }
-}
-
 //
 // Execute write operation
 var executeWriteOperation = function(self, op, ns, ops, options, callback) {
@@ -2014,8 +2029,9 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
   // If the readPreference is primary and we have no primary, store it
   if(readPreference.preference == 'primary' &amp;&amp; !this.s.replicaSetState.hasPrimary() &amp;&amp; this.s.disconnectHandler != null) {
     return this.s.disconnectHandler.add('command', ns, cmd, options, callback);
-  } else if(readPreference.preference != 'primary' &amp;&amp; !this.s.replicaSetState.hasSecondary() &amp;&amp; this.s.disconnectHandler != null) {
-    // Otherwise secondary is allowed
+  } else if(readPreference.preference == 'secondary' &amp;&amp; !this.s.replicaSetState.hasSecondary() &amp;&amp; this.s.disconnectHandler != null) {
+    return this.s.disconnectHandler.add('command', ns, cmd, options, callback);
+  } else if(readPreference.preference != 'primary' &amp;&amp; !this.s.replicaSetState.hasSecondary() &amp;&amp; !this.s.replicaSetState.hasPrimary() &amp;&amp; this.s.disconnectHandler != null) {
     return this.s.disconnectHandler.add('command', ns, cmd, options, callback);
   }
 
@@ -2083,7 +2099,7 @@ ReplSet.prototype.auth = function(mechanism, db) {
     // Arguments without a callback
     var argsWithoutCallback = [mechanism, db].concat(args.slice(0));
     // Create arguments
-    var finalArguments = argsWithoutCallback.concat([function(err, r) {
+    var finalArguments = argsWithoutCallback.concat([function(err) {
       count = count - 1;
       // Save all the errors
       if(err) errors.push({name: server.name, err: err});
@@ -2147,11 +2163,17 @@ ReplSet.prototype.logout = function(dbName, callback) {
   if(count == 0) return callback();
   var errors = [];
 
+  function logoutServer(_server, cb) {
+    _server.logout(dbName, function(err) {
+      if(err) errors.push({name: _server.name, err: err});
+      cb();
+    });
+  }
+
   // Execute logout on all server instances
-  for(var i = 0; i &lt; servers.length; i++) {
-    servers[i].logout(dbName, function(err) {
+  for(i = 0; i &lt; servers.length; i++) {
+    logoutServer(servers[i], function() {
       count = count - 1;
-      if(err) errors.push({name: server.name, err: err});
 
       if(count == 0) {
         // Do not block new operations
@@ -2164,7 +2186,7 @@ ReplSet.prototype.logout = function(dbName, callback) {
         // No errors
         callback();
       }
-    });
+    })
   }
 }
 
@@ -2289,9 +2311,9 @@ ReplSet.prototype.cursor = function(ns, cmd, cursorOptions) {
  */
 
 /**
- * A topology serverHearbeatFailed SDAM event
+ * A topology serverHeartbeatFailed SDAM event
  *
- * @event ReplSet#serverHearbeatFailed
+ * @event ReplSet#serverHeartbeatFailed
  * @type {object}
  */
 
@@ -2332,7 +2354,7 @@ module.exports = ReplSet;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Sep 14 2016 09:14:33 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Nov 29 2016 11:33:36 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

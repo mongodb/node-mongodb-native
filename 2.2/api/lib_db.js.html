@@ -1844,6 +1844,10 @@ var debugFields = ['authSource', 'w', 'wtimeout', 'j', 'native_parser', 'forceSe
   , 'serializeFunctions', 'raw', 'promoteLongs', 'promoteValues', 'promoteBuffers', 'bufferMaxEntries', 'numberOfRetries', 'retryMiliSeconds'
   , 'readPreference', 'pkFactory', 'parentDb', 'promiseLibrary', 'noListener'];
 
+// Filter out any write concern options
+var illegalCommandFields = ['w', 'wtimeout', 'j', 'fsync', 'autoIndexId'
+  , 'strict', 'serializeFunctions', 'pkFactory', 'raw', 'readPreference'];
+
 /**
  * @fileOverview The **Db** class is a class that represents a MongoDB Database.
  *
@@ -2036,7 +2040,7 @@ Object.defineProperty(Db.prototype, 'writeConcern', {
 
 // Internal method
 var open = function(self, callback) {
-  self.s.topology.connect(self, self.s.options, function(err, topology) {
+  self.s.topology.connect(self, self.s.options, function(err) {
     if(callback == null) return;
     var internalCallback = callback;
     callback == null;
@@ -2080,11 +2084,11 @@ var convertReadPreference = function(readPreference) {
   if(readPreference &amp;&amp; typeof readPreference == 'string') {
     return new CoreReadPreference(readPreference);
   } else if(readPreference instanceof ReadPreference) {
-    return new CoreReadPreference(readPreference.mode, readPreference.tags, {maxStalenessMS: readPreference.maxStalenessMS});
+    return new CoreReadPreference(readPreference.mode, readPreference.tags, {maxStalenessSeconds: readPreference.maxStalenessSeconds});
   } else if(readPreference &amp;&amp; typeof readPreference == 'object') {
     var mode = readPreference.mode || readPreference.preference;
     if (mode &amp;&amp; typeof mode == 'string') {
-      readPreference = new CoreReadPreference(mode, readPreference.tags, {maxStalenessMS: readPreference.maxStalenessMS});
+      readPreference = new CoreReadPreference(mode, readPreference.tags, {maxStalenessSeconds: readPreference.maxStalenessSeconds});
     }
   }
   return readPreference;
@@ -2199,7 +2203,7 @@ Db.prototype.close = function(force, callback) {
   })
 
   // Return dummy promise
-  return new this.s.promiseLibrary(function(resolve, reject) {
+  return new this.s.promiseLibrary(function(resolve) {
     resolve();
   });
 }
@@ -2314,7 +2318,6 @@ var createCollection = function(self, name, options, callback) {
   var finalOptions = writeConcern(shallowClone(options), self, options);
   // Did the user destroy the topology
   if(self.serverConfig &amp;&amp; self.serverConfig.isDestroyed()) return callback(new MongoError('topology was destroyed'));
-
   // Check if we have the name
   self.listCollections({name: name})
     .setReadPreference(ReadPreference.PRIMARY)
@@ -2332,18 +2335,19 @@ var createCollection = function(self, name, options, callback) {
 
       // Decorate command with writeConcern if supported
       decorateWithWriteConcern(cmd, self, options);
-
       // Add all optional parameters
       for(var n in options) {
-        if(options[n] != null &amp;&amp; typeof options[n] != 'function')
-          cmd[n] = options[n];
+        if(options[n] != null
+          &amp;&amp; typeof options[n] != 'function' &amp;&amp; illegalCommandFields.indexOf(n) == -1) {
+            cmd[n] = options[n];
+        }
       }
 
       // Force a primary read Preference
       finalOptions.readPreference = ReadPreference.PRIMARY;
 
       // Execute command
-      self.command(cmd, finalOptions, function(err, result) {
+      self.command(cmd, finalOptions, function(err) {
         if(err) return handleCallback(callback, err);
         handleCallback(callback, null, new Collection(self, self.s.topology, self.s.databaseName, name, self.s.pkFactory, options));
       });
@@ -2368,6 +2372,7 @@ var createCollection = function(self, name, options, callback) {
  * @param {number} [options.size=null] The size of the capped collection in bytes.
  * @param {number} [options.max=null] The maximum number of documents in the capped collection.
  * @param {boolean} [options.autoIndexId=true] Create an index on the _id field of the document, True by default on MongoDB 2.2 or higher off for version &lt; 2.2.
+ * @param {object} [options.collation=null] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
  * @param {Db~collectionResultCallback} [callback] The results callback
  * @return {Promise} returns Promise if no callback passed
  */
@@ -2475,7 +2480,7 @@ Db.prototype.listCollections = function(filter, options) {
     // Set the AggregationCursor constructor
     options.cursorFactory = CommandCursor;
     // Create the cursor
-    var cursor = this.s.topology.cursor(f('%s.$cmd', this.s.databaseName), command, options);
+    cursor = this.s.topology.cursor(f('%s.$cmd', this.s.databaseName), command, options);
     // Do we have a readPreference, apply it
     if(options.readPreference) {
       cursor.setReadPreference(options.readPreference);
@@ -2508,7 +2513,7 @@ Db.prototype.listCollections = function(filter, options) {
   // Return options
   var _options = {transforms: listCollectionsTranforms(this.s.databaseName)}
   // Get the cursor
-  var cursor = this.collection(Db.SYSTEM_NAMESPACE_COLLECTION).find(filter, _options);
+  cursor = this.collection(Db.SYSTEM_NAMESPACE_COLLECTION).find(filter, _options);
   // Do we have a readPreference, apply it
   if(options.readPreference) cursor.setReadPreference(options.readPreference);
   // Set the passed in batch size if one was provided
@@ -2653,7 +2658,7 @@ Db.prototype.dropCollection = function(name, options, callback) {
   });
 
   // Clone the options
-  var options = shallowClone(self.s.options);
+  options = shallowClone(self.s.options);
   // Set readPreference PRIMARY
   options.readPreference = ReadPreference.PRIMARY;
 
@@ -2690,7 +2695,7 @@ Db.prototype.dropDatabase = function(options, callback) {
   decorateWithWriteConcern(cmd, self, options);
 
   // Ensure primary only
-  var options = assign({}, this.s.options, {readPreference: ReadPreference.PRIMARY});
+  options = assign({}, this.s.options, {readPreference: ReadPreference.PRIMARY});
 
   // Check if the callback is in fact a string
   if(typeof callback == 'function') return this.command(cmd, options, function(err, result) {
@@ -2939,8 +2944,6 @@ var ensureIndex = function(self, name, fieldOrSpec, options, callback) {
   // Did the user destroy the topology
   if(self.serverConfig &amp;&amp; self.serverConfig.isDestroyed()) return callback(new MongoError('topology was destroyed'));
 
-  // Default command options
-  var commandOptions = {};
   // Check if the index allready exists
   self.indexInformation(name, finalOptions, function(err, indexInformation) {
     if(err != null &amp;&amp; err.code != 26) return handleCallback(callback, err, null);
@@ -3110,14 +3113,14 @@ var addUser = function(self, username, password, options, callback) {
         // We got an error (f.ex not authorized)
         if(err != null) return handleCallback(callback, err, null);
         // Check if the user exists and update i
-        collection.find({user: username}, {dbName: options['dbName']}).toArray(function(err, documents) {
+        collection.find({user: username}, {dbName: options['dbName']}).toArray(function(err) {
           // We got an error (f.ex not authorized)
           if(err != null) return handleCallback(callback, err, null);
           // Add command keys
           finalOptions.upsert = true;
 
           // We have a user, let's update the password or upsert if not
-          collection.update({user: username},{$set: {user: username, pwd: userPassword}}, finalOptions, function(err, results, full) {
+          collection.update({user: username},{$set: {user: username, pwd: userPassword}}, finalOptions, function(err) {
             if(count == 0 &amp;&amp; err) return handleCallback(callback, null, [{user:username, pwd:userPassword}]);
             if(err) return handleCallback(callback, err, null)
             handleCallback(callback, null, [{user:username, pwd:userPassword}]);
@@ -3216,7 +3219,7 @@ var removeUser = function(self, username, options, callback) {
       // Locate the user
       collection.findOne({user: username}, {}, function(err, user) {
         if(user == null) return handleCallback(callback, err, false);
-        collection.remove({user: username}, finalOptions, function(err, result) {
+        collection.remove({user: username}, finalOptions, function(err) {
           handleCallback(callback, err, true);
         });
       });
@@ -3268,9 +3271,10 @@ var authenticate = function(self, username, password, options, callback) {
 
   // the default db to authenticate against is 'self'
   // if authententicate is called from a retry context, it may be another one, like admin
-  var authdb = options.authdb ? options.authdb : options.dbName;
+  var authdb = options.dbName ? options.dbName : self.databaseName;
+  authdb = self.authSource ? self.authSource : authdb;
+  authdb = options.authdb ? options.authdb : authdb;
   authdb = options.authSource ? options.authSource : authdb;
-  authdb = authdb ? authdb : self.databaseName;
 
   // Callback
   var _callback = function(err, result) {
@@ -3288,39 +3292,39 @@ var authenticate = function(self, username, password, options, callback) {
 
   // If classic auth delegate to auth command
   if(authMechanism == 'MONGODB-CR') {
-    self.s.topology.auth('mongocr', authdb, username, password, function(err, result) {
+    self.s.topology.auth('mongocr', authdb, username, password, function(err) {
       if(err) return handleCallback(callback, err, false);
       _callback(null, true);
     });
   } else if(authMechanism == 'PLAIN') {
-    self.s.topology.auth('plain', authdb, username, password, function(err, result) {
+    self.s.topology.auth('plain', authdb, username, password, function(err) {
       if(err) return handleCallback(callback, err, false);
       _callback(null, true);
     });
   } else if(authMechanism == 'MONGODB-X509') {
-    self.s.topology.auth('x509', authdb, username, password, function(err, result) {
+    self.s.topology.auth('x509', authdb, username, password, function(err) {
       if(err) return handleCallback(callback, err, false);
       _callback(null, true);
     });
   } else if(authMechanism == 'SCRAM-SHA-1') {
-    self.s.topology.auth('scram-sha-1', authdb, username, password, function(err, result) {
+    self.s.topology.auth('scram-sha-1', authdb, username, password, function(err) {
       if(err) return handleCallback(callback, err, false);
       _callback(null, true);
     });
   } else if(authMechanism == 'GSSAPI') {
     if(process.platform == 'win32') {
-      self.s.topology.auth('sspi', authdb, username, password, options, function(err, result) {
+      self.s.topology.auth('sspi', authdb, username, password, options, function(err) {
         if(err) return handleCallback(callback, err, false);
         _callback(null, true);
       });
     } else {
-      self.s.topology.auth('gssapi', authdb, username, password, options, function(err, result) {
+      self.s.topology.auth('gssapi', authdb, username, password, options, function(err) {
         if(err) return handleCallback(callback, err, false);
         _callback(null, true);
       });
     }
   } else if(authMechanism == 'DEFAULT') {
-    self.s.topology.auth('default', authdb, username, password, function(err, result) {
+    self.s.topology.auth('default', authdb, username, password, function(err) {
       if(err) return handleCallback(callback, err, false);
       _callback(null, true);
     });
@@ -3399,7 +3403,7 @@ Db.prototype.logout = function(options, callback) {
 
   // If we have a callback
   if(typeof callback == 'function') {
-    return self.s.topology.logout(dbName, function(err, r) {
+    return self.s.topology.logout(dbName, function(err) {
       if(err) return callback(err);
       callback(null, true);
     });
@@ -3407,7 +3411,7 @@ Db.prototype.logout = function(options, callback) {
 
   // Return a promise
   return new this.s.promiseLibrary(function(resolve, reject) {
-    self.s.topology.logout(dbName, function(err, r) {
+    self.s.topology.logout(dbName, function(err) {
       if(err) return reject(err);
       resolve(true);
     });
@@ -3415,13 +3419,6 @@ Db.prototype.logout = function(options, callback) {
 }
 
 define.classMethod('logout', {callback: true, promise:true});
-
-// Figure out the read preference
-var getReadPreference = function(options, db) {
-  if(options.readPreference) return options;
-  if(db.readPreference) options.readPreference = db.readPreference;
-  return options;
-}
 
 /**
  * Retrieves this collections index info.
@@ -3488,7 +3485,6 @@ define.classMethod('indexInformation', {callback: true, promise:true});
 var createCreateIndexCommand = function(db, name, fieldOrSpec, options) {
   var indexParameters = parseIndexOptions(fieldOrSpec);
   var fieldHash = indexParameters.fieldHash;
-  var keys = indexParameters.keys;
 
   // Generate the index name
   var indexName = typeof options.name == 'string' ? options.name : indexParameters.name;
@@ -3620,7 +3616,7 @@ var createListener = function(self, e, object) {
  * Unref all sockets
  * @method
  */
-Db.prototype.unref = function(options, callback) {
+Db.prototype.unref = function() {
   this.s.topology.unref();
 }
 
@@ -3729,7 +3725,7 @@ module.exports = Db;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Sep 14 2016 09:14:23 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Nov 29 2016 11:33:26 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

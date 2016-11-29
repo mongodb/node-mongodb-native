@@ -552,7 +552,7 @@
             
                 <li data-name="Mongos#event:serverDescriptionChanged"><a href="Mongos.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
             
-                <li data-name="Mongos#event:serverHearbeatFailed"><a href="Mongos.html#event:serverHearbeatFailed">serverHearbeatFailed</a></li>
+                <li data-name="Mongos#event:serverHeartbeatFailed"><a href="Mongos.html#event:serverHeartbeatFailed">serverHeartbeatFailed</a></li>
             
                 <li data-name="Mongos#event:serverHeartbeatStarted"><a href="Mongos.html#event:serverHeartbeatStarted">serverHeartbeatStarted</a></li>
             
@@ -711,7 +711,7 @@
             
                 <li data-name="ReplSet#event:serverDescriptionChanged"><a href="ReplSet.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
             
-                <li data-name="ReplSet#event:serverHearbeatFailed"><a href="ReplSet.html#event:serverHearbeatFailed">serverHearbeatFailed</a></li>
+                <li data-name="ReplSet#event:serverHeartbeatFailed"><a href="ReplSet.html#event:serverHeartbeatFailed">serverHeartbeatFailed</a></li>
             
                 <li data-name="ReplSet#event:serverHeartbeatStarted"><a href="ReplSet.html#event:serverHeartbeatStarted">serverHeartbeatStarted</a></li>
             
@@ -955,7 +955,6 @@ var inherits = require('util').inherits,
   f = require('util').format,
   EventEmitter = require('events').EventEmitter,
   Logger = require('../connection/logger'),
-  ObjectId = require('bson').ObjectId,
   ReadPreference = require('./read_preference'),
   MongoError = require('../error');
 
@@ -1018,15 +1017,15 @@ var ReplSetState = function(options) {
 
 inherits(ReplSetState, EventEmitter);
 
-ReplSetState.prototype.hasPrimaryAndSecondary = function(server) {
+ReplSetState.prototype.hasPrimaryAndSecondary = function() {
   return this.primary != null &amp;&amp; this.secondaries.length > 0;
 }
 
-ReplSetState.prototype.hasPrimary = function(server) {
+ReplSetState.prototype.hasPrimary = function() {
   return this.primary != null;
 }
 
-ReplSetState.prototype.hasSecondary = function(server) {
+ReplSetState.prototype.hasSecondary = function() {
   return this.secondaries.length > 0;
 }
 
@@ -1039,13 +1038,13 @@ ReplSetState.prototype.allServers = function(options) {
   return servers;
 }
 
-ReplSetState.prototype.destroy = function() {
+ReplSetState.prototype.destroy = function(options) {
   // Destroy all sockets
-  if(this.primary) this.primary.destroy();
-  this.secondaries.forEach(function(x) { x.destroy(); });
-  this.arbiters.forEach(function(x) { x.destroy(); });
-  this.passives.forEach(function(x) { x.destroy(); });
-  this.ghosts.forEach(function(x) { x.destroy(); });
+  if(this.primary) this.primary.destroy(options);
+  this.secondaries.forEach(function(x) { x.destroy(options); });
+  this.arbiters.forEach(function(x) { x.destroy(options); });
+  this.passives.forEach(function(x) { x.destroy(options); });
+  this.ghosts.forEach(function(x) { x.destroy(options); });
   // Clear out the complete state
   this.secondaries = [];
   this.arbiters = [];
@@ -1072,11 +1071,11 @@ ReplSetState.prototype.remove = function(server, options) {
   }
 
   // If we have it in the set remove it
-  if(this.set[server.name]) {
-    this.set[server.name].type = ServerType.Unknown;
-    this.set[server.name].electionId = null;
-    this.set[server.name].setName = null;
-    this.set[server.name].setVersion = null;
+  if(this.set[server.name.toLowerCase()]) {
+    this.set[server.name.toLowerCase()].type = ServerType.Unknown;
+    this.set[server.name.toLowerCase()].electionId = null;
+    this.set[server.name.toLowerCase()].setName = null;
+    this.set[server.name.toLowerCase()].setVersion = null;
   }
 
   // Remove type
@@ -1120,12 +1119,12 @@ ReplSetState.prototype.update = function(server) {
     for(var i = 0; i &lt; hosts.length; i++) {
       // Add to the list of unknown server
       if(this.unknownServers.indexOf(hosts[i]) == -1
-        &amp;&amp; (!this.set[hosts[i]] || this.set[hosts[i]].type == ServerType.Unknown)) {
+        &amp;&amp; (!this.set[hosts[i].toLowerCase()] || this.set[hosts[i].toLowerCase()].type == ServerType.Unknown)) {
         this.unknownServers.push(hosts[i]);
       }
 
-      if(!this.set[hosts[i]]) {
-        this.set[hosts[i]] = {
+      if(!this.set[hosts[i].toLowerCase()]) {
+        this.set[hosts[i].toLowerCase()] = {
           type: ServerType.Unknown,
           electionId: null,
           setName: null,
@@ -1139,14 +1138,14 @@ ReplSetState.prototype.update = function(server) {
   // Unknown server
   //
   if(!ismaster &amp;&amp; !inList(ismaster, server, this.unknownServers)) {
-    self.set[server.name] = {
+    self.set[server.name.toLowerCase()] = {
       type: ServerType.Unknown, setVersion: null, electionId: null, setName: null
     }
     // Update set information about the server instance
-    self.set[server.name].type = ServerType.Unknown;
-    self.set[server.name].electionId = ismaster ? ismaster.electionId : ismaster;
-    self.set[server.name].setName = ismaster ? ismaster.setName : ismaster;
-    self.set[server.name].setVersion = ismaster ? ismaster.setVersion : ismaster;
+    self.set[server.name.toLowerCase()].type = ServerType.Unknown;
+    self.set[server.name.toLowerCase()].electionId = ismaster ? ismaster.electionId : ismaster;
+    self.set[server.name.toLowerCase()].setName = ismaster ? ismaster.setName : ismaster;
+    self.set[server.name.toLowerCase()].setVersion = ismaster ? ismaster.setVersion : ismaster;
 
     if(self.unknownServers.indexOf(server.name) == -1) {
       self.unknownServers.push(server.name);
@@ -1166,7 +1165,7 @@ ReplSetState.prototype.update = function(server) {
   // A RSOther instance
   if((ismaster.setName &amp;&amp; ismaster.hidden)
     || (ismaster.setName &amp;&amp; !ismaster.ismaster &amp;&amp; !ismaster.secondary &amp;&amp; !ismaster.arbiterOnly &amp;&amp; !ismaster.passive)) {
-    self.set[server.name] = {
+    self.set[server.name.toLowerCase()] = {
       type: ServerType.RSOther, setVersion: null,
       electionId: null, setName: ismaster.setName
     }
@@ -1178,7 +1177,7 @@ ReplSetState.prototype.update = function(server) {
 
   // A RSGhost instance
   if(ismaster.isreplicaset) {
-    self.set[server.name] = {
+    self.set[server.name.toLowerCase()] = {
       type: ServerType.RSGhost, setVersion: null,
       electionId: null, setName: null
     }
@@ -1216,11 +1215,26 @@ ReplSetState.prototype.update = function(server) {
       this.logger.warn(f('the seedlist server was removed due to its address %s not matching its ismaster.me address %s', server.name, ismaster.me));
     }
 
+    // Delete from the set
+    delete this.set[server.name.toLowerCase()];
+
     // Set the type of topology we have
     if(this.primary &amp;&amp; !this.primary.equals(server)) {
       this.topologyType = TopologyType.ReplicaSetWithPrimary;
     } else {
       this.topologyType = TopologyType.ReplicaSetNoPrimary;
+    }
+
+    //
+    // We have a potential primary
+    //
+    if(!this.primary &amp;&amp; ismaster.primary) {
+      this.set[ismaster.primary.toLowerCase()] = {
+        type: ServerType.PossiblePrimary,
+        setName: null,
+        electionId: null,
+        setVersion: null,
+      }
     }
 
     return false;
@@ -1258,30 +1272,40 @@ ReplSetState.prototype.update = function(server) {
       this.maxElectionId = ismasterElectionId;
     }
 
-    self.primary = server;
-    self.set[server.name] = {
-      type: ServerType.RSPrimary,
-      setVersion: ismaster.setVersion,
-      electionId: ismaster.electionId,
-      setName: ismaster.setName
+    // Hande normalization of server names
+    var normalizedHosts = ismaster.hosts.map(function(x) { return x.toLowerCase() });
+    var locationIndex = normalizedHosts.indexOf(server.name.toLowerCase());
+
+    // Validate that the server exists in the host list
+    if(locationIndex != -1) {
+      self.primary = server;
+      self.set[server.name.toLowerCase()] = {
+        type: ServerType.RSPrimary,
+        setVersion: ismaster.setVersion,
+        electionId: ismaster.electionId,
+        setName: ismaster.setName
+      }
+
+      // Set the topology
+      this.topologyType = TopologyType.ReplicaSetWithPrimary;
+      if(ismaster.setName) this.setName = ismaster.setName;
+      removeFrom(server, self.unknownServers);
+      removeFrom(server, self.secondaries);
+      removeFrom(server, self.passives);
+      self.emit('joined', 'primary', server);
+    } else {
+      this.topologyType = TopologyType.ReplicaSetNoPrimary;
     }
 
-    // Set the topology
-    this.topologyType = TopologyType.ReplicaSetWithPrimary;
-    if(ismaster.setName) this.setName = ismaster.setName;
-    removeFrom(server, self.unknownServers);
-    removeFrom(server, self.secondaries);
-    removeFrom(server, self.passives);
-    self.emit('joined', 'primary', server);
     emitTopologyDescriptionChanged(self);
     return true;
   } else if(ismaster.ismaster &amp;&amp; ismaster.setName) {
     // Get the electionIds
-    var currentElectionId = self.set[self.primary.name].electionId;
-    var currentSetVersion = self.set[self.primary.name].setVersion;
-    var currentSetName = self.set[self.primary.name].setName;
-    var ismasterElectionId = server.lastIsMaster().electionId;
-    var ismasterSetVersion = server.lastIsMaster().setVersion;
+    var currentElectionId = self.set[self.primary.name.toLowerCase()].electionId;
+    var currentSetVersion = self.set[self.primary.name.toLowerCase()].setVersion;
+    var currentSetName = self.set[self.primary.name.toLowerCase()].setName;
+    ismasterElectionId = server.lastIsMaster().electionId;
+    ismasterSetVersion = server.lastIsMaster().setVersion;
     var ismasterSetName = server.lastIsMaster().setName;
 
     // Is it the same server instance
@@ -1303,7 +1327,7 @@ ReplSetState.prototype.update = function(server) {
 
     // Check if we need to replace the server
     if(currentElectionId &amp;&amp; ismasterElectionId) {
-      var result = compareObjectIds(currentElectionId, ismasterElectionId);
+      result = compareObjectIds(currentElectionId, ismasterElectionId);
 
       if(result == 1) {
         return false;
@@ -1320,7 +1344,7 @@ ReplSetState.prototype.update = function(server) {
     if(!this.maxElectionId &amp;&amp; ismasterElectionId) {
       this.maxElectionId = ismasterElectionId;
     } else if(this.maxElectionId &amp;&amp; ismasterElectionId) {
-      var result = compareObjectIds(this.maxElectionId, ismasterElectionId);
+      result = compareObjectIds(this.maxElectionId, ismasterElectionId);
 
       if(result == 1) {
         return false;
@@ -1341,7 +1365,7 @@ ReplSetState.prototype.update = function(server) {
     }
 
     // Modify the entry to unknown
-    self.set[self.primary.name] = {
+    self.set[self.primary.name.toLowerCase()] = {
       type: ServerType.Unknown, setVersion: null,
       electionId: null, setName: null
     }
@@ -1353,7 +1377,7 @@ ReplSetState.prototype.update = function(server) {
     // Set the new instance
     self.primary = server;
     // Set the set information
-    self.set[server.name] = {
+    self.set[server.name.toLowerCase()] = {
       type: ServerType.RSPrimary, setVersion: ismaster.setVersion,
       electionId: ismaster.electionId, setName: ismaster.setName
     }
@@ -1371,7 +1395,7 @@ ReplSetState.prototype.update = function(server) {
 
   // A possible instance
   if(!this.primary &amp;&amp; ismaster.primary) {
-    self.set[ismaster.primary] = {
+    self.set[ismaster.primary.toLowerCase()] = {
       type: ServerType.PossiblePrimary, setVersion: null,
       electionId: null, setName: null
     }
@@ -1444,7 +1468,7 @@ ReplSetState.prototype.update = function(server) {
   //
   // Remove the primary
   //
-  if(this.set[server.name] &amp;&amp; this.set[server.name].type == ServerType.RSPrimary) {
+  if(this.set[server.name.toLowerCase()] &amp;&amp; this.set[server.name.toLowerCase()].type == ServerType.RSPrimary) {
     self.emit('left', 'primary', this.primary);
     this.primary.destroy();
     this.primary = null;
@@ -1500,30 +1524,30 @@ ReplSetState.prototype.pickServer = function(readPreference) {
   // If no read Preference set to primary by default
   readPreference = readPreference || ReadPreference.primary;
 
-  // maxStalenessMS is not allowed with a primary read
-  if(readPreference.preference == 'primary' &amp;&amp; readPreference.maxStalenessMS) {
-    return new MongoError('primary readPreference incompatible with maxStalenessMS');
+  // maxStalenessSeconds is not allowed with a primary read
+  if(readPreference.preference == 'primary' &amp;&amp; readPreference.maxStalenessSeconds != null) {
+    return new MongoError('primary readPreference incompatible with maxStalenessSeconds');
   }
 
-  // Check if we have any non compatible servers for maxStalenessMS
+  // Check if we have any non compatible servers for maxStalenessSeconds
   var allservers = this.primary ? [this.primary] : [];
   allservers = allservers.concat(this.secondaries);
 
   // Does any of the servers not support the right wire protocol version
-  // for maxStalenessMS when maxStalenessMS specified on readPreference. Then error out
-  if(readPreference.maxStalenessMS) {
+  // for maxStalenessSeconds when maxStalenessSeconds specified on readPreference. Then error out
+  if(readPreference.maxStalenessSeconds != null) {
     for(var i = 0; i &lt; allservers.length; i++) {
       if(allservers[i].ismaster.maxWireVersion &lt; 5) {
-        return new MongoError('maxStalenessMS not supported by at least one of the replicaset members');
+        return new MongoError('maxStalenessSeconds not supported by at least one of the replicaset members');
       }
     }
   }
 
   // Do we have the nearest readPreference
-  if(readPreference.preference == 'nearest' &amp;&amp; !readPreference.maxStalenessMS) {
+  if(readPreference.preference == 'nearest' &amp;&amp; readPreference.maxStalenessSeconds == null) {
     return pickNearest(this, readPreference);
-  } else if(readPreference.preference == 'nearest' &amp;&amp; readPreference.maxStalenessMS) {
-    return pickNearestMaxStalenessMS(this, readPreference);
+  } else if(readPreference.preference == 'nearest' &amp;&amp; readPreference.maxStalenessSeconds != null) {
+    return pickNearestMaxStalenessSeconds(this, readPreference);
   }
 
   // Get all the secondaries
@@ -1550,16 +1574,16 @@ ReplSetState.prototype.pickServer = function(readPreference) {
   if(readPreference.equals(ReadPreference.secondaryPreferred)
     || readPreference.equals(ReadPreference.secondary)) {
 
-    if(secondaries.length > 0 &amp;&amp; !readPreference.maxStalenessMS) {
+    if(secondaries.length > 0 &amp;&amp; readPreference.maxStalenessSeconds == null) {
       // Pick nearest of any other servers available
       var server = pickNearest(this, readPreference);
       // No server in the window return primary
       if(server) {
         return server;
       }
-    } else if(secondaries.length > 0 &amp;&amp; readPreference.maxStalenessMS) {
+    } else if(secondaries.length > 0 &amp;&amp; readPreference.maxStalenessSeconds != null) {
       // Pick nearest of any other servers available
-      var server = pickNearestMaxStalenessMS(this, readPreference);
+      server = pickNearestMaxStalenessSeconds(this, readPreference);
       // No server in the window return primary
       if(server) {
         return server;
@@ -1575,7 +1599,7 @@ ReplSetState.prototype.pickServer = function(readPreference) {
 
   // Primary preferred
   if(readPreference.equals(ReadPreference.primaryPreferred)) {
-    var server = null;
+    server = null;
 
     // We prefer the primary if it's available
     if(this.primary) {
@@ -1583,10 +1607,10 @@ ReplSetState.prototype.pickServer = function(readPreference) {
     }
 
     // Pick a secondary
-    if(secondaries.length > 0 &amp;&amp; !readPreference.maxStalenessMS) {
+    if(secondaries.length > 0 &amp;&amp; readPreference.maxStalenessSeconds == null) {
       server = pickNearest(this, readPreference);
-    } else if(secondaries.length > 0 &amp;&amp; readPreference.maxStalenessMS) {
-      server = pickNearestMaxStalenessMS(this, readPreference);
+    } else if(secondaries.length > 0 &amp;&amp; readPreference.maxStalenessSeconds != null) {
+      server = pickNearestMaxStalenessSeconds(this, readPreference);
     }
 
     //  Did we find a server
@@ -1611,11 +1635,14 @@ var filterByTags = function(readPreference, servers) {
     // Iterate over all the servers
     for(var i = 0; i &lt; servers.length; i++) {
       var serverTag = servers[i].lastIsMaster().tags || {};
+
       // Did we find the a matching server
       var found = true;
       // Check if the server is valid
       for(var name in tags) {
-        if(serverTag[name] != tags[name]) found = false;
+        if(serverTag[name] != tags[name]) {
+          found = false;
+        }
       }
 
       // Add to candidate list
@@ -1623,24 +1650,23 @@ var filterByTags = function(readPreference, servers) {
         filteredServers.push(servers[i]);
       }
     }
-
-    // We found servers by the highest priority
-    if(found) break;
   }
 
   // Returned filtered servers
   return filteredServers;
 }
 
-function pickNearestMaxStalenessMS(self, readPreference) {
+function pickNearestMaxStalenessSeconds(self, readPreference) {
   // Only get primary and secondaries as seeds
-  var seeds = {};
   var servers = [];
   var heartbeatFrequencyMS = self.heartbeatFrequencyMS;
 
-  // Check if the maxStalenessMS > heartbeatFrequencyMS * 2
-  if(readPreference.maxStalenessMS &lt; (heartbeatFrequencyMS * 2)) {
-    return new MongoError('maxStalenessMS must be at least twice the haInterval');
+  // Get the maxStalenessMS
+  var maxStalenessMS = readPreference.maxStalenessSeconds * 1000;
+
+  // Check if the maxStalenessMS > 90 seconds
+  if(maxStalenessMS &lt; 90 * 1000) {
+    return new MongoError('maxStalenessSeconds must be set to at least 90 seconds');
   }
 
   // Add primary to list if not a secondary read preference
@@ -1662,7 +1688,7 @@ function pickNearestMaxStalenessMS(self, readPreference) {
 
   // Filter by latency
   servers = servers.filter(function(s) {
-    return s.staleness &lt;= readPreference.maxStalenessMS;
+    return s.staleness &lt;= maxStalenessMS;
   });
 
   // Sort by time
@@ -1689,7 +1715,6 @@ function pickNearestMaxStalenessMS(self, readPreference) {
 
 function pickNearest(self, readPreference) {
   // Only get primary and secondaries as seeds
-  var seeds = {};
   var servers = [];
 
   // Add primary to list if not a secondary read preference
@@ -1744,10 +1769,10 @@ function inList(ismaster, server, list) {
 
 function addToList(self, type, ismaster, server, list) {
   // Update set information about the server instance
-  self.set[server.name].type = type;
-  self.set[server.name].electionId = ismaster ? ismaster.electionId : ismaster;
-  self.set[server.name].setName = ismaster ? ismaster.setName : ismaster;
-  self.set[server.name].setVersion = ismaster ? ismaster.setVersion : ismaster;
+  self.set[server.name.toLowerCase()].type = type;
+  self.set[server.name.toLowerCase()].electionId = ismaster ? ismaster.electionId : ismaster;
+  self.set[server.name.toLowerCase()].setName = ismaster ? ismaster.setName : ismaster;
+  self.set[server.name.toLowerCase()].setVersion = ismaster ? ismaster.setVersion : ismaster;
   // Add to the list
   list.push(server);
 }
@@ -1925,7 +1950,7 @@ module.exports = ReplSetState;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Sep 14 2016 09:14:33 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Nov 29 2016 11:33:36 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

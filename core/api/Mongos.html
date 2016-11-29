@@ -552,7 +552,7 @@
             
                 <li data-name="Mongos#event:serverDescriptionChanged"><a href="Mongos.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
             
-                <li data-name="Mongos#event:serverHearbeatFailed"><a href="Mongos.html#event:serverHearbeatFailed">serverHearbeatFailed</a></li>
+                <li data-name="Mongos#event:serverHeartbeatFailed"><a href="Mongos.html#event:serverHeartbeatFailed">serverHeartbeatFailed</a></li>
             
                 <li data-name="Mongos#event:serverHeartbeatStarted"><a href="Mongos.html#event:serverHeartbeatStarted">serverHeartbeatStarted</a></li>
             
@@ -711,7 +711,7 @@
             
                 <li data-name="ReplSet#event:serverDescriptionChanged"><a href="ReplSet.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
             
-                <li data-name="ReplSet#event:serverHearbeatFailed"><a href="ReplSet.html#event:serverHearbeatFailed">serverHearbeatFailed</a></li>
+                <li data-name="ReplSet#event:serverHeartbeatFailed"><a href="ReplSet.html#event:serverHeartbeatFailed">serverHeartbeatFailed</a></li>
             
                 <li data-name="ReplSet#event:serverHeartbeatStarted"><a href="ReplSet.html#event:serverHeartbeatStarted">serverHeartbeatStarted</a></li>
             
@@ -971,7 +971,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line115">line 115</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line112">line 112</a>
         </div>
         
     </div>
@@ -1882,7 +1882,7 @@
     
         <li><a href="Mongos.html#event:serverHeartbeatSucceeded">Mongos#event:serverHeartbeatSucceeded</a></li>
     
-        <li>Mongos#event:serverHeartbeatFailed</li>
+        <li><a href="Mongos.html#event:serverHeartbeatFailed">Mongos#event:serverHeartbeatFailed</a></li>
     
         <li><a href="Mongos.html#event:topologyOpening">Mongos#event:topologyOpening</a></li>
     
@@ -1941,7 +1941,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line854">line 854</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line857">line 857</a>
         </div>
         
     </div>
@@ -2148,7 +2148,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line802">line 802</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line808">line 808</a>
         </div>
         
     </div>
@@ -2502,7 +2502,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line211">line 211</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line207">line 207</a>
         </div>
         
     </div>
@@ -2633,7 +2633,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line993">line 993</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1002">line 1002</a>
         </div>
         
     </div>
@@ -2709,7 +2709,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line840">line 840</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line843">line 843</a>
         </div>
         
     </div>
@@ -3120,7 +3120,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line652">line 652</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line658">line 658</a>
         </div>
         
     </div>
@@ -3139,6 +3139,66 @@ server.connect();</code></pre>
     
     
     
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Default</th>
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.force</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Force destroy the pool</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
     
     
     
@@ -3191,7 +3251,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line982">line 982</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line991">line 991</a>
         </div>
         
     </div>
@@ -3319,7 +3379,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line715">line 715</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line721">line 721</a>
         </div>
         
     </div>
@@ -3681,7 +3741,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line674">line 674</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line680">line 680</a>
         </div>
         
     </div>
@@ -3757,7 +3817,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line683">line 683</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line689">line 689</a>
         </div>
         
     </div>
@@ -3833,7 +3893,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line628">line 628</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line633">line 633</a>
         </div>
         
     </div>
@@ -3909,7 +3969,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line933">line 933</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line936">line 936</a>
         </div>
         
     </div>
@@ -4048,7 +4108,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line773">line 773</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line779">line 779</a>
         </div>
         
     </div>
@@ -4420,7 +4480,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line636">line 636</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line641">line 641</a>
         </div>
         
     </div>
@@ -4491,7 +4551,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line744">line 744</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line750">line 750</a>
         </div>
         
     </div>
@@ -4871,7 +4931,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1024">line 1024</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1033">line 1033</a>
         </div>
         
     </div>
@@ -4952,7 +5012,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1003">line 1003</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1012">line 1012</a>
         </div>
         
     </div>
@@ -5033,7 +5093,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1017">line 1017</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1026">line 1026</a>
         </div>
         
     </div>
@@ -5114,7 +5174,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1040">line 1040</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1049">line 1049</a>
         </div>
         
     </div>
@@ -5263,7 +5323,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1031">line 1031</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1040">line 1040</a>
         </div>
         
     </div>
@@ -5412,7 +5472,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1010">line 1010</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1019">line 1019</a>
         </div>
         
     </div>
@@ -5493,7 +5553,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1056">line 1056</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1065">line 1065</a>
         </div>
         
     </div>
@@ -5574,7 +5634,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1063">line 1063</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1072">line 1072</a>
         </div>
         
     </div>
@@ -5648,14 +5708,14 @@ server.connect();</code></pre>
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="event:serverHearbeatFailed">
+        <h4 class="name" id="event:serverHeartbeatFailed">
             
-            serverHearbeatFailed
+            serverHeartbeatFailed
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1098">line 1098</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1107">line 1107</a>
         </div>
         
     </div>
@@ -5666,7 +5726,7 @@ server.connect();</code></pre>
     
     
     <div class="description">
-        <p>A topology serverHearbeatFailed SDAM event</p>
+        <p>A topology serverHeartbeatFailed SDAM event</p>
     </div>
     
 
@@ -5736,7 +5796,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1091">line 1091</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1100">line 1100</a>
         </div>
         
     </div>
@@ -5817,7 +5877,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1105">line 1105</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1114">line 1114</a>
         </div>
         
     </div>
@@ -5898,7 +5958,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1049">line 1049</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1058">line 1058</a>
         </div>
         
     </div>
@@ -5979,7 +6039,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1077">line 1077</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1086">line 1086</a>
         </div>
         
     </div>
@@ -6060,7 +6120,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1084">line 1084</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1093">line 1093</a>
         </div>
         
     </div>
@@ -6141,7 +6201,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1070">line 1070</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1079">line 1079</a>
         </div>
         
     </div>
@@ -6241,7 +6301,7 @@ server.connect();</code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Sep 14 2016 09:14:33 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Nov 29 2016 11:33:36 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

@@ -18,22 +18,22 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/core/driver/reference/connecting/</loc>
-    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/core/driver/reference/crud/</loc>
-    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/node-mongodb-native/core/driver/reference/connecting/connection-settings/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
   <url>
+    <loc>/node-mongodb-native/core/driver/reference/connecting/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/node-mongodb-native/core/driver/reference/extending/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/core/driver/reference/crud/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   

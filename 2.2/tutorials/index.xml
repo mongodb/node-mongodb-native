@@ -1280,6 +1280,80 @@ co(function*() {
 });
 &lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
 
+&lt;p&gt;&lt;a name=&#39;specify-data-type&#39;&gt;&lt;/a&gt;&lt;/p&gt;
+
+&lt;h4 id=&#34;specify-a-data-type&#34;&gt;Specify a Data Type&lt;/h4&gt;
+
+&lt;p&gt;The following example specifies a numerical data type
+when inserting documents with the &lt;code&gt;insertMany&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
+&lt;p&gt;The Decimal128 data type requires MongoDB server version 3.4 or higher.&lt;/p&gt;
+
+&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;section class=&#34;javascript5&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var Long = require(&#39;mongodb&#39;).Long;
+var Decimal = require(&#39;mongodb&#39;).Decimal128;
+
+var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  var longValue = Long(1787);
+  var decimalValue = Decimal.fromString(&#34;27.8892836&#34;);
+
+  // Insert multiple documents
+  db.collection(&#39;numbers&#39;).insertMany([ { a : longValue }, { b : decimalValue } ], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(2, r.insertedCount);
+    db.close();
+  });
+});
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+&lt;section class=&#34;javascript6 hidden&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var Long = require(&#39;mongodb&#39;).Long;
+var Decimal = require(&#39;mongodb&#39;).Decimal128;
+
+var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  var longValue = Long(1787);
+  var decimalValue = Decimal.fromString(&#34;27.8892836&#34;);
+
+  // Insert multiple documents
+  var r = yield db.collection(&#39;numbers&#39;).insertMany([ { a : longValue }, { b : decimalValue } ]);
+  assert.equal(2, r.insertedCount);
+
+  // Close connection
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+
+&lt;p&gt;The above operation inserts the following documents into the
+&lt;code&gt;numbers&lt;/code&gt; collection:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{ &amp;quot;_id&amp;quot; : ObjectId(&amp;quot;57d6f63a98724c65a5d7bd7a&amp;quot;), &amp;quot;a&amp;quot; : NumberLong(1787) }
+{ &amp;quot;_id&amp;quot; : ObjectId(&amp;quot;57d6f63a98724c65a5d7bd7b&amp;quot;), &amp;quot;b&amp;quot; : NumberDecimal(&amp;quot;27.8892836&amp;quot;) }
+&lt;/code&gt;&lt;/pre&gt;
+
 &lt;h3 id=&#34;updating-documents&#34;&gt;Updating Documents&lt;/h3&gt;
 
 &lt;p&gt;The &lt;code&gt;updateOne&lt;/code&gt; and &lt;code&gt;updateMany&lt;/code&gt; methods exist on the &lt;code&gt;Collection&lt;/code&gt; class and are used to update and upsert documents.&lt;/p&gt;
@@ -2161,6 +2235,430 @@ MongoClient.connect(url, function(err, db) {
     </item>
     
     <item>
+      <title>Collations</title>
+      <link>/node-mongodb-native/2.2/tutorials/collations/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.2/tutorials/collations/</guid>
+      <description>
+
+&lt;h1 id=&#34;overview&#34;&gt;Overview&lt;/h1&gt;
+
+&lt;p&gt;Collations provide a set of rules which comply with the conventions
+of a particular language when comparing strings.&lt;/p&gt;
+
+&lt;p&gt;For example, in Canadian French, the last accent in a given word
+determines the sorting order.&lt;/p&gt;
+
+&lt;p&gt;Consider the following French words:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;   cote &amp;lt; coté &amp;lt; côte &amp;lt; côté
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The sort order using the Canadian French collation would result in
+the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;   cote &amp;lt; côte &amp;lt; coté &amp;lt; côté
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If collation is unspecified, MongoDB uses the simple binary comparison for
+strings.  As such, the sort order of the words would be:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;cote &amp;lt; coté &amp;lt; côte &amp;lt; côté
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;usage&#34;&gt;Usage&lt;/h1&gt;
+
+&lt;p&gt;You can specify a default collation for collections and indexes when
+they are created, or specify a collation for CRUD operations and
+aggregations. For operations that support collation, MongoDB uses the
+collection&amp;rsquo;s default collation unless the operation specifies a
+different collation.&lt;/p&gt;
+
+&lt;h2 id=&#34;collation-parameters&#34;&gt;Collation Parameters&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-xml&#34;&gt;collation: {
+   locale: &amp;lt;string&amp;gt;,
+   caseLevel: &amp;lt;bool&amp;gt;,
+   caseFirst: &amp;lt;string&amp;gt;,
+   strength: &amp;lt;int&amp;gt;,
+   numericOrdering: &amp;lt;bool&amp;gt;,
+   alternate: &amp;lt;string&amp;gt;,
+   maxVariable: &amp;lt;string&amp;gt;,
+   backwards: &amp;lt;bool&amp;gt;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The only required parameter is &lt;code&gt;locale&lt;/code&gt;, which the server parses as
+an &lt;a href=&#34;http://userguide.icu-project.org/locale&#34;&gt;ICU format locale ID&lt;/a&gt;.
+For example, use &lt;code&gt;en_US&lt;/code&gt; to represent US English and &lt;code&gt;fr_CA&lt;/code&gt; to
+represent Canadian French.&lt;/p&gt;
+
+&lt;p&gt;For a complete description of the available parameters, see the
+&lt;a href=&#34;https://docs.mongodb.com/manual/&#34;&gt;MongoDB manual entry&lt;/a&gt;`.&lt;/p&gt;
+
+&lt;!-- NOTE placeholder link to Collation in the manual --&gt;
+
+&lt;h2 id=&#34;assign-a-default-collation-to-a-collection&#34;&gt;Assign a Default Collation to a Collection&lt;/h2&gt;
+
+&lt;p&gt;The following example creates a new collection
+called &lt;code&gt;contacts&lt;/code&gt; on the &lt;code&gt;test&lt;/code&gt; database and assigns a default
+collation with the &lt;code&gt;fr_CA&lt;/code&gt; locale. Specifying a collation when you
+create the collection ensures that all queries that are run against the
+&lt;code&gt;contacts&lt;/code&gt; collection use the &lt;code&gt;fr_CA&lt;/code&gt; collation, unless the query
+specifies another collation. Any indexes on the new collection also
+inherit the default collation, unless the creation command specifies
+another collation.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  createCollated(db, function() {
+    db.close();
+  });
+});
+
+var createCollated = function(db, callback) {
+  db.createCollection(&amp;quot;contacts&amp;quot;, 
+    { 
+      &#39;collation&#39; : 
+        { &#39;locale&#39;: &#39;fr_CA&#39; }
+    },
+
+    function(err, results) {
+      console.log(&amp;quot;Collection created.&amp;quot;);
+      callback();
+    }
+  );
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;assign-a-default-collation-to-an-index&#34;&gt;Assign a Default Collation to an Index&lt;/h2&gt;
+
+&lt;p&gt;To specify a collation for an index, use the &lt;code&gt;collation&lt;/code&gt;
+option when you create the index.&lt;/p&gt;
+
+&lt;p&gt;The following example creates an index on the &lt;code&gt;name&lt;/code&gt;
+field of the &lt;code&gt;contacts&lt;/code&gt; collection, with the &lt;code&gt;unique&lt;/code&gt; parameter
+enabled and a default collation with &lt;code&gt;locale&lt;/code&gt; set to &lt;code&gt;en_US&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  createCollatedIndex(db, function() {
+    db.close();
+  });
+});
+
+var createCollatedIndex = function(db, callback) {
+  // Get the contacts collection
+  var collection = db.collection(&#39;contacts&#39;);
+  // Create the index
+  collection.createIndex(
+    { &#39;name&#39; : 1 },
+    { &#39;unique&#39; : 1 },
+    { &#39;collation&#39; : { &#39;locale&#39; : &#39;en_US&#39; } }, function(err, result) {
+      console.log(result);
+      callback(result);
+  });
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To use this index, make sure your queries also specify the same
+collation. The following query uses the above index:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var findDocuments = function(db, callback) {
+  var collection = db.collection( &#39;contacts&#39; );
+  collection.find({ &#39;city&#39; : &#39;New York&#39; }, { &#39;_id&#39; : 0 }, { &#39;collation&#39; : {&#39;locale&#39; : &#39;en_US&#39; }}).toArray(function(err, docs) {
+      assert.equal(err, null);
+      callback(docs);
+  });
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The following queries do &lt;strong&gt;NOT&lt;/strong&gt; use the index. The first query uses no
+collation, and the second uses a collation with a different &lt;code&gt;strength&lt;/code&gt;
+value than the collation on the index.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var findDocuments = function(db, callback) {
+  var collection = db.collection( &#39;contacts&#39; );
+  collection.find({ &#39;city&#39; : &#39;New York&#39; }, { &#39;_id&#39; : 0 }).toArray(function(err, docs) {
+      assert.equal(err, null);
+      callback(docs);
+  });
+}
+
+var findDocuments = function(db, callback) {
+  var collection = db.collection( &#39;contacts&#39; );
+  collection.find({ &#39;city&#39; : &#39;New York&#39; }, { &#39;_id&#39; : 0 }, { &#39;collation&#39; : { &#39;locale&#39; : &#39;en_US&#39; , &#39;strength&#39; : 2 }}).toArray(function(err, docs) {
+      assert.equal(err, null);
+      callback(docs);
+  });
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;operations-that-support-collation&#34;&gt;Operations that Support Collation&lt;/h2&gt;
+
+&lt;p&gt;All reading, updating, and deleting methods support collation. Some
+examples are listed below.&lt;/p&gt;
+
+&lt;h3 id=&#34;find-and-sort&#34;&gt;&lt;code&gt;find()&lt;/code&gt; and &lt;code&gt;sort()&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;Individual queries can specify a collation to use when matching
+and sorting results. The following query and sort operation uses
+a German collation with the &lt;code&gt;locale&lt;/code&gt; parameter set to &lt;code&gt;de&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  findDocuments(db, function() {
+    db.close();
+  });
+});
+
+var findDocuments = function(db, callback) {
+  var collection = db.collection( &#39;contacts&#39; );
+  collection.find({ &#39;city&#39; : &#39;New York&#39; }, { &#39;_id&#39; : 0 }, { &#39;collation&#39; : {&#39;locale&#39; : &#39;de&#39; } }).sort({ &#39;name&#39;: 1 }).toArray(function(err, docs) {
+      assert.equal(err, null);
+      console.log(&amp;quot;Found the following records&amp;quot;);
+      console.log(docs)
+      callback(docs);
+  });
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;findoneandupdate&#34;&gt;&lt;code&gt;findOneAndUpdate()&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;A collection called &lt;code&gt;names&lt;/code&gt; contains the following documents:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{ &amp;quot;_id&amp;quot; : 1, &amp;quot;first_name&amp;quot; : &amp;quot;Hans&amp;quot; }
+{ &amp;quot;_id&amp;quot; : 2, &amp;quot;first_name&amp;quot; : &amp;quot;Gunter&amp;quot; }
+{ &amp;quot;_id&amp;quot; : 3, &amp;quot;first_name&amp;quot; : &amp;quot;Günter&amp;quot; }
+{ &amp;quot;_id&amp;quot; : 4, &amp;quot;first_name&amp;quot; : &amp;quot;Jürgen&amp;quot; }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The following &lt;code&gt;findOneAndUpdate&lt;/code&gt; operation on the collection
+does not specify a collation.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+  findAndUpdate(db, function() {
+    db.close();
+  });
+});
+
+var findAndUpdate = function(db, callback) {
+  var collection = db.collection(&#39;names&#39;);
+  collection.findOneAndUpdate({ first_name : { $lt: &amp;quot;Gunter&amp;quot; } }, { $set: { verified: true } }, function(err, result) {
+    assert.equal(err, null);
+    callback(result);
+  });
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Because &lt;code&gt;Gunter&lt;/code&gt; is lexically first in the collection,
+the above operation returns no results and updates no documents.&lt;/p&gt;
+
+&lt;p&gt;Consider the same &lt;code&gt;find_one_and_update&lt;/code&gt; operation but with the
+collation specified.  The locale is set to &lt;code&gt;de@collation=phonebook&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
+&lt;p&gt;Some locales have a &lt;code&gt;collation=phonebook&lt;/code&gt; option available for
+use with languages which sort proper nouns differently from other
+words. According to the &lt;code&gt;de@collation=phonebook&lt;/code&gt; collation,
+characters with umlauts come before the same characters without
+umlauts.&lt;/p&gt;
+
+&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+  findAndUpdate(db, function() {
+    db.close();
+  });
+});
+
+var findAndUpdate = function(db, callback) {
+  var collection = db.collection(&#39;names&#39;);
+  collection.findOneAndUpdate({ first_name : { $lt: &amp;quot;Gunter&amp;quot; } }, { $set: { verified: true } }, {collation : { locale : &#39;de@collation=phonebook&#39; } }, function(err, result) {
+    assert.equal(err, null);
+    console.log(result);
+    callback(result);
+  });
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The operation returns the following updated document:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{ lastErrorObject: { updatedExisting: true, n: 1 },
+  value: { _id: 3, first_name: &#39;Günter&#39; },
+  ok: 1 }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;findoneanddelete&#34;&gt;&lt;code&gt;findOneAndDelete()&lt;/code&gt;&lt;/h3&gt;
+
+&lt;p&gt;Set the &lt;code&gt;numericOrdering&lt;/code&gt; collation parameter to &lt;code&gt;true&lt;/code&gt;
+to sort numeric strings based on their numerical order instead of their
+lexical order.&lt;/p&gt;
+
+&lt;p&gt;The collection &lt;code&gt;numbers&lt;/code&gt; contains the following documents:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{ &amp;quot;_id&amp;quot; : 1, &amp;quot;a&amp;quot; : &amp;quot;16&amp;quot; }
+{ &amp;quot;_id&amp;quot; : 2, &amp;quot;a&amp;quot; : &amp;quot;84&amp;quot; }
+{ &amp;quot;_id&amp;quot; : 3, &amp;quot;a&amp;quot; : &amp;quot;179&amp;quot; }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The following example matches the first document in which field &lt;code&gt;a&lt;/code&gt;
+has a numeric value greater than 100 and deletes it.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+  findAndDelete(db, function() {
+    db.close();
+  });
+});
+
+var findAndDelete = function(db, callback) {
+  var collection = db.collection(&#39;numbers&#39;);
+  collection.findOneAndDelete({ a : { $gt: &amp;quot;100&amp;quot; } }, {collation : { locale : &#39;en&#39;, numericOrdering: true } }, function(err, result) {
+    assert.equal(err, null);
+    console.log(result);
+    callback(result);
+  });
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;After the above operation, the following documents remain in the
+collection:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{ &amp;quot;_id&amp;quot; : 1, &amp;quot;a&amp;quot; : &amp;quot;16&amp;quot; }
+{ &amp;quot;_id&amp;quot; : 2, &amp;quot;a&amp;quot; : &amp;quot;84&amp;quot; }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you perform the same operation without collation, the server deletes
+the first document it finds in which the lexical value of &lt;code&gt;a&lt;/code&gt; is
+greater than &lt;code&gt;&amp;quot;100&amp;quot;&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+  findAndDelete(db, function() {
+    db.close();
+  });
+});
+
+var findAndDelete = function(db, callback) {
+  var collection = db.collection(&#39;numbers&#39;);
+  collection.findOneAndDelete({ a : { $gt: &amp;quot;100&amp;quot; } }, function(err, result) {
+    assert.equal(err, null);
+    console.log(result);
+    callback(result);
+  });
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;After the above operation, the following documents remain in the
+collection:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{ &amp;quot;_id&amp;quot; : 2, &amp;quot;a&amp;quot; : &amp;quot;84&amp;quot; }
+{ &amp;quot;_id&amp;quot; : 3, &amp;quot;a&amp;quot; : &amp;quot;179&amp;quot; }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;aggregation&#34;&gt;Aggregation&lt;/h2&gt;
+
+&lt;p&gt;To use collation with an aggregation operation, add the collation
+document after the array of pipeline stages.&lt;/p&gt;
+
+&lt;p&gt;The following aggregation example uses a collection called &lt;code&gt;names&lt;/code&gt;
+and groups the &lt;code&gt;first_name&lt;/code&gt; field together, counts the total
+number of results in each group, and sorts the
+results by German phonebook order.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+  countNames(db, function() {
+    db.close();
+  });
+});
+
+var countNames = function(db, callback) {
+  var collection = db.collection( &#39;names&#39; );
+  collection.aggregate( 
+      [ 
+        { &#39;$group&#39;: { &#39;_id&#39;: &amp;quot;$first_name&amp;quot;, &#39;nameCount&#39;: { &#39;$sum&#39;: 1 } } },
+        { &#39;$sort&#39; : { &#39;_id&#39; : 1 } }
+      ], { collation : { locale : &#39;de@collation=phonebook&#39; } },
+
+      function(err, docs) {
+        assert.equal(err, null);
+        console.log(&amp;quot;Found the following records&amp;quot;);
+        console.log(docs)
+        callback(docs);
+      }
+  );
+}
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Connect to MongoDB</title>
       <link>/node-mongodb-native/2.2/tutorials/connect/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
@@ -2971,40 +3469,6 @@ var createPartialIndex = function(db, callback) {
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;For other index options, see &lt;a href=&#34;https://docs.mongodb.org/manual/core/index-properties/&#34;&gt;Index Options&lt;/a&gt;.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Tutorials</title>
-      <link>/node-mongodb-native/2.2/tutorials/</link>
-      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
-      
-      <guid>/node-mongodb-native/2.2/tutorials/</guid>
-      <description>
-
-&lt;h1 id=&#34;tutorials&#34;&gt;Tutorials&lt;/h1&gt;
-
-&lt;p&gt;The tutorials in this section provide examples of some frequently used operations. This section is not meant to be an exhaustive list of all operations available in the Node.js driver.&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/connect/&#34;&gt;Connect to MongoDB&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/collections/&#34;&gt;Collections&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/create-indexes/&#34;&gt;Create Indexes&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/crud/&#34;&gt;CRUD Operations&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/projections/&#34;&gt;Projections&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/aggregation/&#34;&gt;Aggregation&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/text-search/&#34;&gt;Text Search&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/geospatial-search/&#34;&gt;Geospatial Search&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/commands/&#34;&gt;Database Commands&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/gridfs/&#34;&gt;GridFS&lt;/a&gt;&lt;/p&gt;
 </description>
     </item>
     

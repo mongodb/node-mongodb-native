@@ -295,6 +295,33 @@
 
 
   
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
   
   
   
@@ -627,6 +654,35 @@
         
         
     </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.2/tutorials/collations/">
+        <i class='fa'></i>
+        Collations
+    </a>
   </li>
 
 
@@ -1783,6 +1839,80 @@ co(function*() {
 });
 </code></pre></section>
 
+<p><a name='specify-data-type'></a></p>
+
+<h4 id="specify-a-data-type">Specify a Data Type</h4>
+
+<p>The following example specifies a numerical data type
+when inserting documents with the <code>insertMany</code> method.</p>
+
+<p><div class="admonition note">
+<h5 class="admonition-title">Note</h5>
+<p>The Decimal128 data type requires MongoDB server version 3.4 or higher.</p>
+
+</div>
+</p>
+
+<section class="javascript5"><pre><code class="hljs">
+var Long = require('mongodb').Long;
+var Decimal = require('mongodb').Decimal128;
+
+var MongoClient = require('mongodb').MongoClient
+ , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log("Connected correctly to server");
+
+  var longValue = Long(1787);
+  var decimalValue = Decimal.fromString("27.8892836");
+
+  // Insert multiple documents
+  db.collection('numbers').insertMany([ { a : longValue }, { b : decimalValue } ], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(2, r.insertedCount);
+    db.close();
+  });
+});
+
+</code></pre></section>
+<section class="javascript6 hidden"><pre><code class="hljs">
+var Long = require('mongodb').Long;
+var Decimal = require('mongodb').Decimal128;
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co'),
+  assert = require('assert');
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect('mongodb://localhost:27017/myproject');
+  console.log("Connected correctly to server");
+
+  var longValue = Long(1787);
+  var decimalValue = Decimal.fromString("27.8892836");
+
+  // Insert multiple documents
+  var r = yield db.collection('numbers').insertMany([ { a : longValue }, { b : decimalValue } ]);
+  assert.equal(2, r.insertedCount);
+
+  // Close connection
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+</code></pre></section>
+
+<p>The above operation inserts the following documents into the
+<code>numbers</code> collection:</p>
+
+<pre><code class="language-js">{ &quot;_id&quot; : ObjectId(&quot;57d6f63a98724c65a5d7bd7a&quot;), &quot;a&quot; : NumberLong(1787) }
+{ &quot;_id&quot; : ObjectId(&quot;57d6f63a98724c65a5d7bd7b&quot;), &quot;b&quot; : NumberDecimal(&quot;27.8892836&quot;) }
+</code></pre>
+
 <h3 id="updating-documents">Updating Documents</h3>
 
 <p>The <code>updateOne</code> and <code>updateMany</code> methods exist on the <code>Collection</code> class and are used to update and upsert documents.</p>
@@ -2711,7 +2841,10 @@ MongoClient.connect(url, function(err, db) {
 <ul>
 <li><a href="#write-methods">Write Methods</a>
 <ul>
-<li><a href="#insert-documents">Insert Documents</a></li>
+<li><a href="#insert-documents">Insert Documents</a>
+<ul>
+<li><a href="#specify-a-data-type">Specify a Data Type</a></li>
+</ul></li>
 <li><a href="#updating-documents">Updating Documents</a></li>
 <li><a href="#removing-documents">Removing Documents</a></li>
 <li><a href="#findoneandupdate-findoneanddelete-and-findoneandreplace">findOneAndUpdate, findOneAndDelete, and findOneAndReplace</a></li>

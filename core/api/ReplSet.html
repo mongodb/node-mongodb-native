@@ -552,7 +552,7 @@
             
                 <li data-name="Mongos#event:serverDescriptionChanged"><a href="Mongos.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
             
-                <li data-name="Mongos#event:serverHearbeatFailed"><a href="Mongos.html#event:serverHearbeatFailed">serverHearbeatFailed</a></li>
+                <li data-name="Mongos#event:serverHeartbeatFailed"><a href="Mongos.html#event:serverHeartbeatFailed">serverHeartbeatFailed</a></li>
             
                 <li data-name="Mongos#event:serverHeartbeatStarted"><a href="Mongos.html#event:serverHeartbeatStarted">serverHeartbeatStarted</a></li>
             
@@ -711,7 +711,7 @@
             
                 <li data-name="ReplSet#event:serverDescriptionChanged"><a href="ReplSet.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
             
-                <li data-name="ReplSet#event:serverHearbeatFailed"><a href="ReplSet.html#event:serverHearbeatFailed">serverHearbeatFailed</a></li>
+                <li data-name="ReplSet#event:serverHeartbeatFailed"><a href="ReplSet.html#event:serverHeartbeatFailed">serverHeartbeatFailed</a></li>
             
                 <li data-name="ReplSet#event:serverHeartbeatStarted"><a href="ReplSet.html#event:serverHeartbeatStarted">serverHeartbeatStarted</a></li>
             
@@ -971,7 +971,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line101">line 101</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line100">line 100</a>
         </div>
         
     </div>
@@ -2024,7 +2024,7 @@
     
         <li><a href="ReplSet.html#event:serverHeartbeatSucceeded">ReplSet#event:serverHeartbeatSucceeded</a></li>
     
-        <li>ReplSet#event:serverHeartbeatFailed</li>
+        <li><a href="ReplSet.html#event:serverHeartbeatFailed">ReplSet#event:serverHeartbeatFailed</a></li>
     
         <li><a href="ReplSet.html#event:topologyOpening">ReplSet#event:topologyOpening</a></li>
     
@@ -2083,7 +2083,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1095">line 1095</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1111">line 1111</a>
         </div>
         
     </div>
@@ -2290,7 +2290,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1055">line 1055</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1070">line 1070</a>
         </div>
         
     </div>
@@ -2644,7 +2644,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line790">line 790</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line809">line 809</a>
         </div>
         
     </div>
@@ -2775,7 +2775,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line863">line 863</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line884">line 884</a>
         </div>
         
     </div>
@@ -2851,7 +2851,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1232">line 1232</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1254">line 1254</a>
         </div>
         
     </div>
@@ -3262,7 +3262,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line816">line 816</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line836">line 836</a>
         </div>
         
     </div>
@@ -3281,6 +3281,66 @@ server.connect();</code></pre>
     
     
     
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Default</th>
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.force</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Force destroy the pool</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
     
     
     
@@ -3333,7 +3393,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line931">line 931</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line952">line 952</a>
         </div>
         
     </div>
@@ -3461,7 +3521,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line946">line 946</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line967">line 967</a>
         </div>
         
     </div>
@@ -3537,7 +3597,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line983">line 983</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line998">line 998</a>
         </div>
         
     </div>
@@ -3899,7 +3959,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line879">line 879</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line900">line 900</a>
         </div>
         
     </div>
@@ -4027,7 +4087,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line921">line 921</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line942">line 942</a>
         </div>
         
     </div>
@@ -4103,7 +4163,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line853">line 853</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line874">line 874</a>
         </div>
         
     </div>
@@ -4179,7 +4239,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1177">line 1177</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1193">line 1193</a>
         </div>
         
     </div>
@@ -4318,7 +4378,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1031">line 1031</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1046">line 1046</a>
         </div>
         
     </div>
@@ -4690,7 +4750,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line837">line 837</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line858">line 858</a>
         </div>
         
     </div>
@@ -4761,7 +4821,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1007">line 1007</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1022">line 1022</a>
         </div>
         
     </div>
@@ -5141,7 +5201,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1259">line 1259</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1281">line 1281</a>
         </div>
         
     </div>
@@ -5222,7 +5282,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1238">line 1238</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1260">line 1260</a>
         </div>
         
     </div>
@@ -5303,7 +5363,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1266">line 1266</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1288">line 1288</a>
         </div>
         
     </div>
@@ -5384,7 +5444,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1252">line 1252</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1274">line 1274</a>
         </div>
         
     </div>
@@ -5465,7 +5525,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1282">line 1282</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1304">line 1304</a>
         </div>
         
     </div>
@@ -5614,7 +5674,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1273">line 1273</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1295">line 1295</a>
         </div>
         
     </div>
@@ -5763,7 +5823,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1245">line 1245</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1267">line 1267</a>
         </div>
         
     </div>
@@ -5844,7 +5904,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1298">line 1298</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1320">line 1320</a>
         </div>
         
     </div>
@@ -5925,7 +5985,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1305">line 1305</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1327">line 1327</a>
         </div>
         
     </div>
@@ -5999,14 +6059,14 @@ server.connect();</code></pre>
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="event:serverHearbeatFailed">
+        <h4 class="name" id="event:serverHeartbeatFailed">
             
-            serverHearbeatFailed
+            serverHeartbeatFailed
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1340">line 1340</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1362">line 1362</a>
         </div>
         
     </div>
@@ -6017,7 +6077,7 @@ server.connect();</code></pre>
     
     
     <div class="description">
-        <p>A topology serverHearbeatFailed SDAM event</p>
+        <p>A topology serverHeartbeatFailed SDAM event</p>
     </div>
     
 
@@ -6087,7 +6147,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1333">line 1333</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1355">line 1355</a>
         </div>
         
     </div>
@@ -6168,7 +6228,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1347">line 1347</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1369">line 1369</a>
         </div>
         
     </div>
@@ -6249,7 +6309,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1291">line 1291</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1313">line 1313</a>
         </div>
         
     </div>
@@ -6330,7 +6390,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1319">line 1319</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1341">line 1341</a>
         </div>
         
     </div>
@@ -6411,7 +6471,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1326">line 1326</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1348">line 1348</a>
         </div>
         
     </div>
@@ -6492,7 +6552,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1312">line 1312</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1334">line 1334</a>
         </div>
         
     </div>
@@ -6592,7 +6652,7 @@ server.connect();</code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Sep 14 2016 09:14:33 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Nov 29 2016 11:33:36 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

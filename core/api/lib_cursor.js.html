@@ -552,7 +552,7 @@
             
                 <li data-name="Mongos#event:serverDescriptionChanged"><a href="Mongos.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
             
-                <li data-name="Mongos#event:serverHearbeatFailed"><a href="Mongos.html#event:serverHearbeatFailed">serverHearbeatFailed</a></li>
+                <li data-name="Mongos#event:serverHeartbeatFailed"><a href="Mongos.html#event:serverHeartbeatFailed">serverHeartbeatFailed</a></li>
             
                 <li data-name="Mongos#event:serverHeartbeatStarted"><a href="Mongos.html#event:serverHeartbeatStarted">serverHeartbeatStarted</a></li>
             
@@ -711,7 +711,7 @@
             
                 <li data-name="ReplSet#event:serverDescriptionChanged"><a href="ReplSet.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
             
-                <li data-name="ReplSet#event:serverHearbeatFailed"><a href="ReplSet.html#event:serverHearbeatFailed">serverHearbeatFailed</a></li>
+                <li data-name="ReplSet#event:serverHeartbeatFailed"><a href="ReplSet.html#event:serverHeartbeatFailed">serverHeartbeatFailed</a></li>
             
                 <li data-name="ReplSet#event:serverHeartbeatStarted"><a href="ReplSet.html#event:serverHeartbeatStarted">serverHeartbeatStarted</a></li>
             
@@ -1019,10 +1019,6 @@ var Long = require('bson').Long
  */
 var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   options = options || {};
-  // Cursor reference
-  var self = this;
-  // Initial query
-  var query = null;
 
   // Cursor pool
   this.pool = null;
@@ -1133,7 +1129,7 @@ Cursor.prototype._find = function(callback) {
   var self = this;
 
   if(self.logger.isDebug()) {
-    self.logger.debug(f("issue initial query [%s] with flags [%s]"
+    self.logger.debug(f('issue initial query [%s] with flags [%s]'
       , JSON.stringify(self.cmd)
       , JSON.stringify(self.query)));
   }
@@ -1236,11 +1232,11 @@ Cursor.prototype._find = function(callback) {
   }
 
   // Write the initial command out
-  self.server.s.pool.write(self.query.toBin(), queryOptions, queryCallback);
+  self.server.s.pool.write(self.query, queryOptions, queryCallback);
 }
 
 Cursor.prototype._getmore = function(callback) {
-  if(this.logger.isDebug()) this.logger.debug(f("schedule getMore call for query [%s]", JSON.stringify(this.query)))
+  if(this.logger.isDebug()) this.logger.debug(f('schedule getMore call for query [%s]', JSON.stringify(this.query)))
   // Determine if it's a raw query
   var raw = this.options.raw || this.cmd.raw;
 
@@ -1425,7 +1421,7 @@ var isCursorDeadButNotkilled = function(self, callback) {
  */
 var isCursorDeadAndKilled = function(self, callback) {
   if(self.cursorState.dead &amp;&amp; self.cursorState.killed) {
-    handleCallback(callback, MongoError.create("cursor is dead"));
+    handleCallback(callback, MongoError.create('cursor is dead'));
     return true;
   }
 
@@ -1468,8 +1464,6 @@ var setCursorNotified = function(self, callback) {
   handleCallback(callback, null, null);
 }
 
-var push = Array.prototype.push;
-
 var nextFunction = function(self, callback) {
   // We have notified about it
   if(self.cursorState.notified) {
@@ -1490,6 +1484,10 @@ var nextFunction = function(self, callback) {
     // Topology is not connected, save the call in the provided store to be
     // Executed at some point when the handler deems it's reconnected
     if(!self.topology.isConnected(self.options) &amp;&amp; self.disconnectHandler != null) {
+      if (self.topology.isDestroyed()) {
+        // Topology was destroyed, so don't try to wait for it to reconnect
+        return callback(new MongoError('Topology was destroyed'));
+      }
       return self.disconnectHandler.addObjectAndMethod('cursor', self, 'next', [callback], callback);
     }
 
@@ -1529,10 +1527,10 @@ var nextFunction = function(self, callback) {
     if(isConnectionDead(self, callback)) return;
 
     // Check if topology is destroyed
-    if(self.topology.isDestroyed()) return callback(new MongoError(f('connection destroyed, not possible to instantiate cursor')));
+    if(self.topology.isDestroyed()) return callback(new MongoError('connection destroyed, not possible to instantiate cursor'));
 
     // query, cmd, options, cursorState, callback
-    self._find(function(err, r) {
+    self._find(function(err) {
       if(err) return handleCallback(callback, err, null);
 
       if(self.cursorState.documents.length == 0
@@ -1555,7 +1553,7 @@ var nextFunction = function(self, callback) {
       self.cursorState.cursorIndex = 0;
 
       // Check if topology is destroyed
-      if(self.topology.isDestroyed()) return callback(new MongoError(f('connection destroyed, not possible to instantiate cursor')));
+      if(self.topology.isDestroyed()) return callback(new MongoError('connection destroyed, not possible to instantiate cursor'));
 
       // Check if connection is dead and return if not possible to
       // execute a getmore on this connection
@@ -1575,7 +1573,7 @@ var nextFunction = function(self, callback) {
           &amp;&amp; self.cmd.tailable &amp;&amp; Long.ZERO.equals(self.cursorState.cursorId)) {
           // No more documents in the tailed cursor
           return handleCallback(callback, MongoError.create({
-              message: "No more documents in tailed cursor"
+              message: 'No more documents in tailed cursor'
             , tailable: self.cmd.tailable
             , awaitData: self.cmd.awaitData
           }));
@@ -1593,7 +1591,7 @@ var nextFunction = function(self, callback) {
   } else if(self.cursorState.documents.length == self.cursorState.cursorIndex
     &amp;&amp; self.cmd.tailable &amp;&amp; Long.ZERO.equals(self.cursorState.cursorId)) {
       return handleCallback(callback, MongoError.create({
-          message: "No more documents in tailed cursor"
+          message: 'No more documents in tailed cursor'
         , tailable: self.cmd.tailable
         , awaitData: self.cmd.awaitData
       }));
@@ -1673,7 +1671,7 @@ module.exports = Cursor;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Sep 14 2016 09:14:33 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Nov 29 2016 11:33:36 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

@@ -815,6 +815,14 @@ MongoClient.connect(url, {
 &lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Specify a read concern for the collection. (only MongoDB 3.2 or higher supported).&lt;/td&gt;
 &lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;**maxStalenessSeconds&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Replicaset&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;number&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Specify a maxStalenessSeconds value for secondary reads, minimum is 90 seconds&lt;/td&gt;
+&lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
 
@@ -871,7 +879,7 @@ MongoClient.connect(url, {
 &lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/reference/ecmascript6/connecting/&#34;&gt;Connecting&lt;/a&gt;: how to connect leveraging ECMASdcript 6.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/reference/ecmascript6/connecting/&#34;&gt;Connecting&lt;/a&gt;: how to connect leveraging ECMAScript 6.&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/reference/ecmascript6/crud/&#34;&gt;CRUD&lt;/a&gt;: perform CRUD operations leveraging ECMAScript 6.&lt;/li&gt;
 &lt;/ul&gt;
 </description>

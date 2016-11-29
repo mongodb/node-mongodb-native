@@ -1206,6 +1206,19 @@ some behavior changes for the cursor streams).&lt;/p&gt;
       <guid>/node-mongodb-native/2.2/upgrade-migration/</guid>
       <description>
 
+&lt;h1 id=&#34;what-s-new-in-2-3&#34;&gt;What&amp;rsquo;s New in 2.3&lt;/h1&gt;
+
+&lt;p&gt;Key features of the 2.3 driver include:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Implements &lt;a href=&#34;https://docs.mongodb.org&#34;&gt;Decimal128&lt;/a&gt;, a decimal
+floating-point numbering format that occupies 16 bytes (128 bits).
+See the
+&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/crud/#specify-a-data-type&#34;&gt;CRUD tutorial&lt;/a&gt;
+for an example.
+&amp;lt;!&amp;ndash; NOTE: placeholder link to manual entry &amp;ndash;&amp;gt;&lt;/li&gt;
+&lt;/ul&gt;
+
 &lt;h1 id=&#34;what-s-new-in-2-2&#34;&gt;What&amp;rsquo;s New in 2.2&lt;/h1&gt;
 
 &lt;p&gt;Key features of the 2.2 driver include:&lt;/p&gt;
@@ -1214,7 +1227,7 @@ some behavior changes for the cursor streams).&lt;/p&gt;
 &lt;li&gt;Redesigned Connection Pool.&lt;/li&gt;
 &lt;li&gt;Connection close will drain any outstanding operations.&lt;/li&gt;
 &lt;li&gt;replicaSet parameter &lt;strong&gt;MUST&lt;/strong&gt; be specified if using MongoClient to connect to replicaset, due to SDAM specification implementation.&lt;/li&gt;
-&lt;li&gt;domain support disabled by default, enable with parameter &lt;strong&gt;domainsEnabled&lt;/strong&gt; on MongoClient or on the Server/ReplSet/Mongos.&lt;/li&gt;
+&lt;li&gt;Domain support disabled by default, enable with parameter &lt;strong&gt;domainsEnabled&lt;/strong&gt; on MongoClient or on the Server/ReplSet/Mongos.&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h1 id=&#34;what-s-new-in-2-1&#34;&gt;What&amp;rsquo;s New in 2.1&lt;/h1&gt;
@@ -1563,6 +1576,14 @@ MongoClient.connect(url, {
 &lt;td align=&#34;left&#34;&gt;object&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Specify a read concern for the collection. (only MongoDB 3.2 or higher supported).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;**maxStalenessSeconds&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Replicaset&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;number&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Specify a maxStalenessSeconds value for secondary reads, minimum is 90 seconds&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;

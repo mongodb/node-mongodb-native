@@ -67,7 +67,7 @@
 &lt;pre&gt;&lt;code&gt;npm WARN EPEERINVALID mongodb-core@1.2.21 requires a peer of kerberos@~0.0 but none was installed.
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This tells you that the driver could not resolve it&amp;rsquo;s &lt;code&gt;peerDependency&lt;/code&gt;. However don&amp;rsquo;t worry&amp;ndash; if you do not intend to use kerberos, you can safely ignore the NPM warning above.  If you are using kerberos, then you will need to install the &lt;code&gt;kerberos&lt;/code&gt; package from NPM and save it as a local dependency in your &lt;code&gt;package.json&lt;/code&gt; file:&lt;/p&gt;
+&lt;p&gt;This tells you that the driver could not resolve its &lt;code&gt;peerDependency&lt;/code&gt;. However don&amp;rsquo;t worry &amp;ndash; if you do not intend to use kerberos, you can safely ignore the NPM warning above.  If you are using kerberos, then you will need to install the &lt;code&gt;kerberos&lt;/code&gt; package from NPM and save it as a local dependency in your &lt;code&gt;package.json&lt;/code&gt; file:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;npm install kerberos@0.0.x --save
 &lt;/code&gt;&lt;/pre&gt;
