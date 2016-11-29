@@ -19,6 +19,9 @@
   * NODE-840 Resync CRUD spec tests.
   * Unescapable while(true) loop (Issue #152).
 * NODE-864 close event not emits during network issues using single server topology.
+* Introduced maxStalenessSeconds.
+* NODE-840 Added CRUD specification test cases and fix minor issues with upserts reporting matchedCount > 0.
+* Don't ignore Db-level authSource when using auth method. (https://github.com/donaldguy).
 
 2.2.11 2016-10-21
 -----------------
