@@ -1,3 +1,25 @@
+2.2.12 2016-10-21
+-----------------
+* Updated mongodb-core to 2.0.14.
+  * Updated bson library to 0.5.7.
+  * Dont leak connection.workItems elments when killCursor is called (Issue #150, https://github.com/mdlavin).
+  * Remove unnecessary errors formatting (Issue #149, https://github.com/akryvomaz).
+  * Only check isConnected against availableConnections (Issue #142).
+  * NODE-838 Provide better error message on failed to connect on first retry for Mongos topology.
+  * Set default servername to host is not passed through for sni.
+  * Made monitoring happen on exclusive connection and using connectionTimeout to handle the wait time before failure (Issue #148).
+  * NODE-859 Make minimum value of maxStalenessSeconds 90 seconds.
+  * NODE-852 Fix Kerberos module deprecations on linux and windows and release new kerberos version.
+  * NODE-850 Update Max Staleness implementation.
+  * NODE-849 username no longer required for MONGODB-X509 auth.
+  * NODE-848 BSON Regex flags must be alphabetically ordered.
+  * NODE-846 Create notice for all third party libraries.
+  * NODE-843 Executing bulk operations overwrites write concern parameter.
+  * NODE-842 Re-sync SDAM and SDAM Monitoring tests from Specs repo.
+  * NODE-840 Resync CRUD spec tests.
+  * Unescapable while(true) loop (Issue #152).
+* NODE-864 close event not emits during network issues using single server topology.
+
 2.2.11 2016-10-21
 -----------------
 * Updated mongodb-core to 2.0.13.

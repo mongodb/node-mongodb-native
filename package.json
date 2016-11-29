@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "2.2.11",
+  "version": "2.2.12",
   "description": "The official MongoDB driver for Node.js",
   "main": "index.js",
   "repository": {
@@ -14,8 +14,7 @@
   ],
   "dependencies": {
     "es6-promise": "3.2.1",
-    "mongodb-core": "2.0.13",
-    "mongodb-core": "christkv/mongodb-core#2.0",
+    "mongodb-core": "2.0.14",
     "readable-stream": "2.1.5"
   },
   "devDependencies": {
