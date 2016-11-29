@@ -17,7 +17,7 @@
     "core"
   ],
   "dependencies": {
-    "bson": "~0.5.6",
+    "bson": "~0.5.7",
     "require_optional": "~1.0.0"
   },
   "devDependencies": {
