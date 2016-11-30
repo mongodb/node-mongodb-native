@@ -1,4 +1,4 @@
-2.2.12 2016-10-21
+2.2.12 2016-11-29
 -----------------
 * Updated mongodb-core to 2.0.14.
   * Updated bson library to 0.5.7.
