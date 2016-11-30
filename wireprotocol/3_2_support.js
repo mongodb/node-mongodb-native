@@ -1,9 +1,17 @@
 "use strict";
 
+var BSON = require('bson');
+
+try {
+  try { BSON = require('bson-ext'); } catch(err) {
+    BSON = require_optional('bson-ext');
+  }
+} catch(err) {}
+
 var Query = require('../connection/commands').Query
   , f = require('util').format
   , MongoError = require('../error')
-  , Long = require('bson').Long
+  , Long = BSON.Long
   , getReadPreference = require('./shared').getReadPreference;
 
 var WireProtocol = function(legacyWireProtocol) {

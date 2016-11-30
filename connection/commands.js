@@ -1,6 +1,14 @@
 "use strict";
 
-var Long = require('bson').Long;
+var BSON = require('bson');
+
+try {
+  try { BSON = require('bson-ext'); } catch(err) {
+    BSON = require_optional('bson-ext');
+  }
+} catch(err) {}
+
+var Long = BSON.Long;
 
 // Incrementing request id
 var _requestId = 0;

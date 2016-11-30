@@ -18,16 +18,13 @@ var inherits = require('util').inherits,
   assign = require('./shared').assign,
   createClientInfo = require('./shared').createClientInfo;
 
-// Try to grab the Kerberos class
-try {
-  var BSONEXT = require_optional('bson-ext');
-  console.log("======== loaded BSONEXT")
-} catch(err) {
-  console.log(err)
-}
-
-
 var BSON = require('bson');
+
+try {
+  try { BSON = require('bson-ext'); } catch(err) {
+    BSON = require_optional('bson-ext');
+  }
+} catch(err) {}
 
 // Used for filtering out fields for loggin
 var debugFields = ['reconnect', 'reconnectTries', 'reconnectInterval', 'emitError', 'cursorFactory', 'host'
@@ -103,7 +100,9 @@ var Server = function(options) {
     // Factory overrides
     Cursor: options.cursorFactory || BasicCursor,
     // BSON instance
-    bson: options.bson || new BSON(),
+    bson: options.bson || new BSON([BSON.Binary, BSON.Code, BSON.DBRef, BSON.Decimal128,
+      BSON.Double, BSON.Int32, BSON.Long, BSON.Map, BSON.MaxKey, BSON.MinKey,
+      BSON.ObjectId, BSON.BSONRegExp, BSON.Symbol, BSON.Timestamp]),
     // Pool
     pool: null,
     // Disconnect handler

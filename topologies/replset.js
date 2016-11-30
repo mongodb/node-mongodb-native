@@ -22,6 +22,12 @@ var MongoCR = require('../auth/mongocr')
 
 var BSON = require('bson');
 
+try {
+  try { BSON = require('bson-ext'); } catch(err) {
+    BSON = require_optional('bson-ext');
+  }
+} catch(err) {}
+
 //
 // States
 var DISCONNECTED = 'disconnected';
@@ -130,7 +136,9 @@ var ReplSet = function(seedlist, options) {
   this.s = {
     options: assign({}, options),
     // BSON instance
-    bson: options.bson || new BSON(),
+    bson: options.bson || new BSON([BSON.Binary, BSON.Code, BSON.DBRef, BSON.Decimal128,
+      BSON.Double, BSON.Int32, BSON.Long, BSON.Map, BSON.MaxKey, BSON.MinKey,
+      BSON.ObjectId, BSON.BSONRegExp, BSON.Symbol, BSON.Timestamp]),
     // Factory overrides
     Cursor: options.cursorFactory || BasicCursor,
     // Logger instance
