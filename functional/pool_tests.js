@@ -10,7 +10,7 @@ exports['Should correctly connect pool to single server'] = {
   test: function(configuration, test) {
     var Pool = require('../../../lib/connection/pool')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     // Enable connections accounting
     Connection.enableConnectionAccounting();
@@ -43,7 +43,7 @@ exports['Should correctly write ismaster operation to the server'] = {
   test: function(configuration, test) {
     var Pool = require('../../../lib/connection/pool')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
@@ -80,7 +80,7 @@ exports['Should correctly grow server pool on concurrent operations'] = {
   test: function(configuration, test) {
     var Pool = require('../../../lib/connection/pool')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
@@ -161,7 +161,7 @@ exports['Should correctly write ismaster operation to the server and handle time
   test: function(configuration, test) {
     var Pool = require('../../../lib/connection/pool')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     // Attempt to connect
@@ -195,7 +195,7 @@ exports['Should correctly error out operations if pool is closed in the middle o
   test: function(configuration, test) {
     var Pool = require('../../../lib/connection/pool')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
@@ -260,7 +260,7 @@ exports['Should correctly recover from a server outage'] = {
   test: function(configuration, test) {
     var Pool = require('../../../lib/connection/pool')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
     // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! START TEST")
 
@@ -347,7 +347,7 @@ exports['Should correctly recover from a longer server outage'] = {
   test: function(configuration, test) {
     var Pool = require('../../../lib/connection/pool')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
@@ -437,7 +437,7 @@ exports['Should correctly reclaim immediateRelease socket'] = {
   test: function(configuration, test) {
     var Pool = require('../../../lib/connection/pool')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
       // console.log("============================== 0")
@@ -496,7 +496,7 @@ exports['Should correctly authenticate using scram-sha-1 using connect auth'] = 
   test: function(configuration, test) {
     var Pool = require('../../../lib/connection/pool')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
@@ -548,7 +548,7 @@ exports['Should correctly authenticate using scram-sha-1 using connect auth and 
   test: function(configuration, test) {
     var Pool = require('../../../lib/connection/pool')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
@@ -645,7 +645,7 @@ exports['Should correctly authenticate using scram-sha-1 using auth method'] = {
   test: function(configuration, test) {
     var Pool = require('../../../lib/connection/pool')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
@@ -727,7 +727,7 @@ exports['Should correctly authenticate using scram-sha-1 using connect auth then
   test: function(configuration, test) {
     var Pool = require('../../../lib/connection/pool')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
@@ -790,7 +790,7 @@ exports['Should correctly have auth wait for logout to finish'] = {
   test: function(configuration, test) {
     var Pool = require('../../../lib/connection/pool')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
@@ -857,7 +857,7 @@ exports['Should correctly exit _execute loop when single avialable connection is
   test: function(configuration, test) {
     var Pool = require('../../../lib/connection/pool')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting

@@ -11,7 +11,7 @@ exports['Should iterate cursor'] = {
 
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     // Attempt to connect
     var server = new Server({
@@ -67,7 +67,7 @@ exports['Should iterate cursor but readBuffered'] = {
 
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     // Attempt to connect
     var server = new Server({
@@ -126,7 +126,7 @@ exports['Should callback exhausted cursor with error'] = {
 
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     // Attempt to connect
     var server = new Server({
@@ -181,7 +181,7 @@ exports['Should force a getMore call to happen'] = {
 
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     // Attempt to connect
     var server = new Server({
@@ -236,7 +236,7 @@ exports['Should force a getMore call to happen then call killCursor'] = {
 
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     // Attempt to connect
     var server = new Server({
@@ -296,7 +296,7 @@ exports['Should force a getMore call to happen then call killCursor'] = {
 
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     // Attempt to connect
     var server = new Server({
@@ -356,7 +356,7 @@ exports['Should fail cursor correctly after server restart'] = {
 
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     // Attempt to connect
     var server = new Server({
@@ -415,7 +415,7 @@ exports['Should finish cursor correctly after all sockets to pool destroyed'] = 
 
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     // Attempt to connect
     var server = new Server({
@@ -480,7 +480,7 @@ exports['Should not leak connnection workItem elements when using killCursor'] =
 
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     // Attempt to connect
     var server = new Server({
