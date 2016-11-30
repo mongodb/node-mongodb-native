@@ -10,7 +10,7 @@ exports['Should fail to authenticate server using scram-sha-1 using connect auth
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
@@ -53,7 +53,7 @@ exports['Should correctly authenticate server using scram-sha-1 using connect au
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
@@ -103,7 +103,7 @@ exports['Should correctly authenticate server using scram-sha-1 using connect au
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
@@ -181,7 +181,7 @@ exports['Should correctly authenticate server using scram-sha-1 using auth metho
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
@@ -266,7 +266,7 @@ exports['Should correctly authenticate server using scram-sha-1 using connect au
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
@@ -330,7 +330,7 @@ exports['Should correctly have server auth wait for logout to finish'] = {
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting

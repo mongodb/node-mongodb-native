@@ -8,7 +8,7 @@ exports['Should correctly connect server to single instance'] = {
 
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     // Attempt to connect
     var server = new Server({
@@ -33,7 +33,7 @@ exports['Should correctly connect server to single instance and execute ismaster
 
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     // Attempt to connect
     var server = new Server({
@@ -64,7 +64,7 @@ exports['Should correctly connect server to single instance and execute ismaster
 
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     // Attempt to connect
     var server = new Server({
@@ -97,7 +97,7 @@ exports['Should correctly connect server to single instance and execute insert']
 
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     // Attempt to connect
     var server = new Server({
@@ -132,7 +132,7 @@ exports['Should correctly connect server to single instance and execute bulk ins
 
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     // Attempt to connect
     var server = new Server({
@@ -167,7 +167,7 @@ exports['Should correctly connect server to single instance and execute insert w
 
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     // Attempt to connect
     var server = new Server({
@@ -202,7 +202,7 @@ exports['Should correctly connect server to single instance and execute update']
 
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     // Attempt to connect
     var server = new Server({
@@ -236,7 +236,7 @@ exports['Should correctly connect server to single instance and execute remove']
 
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     // Attempt to connect
     var server = new Server({
@@ -280,7 +280,7 @@ exports['Should correctly recover with multiple restarts'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     var done = false;
 

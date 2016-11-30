@@ -17,7 +17,7 @@
     "core"
   ],
   "dependencies": {
-    "bson": "~0.5.7",
+    "bson": "mongodb/js-bson#1.0-branch",
     "require_optional": "~1.0.0"
   },
   "devDependencies": {
@@ -36,7 +36,8 @@
     "semver": "4.1.0"
   },
   "peerOptionalDependencies": {
-    "kerberos": "~0.0"
+    "kerberos": "~0.0",
+    "bson-ext": "christkv/bson-ext#1.0-branch"
   },
   "author": "Christian Kvalheim",
   "license": "Apache-2.0",

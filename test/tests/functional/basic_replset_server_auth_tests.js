@@ -79,7 +79,7 @@ exports['Should fail to authenticat emitting an error due to it being the initia
   test: function(configuration, test) {
     var ReplSet = require('../../../lib/topologies/replset')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     setUp(configuration, function(err, replicasetManager) {
@@ -144,7 +144,7 @@ exports['Should correctly authenticate server using scram-sha-1 using connect au
   test: function(configuration, test) {
     var ReplSet = require('../../../lib/topologies/replset')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     setUp(configuration, function(err, replicasetManager) {
@@ -211,7 +211,7 @@ exports['Should correctly authenticate using auth method instead of connect'] = 
   test: function(configuration, test) {
     var ReplSet = require('../../../lib/topologies/replset')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
     setUp(configuration, function(err, replicasetManager) {
@@ -281,7 +281,7 @@ exports['Should correctly authenticate using auth method instead of connect and 
   test: function(configuration, test) {
     var ReplSet = require('../../../lib/topologies/replset')
       , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON
+      , bson = require('bson')
       , Query = require('../../../lib/connection/commands').Query;
 
       // console.log("------------------------------ -3")
@@ -387,7 +387,7 @@ exports['Should correctly authenticate using auth method instead of connect and 
 //   test: function(configuration, test) {
 //     var Server = require('../../../lib/topologies/server')
 //       , Connection = require('../../../lib/connection/connection')
-//       , bson = require('bson').BSONPure.BSON
+//       , bson = require('bson')
 //       , Query = require('../../../lib/connection/commands').Query;
 //
 //     // Enable connections accounting
@@ -465,7 +465,7 @@ exports['Should correctly authenticate using auth method instead of connect and 
 //   test: function(configuration, test) {
 //     var Server = require('../../../lib/topologies/server')
 //       , Connection = require('../../../lib/connection/connection')
-//       , bson = require('bson').BSONPure.BSON
+//       , bson = require('bson')
 //       , Query = require('../../../lib/connection/commands').Query;
 //
 //     // Enable connections accounting
@@ -550,7 +550,7 @@ exports['Should correctly authenticate using auth method instead of connect and 
 //   test: function(configuration, test) {
 //     var Server = require('../../../lib/topologies/server')
 //       , Connection = require('../../../lib/connection/connection')
-//       , bson = require('bson').BSONPure.BSON
+//       , bson = require('bson')
 //       , Query = require('../../../lib/connection/commands').Query;
 //
 //     // Enable connections accounting
@@ -614,7 +614,7 @@ exports['Should correctly authenticate using auth method instead of connect and 
 //   test: function(configuration, test) {
 //     var Server = require('../../../lib/topologies/server')
 //       , Connection = require('../../../lib/connection/connection')
-//       , bson = require('bson').BSONPure.BSON
+//       , bson = require('bson')
 //       , Query = require('../../../lib/connection/commands').Query;
 //
 //     // Enable connections accounting

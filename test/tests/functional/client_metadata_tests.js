@@ -8,7 +8,7 @@ exports['Should correctly pass the configuration settings to server'] = {
 
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
     // Attempt to connect
     var server = new Server({
@@ -61,7 +61,7 @@ exports['Should correctly pass the configuration settings to mongos'] = {
 
   test: function(configuration, test) {
     var Mongos = require('../../../lib/topologies/mongos')
-      , bson = require('bson').BSONPure.BSON;
+      , bson = require('bson');
 
       // Attempt to connect
       var _server = new Mongos([
