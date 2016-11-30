@@ -3,7 +3,6 @@
 var inherits = require('util').inherits,
   f = require('util').format,
   EventEmitter = require('events').EventEmitter,
-  BSON = require('bson').native().BSON,
   BasicCursor = require('../cursor'),
   Logger = require('../connection/logger'),
   MongoError = require('../error'),
@@ -11,6 +10,8 @@ var inherits = require('util').inherits,
   assign = require('./shared').assign,
   clone = require('./shared').clone,
   createClientInfo = require('./shared').createClientInfo;
+
+var BSON = require('bson');
 
 /**
  * @fileOverview The **Mongos** class is a class that represents a Mongos Proxy topology and is

@@ -3,7 +3,6 @@
 var inherits = require('util').inherits,
   f = require('util').format,
   EventEmitter = require('events').EventEmitter,
-  BSON = require('bson').native().BSON,
   ReadPreference = require('./read_preference'),
   BasicCursor = require('../cursor'),
   Logger = require('../connection/logger'),
@@ -20,6 +19,8 @@ var MongoCR = require('../auth/mongocr')
   , GSSAPI = require('../auth/gssapi')
   , SSPI = require('../auth/sspi')
   , ScramSHA1 = require('../auth/scram');
+
+var BSON = require('bson');
 
 //
 // States
