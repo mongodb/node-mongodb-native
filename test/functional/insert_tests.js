@@ -87,11 +87,11 @@ exports.shouldCorrectlyHandleMultipleDocumentInsert = {
         test.equal(2, r.ops.length);
         test.equal(2, r.insertedCount);
         test.equal(2, r.insertedIds.length);
-        test.ok(r.insertedIds[0] instanceof ObjectID);
-        test.ok(r.insertedIds[1] instanceof ObjectID);
+        test.ok(r.insertedIds[0]._bsontype == "ObjectID");
+        test.ok(r.insertedIds[1]._bsontype == "ObjectID");
 
         r.ops.forEach(function(doc) {
-          test.ok(((doc['_id']) instanceof ObjectID || Object.prototype.toString.call(doc['_id']) === '[object ObjectID]'));
+          test.ok(((doc['_id'])._bsontype == "ObjectID" || Object.prototype.toString.call(doc['_id']) === '[object ObjectID]'));
         });
 
         // Let's ensure we have both documents
@@ -476,7 +476,7 @@ exports.shouldInsertAndQueryTimestamp = {
       collection.insert({i:Timestamp.fromNumber(100), j:Long.fromNumber(200)}, configuration.writeConcernMax(), function(err, r) {
         // Locate document
         collection.findOne({}, function(err, item) {
-          test.ok(item.i instanceof Timestamp);
+          test.ok(item.i._bsontype == "Timestamp");
           test.equal(100, item.i);
           test.equal(200, item.j);
           db.close();
@@ -940,7 +940,7 @@ exports['Should Correctly allow for control of serialization of functions on com
 
             // Execute a safe insert with replication to two servers
             collection.findAndModify({str:"String"}, [['a', 1]], {'$set':{'f':function() {}}}, {new:true, safe: true, serializeFunctions:true}, function(err, result) {
-              test.ok(result.value.f instanceof Code)
+              test.ok(result.value.f._bsontype == "Code")
               db.close();
               test.done();
             })
@@ -975,7 +975,7 @@ exports['Should Correctly allow for control of serialization of functions on col
         test.equal(null, err);
 
         collection.findOne({str : "String"}, function(err, item) {
-          test.ok(item.func instanceof Code);
+          test.ok(item.func._bsontype == "Code");
           db.close();
           test.done();
         });
@@ -1459,11 +1459,11 @@ exports.handleBSONTypeInsertsCorrectly = {
 
                 collection.findOne({"minkey": new MinKey()}, function(err, doc) {
                   test.equal(null, err);
-                  test.ok(doc.minkey instanceof MinKey);
+                  test.ok(doc.minkey._bsontype == "MinKey");
 
                   collection.findOne({"maxkey": new MaxKey()}, function(err, doc) {
                     test.equal(null, err);
-                    test.ok(doc.maxkey instanceof MaxKey);
+                    test.ok(doc.maxkey._bsontype == "MaxKey");
 
                     collection.findOne({"code": new Code("function () {}", {a: 77})}, function(err, doc) {
                       test.equal(null, err);
@@ -1535,11 +1535,11 @@ exports.handleBSONTypeInsertsCorrectlyFor28OrHigher = {
 
                 collection.findOne({"minkey": new MinKey()}, function(err, doc) {
                   test.equal(null, err);
-                  test.ok(doc.minkey instanceof MinKey);
+                  test.ok(doc.minkey._bsontype == "MinKey");
 
                   collection.findOne({"maxkey": new MaxKey()}, function(err, doc) {
                     test.equal(null, err);
-                    test.ok(doc.maxkey instanceof MaxKey);
+                    test.ok(doc.maxkey._bsontype == "MaxKey");
 
                     collection.findOne({"code": new Code("function () {}", {a: 55})}, function(err, doc) {
                       test.equal(null, err);
@@ -1736,8 +1736,8 @@ exports.shouldCorrectlyHonorPromoteLongFalseNativeBSON = {
 
           db.collection('shouldCorrectlyHonorPromoteLong').findOne(function(err, doc) {
             test.equal(null, err);
-            test.ok(doc.doc instanceof Long);
-            test.ok(doc.array[0][0] instanceof Long);
+            test.ok(doc.doc._bsontype == "Long");
+            test.ok(doc.array[0][0]._bsontype == "Long");
             db.close();
             test.done();
           });
@@ -1774,7 +1774,7 @@ exports.shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore = {
             test.equal(null, err);
             var doc = docs.pop();
 
-            test.ok(doc.a instanceof Long);
+            test.ok(doc.a._bsontype == "Long");
             db.close();
             test.done();
           });
@@ -1832,8 +1832,8 @@ exports.shouldCorrectlyHonorPromoteLongFalseJSBSON = {
           db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').findOne(function(err, doc) {
             test.equal(null, err);
             test.equal(null, err);
-            test.ok(doc.doc instanceof Long);
-            test.ok(doc.array[0][0] instanceof Long);
+            test.ok(doc.doc._bsontype == "Long");
+            test.ok(doc.array[0][0]._bsontype == "Long");
             db.close();
             test.done();
           });

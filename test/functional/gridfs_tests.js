@@ -619,9 +619,12 @@ exports.shouldCorrectlyPerformWorkingFiledWithBigFile = {
           // Flush the remaining data to GridFS
           gridStore.close(function(err, result) {
             test.equal(null, err);
+            console.dir(result)
 
             // Read in the whole file and check that it's the same content
             GridStore.read(client, result._id, function(err, fileData) {
+              console.dir(err)
+
               var data = fs.readFileSync('./test_gs_working_field_read.tmp');
               test.deepEqual(data, fileData);
               client.close();
@@ -1858,7 +1861,7 @@ exports.shouldCorrectlyWriteASmallPayload = {
               collection.find({'filename':'test_gs_small_write4'}).toArray(function(err, items) {
                 test.equal(1, items.length);
                 var item = items[0];
-                test.ok(item._id instanceof ObjectID || Object.prototype.toString.call(item._id) === '[object ObjectID]');
+                test.ok(item._id._bsontype == 'ObjectID' || Object.prototype.toString.call(item._id) === '[object ObjectID]');
 
                 db.collection('fs.chunks', function(err, collection) {
                   var id = ObjectID.createFromHexString(item._id.toHexString());
