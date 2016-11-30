@@ -1,5 +1,10 @@
 "use strict";
 
+var BSON = require('mongodb-core').BSON;
+var bson = new BSON([BSON.Binary, BSON.Code, BSON.DBRef, BSON.Decimal128,
+	BSON.Double, BSON.Int32, BSON.Long, BSON.Map, BSON.MaxKey, BSON.MinKey,
+	BSON.ObjectId, BSON.BSONRegExp, BSON.Symbol, BSON.Timestamp]);
+
 /**
  * @ignore
  */
@@ -8,9 +13,7 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var Buffer = require('buffer').Buffer
-      , BSON = require('mongodb-core').BSON.pure().BSON;
-      // console.dir(BSON)
+    var Buffer = require('buffer').Buffer;
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
     db.open(function(err, db) {
@@ -22,8 +25,8 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = {
             var objects = [];
 
             for(var i = 0; i < items.length; i++) {
-              test.ok(Buffer.isBuffer(items[i])); 
-              objects.push(new BSON().deserialize(items[i]));
+              test.ok(Buffer.isBuffer(items[i]));
+              objects.push(bson.deserialize(items[i]));
             }
 
             test.equal(1, objects[0].a);
@@ -33,7 +36,7 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = {
             // Execute findOne
             collection.findOne({a:1}, {raw:true}, function(err, item) {
               test.ok(Buffer.isBuffer(item));
-              var object = new BSON().deserialize(item);
+              var object = bson.deserialize(item);
               test.equal(1, object.a)
               db.close();
               test.done();
@@ -53,9 +56,7 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRawWithRawSetAtCollectionLevel = 
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var Buffer = require('buffer').Buffer
-      , BSON = require('mongodb-core').BSON.pure().BSON;
-      // console.dir(BSON)
+    var Buffer = require('buffer').Buffer;
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
     db.open(function(err, db) {
@@ -67,7 +68,7 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRawWithRawSetAtCollectionLevel = 
             var objects = [];
             for(var i = 0; i < items.length; i++) {
               test.ok(Buffer.isBuffer(items[i]));
-              objects.push(new BSON().deserialize(items[i]));
+              objects.push(bson.deserialize(items[i]));
             }
 
             test.equal(1, objects[0].a);
@@ -77,7 +78,7 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRawWithRawSetAtCollectionLevel = 
             // Execute findOne
             collection.findOne({a:1}, {raw:true}, function(err, item) {
               test.ok(Buffer.isBuffer(item));
-              var object = new BSON().deserialize(item);
+              var object = bson.deserialize(item);
               test.equal(1, object.a)
               db.close();
               test.done();

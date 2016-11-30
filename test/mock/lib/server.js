@@ -1,6 +1,6 @@
 var net = require('net'),
   Long = require('bson').Long,
-  BSON = require('bson').pure().BSON,
+  BSON = require('bson'),
   Request = require('./request'),
   Query = require('./protocol').Query,
   GetMore = require('./protocol').GetMore,
