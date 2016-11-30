@@ -37,7 +37,7 @@
   },
   "peerOptionalDependencies": {
     "kerberos": "~0.0",
-    "bson-ext": "christkv/bson-ext#1.0-branch"
+    "bson-ext": "1.0.0"
   },
   "author": "Christian Kvalheim",
   "license": "Apache-2.0",
