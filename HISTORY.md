@@ -1,6 +1,6 @@
 2.2.12 2016-11-29
 -----------------
-* Updated mongodb-core to 2.0.14.
+* Updated mongodb-core to 2.0.14. 
   * Updated bson library to 0.5.7.
   * Dont leak connection.workItems elments when killCursor is called (Issue #150, https://github.com/mdlavin).
   * Remove unnecessary errors formatting (Issue #149, https://github.com/akryvomaz).
