@@ -104,7 +104,7 @@ exports['Should correctly grow server pool on concurrent operations'] = {
 
       // Did we receive an answer for all the messages
       if(index == 100) {
-        test.equal(5, pool.socketCount());
+        test.equal(5, pool.allConnections().length);
 
         pool.destroy();
         test.equal(0, Object.keys(Connection.connections()).length);
