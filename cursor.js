@@ -1,17 +1,12 @@
 "use strict";
 
-var BSON = require('bson');
-
-try {
-  try { BSON = require('bson-ext'); } catch(err) {
-    BSON = require_optional('bson-ext');
-  }
-} catch(err) {}
-
-var Long = BSON.Long
-  , Logger = require('./connection/logger')
+var Logger = require('./connection/logger')
+  , retrieveBSON = require('./connection/utils').retrieveBSON
   , MongoError = require('./error')
   , f = require('util').format;
+
+var BSON = retrieveBSON(),
+  Long = BSON.Long;
 
 /**
  * This is a cursor results callback

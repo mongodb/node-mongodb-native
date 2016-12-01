@@ -2,16 +2,13 @@
 
 var BSON = require('bson');
 
-try {
-  try { BSON = require('bson-ext'); } catch(err) {
-    BSON = require_optional('bson-ext');
-  }
-} catch(err) {}
-
 var f = require('util').format
   , Binary = BSON.Binary
+  , retrieveBSON = require('../connection/utils').retrieveBSON
   , Query = require('../connection/commands').Query
   , MongoError = require('../error');
+
+var BSON = retrieveBSON();
 
 var AuthSession = function(db, username, password) {
   this.db = db;

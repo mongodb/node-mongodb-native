@@ -1,18 +1,13 @@
 "use strict";
 
-var BSON = require('bson');
-
-try {
-  try { BSON = require('bson-ext'); } catch(err) {
-    BSON = require_optional('bson-ext');
-  }
-} catch(err) {}
-
 var f = require('util').format
   , crypto = require('crypto')
+  , retrieveBSON = require('../connection/utils').retrieveBSON
   , Query = require('../connection/commands').Query
-  , Binary = BSON.Binary
   , MongoError = require('../error');
+
+var BSON = retrieveBSON(),
+  Binary = BSON.Binary;
 
 var AuthSession = function(db, username, password) {
   this.db = db;

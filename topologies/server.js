@@ -7,6 +7,7 @@ var inherits = require('util').inherits,
   ReadPreference = require('./read_preference'),
   Logger = require('../connection/logger'),
   debugOptions = require('../connection/utils').debugOptions,
+  retrieveBSON = require('../connection/utils').retrieveBSON,
   Pool = require('../connection/pool'),
   Query = require('../connection/commands').Query,
   MongoError = require('../error'),
@@ -18,14 +19,6 @@ var inherits = require('util').inherits,
   assign = require('./shared').assign,
   createClientInfo = require('./shared').createClientInfo;
 
-var BSON = require('bson');
-
-try {
-  try { BSON = require('bson-ext'); } catch(err) {
-    BSON = require_optional('bson-ext');
-  }
-} catch(err) {}
-
 // Used for filtering out fields for loggin
 var debugFields = ['reconnect', 'reconnectTries', 'reconnectInterval', 'emitError', 'cursorFactory', 'host'
   , 'port', 'size', 'keepAlive', 'keepAliveInitialDelay', 'noDelay', 'connectionTimeout', 'checkServerIdentity'
@@ -36,6 +29,7 @@ var debugFields = ['reconnect', 'reconnectTries', 'reconnectInterval', 'emitErro
 var id = 0;
 var serverAccounting = false;
 var servers = {};
+var BSON = retrieveBSON();
 
 /**
  * Creates a new Server instance

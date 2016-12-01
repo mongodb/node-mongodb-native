@@ -5,6 +5,7 @@ var inherits = require('util').inherits,
   EventEmitter = require('events').EventEmitter,
   ReadPreference = require('./read_preference'),
   BasicCursor = require('../cursor'),
+  retrieveBSON = require('../connection/utils').retrieveBSON,
   Logger = require('../connection/logger'),
   MongoError = require('../error'),
   Server = require('./server'),
@@ -20,13 +21,7 @@ var MongoCR = require('../auth/mongocr')
   , SSPI = require('../auth/sspi')
   , ScramSHA1 = require('../auth/scram');
 
-var BSON = require('bson');
-
-try {
-  try { BSON = require('bson-ext'); } catch(err) {
-    BSON = require_optional('bson-ext');
-  }
-} catch(err) {}
+var BSON = retrieveBSON();
 
 //
 // States
