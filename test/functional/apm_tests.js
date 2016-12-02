@@ -923,3 +923,55 @@ exports['Correctly receive the APM events for deleteOne'] = {
     });
   }
 }
+
+exports['Ensure killcursor commands are sent on 3.0 or earlier when APM is enabled'] = {
+  metadata: { requires: { topology: ['single', 'replicaset'], mongodb: "<=3.0.x" } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+    var callbackTriggered = false;
+
+    var listener = require('../..').instrument(function(err, instrumentations) {});
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      var admindb = db.admin();
+      var cursorCountBefore;
+      var cursorCountAfter;
+
+      var collection = db.collection('apm_killcursor_tests');
+
+      // make sure collection has records (more than 2)
+      collection.insertMany([
+        {a : 1}, {a : 2}, {a : 3}
+      ], function(err, r) {
+        test.equal(null, err);
+
+        admindb.serverStatus(function(err, result) {
+          test.equal(null, err);
+
+          cursorCountBefore = result.cursors.clientCursors_size;
+
+          var cursor = collection.find({}).limit(2);
+          cursor.toArray(function(err, r) {
+            test.equal(null, err);
+            cursor.close();
+
+            admindb.serverStatus(function(err, result) {
+              test.equal(null, err);
+
+              cursorCountAfter = result.cursors.clientCursors_size;
+              test.equal(cursorCountBefore, cursorCountAfter);
+
+              listener.uninstrument();
+              db.close();
+              test.done();
+            });
+          });
+        });
+      });
+    });
+  }
+}
