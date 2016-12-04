@@ -87,6 +87,27 @@ exports['Should correctly connect to server using just events'] = {
 /**
  * @ignore
  */
+exports['Should correctly identify parser type'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:true});
+    db.on('open', function(err, db) {
+      test.equal(null, err);
+      test.equal('js', db.serverConfig.parserType);
+
+      db.close();
+      test.done();
+    });
+
+    db.open();
+  }
+}
+
+/**
+ * @ignore
+ */
 exports['Should correctly connect to server using big connection pool'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }, ignore: { travis:true } },
 
@@ -232,7 +253,7 @@ exports.testConnectAllOptions = {
             { server: {auto_reconnect: true, poolSize: 4},
               db: {native_parser: (process.env['TEST_NATIVE'] != null)} },
             connectionTester(test, 'testConnectAllOptions', function(db) {
-      test.equal(1, db.serverConfig.poolSize); 
+      test.equal(1, db.serverConfig.poolSize);
       test.equal(4, db.serverConfig.s.server.s.pool.size);
       test.equal(true, db.serverConfig.autoReconnect);
       db.close();
