@@ -1,6 +1,7 @@
 "use strict";
 
-var f = require('util').format;
+var f = require('util').format,
+  require_optional = require('require_optional');
 
 // Set property function
 var setProperty = function(obj, prop, flag, values) {
@@ -64,13 +65,18 @@ var debugOptions = function(debugFields, options) {
 
 var retrieveBSON = function() {
   var BSON = require('bson');
+  BSON.native = false;
 
   try {
     try {
       BSON = require('bson-ext');
+      BSON.native = true;
     } catch(err) {
       var optionalBSON = require_optional('bson-ext');
-      if(optionalBSON) return optionalBSON;
+      if(optionalBSON) {
+        optionalBSON.native = true;
+        return optionalBSON;
+      }
     }
   } catch(err) {}
 
