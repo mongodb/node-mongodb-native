@@ -17,7 +17,7 @@
     "core"
   ],
   "dependencies": {
-    "bson": "mongodb/js-bson#1.0-branch",
+    "bson": "~1.0.0",
     "require_optional": "~1.0.0"
   },
   "devDependencies": {
