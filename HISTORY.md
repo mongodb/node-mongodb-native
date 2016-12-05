@@ -1,3 +1,9 @@
+2.1.0 2016-12-05
+----------------
+* Updated bson library to 1.0.0.
+* Added optional support for bson-ext 1.0.0.
+* Expose property parserType allowing for identification of currently configured parser.
+
 2.0.14 2016-11-29
 -----------------
 * Updated bson library to 0.5.7.
