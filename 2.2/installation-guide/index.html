@@ -1492,19 +1492,26 @@
 <li>mongodb-core</li>
 <li>bson</li>
 <li>kerberos</li>
+<li>bson-ext</li>
 <li>node-gyp</li>
 </ul>
 
-<p>The only native extension is the <code>kerberos</code> extension. This is a <code>peer dependency</code> for the <code>mongodb</code> module. This means that if you need to use <code>kerberos</code> you will need to add the <code>kerberos</code> module to your module&rsquo;s dependencies.</p>
+<p>The <code>kerberos</code> and <code>bson-ext</code> extensions are native C++ extension. These are optional extensions and are not required for the driver to function.</p>
 
-<p>If you have <strong>NPM 2.0</strong> or earlier NPM will attempt to download and build the <code>kerberos</code> module if you do not have it defined as a dependency in your module. However, from <strong>NPM 3.0</strong> onwards NPM will not attempt to build the <code>kerberos</code> module but instead print a warning in your install log that looks something like the following.</p>
+<h2 id="bson-ext-module">bson-ext Module</h2>
 
-<pre><code>npm WARN EPEERINVALID mongodb-core@1.2.21 requires a peer of kerberos@~0.0 but none was installed.
+<p>The <code>bson-ext</code> module is an alternative <strong>BSON</strong> parser that is written in C++. It delivers better deserialization performance and similar or somewhat better serialization performance to the pure javascript parser.</p>
+
+<p>If you wish to use the <code>bson-ext</code> module you will need to add the <code>bson-ext</code> module to your module&rsquo;s dependencies.</p>
+
+<pre><code>npm install bson-ext --save
 </code></pre>
 
-<p>This tells you that the driver could not resolve its <code>peer dependency</code>. However, don&rsquo;t worry. You only need the <code>kerberos</code> module if you intend to use <code>kerberos</code>, in which case you can add it to your package.json by doing the following:</p>
+<h2 id="kerberos-module">kerberos Module</h2>
 
-<pre><code>npm install kerberos@0.0.x
+<p>If you need to use <code>kerberos</code> module you will need to add the <code>kerberos</code> module to your module&rsquo;s dependencies.</p>
+
+<pre><code>npm install kerberos --save
 </code></pre>
 
 <p>The <code>kerberos</code> package is a C++ extension that requires a build environment to be installed on your system. You must be able to build Node.js itself to be able to compile and install the <code>kerberos</code> module. Furthermore the <code>kerberos</code> module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operating system package manager for what libraries to install.</p>
@@ -1615,7 +1622,9 @@ any issues with broken packages (and there are a lot of broken packages out ther
 <li><a href="#installation">Installation</a>
 <ul>
 <li><a href="#mongodb-driver">MongoDB Driver</a></li>
-<li><a href="#troubleshooting">Troubleshooting</a>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+<li><a href="#bson-ext-module">bson-ext Module</a></li>
+<li><a href="#kerberos-module">kerberos Module</a>
 <ul>
 <li><a href="#diagnosing-on-unix">Diagnosing on UNIX</a></li>
 <li><a href="#diagnosing-on-windows">Diagnosing on Windows</a></li>

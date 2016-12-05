@@ -38,19 +38,26 @@
 &lt;li&gt;mongodb-core&lt;/li&gt;
 &lt;li&gt;bson&lt;/li&gt;
 &lt;li&gt;kerberos&lt;/li&gt;
+&lt;li&gt;bson-ext&lt;/li&gt;
 &lt;li&gt;node-gyp&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;The only native extension is the &lt;code&gt;kerberos&lt;/code&gt; extension. This is a &lt;code&gt;peer dependency&lt;/code&gt; for the &lt;code&gt;mongodb&lt;/code&gt; module. This means that if you need to use &lt;code&gt;kerberos&lt;/code&gt; you will need to add the &lt;code&gt;kerberos&lt;/code&gt; module to your module&amp;rsquo;s dependencies.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;kerberos&lt;/code&gt; and &lt;code&gt;bson-ext&lt;/code&gt; extensions are native C++ extension. These are optional extensions and are not required for the driver to function.&lt;/p&gt;
 
-&lt;p&gt;If you have &lt;strong&gt;NPM 2.0&lt;/strong&gt; or earlier NPM will attempt to download and build the &lt;code&gt;kerberos&lt;/code&gt; module if you do not have it defined as a dependency in your module. However, from &lt;strong&gt;NPM 3.0&lt;/strong&gt; onwards NPM will not attempt to build the &lt;code&gt;kerberos&lt;/code&gt; module but instead print a warning in your install log that looks something like the following.&lt;/p&gt;
+&lt;h2 id=&#34;bson-ext-module&#34;&gt;bson-ext Module&lt;/h2&gt;
 
-&lt;pre&gt;&lt;code&gt;npm WARN EPEERINVALID mongodb-core@1.2.21 requires a peer of kerberos@~0.0 but none was installed.
+&lt;p&gt;The &lt;code&gt;bson-ext&lt;/code&gt; module is an alternative &lt;strong&gt;BSON&lt;/strong&gt; parser that is written in C++. It delivers better deserialization performance and similar or somewhat better serialization performance to the pure javascript parser.&lt;/p&gt;
+
+&lt;p&gt;If you wish to use the &lt;code&gt;bson-ext&lt;/code&gt; module you will need to add the &lt;code&gt;bson-ext&lt;/code&gt; module to your module&amp;rsquo;s dependencies.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install bson-ext --save
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This tells you that the driver could not resolve its &lt;code&gt;peer dependency&lt;/code&gt;. However, don&amp;rsquo;t worry. You only need the &lt;code&gt;kerberos&lt;/code&gt; module if you intend to use &lt;code&gt;kerberos&lt;/code&gt;, in which case you can add it to your package.json by doing the following:&lt;/p&gt;
+&lt;h2 id=&#34;kerberos-module&#34;&gt;kerberos Module&lt;/h2&gt;
 
-&lt;pre&gt;&lt;code&gt;npm install kerberos@0.0.x
+&lt;p&gt;If you need to use &lt;code&gt;kerberos&lt;/code&gt; module you will need to add the &lt;code&gt;kerberos&lt;/code&gt; module to your module&amp;rsquo;s dependencies.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install kerberos --save
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The &lt;code&gt;kerberos&lt;/code&gt; package is a C++ extension that requires a build environment to be installed on your system. You must be able to build Node.js itself to be able to compile and install the &lt;code&gt;kerberos&lt;/code&gt; module. Furthermore the &lt;code&gt;kerberos&lt;/code&gt; module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operating system package manager for what libraries to install.&lt;/p&gt;

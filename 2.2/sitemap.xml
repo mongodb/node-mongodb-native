@@ -28,7 +28,7 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/tutorials/collections/</loc>
+    <loc>/node-mongodb-native/2.2/tutorials/connect/authenticating/</loc>
     <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
   
@@ -38,7 +38,7 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/tutorials/connect/authenticating/</loc>
+    <loc>/node-mongodb-native/2.2/tutorials/collections/</loc>
     <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
   
@@ -78,7 +78,7 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/reference/ecmascript6/connecting/</loc>
+    <loc>/node-mongodb-native/2.2/reference/ecmascript6/crud/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
@@ -88,17 +88,17 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/reference/ecmascript6/crud/</loc>
-    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.2/reference/faq/</loc>
+    <loc>/node-mongodb-native/2.2/reference/ecmascript6/connecting/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
   <url>
     <loc>/node-mongodb-native/2.2/reference/connecting/legacy-connection-settings/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.2/reference/faq/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
