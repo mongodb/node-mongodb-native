@@ -14,7 +14,7 @@
   ],
   "dependencies": {
     "es6-promise": "3.2.1",
-    "mongodb-core": "2.0.14",
+    "mongodb-core": "2.1.0",
     "readable-stream": "2.1.5"
   },
   "devDependencies": {
