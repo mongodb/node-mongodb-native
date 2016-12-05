@@ -28,20 +28,27 @@ The MongoDB driver depends on several other packages, including:
 * mongodb-core
 * bson
 * kerberos
+* bson-ext
 * node-gyp
 
-The only native extension is the `kerberos` extension. This is a `peer dependency` for the `mongodb` module. This means that if you need to use `kerberos` you will need to add the `kerberos` module to your module's dependencies.
+The `kerberos` and `bson-ext` extensions are native C++ extension. These are optional extensions and are not required for the driver to function.
 
-If you have **NPM 2.0** or earlier NPM will attempt to download and build the `kerberos` module if you do not have it defined as a dependency in your module. However, from **NPM 3.0** onwards NPM will not attempt to build the `kerberos` module but instead print a warning in your install log that looks something like the following.
+## bson-ext Module
 
-```
-npm WARN EPEERINVALID mongodb-core@1.2.21 requires a peer of kerberos@~0.0 but none was installed.
-```
+The `bson-ext` module is an alternative **BSON** parser that is written in C++. It delivers better deserialization performance and similar or somewhat better serialization performance to the pure javascript parser.
 
-This tells you that the driver could not resolve its `peer dependency`. However, don't worry. You only need the `kerberos` module if you intend to use `kerberos`, in which case you can add it to your package.json by doing the following:
+If you wish to use the `bson-ext` module you will need to add the `bson-ext` module to your module's dependencies.
 
 ```
-npm install kerberos@0.0.x
+npm install bson-ext --save
+```
+
+## kerberos Module
+
+If you need to use `kerberos` module you will need to add the `kerberos` module to your module's dependencies.
+
+```
+npm install kerberos --save
 ```
 
 The `kerberos` package is a C++ extension that requires a build environment to be installed on your system. You must be able to build Node.js itself to be able to compile and install the `kerberos` module. Furthermore the `kerberos` module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operating system package manager for what libraries to install.
@@ -109,8 +116,8 @@ This should rebuild the driver successfully if you have everything set up correc
 
 ### Other possible issues
 
-If Python is installed incorrectly, it can cause problems for `gyp`. It's a good idea to test your 
-deployment environment first by trying to build Node.js itself on the server in question, as this should unearth 
+If Python is installed incorrectly, it can cause problems for `gyp`. It's a good idea to test your
+deployment environment first by trying to build Node.js itself on the server in question, as this should unearth
 any issues with broken packages (and there are a lot of broken packages out there).
 
 Another thing is to ensure your user has write permission to wherever the Node.js modules are being installed.

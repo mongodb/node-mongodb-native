@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "2.2.12",
+  "version": "2.2.13",
   "description": "The official MongoDB driver for Node.js",
   "main": "index.js",
   "repository": {
@@ -14,14 +14,14 @@
   ],
   "dependencies": {
     "es6-promise": "3.2.1",
-    "mongodb-core": "christkv/mongodb-core#1.0-bson-port",
+    "mongodb-core": "2.1.0",
     "readable-stream": "2.1.5"
   },
   "devDependencies": {
     "JSONStream": "^1.0.7",
     "betterbenchmarks": "^0.1.0",
     "bluebird": "3.4.6",
-    "bson": "mongodb/js-bson#1.0-branch",
+    "bson": "1.0.0",
     "cli-table": "^0.3.1",
     "co": "4.6.0",
     "colors": "^1.1.2",
