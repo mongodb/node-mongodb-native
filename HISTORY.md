@@ -1,3 +1,8 @@
+2.1.1 2016-12-
+----------------
+* Updated bson library to 1.0.1.
+* Added optional support for bson-ext 1.0.1.
+
 2.1.0 2016-12-05
 ----------------
 * Updated bson library to 1.0.0.

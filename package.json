@@ -1,6 +1,6 @@
 {
   "name": "mongodb-core",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Core MongoDB driver functionality, no bells and whistles and meant for integration not end applications",
   "main": "index.js",
   "scripts": {
@@ -17,7 +17,7 @@
     "core"
   ],
   "dependencies": {
-    "bson": "~1.0.0",
+    "bson": "~1.0.1",
     "require_optional": "~1.0.0"
   },
   "devDependencies": {
@@ -37,7 +37,7 @@
   },
   "peerOptionalDependencies": {
     "kerberos": "~0.0",
-    "bson-ext": "1.0.0"
+    "bson-ext": "1.0.1"
   },
   "author": "Christian Kvalheim",
   "license": "Apache-2.0",
