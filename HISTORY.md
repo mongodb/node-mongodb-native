@@ -1,4 +1,4 @@
-2.2.14 2016-12-
+2.2.14 2016-12-08
 -----------------
 * Updated mongodb-core to 2.1.1.
 * NODE-892 Passthrough options.readPreference to mongodb-core ReplSet instance.
