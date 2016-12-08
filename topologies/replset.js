@@ -528,7 +528,6 @@ function topologyMonitor(self, options) {
 
       // Emit the server heartbeat start
       emitSDAMEvent(self, 'serverHeartbeatStarted', { connectionId: _server.name });
-
       // Execute ismaster
       // Set the socketTimeout for a monitoring message to a low number
       // Ensuring ismaster calls are timed out quickly
@@ -833,9 +832,14 @@ ReplSet.prototype.connect = function(options) {
     }));
   });
 
+  // Error out as high availbility interval must be < than socketTimeout
+  if(this.s.options.socketTimeout <= this.s.options.haInterval) {
+    return self.emit('error', new MongoError(f("haInterval [%s] MS must be set to less than socketTimeout [%s] MS"
+      , this.s.options.haInterval, this.s.options.socketTimeout)));
+  }
+
   // Emit the topology opening event
   emitSDAMEvent(this, 'topologyOpening', { topologyId: this.id });
-
   // Start all server connections
   connectServers(self, servers);
 }

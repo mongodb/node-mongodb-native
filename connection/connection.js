@@ -155,12 +155,10 @@ Connection.connections = function() {
 }
 
 function deleteConnection(id) {
-  // console.log("=== delete connection :: " + id)
   delete connections[id];
 }
 
 function addConnection(id, connection) {
-  // console.log("=== add connection :: " + id)
   connections[id] = connection;
 }
 

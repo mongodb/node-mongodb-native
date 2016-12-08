@@ -214,7 +214,9 @@ function monitoringProcess(self) {
     // Get start time
     var start = new Date().getTime();
     // Execute the ismaster query
-    self.s.pool.write(query, function(err, result) {
+    self.s.pool.write(query, {
+      socketTimeout: self.s.options.connectionTimeout || 2000,
+    }, function(err, result) {
       // Set initial lastIsMasterMS
       self.lastIsMasterMS = new Date().getTime() - start;
       if(self.s.pool.isDestroyed()) return;
@@ -247,7 +249,9 @@ var eventHandler = function(self, event) {
       // Get start time
       var start = new Date().getTime();
       // Execute the ismaster query
-      self.s.pool.write(query, function(err, result) {
+      self.s.pool.write(query, {
+        socketTimeout: self.s.options.connectionTimeout || 2000,
+      }, function(err, result) {
         // Set initial lastIsMasterMS
         self.lastIsMasterMS = new Date().getTime() - start;
         if(err) {
