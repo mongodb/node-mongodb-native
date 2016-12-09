@@ -190,6 +190,11 @@ var ReplSet = function(seedlist, options) {
   var types = ['joined', 'left'];
   types.forEach(function(x) {
     self.s.replicaSetState.on(x, function(t, s) {
+      if(self.state === CONNECTED && x === 'joined' && t == 'primary') {
+        self.emit('reconnect', self);
+        // console.log("================ we reconnected to primary")
+      }
+
       self.emit(x, t, s);
     });
   });
@@ -221,6 +226,7 @@ Object.defineProperty(ReplSet.prototype, 'parserType', {
 });
 
 function attemptReconnect(self) {
+  // console.log("!!!!!!!!!!!!!!!! attemptReconnect")
   if(self.runningAttempReconnect) return;
   // Set as running
   self.runningAttempReconnect = true;
@@ -263,9 +269,15 @@ function attemptReconnect(self) {
 
         // Check if we are done
         function done() {
+          // console.log("!!!!!!!!!!!!!!!! attemptReconnect 0:1 = " + self.s.connectingServers.length)
           // Done with the reconnection attempt
           if(self.s.connectingServers.length == 0) {
+            // console.log("!!!!!!!!!!!!!!!! attemptReconnect 0:2")
+            // console.log(self.state)
             if(self.state == DESTROYED) return;
+            // console.log("!!!!!!!!!!!!!!!! attemptReconnect 0:3")
+            // console.log("hasPrimary = " + self.s.replicaSetState.hasPrimary())
+            // console.log("hasPrimaryAndSecondary = " + self.s.replicaSetState.hasPrimaryAndSecondary())
 
             // If we have a primary and a disconnect handler, execute
             // buffered operations
@@ -279,6 +291,10 @@ function attemptReconnect(self) {
 
             // Do we have a primary
             if(self.s.replicaSetState.hasPrimary()) {
+              // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! hasPrimary")
+              // Emit reconnect as new primary was discovered
+              self.emit('reconnect', self);
+
               // Connect any missing servers
               connectNewServers(self, self.s.replicaSetState.unknownServers, function() {
                 // Debug log
@@ -833,7 +849,7 @@ ReplSet.prototype.connect = function(options) {
   });
 
   // Error out as high availbility interval must be < than socketTimeout
-  if(this.s.options.socketTimeout <= this.s.options.haInterval) {
+  if(this.s.options.socketTimeout > 0 && this.s.options.socketTimeout <= this.s.options.haInterval) {
     return self.emit('error', new MongoError(f("haInterval [%s] MS must be set to less than socketTimeout [%s] MS"
       , this.s.options.haInterval, this.s.options.socketTimeout)));
   }
