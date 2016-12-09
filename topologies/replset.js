@@ -295,8 +295,12 @@ function attemptReconnect(self) {
 
                 // Reset the running
                 self.runningAttempReconnect = false;
+
                 // Go back to normal topology monitoring
-                topologyMonitor(self);
+                // Schedule a topology monitoring sweep
+                setTimeout(function() {
+                  topologyMonitor(self);
+                }, self.s.haInterval);
               });
             } else {
               if(self.listeners("close").length > 0) {
