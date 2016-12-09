@@ -147,18 +147,20 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
       { host: 'localhost', port: 32002 }], {
         setName: 'rs',
         connectionTimeout: 5000,
-        socketTimeout: 2000,
+        socketTimeout: 3000,
         haInterval: 2000,
         size: 1
     });
+    // console.log("==================================== schedule -2")
 
     // Add event listeners
     server.on('connect', function(_server) {
+      // console.log("==================================== schedule 0")
       // Set up a write
       function schedule() {
-        // console.log("==================================== schedule 0")
+        // console.log("==================================== schedule 1")
         setTimeout(function() {
-          // console.log("==================================== schedule 1")
+          // console.log("==================================== schedule 2")
           _server.insert('test.test', [{created:new Date()}], function(err, r) {
             // console.log("==================================== insert")
             // if(r) console.log(r.connection.port)
@@ -195,7 +197,7 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
       schedule();
     });
 
-    server.on('error', function(){});
+    server.on('error', function(err){console.dir(err)});
 
     server.on('joined', function(type, server) {
       // console.log("--- joined :: " + type + " :: " + server.name)
@@ -208,6 +210,7 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
       if(type == 'primary') leftPrimaries[server.name] = 1;
     })
 
+    // console.log("==================================== schedule -1")
     // Gives proxies a chance to boot up
     setTimeout(function() {
       server.connect();
