@@ -1,3 +1,9 @@
+2.2.15 2016-12-10
+-----------------
+* Updated mongodb-core to 2.1.2.
+  * Delay topologyMonitoring on successful attemptReconnect as no need to run a full scan immediately.
+  * Emit reconnect event in primary joining when in connected status for a replicaset (Fixes mongoose reconnect issue).
+
 2.2.14 2016-12-08
 -----------------
 * Updated mongodb-core to 2.1.1.

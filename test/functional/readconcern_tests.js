@@ -272,7 +272,7 @@ exports['Should error out with readConcern level set to majority'] = {
 }
 
 exports['Should set majority readConcern aggregate command'] = {
-  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.1.8" } },
+  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.2.0" } },
 
   test: function(configuration, test) {
     var listener = require('../..').instrument(function(err, instrumentations) {});
@@ -311,7 +311,7 @@ exports['Should set majority readConcern aggregate command'] = {
 }
 
 exports['Should set majority readConcern aggregate command but ignore due to out'] = {
-  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.1.8" } },
+  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.2.0" } },
 
   test: function(configuration, test) {
     var listener = require('../..').instrument(function(err, instrumentations) {});
@@ -359,7 +359,7 @@ exports['Should set majority readConcern aggregate command but ignore due to out
 }
 
 exports['Should set majority readConcern mapReduce command but be ignored'] = {
-  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.1.9" } },
+  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.2.0" } },
 
   test: function(configuration, test) {
     var listener = require('../..').instrument(function(err, instrumentations) {});
@@ -402,7 +402,7 @@ exports['Should set majority readConcern mapReduce command but be ignored'] = {
 }
 
 exports['Should set majority readConcern distinct command'] = {
-  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.1.8" } },
+  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.2.0" } },
 
   test: function(configuration, test) {
     var listener = require('../..').instrument(function(err, instrumentations) {});
@@ -445,7 +445,7 @@ exports['Should set majority readConcern distinct command'] = {
 }
 
 exports['Should set majority readConcern count command'] = {
-  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.1.8" } },
+  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.2.0" } },
 
   test: function(configuration, test) {
     var listener = require('../..').instrument(function(err, instrumentations) {});
@@ -488,7 +488,7 @@ exports['Should set majority readConcern count command'] = {
 }
 
 exports['Should set majority readConcern group command'] = {
-  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.1.8" } },
+  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.2.0" } },
 
   test: function(configuration, test) {
     var listener = require('../..').instrument(function(err, instrumentations) {});
@@ -530,7 +530,7 @@ exports['Should set majority readConcern group command'] = {
   }
 }
 exports['Should set majority readConcern parallelCollectionScan command'] = {
-  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.1.8" } },
+  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.2.0" } },
 
   test: function(configuration, test) {
     var listener = require('../..').instrument(function(err, instrumentations) {});
@@ -573,7 +573,7 @@ exports['Should set majority readConcern parallelCollectionScan command'] = {
 }
 
 exports['Should set majority readConcern geoNear command'] = {
-  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.1.8" } },
+  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.2.0" } },
 
   test: function(configuration, test) {
     var listener = require('../..').instrument(function(err, instrumentations) {});
@@ -620,7 +620,7 @@ exports['Should set majority readConcern geoNear command'] = {
 }
 
 exports['Should set majority readConcern geoSearch command'] = {
-  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.1.8" } },
+  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.2.0" } },
 
   test: function(configuration, test) {
     var listener = require('../..').instrument(function(err, instrumentations) {});

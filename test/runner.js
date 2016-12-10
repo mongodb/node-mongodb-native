@@ -14,7 +14,8 @@ var Runner = require('integra').Runner
   , OSFilter = require('./filters/os_filter')
   , TravisFilter = require('./filters/travis_filter')
   , FileFilter = require('integra').FileFilter
-  , TestNameFilter = require('integra').TestNameFilter;
+  , TestNameFilter = require('integra').TestNameFilter
+  , semver = require('semver');
 
 var detector = require('gleak')();
 var smokePlugin = require('./smoke_plugin.js');
@@ -94,28 +95,42 @@ var Configuration = function(options) {
   return function(context) {
     return {
       start: function(callback) {
-        // console.log("------------ start 0")
         var self = this;
         if(skipStart) return callback();
-        // console.log("------------ start 1")
 
-        // Purge the database
-        manager.purge().then(function() {
-          console.log("[purge the directories]");
-
-          var Logger = require('mongodb-topology-manager').Logger;
-          manager.start().then(function() {
-            console.log("[started the topology]");
-            var Logger = require('mongodb-topology-manager').Logger;
-            // Logger.setLevel('info');
-            // Create an instance
-            new mongo.Db(self.db, topology(host, port)).open(function(err, db) {
-              if(err) return callback(err);
-
-              db.dropDatabase(function(err) {
-                db.close();
-                callback();
+        manager.discover().then(function(result) {
+          // Create string representation
+          var currentVersion = result.version.join('.');
+          // If we have a ReplSetManager and the version is >= 3.4.0
+          if(semver.satisfies(currentVersion, ">=3.4.0")) {
+            if(manager instanceof ReplSetManager) {
+              manager.managers = manager.managers.map(function(manager) {
+                manager.options.enableMajorityReadConcern = null;
+                return manager;
               });
+            }
+          }
+
+          // Purge the database
+          manager.purge().then(function() {
+            console.log("[purge the directories]");
+
+            var Logger = require('mongodb-topology-manager').Logger;
+            manager.start().then(function() {
+              console.log("[started the topology]");
+              var Logger = require('mongodb-topology-manager').Logger;
+              // Logger.setLevel('info');
+              // Create an instance
+              new mongo.Db(self.db, topology(host, port)).open(function(err, db) {
+                if(err) return callback(err);
+
+                db.dropDatabase(function(err) {
+                  db.close();
+                  callback();
+                });
+              });
+            }).catch(function(err) {
+              // console.log(err.stack);
             });
           }).catch(function(err) {
             // console.log(err.stack);
