@@ -169,7 +169,11 @@ function executeScenario(scenario, configuration, db, test) {
 
             // Go over the results
             for (var name in scenarioTest.outcome.result) {
-              test.equal(scenarioTest.outcome.result[name], result[name]);
+              if(name == 'upsertedId') {
+                test.equal(scenarioTest.outcome.result[name], result[name]._id);
+              } else {
+                test.equal(scenarioTest.outcome.result[name], result[name]);
+              }
             }
 
             if (scenarioTest.outcome.collection) {
@@ -190,7 +194,11 @@ function executeScenario(scenario, configuration, db, test) {
 
             // Go over the results
             for (var name in scenarioTest.outcome.result) {
-              test.equal(scenarioTest.outcome.result[name], result[name]);
+              if(name == 'upsertedId') {
+                test.equal(scenarioTest.outcome.result[name], result[name]._id);
+              } else {
+                test.equal(scenarioTest.outcome.result[name], result[name]);
+              }
             }
 
             if (scenarioTest.outcome.collection) {
