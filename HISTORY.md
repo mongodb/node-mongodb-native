@@ -1,3 +1,7 @@
+2.2.16 2016-12-13
+-----------------
+* NODE-899 reversed upsertedId change to bring back old behavior.
+
 2.2.15 2016-12-10
 -----------------
 * Updated mongodb-core to 2.1.2.
