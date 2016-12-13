@@ -538,6 +538,7 @@ exports['should correctly execute update methods using crud api'] = {
             test.ok(r.upsertedId != null);
             test.equal('ObjectID', r.upsertedId._bsontype);
             test.equal('ObjectID', r.upsertedId._id._bsontype);
+            test.equal(r.upsertedId.toHexString(), r.upsertedId._id.toHexString());
 
             db.collection('t3_2').updateOne({ c: 1 }
               , { $set: { a: 1 } }, function(err, r) {
