@@ -154,6 +154,10 @@ Sharded.prototype.stop = function(callback) {
   return this.topology.stop();
 }
 
+Sharded.prototype.discover = function() {
+  return this.topology.discover();
+}
+
 Sharded.prototype.purge = function() {
   return this.topology.purge();
 }
