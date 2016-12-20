@@ -161,7 +161,7 @@ exports['Successfully failover to new primary'] = {
 
     server.on('connect', function(e) {
       server.__connected = true;
-      // console.log("========================================== 0")
+      // console.log("========================================== 0 = connect")
 
       // Perform the two steps
       setTimeout(function() {

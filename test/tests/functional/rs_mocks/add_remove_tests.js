@@ -166,7 +166,6 @@ exports['Successfully add a new secondary server to the set'] = {
       } else if(_type == 'secondary') {
         // test.equal(true, server.__connected);
         secondaries[_server.name] = _server;
-
         if(Object.keys(secondaries).length == 2) {
           test.ok(secondaries['localhost:32001'] != null);
           test.ok(secondaries['localhost:32003'] != null);

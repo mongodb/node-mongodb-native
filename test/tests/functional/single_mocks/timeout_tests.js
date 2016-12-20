@@ -187,7 +187,9 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
             // Destroy connection mid write
             connection.destroy();
             // Reset the mock to accept ismasters
-            currentStep += 1;
+            setTimeout(function() {
+              currentStep += 1;
+            }, 10);
             // Return connection was destroyed
             return true;
           }
@@ -224,6 +226,7 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
 
     // Add event listeners
     server.once('connect', function(_server) {
+      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
       // console.log("!!!! server connect")
       var docs = [];
       // Create big insert message
@@ -263,10 +266,13 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
       }
 
       _server.insert('test.test', docs, function(err, r) {
+        // console.log("!!!! insert")
         test.ok(err != null);
         brokenPipe = true;
       });
     });
+
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 1")
 
     server.once('reconnect', function(_server) {
       // console.log("!!!! server reconnect")
