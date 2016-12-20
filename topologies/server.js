@@ -736,6 +736,9 @@ Server.prototype.destroy = function(options) {
     clearTimeout(this.monitoringProcessId);
   }
 
+  // No pool, return
+  if(!self.s.pool) return;
+
   // Emit close event
   if(options.emitClose) {
     self.emit('close', self);

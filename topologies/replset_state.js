@@ -78,6 +78,18 @@ ReplSetState.prototype.hasSecondary = function() {
   return this.secondaries.length > 0;
 }
 
+ReplSetState.prototype.get = function(host) {
+  var servers = this.allServers();
+
+  for(var i = 0; i < servers.length; i++) {
+    if(servers[i].name.toLowerCase() === host.toLowerCase()) {
+      return servers[i];
+    }
+  }
+
+  return null;
+}
+
 ReplSetState.prototype.allServers = function(options) {
   options = options || {};
   var servers = this.primary ? [this.primary] : [];
@@ -143,6 +155,12 @@ ReplSetState.prototype.remove = function(server, options) {
   removeType = removeFrom(server, this.passives) ? 'secondary' : removeType;
   removeFrom(server, this.ghosts);
   removeFrom(server, this.unknownServers);
+
+  // Push to unknownServers
+  this.unknownServers.push(server.name);
+
+  // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+  // console.dir(server)
 
   // Do we have a removeType
   if(removeType) {
