@@ -193,10 +193,13 @@ exports['Successfully handle buffering store execution for primary server'] = {
                   // console.dir(err)
                 });
 
+                // console.log("================================== 0")
               setTimeout(function() {
                 die = false;
+                // console.log("================================== 1")
 
                 setTimeout(function() {
+                  // console.log("================================== 2")
                   // console.dir(results)
                   test.deepEqual(['insertOne', 'aggregate'].sort(), results.sort());
 

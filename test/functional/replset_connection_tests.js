@@ -3,10 +3,21 @@
 var f = require('util').format;
 
 var restartAndDone = function(configuration, test) {
-  console.log("-- restartAndDone")
-  configuration.manager.restart().then(function() {
-    test.done();
-  });
+  var CoreServer = configuration.require.CoreServer
+    , CoreConnection = configuration.require.CoreConnection;
+
+  setTimeout(function() {
+    // Connection account tests
+    test.equal(0, Object.keys(CoreConnection.connections()).length);
+    test.equal(0, Object.keys(CoreServer.servers()).length);
+    CoreServer.disableServerAccounting();
+    CoreConnection.disableConnectionAccounting();
+
+    console.log("-- restartAndDone")
+    configuration.manager.restart().then(function() {
+      test.done();
+    });
+  }, 200);
 }
 
 exports.beforeTests = function(configuration, callback) {
@@ -69,13 +80,22 @@ exports['Should correctly handle error when no server up in replicaset'] = {
 
       db.close();
 
-      // Connection account tests
-      test.equal(0, Object.keys(CoreConnection.connections()).length);
-      test.equal(0, Object.keys(CoreServer.servers()).length);
-      CoreServer.disableServerAccounting();
-      CoreConnection.disableConnectionAccounting();
+      setTimeout(function() {
+        // Connection account tests
+        test.equal(0, Object.keys(CoreConnection.connections()).length);
+        test.equal(0, Object.keys(CoreServer.servers()).length);
+        CoreServer.disableServerAccounting();
+        CoreConnection.disableConnectionAccounting();
 
-      test.done();
+        test.done();
+      }, 200);
+      // // Connection account tests
+      // test.equal(0, Object.keys(CoreConnection.connections()).length);
+      // test.equal(0, Object.keys(CoreServer.servers()).length);
+      // CoreServer.disableServerAccounting();
+      // CoreConnection.disableConnectionAccounting();
+      //
+      // test.done();
     });
   }
 }
@@ -112,13 +132,13 @@ exports['Should correctly connect with default replicaset'] = {
           test.equal(null, err);
           p_db.close();
 
-          // Connection account tests
-          test.equal(0, Object.keys(CoreConnection.connections()).length);
-          test.equal(0, Object.keys(CoreServer.servers()).length);
-          CoreServer.disableServerAccounting();
-          CoreConnection.disableConnectionAccounting();
+          // console.log("==============================================")
+          // console.dir(Object.keys(CoreConnection.connections()))
+          // console.dir(Object.keys(CoreServer.servers()))
 
-          restartAndDone(configuration, test);
+          setTimeout(function() {
+            restartAndDone(configuration, test);
+          }, 1000)
         })
       });
     });
@@ -157,11 +177,15 @@ exports['Should correctly connect with default replicaset and no setName specifi
           test.equal(null, err);
           p_db.close();
 
-          // Connection account tests
-          test.equal(0, Object.keys(CoreConnection.connections()).length);
-          test.equal(0, Object.keys(CoreServer.servers()).length);
-          CoreServer.disableServerAccounting();
-          CoreConnection.disableConnectionAccounting();
+          // console.log("==============================================")
+          // console.dir(Object.keys(CoreConnection.connections()))
+          // console.dir(Object.keys(CoreServer.servers()))
+
+          // // Connection account tests
+          // test.equal(0, Object.keys(CoreConnection.connections()).length);
+          // test.equal(0, Object.keys(CoreServer.servers()).length);
+          // CoreServer.disableServerAccounting();
+          // CoreConnection.disableConnectionAccounting();
 
           restartAndDone(configuration, test);
         });
@@ -202,11 +226,11 @@ exports['Should correctly connect with default replicaset and socket options set
       test.equal(100, connection.keepAliveInitialDelay);
       p_db.close();
 
-      // Connection account tests
-      test.equal(0, Object.keys(CoreConnection.connections()).length);
-      test.equal(0, Object.keys(CoreServer.servers()).length);
-      CoreServer.disableServerAccounting();
-      CoreConnection.disableConnectionAccounting();
+      // // Connection account tests
+      // test.equal(0, Object.keys(CoreConnection.connections()).length);
+      // test.equal(0, Object.keys(CoreServer.servers()).length);
+      // CoreServer.disableServerAccounting();
+      // CoreConnection.disableConnectionAccounting();
 
       test.done();
     })
@@ -254,7 +278,7 @@ exports['Should emit close no callback'] = {
 
         test.equal(dbCloseCount, 1);
         test.done();
-      }, 2000);
+      }, 200);
     })
   }
 }
@@ -292,7 +316,7 @@ exports['Should emit close with callback'] = {
 
       db.close(function() {
         // Let all events fire.
-        process.nextTick(function() {
+        setTimeout(function() {
           // Connection account tests
           test.equal(0, Object.keys(CoreConnection.connections()).length);
           test.equal(0, Object.keys(CoreServer.servers()).length);
@@ -301,7 +325,7 @@ exports['Should emit close with callback'] = {
 
           test.equal(dbCloseCount, 1);
           test.done();
-        });
+        }, 200);
       });
     })
   }
@@ -408,11 +432,11 @@ exports['Should connect with primary stepped down'] = {
           // Close the database
           p_db.close();
 
-          // Connection account tests
-          test.equal(0, Object.keys(CoreConnection.connections()).length);
-          test.equal(0, Object.keys(CoreServer.servers()).length);
-          CoreServer.disableServerAccounting();
-          CoreConnection.disableConnectionAccounting();
+          // // Connection account tests
+          // test.equal(0, Object.keys(CoreConnection.connections()).length);
+          // test.equal(0, Object.keys(CoreServer.servers()).length);
+          // CoreServer.disableServerAccounting();
+          // CoreConnection.disableConnectionAccounting();
 
           restartAndDone(configuration, test);
         })
@@ -459,11 +483,11 @@ exports['Should connect with third node killed'] = {
             // Close the database
             p_db.close();
 
-            // Connection account tests
-            test.equal(0, Object.keys(CoreConnection.connections()).length);
-            test.equal(0, Object.keys(CoreServer.servers()).length);
-            CoreServer.disableServerAccounting();
-            CoreConnection.disableConnectionAccounting();
+            // // Connection account tests
+            // test.equal(0, Object.keys(CoreConnection.connections()).length);
+            // test.equal(0, Object.keys(CoreServer.servers()).length);
+            // CoreServer.disableServerAccounting();
+            // CoreConnection.disableConnectionAccounting();
 
             restartAndDone(configuration, test);
           })
@@ -510,11 +534,11 @@ exports['Should connect with primary node killed'] = {
             // Close the database
             p_db.close();
 
-            // Connection account tests
-            test.equal(0, Object.keys(CoreConnection.connections()).length);
-            test.equal(0, Object.keys(CoreServer.servers()).length);
-            CoreServer.disableServerAccounting();
-            CoreConnection.disableConnectionAccounting();
+            // // Connection account tests
+            // test.equal(0, Object.keys(CoreConnection.connections()).length);
+            // test.equal(0, Object.keys(CoreServer.servers()).length);
+            // CoreServer.disableServerAccounting();
+            // CoreConnection.disableConnectionAccounting();
 
             restartAndDone(configuration, test);
           })
@@ -560,13 +584,15 @@ exports['Should correctly emit open signal and full set signal'] = {
       // Close and cleanup
       _db.close();
 
-      // Connection account tests
-      test.equal(0, Object.keys(CoreConnection.connections()).length);
-      test.equal(0, Object.keys(CoreServer.servers()).length);
-      CoreServer.disableServerAccounting();
-      CoreConnection.disableConnectionAccounting();
+      setTimeout(function() {
+        // Connection account tests
+        test.equal(0, Object.keys(CoreConnection.connections()).length);
+        test.equal(0, Object.keys(CoreServer.servers()).length);
+        CoreServer.disableServerAccounting();
+        CoreConnection.disableConnectionAccounting();
 
-      test.done();
+        test.done();
+      }, 200)
     });
 
     db.open(function(err, p_db) {})
@@ -611,13 +637,15 @@ exports['ReplSet honors socketOptions options'] = {
       test.equal(false, connection.noDelay);
       p_db.close();
 
-      // Connection account tests
-      test.equal(0, Object.keys(CoreConnection.connections()).length);
-      test.equal(0, Object.keys(CoreServer.servers()).length);
-      CoreServer.disableServerAccounting();
-      CoreConnection.disableConnectionAccounting();
+      setTimeout(function() {
+        // Connection account tests
+        test.equal(0, Object.keys(CoreConnection.connections()).length);
+        test.equal(0, Object.keys(CoreServer.servers()).length);
+        CoreServer.disableServerAccounting();
+        CoreConnection.disableConnectionAccounting();
 
-      test.done();
+        test.done();
+      }, 200);
     });
   }
 }
@@ -709,7 +737,7 @@ exports['Should correctly emit all signals even if not yet connected'] = {
                   test.equal(2, close_count);
                   test.equal(2, open_count);
                   test.done();
-                }, 1000);
+                }, 200);
               });
             });
           });
@@ -766,11 +794,11 @@ exports['Should receive all events for primary and secondary leaving'] = {
           test.equal(null, err);
           p_db.close();
 
-          // Connection account tests
-          test.equal(0, Object.keys(CoreConnection.connections()).length);
-          test.equal(0, Object.keys(CoreServer.servers()).length);
-          CoreServer.disableServerAccounting();
-          CoreConnection.disableConnectionAccounting();
+          // // Connection account tests
+          // test.equal(0, Object.keys(CoreConnection.connections()).length);
+          // test.equal(0, Object.keys(CoreServer.servers()).length);
+          // CoreServer.disableServerAccounting();
+          // CoreConnection.disableConnectionAccounting();
 
           restartAndDone(configuration, test);
         });
@@ -820,11 +848,11 @@ exports['Should Fail due to bufferMaxEntries = 0 not causing any buffering'] = {
             test.ok(err.message.indexOf("0") != -1)
             db.close();
 
-            // Connection account tests
-            test.equal(0, Object.keys(CoreConnection.connections()).length);
-            test.equal(0, Object.keys(CoreServer.servers()).length);
-            CoreServer.disableServerAccounting();
-            CoreConnection.disableConnectionAccounting();
+            // // Connection account tests
+            // test.equal(0, Object.keys(CoreConnection.connections()).length);
+            // test.equal(0, Object.keys(CoreServer.servers()).length);
+            // CoreServer.disableServerAccounting();
+            // CoreConnection.disableConnectionAccounting();
 
             restartAndDone(configuration, test);
           });
@@ -932,13 +960,15 @@ exports['Should correctly connect to a replicaset with additional options'] = {
 
         db.close();
 
-        // Connection account tests
-        test.equal(0, Object.keys(CoreConnection.connections()).length);
-        test.equal(0, Object.keys(CoreServer.servers()).length);
-        CoreServer.disableServerAccounting();
-        CoreConnection.disableConnectionAccounting();
+        setTimeout(function() {
+          // Connection account tests
+          test.equal(0, Object.keys(CoreConnection.connections()).length);
+          test.equal(0, Object.keys(CoreServer.servers()).length);
+          CoreServer.disableServerAccounting();
+          CoreConnection.disableConnectionAccounting();
 
-        test.done();
+          test.done();
+        }, 200);
       });
     });
   }
@@ -976,13 +1006,15 @@ exports['Should correctly connect to a replicaset with readPreference set'] = {
 
         db.close();
 
-        // Connection account tests
-        test.equal(0, Object.keys(CoreConnection.connections()).length);
-        test.equal(0, Object.keys(CoreServer.servers()).length);
-        CoreServer.disableServerAccounting();
-        CoreConnection.disableConnectionAccounting();
+        setTimeout(function() {
+          // Connection account tests
+          test.equal(0, Object.keys(CoreConnection.connections()).length);
+          test.equal(0, Object.keys(CoreServer.servers()).length);
+          CoreServer.disableServerAccounting();
+          CoreConnection.disableConnectionAccounting();
 
-        test.done();
+          test.done();
+        }, 200);
       });
     });
   }
@@ -1050,13 +1082,15 @@ exports['Should correctly connect to a replicaset with writeConcern specified an
       test.equal(5000, gs.writeConcern.wtimeout);
       db.close();
 
-      // Connection account tests
-      test.equal(0, Object.keys(CoreConnection.connections()).length);
-      test.equal(0, Object.keys(CoreServer.servers()).length);
-      CoreServer.disableServerAccounting();
-      CoreConnection.disableConnectionAccounting();
+      setTimeout(function() {
+        // Connection account tests
+        test.equal(0, Object.keys(CoreConnection.connections()).length);
+        test.equal(0, Object.keys(CoreServer.servers()).length);
+        CoreServer.disableServerAccounting();
+        CoreConnection.disableConnectionAccounting();
 
-      test.done();
+        test.done();
+      }, 200);
     });
   }
 }
@@ -1127,13 +1161,15 @@ exports['Should Correctly remove server going into recovery mode'] = {
                 //   return CoreServer.servers()[x].name
                 // }))
 
-                // Connection account tests
-                test.equal(0, Object.keys(CoreConnection.connections()).length);
-                test.equal(0, Object.keys(CoreServer.servers()).length);
-                CoreServer.disableServerAccounting();
-                CoreConnection.disableConnectionAccounting();
+                setTimeout(function() {
+                  // Connection account tests
+                  test.equal(0, Object.keys(CoreConnection.connections()).length);
+                  test.equal(0, Object.keys(CoreServer.servers()).length);
+                  CoreServer.disableServerAccounting();
+                  CoreConnection.disableConnectionAccounting();
 
-                test.done();
+                  test.done();
+                }, 200);
               }, 10000);
             });
           }
@@ -1188,13 +1224,15 @@ exports['Should return single server direct connection when replicaSet not provi
       test.ok(db.serverConfig instanceof Server);
       db.close();
 
-      // Connection account tests
-      test.equal(0, Object.keys(CoreConnection.connections()).length);
-      test.equal(0, Object.keys(CoreServer.servers()).length);
-      CoreServer.disableServerAccounting();
-      CoreConnection.disableConnectionAccounting();
+      setTimeout(function() {
+        // Connection account tests
+        test.equal(0, Object.keys(CoreConnection.connections()).length);
+        test.equal(0, Object.keys(CoreServer.servers()).length);
+        CoreServer.disableServerAccounting();
+        CoreConnection.disableConnectionAccounting();
 
-      test.done();
+        test.done();
+      }, 200);
     });
   }
 }
@@ -1256,11 +1294,11 @@ exports['Should correctly connect to arbiter with single connection'] = {
 
             p_db.close();
 
-            // Connection account tests
-            test.equal(0, Object.keys(CoreConnection.connections()).length);
-            test.equal(0, Object.keys(CoreServer.servers()).length);
-            CoreServer.disableServerAccounting();
-            CoreConnection.disableConnectionAccounting();
+            // // Connection account tests
+            // test.equal(0, Object.keys(CoreConnection.connections()).length);
+            // test.equal(0, Object.keys(CoreServer.servers()).length);
+            // CoreServer.disableServerAccounting();
+            // CoreConnection.disableConnectionAccounting();
 
             restartAndDone(configuration, test);
           });
@@ -1301,11 +1339,11 @@ exports['Should correctly connect to secondary with single connection'] = {
 
           p_db.close();
 
-          // Connection account tests
-          test.equal(0, Object.keys(CoreConnection.connections()).length);
-          test.equal(0, Object.keys(CoreServer.servers()).length);
-          CoreServer.disableServerAccounting();
-          CoreConnection.disableConnectionAccounting();
+          // // Connection account tests
+          // test.equal(0, Object.keys(CoreConnection.connections()).length);
+          // test.equal(0, Object.keys(CoreServer.servers()).length);
+          // CoreServer.disableServerAccounting();
+          // CoreConnection.disableConnectionAccounting();
 
           restartAndDone(configuration, test);
         });
@@ -1362,11 +1400,11 @@ exports['Replicaset connection where a server is standalone'] = {
                 test.ok(db.serverConfig instanceof ReplSet);
                 db.close();
 
-                // Connection account tests
-                test.equal(0, Object.keys(CoreConnection.connections()).length);
-                test.equal(0, Object.keys(CoreServer.servers()).length);
-                CoreServer.disableServerAccounting();
-                CoreConnection.disableConnectionAccounting();
+                // // Connection account tests
+                // test.equal(0, Object.keys(CoreConnection.connections()).length);
+                // test.equal(0, Object.keys(CoreServer.servers()).length);
+                // CoreServer.disableServerAccounting();
+                // CoreConnection.disableConnectionAccounting();
 
                 // Stop the normal server
                 nonReplSetMember.stop().then(function() {
@@ -1416,13 +1454,23 @@ exports['Should correctly modify the server reconnectTries for all replset insta
       // Destroy the pool
       db.close();
 
-      // Connection account tests
-      test.equal(0, Object.keys(CoreConnection.connections()).length);
-      test.equal(0, Object.keys(CoreServer.servers()).length);
-      CoreServer.disableServerAccounting();
-      CoreConnection.disableConnectionAccounting();
+      setTimeout(function() {
+        // Connection account tests
+        test.equal(0, Object.keys(CoreConnection.connections()).length);
+        test.equal(0, Object.keys(CoreServer.servers()).length);
+        CoreServer.disableServerAccounting();
+        CoreConnection.disableConnectionAccounting();
 
-      test.done();
+        test.done();
+      }, 200);
+
+      // // Connection account tests
+      // test.equal(0, Object.keys(CoreConnection.connections()).length);
+      // test.equal(0, Object.keys(CoreServer.servers()).length);
+      // CoreServer.disableServerAccounting();
+      // CoreConnection.disableConnectionAccounting();
+      //
+      // test.done();
     });
   }
 }
