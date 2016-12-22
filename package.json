@@ -21,7 +21,7 @@
   "devDependencies": {
     "JSONStream": "^1.0.7",
     "betterbenchmarks": "^0.1.0",
-    "bluebird": "3.4.6",
+    "bluebird": "3.4.7",
     "bson": "1.0.0",
     "cli-table": "^0.3.1",
     "co": "4.6.0",
