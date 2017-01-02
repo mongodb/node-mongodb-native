@@ -17,7 +17,7 @@
     "core"
   ],
   "dependencies": {
-    "bson": "~1.0.1",
+    "bson": "~1.0.2",
     "require_optional": "~1.0.0"
   },
   "devDependencies": {
@@ -37,7 +37,7 @@
   },
   "peerOptionalDependencies": {
     "kerberos": "~0.0",
-    "bson-ext": "1.0.1"
+    "bson-ext": "1.0.2"
   },
   "author": "Christian Kvalheim",
   "license": "Apache-2.0",
