@@ -28,7 +28,7 @@
     "integra": "0.1.8",
     "jsdoc": "3.3.0-alpha8",
     "mkdirp": "0.5.0",
-    "mongodb-topology-manager": "1.0.6",
+    "mongodb-topology-manager": "1.0.x",
     "mongodb-version-manager": "christkv/mongodb-version-manager#master",
     "nyc": "^5.5.0",
     "optimist": "latest",
