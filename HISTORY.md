@@ -1,3 +1,7 @@
+2.2.18 2017-01-03
+-----------------
+- Updated mongodb-core to 2.1.4 to fix bson ObjectId toString issue with utils.inspect messing with toString parameters in node 6.
+
 2.2.17 2017-01-02
 -----------------
 * updated createCollection doc options and linked to create command.
