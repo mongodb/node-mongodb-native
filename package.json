@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "2.2.18",
+  "version": "2.2.19",
   "description": "The official MongoDB driver for Node.js",
   "main": "index.js",
   "repository": {

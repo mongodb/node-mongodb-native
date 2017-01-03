@@ -1,3 +1,7 @@
+2.2.19 2017-01-03
+-----------------
+- Corrupted Npm release fix.
+
 2.2.18 2017-01-03
 -----------------
 - Updated mongodb-core to 2.1.4 to fix bson ObjectId toString issue with utils.inspect messing with toString parameters in node 6.
