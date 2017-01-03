@@ -1,3 +1,7 @@
+2.1.4 2017-01-03
+----------------
+* updated bson and bson-ext dependencies to 1.0.3 due to util.inspect issue with ObjectId optimizations.
+
 2.1.3 2017-01-03
 ----------------
 * Monitoring operations are re-scheduled in pool if it cannot find a connection that does not already have scheduled work on it, this is to avoid the monitoring socket timeout being applied to any existing operations on the socket due to pipelining
