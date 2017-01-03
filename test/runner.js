@@ -27,7 +27,7 @@ var argv = require('optimist')
 // MongoDB Topology Manager
 var ServerManager = require('mongodb-topology-manager').Server,
   ReplSetManager = require('mongodb-topology-manager').ReplSet,
-  ShardingManager = require('./test_topologies.js').Sharded;
+  ShardingManager = require('./topology_test_definitions.js').Sharded;
 
 // Skipping parameters
 var startupOptions = {
@@ -130,13 +130,13 @@ var Configuration = function(options) {
                 });
               });
             }).catch(function(err) {
-              // console.log(err.stack);
+              console.log(err.stack);
             });
           }).catch(function(err) {
-            // console.log(err.stack);
+            console.log(err.stack);
           });
         }).catch(function(err) {
-          // console.log(err.stack);
+          console.log(err.stack);
         });
       },
 
