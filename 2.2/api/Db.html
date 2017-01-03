@@ -2966,7 +2966,7 @@ Db instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1336">line 1336</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1345">line 1345</a>
         </div>
         
     </div>
@@ -3573,7 +3573,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1529">line 1529</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1538">line 1538</a>
         </div>
         
     </div>
@@ -4909,7 +4909,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line936">line 936</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line945">line 945</a>
         </div>
         
     </div>
@@ -5423,7 +5423,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line562">line 562</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line571">line 571</a>
         </div>
         
     </div>
@@ -5434,7 +5434,8 @@ co(function*() {
     
     
     <div class="description">
-        <p>Create a new collection on a server with the specified options. Use this to create capped collections.</p>
+        <p>Create a new collection on a server with the specified options. Use this to create capped collections.
+More information about command options available at https://docs.mongodb.com/manual/reference/command/create/</p>
     </div>
     
 
@@ -5883,6 +5884,42 @@ co(function*() {
 	
         <tr>
             
+                <td class="name"><code>autoIndexId</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Create an index on the _id field of the document, True by default on MongoDB 2.2 or higher off for version &lt; 2.2.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>size</code></td>
             
             
@@ -5955,13 +5992,13 @@ co(function*() {
 	
         <tr>
             
-                <td class="name"><code>autoIndexId</code></td>
+                <td class="name"><code>flags</code></td>
             
             
             <td class="type">
             
                 
-<span class="param-type">boolean</span>
+<span class="param-type">number</span>
 
 
             
@@ -5970,7 +6007,7 @@ co(function*() {
             
                 <td class="default">
                 
-                    true
+                    null
                 
                 </td>
             
@@ -5984,7 +6021,259 @@ co(function*() {
                         
                     
                 
-                <p>Create an index on the _id field of the document, True by default on MongoDB 2.2 or higher off for version &lt; 2.2.</p></td>
+                <p>Optional. Available for the MMAPv1 storage engine only to set the usePowerOf2Sizes and the noPadding flag.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>storageEngine</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Allows users to specify configuration to the storage engine on a per-collection basis when creating a collection on MongoDB 3.0 or higher.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>validator</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Allows users to specify validation rules or expressions for the collection. For more information, see Document Validation on MongoDB 3.2 or higher.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>validationLevel</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Determines how strictly MongoDB applies the validation rules to existing documents during an update on MongoDB 3.2 or higher.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>validationAction</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Determines whether to error on invalid documents or just warn about the violations but allow invalid documents to be inserted on MongoDB 3.2 or higher.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>indexOptionDefaults</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Allows users to specify a default configuration for indexes when creating a collection on MongoDB 3.2 or higher.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>viewOn</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The name of the source collection or view from which to create the view. The name is not the full namespace of the collection or view; i.e. does not include the database name and implies the same database as the view to create on MongoDB 3.4 or higher.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>pipeline</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>An array that consists of the aggregation pipeline stage. create creates the view by applying the specified pipeline to the viewOn collection or view on MongoDB 3.4 or higher.</p></td>
         </tr>
 	
 	
@@ -6315,7 +6604,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1016">line 1016</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1025">line 1025</a>
         </div>
         
     </div>
@@ -7158,7 +7447,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1162">line 1162</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1171">line 1171</a>
         </div>
         
     </div>
@@ -7531,7 +7820,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line820">line 820</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line829">line 829</a>
         </div>
         
     </div>
@@ -7794,7 +8083,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line870">line 870</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line879">line 879</a>
         </div>
         
     </div>
@@ -8059,7 +8348,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1103">line 1103</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1112">line 1112</a>
         </div>
         
     </div>
@@ -8868,7 +9157,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line757">line 757</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line766">line 766</a>
         </div>
         
     </div>
@@ -9485,7 +9774,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line961">line 961</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line970">line 970</a>
         </div>
         
     </div>
@@ -9754,7 +10043,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1616">line 1616</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1625">line 1625</a>
         </div>
         
     </div>
@@ -10059,7 +10348,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line643">line 643</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line652">line 652</a>
         </div>
         
     </div>
@@ -10421,7 +10710,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1578">line 1578</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1587">line 1587</a>
         </div>
         
     </div>
@@ -10932,7 +11221,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1431">line 1431</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1440">line 1440</a>
         </div>
         
     </div>
@@ -11387,7 +11676,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line789">line 789</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line798">line 798</a>
         </div>
         
     </div>
@@ -11818,7 +12107,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line597">line 597</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line606">line 606</a>
         </div>
         
     </div>
@@ -12105,7 +12394,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1802">line 1802</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1811">line 1811</a>
         </div>
         
     </div>
@@ -12321,7 +12610,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line907">line 907</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line916">line 916</a>
         </div>
         
     </div>
@@ -12883,7 +13172,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1815">line 1815</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1824">line 1824</a>
         </div>
         
     </div>
@@ -12965,7 +13254,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1806">line 1806</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1815">line 1815</a>
         </div>
         
     </div>
@@ -13047,7 +13336,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1835">line 1835</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1844">line 1844</a>
         </div>
         
     </div>
@@ -13129,7 +13418,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1862">line 1862</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1871">line 1871</a>
         </div>
         
     </div>
@@ -13215,7 +13504,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1853">line 1853</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1862">line 1862</a>
         </div>
         
     </div>
@@ -13297,7 +13586,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1824">line 1824</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1833">line 1833</a>
         </div>
         
     </div>
@@ -13383,7 +13672,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1844">line 1844</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1853">line 1853</a>
         </div>
         
     </div>
@@ -13484,7 +13773,7 @@ co(function*() {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon Dec 05 2016 14:04:55 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Jan 03 2017 12:52:38 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>
