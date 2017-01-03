@@ -1731,7 +1731,7 @@ var shardedManager;
 
 var setUpSharded = function(configuration, options, callback) {
   // var ShardingManager = require('mongodb-tools').ShardingManager
-  var ShardingManager = require('../test_topologies').Sharded
+  var ShardingManager = require('../topology_test_definitions').Sharded
     , Db = configuration.require.Db
     , Server = configuration.require.Server
     , MongoClient = configuration.require.MongoClient

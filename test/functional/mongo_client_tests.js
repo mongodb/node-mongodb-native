@@ -245,10 +245,6 @@ exports['Should correctly pass through extra sharded options'] = {
         }
       }
     }, function(err, db) {
-      console.log("============================================")
-      console.dir(err)
-      console.dir(db.s.topology.s.clonedOptions)
-
       test.equal(false, db.s.topology.s.clonedOptions.ha);
       test.equal(10000, db.s.topology.s.clonedOptions.haInterval);
       test.equal(100, db.s.topology.s.clonedOptions.localThresholdMS);
@@ -625,6 +621,31 @@ exports['Should correctly pass through socketTimeoutMS and connectTimeoutMS'] = 
         test.equal(0, db.s.topology.s.options.connectionTimeout);
         test.equal(0, db.s.topology.s.options.socketTimeout);
       }
+
+      db.close();
+      test.done();
+    });
+  }
+}
+
+exports['Should correctly pass through socketTimeoutMS and connectTimeoutMS from uri'] = {
+  metadata: {
+    requires: {
+      node: ">0.8.0",
+      topology: ['single']
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var uri = f("%s?socketTimeoutMS=120000&connectTimeoutMS=15000", configuration.url());
+
+    MongoClient.connect(uri, {
+    }, function(err, db) {
+      test.equal(null, err);
+      test.equal(120000, db.serverConfig.s.server.s.options.socketTimeout);
+      test.equal(15000, db.serverConfig.s.server.s.options.connectionTimeout);
 
       db.close();
       test.done();

@@ -403,8 +403,10 @@ exports['Should correctly execute ensureIndex with readPreference primaryPreferr
     // MongoClient.connect(url, function(err, db) {
     MongoClient.connect('mongodb://localhost:31001/integration_test_?replicaSet=rs&readPreference=primaryPreferred')
     .then(function(db) {
+      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
       var collection = db.collection('ensureIndexWithPrimaryPreferred');
       collection.ensureIndex({a:1}, function(err, r) {
+        // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 1")
         test.equal(null, err);
 
         db.close();

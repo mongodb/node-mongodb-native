@@ -21,6 +21,7 @@ docs/
 docs/sphinx-docs
 data/
 db/
+db1/
 dev/
 examples/
 test/

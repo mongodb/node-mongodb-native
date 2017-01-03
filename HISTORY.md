@@ -1,3 +1,19 @@
+2.2.19 2017-01-03
+-----------------
+- Corrupted Npm release fix.
+
+2.2.18 2017-01-03
+-----------------
+- Updated mongodb-core to 2.1.4 to fix bson ObjectId toString issue with utils.inspect messing with toString parameters in node 6.
+
+2.2.17 2017-01-02
+-----------------
+* updated createCollection doc options and linked to create command.
+* Updated mongodb-core to 2.1.3.
+  * Monitoring operations are re-scheduled in pool if it cannot find a connection that does not already have scheduled work on it, this is to avoid the monitoring socket timeout being applied to any existing operations on the socket due to pipelining
+  * Moved replicaset monitoring away from serial mode and to parallel mode.
+  * updated bson and bson-ext dependencies to 1.0.2.
+
 2.2.16 2016-12-13
 -----------------
 * NODE-899 reversed upsertedId change to bring back old behavior.

@@ -31,7 +31,7 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
       test.equal(null, err);
 
       db.serverConfig.on('joined', function(t, d, s) {
-        console.log("---- joined :: " + t + " :: " + s.name)
+        // console.log("---- joined :: " + t + " :: " + s.name)
         if(t == 'secondary'
           && secondaryServerManager
           && s.name == f('%s:%s', secondaryServerManager.host, secondaryServerManager.port)) {
@@ -41,7 +41,7 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
       });
 
       db.serverConfig.on('left', function(t, s) {
-        console.log("---- left :: " + t + " :: " + s.name)
+        // console.log("---- left :: " + t + " :: " + s.name)
         if(t == 'secondary'
           && secondaryServerManager
           && s.name == f('%s:%s', secondaryServerManager.host, secondaryServerManager.port)) {
@@ -49,26 +49,26 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
         }
       });
 
-      console.log("--------- 0")
+      // console.log("--------- 0")
       db.once('fullsetup', function() {
-        console.log("--------- 1")
+        // console.log("--------- 1")
         // Get the secondary server
         manager.secondaries().then(function(managers) {
           secondaryServerManager = managers[0];
-          console.log("--------- 2 :: " + secondaryServerManager.port)
+          // console.log("--------- 2 :: " + secondaryServerManager.port)
 
           // Remove the secondary server
           manager.removeMember(secondaryServerManager, {
             returnImmediately: false, force: false, skipWait:true
           }).then(function() {
-            console.log("--------- 3")
+            // console.log("--------- 3")
             setTimeout(function() {
-              console.log("--------- 4")
+              // console.log("--------- 4")
               // Add a new member to the set
               manager.addMember(secondaryServerManager, {
                 returnImmediately: false, force:false
               }).then(function(x) {
-                console.log("--------- 5")
+                // console.log("--------- 5")
               });
             }, 10000)
           });
@@ -154,15 +154,21 @@ exports['Should correctly recover from secondary shutdowns'] = {
 
     // Wait for a second and shutdown secondaries
     db.once('fullsetup', function() {
+      // console.log("==================== 0")
       configuration.manager.secondaries().then(function(m) {
         managers = m;
 
+        // console.log("==================== 1")
         // Stop bot secondaries
         managers[0].stop().then(function() {
+          // console.log("==================== 2")
           managers[1].stop().then(function() {
+            // console.log("==================== 3")
             // Start bot secondaries
             managers[0].start().then(function() {
+              // console.log("==================== 4")
               managers[1].start().then(function() {
+                // console.log("==================== 5")
               });
             });
           });
@@ -217,30 +223,30 @@ exports['Should correctly remove and re-add secondary with new priority and dete
     var state = 0;
     var leftServer = null;
 
-    console.log('start')
+    // console.log('start')
     // Get a new instance
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
     db.open(function(err, db) {
-      console.log('open')
+      // console.log('open')
       test.equal(null, err);
 
       // Add event listeners
       db.serverConfig.on('joined', function(t, d, s) {
-        console.log("joined - " + t + " - " + s.name)
+        // console.log("joined - " + t + " - " + s.name)
         if(t == 'primary' && leftServer && s.name == f('%s:%s', leftServer.host, leftServer.port)) {
-          console.log("done")
+          // console.log("done")
           db.close();
           restartAndDone(configuration, test);
         }
       });
 
       db.serverConfig.on('left', function(t, s) {
-        console.log("left - " + t + " - " + s.name)
+        // console.log("left - " + t + " - " + s.name)
         if(t == 'secondary' && leftServer && s.name == f('%s:%s', leftServer.host, leftServer.port)) state++;
       });
 
       db.once('fullsetup', function() {
-        console.log("fullsetup")
+        // console.log("fullsetup")
         configuration.manager.secondaries().then(function(managers) {
           leftServer = managers[0];
 
@@ -248,7 +254,7 @@ exports['Should correctly remove and re-add secondary with new priority and dete
           configuration.manager.removeMember(managers[0], {
             returnImmediately: false, force: false, skipWait:true
           }).then(function() {
-            console.log("removed member")
+            // console.log("removed member")
             var config = JSON.parse(JSON.stringify(configuration.manager.configurations[0]));
             var members = config.members;
             // Update the right configuration
@@ -266,10 +272,10 @@ exports['Should correctly remove and re-add secondary with new priority and dete
             configuration.manager.reconfigure(config, {
               returnImmediately:false, force:false
             }).then(function() {
-              console.log("reconfigure")
+              // console.log("reconfigure")
               setTimeout(function() {
                 managers[0].start().then(function() {
-                  console.log("started")
+                  // console.log("started")
                 });
               }, 10000)
             })

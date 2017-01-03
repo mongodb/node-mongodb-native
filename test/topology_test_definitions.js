@@ -7,10 +7,19 @@ var P = global.Promise || require('es6-promise'),
   f = require('util').format;
 
 var Sharded = function(options, clientOptions) {
+  // console.log("================= ShardingManager 0")
   this.topology = new ShardingManager({
     mongod: 'mongod',
     mongos: 'mongos'
   });
+
+  // console.log("================= ShardingManager")
+  // console.dir(this.topology)
+
+  // this.topology.on('state', function(state) {
+  //   console.log("========= received state")
+  //   console.dir(state)
+  // })
 
   // Additional options needed
   this.options = options || {};
@@ -25,19 +34,19 @@ Sharded.prototype.start = function(callback) {
     var nodes1 = [{
       tags: {"loc":"ny"},
       options: {
-        bind_ip: 'localhost', port: 31010, dbpath: f('%s/../db/31000', __dirname)
+        bind_ip: 'localhost', port: 31010, dbpath: f('%s/../db/31000', __dirname), shardsvr:null
       }
     }, {
       tags: {"loc":"sf"},
       options: {
-        bind_ip: 'localhost', port: 31011, dbpath: f('%s/../db/31001', __dirname)
+        bind_ip: 'localhost', port: 31011, dbpath: f('%s/../db/31001', __dirname), shardsvr:null
       }
     }, {
       // Type of node
       arbiter: true,
       // mongod process options
       options: {
-        bind_ip: 'localhost', port: 31012, dbpath: f('%s/../db/31002', __dirname)
+        bind_ip: 'localhost', port: 31012, dbpath: f('%s/../db/31002', __dirname), shardsvr:null
       }
     }];
 
@@ -59,19 +68,19 @@ Sharded.prototype.start = function(callback) {
       var nodes2 = [{
         tags: {"loc":"ny"},
         options: {
-          bind_ip: 'localhost', port: 31020, dbpath: f('%s/../db/31010', __dirname)
+          bind_ip: 'localhost', port: 31020, dbpath: f('%s/../db/31010', __dirname), shardsvr:null
         }
       }, {
         tags: {"loc":"sf"},
         options: {
-          bind_ip: 'localhost', port: 31021, dbpath: f('%s/../db/31011', __dirname)
+          bind_ip: 'localhost', port: 31021, dbpath: f('%s/../db/31011', __dirname), shardsvr:null
         }
       }, {
         // Type of node
         arbiter: true,
         // mongod process options
         options: {
-          bind_ip: 'localhost', port: 31022, dbpath: f('%s/../db/31012', __dirname)
+          bind_ip: 'localhost', port: 31022, dbpath: f('%s/../db/31012', __dirname), shardsvr:null
         }
       }];
 
@@ -152,6 +161,10 @@ Sharded.prototype.start = function(callback) {
 
 Sharded.prototype.stop = function(callback) {
   return this.topology.stop();
+}
+
+Sharded.prototype.discover = function() {
+  return this.topology.discover();
 }
 
 Sharded.prototype.purge = function() {
