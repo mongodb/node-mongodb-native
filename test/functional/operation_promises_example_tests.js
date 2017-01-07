@@ -3271,7 +3271,7 @@ exports.shouldCorrectlyDropTheDatabaseWithPromises = {
         // Let's drop the database
         db.dropDatabase().then(function(result) {
 
-          // Wait to seconds to let it replicate across
+          // Wait two seconds to let it replicate across
           setTimeout(function() {
             // Get the admin database
             db.admin().listDatabases().then(function(dbs) {
