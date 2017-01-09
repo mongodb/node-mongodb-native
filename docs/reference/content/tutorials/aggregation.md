@@ -29,9 +29,9 @@ and operators, see the
 [manual:](https://docs.mongodb.com/manual/core/aggregation-pipeline/)
 
 The following example uses the aggregation pipeline on the
-``restaurants`` sample dataset to find
-a list of the total number of 5-star restaurants, grouped by restaurant
-category.
+[restaurant](https://docs.mongodb.org/getting-started/node/import-data/) 
+sample dataset to find a list of restaurants located in the Bronx,
+grouped by restaurant category.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -48,9 +48,9 @@ MongoClient.connect(url, function(err, db) {
 var simplePipeline = function(db, callback) {
   var collection = db.collection( 'restaurants' );
   collection.aggregate( 
-      [ { '$match': { "stars": 5 } },
+      [ { '$match': { "borough": "Bronx" } },
         { '$unwind': '$categories'},
-        { '$group': { '_id': "$categories", 'fiveStars': { '$sum': 1 } } }		
+        { '$group': { '_id': "$categories", 'Bronx restaurants': { '$sum': 1 } } }		
       ],	  
 	  function(err, results) {
         assert.equal(err, null);
@@ -179,5 +179,3 @@ var simpleDistinct = function(db, callback) {
   );
 }
 ```
-
-
