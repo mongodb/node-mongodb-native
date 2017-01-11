@@ -68,7 +68,7 @@ The table below shows all settings and what topology they affect.
 | **pkFactory** | Server, ReplicaSet, Mongos | object | null | A primary key factory object for generation of custom _id keys. |
 | **promiseLibrary** | Server, ReplicaSet, Mongos | object | null | A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible. |
 | **readConcern** | Server, ReplicaSet, Mongos | object | null |  Specify a read concern for the collection. (only MongoDB 3.2 or higher supported). |
-| **maxStalenessSeconds | Replicaset | number | null | Specify a maxStalenessSeconds value for secondary reads, minimum is 90 seconds |
+| **maxStalenessSeconds** | Replicaset | number | null | Specify a maxStalenessSeconds value for secondary reads, minimum is 90 seconds |
 # Ensure you connection string is valid for Replica Sets
 
 The connection string passed to the driver must use the fully qualified host names for the servers as set in the replicaset config. Given the following configuration settings for your replicaset.

@@ -1,3 +1,7 @@
+2.2.20 2017-01-11
+-----------------
+- Updated mongodb-core to 2.1.5 to include bson 1.0.4 and bson-ext 1.0.4 due to Buffer.from being broken in early node 4.x versions.
+
 2.2.19 2017-01-03
 -----------------
 - Corrupted Npm release fix.
