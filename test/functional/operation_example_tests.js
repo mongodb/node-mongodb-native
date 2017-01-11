@@ -3897,7 +3897,7 @@ exports.shouldCorrectlyDropTheDatabase = {
         db.dropDatabase(function(err, result) {
           test.equal(null, err);
 
-          // Wait to seconds to let it replicate across
+          // Wait two seconds to let it replicate across
           setTimeout(function() {
             // Get the admin database
             db.admin().listDatabases(function(err, dbs) {

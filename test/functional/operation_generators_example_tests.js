@@ -3290,7 +3290,7 @@ exports.shouldCorrectlyDropTheDatabaseWithGenerators = {
       // Let's drop the database
       yield db.dropDatabase();
 
-      // Wait to seconds to let it replicate across
+      // Wait two seconds to let it replicate across
       setTimeout(function() {
         co(function*() {
           // Get the admin database
