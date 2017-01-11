@@ -1,3 +1,7 @@
+2.1.5 2017-01-11
+----------------
+* updated bson and bson-ext dependencies to 1.0.4 to work past early node 4.x.x version having a broken Buffer.from implementation.
+
 2.1.4 2017-01-03
 ----------------
 * updated bson and bson-ext dependencies to 1.0.3 due to util.inspect issue with ObjectId optimizations.
