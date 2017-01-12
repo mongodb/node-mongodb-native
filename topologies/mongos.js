@@ -145,7 +145,9 @@ var Mongos = function(seedlist, options) {
     // localThresholdMS
     localThresholdMS: options.localThresholdMS || 15,
     // Client info
-    clientInfo: createClientInfo(options)
+    clientInfo: createClientInfo(options),
+    // Authentication context
+    authenticationContexts: [],
   }
 
   // Set the client info
@@ -250,6 +252,8 @@ function handleEvent(self) {
 
 function handleInitialConnectEvent(self, event) {
   return function() {
+    var _this = this;
+
     // Destroy the instance
     if(self.state == DESTROYED) {
       // Move from connectingProxies
@@ -259,56 +263,59 @@ function handleInitialConnectEvent(self, event) {
 
     // Check the type of server
     if(event == 'connect') {
-      // Get last known ismaster
-      self.ismaster = this.lastIsMaster();
+      // Do we have authentication contexts that need to be applied
+      applyAuthenticationContexts(self, _this, function() {
+        // Get last known ismaster
+        self.ismaster = _this.lastIsMaster();
 
-      // Is this not a proxy, remove t
-      if(self.ismaster.msg == 'isdbgrid') {
-        // Add to the connectd list
-        for(var i = 0; i < self.connectedProxies.length; i++) {
-          if(self.connectedProxies[i].name == this.name) {
-            // Move from connectingProxies
-            moveServerFrom(self.connectingProxies, self.disconnectedProxies, this);
-            this.destroy();
-            return self.emit('failed', this);
-          }
-        }
-
-        // Remove the handlers
-        for(i = 0; i < handlers.length; i++) {
-          this.removeAllListeners(handlers[i]);
-        }
-
-        // Add stable state handlers
-        this.on('error', handleEvent(self, 'error'));
-        this.on('close', handleEvent(self, 'close'));
-        this.on('timeout', handleEvent(self, 'timeout'));
-        this.on('parseError', handleEvent(self, 'parseError'));
-
-        // Move from connecting proxies connected
-        moveServerFrom(self.connectingProxies, self.connectedProxies, this);
-        // Emit the joined event
-        self.emit('joined', 'mongos', this);
-      } else {
-
-        // Print warning if we did not find a mongos proxy
-        if(self.s.logger.isWarn()) {
-          var message = 'expected mongos proxy, but found replicaset member mongod for server %s';
-          // We have a standalone server
-          if(!self.ismaster.hosts) {
-            message = 'expected mongos proxy, but found standalone mongod for server %s';
+        // Is this not a proxy, remove t
+        if(self.ismaster.msg == 'isdbgrid') {
+          // Add to the connectd list
+          for(var i = 0; i < self.connectedProxies.length; i++) {
+            if(self.connectedProxies[i].name == _this.name) {
+              // Move from connectingProxies
+              moveServerFrom(self.connectingProxies, self.disconnectedProxies, _this);
+              _this.destroy();
+              return self.emit('failed', _this);
+            }
           }
 
-          self.s.logger.warn(f(message, this.name));
-        }
+          // Remove the handlers
+          for(i = 0; i < handlers.length; i++) {
+            _this.removeAllListeners(handlers[i]);
+          }
 
-        // This is not a mongos proxy, remove it completely
-        removeProxyFrom(self.connectingProxies, this);
-        // Emit the left event
-        self.emit('left', 'server', this);
-        // Emit failed event
-        self.emit('failed', this);
-      }
+          // Add stable state handlers
+          _this.on('error', handleEvent(self, 'error'));
+          _this.on('close', handleEvent(self, 'close'));
+          _this.on('timeout', handleEvent(self, 'timeout'));
+          _this.on('parseError', handleEvent(self, 'parseError'));
+
+          // Move from connecting proxies connected
+          moveServerFrom(self.connectingProxies, self.connectedProxies, _this);
+          // Emit the joined event
+          self.emit('joined', 'mongos', _this);
+        } else {
+
+          // Print warning if we did not find a mongos proxy
+          if(self.s.logger.isWarn()) {
+            var message = 'expected mongos proxy, but found replicaset member mongod for server %s';
+            // We have a standalone server
+            if(!self.ismaster.hosts) {
+              message = 'expected mongos proxy, but found standalone mongod for server %s';
+            }
+
+            self.s.logger.warn(f(message, _this.name));
+          }
+
+          // This is not a mongos proxy, remove it completely
+          removeProxyFrom(self.connectingProxies, _this);
+          // Emit the left event
+          self.emit('left', 'server', _this);
+          // Emit failed event
+          self.emit('failed', _this);
+        }
+      });
     } else {
       moveServerFrom(self.connectingProxies, self.disconnectedProxies, this);
       // Emit the left event
@@ -449,27 +456,30 @@ function reconnectProxies(self, proxies, callback) {
       }
 
       if(event == 'connect' && !self.authenticating) {
-        // Destroyed
-        if(self.state == DESTROYED) {
-          moveServerFrom(self.connectingProxies, self.disconnectedProxies, _self);
-          return _self.destroy();
-        }
+        // Do we have authentication contexts that need to be applied
+        applyAuthenticationContexts(self, _self, function() {
+          // Destroyed
+          if(self.state == DESTROYED) {
+            moveServerFrom(self.connectingProxies, self.disconnectedProxies, _self);
+            return _self.destroy();
+          }
 
-        // Remove the handlers
-        for(var i = 0; i < handlers.length; i++) {
-          _self.removeAllListeners(handlers[i]);
-        }
+          // Remove the handlers
+          for(var i = 0; i < handlers.length; i++) {
+            _self.removeAllListeners(handlers[i]);
+          }
 
-        // Add stable state handlers
-        _self.on('error', handleEvent(self, 'error'));
-        _self.on('close', handleEvent(self, 'close'));
-        _self.on('timeout', handleEvent(self, 'timeout'));
-        _self.on('parseError', handleEvent(self, 'parseError'));
+          // Add stable state handlers
+          _self.on('error', handleEvent(self, 'error'));
+          _self.on('close', handleEvent(self, 'close'));
+          _self.on('timeout', handleEvent(self, 'timeout'));
+          _self.on('parseError', handleEvent(self, 'parseError'));
 
-        // Move to the connected servers
-        moveServerFrom(self.disconnectedProxies, self.connectedProxies, _self);
-        // Emit joined event
-        self.emit('joined', 'mongos', _self);
+          // Move to the connected servers
+          moveServerFrom(self.disconnectedProxies, self.connectedProxies, _self);
+          // Emit joined event
+          self.emit('joined', 'mongos', _self);
+        });
       } else if(event == 'connect' && self.authenticating) {
         // Move from connectingProxies
         moveServerFrom(self.connectingProxies, self.disconnectedProxies, _self);
@@ -525,6 +535,35 @@ function reconnectProxies(self, proxies, callback) {
   for(var i = 0; i < proxies.length; i++) {
     execute(proxies[i], i);
   }
+}
+
+function applyAuthenticationContexts(self, server, callback) {
+  if(self.s.authenticationContexts.length == 0) {
+    return callback();
+  }
+
+  // Copy contexts to ensure no modificiation in the middle of
+  // auth process.
+  var authContexts = self.s.authenticationContexts.slice(0);
+
+  // Apply one of the contexts
+  function applyAuth(authContexts, server, callback) {
+    if(authContexts.length == 0) return callback();
+    // Get the first auth context
+    var authContext = authContexts.shift();
+    // Copy the params
+    var customAuthContext = authContext.slice(0);
+    // Push our callback handler
+    customAuthContext.push(function(err) {
+      applyAuth(authContexts, server, callback);
+    });
+
+    // Attempt authentication
+    server.auth.apply(server, customAuthContext)
+  }
+
+  // Apply all auth contexts
+  applyAuth(authContexts, server, callback);
 }
 
 function topologyMonitor(self, options) {
@@ -674,6 +713,8 @@ Mongos.prototype.destroy = function(options) {
   var proxies = this.connectedProxies.concat(this.connectingProxies);
   // Clear out any monitoring process
   if(this.haTimeoutId) clearTimeout(this.haTimeoutId);
+  // Clear out authentication contexts
+  this.s.authenticationContexts = [];
 
   // Destroy all connecting servers
   proxies.forEach(function(x) {
@@ -871,6 +912,7 @@ Mongos.prototype.auth = function(mechanism, db) {
   var self = this;
   var args = Array.prototype.slice.call(arguments, 2);
   var callback = args.pop();
+  var currentContextIndex = 0;
 
   // If we don't have the mechanism fail
   if(this.authProviders[mechanism] == null && mechanism != 'default') {
@@ -916,9 +958,14 @@ Mongos.prototype.auth = function(mechanism, db) {
         self.authenticating = false;
 
         // Return the auth error
-        if(errors.length) return callback(MongoError.create({
-          message: 'authentication fail', errors: errors
-        }), false);
+        if(errors.length) {
+          // Remove the entry from the stored authentication contexts
+          self.s.authenticationContexts.splice(currentContextIndex, 0);
+          // Return error
+          return callback(MongoError.create({
+            message: 'authentication fail', errors: errors
+          }), false);
+        }
 
         // Successfully authenticated session
         callback(null, self);
@@ -930,6 +977,11 @@ Mongos.prototype.auth = function(mechanism, db) {
       server.auth.apply(server, finalArguments);
     }
   }
+
+  // Save current context index
+  currentContextIndex = this.s.authenticationContexts.length;
+  // Store the auth context and return the last index
+  this.s.authenticationContexts.push([mechanism, db].concat(args.slice(0)));
 
   // Get total count
   var count = servers.length;
