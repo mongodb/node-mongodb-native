@@ -1,14 +1,19 @@
+2.2.21 2017-01-13
+-----------------
+* Updated mongodb-core to 2.1.6.
+  * NODE-908 Keep auth contexts in replset and mongos topology to ensure correct application of authentication credentials when primary is first server to be detected causing an immediate connect event to happen.
+
 2.2.20 2017-01-11
 -----------------
-- Updated mongodb-core to 2.1.5 to include bson 1.0.4 and bson-ext 1.0.4 due to Buffer.from being broken in early node 4.x versions.
+* Updated mongodb-core to 2.1.5 to include bson 1.0.4 and bson-ext 1.0.4 due to Buffer.from being broken in early node 4.x versions.
 
 2.2.19 2017-01-03
 -----------------
-- Corrupted Npm release fix.
+* Corrupted Npm release fix.
 
 2.2.18 2017-01-03
 -----------------
-- Updated mongodb-core to 2.1.4 to fix bson ObjectId toString issue with utils.inspect messing with toString parameters in node 6.
+* Updated mongodb-core to 2.1.4 to fix bson ObjectId toString issue with utils.inspect messing with toString parameters in node 6.
 
 2.2.17 2017-01-02
 -----------------

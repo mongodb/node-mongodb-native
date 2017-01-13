@@ -753,6 +753,73 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
 /**
  * @ignore
  */
+exports['Should correctly perform nearest read from secondaries without auth fail when priamry is first seed'] = {
+  metadata: { requires: { topology: ['auth'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Db = configuration.require.Db
+      , Server = configuration.require.Server
+      , ReadPreference = configuration.require.ReadPreference
+      , MongoClient = configuration.require.MongoClient
+      , ReplSet = configuration.require.ReplSet;
+
+    setUp(configuration, function(err, replicasetManager) {
+      var replSet = new ReplSet( [
+          new Server( 'localhost', 31000),
+          new Server( 'localhost', 31001)
+        ],
+        {rs_name: 'rs', poolSize:1}
+      );
+
+      // Connect
+      new Db('replicaset_test_auth', replSet, {
+        w: 1, readPreference: ReadPreference.NEAREST
+      }).open(function(err, db) {
+        // Add a user
+        db.admin().addUser("root", "root", {w:3, wtimeout: 25000}, function(err, result) {
+          test.equal(null, err);
+
+          db.close();
+
+          MongoClient.connect('mongodb://root:root@localhost:31000,localhost:31001,localhost:31002/admin?replicaSet=rs&readPreference=nearest', function(err, db) {
+            test.equal(null, err);
+
+             db.collection('replicaset_test_auth').insert({a:1}, {w:1}, function(err, result) {
+               test.equal(null, err);
+
+               db.collection('replicaset_test_auth').findOne({}, function(err) {
+                 test.equal(null, err);
+
+                 db.collection('replicaset_test_auth').findOne({}, function(err) {
+                   test.equal(null, err);
+
+                   db.collection('replicaset_test_auth').findOne({}, function(err) {
+                     test.equal(null, err);
+
+                     db.collection('replicaset_test_auth').findOne({}, function(err) {
+                       test.equal(null, err);
+
+                       db.close();
+
+                       replicasetManager.stop().then(function() {
+                         test.done();
+                       });
+                     });
+                   });
+                 });
+               });
+             });
+          });
+        });
+      });
+    })
+  }
+}
+
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyAuthenticateUsingPrimary = {
   metadata: { requires: { topology: ['auth'] } },
 
@@ -1501,6 +1568,7 @@ exports.shouldCorrectlyAuthAgainstReplicaSetAdminDbUsingMongoClient = {
             , 'localhost', 31000, dbName, 'rs'), function(err, db) {
               // console.log("--------------------------------------------- 3")
               // console.dir(err)
+              // console.dir(err)
 
               // db.on('all', function(err, db) {
                 // console.log("--------------------------------------------- 4")
@@ -1509,11 +1577,14 @@ exports.shouldCorrectlyAuthAgainstReplicaSetAdminDbUsingMongoClient = {
                 // Insert document
                 db.collection('authcollectiontest').insert({a:1}, {w:3, wtimeout: 25000}, function(err, result) {
                   // console.log("--------------------------------------------- 5")
+                  // console.dir(err)
                   test.equal(null, err);
 
+                  // console.log("--------------------------------------------- 5")
                   // Find the document
                   db.collection('authcollectiontest').find().toArray(function(err, docs) {
                     // console.log("--------------------------------------------- 6")
+                    // console.dir(err)
                     // test.equal(null, err);
                     test.equal(1, docs.length);
                     test.equal(1, docs[0].a);
