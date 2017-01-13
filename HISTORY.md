@@ -1,3 +1,7 @@
+2.1.6 2017-01-13
+----------------
+* NODE-908 Keep auth contexts in replset and mongos topology to ensure correct application of authentication credentials when primary is first server to be detected causing an immediate connect event to happen.
+
 2.1.5 2017-01-11
 ----------------
 * updated bson and bson-ext dependencies to 1.0.4 to work past early node 4.x.x version having a broken Buffer.from implementation.
