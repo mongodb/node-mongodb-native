@@ -159,9 +159,6 @@ ReplSetState.prototype.remove = function(server, options) {
   // Push to unknownServers
   this.unknownServers.push(server.name);
 
-  // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-  // console.dir(server)
-
   // Do we have a removeType
   if(removeType) {
     this.emit('left', removeType, server);
