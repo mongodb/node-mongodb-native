@@ -1561,6 +1561,7 @@ exports.shouldCorrectlyAuthAgainstReplicaSetAdminDbUsingMongoClient = {
 
         db_p.admin().addUser("me", "secret", {w:3, wtimeout:25000}, function runWhatever(err, result) {
           // console.log("--------------------------------------------- 2")
+          // process.exit(0)
 
           db_p.close();
 

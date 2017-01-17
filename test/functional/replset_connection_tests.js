@@ -1474,3 +1474,28 @@ exports['Should correctly modify the server reconnectTries for all replset insta
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Should correctly connect to a replicaset with auth options, bufferMaxEntries and connectWithNoPrimary'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , MongoClient = mongo.MongoClient
+
+    var url = f("mongodb://me:secret@localhost:%s,localhost:%s/integration_test_?replicaSet=%s"
+      , configuration.port + 1, configuration.port + 2, configuration.replicasetName)
+
+    MongoClient.connect(url, {
+      connectWithNoPrimary:true,
+      bufferMaxEntries: 0,
+    }, function(err, db) {
+      test.ok(err);
+      test.ok(err.message.indexOf('no connection available for operation and number of stored operation') == -1);
+      test.done();
+    });
+  }
+}
