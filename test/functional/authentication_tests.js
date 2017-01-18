@@ -820,6 +820,72 @@ exports['Should correctly perform nearest read from secondaries without auth fai
 /**
  * @ignore
  */
+exports['Should correctly create indexes without hanging when different seedlists'] = {
+  metadata: { requires: { topology: ['auth'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Db = configuration.require.Db
+      , Server = configuration.require.Server
+      , ReadPreference = configuration.require.ReadPreference
+      , MongoClient = configuration.require.MongoClient
+      , ReplSet = configuration.require.ReplSet;
+
+    setUp(configuration, function(err, replicasetManager) {
+      var replSet = new ReplSet( [
+          new Server( 'localhost', 31000),
+          new Server( 'localhost', 31001)
+        ],
+        {rs_name: 'rs', poolSize:1}
+      );
+
+      // Connect
+      new Db('replicaset_test_auth', replSet, {
+        w: 1, readPreference: ReadPreference.NEAREST
+      }).open(function(err, db) {
+        // Add a user
+        db.admin().addUser("root", "root", {w:3, wtimeout: 25000}, function(err, result) {
+          test.equal(null, err);
+
+          // process.exit(0)
+          db.close();
+
+          MongoClient.connect('mongodb://root:root@localhost:31000,localhost:31001,localhost:31002/admin?replicaSet=rs&readPreference=secondary', function(err, db) {
+            test.equal(null, err);
+
+            // Attempt create index
+            db.db('replicaset_test_auth')
+              .collection('createIndexes1')
+              .ensureIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }, function(err, r) {
+              test.equal(null, err);
+              db.close();
+
+              MongoClient.connect('mongodb://root:root@localhost:31002/admin?replicaSet=rs&readPreference=secondary', function(err, db) {
+                test.equal(null, err);
+
+                db.db('replicaset_test_auth')
+                  .collection('createIndexes2')
+                  .ensureIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }, function(err, r) {
+                    console.dir(err)
+                  test.equal(null, err);
+                  db.close();
+
+                  replicasetManager.stop().then(function() {
+                   test.done();
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    })
+  }
+}
+
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyAuthenticateUsingPrimary = {
   metadata: { requires: { topology: ['auth'] } },
 
