@@ -282,7 +282,6 @@ Cursor.prototype._find = function(callback) {
   if(typeof self.cursorState.promoteBuffers == 'boolean') {
     queryOptions.promoteBuffers = self.cursorState.promoteBuffers;
   }
-
   // Write the initial command out
   self.server.s.pool.write(self.query, queryOptions, queryCallback);
 }

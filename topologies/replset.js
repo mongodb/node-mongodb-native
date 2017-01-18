@@ -1095,8 +1095,12 @@ ReplSet.prototype.auth = function(mechanism, db) {
 
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected
-  if(!self.s.replicaSetState.hasPrimary() && self.s.disconnectHandler != null) {
-    return self.s.disconnectHandler.add('auth', db, allArgs, {}, callback);
+  if(self.s.disconnectHandler != null) {
+    if(!self.s.replicaSetState.hasPrimary() && !self.s.options.secondaryOnlyConnectionAllowed) {
+      return self.s.disconnectHandler.add('auth', db, allArgs, {}, callback);
+    } else if(!self.s.replicaSetState.hasSecondary() && self.s.options.secondaryOnlyConnectionAllowed) {
+      return self.s.disconnectHandler.add('auth', db, allArgs, {}, callback);
+    }
   }
 
   // Set to authenticating
