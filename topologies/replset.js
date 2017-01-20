@@ -208,6 +208,8 @@ var ReplSet = function(seedlist, options) {
   this.authenticating = false;
   // Last ismaster
   this.ismaster = null;
+  // Contains the intervalId
+  this.intervalIds = [];
 }
 
 inherits(ReplSet, EventEmitter);
@@ -257,6 +259,12 @@ function connectNewServers(self, servers, callback) {
 
         // Do we have authentication contexts that need to be applied
         applyAuthenticationContexts(self, _self, function() {
+          // Destroy the instance
+          if(self.state == DESTROYED) {
+            return _self.destroy();
+          }
+
+          // Update the state
           var result = self.s.replicaSetState.update(_self);
           // Update the state with the new server
           if(result) {
@@ -503,6 +511,9 @@ function topologyMonitor(self, options) {
         });
       }
     }, _haInterval);
+
+    // Add the intervalId to our list of intervalIds
+    self.intervalIds.push(intervalId);
   }
 
   if(_process === setTimeout) {
@@ -534,9 +545,9 @@ function topologyMonitor(self, options) {
 
       connectNewServers(self, self.s.replicaSetState.unknownServers, function() {
         if(self.s.replicaSetState.hasPrimary()) {
-          setTimeout(executeReconnect(self), _haInterval);
+          self.intervalIds.push(setTimeout(executeReconnect(self), _haInterval));
         } else {
-          setTimeout(executeReconnect(self), self.s.minHeartbeatFrequencyMS);
+          self.intervalIds.push(setTimeout(executeReconnect(self), self.s.minHeartbeatFrequencyMS));
         }
       });
     }
@@ -547,7 +558,7 @@ function topologyMonitor(self, options) {
     ? self.s.minHeartbeatFrequencyMS
     : _haInterval
 
-  setTimeout(executeReconnect(self), intervalTime);
+  self.intervalIds.push(setTimeout(executeReconnect(self), intervalTime));
 }
 
 function addServerToList(list, server) {
@@ -631,6 +642,11 @@ function handleInitialConnectEvent(self, event) {
     if(event == 'connect') {
       // Do we have authentication contexts that need to be applied
       applyAuthenticationContexts(self, _this, function() {
+        // Destroy the instance
+        if(self.state == DESTROYED) {
+          return _this.destroy();
+        }
+
         // Update the state
         var result = self.s.replicaSetState.update(_this);
         if(result == true) {
@@ -815,6 +831,15 @@ ReplSet.prototype.destroy = function(options) {
   this.s.connectingServers.forEach(function(x) {
     x.destroy(options);
   });
+
+  // Clear out all monitoring
+  for(var i = 0; i < this.intervalIds.length; i++) {
+    clearInterval(this.intervalIds[i]);
+    clearTimeout(this.intervalIds[i]);
+  }
+
+  // Reset list of intervalIds
+  this.intervalIds = [];
 
   // Emit toplogy closing event
   emitSDAMEvent(this, 'topologyClosed', { topologyId: this.id });
