@@ -131,6 +131,7 @@ exports['Should correctly connect with default replicaset'] = {
         db.open(function(err, p_db) {
           test.equal(null, err);
           p_db.close();
+          // process.exit(0)
 
           // console.log("==============================================")
           // console.dir(Object.keys(CoreConnection.connections()))
