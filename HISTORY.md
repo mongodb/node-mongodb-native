@@ -1,3 +1,7 @@
+2.1.7
+----------------
+* NODE-919 ReplicaSet connection does not close immediately (Issue #156).
+
 2.1.6 2017-01-13
 ----------------
 * NODE-908 Keep auth contexts in replset and mongos topology to ensure correct application of authentication credentials when primary is first server to be detected causing an immediate connect event to happen.
