@@ -160,7 +160,7 @@ exports.shouldCorrectlyDoSimpleCountExamplesWithPromises = {
         collection.count().then(function(count) {
           test.equal(4, count);
 
-          // Peform a partial account where b=1
+          // Perform a partial account where b=1
           collection.count({b:1}).then(function(count) {
             test.equal(1, count);
 
@@ -209,7 +209,7 @@ exports.shouldCreateComplexIndexOnTwoFieldsWithPromises = {
           collection.find({}).toArray().then(function(items) {
             test.equal(4, items.length);
 
-            // Peform a query, with explain to show we hit the query
+            // Perform a query, with explain to show we hit the query
             collection.find({a:2}).explain().then(function(explanation) {
               test.ok(explanation != null);
 
@@ -252,7 +252,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithPromises = {
       collection.insertMany([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
         {a:2, b:{c:'a'}}, {a:3}, {a:3}], configuration.writeConcernMax()).then(function(ids) {
 
-        // Peform a distinct query against the a field
+        // Perform a distinct query against the a field
         collection.distinct('a').then(function(docs) {
           test.deepEqual([0, 1, 2, 3], docs.sort());
 
@@ -297,7 +297,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithPromises = {
       collection.insertMany([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
         {a:2, b:{c:'a'}}, {a:3}, {a:3}, {a:5, c:1}], configuration.writeConcernMax(), function(err, ids) {
 
-        // Peform a distinct query with a filter against the documents
+        // Perform a distinct query with a filter against the documents
         collection.distinct('a', {c:1}).then(function(docs) {
           test.deepEqual([5], docs.sort());
 
@@ -482,7 +482,7 @@ exports.shouldCreateComplexEnsureIndexWithPromises = {
           collection.find({}).toArray().then(function(items) {
             test.equal(4, items.length);
 
-            // Peform a query, with explain to show we hit the query
+            // Perform a query, with explain to show we hit the query
             collection.find({a:2}).explain().then(function(explanation) {
               test.ok(explanation != null);
 
@@ -531,7 +531,7 @@ exports.ensureIndexExampleWithCompountIndexWithPromises = {
           collection.find({}).toArray().then(function(items) {
             test.equal(4, items.length);
 
-            // Peform a query, with explain to show we hit the query
+            // Perform a query, with explain to show we hit the query
             collection.find({a:2}).explain().then(function(explanation) {
               test.ok(explanation != null);
 
@@ -553,7 +553,7 @@ exports.ensureIndexExampleWithCompountIndexWithPromises = {
  * @example-method find
  * @ignore
  */
-exports.shouldPeformASimpleQueryWithPromises = {
+exports.shouldPerformASimpleQueryWithPromises = {
   metadata: { requires: { promises:true, topology: ['single'] } },
 
   // The actual test we wish to run
@@ -574,7 +574,7 @@ exports.shouldPeformASimpleQueryWithPromises = {
       // Insert a bunch of documents for the testing
       collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(result) {
 
-        // Peform a simple find and return all the documents
+        // Perform a simple find and return all the documents
         collection.find().toArray().then(function(docs) {
           test.equal(3, docs.length);
 
@@ -594,7 +594,7 @@ exports.shouldPeformASimpleQueryWithPromises = {
  * @example-method find
  * @ignore
  */
-exports.shouldPeformASimpleExplainQueryWithPromises = {
+exports.shouldPerformASimpleExplainQueryWithPromises = {
   metadata: { requires: { promises:true, topology: ['single'] } },
 
   // The actual test we wish to run
@@ -614,7 +614,7 @@ exports.shouldPeformASimpleExplainQueryWithPromises = {
       // Insert a bunch of documents for the testing
       collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(result) {
 
-        // Peform a simple find and return all the documents
+        // Perform a simple find and return all the documents
         collection.find({}).explain().then(function(docs) {
           test.ok(docs != null);
 
@@ -634,7 +634,7 @@ exports.shouldPeformASimpleExplainQueryWithPromises = {
  * @example-method find
  * @ignore
  */
-exports.shouldPeformASimpleLimitSkipQueryWithPromises = {
+exports.shouldPerformASimpleLimitSkipQueryWithPromises = {
   metadata: { requires: { promises:true, topology: ['single'] } },
 
   // The actual test we wish to run
@@ -654,7 +654,7 @@ exports.shouldPeformASimpleLimitSkipQueryWithPromises = {
       // Insert a bunch of documents for the testing
       collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax()).then(function(result) {
 
-        // Peform a simple find and return all the documents
+        // Perform a simple find and return all the documents
         collection.find({})
           .skip(1).limit(1).project({b:1}).toArray().then(function(docs) {
             test.equal(1, docs.length);
@@ -787,7 +787,7 @@ exports.shouldPerformSimpleFindAndRemoveWithPromises = {
  * @example-method findOne
  * @ignore
  */
-exports.shouldPeformASimpleLimitSkipFindOneQueryWithPromises = {
+exports.shouldPerformASimpleLimitSkipFindOneQueryWithPromises = {
   metadata: { requires: { promises:true, topology: ['single'] } },
 
   // The actual test we wish to run
@@ -807,7 +807,7 @@ exports.shouldPeformASimpleLimitSkipFindOneQueryWithPromises = {
       // Insert a bunch of documents for the testing
       collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax()).then(function(result) {
 
-        // Peform a simple find and return all the documents
+        // Perform a simple find and return all the documents
         collection.findOne({a:2}, {fields:{b:1}}).then(function(doc) {
           test.equal(null, doc.a);
           test.equal(2, doc.b);
@@ -937,7 +937,7 @@ exports.shouldCorrectlyExecuteGroupFunctionWithPromises = {
       // Create a test collection
       var collection = db.collection('test_group_with_promise');
 
-      // Peform a simple group by on an empty collection
+      // Perform a simple group by on an empty collection
       collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }").then(function(results) {
         test.deepEqual([], results);
 
@@ -948,7 +948,7 @@ exports.shouldCorrectlyExecuteGroupFunctionWithPromises = {
           collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }").then(function(results) {
             test.equal(3, results[0].count);
 
-            // Pefrom a group count using the eval method
+            // Perform a group count using the eval method
             collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", false).then(function(results) {
               test.equal(3, results[0].count);
 
@@ -1071,7 +1071,7 @@ exports.shouldPerformSimpleMapReduceFunctionsWithPromises = {
         // Reduce function
         var reduce = function(k,vals) { return 1; };
 
-        // Peform the map reduce
+        // Perform the map reduce
         collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}).then(function(collection) {
 
           // Mapreduce returns the temporary collection with the results
@@ -3174,7 +3174,7 @@ exports.shouldCreateOnDbComplexIndexOnTwoFieldsWithPromises = {
           collection.find({}).toArray().then(function(items) {
             test.equal(4, items.length);
 
-            // Peform a query, with explain to show we hit the query
+            // Perform a query, with explain to show we hit the query
             collection.find({a:2}).explain().then(function(explanation) {
               test.ok(explanation != null);
 
@@ -3225,7 +3225,7 @@ exports.shouldCreateComplexEnsureIndexDbWithPromises = {
           collection.find({}).toArray().then(function(items) {
             test.equal(4, items.length);
 
-            // Peform a query, with explain to show we hit the query
+            // Perform a query, with explain to show we hit the query
             collection.find({a:2}).explain().then(function(explanation) {
               test.ok(explanation != null);
 
@@ -4254,7 +4254,7 @@ exports.shouldCorrectlyUseCursorCountFunctionWithPromises = {
  * @example-method nextObject
  * @ignore
  */
-exports.shouldCorrectlyPeformNextObjectOnCursorWithPromises = {
+exports.shouldCorrectlyPerformNextObjectOnCursorWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { promises:true, topology: ['single'] } },
@@ -4298,7 +4298,7 @@ exports.shouldCorrectlyPeformNextObjectOnCursorWithPromises = {
  * @example-method explain
  * @ignore
  */
-exports.shouldCorrectlyPeformSimpleExplainCursorWithPromises = {
+exports.shouldCorrectlyPerformSimpleExplainCursorWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { promises:true, topology: ['single'] } },
@@ -4369,7 +4369,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunctionWithPromises = {
 
       // Insert documents into collection
       collection.insertMany(docs, configuration.writeConcernMax()).then(function(ids) {
-        // Peform a find to get a cursor
+        // Perform a find to get a cursor
         var cursor = collection.find();
 
         // Fetch the first object

@@ -172,7 +172,7 @@ exports.shouldCorrectlyDoSimpleCountExamplesWithGenerators = {
       var count = yield collection.count();
       test.equal(4, count);
 
-      // Peform a partial account where b=1
+      // Perform a partial account where b=1
       var count = yield collection.count({b:1});
       test.equal(1, count);
 
@@ -224,7 +224,7 @@ exports.shouldCreateComplexIndexOnTwoFieldsWithGenerators = {
       var items = yield collection.find({}).toArray();
       test.equal(4, items.length);
 
-      // Peform a query, with explain to show we hit the query
+      // Perform a query, with explain to show we hit the query
       var explanation = yield collection.find({a:2}).explain()
       test.ok(explanation != null);
 
@@ -268,7 +268,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithGenerators = {
       yield collection.insertMany([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
         {a:2, b:{c:'a'}}, {a:3}, {a:3}], configuration.writeConcernMax());
 
-      // Peform a distinct query against the a field
+      // Perform a distinct query against the a field
       var docs = yield collection.distinct('a');
       test.deepEqual([0, 1, 2, 3], docs.sort());
 
@@ -315,7 +315,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithGenerators = {
       yield collection.insertMany([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
         {a:2, b:{c:'a'}}, {a:3}, {a:3}, {a:5, c:1}], configuration.writeConcernMax());
 
-      // Peform a distinct query with a filter against the documents
+      // Perform a distinct query with a filter against the documents
       var docs = yield collection.distinct('a', {c:1});
       test.deepEqual([5], docs.sort());
 
@@ -512,7 +512,7 @@ exports.shouldCreateComplexEnsureIndexWithGenerators = {
       var items = yield collection.find({}).toArray();
       test.equal(4, items.length);
 
-      // Peform a query, with explain to show we hit the query
+      // Perform a query, with explain to show we hit the query
       var explanation = yield collection.find({a:2}).explain();
       test.ok(explanation != null);
 
@@ -562,7 +562,7 @@ exports.ensureIndexExampleWithCompountIndexWithGenerators = {
       var items = yield collection.find({}).toArray();
       test.equal(4, items.length);
 
-      // Peform a query, with explain to show we hit the query
+      // Perform a query, with explain to show we hit the query
       var explanation = yield collection.find({a:2}).explain();
       test.ok(explanation != null);
 
@@ -581,7 +581,7 @@ exports.ensureIndexExampleWithCompountIndexWithGenerators = {
  * @example-method find
  * @ignore
  */
-exports.shouldPeformASimpleQueryWithGenerators = {
+exports.shouldPerformASimpleQueryWithGenerators = {
   metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
@@ -607,7 +607,7 @@ exports.shouldPeformASimpleQueryWithGenerators = {
       // Insert a bunch of documents for the testing
       yield collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax());
 
-      // Peform a simple find and return all the documents
+      // Perform a simple find and return all the documents
       var docs = yield collection.find().toArray();
       test.equal(3, docs.length);
 
@@ -626,7 +626,7 @@ exports.shouldPeformASimpleQueryWithGenerators = {
  * @example-method find
  * @ignore
  */
-exports.shouldPeformASimpleExplainQueryWithGenerators = {
+exports.shouldPerformASimpleExplainQueryWithGenerators = {
   metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
@@ -651,7 +651,7 @@ exports.shouldPeformASimpleExplainQueryWithGenerators = {
       // Insert a bunch of documents for the testing
       yield collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax());
 
-      // Peform a simple find and return all the documents
+      // Perform a simple find and return all the documents
       var explain = yield collection.find({}).explain();
       test.ok(explain != null);
 
@@ -669,7 +669,7 @@ exports.shouldPeformASimpleExplainQueryWithGenerators = {
  * @example-method find
  * @ignore
  */
-exports.shouldPeformASimpleLimitSkipQueryWithGenerators = {
+exports.shouldPerformASimpleLimitSkipQueryWithGenerators = {
   metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
@@ -694,7 +694,7 @@ exports.shouldPeformASimpleLimitSkipQueryWithGenerators = {
       // Insert a bunch of documents for the testing
       yield collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax());
 
-      // Peform a simple find and return all the documents
+      // Perform a simple find and return all the documents
       var docs = yield collection.find({})
       .skip(1).limit(1).project({b:1}).toArray();
         test.equal(1, docs.length);
@@ -830,7 +830,7 @@ exports.shouldPerformSimpleFindAndRemoveWithGenerators = {
  * @example-method findOne
  * @ignore
  */
-exports.shouldPeformASimpleLimitSkipFindOneQueryWithGenerators = {
+exports.shouldPerformASimpleLimitSkipFindOneQueryWithGenerators = {
   metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
@@ -856,7 +856,7 @@ exports.shouldPeformASimpleLimitSkipFindOneQueryWithGenerators = {
       // Insert a bunch of documents for the testing
       yield collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax());
 
-      // Peform a simple find and return all the documents
+      // Perform a simple find and return all the documents
       var doc = yield collection.findOne({a:2}, {fields:{b:1}});
       test.equal(null, doc.a);
       test.equal(2, doc.b);
@@ -995,7 +995,7 @@ exports.shouldCorrectlyExecuteGroupFunctionWithGenerators = {
       // Create a test collection
       var collection = db.collection('test_group_with_generators');
 
-      // Peform a simple group by on an empty collection
+      // Perform a simple group by on an empty collection
       var results = yield collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }");
       test.deepEqual([], results);
 
@@ -1006,7 +1006,7 @@ exports.shouldCorrectlyExecuteGroupFunctionWithGenerators = {
       var results = yield collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }");
       test.equal(3, results[0].count);
 
-      // Pefrom a group count using the eval method
+      // Perform a group count using the eval method
       var results = yield collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", false);
       test.equal(3, results[0].count);
 
@@ -1125,7 +1125,7 @@ exports.shouldPerformSimpleMapReduceFunctionsWithGenerators = {
       // Reduce function
       var reduce = function(k,vals) { return 1; };
 
-      // Peform the map reduce
+      // Perform the map reduce
       var collection = yield collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}});
 
       // Mapreduce returns the temporary collection with the results
@@ -3191,7 +3191,7 @@ exports.shouldCreateOnDbComplexIndexOnTwoFieldsWithGenerators = {
       var items = yield collection.find({}).toArray();
       test.equal(4, items.length);
 
-      // Peform a query, with explain to show we hit the query
+      // Perform a query, with explain to show we hit the query
       var explanation = yield collection.find({a:2}).explain();
       test.ok(explanation != null);
 
@@ -3243,7 +3243,7 @@ exports.shouldCreateComplexEnsureIndexDbWithGenerators = {
       var items = yield collection.find({}).toArray();
       test.equal(4, items.length);
 
-      // Peform a query, with explain to show we hit the query
+      // Perform a query, with explain to show we hit the query
       var explanation = yield collection.find({a:2}).explain();
       test.ok(explanation != null);
 
@@ -4283,7 +4283,7 @@ exports.shouldCorrectlyUseCursorCountFunctionWithGenerators = {
  * @example-method nextObject
  * @ignore
  */
-exports.shouldCorrectlyPeformNextObjectOnCursorWithGenerators = {
+exports.shouldCorrectlyPerformNextObjectOnCursorWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { generators:true, topology: ['single'] } },
@@ -4329,7 +4329,7 @@ exports.shouldCorrectlyPeformNextObjectOnCursorWithGenerators = {
  * @example-method next
  * @ignore
  */
-exports.shouldCorrectlyPeformNextOnCursorWithGenerators = {
+exports.shouldCorrectlyPerformNextOnCursorWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { generators:true, topology: ['single'] } },
@@ -4385,7 +4385,7 @@ exports.shouldCorrectlyPeformNextOnCursorWithGenerators = {
  * @example-method explain
  * @ignore
  */
-exports.shouldCorrectlyPeformSimpleExplainCursorWithGenerators = {
+exports.shouldCorrectlyPerformSimpleExplainCursorWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { generators:true, topology: ['single'] } },
@@ -4462,7 +4462,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunctionWithGenerators = {
 
       // Insert documents into collection
       yield collection.insertMany(docs, configuration.writeConcernMax());
-      // Peform a find to get a cursor
+      // Perform a find to get a cursor
       var cursor = collection.find();
 
       // Fetch the first object

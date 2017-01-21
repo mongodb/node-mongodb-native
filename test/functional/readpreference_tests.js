@@ -213,7 +213,7 @@ exports['Should correctly apply collection level read Preference to mapReduce'] 
       // Reduce function
       var reduce = function(k,vals) { return 1; };
 
-      // Peform the map reduce
+      // Perform the map reduce
       collection.mapReduce(map, reduce, {out: {inline:1}}, function(err, collection) {
         db.serverConfig.command = command;
 
@@ -253,7 +253,7 @@ exports['Should correctly apply collection level read Preference to mapReduce ba
       // Reduce function
       var reduce = function(k,vals) { return 1; };
 
-      // Peform the map reduce
+      // Perform the map reduce
       collection.mapReduce(map, reduce, {out: 'inline'}, function(err, collection) {
         db.serverConfig.command = command;
 
@@ -285,7 +285,7 @@ exports['Should fail due to not using mapreduce inline with read preference'] = 
       var reduce = function(k,vals) { return 1; };
 
       try {
-        // Peform the map reduce
+        // Perform the map reduce
         collection.mapReduce(map, reduce, {out: {append: "test"}}, function(err, collection) {});
         test.fail();
       } catch(err) {
@@ -325,7 +325,7 @@ exports['Should correctly apply collection level read Preference to aggregate'] 
       // Reduce function
       var reduce = function(k,vals) { return 1; };
 
-      // Peform the map reduce
+      // Perform the map reduce
       collection.aggregate([
           { $project : {
             author : 1,
@@ -375,7 +375,7 @@ exports['Should correctly apply collection level read Preference to stats'] = {
       // Reduce function
       var reduce = function(k,vals) { return 1; };
 
-      // Peform the map reduce
+      // Perform the map reduce
       collection.stats(function(err, collection) {
         db.serverConfig.command = command;
 

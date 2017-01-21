@@ -18,7 +18,7 @@ module.exports = function(o, callback) {
     var totalDocs = 0;
 
     // console.dir({$gte: {_i: skip}, $lte: {_i: end}})
-    // Peform the query
+    // Perform the query
     collection.find({_i : {$gte: skip, $lte: end}}).each(function(err, doc) {
       if(doc == null) return callback();
       docs.push(doc);

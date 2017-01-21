@@ -260,7 +260,7 @@ exports.shouldSaveDataToDifferentDbFromMapreduce = {
           // Reduce function
           var reduce = function(k,vals) { return 1; };
 
-          // Peform the map reduce
+          // Perform the map reduce
           collection.mapReduce(map, reduce, {out: {replace : 'tempCollection', db: "outputCollectionDb"}}, function(err, collection) {
 
             // Mapreduce returns the temporary collection with the results

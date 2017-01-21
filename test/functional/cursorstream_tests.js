@@ -29,7 +29,7 @@ exports.shouldStreamDocumentsWithPauseAndResumeForFetching = {
             left = left - 1;
 
             if(left == 0) {
-              // Peform a find to get a cursor
+              // Perform a find to get a cursor
               var stream = collection.find({}).stream();
               var data = [];
 
@@ -88,7 +88,7 @@ exports.shouldStream10KDocuments = {
             left = left - 1;
 
             if(left == 0) {
-              // Peform a find to get a cursor
+              // Perform a find to get a cursor
               var stream = collection.find({}).stream();
               var data = [];
 
@@ -138,7 +138,7 @@ exports.shouldTriggerMassiveAmountOfGetMores = {
       db.createCollection('test_streaming_function_with_limit_for_fetching_3', function(err, collection) {
 
         collection.insert(docs, {w:1}, function(err, ids) {
-          // Peform a find to get a cursor
+          // Perform a find to get a cursor
           var stream = collection.find({}).stream();
           var data = [];
 

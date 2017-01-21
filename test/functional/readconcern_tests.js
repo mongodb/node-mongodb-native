@@ -426,7 +426,7 @@ exports['Should set majority readConcern distinct command'] = {
         listener.on('started', function(event) { if(event.commandName == 'distinct') started.push(event); });
         listener.on('succeeded', function(event) { if(event.commandName == 'distinct') succeeded.push(event);});
 
-        // Peform a distinct query against the a field
+        // Perform a distinct query against the a field
         collection.distinct('a', function(err, docs) {
           test.equal(null, err);
           test.equal(1, started.length);
@@ -469,7 +469,7 @@ exports['Should set majority readConcern count command'] = {
         listener.on('started', function(event) { if(event.commandName == 'count') started.push(event); });
         listener.on('succeeded', function(event) { if(event.commandName == 'count') succeeded.push(event);});
 
-        // Peform a distinct query against the a field
+        // Perform a distinct query against the a field
         collection.count({a:1}, function(err, docs) {
           test.equal(null, err);
           test.equal(1, started.length);
