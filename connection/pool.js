@@ -638,7 +638,9 @@ Pool.prototype.connect = function() {
     connection.connect();
   } catch(err) {
     // SSL or something threw on connect
-    self.emit('error', err);
+    process.nextTick(function() {
+      self.emit('error', err);
+    });
   }
 }
 
