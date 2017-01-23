@@ -240,9 +240,6 @@ function connectNewServers(self, servers, callback) {
   // Count lefts
   var count = servers.length;
 
-  // console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ connectNewServers")
-  // console.dir(servers)
-
   // Handle events
   var _handleEvent = function(self, event) {
     return function() {
@@ -566,7 +563,7 @@ function topologyMonitor(self, options) {
 
 function addServerToList(list, server) {
   for(var i = 0; i < list.length; i++) {
-    if(list[i].name === server.name) return true;
+    if(list[i].name.toLowerCase() === server.name.toLowerCase()) return true;
   }
 
   list.push(server);
