@@ -1,9 +1,9 @@
 var BSON = require('bson');
 
 try {
-  try { BSON = require('bson-ext'); } catch(err) {
+  // try { BSON = require('bson-ext'); } catch(err) {
     BSON = require_optional('bson-ext');
-  }
+  // }
 } catch(err) {}
 
 module.exports = {
