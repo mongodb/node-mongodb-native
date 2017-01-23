@@ -485,7 +485,7 @@ exports.shouldCorrectlyDoSimpleCountExamples = {
           test.equal(null, err);
           test.equal(4, count);
 
-          // Peform a partial account where b=1
+          // Perform a partial account where b=1
           collection.count({b:1}, function(err, count) {
             test.equal(null, err);
             test.equal(1, count);
@@ -537,7 +537,7 @@ exports.shouldCreateComplexIndexOnTwoFields = {
             test.equal(null, err);
             test.equal(4, items.length);
 
-            // Peform a query, with explain to show we hit the query
+            // Perform a query, with explain to show we hit the query
             collection.find({a:2}).explain(function(err, explanation) {
               test.equal(null, err);
               test.ok(explanation != null);
@@ -585,7 +585,7 @@ exports.shouldCreateASimpleIndexOnASingleField = {
         collection.createIndex('a', {w:1}, function(err, indexName) {
           test.equal("a_1", indexName);
 
-          // Peform a query, with explain to show we hit the query
+          // Perform a query, with explain to show we hit the query
           collection.find({a:2}).explain(function(err, explanation) {
             test.equal(null, err);
             test.ok(explanation != null);
@@ -640,7 +640,7 @@ exports.createIndexExample3 = {
             test.equal(null, err);
             test.equal(4, items.length);
 
-            // Peform a query, with explain to show we hit the query
+            // Perform a query, with explain to show we hit the query
             collection.find({a:2}).explain(function(err, explanation) {
               test.equal(null, err);
               test.ok(explanation != null);
@@ -684,7 +684,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = {
       collection.insertMany([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
         {a:2, b:{c:'a'}}, {a:3}, {a:3}], configuration.writeConcernMax(), function(err, ids) {
 
-        // Peform a distinct query against the a field
+        // Perform a distinct query against the a field
         collection.distinct('a', function(err, docs) {
           test.deepEqual([0, 1, 2, 3], docs.sort());
 
@@ -731,7 +731,7 @@ exports.shouldCorrectlyHandleDistinctIndexes = {
       collection.insertMany([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
         {a:2, b:{c:'a'}}, {a:3}, {a:3}, {a:5, c:1}], configuration.writeConcernMax(), function(err, ids) {
 
-        // Peform a distinct query with a filter against the documents
+        // Perform a distinct query with a filter against the documents
         collection.distinct('a', {c:1}, function(err, docs) {
           test.deepEqual([5], docs.sort());
 
@@ -924,7 +924,7 @@ exports.shouldCreateComplexEnsureIndex = {
             test.equal(null, err);
             test.equal(4, items.length);
 
-            // Peform a query, with explain to show we hit the query
+            // Perform a query, with explain to show we hit the query
             collection.find({a:2}).explain(function(err, explanation) {
               test.equal(null, err);
               test.ok(explanation != null);
@@ -977,7 +977,7 @@ exports.ensureIndexExampleWithCompountIndex = {
             test.equal(null, err);
             test.equal(4, items.length);
 
-            // Peform a query, with explain to show we hit the query
+            // Perform a query, with explain to show we hit the query
             collection.find({a:2}).explain(function(err, explanation) {
               test.equal(null, err);
               test.ok(explanation != null);
@@ -1000,7 +1000,7 @@ exports.ensureIndexExampleWithCompountIndex = {
  * @example-method find
  * @ignore
  */
-exports.shouldPeformASimpleQuery = {
+exports.shouldPerformASimpleQuery = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
@@ -1022,7 +1022,7 @@ exports.shouldPeformASimpleQuery = {
       collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
-        // Peform a simple find and return all the documents
+        // Perform a simple find and return all the documents
         collection.find().toArray(function(err, docs) {
           test.equal(null, err);
           test.equal(3, docs.length);
@@ -1043,7 +1043,7 @@ exports.shouldPeformASimpleQuery = {
  * @example-method find
  * @ignore
  */
-exports.shouldPeformASimpleExplainQuery = {
+exports.shouldPerformASimpleExplainQuery = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
@@ -1064,7 +1064,7 @@ exports.shouldPeformASimpleExplainQuery = {
       collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
-        // Peform a simple find and return all the documents
+        // Perform a simple find and return all the documents
         collection.find({}).explain(function(err, explain) {
           test.equal(null, err);
           test.ok(explain != null);
@@ -1085,7 +1085,7 @@ exports.shouldPeformASimpleExplainQuery = {
  * @example-method find
  * @ignore
  */
-exports.shouldPeformASimpleLimitSkipQuery = {
+exports.shouldPerformASimpleLimitSkipQuery = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
@@ -1106,7 +1106,7 @@ exports.shouldPeformASimpleLimitSkipQuery = {
       collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
-        // Peform a simple find and return all the documents
+        // Perform a simple find and return all the documents
         collection.find({})
           .skip(1).limit(1).project({b:1}).toArray(function(err, docs) {
             test.equal(null, err);
@@ -1248,7 +1248,7 @@ exports.shouldPerformSimpleFindAndRemove = {
  * @example-method findOne
  * @ignore
  */
-exports.shouldPeformASimpleLimitSkipFindOneQuery = {
+exports.shouldPerformASimpleLimitSkipFindOneQuery = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
@@ -1269,7 +1269,7 @@ exports.shouldPeformASimpleLimitSkipFindOneQuery = {
       collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
-        // Peform a simple find and return all the documents
+        // Perform a simple find and return all the documents
         collection.findOne({a:2}, {fields:{b:1}}, function(err, doc) {
           test.equal(null, err);
           test.equal(null, doc.a);
@@ -1400,7 +1400,7 @@ exports.shouldCorrectlyExecuteGroupFunction = {
       // Create a test collection
       var collection = db.collection('test_group');
 
-      // Peform a simple group by on an empty collection
+      // Perform a simple group by on an empty collection
       collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
         test.deepEqual([], results);
 
@@ -1411,7 +1411,7 @@ exports.shouldCorrectlyExecuteGroupFunction = {
           collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
             test.equal(3, results[0].count);
 
-            // Pefrom a group count using the eval method
+            // Perform a group count using the eval method
             collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", false, function(err, results) {
               test.equal(3, results[0].count);
 
@@ -1533,7 +1533,7 @@ exports.shouldPerformSimpleMapReduceFunctions = {
         // Reduce function
         var reduce = function(k,vals) { return 1; };
 
-        // Peform the map reduce
+        // Perform the map reduce
         collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
           test.equal(null, err);
 
@@ -3794,7 +3794,7 @@ exports.shouldCreateOnDbComplexIndexOnTwoFields = {
             test.equal(null, err);
             test.equal(4, items.length);
 
-            // Peform a query, with explain to show we hit the query
+            // Perform a query, with explain to show we hit the query
             collection.find({a:2}).explain(function(err, explanation) {
               test.equal(null, err);
               test.ok(explanation != null);
@@ -3848,7 +3848,7 @@ exports.shouldCreateComplexEnsureIndexDb = {
             test.equal(null, err);
             test.equal(4, items.length);
 
-            // Peform a query, with explain to show we hit the query
+            // Perform a query, with explain to show we hit the query
             collection.find({a:2}).explain(function(err, explanation) {
               test.equal(null, err);
               test.ok(explanation != null);
@@ -5123,7 +5123,7 @@ exports.shouldCorrectlyUseCursorCountFunction = {
  * @example-method sort
  * @ignore
  */
-exports.shouldCorrectlyPeformSimpleSorts = {
+exports.shouldCorrectlyPerformSimpleSorts = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -5175,7 +5175,7 @@ exports.shouldCorrectlyPeformSimpleSorts = {
  * @example-method limit
  * @ignore
  */
-exports.shouldCorrectlyPeformLimitOnCursor = {
+exports.shouldCorrectlyPerformLimitOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -5221,7 +5221,7 @@ exports.shouldCorrectlyPeformLimitOnCursor = {
  * @example-method skip
  * @ignore
  */
-exports.shouldCorrectlyPeformSkipOnCursor = {
+exports.shouldCorrectlyPerformSkipOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -5268,7 +5268,7 @@ exports.shouldCorrectlyPeformSkipOnCursor = {
  * @example-method batchSize
  * @ignore
  */
-exports.shouldCorrectlyPeformBatchSizeOnCursor = {
+exports.shouldCorrectlyPerformBatchSizeOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -5314,7 +5314,7 @@ exports.shouldCorrectlyPeformBatchSizeOnCursor = {
  * @example-method nextObject
  * @ignore
  */
-exports.shouldCorrectlyPeformNextObjectOnCursor = {
+exports.shouldCorrectlyPerformNextObjectOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -5360,7 +5360,7 @@ exports.shouldCorrectlyPeformNextObjectOnCursor = {
  * @example-method next
  * @ignore
  */
-exports.shouldCorrectlyPeformNextOnCursorWithCallbacks = {
+exports.shouldCorrectlyPerformNextOnCursorWithCallbacks = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -5438,7 +5438,7 @@ exports.shouldCorrectlyPeformNextOnCursorWithCallbacks = {
  * @example-method explain
  * @ignore
  */
-exports.shouldCorrectlyPeformSimpleExplainCursor = {
+exports.shouldCorrectlyPerformSimpleExplainCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -5512,7 +5512,7 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = {
 
       // Insert documents into collection
       collection.insertMany(docs, configuration.writeConcernMax(), function(err, ids) {
-        // Peform a find to get a cursor
+        // Perform a find to get a cursor
         var stream = collection.find().stream();
 
         // Execute find on all the documents
@@ -5566,7 +5566,7 @@ exports.shouldStreamDocumentsUsingTheIsCloseFunction = {
 
       // Insert documents into collection
       collection.insertMany(docs, configuration.writeConcernMax(), function(err, ids) {
-        // Peform a find to get a cursor
+        // Perform a find to get a cursor
         var cursor = collection.find();
 
         // Fetch the first object
@@ -5624,7 +5624,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = {
 
       // Insert documents into collection
       collection.insertMany(docs, configuration.writeConcernMax(), function(err, ids) {
-        // Peform a find to get a cursor
+        // Perform a find to get a cursor
         var cursor = collection.find();
 
         // Fetch the first object
@@ -5680,7 +5680,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = {
 
       // Insert documents into collection
       collection.insertMany(docs, {w:1}, function(err, ids) {
-        // Peform a find to get a cursor
+        // Perform a find to get a cursor
         var stream = collection.find().stream();
 
         // For each data item
@@ -5742,7 +5742,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamDestroyFunction = {
 
       // Insert documents into collection
       collection.insertMany(docs, {w:1}, function(err, ids) {
-        // Peform a find to get a cursor
+        // Perform a find to get a cursor
         var stream = collection.find().stream();
 
         // For each data item
@@ -7776,7 +7776,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamPauseFunction = {
             file = new GridStore(db, fileId, "r");
             // Open the file
             file.open(function(err, file) {
-              // Peform a find to get a cursor
+              // Perform a find to get a cursor
               var stream = file.stream();
 
               // For each data item
@@ -7840,7 +7840,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamResumeFunction = {
 
             // Open the file
             file.open(function(err, file) {
-              // Peform a find to get a cursor
+              // Perform a find to get a cursor
               var stream = file.stream(true);
 
               // Pause the stream initially
@@ -7917,7 +7917,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamDestroyFunction = {
             file = new GridStore(db, fileId, "r");
             // Open the file
             file.open(function(err, file) {
-              // Peform a find to get a cursor
+              // Perform a find to get a cursor
               var stream = file.stream();
 
               // For each data item

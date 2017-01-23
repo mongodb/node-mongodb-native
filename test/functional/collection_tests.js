@@ -658,7 +658,7 @@ exports.shouldCorrectlySaveDocumentWithNestedArray = {
 /**
  * @ignore
  */
-exports.shouldPeformCollectionRemoveWithNoCallback = {
+exports.shouldPerformCollectionRemoveWithNoCallback = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run

@@ -47,7 +47,7 @@ exports.shouldCorrectlyPerformSimpleFind = {
  * Test a simple find chained
  * @ignore
  */
-exports.shouldCorrectlyPeformSimpleChainedFind = {
+exports.shouldCorrectlyPerformSimpleChainedFind = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
@@ -92,7 +92,7 @@ exports.shouldCorrectlyPeformSimpleChainedFind = {
  * Test advanced find
  * @ignore
  */
-exports.shouldCorrectlyPeformAdvancedFinds = {
+exports.shouldCorrectlyPerformAdvancedFinds = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
@@ -1563,7 +1563,7 @@ exports.shouldReturnInstanceofErrorWithBadFieldSelection = {
 /**
  * A simple query using find and fields
  */
-exports.shouldPeformASimpleLimitSkipFindWithFields = {
+exports.shouldPerformASimpleLimitSkipFindWithFields = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
@@ -1581,14 +1581,14 @@ exports.shouldPeformASimpleLimitSkipFindWithFields = {
         collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
-          // Peform a simple find and return all the documents
+          // Perform a simple find and return all the documents
           collection.find({a:2}, ['b']).toArray(function(err, docs) {
             test.equal(null, err);
             test.equal(1, docs.length);
             test.equal(null, docs[0].a);
             test.equal(2, docs[0].b);
 
-            // Peform a simple find and return all the documents
+            // Perform a simple find and return all the documents
             collection.find({a:2}, {b:1}).toArray(function(err, docs) {
               test.equal(null, err);
               test.equal(1, docs.length);
@@ -1608,7 +1608,7 @@ exports.shouldPeformASimpleLimitSkipFindWithFields = {
 /**
  * A simple query using find and fields
  */
-exports.shouldPeformASimpleLimitSkipFindWithFields2 = {
+exports.shouldPerformASimpleLimitSkipFindWithFields2 = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
@@ -1626,7 +1626,7 @@ exports.shouldPeformASimpleLimitSkipFindWithFields2 = {
         collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
-          // Peform a simple find and return all the documents
+          // Perform a simple find and return all the documents
           collection.find({a:2}, {fields: ['b']}).toArray(function(err, docs) {
             test.equal(null, err);
             test.equal(1, docs.length);
@@ -1668,7 +1668,7 @@ exports.shouldPerformQueryWithBatchSizeDifferentToStandard = {
         collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
-          // Peform a simple find and return all the documents
+          // Perform a simple find and return all the documents
           collection.find({}, {batchSize:1000}).toArray(function(err, docs) {
             test.equal(null, err);
             test.equal(1000, docs.length);
@@ -1704,7 +1704,7 @@ exports.shouldCorrectlyPerformNegativeLimit = {
 
         // Insert a bunch of documents
         collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
-          // Peform a simple find and return all the documents
+          // Perform a simple find and return all the documents
           collection.find({}).limit(-10).toArray(function(err, docs) {
             test.equal(null, err);
             test.equal(10, docs.length);
@@ -1761,7 +1761,7 @@ exports.shouldCorrectlyExecuteExhaustQuery = {
           collection.insert(docs2, configuration.writeConcernMax(), function(err, result) {
             test.equal(null, err);
 
-            // Peform a simple find and return all the documents
+            // Perform a simple find and return all the documents
             collection.find({}, {exhaust:true}).toArray(function(err, docs3) {
               test.equal(null, err);
               test.equal(docs1.length + docs2.length, docs3.length)
@@ -1800,7 +1800,7 @@ exports['Readpreferences should work fine when using a single server instance'] 
       db.collection('Readpreferencesshouldworkfine', function(err, collection) {
         // Insert a bunch of documents
         collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
-          // Peform a simple find and return all the documents
+          // Perform a simple find and return all the documents
           collection.find({}, {exhaust:true}).toArray(function(err, docs2) {
             test.equal(null, err);
             test.equal(docs.length, docs2.length)
@@ -1827,7 +1827,7 @@ exports['Each should not hang on iterating over no results'] = {
       test.equal(null, err);
       // Create a collection we want to drop later
       db.collection('noresultAvailableForEachToIterate', function(err, collection) {
-        // Peform a simple find and return all the documents
+        // Perform a simple find and return all the documents
         collection.find({}).each(function(err, item) {
           test.equal(null, item);
 
