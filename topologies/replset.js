@@ -240,6 +240,9 @@ function connectNewServers(self, servers, callback) {
   // Count lefts
   var count = servers.length;
 
+  // console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ connectNewServers")
+  // console.dir(servers)
+
   // Handle events
   var _handleEvent = function(self, event) {
     return function() {
