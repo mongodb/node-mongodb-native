@@ -45,13 +45,15 @@ var MongoCR = require('../auth/mongocr')
 var DISCONNECTED = 'disconnected';
 var CONNECTING = 'connecting';
 var CONNECTED = 'connected';
+var UNREFERENCED = 'unreferenced';
 var DESTROYED = 'destroyed';
 
 function stateTransition(self, newState) {
   var legalTransitions = {
     'disconnected': [CONNECTING, DESTROYED, DISCONNECTED],
     'connecting': [CONNECTING, DESTROYED, CONNECTED, DISCONNECTED],
-    'connected': [CONNECTED, DISCONNECTED, DESTROYED],
+    'connected': [CONNECTED, DISCONNECTED, DESTROYED, UNREFERENCED],
+    'unreferenced': [UNREFERENCED, DESTROYED],
     'destroyed': [DESTROYED]
   }
 
@@ -450,7 +452,7 @@ function reconnectProxies(self, proxies, callback) {
       count = count - 1;
 
       // Destroyed
-      if(self.state == DESTROYED) {
+      if(self.state == DESTROYED || self.state == UNREFERENCED) {
         moveServerFrom(self.connectingProxies, self.disconnectedProxies, _self);
         return this.destroy();
       }
@@ -459,7 +461,7 @@ function reconnectProxies(self, proxies, callback) {
         // Do we have authentication contexts that need to be applied
         applyAuthenticationContexts(self, _self, function() {
           // Destroyed
-          if(self.state == DESTROYED) {
+          if(self.state == DESTROYED || self.state == UNREFERENCED) {
             moveServerFrom(self.connectingProxies, self.disconnectedProxies, _self);
             return _self.destroy();
           }
@@ -502,7 +504,7 @@ function reconnectProxies(self, proxies, callback) {
   function execute(_server, i) {
     setTimeout(function() {
       // Destroyed
-      if(self.state == DESTROYED) {
+      if(self.state == DESTROYED || self.state == UNREFERENCED) {
         return;
       }
 
@@ -571,7 +573,7 @@ function topologyMonitor(self, options) {
 
   // Set momitoring timeout
   self.haTimeoutId = setTimeout(function() {
-    if(self.state == DESTROYED) return;
+    if(self.state == DESTROYED || self.state == UNREFERENCED) return;
     // If we have a primary and a disconnect handler, execute
     // buffered operations
     if(self.isConnected() && self.s.disconnectHandler) {
@@ -598,7 +600,7 @@ function topologyMonitor(self, options) {
         monitoring: true,
         socketTimeout: self.s.options.connectionTimeout || 2000,
       }, function(err, r) {
-        if(self.state == DESTROYED) {
+        if(self.state == DESTROYED || self.state == UNREFERENCED) {
           // Move from connectingProxies
           moveServerFrom(self.connectedProxies, self.disconnectedProxies, _server);
           _server.destroy();
@@ -638,7 +640,7 @@ function topologyMonitor(self, options) {
 
       // Attempt to connect to any unknown servers
       return reconnectProxies(self, self.disconnectedProxies, function() {
-        if(self.state == DESTROYED) return;
+        if(self.state == DESTROYED || self.state == UNREFERENCED) return;
 
         // Are we connected ? emit connect event
         if(self.state == CONNECTING && options.firstConnect) {
@@ -662,11 +664,11 @@ function topologyMonitor(self, options) {
         count = count - 1;
 
         if(count == 0) {
-          if(self.state == DESTROYED) return;
+          if(self.state == DESTROYED || self.state == UNREFERENCED) return;
 
           // Attempt to connect to any unknown servers
           reconnectProxies(self, self.disconnectedProxies, function() {
-            if(self.state == DESTROYED) return;
+            if(self.state == DESTROYED || self.state == UNREFERENCED) return;
             // Perform topology monitor
             topologyMonitor(self);
           });
@@ -691,7 +693,7 @@ Mongos.prototype.lastIsMaster = function() {
  */
 Mongos.prototype.unref = function() {
   // Transition state
-  stateTransition(this, DISCONNECTED);
+  stateTransition(this, UNREFERENCED);
   // Get all proxies
   var proxies = this.connectedProxies.concat(this.connectingProxies);
   proxies.forEach(function(x) {

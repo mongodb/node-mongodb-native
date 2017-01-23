@@ -28,13 +28,15 @@ var BSON = retrieveBSON();
 var DISCONNECTED = 'disconnected';
 var CONNECTING = 'connecting';
 var CONNECTED = 'connected';
+var UNREFERENCED = 'unreferenced';
 var DESTROYED = 'destroyed';
 
 function stateTransition(self, newState) {
   var legalTransitions = {
     'disconnected': [CONNECTING, DESTROYED, DISCONNECTED],
     'connecting': [CONNECTING, DESTROYED, CONNECTED, DISCONNECTED],
-    'connected': [CONNECTED, DISCONNECTED, DESTROYED],
+    'connected': [CONNECTED, DISCONNECTED, DESTROYED, UNREFERENCED],
+    'unreferenced': [UNREFERENCED, DESTROYED],
     'destroyed': [DESTROYED]
   }
 
@@ -247,20 +249,20 @@ function connectNewServers(self, servers, callback) {
       count = count - 1;
 
       // Destroyed
-      if(self.state == DESTROYED) {
+      if(self.state == DESTROYED || self.state == UNREFERENCED) {
         return this.destroy();
       }
 
       if(event == 'connect' && !self.authenticating) {
         // Destroyed
-        if(self.state == DESTROYED) {
+        if(self.state == DESTROYED || self.state == UNREFERENCED) {
           return _self.destroy();
         }
 
         // Do we have authentication contexts that need to be applied
         applyAuthenticationContexts(self, _self, function() {
           // Destroy the instance
-          if(self.state == DESTROYED) {
+          if(self.state == DESTROYED || self.state == UNREFERENCED) {
             return _self.destroy();
           }
 
@@ -309,7 +311,7 @@ function connectNewServers(self, servers, callback) {
   function execute(_server, i) {
     setTimeout(function() {
       // Destroyed
-      if(self.state == DESTROYED) {
+      if(self.state == DESTROYED || self.state == UNREFERENCED) {
         return;
       }
 
@@ -361,7 +363,7 @@ var pingServer = function(self, server, cb) {
     monitoring: true,
     socketTimeout: self.s.options.connectionTimeout || 2000,
   }, function(err, r) {
-    if(self.state == DESTROYED) {
+    if(self.state == DESTROYED || self.state == UNREFERENCED) {
       server.destroy();
       return cb(err, r);
     }
@@ -423,7 +425,7 @@ var pingServer = function(self, server, cb) {
 }
 
 function topologyMonitor(self, options) {
-  if(self.state == DESTROYED) return;
+  if(self.state == DESTROYED || self.state == UNREFERENCED) return;
   options = options || {};
 
   var servers = Object.keys(self.s.replicaSetState.set);
@@ -438,7 +440,7 @@ function topologyMonitor(self, options) {
   // Each server is monitored in parallel in their own timeout loop
   var monitorServer = function(_host, _self, _options) {
     var intervalId = _process(function() {
-      if(self.state == DESTROYED) {
+      if(self.state == DESTROYED || self.state == UNREFERENCED) {
         clearInterval(intervalId);
         return;
       }
@@ -452,7 +454,7 @@ function topologyMonitor(self, options) {
       // Check if we have a known server connection and reuse
       if(_server) {
         return pingServer(_self, _server, function(err) {
-          if(self.state == DESTROYED) {
+          if(self.state == DESTROYED || self.state == UNREFERENCED) {
             clearInterval(intervalId);
             return;
           }
@@ -539,7 +541,7 @@ function topologyMonitor(self, options) {
   // Run the reconnect process
   function executeReconnect(self) {
     return function() {
-      if(self.state === DESTROYED) {
+      if(self.state == DESTROYED || self.state == UNREFERENCED) {
         return;
       }
 
@@ -571,7 +573,7 @@ function addServerToList(list, server) {
 
 function handleEvent(self, event) {
   return function() {
-    if(self.state === DESTROYED) return;
+    if(self.state == DESTROYED || self.state == UNREFERENCED) return;
     // Debug log
     if(self.s.logger.isDebug()) {
       self.s.logger.debug(f('handleEvent %s from server %s in replset with id %s', event, this.name, self.id));
@@ -581,7 +583,7 @@ function handleEvent(self, event) {
     self.s.replicaSetState.remove(this);
 
     // Are we in a destroyed state return
-    if(self.state === DESTROYED) return;
+    if(self.state == DESTROYED || self.state == UNREFERENCED) return;
 
     // If no primary and secondary available
     if(!self.s.replicaSetState.hasPrimary()
@@ -634,7 +636,7 @@ function handleInitialConnectEvent(self, event) {
     }
 
     // Destroy the instance
-    if(self.state == DESTROYED) {
+    if(self.state == DESTROYED || self.state == UNREFERENCED) {
       return this.destroy();
     }
 
@@ -643,7 +645,7 @@ function handleInitialConnectEvent(self, event) {
       // Do we have authentication contexts that need to be applied
       applyAuthenticationContexts(self, _this, function() {
         // Destroy the instance
-        if(self.state == DESTROYED) {
+        if(self.state == DESTROYED || self.state == UNREFERENCED) {
           return _this.destroy();
         }
 
@@ -851,7 +853,7 @@ ReplSet.prototype.destroy = function(options) {
  */
 ReplSet.prototype.unref = function() {
   // Transition state
-  stateTransition(this, DISCONNECTED);
+  stateTransition(this, UNREFERENCED);
 
   this.s.replicaSetState.allServers().forEach(function(x) {
     x.unref();
