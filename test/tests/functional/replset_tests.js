@@ -32,16 +32,14 @@ exports['Discover arbiters'] = {
       });
 
       server.on('joined', function(_type, _server) {
-        // console.log("======================= joined :: " + _type + " :: " + server.name)
         if(_type == 'arbiter') {
           server.destroy();
 
           setTimeout(function() {
-            // console.log(Object.keys(Connection.connections()))
             test.equal(0, Object.keys(Connection.connections()).length);
             Connection.disableConnectionAccounting();
             test.done();
-          }, 1000);
+          }, 2000);
         }
       });
 

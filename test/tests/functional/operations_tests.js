@@ -5,7 +5,7 @@ var f = require('util').format
 
 exports['Should correctly connect using server object'] = {
   metadata: {
-    requires: { topology: ["single", "replicaset", "mongos"] }
+    requires: { topology: ["single", "replicaset", "sharded"] }
   },
 
   test: function(configuration, test) {
@@ -24,7 +24,7 @@ exports['Should correctly connect using server object'] = {
 
 exports['Should correctly execute command'] = {
   metadata: {
-    requires: { topology: ["single", "replicaset", "mongos"] }
+    requires: { topology: ["single", "replicaset", "sharded"] }
   },
 
   test: function(configuration, test) {
@@ -53,7 +53,7 @@ exports['Should correctly execute command'] = {
 
 exports['Should correctly execute write'] = {
   metadata: {
-    requires: { topology: ["single", "replicaset", "mongos"] }
+    requires: { topology: ["single", "replicaset", "sharded"] }
   },
 
   test: function(configuration, test) {
@@ -81,7 +81,7 @@ exports['Should correctly execute write'] = {
 
 exports['Should correctly execute find'] = {
   metadata: {
-    requires: { topology: ["single", "replicaset", "mongos"] }
+    requires: { topology: ["single", "replicaset", "sharded"] }
   },
 
   test: function(configuration, test) {
@@ -132,7 +132,7 @@ exports['Should correctly execute find'] = {
 
 exports['Should correctly execute find with limit and skip'] = {
   metadata: {
-    requires: { topology: ["single", "replicaset", "mongos"] }
+    requires: { topology: ["single", "replicaset", "sharded"] }
   },
 
   test: function(configuration, test) {
@@ -185,7 +185,7 @@ exports['Should correctly execute find with limit and skip'] = {
 
 exports['Should correctly execute find against document with result array field'] = {
   metadata: {
-    requires: { topology: ["single", "replicaset", "mongos"] }
+    requires: { topology: ["single", "replicaset", "sharded"] }
   },
 
   test: function(configuration, test) {
@@ -234,7 +234,7 @@ exports['Should correctly execute find against document with result array field'
 exports['Should correctly execute aggregation command'] = {
   metadata: {
     requires: {
-      topology: ["single", "replicaset", "mongos"],
+      topology: ["single", "replicaset", "sharded"],
       mongodb: ">=2.6.0"
     }
   },
@@ -293,7 +293,7 @@ exports['Should correctly execute query against cursorId'] = {
   metadata: {
     requires: {
       mongodb: ">=2.6.0",
-      topology: ["single", "replicaset", "mongos"]
+      topology: ["single", "replicaset"]
     }
   },
 
@@ -355,7 +355,7 @@ exports['Should correctly kill command cursor'] = {
   metadata: {
     requires: {
       mongodb: ">=2.6.0",
-      topology: ["single", "replicaset", "mongos"]
+      topology: ["single", "replicaset", "sharded"]
     }
   },
 
@@ -406,7 +406,7 @@ exports['Should correctly kill command cursor'] = {
 exports['Should correctly kill find command cursor'] = {
   metadata: {
     requires: {
-      topology: ["single", "replicaset", "mongos"]
+      topology: ["single", "replicaset", "sharded"]
     }
   },
 
@@ -456,10 +456,12 @@ exports['Should correctly kill find command cursor'] = {
 
 exports['Should correctly execute unref and finish all operations'] = {
   metadata: {
-    requires: { topology: ["single", "replicaset", "mongos"] }
+    requires: { topology: ["single", "replicaset", "sharded"] }
   },
 
   test: function(configuration, test) {
+    var Connection = require('../../../lib/connection/connection');
+
     // console.log("================ -- 0")
     configuration.newTopology(function(err, server) {
       // console.log("================ -- 1")
@@ -468,7 +470,7 @@ exports['Should correctly execute unref and finish all operations'] = {
         var left = 100;
 
         for(var i = 0; i < 100; i++) {
-          // console.log("================ ")
+          // console.log("================ insert doc")
           // Execute the write
           _server.insert(f("%s.inserts_unref", configuration.db), [{a:i}], {
             writeConcern: {w:1}, ordered:true
@@ -482,6 +484,9 @@ exports['Should correctly execute unref and finish all operations'] = {
             // Number of operations left
             if(left == 0) {
               configuration.newTopology(function(err, server) {
+                // Enable connections accounting
+                Connection.enableConnectionAccounting();
+
                 // Add event listeners
                 server.on('connect', function(_server) {
                   _server.command(f("%s.$cmd", configuration.db), {count: 'inserts_unref'}, function(e, result) {
@@ -491,8 +496,17 @@ exports['Should correctly execute unref and finish all operations'] = {
                     test.equal(null, err);
                     test.equal(100, result.result.n);
 
+                    // console.log("================ DESTROY ReplSet :: " + _server.id)
                     _server.destroy();
-                    test.done();
+
+                    setTimeout(function() {
+                      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! state of server :: " + _server.state)
+
+                      // console.log(Object.keys(Connection.connections()))
+                      test.equal(0, Object.keys(Connection.connections()).length);
+                      Connection.disableConnectionAccounting();
+                      test.done();
+                    }, 1000);
                   });
                 });
 

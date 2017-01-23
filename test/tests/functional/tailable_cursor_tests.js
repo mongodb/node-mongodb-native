@@ -4,7 +4,7 @@ var f = require('util').format;
 
 exports['Should correctly perform awaitdata'] = {
   metadata: {
-    requires: { topology: ["single", "replicaset", "mongos"] }
+    requires: { topology: ["single", "replicaset", "sharded"] }
   },
 
   test: function(configuration, test) {

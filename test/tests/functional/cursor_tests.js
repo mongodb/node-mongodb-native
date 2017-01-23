@@ -6,7 +6,7 @@ var f = require('util').format,
 
 exports['Should iterate cursor'] = {
   metadata: {
-    requires: { topology: ["single", "replicaset", "mongos"] }
+    requires: { topology: ["single", "replicaset", "sharded"] }
   },
 
   test: function(configuration, test) {
@@ -62,7 +62,7 @@ exports['Should iterate cursor'] = {
 
 exports['Should iterate cursor but readBuffered'] = {
   metadata: {
-    requires: { topology: ["single", "replicaset", "mongos"] }
+    requires: { topology: ["single", "replicaset", "sharded"] }
   },
 
   test: function(configuration, test) {
@@ -121,7 +121,7 @@ exports['Should iterate cursor but readBuffered'] = {
 
 exports['Should callback exhausted cursor with error'] = {
   metadata: {
-    requires: { topology: ["single", "replicaset", "mongos"] }
+    requires: { topology: ["single", "replicaset", "sharded"] }
   },
 
   test: function(configuration, test) {
@@ -176,7 +176,7 @@ exports['Should callback exhausted cursor with error'] = {
 
 exports['Should force a getMore call to happen'] = {
   metadata: {
-    requires: { topology: ["single", "replicaset", "mongos"] }
+    requires: { topology: ["single", "replicaset", "sharded"] }
   },
 
   test: function(configuration, test) {
@@ -231,7 +231,7 @@ exports['Should force a getMore call to happen'] = {
 
 exports['Should force a getMore call to happen then call killCursor'] = {
   metadata: {
-    requires: { topology: ["single", "replicaset", "mongos"] }
+    requires: { topology: ["single", "replicaset", "sharded"] }
   },
 
   test: function(configuration, test) {
@@ -291,7 +291,7 @@ exports['Should force a getMore call to happen then call killCursor'] = {
 
 exports['Should force a getMore call to happen then call killCursor'] = {
   metadata: {
-    requires: { topology: ["single", "replicaset", "mongos"] }
+    requires: { topology: ["single", "replicaset", "sharded"] }
   },
 
   test: function(configuration, test) {
@@ -475,7 +475,7 @@ exports['Should finish cursor correctly after all sockets to pool destroyed'] = 
 
 exports['Should not leak connnection workItem elements when using killCursor'] = {
   metadata: {
-    requires: { topology: ["single", "replicaset", "mongos"] }
+    requires: { topology: ["single", "replicaset", "sharded"] }
   },
 
   test: function(configuration, test) {
