@@ -1,3 +1,12 @@
+2.2.22 2017-01-24
+-----------------
+* Updated mongodb-core to 2.1.7.
+  * NODE-919 ReplicaSet connection does not close immediately (Issue #156).
+  * NODE-901 Fixed bug when normalizing host names.
+  * NODE-909 Fixed readPreference issue caused by direct connection to primary.
+  * NODE-910 Fixed issue when bufferMaxEntries == 0 and read preference set to nearest.
+* Add missing unref implementations for replset, mongos (Issue #1455, https://github.com/zbjornson)
+
 2.2.21 2017-01-13
 -----------------
 * Updated mongodb-core to 2.1.6.
