@@ -1,6 +1,9 @@
-2.1.7
+2.1.7 2017-01-24
 ----------------
 * NODE-919 ReplicaSet connection does not close immediately (Issue #156).
+* NODE-901 Fixed bug when normalizing host names.
+* NODE-909 Fixed readPreference issue caused by direct connection to primary.
+* NODE-910 Fixed issue when bufferMaxEntries == 0 and read preference set to nearest.
 
 2.1.6 2017-01-13
 ----------------
