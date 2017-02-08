@@ -400,7 +400,6 @@ exports['Should correctly reconnect to server with automatic reconnect enabled']
         setTimeout(function() {
           // Attempt a proper command
           _server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
-            // console.dir(err)
             test.ok(err != null);
           });
         }, 100);
@@ -412,7 +411,6 @@ exports['Should correctly reconnect to server with automatic reconnect enabled']
     });
 
     server.once('reconnect', function() {
-      // console.log('!!!!!!!!!!! reconnect')
       test.equal(true, emittedClose);
       test.equal(true, server.isConnected());
       test.equal(30, server.s.pool.retriesLeft);
