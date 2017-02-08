@@ -639,7 +639,7 @@ exports['Should not overflow the poolSize due to concurrent operations'] = {
 
           if(!left) {
             test.equal(50, server.connections().length);
-            
+
             test.done();
             server.destroy();
           }
@@ -647,6 +647,46 @@ exports['Should not overflow the poolSize due to concurrent operations'] = {
       }
     });
 
+    server.connect();
+  }
+}
+
+exports['Should correctly connect execute 5 evals in parallel'] = {
+  metadata: { requires: { topology: "single" } },
+
+  test: function(configuration, test) {
+    var Server = require('../../../lib/topologies/server')
+      , bson = require('bson');
+
+    // Attempt to connect
+    var server = new Server({
+        host: configuration.host
+      , port: configuration.port
+      , size: 10
+      , bson: new bson()
+    })
+
+    // Add event listeners
+    server.on('connect', function(server) {
+      var left = 5;
+      var start = new Date().getTime();
+
+      for (var i = 0; i < left; i++) {
+        server.command('system.$cmd', {eval: 'sleep(100);'}, function(err, r) {
+          left = left - 1;
+
+          if(left == 0) {
+            var total = new Date().getTime() - start;
+            test.ok(total > 5*100 && total < 1000);
+
+            server.destroy();
+            test.done();
+          }
+        });
+      }
+    });
+
+    // Start connection
     server.connect();
   }
 }
