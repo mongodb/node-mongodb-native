@@ -83,7 +83,7 @@ var handlers = ['connect', 'close', 'error', 'timeout', 'parseError'];
  * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
  * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
  * @param {number} [options.pingInterval=5000] Ping interval to check the response time to the different servers
- * @param {number} [options.localThresholdMS=15] Cutoff latency point in MS for MongoS proxy selection
+ * @param {number} [options.localThresholdMS=15] Cutoff latency point in MS for Replicaset member selection
  * @param {boolean} [options.domainsEnabled=false] Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit.
  * @return {ReplSet} A cursor instance
  * @fires ReplSet#connect
@@ -600,6 +600,11 @@ function handleEvent(self, event) {
 
 function applyAuthenticationContexts(self, server, callback) {
   if(self.s.authenticationContexts.length == 0) {
+    return callback();
+  }
+
+  // Do not apply any auth contexts if it's an arbiter
+  if(server.lastIsMaster() && server.lastIsMaster().arbiterOnly) {
     return callback();
   }
 
