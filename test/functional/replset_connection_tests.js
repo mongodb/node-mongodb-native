@@ -871,55 +871,6 @@ exports['Should Fail due to bufferMaxEntries = 0 not causing any buffering'] = {
   }
 }
 
-// exports['Should correctly receive ping and ha events'] = {
-//   metadata: { requires: { topology: 'replicaset' } },
-//
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var ReplSet = configuration.require.ReplSet
-//       , Server = configuration.require.Server
-//       , Db = configuration.require.Db;
-//
-//     // Replica configuration
-//     var replSet = new ReplSet([
-//         new Server(configuration.host, configuration.port),
-//         new Server(configuration.host, configuration.port + 1),
-//         new Server(configuration.host, configuration.port + 2)
-//       ],
-//       {rs_name:configuration.replicasetName}
-//     );
-//
-//     // Open the db connection
-//     new Db('integration_test_', replSet, {w:1}).open(function(err, db) {
-//       test.equal(null, err)
-//       var ha_connect = false;
-//       var ha_ismaster = false;
-//       var ping = false;
-//
-//       // Listen to the ha and ping events
-//       db.serverConfig.once("ha_connect", function(err) {
-//         ha_connect = true;
-//       });
-//
-//       db.serverConfig.once("ha_ismaster", function(err, result) {
-//         ha_ismaster = true;
-//       });
-//
-//       db.serverConfig.once("ping", function(err, r) {
-//         ping = true;
-//       });
-//
-//       var interval = setInterval(function() {
-//         if(ping && ha_connect && ha_ismaster) {
-//           clearInterval(interval);
-//           db.close();
-//           test.done();
-//         }
-//       }, 100);
-//     });
-//   }
-// }
-
 /**
  * @ignore
  */
@@ -1170,7 +1121,7 @@ exports['Should Correctly remove server going into recovery mode'] = {
                   CoreConnection.disableConnectionAccounting();
 
                   test.done();
-                }, 200);
+                }, 1000);
               }, 10000);
             });
           }
@@ -1464,14 +1415,6 @@ exports['Should correctly modify the server reconnectTries for all replset insta
 
         test.done();
       }, 200);
-
-      // // Connection account tests
-      // test.equal(0, Object.keys(CoreConnection.connections()).length);
-      // test.equal(0, Object.keys(CoreServer.servers()).length);
-      // CoreServer.disableServerAccounting();
-      // CoreConnection.disableConnectionAccounting();
-      //
-      // test.done();
     });
   }
 }
