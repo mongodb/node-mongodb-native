@@ -164,7 +164,7 @@ ReplSetState.prototype.remove = function(server, options) {
   removeFrom(server, this.unknownServers);
 
   // Push to unknownServers
-  this.unknownServers.push(server.name);
+  this.unknownServers.push(server.name.toLowerCase());
 
   // Do we have a removeType
   if(removeType) {
@@ -192,7 +192,7 @@ ReplSetState.prototype.update = function(server) {
       // Add to the list of unknown server
       if(this.unknownServers.indexOf(hosts[i]) == -1
         && (!this.set[hosts[i]] || this.set[hosts[i]].type == ServerType.Unknown)) {
-        this.unknownServers.push(hosts[i]);
+        this.unknownServers.push(hosts[i].toLowerCase());
       }
 
       if(!this.set[hosts[i]]) {
@@ -220,7 +220,7 @@ ReplSetState.prototype.update = function(server) {
     self.set[server.name.toLowerCase()].setVersion = ismaster ? ismaster.setVersion : ismaster;
 
     if(self.unknownServers.indexOf(server.name) == -1) {
-      self.unknownServers.push(server.name);
+      self.unknownServers.push(server.name.toLowerCase());
     }
 
     // Set the topology
