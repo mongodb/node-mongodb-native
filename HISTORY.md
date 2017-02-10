@@ -1,3 +1,8 @@
+2.1.8
+----------------
+* NODE-925 ensure we reschedule operations while pool is < poolSize while pool is growing and there are no connnections with not currently performing work.
+* NODE-927 fixes issue where authentication was performed against arbiter instances.
+
 2.1.7 2017-01-24
 ----------------
 * NODE-919 ReplicaSet connection does not close immediately (Issue #156).
