@@ -2,6 +2,8 @@
 ----------------
 * NODE-925 ensure we reschedule operations while pool is < poolSize while pool is growing and there are no connnections with not currently performing work.
 * NODE-927 fixes issue where authentication was performed against arbiter instances.
+* NODE-915 Normalize all host names to avoid comparision issues.
+* Fixed issue where pool.destroy would never finish due to a single operation not being executed and keeping it open.
 
 2.1.7 2017-01-24
 ----------------
