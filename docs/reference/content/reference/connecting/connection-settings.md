@@ -63,12 +63,17 @@ The table below shows all settings and what topology they affect.
 | **ignoreUndefined** | Server, ReplicaSet, Mongos | boolean | false | Specify if the BSON serializer should ignore undefined fields. |
 | **raw** | Server, ReplicaSet, Mongos | boolean | false | Return document results as raw BSON buffers. |
 | **promoteLongs** | Server, ReplicaSet, Mongos | boolean | true | Promotes Long values to number if they fit inside the 53 bits resolution. |
+| **promoteBuffers** | Server, ReplicaSet, Mongos | boolean | false | Promotes Binary BSON values to native Node Buffers. |
+| **promoteValues** | Server, ReplicaSet, Mongos | boolean | true | Promotes BSON values to native types where possible, set to false to only receive wrapper types. |
+| **domainsEnabled** | Server, ReplicaSet, Mongos | boolean | false | Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit. |
 | **bufferMaxEntries** | Server, ReplicaSet, Mongos | integer | -1 | Sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited. |
 | **readPreference** | Server, ReplicaSet, Mongos | object | null | The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). |
 | **pkFactory** | Server, ReplicaSet, Mongos | object | null | A primary key factory object for generation of custom _id keys. |
 | **promiseLibrary** | Server, ReplicaSet, Mongos | object | null | A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible. |
 | **readConcern** | Server, ReplicaSet, Mongos | object | null |  Specify a read concern for the collection. (only MongoDB 3.2 or higher supported). |
 | **maxStalenessSeconds** | Replicaset | number | null | Specify a maxStalenessSeconds value for secondary reads, minimum is 90 seconds |
+| **loggerLevel** | Server, Replicaset, Mongos | string | null | Specify the log level used by the driver logger (error/warn/info/debug) |
+| **logger** | Server, Replicaset, Mongos | object | null | Specify a customer logger mechanism, can be used to log using your app level logger |
 # Ensure you connection string is valid for Replica Sets
 
 The connection string passed to the driver must use the fully qualified host names for the servers as set in the replicaset config. Given the following configuration settings for your replicaset.

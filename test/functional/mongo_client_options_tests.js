@@ -23,6 +23,47 @@ exports['pass in server and db top level options'] = {
 /**
  * @ignore
  */
+exports['pass in server and db top level options'] = {
+  metadata: { requires: { topology: 'single' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var connect = configuration.require;
+
+    connect(configuration.url(),
+            { autoReconnect: true, poolSize: 4 },
+            connectionTester(test, 'testConnectServerOptions', function(db) {
+      test.equal(1, db.serverConfig.poolSize);
+      test.equal(4, db.serverConfig.s.server.s.pool.size);
+      test.equal(true, db.serverConfig.autoReconnect);
+      db.close();
+      test.done();
+    }));
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['should error on unexpected options'] = {
+  metadata: { requires: { topology: 'single' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var connect = configuration.require;
+
+    connect(configuration.url(), {
+      autoReconnect: true, poolSize: 4, notlegal: {}
+    }, function(err, db) {
+      test.ok(err.message.indexOf('option notlegal is not supported') != -1);
+      test.done();
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
 function connectionTester(test, testName, callback) {
   return function(err, db) {
     test.equal(err, null);

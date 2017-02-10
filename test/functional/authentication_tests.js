@@ -658,6 +658,7 @@ var setUp = function(configuration, options, callback) {
       dbpath: f('%s/../db/31001', __dirname),
     }
   }, {
+    // arbiter: true,
     options: {
       bind_ip: 'localhost', port: 31002,
       dbpath: f('%s/../db/31002', __dirname),
@@ -718,6 +719,7 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
         // Add a user
         db.admin().addUser("root", "root", {w:3, wtimeout: 25000}, function(err, result) {
           test.equal(null, err);
+          // process.exit(0)
 
           db.admin().authenticate("root", "root", function(err, result) {
             test.equal(null, err);
