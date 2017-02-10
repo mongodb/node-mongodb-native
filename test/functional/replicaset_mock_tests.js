@@ -307,6 +307,7 @@ exports['Should correctly set socketTimeoutMS and connectTimeoutMS for mongos'] 
 
         db.close();
         mongos1.destroy();
+        mongos2.destroy();
         running = false;
         test.done();
       });
