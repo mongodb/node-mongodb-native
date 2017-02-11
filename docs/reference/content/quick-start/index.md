@@ -246,7 +246,7 @@ Remove the document where the field **a** is equal to **3**.
 var removeDocument = function(db, callback) {
   // Get the documents collection
   var collection = db.collection('documents');
-  // Insert some documents
+  // Delete document where a is 3
   collection.deleteOne({ a : 3 }, function(err, result) {
     assert.equal(err, null);
     assert.equal(1, result.result.n);
