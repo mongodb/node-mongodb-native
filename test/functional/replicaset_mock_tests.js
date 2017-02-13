@@ -108,7 +108,10 @@ exports['Should correctly print warning when non mongos proxy passed in seed lis
         db.close();
         mongos1.destroy();
         mongos2.destroy();
-        test.done();
+
+        setTimeout(function(){
+          test.done();
+        }, 200);
       });
     });
   }
@@ -162,8 +165,8 @@ exports['Should correctly print warning and error when no mongos proxies in seed
 
     // Boot the mock
     co(function*() {
-      mongos1 = yield mockupdb.createServer(52000, 'localhost');
-      mongos2 = yield mockupdb.createServer(52001, 'localhost');
+      mongos1 = yield mockupdb.createServer(52002, 'localhost');
+      mongos2 = yield mockupdb.createServer(52003, 'localhost');
 
       // Mongos
       co(function*() {
@@ -203,12 +206,12 @@ exports['Should correctly print warning and error when no mongos proxies in seed
         warnings.push(state);
       });
 
-      MongoClient.connect('mongodb://localhost:52000,localhost:52001/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:52002,localhost:52003/test', function(err, db) {
         Logger.setCurrentLogger(logger);
 
         // Assert all warnings
-        test.equal('expected mongos proxy, but found replicaset member mongod for server localhost:52000', warnings[0].message);
-        test.equal('expected mongos proxy, but found replicaset member mongod for server localhost:52001', warnings[1].message);
+        test.equal('expected mongos proxy, but found replicaset member mongod for server localhost:52002', warnings[0].message);
+        test.equal('expected mongos proxy, but found replicaset member mongod for server localhost:52003', warnings[1].message);
         test.equal('no mongos proxies found in seed list, did you mean to connect to a replicaset', warnings[2].message);
         test.equal('seed list contains no mongos proxies, replicaset connections requires the parameter replicaSet to be supplied in the URI or options object, mongodb://server:port/db?replicaSet=name', warnings[3].message);
         // Assert error
@@ -217,7 +220,9 @@ exports['Should correctly print warning and error when no mongos proxies in seed
         running = false;
         mongos1.destroy();
         mongos2.destroy();
-        test.done();
+        setTimeout(function(){
+          test.done();
+        }, 200);
       });
     });
   }
@@ -269,8 +274,8 @@ exports['Should correctly set socketTimeoutMS and connectTimeoutMS for mongos'] 
     var command = null;
     // Boot the mock
     co(function*() {
-      mongos1 = yield mockupdb.createServer(52000, 'localhost');
-      mongos2 = yield mockupdb.createServer(52001, 'localhost');
+      mongos1 = yield mockupdb.createServer(52004, 'localhost');
+      mongos2 = yield mockupdb.createServer(52005, 'localhost');
 
       // Mongos
       co(function*() {
@@ -300,7 +305,7 @@ exports['Should correctly set socketTimeoutMS and connectTimeoutMS for mongos'] 
         }
       });
 
-      MongoClient.connect('mongodb://localhost:52000,localhost:52001/test?socketTimeoutMS=120000&connectTimeoutMS=15000', function(err, db) {
+      MongoClient.connect('mongodb://localhost:52004,localhost:52005/test?socketTimeoutMS=120000&connectTimeoutMS=15000', function(err, db) {
         test.equal(null, err);
         test.equal(15000, db.serverConfig.s.mongos.s.options.connectionTimeout);
         test.equal(120000, db.serverConfig.s.mongos.s.options.socketTimeout);
@@ -309,7 +314,10 @@ exports['Should correctly set socketTimeoutMS and connectTimeoutMS for mongos'] 
         mongos1.destroy();
         mongos2.destroy();
         running = false;
-        test.done();
+
+        setTimeout(function(){
+          test.done();
+        }, 200);
       });
     });
   }
