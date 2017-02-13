@@ -38,11 +38,10 @@ var MongoClient = require('mongodb').MongoClient,
 var user = encodeURIComponent('dave');
 var password = encodeURIComponent('abc123');
 var authMechanism = 'DEFAULT';
-var authSource = 'myproject';
 
 // Connection URL
-var url = f('mongodb://%s:%s@localhost:27017?authMechanism=%s&authSource=',
-  user, password, authMechanism, authSource);
+var url = f('mongodb://%s:%s@localhost:27017/myproject?authMechanism=%s',
+  user, password, authMechanism);
 
 // Use connect method to connect to the Server
 MongoClient.connect(url, function(err, db) {
