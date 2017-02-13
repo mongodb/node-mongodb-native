@@ -36,7 +36,10 @@
       "node_modules/bson/lib/bson/symbol.js",
       "node_modules/bson/lib/bson/timestamp.js",
       "node_modules/bson/lib/bson/max_key.js",
-      "node_modules/bson/lib/bson/min_key.js"
+      "node_modules/bson/lib/bson/min_key.js",
+      "node_modules/bson/lib/bson/decimal128.js",
+      "node_modules/bson/lib/bson/int_32.js",
+      "node_modules/bson/lib/bson/regexp.js"
     ]
   },
   "templates": {
