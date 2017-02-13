@@ -43,7 +43,7 @@ var createAscendingIndex = function(db, callback) {
 
 ## Create a Descending Index
 
-For an ascending index type, specify ``-1`` for ``<type>``.
+For an descending index type, specify ``-1`` for ``<type>``.
 
 The following example specifies a descending index key on the
 ``lastName`` field:
