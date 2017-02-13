@@ -9,7 +9,7 @@ title = "Quick Start"
 
 Quick Start
 ===========
-This guide will show you how to set up a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD operations. For more in-depth coverage, see the [tutorials]({{< relref "reference/index.md" >}}).
+This guide will show you how to set up a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD operations. For more in-depth coverage, see the [tutorials]({{< relref "reference/main.md" >}}).
 
 Create the package.json file
 ----------------------------
@@ -311,4 +311,4 @@ MongoClient.connect(url, function(err, db) {
 });
 ```
 
-For more detailed information, see the [tutorials]({{< relref "tutorials/index.md" >}}).
+For more detailed information, see the [tutorials]({{< relref "tutorials/main.md" >}}).

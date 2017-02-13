@@ -11,7 +11,7 @@ title = "CRUD Operations"
 # CRUD Operations
 
 For a walkthrough of the main CRUD operations please refer to the
-[Quick Start guide]({{< ref "quick-start/index.md" >}}).
+[Quick Start guide]({{< ref "quick-start/quick-start.md" >}}).
 
 Driver CRUD operations are defined as the operations performed to create, read, update, and delete documents.
 This tutorial covers both the basic CRUD methods and the specialized ``findAndModify`` based methods

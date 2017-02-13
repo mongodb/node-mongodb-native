@@ -11,15 +11,15 @@ Welcome to the MongoDB Node.js 2.x driver documentation.
 
 ## What's New
 
-The [What's New]({{< relref "upgrade-migration/index.md" >}}) guide explains the major new features of the driver.
+The [What's New]({{< relref "upgrade-migration/main.md" >}}) guide explains the major new features of the driver.
 
 If you are upgrading from the 1.x series of the driver, consult the [Upgrading]({{< relref "upgrade-migration/upgrading.md" >}}) documentation for
 information on recent changes.
 
 ## Starting points
 
-* [Installing the driver]({{< relref "installation-guide/index.md" >}})
-* [Quick start]({{< relref "quick-start/index.md" >}})
+* [Installing the driver]({{< relref "installation-guide/installation-guide.md" >}})
+* [Quick start]({{< relref "quick-start/quick-start.md" >}})
 * [CRUD operations]({{< relref "tutorials/crud.md" >}})
 * [Connect]({{< relref "tutorials/connect/index.md" >}})
 
