@@ -1,3 +1,14 @@
+2.2.23 2017-02-13
+-----------------
+* Updated mongodb-core to 2.1.8.
+  * NODE-925 ensure we reschedule operations while pool is < poolSize while pool is growing and there are no connections with not currently performing work.
+  * NODE-927 fixes issue where authentication was performed against arbiter instances.
+  * NODE-915 Normalize all host names to avoid comparison issues.
+  * Fixed issue where pool.destroy would never finish due to a single operation not being executed and keeping it open.
+* NODE-931 Validates all the options for MongoClient.connect and fixes missing connection settings.
+* NODE-929 Update SSL tutorial to correctly reflect the non-need for server/mongos/replset subobjects
+* Fix sensitive command check (Issue #1473, https://github.com/Annoraaq)
+
 2.2.22 2017-01-24
 -----------------
 * Updated mongodb-core to 2.1.7.
@@ -5,7 +16,7 @@
   * NODE-901 Fixed bug when normalizing host names.
   * NODE-909 Fixed readPreference issue caused by direct connection to primary.
   * NODE-910 Fixed issue when bufferMaxEntries == 0 and read preference set to nearest.
-* Add missing unref implementations for replset, mongos (Issue #1455, https://github.com/zbjornson) 
+* Add missing unref implementations for replset, mongos (Issue #1455, https://github.com/zbjornson)
 
 2.2.21 2017-01-13
 -----------------
