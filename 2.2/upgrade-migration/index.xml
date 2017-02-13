@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Upgrade-Migrations on MongoDB Node.js Driver</title>
-    <link>/node-mongodb-native/2.2/upgrade-migration/</link>
-    <description>Recent content in Upgrade-Migrations on MongoDB Node.js Driver</description>
+    <title>Upgrade-migrations on MongoDB Node.js Driver</title>
+    <link>/node-mongodb-native/2.2/upgrade-migration/index.xml</link>
+    <description>Recent content in Upgrade-migrations on MongoDB Node.js Driver</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 19 Mar 2015 12:53:39 -0400</lastBuildDate>
@@ -115,7 +115,7 @@ floating-point numbering format that occupies 16 bytes (128 bits).
 See the
 &lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/crud/#specify-a-data-type&#34;&gt;CRUD tutorial&lt;/a&gt;
 for an example.
-&amp;lt;!&amp;ndash; NOTE: placeholder link to manual entry &amp;ndash;&amp;gt;&lt;/li&gt;
+&lt;!-- NOTE: placeholder link to manual entry --&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h1 id=&#34;what-s-new-in-2-2&#34;&gt;What&amp;rsquo;s New in 2.2&lt;/h1&gt;

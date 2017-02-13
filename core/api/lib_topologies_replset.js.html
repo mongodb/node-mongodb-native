@@ -979,19 +979,17 @@ var BSON = retrieveBSON();
 var DISCONNECTED = 'disconnected';
 var CONNECTING = 'connecting';
 var CONNECTED = 'connected';
+var UNREFERENCED = 'unreferenced';
 var DESTROYED = 'destroyed';
 
 function stateTransition(self, newState) {
   var legalTransitions = {
     'disconnected': [CONNECTING, DESTROYED, DISCONNECTED],
     'connecting': [CONNECTING, DESTROYED, CONNECTED, DISCONNECTED],
-    'connected': [CONNECTED, DISCONNECTED, DESTROYED],
+    'connected': [CONNECTED, DISCONNECTED, DESTROYED, UNREFERENCED],
+    'unreferenced': [UNREFERENCED, DESTROYED],
     'destroyed': [DESTROYED]
   }
-
-  // console.log("==================== stateTransition")
-  // console.log("old = " + self.state)
-  // console.log("new = " + newState)
 
   // Get current state
   var legalStates = legalTransitions[self.state];
@@ -1036,7 +1034,7 @@ var handlers = ['connect', 'close', 'error', 'timeout', 'parseError'];
  * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
  * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
  * @param {number} [options.pingInterval=5000] Ping interval to check the response time to the different servers
- * @param {number} [options.localThresholdMS=15] Cutoff latency point in MS for MongoS proxy selection
+ * @param {number} [options.localThresholdMS=15] Cutoff latency point in MS for Replicaset member selection
  * @param {boolean} [options.domainsEnabled=false] Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit.
  * @return {ReplSet} A cursor instance
  * @fires ReplSet#connect
@@ -1119,7 +1117,9 @@ var ReplSet = function(seedlist, options) {
     // Are we running in debug mode
     debug: typeof options.debug == 'boolean' ? options.debug : false,
     // Client info
-    clientInfo: createClientInfo(options)
+    clientInfo: createClientInfo(options),
+    // Authentication context
+    authenticationContexts: [],
   }
 
   // Add handler for topology change
@@ -1145,11 +1145,6 @@ var ReplSet = function(seedlist, options) {
   var types = ['joined', 'left'];
   types.forEach(function(x) {
     self.s.replicaSetState.on(x, function(t, s) {
-      // console.log("!!!!!!!!!!!!! HEY")
-      // if(self.state === CONNECTED &amp;&amp; x === 'joined' &amp;&amp; t == 'primary') {
-      //   self.emit('reconnect', self);
-      // }
-
       self.emit(x, t, s);
     });
   });
@@ -1166,6 +1161,8 @@ var ReplSet = function(seedlist, options) {
   this.authenticating = false;
   // Last ismaster
   this.ismaster = null;
+  // Contains the intervalId
+  this.intervalIds = [];
 }
 
 inherits(ReplSet, EventEmitter);
@@ -1180,173 +1177,17 @@ Object.defineProperty(ReplSet.prototype, 'parserType', {
   }
 });
 
-// function attemptReconnect(self) {
-//   if(self.runningAttempReconnect) return;
-//   // Set as running
-//   self.runningAttempReconnect = true;
-//   // Wait before execute
-//   self.haTimeoutId = setTimeout(function() {
-//     if(self.state == DESTROYED) return;
-//
-//     // Debug log
-//     if(self.s.logger.isDebug()) {
-//       self.s.logger.debug(f('attemptReconnect for replset with id %s', self.id));
-//     }
-//
-//     // Get all known hosts
-//     var keys = Object.keys(self.s.replicaSetState.set);
-//     var servers = keys.map(function(x) {
-//       return new Server(assign({}, self.s.options, {
-//         host: x.split(':')[0], port: parseInt(x.split(':')[1], 10)
-//       }, {
-//         authProviders: self.authProviders, reconnect:false, monitoring: false, inTopology: true
-//       }, {
-//         clientInfo: clone(self.s.clientInfo)
-//       }));
-//     });
-//
-//     // Create the list of servers
-//     self.s.connectingServers = servers.slice(0);
-//
-//     // Handle all events coming from servers
-//     function _handleEvent(self, event) {
-//       return function() {
-//         // Destroy the instance
-//         if(self.state == DESTROYED) {
-//           return this.destroy();
-//         }
-//
-//         // Debug log
-//         if(self.s.logger.isDebug()) {
-//           self.s.logger.debug(f('attemptReconnect for replset with id %s using server %s ended with event %s', self.id, this.name, event));
-//         }
-//
-//         // Check if we are done
-//         function done() {
-//           // Done with the reconnection attempt
-//           if(self.s.connectingServers.length == 0) {
-//             if(self.state == DESTROYED) return;
-//
-//             // If we have a primary and a disconnect handler, execute
-//             // buffered operations
-//             if(self.s.replicaSetState.hasPrimaryAndSecondary() &amp;&amp; self.s.disconnectHandler) {
-//               self.s.disconnectHandler.execute();
-//             } else if(self.s.replicaSetState.hasPrimary() &amp;&amp; self.s.disconnectHandler) {
-//               self.s.disconnectHandler.execute({ executePrimary:true });
-//             } else if(self.s.replicaSetState.hasSecondary() &amp;&amp; self.s.disconnectHandler) {
-//               self.s.disconnectHandler.execute({ executeSecondary:true });
-//             }
-//
-//             // Do we have a primary
-//             if(self.s.replicaSetState.hasPrimary()) {
-//               // Emit reconnect as new primary was discovered
-//               self.emit('reconnect', self);
-//
-//               // Connect any missing servers
-//               connectNewServers(self, self.s.replicaSetState.unknownServers, function() {
-//                 // Debug log
-//                 if(self.s.logger.isDebug()) {
-//                   self.s.logger.debug(f('attemptReconnect for replset with id successful resuming topologyMonitor', self.id));
-//                 }
-//
-//                 // Reset the running
-//                 self.runningAttempReconnect = false;
-//
-//                 // Go back to normal topology monitoring
-//                 // Schedule a topology monitoring sweep
-//                 setTimeout(function() {
-//                   topologyMonitor(self);
-//                 }, self.s.haInterval);
-//               });
-//             } else {
-//               if(self.listeners("close").length > 0) {
-//                 self.emit('close', self);
-//               }
-//
-//               // Reset the running
-//               self.runningAttempReconnect = false;
-//               // Attempt a new reconnect
-//               attemptReconnect(self);
-//             }
-//           }
-//         }
-//
-//         // Remove the server from our list
-//         for(var i = 0; i &lt; self.s.connectingServers.length; i++) {
-//           if(self.s.connectingServers[i].equals(this)) {
-//             self.s.connectingServers.splice(i, 1);
-//           }
-//         }
-//
-//         // Keep reference to server
-//         var _self = this;
-//
-//         // Debug log
-//         if(self.s.logger.isDebug()) {
-//           self.s.logger.debug(f('attemptReconnect in replset with id %s for', self.id));
-//         }
-//
-//         // Connect and not authenticating
-//         if(event == 'connect' &amp;&amp; !self.authenticating) {
-//           if(self.state == DESTROYED) {
-//             return _self.destroy();
-//           }
-//
-//           // Update the replicaset state
-//           if(self.s.replicaSetState.update(_self)) {
-//             // Primary lastIsMaster store it
-//             if(_self.lastIsMaster() &amp;&amp; _self.lastIsMaster().ismaster) {
-//               self.ismaster = _self.lastIsMaster();
-//             }
-//
-//             // Remove the handlers
-//             for(i = 0; i &lt; handlers.length; i++) {
-//               _self.removeAllListeners(handlers[i]);
-//             }
-//
-//             // Add stable state handlers
-//             _self.on('error', handleEvent(self, 'error'));
-//             _self.on('close', handleEvent(self, 'close'));
-//             _self.on('timeout', handleEvent(self, 'timeout'));
-//             _self.on('parseError', handleEvent(self, 'parseError'));
-//           } else {
-//             _self.destroy();
-//           }
-//         } else if(event == 'connect' &amp;&amp; self.authenticating) {
-//           this.destroy();
-//         }
-//
-//         done();
-//       }
-//     }
-//
-//     // Index used to interleaf the server connects, avoiding
-//     // runtime issues on io constrained vm's
-//     var timeoutInterval = 0;
-//
-//     function connect(server, timeoutInterval) {
-//       setTimeout(function() {
-//         server.once('connect', _handleEvent(self, 'connect'));
-//         server.once('close', _handleEvent(self, 'close'));
-//         server.once('timeout', _handleEvent(self, 'timeout'));
-//         server.once('error', _handleEvent(self, 'error'));
-//         server.once('parseError', _handleEvent(self, 'parseError'));
-//
-//         // SDAM Monitoring events
-//         server.on('serverOpening', function(e) { self.emit('serverOpening', e); });
-//         server.on('serverDescriptionChanged', function(e) { self.emit('serverDescriptionChanged', e); });
-//         server.on('serverClosed', function(e) { self.emit('serverClosed', e); });
-//
-//         server.connect(self.s.connectOptions);
-//       }, timeoutInterval);
-//     }
-//
-//     // Connect all servers
-//     while(servers.length > 0) {
-//       connect(servers.shift(), timeoutInterval++);
-//     }
-//   }, self.s.minHeartbeatFrequencyMS);
-// }
+function rexecuteOperations(self) {
+  // If we have a primary and a disconnect handler, execute
+  // buffered operations
+  if(self.s.replicaSetState.hasPrimaryAndSecondary() &amp;&amp; self.s.disconnectHandler) {
+    self.s.disconnectHandler.execute();
+  } else if(self.s.replicaSetState.hasPrimary() &amp;&amp; self.s.disconnectHandler) {
+    self.s.disconnectHandler.execute({ executePrimary:true });
+  } else if(self.s.replicaSetState.hasSecondary() &amp;&amp; self.s.disconnectHandler) {
+    self.s.disconnectHandler.execute({ executeSecondary:true });
+  }
+}
 
 function connectNewServers(self, servers, callback) {
   // Count lefts
@@ -1359,54 +1200,55 @@ function connectNewServers(self, servers, callback) {
       count = count - 1;
 
       // Destroyed
-      if(self.state == DESTROYED) {
+      if(self.state == DESTROYED || self.state == UNREFERENCED) {
         return this.destroy();
       }
 
       if(event == 'connect' &amp;&amp; !self.authenticating) {
         // Destroyed
-        if(self.state == DESTROYED) {
+        if(self.state == DESTROYED || self.state == UNREFERENCED) {
           return _self.destroy();
         }
 
-        var result = self.s.replicaSetState.update(_self);
-        // Update the state with the new server
-        if(result) {
-          // Primary lastIsMaster store it
-          if(_self.lastIsMaster() &amp;&amp; _self.lastIsMaster().ismaster) {
-            self.ismaster = _self.lastIsMaster();
+        // Do we have authentication contexts that need to be applied
+        applyAuthenticationContexts(self, _self, function() {
+          // Destroy the instance
+          if(self.state == DESTROYED || self.state == UNREFERENCED) {
+            return _self.destroy();
           }
 
-          // Remove the handlers
-          for(var i = 0; i &lt; handlers.length; i++) {
-            _self.removeAllListeners(handlers[i]);
-          }
+          // Update the state
+          var result = self.s.replicaSetState.update(_self);
+          // Update the state with the new server
+          if(result) {
+            // Primary lastIsMaster store it
+            if(_self.lastIsMaster() &amp;&amp; _self.lastIsMaster().ismaster) {
+              self.ismaster = _self.lastIsMaster();
+            }
 
-          // Add stable state handlers
-          _self.on('error', handleEvent(self, 'error'));
-          _self.on('close', handleEvent(self, 'close'));
-          _self.on('timeout', handleEvent(self, 'timeout'));
-          _self.on('parseError', handleEvent(self, 'parseError'));
-        } else {
-          _self.destroy();
-        }
+            // Remove the handlers
+            for(var i = 0; i &lt; handlers.length; i++) {
+              _self.removeAllListeners(handlers[i]);
+            }
+
+            // Add stable state handlers
+            _self.on('error', handleEvent(self, 'error'));
+            _self.on('close', handleEvent(self, 'close'));
+            _self.on('timeout', handleEvent(self, 'timeout'));
+            _self.on('parseError', handleEvent(self, 'parseError'));
+
+            // Rexecute any stalled operation
+            rexecuteOperations(self);
+          } else {
+            _self.destroy();
+          }
+        });
       } else if(event == 'connect' &amp;&amp; self.authenticating) {
         this.destroy();
       }
 
-      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
-      // console.log("hasPrimary :: " + self.s.replicaSetState.hasPrimary())
-      // console.log("hasPrimaryAndSecondary :: " + self.s.replicaSetState.hasPrimaryAndSecondary())
-      // console.log("hasSecondary :: " + self.s.replicaSetState.hasSecondary())
-      // If we have a primary and a disconnect handler, execute
-      // buffered operations
-      if(self.s.replicaSetState.hasPrimaryAndSecondary() &amp;&amp; self.s.disconnectHandler) {
-        self.s.disconnectHandler.execute();
-      } else if(self.s.replicaSetState.hasPrimary() &amp;&amp; self.s.disconnectHandler) {
-        self.s.disconnectHandler.execute({ executePrimary:true });
-      } else if(self.s.replicaSetState.hasSecondary() &amp;&amp; self.s.disconnectHandler) {
-        self.s.disconnectHandler.execute({ executeSecondary:true });
-      }
+      // Rexecute any stalled operation
+      rexecuteOperations(self);
 
       // Are we done finish up callback
       if(count == 0) { callback(); }
@@ -1420,7 +1262,7 @@ function connectNewServers(self, servers, callback) {
   function execute(_server, i) {
     setTimeout(function() {
       // Destroyed
-      if(self.state == DESTROYED) {
+      if(self.state == DESTROYED || self.state == UNREFERENCED) {
         return;
       }
 
@@ -1463,7 +1305,6 @@ var pingServer = function(self, server, cb) {
   // Emit the server heartbeat start
   emitSDAMEvent(self, 'serverHeartbeatStarted', { connectionId: server.name });
 
-  // console.log("  ==== ping server :: " + server.name)
   // Execute ismaster
   // Set the socketTimeout for a monitoring message to a low number
   // Ensuring ismaster calls are timed out quickly
@@ -1473,28 +1314,10 @@ var pingServer = function(self, server, cb) {
     monitoring: true,
     socketTimeout: self.s.options.connectionTimeout || 2000,
   }, function(err, r) {
-    // console.log("  ==== ping server result :: " + server.name)
-    // console.dir(err)
-    // console.log("hasPrimary :: " + self.s.replicaSetState.hasPrimary())
-    // console.log("hasPrimaryAndSecondary :: " + self.s.replicaSetState.hasPrimaryAndSecondary())
-    // console.log("hasSecondary :: " + self.s.replicaSetState.hasSecondary())
-    // console.log("connectingServers :: ")
-    // console.log(self.s.connectingServers)
-    // console.log(self.s.replicaSetState.unknownServers)
-
-    if(self.state == DESTROYED) {
+    if(self.state == DESTROYED || self.state == UNREFERENCED) {
       server.destroy();
       return cb(err, r);
     }
-
-    // // If no primary and secondary available
-    // if(!self.s.replicaSetState.hasPrimary()
-    //   &amp;&amp; !self.s.replicaSetState.hasSecondary()
-    //   &amp;&amp; self.s.options.secondaryOnlyConnectionAllowed) {
-    //   stateTransition(self, DISCONNECTED);
-    // } else if(!self.s.replicaSetState.hasPrimary()) {
-    //   stateTransition(self, DISCONNECTED);
-    // }
 
     // Calculate latency
     var latencyMS = new Date().getTime() - start;
@@ -1553,15 +1376,10 @@ var pingServer = function(self, server, cb) {
 }
 
 function topologyMonitor(self, options) {
-  if(self.state == DESTROYED) return;
+  if(self.state == DESTROYED || self.state == UNREFERENCED) return;
   options = options || {};
 
   var servers = Object.keys(self.s.replicaSetState.set);
-
-  // console.log("=======2==========================")
-  // console.dir(options)
-  // console.dir(servers)
-  // console.dir(self.s.replicaSetState.allServers())
 
   // Get the haInterval
   var _process = options.haInterval ? setTimeout : setInterval;
@@ -1573,7 +1391,7 @@ function topologyMonitor(self, options) {
   // Each server is monitored in parallel in their own timeout loop
   var monitorServer = function(_host, _self, _options) {
     var intervalId = _process(function() {
-      if(self.state == DESTROYED) {
+      if(self.state == DESTROYED || self.state == UNREFERENCED) {
         clearInterval(intervalId);
         return;
       }
@@ -1587,20 +1405,13 @@ function topologyMonitor(self, options) {
       // Check if we have a known server connection and reuse
       if(_server) {
         return pingServer(_self, _server, function(err) {
-          // console.log("=== pingServer :: " + _server.name)
-          // console.log(self.s.replicaSetState.unknownServers)
-          if(self.state == DESTROYED) {
+          if(self.state == DESTROYED || self.state == UNREFERENCED) {
             clearInterval(intervalId);
             return;
           }
 
           // Initial sweep
           if(_process === setTimeout) {
-            // console.log("!!!!!!!!!!!!! setTimeout :: " + self.state)
-            // console.log("hasPrimary :: " + self.s.replicaSetState.hasPrimary())
-            // console.log("hasPrimaryAndSecondary :: " + self.s.replicaSetState.hasPrimaryAndSecondary())
-            // console.log("hasSecondary :: " + self.s.replicaSetState.hasSecondary())
-
             if(_self.state == CONNECTING &amp;&amp; (
               (
                 self.s.replicaSetState.hasSecondary()
@@ -1615,26 +1426,10 @@ function topologyMonitor(self, options) {
                 self.emit('connect', self);
               });
 
-              // if(self.s.replicaSetState.hasPrimaryAndSecondary()) {
-              //   process.nextTick(function() {
-              //     self.emit('fullsetup', self);
-              //     self.emit('all', self);
-              //   });
-              // }
-
               // Start topology interval check
               topologyMonitor(_self, {});
-            // } else if(_self.state == CONNECTING &amp;&amp; _options.haInterval &amp;&amp; count == 0) {
-            //   self.emit('error', new MongoError('no primary found in replicaset'));
-            //   clearInterval(intervalId);
-            //   return self.destroy();
             }
           } else {
-            // console.log("!!!!!!!!!!!!! setInterval :: " + self.state)
-            // console.log("hasPrimary :: " + self.s.replicaSetState.hasPrimary())
-            // console.log("hasPrimaryAndSecondary :: " + self.s.replicaSetState.hasPrimaryAndSecondary())
-            // console.log("hasSecondary :: " + self.s.replicaSetState.hasSecondary())
-
             if(_self.state == DISCONNECTED &amp;&amp; (
               (
                 self.s.replicaSetState.hasSecondary()
@@ -1644,15 +1439,8 @@ function topologyMonitor(self, options) {
             )) {
               _self.state = CONNECTED;
 
-              // If we have a primary and a disconnect handler, execute
-              // buffered operations
-              if(self.s.replicaSetState.hasPrimaryAndSecondary() &amp;&amp; self.s.disconnectHandler) {
-                self.s.disconnectHandler.execute();
-              } else if(self.s.replicaSetState.hasPrimary() &amp;&amp; self.s.disconnectHandler) {
-                self.s.disconnectHandler.execute({ executePrimary:true });
-              } else if(self.s.replicaSetState.hasSecondary() &amp;&amp; self.s.disconnectHandler) {
-                self.s.disconnectHandler.execute({ executeSecondary:true });
-              }
+              // Rexecute any stalled operation
+              rexecuteOperations(self);
 
               // Emit connected sign
               process.nextTick(function() {
@@ -1664,7 +1452,6 @@ function topologyMonitor(self, options) {
           if(self.initialConnectState.connect
             &amp;&amp; !self.initialConnectState.fullsetup
             &amp;&amp; self.s.replicaSetState.hasPrimaryAndSecondary()) {
-              // console.log("========= emit fullsetup 1")
               // Set initial connect state
               self.initialConnectState.fullsetup = true;
               self.initialConnectState.all = true;
@@ -1677,19 +1464,13 @@ function topologyMonitor(self, options) {
         });
       }
     }, _haInterval);
+
+    // Add the intervalId to our list of intervalIds
+    self.intervalIds.push(intervalId);
   }
-
-  // for(var i = 0; i &lt; servers.length; i++) {
-  //   monitorServer(servers[i], self, options);
-  // }
-
-  // var hosts = self.s.connectingServers.map(function(x) {
-  //   return x.name;
-  // });
 
   if(_process === setTimeout) {
     return connectNewServers(self, self.s.replicaSetState.unknownServers, function() {
-      // console.log("===================================== 0")
       if(!self.s.replicaSetState.hasPrimary() &amp;&amp; !self.s.options.secondaryOnlyConnectionAllowed) {
         self.emit('error', new MongoError('no primary found in replicaset'));
         return self.destroy();
@@ -1697,46 +1478,29 @@ function topologyMonitor(self, options) {
         self.emit('error', new MongoError('no secondary found in replicaset'));
         return self.destroy();
       }
-      //   clearInterval(intervalId);
-      //   return self.destroy();
-
-      // console.log("===================================== 1")
-
-      // if(self.s.replicaSetState.hasPrimaryAndSecondary()) {
-      //   console.log("==================================== fullsetup")
-      //   process.nextTick(function() {
-      //     self.emit('fullsetup', self);
-      //     self.emit('all', self);
-      //   });
-      // }
 
       for(var i = 0; i &lt; servers.length; i++) {
         monitorServer(servers[i], self, options);
       }
     });
-    // return connectNewServers(self, hosts, function() {});
   } else {
     for(var i = 0; i &lt; servers.length; i++) {
       monitorServer(servers[i], self, options);
     }
   }
 
-  // console.log("!!!!!!!!!!!!!!! START :: " + _haInterval)
-
   // Run the reconnect process
   function executeReconnect(self) {
     return function() {
-      if(self.state === DESTROYED) {
+      if(self.state == DESTROYED || self.state == UNREFERENCED) {
         return;
       }
 
       connectNewServers(self, self.s.replicaSetState.unknownServers, function() {
-        // console.log("=============== attempt reconnect to disconnected servers 1 :: " + self.s.replicaSetState.hasPrimary() + " :: " + new Date())
-
         if(self.s.replicaSetState.hasPrimary()) {
-          setTimeout(executeReconnect(self), _haInterval);
+          self.intervalIds.push(setTimeout(executeReconnect(self), _haInterval));
         } else {
-          setTimeout(executeReconnect(self), self.s.minHeartbeatFrequencyMS);
+          self.intervalIds.push(setTimeout(executeReconnect(self), self.s.minHeartbeatFrequencyMS));
         }
       });
     }
@@ -1747,257 +1511,12 @@ function topologyMonitor(self, options) {
     ? self.s.minHeartbeatFrequencyMS
     : _haInterval
 
-  setTimeout(executeReconnect(self), intervalTime);
-
-  // // Run a reconnection interval
-  // var reconnectIntervalId = setInterval(function() {
-  //   if(self.state === DESTROYED) {
-  //     return clearInterval(reconnectIntervalId)
-  //   }
-  //
-  //   // console.log("=============== attempt reconnect to disconnected servers 0")
-  //   // console.log(self.s.replicaSetState.unknownServers.length)
-  //   // console.log(hosts.length)
-  //   connectNewServers(self, self.s.replicaSetState.unknownServers, function() {
-  //   // connectNewServers(self, hosts, function() {
-  //     console.log("=============== attempt reconnect to disconnected servers 1 :: " + new Date())
-  //   });
-  // }, _haInterval);
+  self.intervalIds.push(setTimeout(executeReconnect(self), intervalTime));
 }
-
-// function topologyMonitor(self, options) {
-//   options = options || {};
-//
-//   // Set momitoring timeout
-//   self.haTimeoutId = setTimeout(function() {
-//     if(self.state == DESTROYED) return;
-//
-//     // Is this a on connect topology discovery
-//     // Schedule a proper topology monitoring to happen
-//     // To ensure any discovered servers do not timeout
-//     // while waiting for the initial discovery to happen.
-//     if(options.haInterval) {
-//       topologyMonitor(self);
-//     }
-//
-//     // If we have a primary and a disconnect handler, execute
-//     // buffered operations
-//     if(self.s.replicaSetState.hasPrimaryAndSecondary() &amp;&amp; self.s.disconnectHandler) {
-//       self.s.disconnectHandler.execute();
-//     } else if(self.s.replicaSetState.hasPrimary() &amp;&amp; self.s.disconnectHandler) {
-//       self.s.disconnectHandler.execute({ executePrimary:true });
-//     } else if(self.s.replicaSetState.hasSecondary() &amp;&amp; self.s.disconnectHandler) {
-//       self.s.disconnectHandler.execute({ executeSecondary:true });
-//     }
-//
-//     // Get the connectingServers
-//     var connectingServers = self.s.replicaSetState.allServers();
-//     // Debug log
-//     if(self.s.logger.isDebug()) {
-//       self.s.logger.debug(f('topologyMonitor in replset with id %s connected servers [%s]'
-//         , self.id
-//         , connectingServers.map(function(x) {
-//           return x.name;
-//         })));
-//     }
-//     // Get the count
-//     var count = connectingServers.length;
-//
-//     // If we have no servers connected
-//     if(count == 0 &amp;&amp; !options.haInterval) {
-//       if(self.listeners("close").length > 0) {
-//         self.emit('close', self);
-//       }
-//
-//       return attemptReconnect(self);
-//     }
-//
-//     // If the count is zero schedule a new fast
-//     function pingServer(_self, _server, cb) {
-//       // Measure running time
-//       var start = new Date().getTime();
-//
-//       // Emit the server heartbeat start
-//       emitSDAMEvent(self, 'serverHeartbeatStarted', { connectionId: _server.name });
-//       // Execute ismaster
-//       // Set the socketTimeout for a monitoring message to a low number
-//       // Ensuring ismaster calls are timed out quickly
-//       _server.command('admin.$cmd', {
-//         ismaster:true
-//       }, {
-//         monitoring: true,
-//         socketTimeout: self.s.options.connectionTimeout || 2000,
-//       }, function(err, r) {
-//         console.log("===================== PING :: " + _server.name)
-//         console.dir(err)
-//         if(self.state == DESTROYED) {
-//           _server.destroy();
-//           return cb(err, r);
-//         }
-//
-//         // Calculate latency
-//         var latencyMS = new Date().getTime() - start;
-//
-//         // Set the last updatedTime
-//         var hrTime = process.hrtime();
-//         // Calculate the last update time
-//         _server.lastUpdateTime = hrTime[0] * 1000 + Math.round(hrTime[1]/1000);
-//
-//         // We had an error, remove it from the state
-//         if(err) {
-//           // Emit the server heartbeat failure
-//           emitSDAMEvent(self, 'serverHeartbeatFailed', { durationMS: latencyMS, failure: err, connectionId: _server.name });
-//           // Add to connecting list
-//           if(self.s.connectingServers.indexOf(_server.name) == -1) {
-//             self.s.connectingServers.push(_server.name);
-//           }
-//           // Remove server from the state
-//           _self.s.replicaSetState.remove(_server);
-//         } else {
-//           // Update the server ismaster
-//           _server.ismaster = r.result;
-//
-//           // Check if we have a lastWriteDate convert it to MS
-//           // and store on the server instance for later use
-//           if(_server.ismaster.lastWrite &amp;&amp; _server.ismaster.lastWrite.lastWriteDate) {
-//             _server.lastWriteDate = _server.ismaster.lastWrite.lastWriteDate.getTime();
-//           }
-//
-//           // Do we have a brand new server
-//           if(_server.lastIsMasterMS == -1) {
-//             _server.lastIsMasterMS = latencyMS;
-//           } else if(_server.lastIsMasterMS) {
-//             // After the first measurement, average RTT MUST be computed using an
-//             // exponentially-weighted moving average formula, with a weighting factor (alpha) of 0.2.
-//             // If the prior average is denoted old_rtt, then the new average (new_rtt) is
-//             // computed from a new RTT measurement (x) using the following formula:
-//             // alpha = 0.2
-//             // new_rtt = alpha * x + (1 - alpha) * old_rtt
-//             _server.lastIsMasterMS = 0.2 * latencyMS + (1 - 0.2) * _server.lastIsMasterMS;
-//           }
-//
-//           if(_self.s.replicaSetState.update(_server)) {
-//             // Primary lastIsMaster store it
-//             if(_server.lastIsMaster() &amp;&amp; _server.lastIsMaster().ismaster) {
-//               self.ismaster = _server.lastIsMaster();
-//             }
-//           }
-//
-//           // Server heart beat event
-//           emitSDAMEvent(self, 'serverHeartbeatSucceeded', { durationMS: latencyMS, reply: r.result, connectionId: _server.name });
-//         }
-//
-//         // Calculate the stalness for this server
-//         self.s.replicaSetState.updateServerMaxStaleness(_server, self.s.haInterval);
-//
-//         // Callback
-//         cb(err, r);
-//       });
-//     }
-//
-//     // Connect any missing servers
-//     function connectMissingServers() {
-//       if(self.state == DESTROYED) return;
-//
-//       // Attempt to connect to any unknown servers
-//       connectNewServers(self, self.s.replicaSetState.unknownServers, function() {
-//         if(self.state == DESTROYED) return;
-//
-//         // Check if we have an options.haInterval (meaning it was triggered from connect)
-//         if(options.haInterval) {
-//           // Do we have a primary and secondary
-//           if(self.state == CONNECTING
-//             &amp;&amp; self.s.replicaSetState.hasPrimaryAndSecondary()) {
-//             // Transition to connected
-//             stateTransition(self, CONNECTED);
-//             // Update initial state
-//             self.initialConnectState.connect = true;
-//             self.initialConnectState.fullsetup = true;
-//             self.initialConnectState.all = true;
-//             // Emit fullsetup and all events
-//             process.nextTick(function() {
-//               self.emit('connect', self);
-//               self.emit('fullsetup', self);
-//               self.emit('all', self);
-//             });
-//           } else if(self.state == CONNECTING
-//             &amp;&amp; self.s.replicaSetState.hasPrimary()) {
-//               // Transition to connected
-//               stateTransition(self, CONNECTED);
-//               // Update initial state
-//               self.initialConnectState.connect = true;
-//               // Emit connected sign
-//               process.nextTick(function() {
-//                 self.emit('connect', self);
-//               });
-//           } else if(self.state == CONNECTING
-//             &amp;&amp; self.s.replicaSetState.hasSecondary()
-//             &amp;&amp; self.s.options.secondaryOnlyConnectionAllowed) {
-//               // Transition to connected
-//               stateTransition(self, CONNECTED);
-//               // Update initial state
-//               self.initialConnectState.connect = true;
-//               // Emit connected sign
-//               process.nextTick(function() {
-//                 self.emit('connect', self);
-//               });
-//           } else if(self.state == CONNECTING) {
-//             self.emit('error', new MongoError('no primary found in replicaset'));
-//             // Destroy the topology
-//             return self.destroy();
-//           } else if(self.state == CONNECTED
-//             &amp;&amp; self.s.replicaSetState.hasPrimaryAndSecondary()
-//             &amp;&amp; !self.initialConnectState.fullsetup) {
-//               self.initialConnectState.fullsetup = true;
-//             // Emit fullsetup and all events
-//             process.nextTick(function() {
-//               self.emit('fullsetup', self);
-//               self.emit('all', self);
-//             });
-//           }
-//         }
-//
-//         if(!options.haInterval) topologyMonitor(self);
-//       });
-//     }
-//
-//     // No connectingServers but unknown servers
-//     if(connectingServers.length == 0
-//       &amp;&amp; self.s.replicaSetState.unknownServers.length > 0 &amp;&amp; options.haInterval) {
-//         return connectMissingServers();
-//     } else if(connectingServers.length == 0 &amp;&amp; options.haInterval) {
-//       self.destroy();
-//       return self.emit('error', new MongoError('no valid replicaset members found'));
-//     }
-//
-//     console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! SERVER STATE")
-//     console.log(self.s.replicaSetState.allServers().map(x => {
-//       return x.name
-//     }))
-//     // console.log(self.s.replicaSetState.unknownServers.map(x => {
-//     //   return x.name
-//     // }))
-//     console.log(self.s.connectingServers)
-//
-//     // Ping all servers
-//     for(var i = 0; i &lt; connectingServers.length; i++) {
-//       console.log("===== start ping :: " + connectingServers[i])
-//       pingServer(self, connectingServers[i], function(e, r) {
-//         console.log("===== end ping :: " + count)
-//         if(r)console.dir(r.result.me)
-//         count = count - 1;
-//
-//         if(count == 0) {
-//           connectMissingServers();
-//         }
-//       });
-//     }
-//   }, options.haInterval || self.s.haInterval)
-// }
 
 function addServerToList(list, server) {
   for(var i = 0; i &lt; list.length; i++) {
-    if(list[i].name === server.name) return true;
+    if(list[i].name.toLowerCase() === server.name.toLowerCase()) return true;
   }
 
   list.push(server);
@@ -2005,20 +1524,17 @@ function addServerToList(list, server) {
 
 function handleEvent(self, event) {
   return function() {
-    if(self.state === DESTROYED) return;
+    if(self.state == DESTROYED || self.state == UNREFERENCED) return;
     // Debug log
     if(self.s.logger.isDebug()) {
       self.s.logger.debug(f('handleEvent %s from server %s in replset with id %s', event, this.name, self.id));
     }
 
-    // console.log("==== handleEvent :: " + event + " :: " + this.name)
-    // console.dir(self.state)
-
     // Remove from the replicaset state
     self.s.replicaSetState.remove(this);
 
     // Are we in a destroyed state return
-    if(self.state === DESTROYED) return;
+    if(self.state == DESTROYED || self.state == UNREFERENCED) return;
 
     // If no primary and secondary available
     if(!self.s.replicaSetState.hasPrimary()
@@ -2033,93 +1549,121 @@ function handleEvent(self, event) {
   }
 }
 
+function applyAuthenticationContexts(self, server, callback) {
+  if(self.s.authenticationContexts.length == 0) {
+    return callback();
+  }
+
+  // Do not apply any auth contexts if it's an arbiter
+  if(server.lastIsMaster() &amp;&amp; server.lastIsMaster().arbiterOnly) {
+    return callback();
+  }
+
+  // Copy contexts to ensure no modificiation in the middle of
+  // auth process.
+  var authContexts = self.s.authenticationContexts.slice(0);
+
+  // Apply one of the contexts
+  function applyAuth(authContexts, server, callback) {
+    if(authContexts.length == 0) return callback();
+    // Get the first auth context
+    var authContext = authContexts.shift();
+    // Copy the params
+    var customAuthContext = authContext.slice(0);
+    // Push our callback handler
+    customAuthContext.push(function(err) {
+      applyAuth(authContexts, server, callback);
+    });
+
+    // Attempt authentication
+    server.auth.apply(server, customAuthContext)
+  }
+
+  // Apply all auth contexts
+  applyAuth(authContexts, server, callback);
+}
+
 function handleInitialConnectEvent(self, event) {
   return function() {
-    // console.log("!!!!!!!!!!!!!!!!!!!!!!! handleInitialConnectEvent :: " + event)
+    var _this = this;
     // Debug log
     if(self.s.logger.isDebug()) {
       self.s.logger.debug(f('handleInitialConnectEvent %s from server %s in replset with id %s', event, this.name, self.id));
     }
 
     // Destroy the instance
-    if(self.state == DESTROYED) {
+    if(self.state == DESTROYED || self.state == UNREFERENCED) {
       return this.destroy();
     }
 
     // Check the type of server
     if(event == 'connect') {
-      // Update the state
-      var result = self.s.replicaSetState.update(this);
-      if(result == true) {
-        // Primary lastIsMaster store it
-        if(this.lastIsMaster() &amp;&amp; this.lastIsMaster().ismaster) {
-          self.ismaster = this.lastIsMaster();
+      // Do we have authentication contexts that need to be applied
+      applyAuthenticationContexts(self, _this, function() {
+        // Destroy the instance
+        if(self.state == DESTROYED || self.state == UNREFERENCED) {
+          return _this.destroy();
         }
 
-        // Debug log
-        if(self.s.logger.isDebug()) {
-          self.s.logger.debug(f('handleInitialConnectEvent %s from server %s in replset with id %s has state [%s]', event, this.name, self.id, JSON.stringify(self.s.replicaSetState.set)));
+        // Update the state
+        var result = self.s.replicaSetState.update(_this);
+        if(result == true) {
+          // Primary lastIsMaster store it
+          if(_this.lastIsMaster() &amp;&amp; _this.lastIsMaster().ismaster) {
+            self.ismaster = _this.lastIsMaster();
+          }
+
+          // Debug log
+          if(self.s.logger.isDebug()) {
+            self.s.logger.debug(f('handleInitialConnectEvent %s from server %s in replset with id %s has state [%s]', event, _this.name, self.id, JSON.stringify(self.s.replicaSetState.set)));
+          }
+
+          // Remove the handlers
+          for(var i = 0; i &lt; handlers.length; i++) {
+            _this.removeAllListeners(handlers[i]);
+          }
+
+          // Add stable state handlers
+          _this.on('error', handleEvent(self, 'error'));
+          _this.on('close', handleEvent(self, 'close'));
+          _this.on('timeout', handleEvent(self, 'timeout'));
+          _this.on('parseError', handleEvent(self, 'parseError'));
+
+          // Do we have a primary or primaryAndSecondary
+          if(self.state === CONNECTING &amp;&amp; self.s.replicaSetState.hasPrimary()
+            || (self.s.replicaSetState.hasSecondary() &amp;&amp; self.s.options.secondaryOnlyConnectionAllowed)) {
+            // We are connected
+            self.state = CONNECTED;
+
+            // Set initial connect state
+            self.initialConnectState.connect = true;
+            // Emit connect event
+            process.nextTick(function() {
+              self.emit('connect', self);
+            });
+
+            topologyMonitor(self, {});
+          }
+        } else if(result instanceof MongoError) {
+          _this.destroy();
+          self.destroy();
+          return self.emit('error', result);
+        } else {
+          _this.destroy();
         }
-
-        // Remove the handlers
-        for(var i = 0; i &lt; handlers.length; i++) {
-          this.removeAllListeners(handlers[i]);
-        }
-
-        // Add stable state handlers
-        this.on('error', handleEvent(self, 'error'));
-        this.on('close', handleEvent(self, 'close'));
-        this.on('timeout', handleEvent(self, 'timeout'));
-        this.on('parseError', handleEvent(self, 'parseError'));
-
-        // Do we have a primary or primaryAndSecondary
-        if(self.state === CONNECTING &amp;&amp; self.s.replicaSetState.hasPrimary()
-          || (self.s.replicaSetState.hasSecondary() &amp;&amp; self.s.options.secondaryOnlyConnectionAllowed)) {
-          // We are connected
-          self.state = CONNECTED;
-
-          // console.log("======================= 0")
-
-          // Set initial connect state
-          self.initialConnectState.connect = true;
-          // Emit connect event
-          process.nextTick(function() {
-            self.emit('connect', self);
-          });
-
-          topologyMonitor(self, {});
-        }
-      } else if(result instanceof MongoError) {
-        this.destroy();
-        self.destroy();
-        return self.emit('error', result);
-      } else {
-        this.destroy();
-      }
+      });
     } else {
       // Emit failure to connect
       self.emit('failed', this);
 
       addServerToList(self.s.connectingServers, this);
-      // // Add to connecting list
-      // if(self.s.connectingServers.indexOf(this.name) == -1) {
-      //   // console.log("!!!!!!!!!! pushing connectingServers 0")
-      //   self.s.connectingServers.push(this.name);
-      // }
       // Remove from the state
       self.s.replicaSetState.remove(this);
     }
 
-    // console.log("======== connect " + this.name)
-    // console.log(self.s.connectingServers)
-
-    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! remove :: " + this.name)
-    // console.log(self.s.connectingServers.map(x => x.name))
-
     if(self.initialConnectState.connect
       &amp;&amp; !self.initialConnectState.fullsetup
       &amp;&amp; self.s.replicaSetState.hasPrimaryAndSecondary()) {
-        // console.log("========= emit fullsetup 0")
         // Set initial connect state
         self.initialConnectState.fullsetup = true;
         self.initialConnectState.all = true;
@@ -2131,14 +1675,12 @@ function handleInitialConnectEvent(self, event) {
     }
 
     // Remove from the list from connectingServers
-    for(i = 0; i &lt; self.s.connectingServers.length; i++) {
+    for(var i = 0; i &lt; self.s.connectingServers.length; i++) {
       if(self.s.connectingServers[i].equals(this)) {
         self.s.connectingServers.splice(i, 1);
       }
     }
 
-    // console.log(self.s.connectingServers.map(x => x.name))
-    // console.log(self.state)
     // Trigger topologyMonitor
     if(self.s.connectingServers.length == 0 &amp;&amp; self.state == CONNECTING) {
       topologyMonitor(self, {haInterval: 1});
@@ -2147,7 +1689,6 @@ function handleInitialConnectEvent(self, event) {
 }
 
 function connectServers(self, servers) {
-  // console.log("!!!!!!!!!! pushing connectingServers 2")
   // Update connectingServers
   self.s.connectingServers = self.s.connectingServers.concat(servers);
 
@@ -2241,11 +1782,22 @@ ReplSet.prototype.destroy = function(options) {
   if(this.haTimeoutId) clearTimeout(this.haTimeoutId);
   // Destroy the replicaset
   this.s.replicaSetState.destroy(options);
+  // Clear out authentication contexts
+  this.s.authenticationContexts = [];
 
   // Destroy all connecting servers
   this.s.connectingServers.forEach(function(x) {
     x.destroy(options);
   });
+
+  // Clear out all monitoring
+  for(var i = 0; i &lt; this.intervalIds.length; i++) {
+    clearInterval(this.intervalIds[i]);
+    clearTimeout(this.intervalIds[i]);
+  }
+
+  // Reset list of intervalIds
+  this.intervalIds = [];
 
   // Emit toplogy closing event
   emitSDAMEvent(this, 'topologyClosed', { topologyId: this.id });
@@ -2257,7 +1809,7 @@ ReplSet.prototype.destroy = function(options) {
  */
 ReplSet.prototype.unref = function() {
   // Transition state
-  stateTransition(this, DISCONNECTED);
+  stateTransition(this, UNREFERENCED);
 
   this.s.replicaSetState.allServers().forEach(function(x) {
     x.unref();
@@ -2352,7 +1904,6 @@ ReplSet.prototype.isDestroyed = function() {
 ReplSet.prototype.getServer = function(options) {
   // Ensure we have no options
   options = options || {};
-
   // Pick the right server baspickServerd on readPreference
   var server = this.s.replicaSetState.pickServer(options.readPreference);
   if(this.s.debug) this.emit('pickedServer', options.readPreference, server);
@@ -2513,6 +2064,7 @@ ReplSet.prototype.auth = function(mechanism, db) {
   var self = this;
   var args = Array.prototype.slice.call(arguments, 2);
   var callback = args.pop();
+  var currentContextIndex = 0;
 
   // If we don't have the mechanism fail
   if(this.authProviders[mechanism] == null &amp;&amp; mechanism != 'default') {
@@ -2526,8 +2078,12 @@ ReplSet.prototype.auth = function(mechanism, db) {
 
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected
-  if(!self.s.replicaSetState.hasPrimary() &amp;&amp; self.s.disconnectHandler != null) {
-    return self.s.disconnectHandler.add('auth', db, allArgs, {}, callback);
+  if(self.s.disconnectHandler != null) {
+    if(!self.s.replicaSetState.hasPrimary() &amp;&amp; !self.s.options.secondaryOnlyConnectionAllowed) {
+      return self.s.disconnectHandler.add('auth', db, allArgs, {}, callback);
+    } else if(!self.s.replicaSetState.hasSecondary() &amp;&amp; self.s.options.secondaryOnlyConnectionAllowed) {
+      return self.s.disconnectHandler.add('auth', db, allArgs, {}, callback);
+    }
   }
 
   // Set to authenticating
@@ -2558,9 +2114,14 @@ ReplSet.prototype.auth = function(mechanism, db) {
         self.authenticating = false;
 
         // Return the auth error
-        if(errors.length) return callback(MongoError.create({
-          message: 'authentication fail', errors: errors
-        }), false);
+        if(errors.length) {
+          // Remove the entry from the stored authentication contexts
+          self.s.authenticationContexts.splice(currentContextIndex, 0);
+          // Return error
+          return callback(MongoError.create({
+            message: 'authentication fail', errors: errors
+          }), false);
+        }
 
         // Successfully authenticated session
         callback(null, self);
@@ -2578,6 +2139,13 @@ ReplSet.prototype.auth = function(mechanism, db) {
 
   // Get total count
   var count = servers.length;
+
+  // Save current context index
+  currentContextIndex = this.s.authenticationContexts.length;
+
+  // Store the auth context and return the last index
+  this.s.authenticationContexts.push([mechanism, db].concat(args.slice(0)));
+
   // Authenticate against all servers
   while(servers.length > 0) {
     auth(servers.shift());
@@ -2605,6 +2173,11 @@ ReplSet.prototype.logout = function(dbName, callback) {
   for(var i = 0; i &lt; providers.length; i++) {
     this.authProviders[providers[i]].logout(dbName);
   }
+
+  // Clear out any contexts associated with the db
+  self.s.authenticationContexts = self.s.authenticationContexts.filter(function(context) {
+    return context[1] !== dbName;
+  });
 
   // Now logout all the servers
   var servers = this.s.replicaSetState.allServers();
@@ -2803,7 +2376,7 @@ module.exports = ReplSet;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Jan 03 2017 12:52:48 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 13 2017 11:58:15 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

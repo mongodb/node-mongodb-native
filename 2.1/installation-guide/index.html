@@ -9,7 +9,7 @@
 
     <link rel="shortcut icon" href="/node-mongodb-native/2.1//img/favicon.png">
 
-    <title>Installation Guide</title>
+    <title>Installation-guides</title>
 
     <link rel="stylesheet" href="/node-mongodb-native/2.1//lib/bootstrap.css" type="text/css" />
 <link rel="stylesheet" href="/node-mongodb-native/2.1//lib/font-awesome/css/font-awesome.min.css" type="text/css" />
@@ -1236,7 +1236,7 @@
 
 
     <li class="toctree-l1">
-    <a href="/node-mongodb-native/2.1/api/">
+    <a href="/node-mongodb-native/2.1/api">
         <i class='fa fa-file-text-o'></i>
         API Documentation
     </a>
@@ -1378,150 +1378,25 @@
                     </div>
                     </p>
 
-
-   
-<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/2.1/docs/reference/content/installation-guide/index.md" target="_blank" title="Edit installation-guide/index.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
-
-
-
-
-
-
-
-
-
-
-<div class="bc">
-<ul>
-  
-  
-  
-  
-  
-  
-  <li>Installation Guide</li>
-</ul>
+<section id="main">
+  <div>
+   <h1 id="title">Installation-guides</h1>
+        <ul id="list">
+            
+                <li class="category">
+<div>
+  <article>
+    <div>
+      <h2><a href='/node-mongodb-native/2.1/installation-guide/'>Installation Guide</a></h2>
+    </div>
+  </article>
 </div>
+</li>
 
-
-
-
-<h1 id="installation">Installation</h1>
-
-<p>The recommended way to get started using the Node.js 2.1 driver is by using <code>NPM</code> (Node Package Manager) to install the dependency in your project.</p>
-
-<h2 id="mongodb-driver">MongoDB Driver</h2>
-
-<p>After you&rsquo;ve created your project with <code>npm init</code>, you can install the MongoDB driver and its dependencies with the command:</p>
-
-<pre><code>npm install mongodb --save
-</code></pre>
-
-<p>This will download the MongoDB driver and add a dependency entry in your <code>package.json</code> file.</p>
-
-<h2 id="troubleshooting">Troubleshooting</h2>
-
-<p>The MongoDB driver depends on several other packages, including:</p>
-
-<ul>
-<li>mongodb-core</li>
-<li>bson</li>
-<li>kerberos</li>
-<li>node-gyp</li>
-</ul>
-
-<p>The only native extension is the <code>kerberos</code> extension. This is a <code>peer dependency</code> for the <code>mongodb</code> module. This means that if you need to use <code>kerberos</code> you will need to add the <code>kerberos</code> module to your module&rsquo;s dependencies.</p>
-
-<p>If you have <strong>NPM 2.0</strong> or earlier NPM will attempt to download and build the <code>kerberos</code> module if you do not have it defined as a dependency in your module. However, from <strong>NPM 3.0</strong> onwards NPM will not attempt to build the <code>kerberos</code> module but instead print a warning in your install log that looks something like the following.</p>
-
-<pre><code>npm WARN EPEERINVALID mongodb-core@1.2.21 requires a peer of kerberos@~0.0 but none was installed.
-</code></pre>
-
-<p>This tells you that the driver could not resolve its <code>peer dependency</code>. However, don&rsquo;t worry. You only need the <code>kerberos</code> module if you intend to use <code>kerberos</code>, in which case you can add it to your package.json by doing the following:</p>
-
-<pre><code>npm install kerberos@0.0.x
-</code></pre>
-
-<p>The <code>kerberos</code> package is a C++ extension that requires a build environment to be installed on your system. You must be able to build Node.js itself to be able to compile and install the <code>kerberos</code> module. Furthermore the <code>kerberos</code> module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operating system package manager for what libraries to install.</p>
-
-<p><div class="admonition important">
-<h5 class="admonition-title">important</h5>
-<p>Windows already contains the SSPI API used for Kerberos authentication. However, you will need to install a full compiler toolchain
-using Visual Studio to correctly install the <code>kerberos</code> extension.</p>
-
-</div>
-</p>
-
-<h3 id="diagnosing-on-unix">Diagnosing on UNIX</h3>
-
-<p>If you don’t have the build essentials it won’t build. In the case of linux you will need gcc and g++, Node.js with all the headers and Python. The easiest way to figure out what’s missing is by trying to build the kerberos project. You can do this by performing the following steps.</p>
-
-<pre><code>git clone https://github.com/christkv/kerberos.git
-cd kerberos
-npm install
-</code></pre>
-
-<p>If all the steps complete you have the right toolchain installed. If you get <code>node-gyp not found</code> you need to install it globally by doing:</p>
-
-<pre><code>npm install -g node-gyp
-</code></pre>
-
-<p>If it compiles correctly, you&rsquo;re ready to proceed. You can now try to install the MongoDB driver with the following command:</p>
-
-<pre><code>cd yourproject
-npm install mongodb --save
-</code></pre>
-
-<p>If it still fails the next step is to examine the npm log. Re-run the command in verbose mode.</p>
-
-<pre><code>npm --loglevel verbose install mongodb
-</code></pre>
-
-<p>This will print out all the steps npm is performing while trying to install the module.</p>
-
-<h3 id="diagnosing-on-windows">Diagnosing on Windows</h3>
-
-<p>A compiler toolchain known to work for compiling <code>kerberos</code> on Windows is the following:</p>
-
-<ul>
-<li>Visual Studio 2010 (do not use higher versions)</li>
-<li>Windows 7 64bit SDK</li>
-<li>Python 2.7 or higher</li>
-</ul>
-
-<p>Open Visual Studio command prompt. Ensure node.exe is in your path and install node-gyp.</p>
-
-<pre><code>npm install -g node-gyp
-</code></pre>
-
-<p>Next you will have to build the project manually to test it. Use any tool you use with git and grab the repo.</p>
-
-<pre><code>git clone https://github.com/christkv/kerberos.git
-cd kerberos
-npm install
-node-gyp rebuild
-</code></pre>
-
-<p>This should rebuild the driver successfully if you have everything set up correctly.</p>
-
-<h3 id="other-possible-issues">Other possible issues</h3>
-
-<p>If Python is installed incorrectly, it can cause problems for <code>gyp</code>. It&rsquo;s a good idea to test your
-deployment environment first by trying to build Node.js itself on the server in question, as this should unearth
-any issues with broken packages (and there are a lot of broken packages out there).</p>
-
-<p>Another thing is to ensure your user has write permission to wherever the Node.js modules are being installed.</p>
-
-
-
-
-
-
-<div id="btnv">
-  
-  
-</div>
-</div>
+            
+        </ul>
+  </div>
+</section>
 
 
 <div id="disqus_thread"></div>
@@ -1542,24 +1417,6 @@ any issues with broken packages (and there are a lot of broken packages out ther
 </div>
 <div class="right-column">
 <div class="wrapper">
-  
-  <div class="toc">
-    <span class="toc-header">On this page</span>
-    <nav id="TableOfContents">
-<ul>
-<li><a href="#installation">Installation</a>
-<ul>
-<li><a href="#mongodb-driver">MongoDB Driver</a></li>
-<li><a href="#troubleshooting">Troubleshooting</a>
-<ul>
-<li><a href="#diagnosing-on-unix">Diagnosing on UNIX</a></li>
-<li><a href="#diagnosing-on-windows">Diagnosing on Windows</a></li>
-<li><a href="#other-possible-issues">Other possible issues</a></li>
-</ul></li>
-</ul></li>
-</ul>
-</nav>
-  </div>
   
 </div>
 </div>

@@ -1395,7 +1395,7 @@
 
 
     <li class="toctree-l1">
-    <a href="/node-mongodb-native/2.2/api/">
+    <a href="/node-mongodb-native/2.2/api">
         <i class='fa fa-file-text-o'></i>
         API Documentation
     </a>
@@ -1578,7 +1578,6 @@
 MongoClient.connect(&quot;mongodb://localhost:27017/test?ssl=true&quot;, function(err, db) {
   db.close();
 });
-
 </code></pre>
 
 <h2 id="validate-server-certificate">Validate Server Certificate</h2>
@@ -1588,7 +1587,7 @@ MongoClient.connect(&quot;mongodb://localhost:27017/test?ssl=true&quot;, functio
 <ul>
 <li><p>A <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI Connection String </a> that includes <code>ssl=true</code> setting,</p></li>
 
-<li><p>A connections options for the <code>server</code> with the certificate for the Certificate Authority (<code>sslCA</code>) and the <code>sslValidate</code> setting set to <code>true</code></p></li>
+<li><p>A connections options with the certificate for the Certificate Authority (<code>sslCA</code>) and the <code>sslValidate</code> setting set to <code>true</code></p></li>
 </ul>
 
 <pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
@@ -1600,10 +1599,8 @@ var ca = [fs.readFileSync(__dirname + &quot;/ssl/ca.pem&quot;)];
 
 // Connect validating the returned certificates from the server
 MongoClient.connect(&quot;mongodb://localhost:27017/test?ssl=true&quot;, {
-  server: {
-      sslValidate:true
-    , sslCA:ca
-  }
+  sslValidate:true,
+  sslCA:ca
 }, function(err, db) {
   db.close();
 });
@@ -1617,7 +1614,7 @@ server&rsquo;s SSL certificate(s) matches the hostname(s) provided in the URI co
 <ul>
 <li><p>A <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI Connection String </a> that includes <code>ssl=true</code> setting,</p></li>
 
-<li><p>A connections options for the <code>server</code> with the certificate for the Certificate Authority (<code>sslCA</code>) and the <code>sslValidate</code> setting set to <code>true</code> but  <code>checkServerIdentity</code> set to <code>false</code>.</p></li>
+<li><p>A connections options with the certificate for the Certificate Authority (<code>sslCA</code>) and the <code>sslValidate</code> setting set to <code>true</code> but  <code>checkServerIdentity</code> set to <code>false</code>.</p></li>
 </ul>
 
 <pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
@@ -1629,11 +1626,9 @@ var ca = [fs.readFileSync(__dirname + &quot;/ssl/ca.pem&quot;)];
 
 // Connect validating the returned certificates from the server
 MongoClient.connect(&quot;mongodb://localhost:27017/test?ssl=true&quot;, {
-  server: {
-      sslValidate:true
-    , checkServerIdentity:false
-    , sslCA:ca
-  }
+  sslValidate:true,
+  checkServerIdentity:false,
+  sslCA:ca
 }, function(err, db) {
   db.close();
 });
@@ -1647,7 +1642,7 @@ certificate to the server. To pass the client&rsquo;s certificate as well as to 
 <ul>
 <li><p>A <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI Connection String </a> that includes <code>ssl=true</code> setting,</p></li>
 
-<li><p>A connections options for the <code>server</code> with the <code>sslValidate</code> setting set to <code>true</code>, the certificate for the Certificate Authority (<code>sslCA</code>), the client&rsquo;s certificate (<code>sslCert</code>) and private key file (<code>sslKey</code>).  If the client&rsquo;s key file is encrypted, include the password (<code>sslPass</code>).</p></li>
+<li><p>A connections options with the <code>sslValidate</code> setting set to <code>true</code>, the certificate for the Certificate Authority (<code>sslCA</code>), the client&rsquo;s certificate (<code>sslCert</code>) and private key file (<code>sslKey</code>).  If the client&rsquo;s key file is encrypted, include the password (<code>sslPass</code>).</p></li>
 </ul>
 
 <pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
@@ -1661,17 +1656,14 @@ var key = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
 
 // Connect validating the returned certificates from the server
 MongoClient.connect(&quot;mongodb://localhost:27017/test?ssl=true&quot;, {
-  server: {
-      sslValidate:true
-    , sslCA:ca
-    , sslKey:key
-    , sslCert:cert
-    , sslPass:'10gen'
-  }
+  sslValidate:true,
+  sslCA:ca,
+  sslKey:key,
+  sslCert:cert,
+  sslPass:'10gen',
 }, function(err, db) {
   db.close();
 });
-
 </code></pre>
 
 <h2 id="connect-with-x-509">Connect with X.509</h2>
@@ -1681,7 +1673,7 @@ MongoClient.connect(&quot;mongodb://localhost:27017/test?ssl=true&quot;, {
 <p>To connect using the X.509 authentication mechanism, specify <code>MONGODB-CR</code> as the mechanism in the <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI connection string</a>, <code>ssl=true</code>, and the username. Use <code>enodeURIComponent</code> to encode the username string.</p>
 
 <p>In addition to the connection string, pass to the <code>MongoClient.connect</code> method
-a connections options for the <code>server</code> with  the X.509 certificate and other <a href="/node-mongodb-native/2.2/tutorials/connect/ssl/">TLS/SSL connections</a> options.</p>
+a connections options with  the X.509 certificate and other <a href="/node-mongodb-native/2.2/reference/connecting/connection-settings/">TLS/SSL connections</a> options.</p>
 
 <pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
   f = require('util').format,
@@ -1697,14 +1689,11 @@ var userName = &quot;CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York
 // Connect using the MONGODB-X509 authentication mechanism
 MongoClient.connect(f('mongodb://%s@server:27017/test?authMechanism=%s&amp;ssl=true'
     , encodeURIComponent(userName), 'MONGODB-X509'), {
-  server: {
-      sslKey:key
-    , sslCert:cert
-  }
+  sslKey:key,
+  sslCert:cert,
 }, function(err, db) {
   db.close();
 });
-
 </code></pre>
 
 <h2 id="tls-ssl-options">TLS/SSL Options</h2>
@@ -1753,76 +1742,61 @@ MongoClient.connect(f('mongodb://%s@server:27017/test?authMechanism=%s&amp;ssl=t
 </tbody>
 </table>
 
-<p>To connect to a single MongoDB instance, specify the TLS/SSL connection options for <code>server</code>.</p>
-
-<pre><code class="language-js">
-var MongoClient = require('mongodb').MongoClient,
-  fs = require('fs');
-
-
-// Read the certificates
-
-var ca = [fs.readFileSync(__dirname + &quot;/ssl/ca.pem&quot;)];
-var cert = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
-var key = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
-
-MongoClient.connect('mongodb://server:27017/test?ssl=true', {
-  server: {
-      sslCA:ca
-    , sslKey:key
-    , sslCert:cert
-  }
-}, function(err, db) {
-  db.close();
-});
-
-</code></pre>
-
-<p>To connect to a replica set, specify the TLS/SSL connection options for <code>replset</code> .</p>
+<p>To connect to a single MongoDB instance, specify the TLS/SSL connection options.</p>
 
 <pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
   fs = require('fs');
 
 // Read the certificates
-
 var ca = [fs.readFileSync(__dirname + &quot;/ssl/ca.pem&quot;)];
 var cert = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
 var key = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
 
+MongoClient.connect('mongodb://server:27017/test?ssl=true', {
+  sslCA:ca,
+  sslKey:key,
+  sslCert:cert,
+}, function(err, db) {
+  db.close();
+});
+</code></pre>
+
+<p>To connect to a replica set, specify the TLS/SSL connection options.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
+  fs = require('fs');
+
+// Read the certificates
+var ca = [fs.readFileSync(__dirname + &quot;/ssl/ca.pem&quot;)];
+var cert = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
+var key = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
 
 MongoClient.connect('mongodb://server:27017/test?replicaSet=foo&amp;ssl=true', {
-  replset: {
-      sslCA:ca
-    , sslKey:key
-    , sslCert:cert
-  }
+  sslCA:ca,
+  sslKey:key,
+  sslCert:cert,
 }, function(err, db) {
   db.close();
 });
-
 </code></pre>
 
-<p>To connect to a replica set, specify the TLS/SSL connection options for <code>mongos</code>.</p>
+<p>To connect to a mongos we pass in the options at the top level, just as for replicasets and single server connections.</p>
 
 <pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
   fs = require('fs');
 
 // Read the certificates
-
 var ca = [fs.readFileSync(__dirname + &quot;/ssl/ca.pem&quot;)];
 var cert = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
 var key = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
 
 MongoClient.connect('mongodb://server:27017/test?ssl=true', {
-  mongos: {
-      sslCA:ca
-    , sslKey:key
-    , sslCert:cert
-  }
+  sslCA:ca,
+  sslKey:key,
+  sslCert:cert,
 }, function(err, db) {
   db.close();
 });
-
 </code></pre>
 
 

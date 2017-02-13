@@ -1336,7 +1336,7 @@
 
 
     <li class="toctree-l1">
-    <a href="/node-mongodb-native/2.0/api/">
+    <a href="/node-mongodb-native/2.0/api">
         <i class='fa fa-file-text-o'></i>
         API Documentation
     </a>
@@ -1636,12 +1636,12 @@ Socket N &lt;- [S, F, F, F]
 
 <p>Unfortunately until MongoDB starts multiplexing threads on sockets or becomes an asynchronous there is only one reasonable strategy to avoid this problem.</p>
 
-<p><div class="admonition note">
+<div class="admonition note">
 <h5 class="admonition-title">Note</h5>
 <p>Create a separate connection pool for the slow executing operations, thus isolating the slow operations from the fast operations.</p>
 
 </div>
-</p>
+
 
 
 

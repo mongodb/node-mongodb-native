@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Quick-Starts on MongoDB Node.js Driver</title>
-    <link>/node-mongodb-native/2.2/quick-start/</link>
-    <description>Recent content in Quick-Starts on MongoDB Node.js Driver</description>
+    <title>Quick-starts on MongoDB Node.js Driver</title>
+    <link>/node-mongodb-native/2.2/quick-start/index.xml</link>
+    <description>Recent content in Quick-starts on MongoDB Node.js Driver</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 17 Mar 2015 15:36:56 +0000</lastBuildDate>
@@ -256,7 +256,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var removeDocument = function(db, callback) {
   // Get the documents collection
   var collection = db.collection(&#39;documents&#39;);
-  // Insert some documents
+  // Delete document where a is 3
   collection.deleteOne({ a : 3 }, function(err, result) {
     assert.equal(err, null);
     assert.equal(1, result.result.n);

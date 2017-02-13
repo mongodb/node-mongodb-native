@@ -2691,9 +2691,7 @@ co(function*() {
 <p> { deleteOne: { filter: {c:1} } }</p>
 <p> { deleteMany: { filter: {c:1} } }</p>
 <p> { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}</p>
-<p>If documents passed in do not contain the <strong>_id</strong> field,
-one will be added to each of the documents missing it by the driver, mutating the document. This behavior
-can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
+<p>If documents passed in do not contain the <strong>_id</strong> field,<br>one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
     </div>
     
 
@@ -4562,9 +4560,7 @@ co(function*() {
     
     
     <div class="description">
-        <p>Creates multiple indexes in the collection, this method is only supported for
-MongoDB 2.6 or higher. Earlier version of MongoDB will throw a command not supported
-error. Index specifications are defined at http://docs.mongodb.org/manual/reference/command/createIndexes/.</p>
+        <p>Creates multiple indexes in the collection, this method is only supported for<br>MongoDB 2.6 or higher. Earlier version of MongoDB will throw a command not supported<br>error. Index specifications are defined at http://docs.mongodb.org/manual/reference/command/createIndexes/.</p>
     </div>
     
 
@@ -8761,9 +8757,7 @@ Promise if no callback passed
 
     
     <pre class="prettyprint"><code>// A whole set of different ways to use the findAndModify command.
-// The first findAndModify command modifies a document and returns the modified document back.
-// The second findAndModify command removes the document.
-// The second findAndModify command upserts a document and returns the new document.
+// The first findAndModify command modifies a document and returns the modified document back.<br>The second findAndModify command removes the document.<br>The second findAndModify command upserts a document and returns the new document.
 
 var MongoClient = require('mongodb').MongoClient,
   test = require('assert');
@@ -8811,9 +8805,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
     
     <pre class="prettyprint"><code>// A whole set of different ways to use the findAndModify command with a Promise..
-// The first findAndModify command modifies a document and returns the modified document back.
-// The second findAndModify command removes the document.
-// The second findAndModify command upserts a document and returns the new document.
+// The first findAndModify command modifies a document and returns the modified document back.<br>The second findAndModify command removes the document.<br>The second findAndModify command upserts a document and returns the new document.
 
 var MongoClient = require('mongodb').MongoClient,
   test = require('assert');
@@ -8856,9 +8848,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
     
     <pre class="prettyprint"><code>// A whole set of different ways to use the findAndModify command with a Generator and the co module..
-// The first findAndModify command modifies a document and returns the modified document back.
-// The second findAndModify command removes the document.
-// The second findAndModify command upserts a document and returns the new document.
+// The first findAndModify command modifies a document and returns the modified document back.<br>The second findAndModify command removes the document.<br>The second findAndModify command upserts a document and returns the new document.
 
 var MongoClient = require('mongodb').MongoClient,
   co = require('co');
@@ -15652,9 +15642,7 @@ co(function*() {
     
     
     <div class="description">
-        <p>Inserts a single document or a an array of documents into MongoDB. If documents passed in do not contain the <strong>_id</strong> field,
-one will be added to each of the documents missing it by the driver, mutating the document. This behavior
-can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
+        <p>Inserts a single document or a an array of documents into MongoDB. If documents passed in do not contain the <strong>_id</strong> field,<br>one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
     </div>
     
 
@@ -16435,9 +16423,7 @@ co(function*() {
     
     
     <div class="description">
-        <p>Inserts an array of documents into MongoDB. If documents passed in do not contain the <strong>_id</strong> field,
-one will be added to each of the documents missing it by the driver, mutating the document. This behavior
-can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
+        <p>Inserts an array of documents into MongoDB. If documents passed in do not contain the <strong>_id</strong> field,<br>one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
     </div>
     
 
@@ -16907,9 +16893,7 @@ co(function*() {
     
     
     <div class="description">
-        <p>Inserts a single document into MongoDB. If documents passed in do not contain the <strong>_id</strong> field,
-one will be added to each of the documents missing it by the driver, mutating the document. This behavior
-can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
+        <p>Inserts a single document into MongoDB. If documents passed in do not contain the <strong>_id</strong> field,<br>one will be added to each of the documents missing it by the driver, mutating the document. This behavior<br>can be overridden by setting the <strong>forceServerObjectId</strong> flag.</p>
     </div>
     
 
@@ -19335,8 +19319,7 @@ co(function*() {
     
     
     <div class="description">
-        <p>Return N number of parallel cursors for a collection allowing parallel reading of entire collection. There are
-no ordering guarantees for returned results.</p>
+        <p>Return N number of parallel cursors for a collection allowing parallel reading of entire collection. There are<br>no ordering guarantees for returned results.</p>
     </div>
     
 
@@ -19819,8 +19802,7 @@ co(function*() {
     
     
     <div class="description">
-        <p>Reindex all indexes on the collection
-Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground) and will be slow for large collections.</p>
+        <p>Reindex all indexes on the collection<br>Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground) and will be slow for large collections.</p>
     </div>
     
 
@@ -21555,8 +21537,7 @@ Promise if no callback passed
     
     
     <div class="description">
-        <p>Save a document. Simple full document replacement function. Not recommended for efficiency, use atomic
-operators and update instead for more efficient operations.</p>
+        <p>Save a document. Simple full document replacement function. Not recommended for efficiency, use atomic<br>operators and update instead for more efficient operations.</p>
     </div>
     
 
@@ -27316,7 +27297,7 @@ co(function*() {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Jan 03 2017 12:52:46 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 13 2017 11:58:13 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

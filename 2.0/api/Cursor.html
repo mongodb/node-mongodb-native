@@ -1884,28 +1884,7 @@ Cursor instance.
 
     
     <pre class="prettyprint"><code><p>Cursor cursor options.</p>
-<p>collection.find({}).project({a:1})                             // Create a projection of field a
-collection.find({}).skip(1).limit(10)                          // Skip 1 and limit 10
-collection.find({}).batchSize(5)                               // Set batchSize on cursor to 5
-collection.find({}).filter({a:1})                              // Set query on the cursor
-collection.find({}).comment('add a comment')                   // Add a comment to the query, allowing to correlate queries
-collection.find({}).addCursorFlag('tailable', true)            // Set cursor as tailable
-collection.find({}).addCursorFlag('oplogReplay', true)         // Set cursor as oplogReplay
-collection.find({}).addCursorFlag('noCursorTimeout', true)     // Set cursor as noCursorTimeout
-collection.find({}).addCursorFlag('awaitData', true)           // Set cursor as awaitData
-collection.find({}).addCursorFlag('exhaust', true)             // Set cursor as exhaust
-collection.find({}).addCursorFlag('partial', true)             // Set cursor as partial
-collection.find({}).addQueryModifier('$orderby', {a:1})        // Set $orderby {a:1}
-collection.find({}).max(10)                                    // Set the cursor maxScan
-collection.find({}).maxScan(10)                                // Set the cursor maxScan
-collection.find({}).maxTimeMS(1000)                            // Set the cursor maxTimeMS
-collection.find({}).min(100)                                   // Set the cursor min
-collection.find({}).returnKey(10)                              // Set the cursor returnKey
-collection.find({}).setReadPreference(ReadPreference.PRIMARY)  // Set the cursor readPreference
-collection.find({}).showRecordId(true)                         // Set the cursor showRecordId
-collection.find({}).snapshot(true)                             // Set the cursor snapshot
-collection.find({}).sort([['a', 1]])                           // Sets the sort order of the cursor query
-collection.find({}).hint('a_1')                                // Set the cursor hint</p>
+<p>collection.find({}).project({a:1})                             // Create a projection of field a<br>collection.find({}).skip(1).limit(10)                          // Skip 1 and limit 10<br>collection.find({}).batchSize(5)                               // Set batchSize on cursor to 5<br>collection.find({}).filter({a:1})                              // Set query on the cursor<br>collection.find({}).comment('add a comment')                   // Add a comment to the query, allowing to correlate queries<br>collection.find({}).addCursorFlag('tailable', true)            // Set cursor as tailable<br>collection.find({}).addCursorFlag('oplogReplay', true)         // Set cursor as oplogReplay<br>collection.find({}).addCursorFlag('noCursorTimeout', true)     // Set cursor as noCursorTimeout<br>collection.find({}).addCursorFlag('awaitData', true)           // Set cursor as awaitData<br>collection.find({}).addCursorFlag('exhaust', true)             // Set cursor as exhaust<br>collection.find({}).addCursorFlag('partial', true)             // Set cursor as partial<br>collection.find({}).addQueryModifier('$orderby', {a:1})        // Set $orderby {a:1}<br>collection.find({}).max(10)                                    // Set the cursor maxScan<br>collection.find({}).maxScan(10)                                // Set the cursor maxScan<br>collection.find({}).maxTimeMS(1000)                            // Set the cursor maxTimeMS<br>collection.find({}).min(100)                                   // Set the cursor min<br>collection.find({}).returnKey(10)                              // Set the cursor returnKey<br>collection.find({}).setReadPreference(ReadPreference.PRIMARY)  // Set the cursor readPreference<br>collection.find({}).showRecordId(true)                         // Set the cursor showRecordId<br>collection.find({}).snapshot(true)                             // Set the cursor snapshot<br>collection.find({}).sort([['a', 1]])                           // Sets the sort order of the cursor query<br>collection.find({}).hint('a_1')                                // Set the cursor hint</p>
 <p>All options are chainable, so one can do the following.</p>
 <p>collection.find({}).maxTimeMS(1000).maxScan(100).skip(1).toArray(..)</p></code></pre>
     
@@ -2395,8 +2374,7 @@ collection.find({}).hint('a_1')                                // Set the cursor
         
 
     
-    <pre class="prettyprint"><code>// A simple example showing the use of batchSize on the cursor, batchSize only regulates how many
-// documents are returned for each batch using the getMoreCommand against the MongoDB server
+    <pre class="prettyprint"><code>// A simple example showing the use of batchSize on the cursor, batchSize only regulates how many<br>documents are returned for each batch using the getMoreCommand against the MongoDB server
 
 var MongoClient = require('mongodb').MongoClient,
   test = require('assert');
@@ -3390,12 +3368,7 @@ co(function*() {
     
     
     <div class="description">
-        <p>Iterates over all the documents for this cursor. As with <strong>{cursor.toArray}</strong>,
-not all of the elements will be iterated if this cursor had been previouly accessed.
-In that case, <strong>{cursor.rewind}</strong> can be used to reset the cursor. However, unlike
-<strong>{cursor.toArray}</strong>, the cursor will only hold a maximum of batch size elements
-at any given time if batch size is specified. Otherwise, the caller is responsible
-for making sure that the entire result can fit the memory.</p>
+        <p>Iterates over all the documents for this cursor. As with <strong>{cursor.toArray}</strong>,<br>not all of the elements will be iterated if this cursor had been previouly accessed.<br>In that case, <strong>{cursor.rewind}</strong> can be used to reset the cursor. However, unlike<br><strong>{cursor.toArray}</strong>, the cursor will only hold a maximum of batch size elements<br>at any given time if batch size is specified. Otherwise, the caller is responsible<br>for making sure that the entire result can fit the memory.</p>
     </div>
     
 
@@ -7825,10 +7798,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     <div class="description">
-        <p>Returns an array of documents. The caller is responsible for making sure that there
-is enough memory to store the results. Note that the array only contain partial
-results when this cursor had been previouly accessed. In that case,
-cursor.rewind() can be used to reset the cursor.</p>
+        <p>Returns an array of documents. The caller is responsible for making sure that there<br>is enough memory to store the results. Note that the array only contain partial<br>results when this cursor had been previouly accessed. In that case,<br>cursor.rewind() can be used to reset the cursor.</p>
     </div>
     
 
@@ -9432,7 +9402,7 @@ co(function*() {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Jan 03 2017 12:52:46 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 13 2017 11:58:13 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

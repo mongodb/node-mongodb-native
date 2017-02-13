@@ -1371,7 +1371,7 @@
 
 
     <li class="toctree-l1">
-    <a href="/node-mongodb-native/2.2/api/">
+    <a href="/node-mongodb-native/2.2/api">
         <i class='fa fa-file-text-o'></i>
         API Documentation
     </a>
@@ -1547,12 +1547,12 @@
 
 <h2 id="default">DEFAULT</h2>
 
-<p><div class="admonition note">
+<div class="admonition note">
 <h5 class="admonition-title">Note</h5>
 <p>Starting in MongoDB 3.0, MongoDB changed the default authentication mechanism from <a href="https://docs.mongodb.org/manual/core/security-mongodb-cr/">MONGODB-CR</a> to <a href="https://docs.mongodb.org/manual/core/security-scram-sha-1/">SCRAM-SHA-1</a>.</p>
 
 </div>
-</p>
+
 
 <p>To use the default mechanism, either omit the authentication mechanism specification or specify <code>DEFAULT</code> as the mechanism in the <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI ConnectionString</a>. The driver will attempt to authenticate using the <a href="https://docs.mongodb.org/manual/core/security-scram-sha-1/">SCRAM-SHA-1 authentication</a> method if it is available on the MongoDB server. If the server does not support SCRAM-SHA-1, the driver will authenticate using <a href="https://docs.mongodb.org/manual/core/security-mongodb-cr/">MONGODB-CR</a>.</p>
 
@@ -1560,12 +1560,12 @@
 
 <p>In the following example, the connection string specifies the user <code>dave</code>, password <code>abc123</code>, authentication mechanism <code>DEFAULT</code>, and authentication database <code>myproject</code>.</p>
 
-<p><div class="admonition important">
+<div class="admonition important">
 <h5 class="admonition-title">important</h5>
 <p>The user and password should always be <strong>URI</strong> encoded using <code>encodeURIComponent</code> to ensure any non URI compliant user or password characters are correctly parsed.</p>
 
 </div>
-</p>
+
 
 <pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
   f = require('util').format,
@@ -1574,11 +1574,10 @@
 var user = encodeURIComponent('dave');
 var password = encodeURIComponent('abc123');
 var authMechanism = 'DEFAULT';
-var authSource = 'myproject';
 
 // Connection URL
-var url = f('mongodb://%s:%s@localhost:27017?authMechanism=%s&amp;authSource=',
-  user, password, authMechanism, authSource);
+var url = f('mongodb://%s:%s@localhost:27017/myproject?authMechanism=%s',
+  user, password, authMechanism);
 
 // Use connect method to connect to the Server
 MongoClient.connect(url, function(err, db) {
@@ -1635,12 +1634,12 @@ MongoClient.connect(url, function(err, db) {
 });
 </code></pre>
 
-<p><div class="admonition important">
+<div class="admonition important">
 <h5 class="admonition-title">important</h5>
 <p>If you have <a href="https://docs.mongodb.org/manual/release-notes/3.0-scram/">upgraded the authentication schema</a> from <code>MONGODB-CR</code> to <code>SCRAM-SHA-1</code>, <code>MONGODB-CR</code> credentials will fail to authenticate.</p>
 
 </div>
-</p>
+
 
 <h2 id="x509">X509</h2>
 
@@ -1709,12 +1708,12 @@ MongoClient.connect(f(&quot;mongodb://%s@%s/kerberos?authMechanism=GSSAPI&amp;gs
 });
 </code></pre>
 
-<p><div class="admonition note">
+<div class="admonition note">
 <h5 class="admonition-title">Note</h5>
 <p>The method refers to the <code>GSSAPI</code> authentication mechanism instead of <code>Kerberos</code> because technically the driver authenticates via the <a href="https://tools.ietf.org/html/rfc4752">GSSAPI</a> SASL mechanism.</p>
 
 </div>
-</p>
+
 
 <h2 id="ldap-plain">LDAP (PLAIN)</h2>
 
@@ -1743,12 +1742,12 @@ MongoClient.connect(url, function(err, db) {
 });
 </code></pre>
 
-<p><div class="admonition note">
+<div class="admonition note">
 <h5 class="admonition-title">Note</h5>
 <p>The method refers to the <code>PLAIN</code> authentication mechanism instead of <code>LDAP</code> because technically the driver authenticates via the <a href="https://www.ietf.org/rfc/rfc4616.txt">PLAIN</a> SASL mechanism.</p>
 
 </div>
-</p>
+
 
 
 

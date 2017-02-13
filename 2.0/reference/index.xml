@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>References on MongoDB Node.js Driver</title>
-    <link>/node-mongodb-native/2.0/reference/</link>
+    <link>/node-mongodb-native/2.0/reference/index.xml</link>
     <description>Recent content in References on MongoDB Node.js Driver</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
@@ -25,12 +25,12 @@
 
 &lt;p&gt;When you query a GridFS store for a file, the driver or client will reassemble the chunks as needed. GridFS is useful not only for storing files that exceed 16MB but also for storing any files for which you want access without having to load the entire file into memory.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;For more information about GridFS see the &lt;a href=&#34;http://docs.mongodb.org/manual/core/gridfs/&#34;&gt;MongoDB GridFS documentation&lt;/a&gt;.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;p&gt;The Node.js Driver includes the legacy &lt;code&gt;GridStore&lt;/code&gt; API.&lt;/p&gt;
 
@@ -53,14 +53,14 @@
 &lt;p&gt;The Node.js driver supports all MongoDB &lt;a href=&#34;http://docs.mongodb.org/manual/core/authentication/&#34;&gt;authentication mechanisms&lt;/a&gt;, including those
 only available in the MongoDB &lt;a href=&#34;http://docs.mongodb.org/manual/administration/install-enterprise/&#34;&gt;Enterprise Edition&lt;/a&gt;.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;MongoDB 3.0 changed the default authentication mechanism from
 &lt;a href=&#34;http://docs.mongodb.org/manual/core/authentication/#mongodb-cr-authentication&#34;&gt;MONGODB-CR&lt;/a&gt; to
 &lt;a href=&#34;http://docs.mongodb.org/manual/core/authentication/#scram-sha-1-authentication&#34;&gt;SCRAM-SHA-1&lt;/a&gt;.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;h2 id=&#34;default&#34;&gt;DEFAULT&lt;/h2&gt;
 
@@ -123,12 +123,12 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;The URI uses the authMechanism &lt;code&gt;MONGODB-CR&lt;/code&gt; with the user &lt;code&gt;dave&lt;/code&gt; and password &lt;code&gt;password&lt;/code&gt; against the database &lt;code&gt;db&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition important&#34;&gt;
+&lt;div class=&#34;admonition important&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;important&lt;/h5&gt;
 &lt;p&gt;If you specify the &lt;code&gt;MONGODB-CR&lt;/code&gt; authMechanism the authentication might fail once you upgrade MongoDB to 3.0 or higher due to new users only being created using the &lt;code&gt;SCRAM-SHA-1&lt;/code&gt; mechanism.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;h2 id=&#34;x509&#34;&gt;X509&lt;/h2&gt;
 
@@ -194,13 +194,13 @@ MongoClient.connect(format(&amp;quot;mongodb://%s@%s/kerberos?authMechanism=GSSA
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;The method refers to the &lt;code&gt;GSSAPI&lt;/code&gt; authentication mechanism instead of &lt;code&gt;Kerberos&lt;/code&gt; because technically the driver is authenticating via the
 &lt;a href=&#34;https://tools.ietf.org/html/rfc4752&#34;&gt;GSSAPI&lt;/a&gt; SASL mechanism.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;h2 id=&#34;ldap-plain&#34;&gt;LDAP (PLAIN)&lt;/h2&gt;
 
@@ -228,12 +228,12 @@ MongoClient.connect(url, function(err, db) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;The method refers to the &lt;code&gt;plain&lt;/code&gt; authentication mechanism instead of &lt;code&gt;LDAP&lt;/code&gt; because technically the driver is authenticating via the &lt;a href=&#34;https://www.ietf.org/rfc/rfc4616.txt&#34;&gt;PLAIN&lt;/a&gt; SASL mechanism.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 </description>
     </item>
     
@@ -253,12 +253,12 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;When you query a GridFS store for a file, the driver or client will reassemble the chunks as needed. GridFS is useful not only for storing files that exceed 16MB but also for storing any files for which you want access without having to load the entire file into memory.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;For more information about GridFS see the &lt;a href=&#34;http://docs.mongodb.org/manual/core/gridfs/&#34;&gt;MongoDB GridFS documentation&lt;/a&gt;.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;p&gt;GridStore is a single file inside GridFS that can be managed by the script.&lt;/p&gt;
 
@@ -400,7 +400,8 @@ MongoClient.connect(url, function(err, db) {
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;db&lt;/code&gt; is the database object&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;filename&lt;/code&gt; is the name of the file to be checked or a regular expression&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a callback function with two parameters - an error object (if an error occured) and a boolean value indicating if the file exists or not&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a callback function with two parameters - an error object (if an error occured) and a boolean value indicating if the file exists or not
+&lt;br /&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h2 id=&#34;seek-to-a-specific-position-for-reading&#34;&gt;Seek to a Specific position for Reading&lt;/h2&gt;
@@ -1604,6 +1605,26 @@ co(function*() {
     
     <item>
       <title>Connecting</title>
+      <link>/node-mongodb-native/2.0/reference/connecting/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/reference/connecting/</guid>
+      <description>
+
+&lt;h2 id=&#34;connecting&#34;&gt;Connecting&lt;/h2&gt;
+
+&lt;p&gt;The reference documentation for connecting to a MongoDB server deployment is divided into three sections:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/connection-settings/&#34;&gt;Connection Settings&lt;/a&gt;: documentation of the various ways to specify the properties of a connection&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/authenticating/&#34;&gt;Authenticating&lt;/a&gt;: detailed documentation of the various ways to specify authentication credentials&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/ssl/&#34;&gt;SSL&lt;/a&gt;: Detailed documentation of the various ways to specify the properties of an SSL connection&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Connecting</title>
       <link>/node-mongodb-native/2.0/reference/ecmascript6/connecting/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
       
@@ -1631,26 +1652,6 @@ co(function*() {
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The &lt;code&gt;MongoClient.connect&lt;/code&gt; function returns a &lt;code&gt;Promise&lt;/code&gt; that we then execute using the &lt;code&gt;yield&lt;/code&gt; keyword of the &lt;code&gt;generator&lt;/code&gt; function. If an error happens during the &lt;code&gt;MongoClient.connect&lt;/code&gt; the error is caught by &lt;code&gt;co&lt;/code&gt; and can be inspected by attaching a function to the &lt;code&gt;catch&lt;/code&gt; method as shown above.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Connecting</title>
-      <link>/node-mongodb-native/2.0/reference/connecting/</link>
-      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
-      
-      <guid>/node-mongodb-native/2.0/reference/connecting/</guid>
-      <description>
-
-&lt;h2 id=&#34;connecting&#34;&gt;Connecting&lt;/h2&gt;
-
-&lt;p&gt;The reference documentation for connecting to a MongoDB server deployment is divided into three sections:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/connection-settings/&#34;&gt;Connection Settings&lt;/a&gt;: documentation of the various ways to specify the properties of a connection&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/authenticating/&#34;&gt;Authenticating&lt;/a&gt;: detailed documentation of the various ways to specify authentication credentials&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/ssl/&#34;&gt;SSL&lt;/a&gt;: Detailed documentation of the various ways to specify the properties of an SSL connection&lt;/li&gt;
-&lt;/ul&gt;
 </description>
     </item>
     
@@ -2390,12 +2391,12 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 
 &lt;p&gt;This section exposes how to use the MongoDB Node.js driver with ECMAScript 6, leveraging all the productivity gains you get from the new Generators.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;For more information about ECMAScript 6 see the &lt;a href=&#34;http://es6-features.org/&#34;&gt;ECMAScript 6 features&lt;/a&gt;.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/ecmascript6/connecting/&#34;&gt;Connecting&lt;/a&gt;: how to connect leveraging ECMASdcript 6.&lt;/li&gt;
@@ -2542,12 +2543,12 @@ Socket N &amp;lt;- [S, F, F, F]
 
 &lt;p&gt;Unfortunately until MongoDB starts multiplexing threads on sockets or becomes an asynchronous there is only one reasonable strategy to avoid this problem.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;Create a separate connection pool for the slow executing operations, thus isolating the slow operations from the fast operations.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 </description>
     </item>
     

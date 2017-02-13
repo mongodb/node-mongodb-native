@@ -1536,7 +1536,7 @@
 
 
     <li class="toctree-l1">
-    <a href="/node-mongodb-native/2.2/api/">
+    <a href="/node-mongodb-native/2.2/api">
         <i class='fa fa-file-text-o'></i>
         API Documentation
     </a>
@@ -1727,9 +1727,9 @@ and operators, see the
 <a href="https://docs.mongodb.com/manual/core/aggregation-pipeline/">manual:</a></p>
 
 <p>The following example uses the aggregation pipeline on the
-<code>restaurants</code> sample dataset to find
-a list of the total number of 5-star restaurants, grouped by restaurant
-category.</p>
+<a href="https://docs.mongodb.org/getting-started/node/import-data/">restaurant</a>
+sample dataset to find a list of restaurants located in the Bronx,
+grouped by restaurant category.</p>
 
 <pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
   , assert = require('assert');
@@ -1745,9 +1745,9 @@ MongoClient.connect(url, function(err, db) {
 var simplePipeline = function(db, callback) {
   var collection = db.collection( 'restaurants' );
   collection.aggregate( 
-      [ { '$match': { &quot;stars&quot;: 5 } },
+      [ { '$match': { &quot;borough&quot;: &quot;Bronx&quot; } },
         { '$unwind': '$categories'},
-        { '$group': { '_id': &quot;$categories&quot;, 'fiveStars': { '$sum': 1 } } }		
+        { '$group': { '_id': &quot;$categories&quot;, 'Bronx restaurants': { '$sum': 1 } } }		
       ],	  
 	  function(err, results) {
         assert.equal(err, null);

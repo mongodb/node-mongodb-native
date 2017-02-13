@@ -2,12 +2,6 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>/node-mongodb-native/2.2/</loc>
-    <lastmod>2016-06-01T12:53:30-04:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/node-mongodb-native/2.2/tutorials/projections/</loc>
     <lastmod>2016-06-01T12:53:30-04:00</lastmod>
   </url>
@@ -23,12 +17,7 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/reference/management/</loc>
-    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.2/tutorials/commands/</loc>
+    <loc>/node-mongodb-native/2.2/tutorials/connect/authenticating/</loc>
     <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
   
@@ -38,7 +27,7 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/tutorials/connect/authenticating/</loc>
+    <loc>/node-mongodb-native/2.2/tutorials/commands/</loc>
     <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
   
@@ -49,6 +38,11 @@
   
   <url>
     <loc>/node-mongodb-native/2.2/tutorials/gridfs/gridstore/</loc>
+    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.2/reference/management/</loc>
     <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
   
@@ -68,42 +62,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/reference/connecting/connection-settings/</loc>
-    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.2/reference/connecting/legacy-connection-settings/</loc>
-    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.2/reference/connecting/</loc>
-    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/node-mongodb-native/2.2/reference/ecmascript6/crud/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/reference/ecmascript6/</loc>
-    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.2/reference/ecmascript6/connecting/</loc>
-    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.2/reference/faq/</loc>
-    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.2/reference/pool/</loc>
+    <loc>/node-mongodb-native/2.2/tutorials/crud/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
@@ -118,7 +82,37 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/tutorials/crud/</loc>
+    <loc>/node-mongodb-native/2.2/reference/ecmascript6/connecting/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.2/reference/connecting/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.2/reference/connecting/connection-settings/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.2/reference/ecmascript6/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.2/reference/faq/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.2/reference/connecting/legacy-connection-settings/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.2/reference/pool/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
@@ -128,18 +122,13 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/reference/management/sdam-monitoring/</loc>
-    <lastmod>2015-03-19T12:53:26-04:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/node-mongodb-native/2.2/tutorials/connect/ssl/</loc>
     <lastmod>2015-03-19T12:53:26-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/reference/management/logging/</loc>
-    <lastmod>2015-03-18T21:14:20-04:00</lastmod>
+    <loc>/node-mongodb-native/2.2/reference/management/sdam-monitoring/</loc>
+    <lastmod>2015-03-19T12:53:26-04:00</lastmod>
   </url>
   
   <url>
@@ -148,8 +137,18 @@
   </url>
   
   <url>
+    <loc>/node-mongodb-native/2.2/reference/management/logging/</loc>
+    <lastmod>2015-03-18T21:14:20-04:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/node-mongodb-native/2.2/issues-help/</loc>
     <lastmod>2015-03-18T16:56:14+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.2/tutorials/create-indexes/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   
   <url>
@@ -163,23 +162,54 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/</loc>
-    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/node-mongodb-native/2.2/reference/</loc>
-    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.2/tutorials/create-indexes/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   
   <url>
     <loc>/node-mongodb-native/2.2/tutorials/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.2/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.2/installation-guide/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.2/</loc>
+    <lastmod>2016-06-01T12:53:30-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.2/quick-start/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.2/reference/</loc>
+    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.2/tutorials/</loc>
+    <lastmod>2016-06-01T12:53:30-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.2/upgrade-migration/</loc>
+    <lastmod>2015-03-19T12:53:39-04:00</lastmod>
+    <priority>0</priority>
   </url>
   
 </urlset>

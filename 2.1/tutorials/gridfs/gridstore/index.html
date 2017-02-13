@@ -1604,7 +1604,7 @@
 
 
     <li class="toctree-l1">
-    <a href="/node-mongodb-native/2.1/api/">
+    <a href="/node-mongodb-native/2.1/api">
         <i class='fa fa-file-text-o'></i>
         API Documentation
     </a>
@@ -1774,13 +1774,13 @@
 
 
 
-<p><div class="admonition warning">
+<div class="admonition warning">
 <h5 class="admonition-title">Note</h5>
 <p>The GridStore API is deprecated. Driver version 2.0 and later uses the
 <a href="/node-mongodb-native/2.1/tutorials/gridfs/streaming/">GridFS API</a>.</p>
 
 </div>
-</p>
+
 
 <h1 id="gridstore">GridStore</h1>
 
@@ -1925,7 +1925,8 @@ result value which indicates if the write was successful or not.</p>
 <ul>
 <li><code>db</code> is the database object</li>
 <li><code>filename</code> is the name of the file to be checked or a regular expression</li>
-<li><code>callback</code> is a callback function with two parameters - an error object (if an error occured) and a boolean value indicating if the file exists or not</li>
+<li><code>callback</code> is a callback function with two parameters - an error object (if an error occured) and a boolean value indicating if the file exists or not
+<br /></li>
 </ul>
 
 <h2 id="seek-to-a-specific-position-for-reading">Seek to a specific position for reading</h2>

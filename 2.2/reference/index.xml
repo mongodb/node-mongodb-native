@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>References on MongoDB Node.js Driver</title>
-    <link>/node-mongodb-native/2.2/reference/</link>
+    <link>/node-mongodb-native/2.2/reference/index.xml</link>
     <description>Recent content in References on MongoDB Node.js Driver</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
@@ -44,7 +44,7 @@
 &lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/crud/&#34;&gt;CRUD&lt;/a&gt;: CRUD Specification.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;This reference also obmits methods that no longer make sense when using ECMAScript 6 such as the &lt;code&gt;each&lt;/code&gt; and &lt;code&gt;forEach&lt;/code&gt; methods.&lt;/p&gt;
+&lt;p&gt;This reference also omits methods that no longer make sense when using ECMAScript 6 such as the &lt;code&gt;each&lt;/code&gt; and &lt;code&gt;forEach&lt;/code&gt; methods.&lt;/p&gt;
 
 &lt;h2 id=&#34;inserting-documents&#34;&gt;Inserting Documents&lt;/h2&gt;
 
@@ -777,6 +777,30 @@ MongoClient.connect(url, {
 &lt;/tr&gt;
 
 &lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;promoteBuffers&lt;/strong&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;boolean&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Promotes Binary BSON values to native Node Buffers.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;promoteValues&lt;/strong&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;boolean&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Promotes BSON values to native types where possible, set to false to only receive wrapper types.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;domainsEnabled&lt;/strong&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;boolean&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;&lt;strong&gt;bufferMaxEntries&lt;/strong&gt;&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;integer&lt;/td&gt;
@@ -817,11 +841,27 @@ MongoClient.connect(url, {
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;**maxStalenessSeconds&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;maxStalenessSeconds&lt;/strong&gt;&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Replicaset&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;number&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Specify a maxStalenessSeconds value for secondary reads, minimum is 90 seconds&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;loggerLevel&lt;/strong&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Server, Replicaset, Mongos&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;string&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Specify the log level used by the driver logger (error/warn/info/debug)&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;logger&lt;/strong&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Server, Replicaset, Mongos&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;object&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Specify a customer logger mechanism, can be used to log using your app level logger&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
@@ -871,12 +911,12 @@ MongoClient.connect(url, {
 
 &lt;p&gt;This section exposes how to use the MongoDB Node.js driver with ECMAScript 6, leveraging all the productivity gains you get from the new Generators.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;For more information about ECMAScript 6 see the &lt;a href=&#34;http://es6-features.org/&#34;&gt;ECMAScript 6 features&lt;/a&gt;.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/reference/ecmascript6/connecting/&#34;&gt;Connecting&lt;/a&gt;: how to connect leveraging ECMAScript 6.&lt;/li&gt;
@@ -1052,12 +1092,12 @@ this with the &lt;code&gt;ulimit&lt;/code&gt; shell command.&lt;/p&gt;
 
 &lt;h1 id=&#34;how-can-i-prevent-a-slow-operation-from-delaying-other-operations&#34;&gt;How can I prevent a slow operation from delaying other operations?&lt;/h1&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;The driver is only affected by the slow train operations if the number of slow operations is larger than the max pool size.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;p&gt;While Node.js is asynchronous, MongoDB is not. Currently, MongoDB uses a single execution thread per socket. This means that it will only execute a single operation on a socket at any given point in time. Any other operations sent to that socket will have to wait until the current operation is finished. If you have a slow-running operation which holds up other operations,
 the best solution is to create a separate connection pool for the slow operation, isolating it from other, faster
@@ -1102,12 +1142,12 @@ operations.&lt;/p&gt;
 
 &lt;h1 id=&#34;connect-to-mongodb-legacy&#34;&gt;Connect To MongoDB (Legacy)&lt;/h1&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;For 2.1.10 or earlier. For newer versions, see &lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/reference/connecting/&#34;&gt;Connect to MongoDB&lt;/a&gt;&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;p&gt;Connecting to MongoDB using the driver is primarily done using the &lt;code&gt;MongoClient.connect&lt;/code&gt; method and a URI. Let&amp;rsquo;s look at how we connect to a couple of different server topologies.&lt;/p&gt;
 

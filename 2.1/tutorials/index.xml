@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tutorials on MongoDB Node.js Driver</title>
-    <link>/node-mongodb-native/2.1/tutorials/</link>
+    <link>/node-mongodb-native/2.1/tutorials/index.xml</link>
     <description>Recent content in Tutorials on MongoDB Node.js Driver</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
@@ -313,12 +313,12 @@ collection that stores the file metadata.&lt;/p&gt;
 
 &lt;p&gt;When you query a GridFS store for a file, the driver or client will reassemble the chunks as needed. GridFS is useful not only for storing files that exceed 16 megabytes but also for storing any files which you want to access without having to load the entire file into memory.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;For more information about GridFS, see the &lt;a href=&#34;http://docs.mongodb.org/manual/core/gridfs/&#34;&gt;MongoDB GridFS documentation&lt;/a&gt;.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;p&gt;The Node.js Driver includes the legacy &lt;code&gt;GridStore&lt;/code&gt; API.&lt;/p&gt;
 
@@ -343,12 +343,12 @@ collection that stores the file metadata.&lt;/p&gt;
 
 &lt;h2 id=&#34;default&#34;&gt;DEFAULT&lt;/h2&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;Starting in MongoDB 3.0, MongoDB changed the default authentication mechanism from &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-mongodb-cr/&#34;&gt;MONGODB-CR&lt;/a&gt; to &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-scram-sha-1/&#34;&gt;SCRAM-SHA-1&lt;/a&gt;.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;p&gt;To use the default mechanism, either omit the authentication mechanism specification or specify &lt;code&gt;DEFAULT&lt;/code&gt; as the mechanism in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI ConnectionString&lt;/a&gt;. The driver will attempt to authenticate using the &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-scram-sha-1/&#34;&gt;SCRAM-SHA-1 authentication&lt;/a&gt; method if it is available on the MongoDB server. If the server does not support SCRAM-SHA-1, the driver will authenticate using &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-mongodb-cr/&#34;&gt;MONGODB-CR&lt;/a&gt;.&lt;/p&gt;
 
@@ -417,12 +417,12 @@ MongoClient.connect(url, function(err, db) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition important&#34;&gt;
+&lt;div class=&#34;admonition important&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;important&lt;/h5&gt;
 &lt;p&gt;If you have &lt;a href=&#34;https://docs.mongodb.org/manual/release-notes/3.0-scram/&#34;&gt;upgraded the authentication schema&lt;/a&gt; from &lt;code&gt;MONGODB-CR&lt;/code&gt; to &lt;code&gt;SCRAM-SHA-1&lt;/code&gt;, &lt;code&gt;MONGODB-CR&lt;/code&gt; credentials will fail to authenticate.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;h2 id=&#34;x509&#34;&gt;X509&lt;/h2&gt;
 
@@ -491,12 +491,12 @@ MongoClient.connect(f(&amp;quot;mongodb://%s@%s/kerberos?authMechanism=GSSAPI&am
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;The method refers to the &lt;code&gt;GSSAPI&lt;/code&gt; authentication mechanism instead of &lt;code&gt;Kerberos&lt;/code&gt; because technically the driver authenticates via the &lt;a href=&#34;https://tools.ietf.org/html/rfc4752&#34;&gt;GSSAPI&lt;/a&gt; SASL mechanism.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;h2 id=&#34;ldap-plain&#34;&gt;LDAP (PLAIN)&lt;/h2&gt;
 
@@ -525,12 +525,12 @@ MongoClient.connect(url, function(err, db) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;The method refers to the &lt;code&gt;PLAIN&lt;/code&gt; authentication mechanism instead of &lt;code&gt;LDAP&lt;/code&gt; because technically the driver authenticates via the &lt;a href=&#34;https://www.ietf.org/rfc/rfc4616.txt&#34;&gt;PLAIN&lt;/a&gt; SASL mechanism.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 </description>
     </item>
     
@@ -829,13 +829,13 @@ MongoClient.connect(url, function(err, db) {
       <guid>/node-mongodb-native/2.1/tutorials/gridfs/gridstore/</guid>
       <description>
 
-&lt;p&gt;&lt;div class=&#34;admonition warning&#34;&gt;
+&lt;div class=&#34;admonition warning&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;The GridStore API is deprecated. Driver version 2.0 and later uses the
 &lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/tutorials/gridfs/streaming/&#34;&gt;GridFS API&lt;/a&gt;.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;h1 id=&#34;gridstore&#34;&gt;GridStore&lt;/h1&gt;
 
@@ -980,7 +980,8 @@ result value which indicates if the write was successful or not.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;db&lt;/code&gt; is the database object&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;filename&lt;/code&gt; is the name of the file to be checked or a regular expression&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a callback function with two parameters - an error object (if an error occured) and a boolean value indicating if the file exists or not&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a callback function with two parameters - an error object (if an error occured) and a boolean value indicating if the file exists or not
+&lt;br /&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h2 id=&#34;seek-to-a-specific-position-for-reading&#34;&gt;Seek to a specific position for reading&lt;/h2&gt;
@@ -2156,7 +2157,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;h1 id=&#34;connect-to-mongodb&#34;&gt;Connect to MongoDB&lt;/h1&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;This reference applies to &lt;strong&gt;2.1.11&lt;/strong&gt; or higher. For &lt;strong&gt;2.1.10&lt;/strong&gt; or
 earlier, refer to the &lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/legacy-connection-settings/&#34;&gt;legacy connection settings&lt;/a&gt;. &lt;strong&gt;2.1.11&lt;/strong&gt;
@@ -2164,7 +2165,7 @@ is backward compatible with the legacy settings as well as the
 simplified settings.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;p&gt;Use the &lt;code&gt;MongoClient.connect&lt;/code&gt; method to connect to a running MongoDB deployment.&lt;/p&gt;
 

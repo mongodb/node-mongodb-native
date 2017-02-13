@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tutorials on MongoDB Node.js Driver</title>
-    <link>/node-mongodb-native/2.2/tutorials/</link>
+    <link>/node-mongodb-native/2.2/tutorials/index.xml</link>
     <description>Recent content in Tutorials on MongoDB Node.js Driver</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
@@ -313,12 +313,12 @@ collection that stores the file metadata.&lt;/p&gt;
 
 &lt;p&gt;When you query a GridFS store for a file, the driver or client will reassemble the chunks as needed. GridFS is useful not only for storing files that exceed 16 megabytes but also for storing any files which you want to access without having to load the entire file into memory.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;For more information about GridFS, see the &lt;a href=&#34;http://docs.mongodb.org/manual/core/gridfs/&#34;&gt;MongoDB GridFS documentation&lt;/a&gt;.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;p&gt;The Node.js Driver includes the legacy &lt;code&gt;GridStore&lt;/code&gt; API.&lt;/p&gt;
 
@@ -343,12 +343,12 @@ collection that stores the file metadata.&lt;/p&gt;
 
 &lt;h2 id=&#34;default&#34;&gt;DEFAULT&lt;/h2&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;Starting in MongoDB 3.0, MongoDB changed the default authentication mechanism from &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-mongodb-cr/&#34;&gt;MONGODB-CR&lt;/a&gt; to &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-scram-sha-1/&#34;&gt;SCRAM-SHA-1&lt;/a&gt;.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;p&gt;To use the default mechanism, either omit the authentication mechanism specification or specify &lt;code&gt;DEFAULT&lt;/code&gt; as the mechanism in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI ConnectionString&lt;/a&gt;. The driver will attempt to authenticate using the &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-scram-sha-1/&#34;&gt;SCRAM-SHA-1 authentication&lt;/a&gt; method if it is available on the MongoDB server. If the server does not support SCRAM-SHA-1, the driver will authenticate using &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-mongodb-cr/&#34;&gt;MONGODB-CR&lt;/a&gt;.&lt;/p&gt;
 
@@ -356,12 +356,12 @@ collection that stores the file metadata.&lt;/p&gt;
 
 &lt;p&gt;In the following example, the connection string specifies the user &lt;code&gt;dave&lt;/code&gt;, password &lt;code&gt;abc123&lt;/code&gt;, authentication mechanism &lt;code&gt;DEFAULT&lt;/code&gt;, and authentication database &lt;code&gt;myproject&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition important&#34;&gt;
+&lt;div class=&#34;admonition important&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;important&lt;/h5&gt;
 &lt;p&gt;The user and password should always be &lt;strong&gt;URI&lt;/strong&gt; encoded using &lt;code&gt;encodeURIComponent&lt;/code&gt; to ensure any non URI compliant user or password characters are correctly parsed.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
   f = require(&#39;util&#39;).format,
@@ -370,11 +370,10 @@ collection that stores the file metadata.&lt;/p&gt;
 var user = encodeURIComponent(&#39;dave&#39;);
 var password = encodeURIComponent(&#39;abc123&#39;);
 var authMechanism = &#39;DEFAULT&#39;;
-var authSource = &#39;myproject&#39;;
 
 // Connection URL
-var url = f(&#39;mongodb://%s:%s@localhost:27017?authMechanism=%s&amp;amp;authSource=&#39;,
-  user, password, authMechanism, authSource);
+var url = f(&#39;mongodb://%s:%s@localhost:27017/myproject?authMechanism=%s&#39;,
+  user, password, authMechanism);
 
 // Use connect method to connect to the Server
 MongoClient.connect(url, function(err, db) {
@@ -431,12 +430,12 @@ MongoClient.connect(url, function(err, db) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition important&#34;&gt;
+&lt;div class=&#34;admonition important&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;important&lt;/h5&gt;
 &lt;p&gt;If you have &lt;a href=&#34;https://docs.mongodb.org/manual/release-notes/3.0-scram/&#34;&gt;upgraded the authentication schema&lt;/a&gt; from &lt;code&gt;MONGODB-CR&lt;/code&gt; to &lt;code&gt;SCRAM-SHA-1&lt;/code&gt;, &lt;code&gt;MONGODB-CR&lt;/code&gt; credentials will fail to authenticate.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;h2 id=&#34;x509&#34;&gt;X509&lt;/h2&gt;
 
@@ -505,12 +504,12 @@ MongoClient.connect(f(&amp;quot;mongodb://%s@%s/kerberos?authMechanism=GSSAPI&am
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;The method refers to the &lt;code&gt;GSSAPI&lt;/code&gt; authentication mechanism instead of &lt;code&gt;Kerberos&lt;/code&gt; because technically the driver authenticates via the &lt;a href=&#34;https://tools.ietf.org/html/rfc4752&#34;&gt;GSSAPI&lt;/a&gt; SASL mechanism.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;h2 id=&#34;ldap-plain&#34;&gt;LDAP (PLAIN)&lt;/h2&gt;
 
@@ -539,12 +538,12 @@ MongoClient.connect(url, function(err, db) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;The method refers to the &lt;code&gt;PLAIN&lt;/code&gt; authentication mechanism instead of &lt;code&gt;LDAP&lt;/code&gt; because technically the driver authenticates via the &lt;a href=&#34;https://www.ietf.org/rfc/rfc4616.txt&#34;&gt;PLAIN&lt;/a&gt; SASL mechanism.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 </description>
     </item>
     
@@ -843,13 +842,13 @@ MongoClient.connect(url, function(err, db) {
       <guid>/node-mongodb-native/2.2/tutorials/gridfs/gridstore/</guid>
       <description>
 
-&lt;p&gt;&lt;div class=&#34;admonition warning&#34;&gt;
+&lt;div class=&#34;admonition warning&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;The GridStore API is deprecated. Driver version 2.0 and later uses the
 &lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/gridfs/streaming/&#34;&gt;GridFS API&lt;/a&gt;.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;h1 id=&#34;gridstore&#34;&gt;GridStore&lt;/h1&gt;
 
@@ -994,7 +993,8 @@ result value which indicates if the write was successful or not.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;db&lt;/code&gt; is the database object&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;filename&lt;/code&gt; is the name of the file to be checked or a regular expression&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a callback function with two parameters - an error object (if an error occured) and a boolean value indicating if the file exists or not&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a callback function with two parameters - an error object (if an error occured) and a boolean value indicating if the file exists or not
+&lt;br /&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h2 id=&#34;seek-to-a-specific-position-for-reading&#34;&gt;Seek to a specific position for reading&lt;/h2&gt;
@@ -1287,12 +1287,12 @@ co(function*() {
 &lt;p&gt;The following example specifies a numerical data type
 when inserting documents with the &lt;code&gt;insertMany&lt;/code&gt; method.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;The Decimal128 data type requires MongoDB server version 3.4 or higher.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;section class=&#34;javascript5&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
 var Long = require(&#39;mongodb&#39;).Long;
@@ -2490,7 +2490,7 @@ the above operation returns no results and updates no documents.&lt;/p&gt;
 &lt;p&gt;Consider the same &lt;code&gt;find_one_and_update&lt;/code&gt; operation but with the
 collation specified.  The locale is set to &lt;code&gt;de@collation=phonebook&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;Some locales have a &lt;code&gt;collation=phonebook&lt;/code&gt; option available for
 use with languages which sort proper nouns differently from other
@@ -2499,7 +2499,7 @@ characters with umlauts come before the same characters without
 umlauts.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
  , assert = require(&#39;assert&#39;);
@@ -2668,7 +2668,7 @@ var countNames = function(db, callback) {
 
 &lt;h1 id=&#34;connect-to-mongodb&#34;&gt;Connect to MongoDB&lt;/h1&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;This reference applies to &lt;strong&gt;2.1.11&lt;/strong&gt; or higher. For &lt;strong&gt;2.1.10&lt;/strong&gt; or
 earlier, refer to the &lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/reference/connecting/legacy-connection-settings/&#34;&gt;legacy connection settings&lt;/a&gt;. &lt;strong&gt;2.1.11&lt;/strong&gt;
@@ -2676,7 +2676,7 @@ is backward compatible with the legacy settings as well as the
 simplified settings.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;p&gt;Use the &lt;code&gt;MongoClient.connect&lt;/code&gt; method to connect to a running MongoDB deployment.&lt;/p&gt;
 
@@ -2832,7 +2832,6 @@ MongoClient.connect(url,  {
 MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, function(err, db) {
   db.close();
 });
-
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h2 id=&#34;validate-server-certificate&#34;&gt;Validate Server Certificate&lt;/h2&gt;
@@ -2842,7 +2841,7 @@ MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;,
 &lt;ul&gt;
 &lt;li&gt;&lt;p&gt;A &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI Connection String &lt;/a&gt; that includes &lt;code&gt;ssl=true&lt;/code&gt; setting,&lt;/p&gt;&lt;/li&gt;
 
-&lt;li&gt;&lt;p&gt;A connections options for the &lt;code&gt;server&lt;/code&gt; with the certificate for the Certificate Authority (&lt;code&gt;sslCA&lt;/code&gt;) and the &lt;code&gt;sslValidate&lt;/code&gt; setting set to &lt;code&gt;true&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;A connections options with the certificate for the Certificate Authority (&lt;code&gt;sslCA&lt;/code&gt;) and the &lt;code&gt;sslValidate&lt;/code&gt; setting set to &lt;code&gt;true&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
@@ -2854,10 +2853,8 @@ var ca = [fs.readFileSync(__dirname + &amp;quot;/ssl/ca.pem&amp;quot;)];
 
 // Connect validating the returned certificates from the server
 MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, {
-  server: {
-      sslValidate:true
-    , sslCA:ca
-  }
+  sslValidate:true,
+  sslCA:ca
 }, function(err, db) {
   db.close();
 });
@@ -2871,7 +2868,7 @@ server&amp;rsquo;s SSL certificate(s) matches the hostname(s) provided in the UR
 &lt;ul&gt;
 &lt;li&gt;&lt;p&gt;A &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI Connection String &lt;/a&gt; that includes &lt;code&gt;ssl=true&lt;/code&gt; setting,&lt;/p&gt;&lt;/li&gt;
 
-&lt;li&gt;&lt;p&gt;A connections options for the &lt;code&gt;server&lt;/code&gt; with the certificate for the Certificate Authority (&lt;code&gt;sslCA&lt;/code&gt;) and the &lt;code&gt;sslValidate&lt;/code&gt; setting set to &lt;code&gt;true&lt;/code&gt; but  &lt;code&gt;checkServerIdentity&lt;/code&gt; set to &lt;code&gt;false&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;A connections options with the certificate for the Certificate Authority (&lt;code&gt;sslCA&lt;/code&gt;) and the &lt;code&gt;sslValidate&lt;/code&gt; setting set to &lt;code&gt;true&lt;/code&gt; but  &lt;code&gt;checkServerIdentity&lt;/code&gt; set to &lt;code&gt;false&lt;/code&gt;.&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
@@ -2883,11 +2880,9 @@ var ca = [fs.readFileSync(__dirname + &amp;quot;/ssl/ca.pem&amp;quot;)];
 
 // Connect validating the returned certificates from the server
 MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, {
-  server: {
-      sslValidate:true
-    , checkServerIdentity:false
-    , sslCA:ca
-  }
+  sslValidate:true,
+  checkServerIdentity:false,
+  sslCA:ca
 }, function(err, db) {
   db.close();
 });
@@ -2901,7 +2896,7 @@ certificate to the server. To pass the client&amp;rsquo;s certificate as well as
 &lt;ul&gt;
 &lt;li&gt;&lt;p&gt;A &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI Connection String &lt;/a&gt; that includes &lt;code&gt;ssl=true&lt;/code&gt; setting,&lt;/p&gt;&lt;/li&gt;
 
-&lt;li&gt;&lt;p&gt;A connections options for the &lt;code&gt;server&lt;/code&gt; with the &lt;code&gt;sslValidate&lt;/code&gt; setting set to &lt;code&gt;true&lt;/code&gt;, the certificate for the Certificate Authority (&lt;code&gt;sslCA&lt;/code&gt;), the client&amp;rsquo;s certificate (&lt;code&gt;sslCert&lt;/code&gt;) and private key file (&lt;code&gt;sslKey&lt;/code&gt;).  If the client&amp;rsquo;s key file is encrypted, include the password (&lt;code&gt;sslPass&lt;/code&gt;).&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;A connections options with the &lt;code&gt;sslValidate&lt;/code&gt; setting set to &lt;code&gt;true&lt;/code&gt;, the certificate for the Certificate Authority (&lt;code&gt;sslCA&lt;/code&gt;), the client&amp;rsquo;s certificate (&lt;code&gt;sslCert&lt;/code&gt;) and private key file (&lt;code&gt;sslKey&lt;/code&gt;).  If the client&amp;rsquo;s key file is encrypted, include the password (&lt;code&gt;sslPass&lt;/code&gt;).&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
@@ -2915,17 +2910,14 @@ var key = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
 
 // Connect validating the returned certificates from the server
 MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, {
-  server: {
-      sslValidate:true
-    , sslCA:ca
-    , sslKey:key
-    , sslCert:cert
-    , sslPass:&#39;10gen&#39;
-  }
+  sslValidate:true,
+  sslCA:ca,
+  sslKey:key,
+  sslCert:cert,
+  sslPass:&#39;10gen&#39;,
 }, function(err, db) {
   db.close();
 });
-
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h2 id=&#34;connect-with-x-509&#34;&gt;Connect with X.509&lt;/h2&gt;
@@ -2935,7 +2927,7 @@ MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;,
 &lt;p&gt;To connect using the X.509 authentication mechanism, specify &lt;code&gt;MONGODB-CR&lt;/code&gt; as the mechanism in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI connection string&lt;/a&gt;, &lt;code&gt;ssl=true&lt;/code&gt;, and the username. Use &lt;code&gt;enodeURIComponent&lt;/code&gt; to encode the username string.&lt;/p&gt;
 
 &lt;p&gt;In addition to the connection string, pass to the &lt;code&gt;MongoClient.connect&lt;/code&gt; method
-a connections options for the &lt;code&gt;server&lt;/code&gt; with  the X.509 certificate and other &lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/connect/ssl/&#34;&gt;TLS/SSL connections&lt;/a&gt; options.&lt;/p&gt;
+a connections options with  the X.509 certificate and other &lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/reference/connecting/connection-settings/&#34;&gt;TLS/SSL connections&lt;/a&gt; options.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
   f = require(&#39;util&#39;).format,
@@ -2951,14 +2943,11 @@ var userName = &amp;quot;CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New 
 // Connect using the MONGODB-X509 authentication mechanism
 MongoClient.connect(f(&#39;mongodb://%s@server:27017/test?authMechanism=%s&amp;amp;ssl=true&#39;
     , encodeURIComponent(userName), &#39;MONGODB-X509&#39;), {
-  server: {
-      sslKey:key
-    , sslCert:cert
-  }
+  sslKey:key,
+  sslCert:cert,
 }, function(err, db) {
   db.close();
 });
-
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h2 id=&#34;tls-ssl-options&#34;&gt;TLS/SSL Options&lt;/h2&gt;
@@ -3007,76 +2996,61 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test?authMechanism=%s&amp;a
 &lt;/tbody&gt;
 &lt;/table&gt;
 
-&lt;p&gt;To connect to a single MongoDB instance, specify the TLS/SSL connection options for &lt;code&gt;server&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;
-var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  fs = require(&#39;fs&#39;);
-
-
-// Read the certificates
-
-var ca = [fs.readFileSync(__dirname + &amp;quot;/ssl/ca.pem&amp;quot;)];
-var cert = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
-var key = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
-
-MongoClient.connect(&#39;mongodb://server:27017/test?ssl=true&#39;, {
-  server: {
-      sslCA:ca
-    , sslKey:key
-    , sslCert:cert
-  }
-}, function(err, db) {
-  db.close();
-});
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To connect to a replica set, specify the TLS/SSL connection options for &lt;code&gt;replset&lt;/code&gt; .&lt;/p&gt;
+&lt;p&gt;To connect to a single MongoDB instance, specify the TLS/SSL connection options.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
   fs = require(&#39;fs&#39;);
 
 // Read the certificates
-
 var ca = [fs.readFileSync(__dirname + &amp;quot;/ssl/ca.pem&amp;quot;)];
 var cert = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
 var key = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
 
+MongoClient.connect(&#39;mongodb://server:27017/test?ssl=true&#39;, {
+  sslCA:ca,
+  sslKey:key,
+  sslCert:cert,
+}, function(err, db) {
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To connect to a replica set, specify the TLS/SSL connection options.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  fs = require(&#39;fs&#39;);
+
+// Read the certificates
+var ca = [fs.readFileSync(__dirname + &amp;quot;/ssl/ca.pem&amp;quot;)];
+var cert = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
+var key = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
 
 MongoClient.connect(&#39;mongodb://server:27017/test?replicaSet=foo&amp;amp;ssl=true&#39;, {
-  replset: {
-      sslCA:ca
-    , sslKey:key
-    , sslCert:cert
-  }
+  sslCA:ca,
+  sslKey:key,
+  sslCert:cert,
 }, function(err, db) {
   db.close();
 });
-
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;To connect to a replica set, specify the TLS/SSL connection options for &lt;code&gt;mongos&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;To connect to a mongos we pass in the options at the top level, just as for replicasets and single server connections.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
   fs = require(&#39;fs&#39;);
 
 // Read the certificates
-
 var ca = [fs.readFileSync(__dirname + &amp;quot;/ssl/ca.pem&amp;quot;)];
 var cert = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
 var key = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
 
 MongoClient.connect(&#39;mongodb://server:27017/test?ssl=true&#39;, {
-  mongos: {
-      sslCA:ca
-    , sslKey:key
-    , sslCert:cert
-  }
+  sslCA:ca,
+  sslKey:key,
+  sslCert:cert,
 }, function(err, db) {
   db.close();
 });
-
 &lt;/code&gt;&lt;/pre&gt;
 </description>
     </item>
@@ -3110,9 +3084,9 @@ and operators, see the
 &lt;a href=&#34;https://docs.mongodb.com/manual/core/aggregation-pipeline/&#34;&gt;manual:&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;The following example uses the aggregation pipeline on the
-&lt;code&gt;restaurants&lt;/code&gt; sample dataset to find
-a list of the total number of 5-star restaurants, grouped by restaurant
-category.&lt;/p&gt;
+&lt;a href=&#34;https://docs.mongodb.org/getting-started/node/import-data/&#34;&gt;restaurant&lt;/a&gt;
+sample dataset to find a list of restaurants located in the Bronx,
+grouped by restaurant category.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
   , assert = require(&#39;assert&#39;);
@@ -3128,9 +3102,9 @@ MongoClient.connect(url, function(err, db) {
 var simplePipeline = function(db, callback) {
   var collection = db.collection( &#39;restaurants&#39; );
   collection.aggregate( 
-      [ { &#39;$match&#39;: { &amp;quot;stars&amp;quot;: 5 } },
+      [ { &#39;$match&#39;: { &amp;quot;borough&amp;quot;: &amp;quot;Bronx&amp;quot; } },
         { &#39;$unwind&#39;: &#39;$categories&#39;},
-        { &#39;$group&#39;: { &#39;_id&#39;: &amp;quot;$categories&amp;quot;, &#39;fiveStars&#39;: { &#39;$sum&#39;: 1 } } }		
+        { &#39;$group&#39;: { &#39;_id&#39;: &amp;quot;$categories&amp;quot;, &#39;Bronx restaurants&#39;: { &#39;$sum&#39;: 1 } } }		
       ],	  
 	  function(err, results) {
         assert.equal(err, null);
@@ -3302,7 +3276,7 @@ var createAscendingIndex = function(db, callback) {
 
 &lt;h2 id=&#34;create-a-descending-index&#34;&gt;Create a Descending Index&lt;/h2&gt;
 
-&lt;p&gt;For an ascending index type, specify &lt;code&gt;-1&lt;/code&gt; for &lt;code&gt;&amp;lt;type&amp;gt;&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;For an descending index type, specify &lt;code&gt;-1&lt;/code&gt; for &lt;code&gt;&amp;lt;type&amp;gt;&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;The following example specifies a descending index key on the
 &lt;code&gt;lastName&lt;/code&gt; field:&lt;/p&gt;

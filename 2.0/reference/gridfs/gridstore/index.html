@@ -1233,7 +1233,7 @@
 
 
     <li class="toctree-l1">
-    <a href="/node-mongodb-native/2.0/api/">
+    <a href="/node-mongodb-native/2.0/api">
         <i class='fa fa-file-text-o'></i>
         API Documentation
     </a>
@@ -1411,12 +1411,12 @@
 
 <p>When you query a GridFS store for a file, the driver or client will reassemble the chunks as needed. GridFS is useful not only for storing files that exceed 16MB but also for storing any files for which you want access without having to load the entire file into memory.</p>
 
-<p><div class="admonition note">
+<div class="admonition note">
 <h5 class="admonition-title">Note</h5>
 <p>For more information about GridFS see the <a href="http://docs.mongodb.org/manual/core/gridfs/">MongoDB GridFS documentation</a>.</p>
 
 </div>
-</p>
+
 
 <p>GridStore is a single file inside GridFS that can be managed by the script.</p>
 
@@ -1558,7 +1558,8 @@
 <ul>
 <li><code>db</code> is the database object</li>
 <li><code>filename</code> is the name of the file to be checked or a regular expression</li>
-<li><code>callback</code> is a callback function with two parameters - an error object (if an error occured) and a boolean value indicating if the file exists or not</li>
+<li><code>callback</code> is a callback function with two parameters - an error object (if an error occured) and a boolean value indicating if the file exists or not
+<br /></li>
 </ul>
 
 <h2 id="seek-to-a-specific-position-for-reading">Seek to a Specific position for Reading</h2>

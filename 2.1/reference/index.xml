@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>References on MongoDB Node.js Driver</title>
-    <link>/node-mongodb-native/2.1/reference/</link>
+    <link>/node-mongodb-native/2.1/reference/index.xml</link>
     <description>Recent content in References on MongoDB Node.js Driver</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
@@ -863,12 +863,12 @@ MongoClient.connect(url, {
 
 &lt;p&gt;This section exposes how to use the MongoDB Node.js driver with ECMAScript 6, leveraging all the productivity gains you get from the new Generators.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;For more information about ECMAScript 6 see the &lt;a href=&#34;http://es6-features.org/&#34;&gt;ECMAScript 6 features&lt;/a&gt;.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/ecmascript6/connecting/&#34;&gt;Connecting&lt;/a&gt;: how to connect leveraging ECMASdcript 6.&lt;/li&gt;
@@ -1044,12 +1044,12 @@ this with the &lt;code&gt;ulimit&lt;/code&gt; shell command.&lt;/p&gt;
 
 &lt;h1 id=&#34;how-can-i-prevent-a-slow-operation-from-delaying-other-operations&#34;&gt;How can I prevent a slow operation from delaying other operations?&lt;/h1&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;Create a separate connection pool for the slow executing operations, thus isolating the slow operations from the fast operations.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;p&gt;While Node.js is asynchronous, MongoDB is not. Currently, MongoDB uses a single execution thread per socket. This means that it will only execute a single operation on a socket at any given point in time. Any other operations sent to that socket will have to wait until the current operation is finished. If you have a slow-running operation which holds up other operations,
 the best solution is to create a separate connection pool for the slow operation, isolating it from other, faster
@@ -1094,12 +1094,12 @@ operations.&lt;/p&gt;
 
 &lt;h1 id=&#34;connect-to-mongodb-legacy&#34;&gt;Connect To MongoDB (Legacy)&lt;/h1&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;For 2.1.10 or earlier. For newer versions, see &lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/&#34;&gt;Connect to MongoDB&lt;/a&gt;&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;p&gt;Connecting to MongoDB using the driver is primarily done using the &lt;code&gt;MongoClient.connect&lt;/code&gt; method and a URI. Let&amp;rsquo;s look at how we connect to a couple of different server topologies.&lt;/p&gt;
 

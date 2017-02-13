@@ -1021,6 +1021,10 @@ ReplSetState.prototype.hasPrimaryAndSecondary = function() {
   return this.primary != null &amp;&amp; this.secondaries.length > 0;
 }
 
+ReplSetState.prototype.hasPrimaryOrSecondary = function() {
+  return this.hasPrimary() || this.hasSecondary();
+}
+
 ReplSetState.prototype.hasPrimary = function() {
   return this.primary != null;
 }
@@ -1069,6 +1073,9 @@ ReplSetState.prototype.destroy = function(options) {
 ReplSetState.prototype.remove = function(server, options) {
   options = options || {};
 
+  // Get the server name and lowerCase it
+  var serverName = server.name.toLowerCase();
+
   // Only remove if the current server is not connected
   var servers = this.primary ? [this.primary] : [];
   servers = servers.concat(this.secondaries);
@@ -1077,17 +1084,20 @@ ReplSetState.prototype.remove = function(server, options) {
 
   // Check if it's active and this is just a failed connection attempt
   for(var i = 0; i &lt; servers.length; i++) {
-    if(!options.force &amp;&amp; servers[i].equals(server) &amp;&amp; servers[i].isConnected &amp;&amp; servers[i].isConnected()) {
+    if(!options.force
+      &amp;&amp; servers[i].equals(server)
+      &amp;&amp; servers[i].isConnected
+      &amp;&amp; servers[i].isConnected()) {
       return;
     }
   }
 
   // If we have it in the set remove it
-  if(this.set[server.name.toLowerCase()]) {
-    this.set[server.name.toLowerCase()].type = ServerType.Unknown;
-    this.set[server.name.toLowerCase()].electionId = null;
-    this.set[server.name.toLowerCase()].setName = null;
-    this.set[server.name.toLowerCase()].setVersion = null;
+  if(this.set[serverName]) {
+    this.set[serverName].type = ServerType.Unknown;
+    this.set[serverName].electionId = null;
+    this.set[serverName].setName = null;
+    this.set[serverName].setVersion = null;
   }
 
   // Remove type
@@ -1108,10 +1118,7 @@ ReplSetState.prototype.remove = function(server, options) {
   removeFrom(server, this.unknownServers);
 
   // Push to unknownServers
-  this.unknownServers.push(server.name);
-
-  // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-  // console.dir(server)
+  this.unknownServers.push(serverName);
 
   // Do we have a removeType
   if(removeType) {
@@ -1124,6 +1131,9 @@ ReplSetState.prototype.update = function(server) {
   // Get the current ismaster
   var ismaster = server.lastIsMaster();
 
+  // Get the server name and lowerCase it
+  var serverName = server.name.toLowerCase();
+
   //
   // Add any hosts
   //
@@ -1132,17 +1142,18 @@ ReplSetState.prototype.update = function(server) {
     var hosts = Array.isArray(ismaster.hosts) ? ismaster.hosts : [];
     hosts = hosts.concat(Array.isArray(ismaster.arbiters) ? ismaster.arbiters : []);
     hosts = hosts.concat(Array.isArray(ismaster.passives) ? ismaster.passives : []);
+    hosts = hosts.map(function(s) { return s.toLowerCase() });
 
     // Add all hosts as unknownServers
     for(var i = 0; i &lt; hosts.length; i++) {
       // Add to the list of unknown server
       if(this.unknownServers.indexOf(hosts[i]) == -1
-        &amp;&amp; (!this.set[hosts[i].toLowerCase()] || this.set[hosts[i].toLowerCase()].type == ServerType.Unknown)) {
-        this.unknownServers.push(hosts[i]);
+        &amp;&amp; (!this.set[hosts[i]] || this.set[hosts[i]].type == ServerType.Unknown)) {
+        this.unknownServers.push(hosts[i].toLowerCase());
       }
 
-      if(!this.set[hosts[i].toLowerCase()]) {
-        this.set[hosts[i].toLowerCase()] = {
+      if(!this.set[hosts[i]]) {
+        this.set[hosts[i]] = {
           type: ServerType.Unknown,
           electionId: null,
           setName: null,
@@ -1156,17 +1167,17 @@ ReplSetState.prototype.update = function(server) {
   // Unknown server
   //
   if(!ismaster &amp;&amp; !inList(ismaster, server, this.unknownServers)) {
-    self.set[server.name.toLowerCase()] = {
+    self.set[serverName] = {
       type: ServerType.Unknown, setVersion: null, electionId: null, setName: null
     }
     // Update set information about the server instance
-    self.set[server.name.toLowerCase()].type = ServerType.Unknown;
-    self.set[server.name.toLowerCase()].electionId = ismaster ? ismaster.electionId : ismaster;
-    self.set[server.name.toLowerCase()].setName = ismaster ? ismaster.setName : ismaster;
-    self.set[server.name.toLowerCase()].setVersion = ismaster ? ismaster.setVersion : ismaster;
+    self.set[serverName].type = ServerType.Unknown;
+    self.set[serverName].electionId = ismaster ? ismaster.electionId : ismaster;
+    self.set[serverName].setName = ismaster ? ismaster.setName : ismaster;
+    self.set[serverName].setVersion = ismaster ? ismaster.setVersion : ismaster;
 
     if(self.unknownServers.indexOf(server.name) == -1) {
-      self.unknownServers.push(server.name);
+      self.unknownServers.push(serverName);
     }
 
     // Set the topology
@@ -1183,7 +1194,7 @@ ReplSetState.prototype.update = function(server) {
   // A RSOther instance
   if((ismaster.setName &amp;&amp; ismaster.hidden)
     || (ismaster.setName &amp;&amp; !ismaster.ismaster &amp;&amp; !ismaster.secondary &amp;&amp; !ismaster.arbiterOnly &amp;&amp; !ismaster.passive)) {
-    self.set[server.name.toLowerCase()] = {
+    self.set[serverName] = {
       type: ServerType.RSOther, setVersion: null,
       electionId: null, setName: ismaster.setName
     }
@@ -1195,7 +1206,7 @@ ReplSetState.prototype.update = function(server) {
 
   // A RSGhost instance
   if(ismaster.isreplicaset) {
-    self.set[server.name.toLowerCase()] = {
+    self.set[serverName] = {
       type: ServerType.RSGhost, setVersion: null,
       electionId: null, setName: null
     }
@@ -1228,13 +1239,18 @@ ReplSetState.prototype.update = function(server) {
   //
   // If the .me field does not match the passed in server
   //
-  if(ismaster.me &amp;&amp; ismaster.me != server.name) {
+  if(ismaster.me &amp;&amp; ismaster.me.toLowerCase() != serverName) {
     if(this.logger.isWarn()) {
       this.logger.warn(f('the seedlist server was removed due to its address %s not matching its ismaster.me address %s', server.name, ismaster.me));
     }
 
     // Delete from the set
-    delete this.set[server.name.toLowerCase()];
+    delete this.set[serverName];
+    // Delete unknown servers
+    removeFrom(server, self.unknownServers);
+
+    // Destroy the instance
+    server.destroy();
 
     // Set the type of topology we have
     if(this.primary &amp;&amp; !this.primary.equals(server)) {
@@ -1275,7 +1291,6 @@ ReplSetState.prototype.update = function(server) {
       // Get the electionIds
       var ismasterSetVersion = server.lastIsMaster().setVersion;
 
-      // if(result == 1 || result == 0) {
       if(result == 1) {
         this.topologyType = TopologyType.ReplicaSetNoPrimary;
         return false;
@@ -1292,12 +1307,12 @@ ReplSetState.prototype.update = function(server) {
 
     // Hande normalization of server names
     var normalizedHosts = ismaster.hosts.map(function(x) { return x.toLowerCase() });
-    var locationIndex = normalizedHosts.indexOf(server.name.toLowerCase());
+    var locationIndex = normalizedHosts.indexOf(serverName);
 
     // Validate that the server exists in the host list
     if(locationIndex != -1) {
       self.primary = server;
-      self.set[server.name.toLowerCase()] = {
+      self.set[serverName] = {
         type: ServerType.RSPrimary,
         setVersion: ismaster.setVersion,
         electionId: ismaster.electionId,
@@ -1395,7 +1410,7 @@ ReplSetState.prototype.update = function(server) {
     // Set the new instance
     self.primary = server;
     // Set the set information
-    self.set[server.name.toLowerCase()] = {
+    self.set[serverName] = {
       type: ServerType.RSPrimary, setVersion: ismaster.setVersion,
       electionId: ismaster.electionId, setName: ismaster.setName
     }
@@ -1432,10 +1447,11 @@ ReplSetState.prototype.update = function(server) {
     removeFrom(server, self.unknownServers);
 
     // Remove primary
-    if(this.primary &amp;&amp; this.primary.name == server.name) {
-      server.destroy();
-      this.primary = null;
-      self.emit('left', 'primary', server);
+    if(this.primary
+      &amp;&amp; this.primary.name.toLowerCase() == serverName) {
+        server.destroy();
+        this.primary = null;
+        self.emit('left', 'primary', server);
     }
 
     self.emit('joined', 'secondary', server);
@@ -1472,10 +1488,11 @@ ReplSetState.prototype.update = function(server) {
     removeFrom(server, self.unknownServers);
 
     // Remove primary
-    if(this.primary &amp;&amp; this.primary.name == server.name) {
-      server.destroy();
-      this.primary = null;
-      self.emit('left', 'primary', server);
+    if(this.primary
+      &amp;&amp; this.primary.name.toLowerCase() == serverName) {
+        server.destroy();
+        this.primary = null;
+        self.emit('left', 'primary', server);
     }
 
     self.emit('joined', 'secondary', server);
@@ -1486,7 +1503,7 @@ ReplSetState.prototype.update = function(server) {
   //
   // Remove the primary
   //
-  if(this.set[server.name.toLowerCase()] &amp;&amp; this.set[server.name.toLowerCase()].type == ServerType.RSPrimary) {
+  if(this.set[serverName] &amp;&amp; this.set[serverName].type == ServerType.RSPrimary) {
     self.emit('left', 'primary', this.primary);
     this.primary.destroy();
     this.primary = null;
@@ -1779,18 +1796,20 @@ function pickNearest(self, readPreference) {
 
 function inList(ismaster, server, list) {
   for(var i = 0; i &lt; list.length; i++) {
-    if(list[i].name == server.name) return true;
+    if(list[i] &amp;&amp; list[i].name
+      &amp;&amp; list[i].name.toLowerCase() == server.name.toLowerCase()) return true;
   }
 
   return false;
 }
 
 function addToList(self, type, ismaster, server, list) {
+  var serverName = server.name.toLowerCase();
   // Update set information about the server instance
-  self.set[server.name.toLowerCase()].type = type;
-  self.set[server.name.toLowerCase()].electionId = ismaster ? ismaster.electionId : ismaster;
-  self.set[server.name.toLowerCase()].setName = ismaster ? ismaster.setName : ismaster;
-  self.set[server.name.toLowerCase()].setVersion = ismaster ? ismaster.setVersion : ismaster;
+  self.set[serverName].type = type;
+  self.set[serverName].electionId = ismaster ? ismaster.electionId : ismaster;
+  self.set[serverName].setName = ismaster ? ismaster.setName : ismaster;
+  self.set[serverName].setVersion = ismaster ? ismaster.setVersion : ismaster;
   // Add to the list
   list.push(server);
 }
@@ -1830,9 +1849,10 @@ function removeFrom(server, list) {
     if(list[i].equals &amp;&amp; list[i].equals(server)) {
       list.splice(i, 1);
       return true;
-    } else if(typeof list[i] == 'string' &amp;&amp; list[i] == server.name) {
-      list.splice(i, 1);
-      return true;
+    } else if(typeof list[i] == 'string'
+      &amp;&amp; list[i].toLowerCase() == server.name.toLowerCase()) {
+        list.splice(i, 1);
+        return true;
     }
   }
 
@@ -1921,7 +1941,7 @@ function diff(previous, current) {
       var currServer = current.servers[j];
 
       // Matching server
-      if(prevServer.address === currServer.address) {
+      if(prevServer.address.toLowerCase() === currServer.address.toLowerCase()) {
         // We had a change in state
         if(prevServer.type != currServer.type) {
           diff.servers.push({
@@ -1968,7 +1988,7 @@ module.exports = ReplSetState;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Jan 03 2017 12:52:48 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 13 2017 11:58:15 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

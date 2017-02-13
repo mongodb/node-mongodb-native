@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>MongoDB Node.js Driver</title>
-    <link>/node-mongodb-native/2.1/</link>
+    <link>/node-mongodb-native/2.1/index.xml</link>
     <description>Recent content on MongoDB Node.js Driver</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
@@ -313,12 +313,12 @@ collection that stores the file metadata.&lt;/p&gt;
 
 &lt;p&gt;When you query a GridFS store for a file, the driver or client will reassemble the chunks as needed. GridFS is useful not only for storing files that exceed 16 megabytes but also for storing any files which you want to access without having to load the entire file into memory.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;For more information about GridFS, see the &lt;a href=&#34;http://docs.mongodb.org/manual/core/gridfs/&#34;&gt;MongoDB GridFS documentation&lt;/a&gt;.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;p&gt;The Node.js Driver includes the legacy &lt;code&gt;GridStore&lt;/code&gt; API.&lt;/p&gt;
 
@@ -330,21 +330,207 @@ collection that stores the file metadata.&lt;/p&gt;
     </item>
     
     <item>
-      <title>Management</title>
-      <link>/node-mongodb-native/2.1/reference/management/</link>
+      <title>Authentication</title>
+      <link>/node-mongodb-native/2.1/tutorials/connect/authenticating/</link>
       <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
       
-      <guid>/node-mongodb-native/2.1/reference/management/</guid>
+      <guid>/node-mongodb-native/2.1/tutorials/connect/authenticating/</guid>
       <description>
 
-&lt;h2 id=&#34;management&#34;&gt;Management&lt;/h2&gt;
+&lt;h1 id=&#34;authentication&#34;&gt;Authentication&lt;/h1&gt;
 
-&lt;p&gt;The driver provides two mechanisms for examining its state:&lt;/p&gt;
+&lt;p&gt;The Node.js driver supports all MongoDB &lt;a href=&#34;http://docs.mongodb.org/manual/core/authentication/&#34;&gt;authentication mechanisms&lt;/a&gt;, including those only available in the MongoDB &lt;a href=&#34;http://docs.mongodb.org/manual/administration/install-enterprise/&#34;&gt;Enterprise Edition&lt;/a&gt;.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/management/logging/&#34;&gt;Logging&lt;/a&gt;: Comprehensive logging of all operations.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/management/apm/&#34;&gt;Application Performance Monitoring&lt;/a&gt;: The Application Performance Monitoring API is an API developers to tap into the commands issues to MongoDB to record performance metrics and/or inspect the commands sent to MongoDB.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;h2 id=&#34;default&#34;&gt;DEFAULT&lt;/h2&gt;
+
+&lt;div class=&#34;admonition note&#34;&gt;
+&lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
+&lt;p&gt;Starting in MongoDB 3.0, MongoDB changed the default authentication mechanism from &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-mongodb-cr/&#34;&gt;MONGODB-CR&lt;/a&gt; to &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-scram-sha-1/&#34;&gt;SCRAM-SHA-1&lt;/a&gt;.&lt;/p&gt;
+
+&lt;/div&gt;
+
+
+&lt;p&gt;To use the default mechanism, either omit the authentication mechanism specification or specify &lt;code&gt;DEFAULT&lt;/code&gt; as the mechanism in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI ConnectionString&lt;/a&gt;. The driver will attempt to authenticate using the &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-scram-sha-1/&#34;&gt;SCRAM-SHA-1 authentication&lt;/a&gt; method if it is available on the MongoDB server. If the server does not support SCRAM-SHA-1, the driver will authenticate using &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-mongodb-cr/&#34;&gt;MONGODB-CR&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Include the name and password and the &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-users/#user-authentication-database&#34;&gt;authentication database&lt;/a&gt; (&lt;code&gt;authSource&lt;/code&gt;) in the connection string.&lt;/p&gt;
+
+&lt;p&gt;In the following example, the connection string specifies the user &lt;code&gt;dave&lt;/code&gt;, password &lt;code&gt;abc123&lt;/code&gt;, authentication mechanism &lt;code&gt;DEFAULT&lt;/code&gt;, and authentication database &lt;code&gt;myproject&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  f = require(&#39;util&#39;).format,
+  assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://dave:abc123@localhost:27017?authMechanism=DEFAULT&amp;amp;authSource=myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;scram-sha-1&#34;&gt;SCRAM-SHA-1&lt;/h2&gt;
+
+&lt;p&gt;To explicitly connect to MongoDB using &lt;a href=&#34;http://docs.mongodb.org/manual/core/authentication/#scram-sha-1-authentication&#34;&gt;SCRAM-SHA-1&lt;/a&gt;, specify &lt;code&gt;SCRAM-SHA-1&lt;/code&gt; as the mechanism in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI connection string&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Include the name and password and the &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-users/#user-authentication-database&#34;&gt;authentication database&lt;/a&gt; (&lt;code&gt;authSource&lt;/code&gt;) in the connection string.&lt;/p&gt;
+
+&lt;p&gt;In the following example, the connection string specifies the user &lt;code&gt;dave&lt;/code&gt;, password &lt;code&gt;abc123&lt;/code&gt;, authentication mechanism &lt;code&gt;SCRAM-SHA-1&lt;/code&gt;, and authentication database &lt;code&gt;myproject&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  f = require(&#39;util&#39;).format,
+  assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://dave:abc123@localhost:27017?authMechanism=SCRAM-SHA-1&amp;amp;authSource=myprojectdb&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;mongodb-cr&#34;&gt;MONGODB-CR&lt;/h2&gt;
+
+&lt;p&gt;To explicitly connect to MongoDB using &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-mongodb-cr/&#34;&gt;MONGODB-CR&lt;/a&gt;, specify &lt;code&gt;MONGODB-CR&lt;/code&gt; as the mechanism in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI connection string&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Include the name and password and the &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-users/#user-authentication-database&#34;&gt;authentication database&lt;/a&gt; (&lt;code&gt;authSource&lt;/code&gt;) in the connection string.&lt;/p&gt;
+
+&lt;p&gt;In the following example, the connection string specifies the user &lt;code&gt;dave&lt;/code&gt;, password &lt;code&gt;abc123&lt;/code&gt;, authentication mechanism &lt;code&gt;MONGODB-CR&lt;/code&gt;, and authentication database &lt;code&gt;myproject&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  f = require(&#39;util&#39;).format,
+  assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://dave:abc123@localhost:27017?authMechanism=MONGODB-CR&amp;amp;authSource=myprojectdb&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;div class=&#34;admonition important&#34;&gt;
+&lt;h5 class=&#34;admonition-title&#34;&gt;important&lt;/h5&gt;
+&lt;p&gt;If you have &lt;a href=&#34;https://docs.mongodb.org/manual/release-notes/3.0-scram/&#34;&gt;upgraded the authentication schema&lt;/a&gt; from &lt;code&gt;MONGODB-CR&lt;/code&gt; to &lt;code&gt;SCRAM-SHA-1&lt;/code&gt;, &lt;code&gt;MONGODB-CR&lt;/code&gt; credentials will fail to authenticate.&lt;/p&gt;
+
+&lt;/div&gt;
+
+
+&lt;h2 id=&#34;x509&#34;&gt;X509&lt;/h2&gt;
+
+&lt;p&gt;With  &lt;a href=&#34;http://docs.mongodb.org/manual/core/authentication/#x-509-certificate-authentication&#34;&gt;X.509&lt;/a&gt; mechanism, MongoDB uses the X.509 certificate presented during SSL negotiation to authenticate a user whose name is derived from the distinguished name of the X.509 certificate.&lt;/p&gt;
+
+&lt;p&gt;X.509 authentication requires the use of SSL connections with certificate validation and is available in MongoDB 2.6 and newer.&lt;/p&gt;
+
+&lt;p&gt;To connect using the X.509 authentication mechanism, specify &lt;code&gt;MONGODB-X509&lt;/code&gt; as the mechanism in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI connection string&lt;/a&gt;, &lt;code&gt;ssl=true&lt;/code&gt;, and the username. Use &lt;code&gt;enodeURIComponent&lt;/code&gt; to encode the username string.&lt;/p&gt;
+
+&lt;p&gt;In addition to the connection string, pass to the &lt;code&gt;MongoClient.connect&lt;/code&gt; method a connections options for the &lt;code&gt;server&lt;/code&gt; with  the X.509 certificate and other &lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/tutorials/connect/ssl/&#34;&gt;TLS/SSL connections&lt;/a&gt; options.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  f = require(&#39;util&#39;).format,
+  assert = require(&#39;assert&#39;);
+
+// Read the cert and key
+var cert = fs.readFileSync(__dirname + &amp;quot;/ssl/x509/client.pem&amp;quot;);
+var key = fs.readFileSync(__dirname + &amp;quot;/ssl/x509/client.pem&amp;quot;);
+
+// User name
+var userName = encodeURIComponent(&amp;quot;CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US&amp;quot;);
+
+// Connect using X509 authentication
+MongoClient.connect(f(&#39;mongodb://%s@server:27017/test?authMechanism=MONGODB-X509&amp;amp;ssl=true&#39;, userName), {
+  server: {
+      sslKey:key
+    , sslCert:cert
+    , sslValidate:false
+  }
+}, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For more information on connecting to MongoDB instance, replica set, and sharded cluster with TLS/SSL options, see &lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/tutorials/connect/ssl/&#34;&gt;TLS/SSL connections options&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;For more information, refer to the MongoDB manual
+&lt;a href=&#34;http://docs.mongodb.org/manual/tutorial/configure-x509-client-authentication/#add-x-509-certificate-subject-as-a-user&#34;&gt;X.509 tutorial&lt;/a&gt; for more information about determining the subject name from the certificate.&lt;/p&gt;
+
+&lt;h2 id=&#34;kerberos-gssapi-sspi&#34;&gt;Kerberos (GSSAPI/SSPI)&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://www.mongodb.com/products/mongodb-enterprise&#34;&gt;MongoDB Enterprise&lt;/a&gt; supports proxy authentication through a Kerberos service. The Node.js driver supports Kerberos on UNIX via the MIT Kerberos library and on Windows via the SSPI API.&lt;/p&gt;
+
+&lt;p&gt;To connect using the X.509 authentication mechanism, specify &lt;code&gt;authMechanism=GSSAPI&lt;/code&gt; as the mechanism in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI connection string&lt;/a&gt;. Specify the user principal and the service name in the connection string.  Use &lt;code&gt;enodeURIComponent&lt;/code&gt; to encode the user principal string.&lt;/p&gt;
+
+&lt;p&gt;The following example connects to MongoDB using Kerberos for UNIX.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  f = require(&#39;util&#39;).format,
+  assert = require(&#39;assert&#39;);
+
+// KDC Server
+var server = &amp;quot;kerberos.example.com&amp;quot;;
+var principal = &amp;quot;drivers@KERBEROS.EXAMPLE.COM&amp;quot;;
+var urlEncodedPrincipal = encodeURIComponent(principal);
+
+// Let&#39;s write the actual connection code
+MongoClient.connect(f(&amp;quot;mongodb://%s@%s/kerberos?authMechanism=GSSAPI&amp;amp;gssapiServiceName=mongodb&amp;quot;, urlEncodedPrincipal, server), function(err, db) {
+  assert.equal(null, err);
+
+  db.close();
+  test.done();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;div class=&#34;admonition note&#34;&gt;
+&lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
+&lt;p&gt;The method refers to the &lt;code&gt;GSSAPI&lt;/code&gt; authentication mechanism instead of &lt;code&gt;Kerberos&lt;/code&gt; because technically the driver authenticates via the &lt;a href=&#34;https://tools.ietf.org/html/rfc4752&#34;&gt;GSSAPI&lt;/a&gt; SASL mechanism.&lt;/p&gt;
+
+&lt;/div&gt;
+
+
+&lt;h2 id=&#34;ldap-plain&#34;&gt;LDAP (PLAIN)&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://www.mongodb.com/products/mongodb-enterprise&#34;&gt;MongoDB Enterprise&lt;/a&gt; supports proxy authentication through a Lightweight Directory Access Protocol (LDAP) service.&lt;/p&gt;
+
+&lt;p&gt;To connect using the LDAP authentication mechanism, specify &lt;code&gt;authMechanism=PLAIN&lt;/code&gt; as the mechanism in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI connection string&lt;/a&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  f = require(&#39;util&#39;).format,
+  assert = require(&#39;assert&#39;);
+
+// LDAP Server
+var server = &amp;quot;ldap.example.com&amp;quot;;
+var user = &amp;quot;ldap-user&amp;quot;;
+var pass = &amp;quot;ldap-password&amp;quot;;
+
+// Url
+var url = f(&amp;quot;mongodb://%s:%s@%s/test?authMechanism=PLAIN&amp;amp;maxPoolSize=1&amp;quot;, user, pass, server);
+
+// Let&#39;s write the actual connection code
+MongoClient.connect(url, function(err, db) {
+  test.equal(null, err);    
+
+  db.close();
+  test.done();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;div class=&#34;admonition note&#34;&gt;
+&lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
+&lt;p&gt;The method refers to the &lt;code&gt;PLAIN&lt;/code&gt; authentication mechanism instead of &lt;code&gt;LDAP&lt;/code&gt; because technically the driver authenticates via the &lt;a href=&#34;https://www.ietf.org/rfc/rfc4616.txt&#34;&gt;PLAIN&lt;/a&gt; SASL mechanism.&lt;/p&gt;
+
+&lt;/div&gt;
+
 </description>
     </item>
     
@@ -491,211 +677,6 @@ MongoClient.connect(url, function(err, db) {
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;For a complete list of database commands, see the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/command/&#34;&gt;manual&lt;/a&gt;.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Authentication</title>
-      <link>/node-mongodb-native/2.1/tutorials/connect/authenticating/</link>
-      <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
-      
-      <guid>/node-mongodb-native/2.1/tutorials/connect/authenticating/</guid>
-      <description>
-
-&lt;h1 id=&#34;authentication&#34;&gt;Authentication&lt;/h1&gt;
-
-&lt;p&gt;The Node.js driver supports all MongoDB &lt;a href=&#34;http://docs.mongodb.org/manual/core/authentication/&#34;&gt;authentication mechanisms&lt;/a&gt;, including those only available in the MongoDB &lt;a href=&#34;http://docs.mongodb.org/manual/administration/install-enterprise/&#34;&gt;Enterprise Edition&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&#34;default&#34;&gt;DEFAULT&lt;/h2&gt;
-
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
-&lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
-&lt;p&gt;Starting in MongoDB 3.0, MongoDB changed the default authentication mechanism from &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-mongodb-cr/&#34;&gt;MONGODB-CR&lt;/a&gt; to &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-scram-sha-1/&#34;&gt;SCRAM-SHA-1&lt;/a&gt;.&lt;/p&gt;
-
-&lt;/div&gt;
-&lt;/p&gt;
-
-&lt;p&gt;To use the default mechanism, either omit the authentication mechanism specification or specify &lt;code&gt;DEFAULT&lt;/code&gt; as the mechanism in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI ConnectionString&lt;/a&gt;. The driver will attempt to authenticate using the &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-scram-sha-1/&#34;&gt;SCRAM-SHA-1 authentication&lt;/a&gt; method if it is available on the MongoDB server. If the server does not support SCRAM-SHA-1, the driver will authenticate using &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-mongodb-cr/&#34;&gt;MONGODB-CR&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Include the name and password and the &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-users/#user-authentication-database&#34;&gt;authentication database&lt;/a&gt; (&lt;code&gt;authSource&lt;/code&gt;) in the connection string.&lt;/p&gt;
-
-&lt;p&gt;In the following example, the connection string specifies the user &lt;code&gt;dave&lt;/code&gt;, password &lt;code&gt;abc123&lt;/code&gt;, authentication mechanism &lt;code&gt;DEFAULT&lt;/code&gt;, and authentication database &lt;code&gt;myproject&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  f = require(&#39;util&#39;).format,
-  assert = require(&#39;assert&#39;);
-
-// Connection URL
-var url = &#39;mongodb://dave:abc123@localhost:27017?authMechanism=DEFAULT&amp;amp;authSource=myproject&#39;;
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&amp;quot;Connected correctly to server&amp;quot;);
-
-  db.close();
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;scram-sha-1&#34;&gt;SCRAM-SHA-1&lt;/h2&gt;
-
-&lt;p&gt;To explicitly connect to MongoDB using &lt;a href=&#34;http://docs.mongodb.org/manual/core/authentication/#scram-sha-1-authentication&#34;&gt;SCRAM-SHA-1&lt;/a&gt;, specify &lt;code&gt;SCRAM-SHA-1&lt;/code&gt; as the mechanism in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI connection string&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Include the name and password and the &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-users/#user-authentication-database&#34;&gt;authentication database&lt;/a&gt; (&lt;code&gt;authSource&lt;/code&gt;) in the connection string.&lt;/p&gt;
-
-&lt;p&gt;In the following example, the connection string specifies the user &lt;code&gt;dave&lt;/code&gt;, password &lt;code&gt;abc123&lt;/code&gt;, authentication mechanism &lt;code&gt;SCRAM-SHA-1&lt;/code&gt;, and authentication database &lt;code&gt;myproject&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  f = require(&#39;util&#39;).format,
-  assert = require(&#39;assert&#39;);
-
-// Connection URL
-var url = &#39;mongodb://dave:abc123@localhost:27017?authMechanism=SCRAM-SHA-1&amp;amp;authSource=myprojectdb&#39;;
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&amp;quot;Connected correctly to server&amp;quot;);
-
-  db.close();
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;mongodb-cr&#34;&gt;MONGODB-CR&lt;/h2&gt;
-
-&lt;p&gt;To explicitly connect to MongoDB using &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-mongodb-cr/&#34;&gt;MONGODB-CR&lt;/a&gt;, specify &lt;code&gt;MONGODB-CR&lt;/code&gt; as the mechanism in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI connection string&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;Include the name and password and the &lt;a href=&#34;https://docs.mongodb.org/manual/core/security-users/#user-authentication-database&#34;&gt;authentication database&lt;/a&gt; (&lt;code&gt;authSource&lt;/code&gt;) in the connection string.&lt;/p&gt;
-
-&lt;p&gt;In the following example, the connection string specifies the user &lt;code&gt;dave&lt;/code&gt;, password &lt;code&gt;abc123&lt;/code&gt;, authentication mechanism &lt;code&gt;MONGODB-CR&lt;/code&gt;, and authentication database &lt;code&gt;myproject&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  f = require(&#39;util&#39;).format,
-  assert = require(&#39;assert&#39;);
-
-// Connection URL
-var url = &#39;mongodb://dave:abc123@localhost:27017?authMechanism=MONGODB-CR&amp;amp;authSource=myprojectdb&#39;;
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&amp;quot;Connected correctly to server&amp;quot;);
-
-  db.close();
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;div class=&#34;admonition important&#34;&gt;
-&lt;h5 class=&#34;admonition-title&#34;&gt;important&lt;/h5&gt;
-&lt;p&gt;If you have &lt;a href=&#34;https://docs.mongodb.org/manual/release-notes/3.0-scram/&#34;&gt;upgraded the authentication schema&lt;/a&gt; from &lt;code&gt;MONGODB-CR&lt;/code&gt; to &lt;code&gt;SCRAM-SHA-1&lt;/code&gt;, &lt;code&gt;MONGODB-CR&lt;/code&gt; credentials will fail to authenticate.&lt;/p&gt;
-
-&lt;/div&gt;
-&lt;/p&gt;
-
-&lt;h2 id=&#34;x509&#34;&gt;X509&lt;/h2&gt;
-
-&lt;p&gt;With  &lt;a href=&#34;http://docs.mongodb.org/manual/core/authentication/#x-509-certificate-authentication&#34;&gt;X.509&lt;/a&gt; mechanism, MongoDB uses the X.509 certificate presented during SSL negotiation to authenticate a user whose name is derived from the distinguished name of the X.509 certificate.&lt;/p&gt;
-
-&lt;p&gt;X.509 authentication requires the use of SSL connections with certificate validation and is available in MongoDB 2.6 and newer.&lt;/p&gt;
-
-&lt;p&gt;To connect using the X.509 authentication mechanism, specify &lt;code&gt;MONGODB-X509&lt;/code&gt; as the mechanism in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI connection string&lt;/a&gt;, &lt;code&gt;ssl=true&lt;/code&gt;, and the username. Use &lt;code&gt;enodeURIComponent&lt;/code&gt; to encode the username string.&lt;/p&gt;
-
-&lt;p&gt;In addition to the connection string, pass to the &lt;code&gt;MongoClient.connect&lt;/code&gt; method a connections options for the &lt;code&gt;server&lt;/code&gt; with  the X.509 certificate and other &lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/tutorials/connect/ssl/&#34;&gt;TLS/SSL connections&lt;/a&gt; options.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  f = require(&#39;util&#39;).format,
-  assert = require(&#39;assert&#39;);
-
-// Read the cert and key
-var cert = fs.readFileSync(__dirname + &amp;quot;/ssl/x509/client.pem&amp;quot;);
-var key = fs.readFileSync(__dirname + &amp;quot;/ssl/x509/client.pem&amp;quot;);
-
-// User name
-var userName = encodeURIComponent(&amp;quot;CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US&amp;quot;);
-
-// Connect using X509 authentication
-MongoClient.connect(f(&#39;mongodb://%s@server:27017/test?authMechanism=MONGODB-X509&amp;amp;ssl=true&#39;, userName), {
-  server: {
-      sslKey:key
-    , sslCert:cert
-    , sslValidate:false
-  }
-}, function(err, db) {
-  assert.equal(null, err);
-  console.log(&amp;quot;Connected correctly to server&amp;quot;);
-
-  db.close();
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;For more information on connecting to MongoDB instance, replica set, and sharded cluster with TLS/SSL options, see &lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/tutorials/connect/ssl/&#34;&gt;TLS/SSL connections options&lt;/a&gt;.&lt;/p&gt;
-
-&lt;p&gt;For more information, refer to the MongoDB manual
-&lt;a href=&#34;http://docs.mongodb.org/manual/tutorial/configure-x509-client-authentication/#add-x-509-certificate-subject-as-a-user&#34;&gt;X.509 tutorial&lt;/a&gt; for more information about determining the subject name from the certificate.&lt;/p&gt;
-
-&lt;h2 id=&#34;kerberos-gssapi-sspi&#34;&gt;Kerberos (GSSAPI/SSPI)&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&#34;http://www.mongodb.com/products/mongodb-enterprise&#34;&gt;MongoDB Enterprise&lt;/a&gt; supports proxy authentication through a Kerberos service. The Node.js driver supports Kerberos on UNIX via the MIT Kerberos library and on Windows via the SSPI API.&lt;/p&gt;
-
-&lt;p&gt;To connect using the X.509 authentication mechanism, specify &lt;code&gt;authMechanism=GSSAPI&lt;/code&gt; as the mechanism in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI connection string&lt;/a&gt;. Specify the user principal and the service name in the connection string.  Use &lt;code&gt;enodeURIComponent&lt;/code&gt; to encode the user principal string.&lt;/p&gt;
-
-&lt;p&gt;The following example connects to MongoDB using Kerberos for UNIX.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  f = require(&#39;util&#39;).format,
-  assert = require(&#39;assert&#39;);
-
-// KDC Server
-var server = &amp;quot;kerberos.example.com&amp;quot;;
-var principal = &amp;quot;drivers@KERBEROS.EXAMPLE.COM&amp;quot;;
-var urlEncodedPrincipal = encodeURIComponent(principal);
-
-// Let&#39;s write the actual connection code
-MongoClient.connect(f(&amp;quot;mongodb://%s@%s/kerberos?authMechanism=GSSAPI&amp;amp;gssapiServiceName=mongodb&amp;quot;, urlEncodedPrincipal, server), function(err, db) {
-  assert.equal(null, err);
-
-  db.close();
-  test.done();
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
-&lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
-&lt;p&gt;The method refers to the &lt;code&gt;GSSAPI&lt;/code&gt; authentication mechanism instead of &lt;code&gt;Kerberos&lt;/code&gt; because technically the driver authenticates via the &lt;a href=&#34;https://tools.ietf.org/html/rfc4752&#34;&gt;GSSAPI&lt;/a&gt; SASL mechanism.&lt;/p&gt;
-
-&lt;/div&gt;
-&lt;/p&gt;
-
-&lt;h2 id=&#34;ldap-plain&#34;&gt;LDAP (PLAIN)&lt;/h2&gt;
-
-&lt;p&gt;&lt;a href=&#34;http://www.mongodb.com/products/mongodb-enterprise&#34;&gt;MongoDB Enterprise&lt;/a&gt; supports proxy authentication through a Lightweight Directory Access Protocol (LDAP) service.&lt;/p&gt;
-
-&lt;p&gt;To connect using the LDAP authentication mechanism, specify &lt;code&gt;authMechanism=PLAIN&lt;/code&gt; as the mechanism in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI connection string&lt;/a&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  f = require(&#39;util&#39;).format,
-  assert = require(&#39;assert&#39;);
-
-// LDAP Server
-var server = &amp;quot;ldap.example.com&amp;quot;;
-var user = &amp;quot;ldap-user&amp;quot;;
-var pass = &amp;quot;ldap-password&amp;quot;;
-
-// Url
-var url = f(&amp;quot;mongodb://%s:%s@%s/test?authMechanism=PLAIN&amp;amp;maxPoolSize=1&amp;quot;, user, pass, server);
-
-// Let&#39;s write the actual connection code
-MongoClient.connect(url, function(err, db) {
-  test.equal(null, err);    
-
-  db.close();
-  test.done();
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
-&lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
-&lt;p&gt;The method refers to the &lt;code&gt;PLAIN&lt;/code&gt; authentication mechanism instead of &lt;code&gt;LDAP&lt;/code&gt; because technically the driver authenticates via the &lt;a href=&#34;https://www.ietf.org/rfc/rfc4616.txt&#34;&gt;PLAIN&lt;/a&gt; SASL mechanism.&lt;/p&gt;
-
-&lt;/div&gt;
-&lt;/p&gt;
 </description>
     </item>
     
@@ -848,13 +829,13 @@ MongoClient.connect(url, function(err, db) {
       <guid>/node-mongodb-native/2.1/tutorials/gridfs/gridstore/</guid>
       <description>
 
-&lt;p&gt;&lt;div class=&#34;admonition warning&#34;&gt;
+&lt;div class=&#34;admonition warning&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
 &lt;p&gt;The GridStore API is deprecated. Driver version 2.0 and later uses the
 &lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/tutorials/gridfs/streaming/&#34;&gt;GridFS API&lt;/a&gt;.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;h1 id=&#34;gridstore&#34;&gt;GridStore&lt;/h1&gt;
 
@@ -999,7 +980,8 @@ result value which indicates if the write was successful or not.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;db&lt;/code&gt; is the database object&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;filename&lt;/code&gt; is the name of the file to be checked or a regular expression&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a callback function with two parameters - an error object (if an error occured) and a boolean value indicating if the file exists or not&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a callback function with two parameters - an error object (if an error occured) and a boolean value indicating if the file exists or not
+&lt;br /&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h2 id=&#34;seek-to-a-specific-position-for-reading&#34;&gt;Seek to a specific position for reading&lt;/h2&gt;
@@ -1010,6 +992,25 @@ result value which indicates if the write was successful or not.&lt;/p&gt;
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This function moves the internal pointer to the specified position.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Management</title>
+      <link>/node-mongodb-native/2.1/reference/management/</link>
+      <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.1/reference/management/</guid>
+      <description>
+
+&lt;h2 id=&#34;management&#34;&gt;Management&lt;/h2&gt;
+
+&lt;p&gt;The driver provides two mechanisms for examining its state:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/management/logging/&#34;&gt;Logging&lt;/a&gt;: Comprehensive logging of all operations.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/management/apm/&#34;&gt;Application Performance Monitoring&lt;/a&gt;: The Application Performance Monitoring API is an API developers to tap into the commands issues to MongoDB to record performance metrics and/or inspect the commands sent to MongoDB.&lt;/li&gt;
+&lt;/ul&gt;
 </description>
     </item>
     
@@ -1226,35 +1227,26 @@ some behavior changes for the cursor streams).&lt;/p&gt;
     </item>
     
     <item>
-      <title>Connection Options</title>
-      <link>/node-mongodb-native/2.1/reference/connecting/</link>
+      <title>CRUD Operations</title>
+      <link>/node-mongodb-native/2.1/reference/ecmascript6/crud/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
       
-      <guid>/node-mongodb-native/2.1/reference/connecting/</guid>
+      <guid>/node-mongodb-native/2.1/reference/ecmascript6/crud/</guid>
       <description>
 
-&lt;h1 id=&#34;connection-options&#34;&gt;Connection Options&lt;/h1&gt;
+&lt;h1 id=&#34;ecmascript-6-crud&#34;&gt;ECMAScript 6 CRUD&lt;/h1&gt;
 
-&lt;p&gt;For more information on the connection options:&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s take a look at the CRUD operations from the perspective of ECMAScript 6. In this guide we will be using the same examples as in the general CRUD specification overview but rewrite them to use the new ECMAScript 6 features. For all method options refer to the main CRUD tutorial.&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI Connection String&lt;/a&gt;: MongoDB connection string URI.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/connection-settings/&#34;&gt;Connection Settings&lt;/a&gt;: Reference on the driver-specific connection settings.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/tutorials/crud/&#34;&gt;CRUD&lt;/a&gt;: CRUD Specification.&lt;/li&gt;
 &lt;/ul&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Connecting</title>
-      <link>/node-mongodb-native/2.1/reference/ecmascript6/connecting/</link>
-      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
-      
-      <guid>/node-mongodb-native/2.1/reference/ecmascript6/connecting/</guid>
-      <description>
 
-&lt;h1 id=&#34;connecting&#34;&gt;Connecting&lt;/h1&gt;
+&lt;p&gt;This reference also omits methods that no longer make sense when using ECMAScript 6 such as the &lt;code&gt;each&lt;/code&gt; and &lt;code&gt;forEach&lt;/code&gt; methods.&lt;/p&gt;
 
-&lt;p&gt;The MongoClient connection method returns a Promise if no callback is passed to it. Below is an example using the &lt;a href=&#34;https://www.npmjs.com/package/co&#34;&gt;co&lt;/a&gt; package to run a &lt;code&gt;generator&lt;/code&gt; function, which is one of the most exciting innovations of ECMAScript 6.&lt;/p&gt;
+&lt;h2 id=&#34;inserting-documents&#34;&gt;Inserting Documents&lt;/h2&gt;
+
+&lt;p&gt;The &lt;em&gt;insertOne&lt;/em&gt; and &lt;em&gt;insertMany&lt;/em&gt; methods exists on the &lt;em&gt;Collection&lt;/em&gt; class and is used to insert documents into MongoDB. Code speaks a thousand words so let&amp;rsquo;s see two simple examples of inserting documents.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
   co = require(&#39;co&#39;),
@@ -1262,363 +1254,1618 @@ some behavior changes for the cursor streams).&lt;/p&gt;
 
 co(function*() {
   // Connection URL
-  var url = &#39;mongodb://localhost:27017/myproject&#39;;
-  // Use connect method to connect to the Server
-  var db = yield MongoClient.connect(url);
-  // Close the connection
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Insert a single document
+  var r = yield db.collection(&#39;inserts&#39;).insertOne({a:1});
+  assert.equal(1, r.insertedCount);
+
+  // Insert multiple documents
+  var r = yield db.collection(&#39;inserts&#39;).insertMany([{a:2}, {a:3}]);
+  assert.equal(2, r.insertedCount);
+
+  // Close connection
   db.close();
 }).catch(function(err) {
   console.log(err.stack);
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The &lt;code&gt;MongoClient.connect&lt;/code&gt; function returns a &lt;code&gt;Promise&lt;/code&gt; that we then execute using the &lt;code&gt;yield&lt;/code&gt; keyword of the &lt;code&gt;generator&lt;/code&gt; function. If an error happens during the &lt;code&gt;MongoClient.connect&lt;/code&gt; the error is caught by &lt;code&gt;co&lt;/code&gt; and can be inspected by attaching a function to the &lt;code&gt;catch&lt;/code&gt; method as shown above.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s look at a simple example where we are writing to a replicaset and we wish to ensure that we serialize a passed in function as well as have the server assign the &lt;em&gt;_id&lt;/em&gt; for each document.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Insert a single document
+  var r = yield db.collection(&#39;inserts&#39;).insertOne({
+        a:1
+      , b: function() { return &#39;hello&#39;; }
+    }, {
+        w: &#39;majority&#39;
+      , wtimeout: 10000
+      , serializeFunctions: true
+      , forceServerObjectId: true
+    });
+
+  assert.equal(1, r.insertedCount);
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That wraps up the &lt;em&gt;insert&lt;/em&gt; methods. Next let&amp;rsquo;s look at the &lt;em&gt;update&lt;/em&gt; methods.&lt;/p&gt;
+
+&lt;h2 id=&#34;updating-documents&#34;&gt;Updating Documents&lt;/h2&gt;
+
+&lt;p&gt;The &lt;em&gt;updateOne&lt;/em&gt; and &lt;em&gt;updateMany&lt;/em&gt; methods exists on the &lt;em&gt;Collection&lt;/em&gt; class and is used to update and upsert documents into MongoDB. Let&amp;rsquo;s look at a couple of usage examples.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Get the updates collection
+  var col = db.collection(&#39;updates&#39;);
+  // Insert a single document
+  var r = yield col.insertMany([{a:1}, {a:2}, {a:2}]);
+  assert.equal(3, r.insertedCount);
+
+  // Update a single document
+  var r = yield col.updateOne({a:1}, {$set: {b: 1}});
+  assert.equal(1, r.matchedCount);
+  assert.equal(1, r.modifiedCount);
+
+  // Update multiple documents
+  var r = yield col.updateMany({a:2}, {$set: {b: 1}});
+  assert.equal(2, r.matchedCount);
+  assert.equal(2, r.modifiedCount);
+
+  // Upsert a single document
+  var r = yield col.updateOne({a:3}, {$set: {b: 1}}, {
+    upsert: true
+  });
+  assert.equal(0, r.matchedCount);
+  assert.equal(1, r.upsertedCount);
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;removing-documents&#34;&gt;Removing Documents&lt;/h2&gt;
+
+&lt;p&gt;The &lt;em&gt;deleteOne&lt;/em&gt; and &lt;em&gt;deleteMany&lt;/em&gt; methods exist on the &lt;em&gt;Collection&lt;/em&gt; class and is used to remove documents from MongoDB. Let&amp;rsquo;s look at a couple of usage examples.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Get the removes collection
+  var col = db.collection(&#39;removes&#39;);
+  // Insert a single document
+  var r = yield col.insertMany([{a:1}, {a:2}, {a:2}]);
+  assert.equal(3, r.insertedCount);
+
+  // Remove a single document
+  var r = yield col.deleteOne({a:1});
+  assert.equal(1, r.deletedCount);
+
+  // Update multiple documents
+  var r = yield col.deleteMany({a:2});
+  assert.equal(2, r.deletedCount);
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;findoneandupdate-findoneanddelete-and-findoneandreplace&#34;&gt;findOneAndUpdate, findOneAndDelete and findOneAndReplace&lt;/h2&gt;
+
+&lt;p&gt;The three methods &lt;em&gt;findOneAndUpdate&lt;/em&gt;, &lt;em&gt;findOneAndDelete&lt;/em&gt; and &lt;em&gt;findOneAndReplace&lt;/em&gt; are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is &lt;em&gt;atomic&lt;/em&gt;. Let&amp;rsquo;s look at &lt;em&gt;findOneAndUpdate&lt;/em&gt; first using an example.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Get the findAndModify collection
+  var col = db.collection(&#39;findAndModify&#39;);
+  // Insert a single document
+  var r = yield col.insert([{a:1}, {a:2}, {a:2}]);
+  assert.equal(3, r.result.n);
+
+  // Modify and return the modified document
+  var r = yield col.findOneAndUpdate({a:1}, {$set: {b: 1}}, {
+      returnOriginal: false
+    , sort: [[a,1]]
+    , upsert: true
+  });
+  assert.equal(1, r.value.b);
+
+  // Remove and return a document
+  var r = yield col.findOneAndDelete({a:2});
+  assert.ok(r.value.b == null);
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;em&gt;findOneAndDelete&lt;/em&gt; function is a function especially defined to help remove a document. Let&amp;rsquo;s look at an example of usage.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Get the findAndModify collection
+  var col = db.collection(&#39;findAndModify&#39;);
+  // Insert a single document
+  var r = yield col.insert([{a:1}, {a:2}, {a:2}]);
+  assert.equal(3, r.result.n);
+
+  // Remove a document from MongoDB and return it
+  var r = yield col.findOneAndDelete({a:1}, {
+      sort: [[a,1]]
+    });
+  assert.ok(r.value.b == null);
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;bulkwrite&#34;&gt;BulkWrite&lt;/h2&gt;
+
+&lt;p&gt;The &lt;em&gt;bulkWrite&lt;/em&gt; function allows for a simple set of bulk operations to be done in a non fluent way as in comparison to the bulk API discussed next. Let&amp;rsquo;s look at an example.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Get the collection
+  var col = db.collection(&#39;bulk_write&#39;);
+  var r = yield col.bulkWrite([
+      { insertOne: { document: { a: 1 } } }
+    , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+    , { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+    , { deleteOne: { filter: {c:1} } }
+    , { deleteMany: { filter: {c:1} } }
+    , { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}]
+  , {ordered:true, w:1});
+  assert.equal(1, r.insertedCount);
+  assert.equal(1, Object.keys(r.insertedIds).length);
+  assert.equal(1, r.matchedCount);
+  assert.equal(0, r.modifiedCount);
+  assert.equal(0, r.deletedCount);
+  assert.equal(2, r.upsertedCount);
+  assert.equal(2, Object.keys(r.upsertedIds).length);
+
+  // Ordered bulk operation
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This covers the basic write operations. Let&amp;rsquo;s have a look at the Bulk write operations next.&lt;/p&gt;
+
+&lt;h2 id=&#34;bulk-write-operations&#34;&gt;Bulk Write Operations&lt;/h2&gt;
+
+&lt;p&gt;The bulk write operations make it easy to write groups of operations together to MongoDB. There are some caveats and to get the best performance you need to be running against MongoDB &lt;em&gt;2.6&lt;/em&gt; or higher that support the new write commands. Bulk operations are split into &lt;em&gt;ordered&lt;/em&gt; and &lt;em&gt;unordered&lt;/em&gt; bulk operations. An &lt;em&gt;ordered&lt;/em&gt; bulk operation guarantees the order of execution of writes while the &lt;em&gt;unordered&lt;/em&gt; bulk operation makes no assumptions about the order of execution. In the Node.js driver the &lt;em&gt;unordered&lt;/em&gt; bulk operations will group operations according to type and write them in parallel. Let&amp;rsquo;s have a look at how to build an ordered bulk operation.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Get the collection
+  var col = db.collection(&#39;bulkops&#39;);
+  // Create ordered bulk, for unordered initializeUnorderedBulkOp()
+  var bulk = col.initializeOrderedBulkOp();
+  // Insert 10 documents
+  for(var i = 0; i &amp;lt; 10; i++) {
+    bulk.insert({a: i});
+  }
+
+  // Next perform some upserts
+  for(var i = 0; i &amp;lt; 10; i++) {
+    bulk.find({b:i}).upsert().updateOne({b:1});
+  }
+
+  // Finally perform a remove operation
+  bulk.find({b:1}).deleteOne();
+
+  // Execute the bulk with a journal write concern
+  var result = yield bulk.execute();
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We will not cover the results object here as it&amp;rsquo;s documented in the driver API. The Bulk API handles all the splitting of operations into multiple writes and also emulates 2.6 and higher write commands for 2.4 and earlier servers.&lt;/p&gt;
+
+&lt;p&gt;There are some important things to keep in mind when using the bulk API and especially the &lt;em&gt;ordered&lt;/em&gt; bulk API mode. The write commands are single operation type. That means they can only do insert/update and remove. If you f.ex do the following combination of operations.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Insert {a:1}
+Update {a:1} to {a:1, b:1}
+Insert {a:2}
+Remove {b:1}
+Insert {a:3}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will result in the driver issuing 4 write commands to the server.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Insert Command with {a:1}
+Update Command {a:1} to {a:1, b:1}
+Insert Command with {a:2}
+Remove Command with {b:1}
+Insert Command with {a:3}    
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you instead organize your &lt;em&gt;ordered&lt;/em&gt; in the following manner.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Insert {a:1}
+Insert {a:2}
+Insert {a:3}
+Update {a:1} to {a:1, b:1}
+Remove {b:1}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The number of write commands issued by the driver will be.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Insert Command with {a:1}, {a:2}, {a:3}
+Update Command {a:1} to {a:1, b:1}
+Remove Command with {b:1}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Allowing for more efficient and faster bulk write operation.&lt;/p&gt;
+
+&lt;p&gt;For &lt;em&gt;unordered&lt;/em&gt; bulk operations this is not important as the driver sorts operations by type and executes them in parallel.&lt;/p&gt;
+
+&lt;p&gt;This covers write operations for MongoDB. Let&amp;rsquo;s look at querying for documents next.&lt;/p&gt;
+
+&lt;h2 id=&#34;read-methods&#34;&gt;Read Methods&lt;/h2&gt;
+
+&lt;p&gt;The main method for querying the database are the &lt;em&gt;find&lt;/em&gt; and the &lt;em&gt;aggregate&lt;/em&gt; method. In this CRUD tutorial we will focus on &lt;em&gt;find&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;The &lt;em&gt;method&lt;/em&gt; return a cursor that allows us to operate on the data. The &lt;em&gt;cursor&lt;/em&gt; also implements the Node.js 0.10.x or higher stream interface allowing us to pipe the results to other streams.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at a simple find example that materializes all the documents from a query using the toArray but limits the number of returned results to 2 documents.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Get the collection
+  var col = db.collection(&#39;find&#39;);
+  // Insert a single document
+  var r = yield col.insertMany([{a:1}, {a:1}, {a:1}]);
+  assert.equal(3, r.insertedCount);
+
+  // Get first two documents that match the query
+  var docs = yield col.find({a:1}).limit(2).toArray();
+  assert.equal(2, docs.length);
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next lets take a look at the &lt;em&gt;next&lt;/em&gt; method and how we can iterate over the cursor in ECMAScript 6. The new &lt;code&gt;generator&lt;/code&gt; functions allow for what is arguably a much cleaner and easier to read iteration code.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Get the collection
+  var col = db.collection(&#39;find&#39;);
+  // Insert a single document
+  var r = yield col.insertMany([{a:1}, {a:1}, {a:1}]);
+  assert.equal(3, r.insertedCount);
+
+  // Get the cursor
+  var cursor = col.find({a:1}).limit(2);
+
+  // Iterate over the cursor
+  while(yield cursor.hasNext()) {
+    var doc = yield cursor.next();
+    console.dir(doc);
+  }
+
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;executing-commands&#34;&gt;Executing Commands&lt;/h2&gt;
+
+&lt;p&gt;The &lt;code&gt;Db.command&lt;/code&gt; method also returns a &lt;code&gt;Promise&lt;/code&gt; allowing us to leverage &lt;code&gt;generators&lt;/code&gt; to get clear and concise code. Below is an example calling the &lt;code&gt;buildInfo&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+  // Use the admin database for the operation
+  var adminDb = db.admin();
+  // Retrive the build information using the admin command
+  yield adminDb.command({buildInfo:1})
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
 </description>
     </item>
     
     <item>
-      <title>Connection Settings</title>
-      <link>/node-mongodb-native/2.1/reference/connecting/connection-settings/</link>
+      <title>CRUD Operations</title>
+      <link>/node-mongodb-native/2.1/tutorials/crud/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
       
-      <guid>/node-mongodb-native/2.1/reference/connecting/connection-settings/</guid>
+      <guid>/node-mongodb-native/2.1/tutorials/crud/</guid>
       <description>
 
-&lt;h1 id=&#34;uri-connection-settings&#34;&gt;URI Connection Settings&lt;/h1&gt;
+&lt;h1 id=&#34;crud-operations&#34;&gt;CRUD Operations&lt;/h1&gt;
 
-&lt;p&gt;Optional connection settings are settings not covered by the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI Connection String &lt;/a&gt;. The following options are passed in the options parameter in the MongoClient.connect function.&lt;/p&gt;
+&lt;p&gt;For a walkthrough of the main CRUD operations please refer to the
+&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/quick-start/&#34;&gt;Quick Start guide&lt;/a&gt;.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , assert = require(&#39;assert&#39;);
+&lt;p&gt;Driver CRUD operations are defined as the operations performed to create, read, update, and delete documents.
+This tutorial covers both the basic CRUD methods and the specialized &lt;code&gt;findAndModify&lt;/code&gt; based methods
+as well as the new Bulk API methods for efficient bulk write operations.&lt;/p&gt;
+
+&lt;div class=&#34;pull-right&#34;&gt;
+  &lt;input type=&#34;checkbox&#34; checked=&#34;&#34; class=&#34;distroPicker&#34; data-toggle=&#34;toggle&#34; data-on=&#34;JavaScript 5&#34; data-off=&#34;JavaScript 6&#34; data-offstyle=&#34;success&#34;&gt;
+&lt;/div&gt;
+
+&lt;h2 id=&#34;write-methods&#34;&gt;Write Methods&lt;/h2&gt;
+
+&lt;p&gt;Write methods are divided into those which insert documents into a collection, those which update
+documents in a collection, and those which remove documents from a collection.&lt;/p&gt;
+
+&lt;h3 id=&#34;insert-documents&#34;&gt;Insert Documents&lt;/h3&gt;
+
+&lt;p&gt;The &lt;code&gt;insertOne&lt;/code&gt; and &lt;code&gt;insertMany&lt;/code&gt; methods exist on the &lt;code&gt;Collection&lt;/code&gt; class and are used to insert documents into MongoDB.&lt;/p&gt;
+
+&lt;section class=&#34;javascript5&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
 
 // Connection URL
-var url = &#39;mongodb://localhost:50000,localhost:50001/myproject&#39;;
-// Use connect method to connect to the Server passing in
-// additional options
-MongoClient.connect(url, {
-  poolSize: 10, ssl: true
-}, function(err, db) {
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
-  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+  console.log(&#34;Connected correctly to server&#34;);
 
-  db.close();
+  // Insert a single document
+  db.collection(&#39;inserts&#39;).insertOne({a:1}, function(err, r) {
+    assert.equal(null, err);
+    assert.equal(1, r.insertedCount);
+
+    // Insert multiple documents
+    db.collection(&#39;inserts&#39;).insertMany([{a:2}, {a:3}], function(err, r) {
+      assert.equal(null, err);
+      assert.equal(2, r.insertedCount);
+
+      db.close();
+    });
+  });
 });
-&lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The table below shows all settings and what topology they affect.&lt;/p&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+&lt;section class=&#34;javascript6 hidden&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  // Insert a single document
+  var r = yield db.collection(&#39;inserts&#39;).insertOne({a:1});
+  assert.equal(1, r.insertedCount);
+
+  // Insert multiple documents
+  var r = yield db.collection(&#39;inserts&#39;).insertMany([{a:2}, {a:3}]);
+  assert.equal(2, r.insertedCount);
+
+  // Close connection
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+
+&lt;p&gt;The first &lt;code&gt;insert&lt;/code&gt; inserts a single document into the &lt;em&gt;inserts&lt;/em&gt; collection. Notice that there&amp;rsquo;s no need to
+explicitly create a new &lt;em&gt;inserts&lt;/em&gt; collection, as the server will create it implicitly when the first document
+is inserted. The method &lt;code&gt;db.createIndex&lt;/code&gt; is only necessary when creating non-standard collections,
+such as &lt;a href=&#34;https://docs.mongodb.org/manual/core/capped-collections/&#34;&gt;capped collections&lt;/a&gt; or where parameters other
+than the defaults are necessary.&lt;/p&gt;
+
+&lt;p&gt;The &lt;code&gt;insertOne&lt;/code&gt; and &lt;code&gt;insertMany&lt;/code&gt; methods also accept a second argument which can be an options object. This object can have the following fields:&lt;/p&gt;
 
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
-&lt;th align=&#34;left&#34;&gt;Option&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Affects&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
 &lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;Default&lt;/th&gt;
 &lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
 
 &lt;tbody&gt;
 &lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;poolSize&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;integer&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;5&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Set the maximum poolSize for each individual server or proxy connection.&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;w&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;ssl&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;boolean&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Use ssl connection (needs to have a mongod server with ssl support)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;wtimeout&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;set the timeout for waiting for write concern to finish (combines with w option).&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;sslValidate&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;boolean&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;j&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;write waits for journal sync.&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;sslCA&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Array&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;serializeFunctions&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;serialize functions on an object to mongodb, by default the driver does not serialize any functions on the passed in documents.&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;sslCert&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Buffer/String&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher)&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;sslKey&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Buffer/String&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher)&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;sslPass&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Buffer/String&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher)&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;autoReconnect&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;boolean&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Reconnect on error.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;noDelay&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;boolean&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;TCP Socket NoDelay option.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;keepAlive&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;integer&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;0&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The number of milliseconds to wait before initiating keepAlive on the TCP socket.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;connectTimeoutMS&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;integer&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;30000&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;TCP Connection timeout setting.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;socketTimeoutMS&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;integer&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;30000&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;TCP Socket timeout setting.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;reconnectTries&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;integer&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;30&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server attempt to reconnect #times&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;reconnectInterval&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;integer&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;1000&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server will wait # milliseconds between retries.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;ha&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;boolean&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Turn on high availability monitoring.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;haInterval&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;integer&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;10000,5000&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Time between each replicaset status check.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;replicaSet&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;ReplicaSet&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;string&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The name of the replicaset to connect to.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;secondaryAcceptableLatencyMS&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;ReplicaSet&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;integer&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;15&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms).&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;acceptableLatencyMS&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;integer&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;15&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms).&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;connectWithNoPrimary&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;ReplicaSet&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;boolean&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Sets if the driver should connect even if no primary is available.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;authSource&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;string&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;If the database authentication is dependent on another databaseName.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;w&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;string, integer&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The write concern.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;wtimeout&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;integer&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The write concern timeout value.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;j&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;boolean&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Specify a journal write concern.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;forceServerObjectId&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;boolean&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;forceServerObjectId&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Force server to assign _id values instead of driver.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;serializeFunctions&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;boolean&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Serialize functions on any object.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;ignoreUndefined&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;boolean&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Specify if the BSON serializer should ignore undefined fields.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;raw&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;boolean&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Return document results as raw BSON buffers.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;promoteLongs&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;boolean&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Promotes Long values to number if they fit inside the 53 bits resolution.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;bufferMaxEntries&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;integer&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;-1&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;readPreference&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;object&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;pkFactory&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;object&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;A primary key factory object for generation of custom _id keys.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;promiseLibrary&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;object&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible.&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;readConcern&lt;/strong&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;object&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Specify a read concern for the collection. (only MongoDB 3.2 or higher supported).&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
 
-&lt;h1 id=&#34;ensure-you-connection-string-is-valid-for-replica-sets&#34;&gt;Ensure you connection string is valid for Replica Sets&lt;/h1&gt;
+&lt;p&gt;The following example shows how to serialize a passed-in function when writing to a
+&lt;a href=&#34;https://docs.mongodb.org/manual/core/replica-set-members/&#34;&gt;replica set&lt;/a&gt;.&lt;/p&gt;
 
-&lt;p&gt;The connection string passed to the driver must use the fully qualified host names for the servers as set in the replicaset config. Given the following configuration settings for your replicaset.&lt;/p&gt;
+&lt;section class=&#34;javascript5&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
 
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
-	&amp;quot;_id&amp;quot; : &amp;quot;testSet&amp;quot;,
-	&amp;quot;version&amp;quot; : 1,
-	&amp;quot;protocolVersion&amp;quot; : 1,
-	&amp;quot;members&amp;quot; : [
-		{
-			&amp;quot;_id&amp;quot; : 1,
-			&amp;quot;host&amp;quot; : &amp;quot;server1:31000&amp;quot;,
-		},
-		{
-			&amp;quot;_id&amp;quot; : 2,
-			&amp;quot;host&amp;quot; : &amp;quot;server2:31001&amp;quot;,
-		},
-		{
-			&amp;quot;_id&amp;quot; : 3,
-			&amp;quot;host&amp;quot; : &amp;quot;server3:31002&amp;quot;,
-		}
-	]
-}
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  // Insert a single document
+  db.collection(&#39;inserts&#39;).insertOne({
+        a:1
+      , b: function() { return &#39;hello&#39;; }
+    }, {
+        w: &#39;majority&#39;
+      , wtimeout: 10000
+      , serializeFunctions: true
+    }, function(err, r) {
+    assert.equal(null, err);
+    assert.equal(1, r.insertedCount);
+    db.close();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+&lt;section class=&#34;javascript6 hidden&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  // Insert a single document
+  var r = yield db.collection(&#39;inserts&#39;).insertOne({
+        a:1
+      , b: function() { return &#39;hello&#39;; }
+    }, {
+        w: &#39;majority&#39;
+      , wtimeout: 10000
+      , serializeFunctions: true
+      , forceServerObjectId: true
+    });
+
+  assert.equal(1, r.insertedCount);
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+
+&lt;h3 id=&#34;updating-documents&#34;&gt;Updating Documents&lt;/h3&gt;
+
+&lt;p&gt;The &lt;code&gt;updateOne&lt;/code&gt; and &lt;code&gt;updateMany&lt;/code&gt; methods exist on the &lt;code&gt;Collection&lt;/code&gt; class and are used to update and upsert documents.&lt;/p&gt;
+
+&lt;section class=&#34;javascript5&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  var col = db.collection(&#39;updates&#39;);
+  // Insert a single document
+  col.insertMany([{a:1}, {a:2}, {a:2}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.insertedCount);
+
+    // Update a single document
+    col.updateOne({a:1}, {$set: {b: 1}}, function(err, r) {
+      assert.equal(null, err);
+      assert.equal(1, r.matchedCount);
+      assert.equal(1, r.modifiedCount);
+
+      // Update multiple documents
+      col.updateMany({a:2}, {$set: {b: 1}}, function(err, r) {
+        assert.equal(null, err);
+        assert.equal(2, r.matchedCount);
+        assert.equal(2, r.modifiedCount);
+
+        // Upsert a single document
+        col.updateOne({a:3}, {$set: {b: 1}}, {
+          upsert: true
+        }, function(err, r) {
+          assert.equal(null, err);
+          assert.equal(0, r.matchedCount);
+          assert.equal(1, r.upsertedCount);
+          db.close();
+        });
+      });
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+&lt;section class=&#34;javascript6 hidden&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  // Get the updates collection
+  var col = db.collection(&#39;updates&#39;);
+  // Insert a single document
+  var r = yield col.insertMany([{a:1}, {a:2}, {a:2}]);
+  assert.equal(3, r.insertedCount);
+
+  // Update a single document
+  var r = yield col.updateOne({a:1}, {$set: {b: 1}});
+  assert.equal(1, r.matchedCount);
+  assert.equal(1, r.modifiedCount);
+
+  // Update multiple documents
+  var r = yield col.updateMany({a:2}, {$set: {b: 1}});
+  assert.equal(2, r.matchedCount);
+  assert.equal(2, r.modifiedCount);
+
+  // Upsert a single document
+  var r = yield col.updateOne({a:3}, {$set: {b: 1}}, {
+    upsert: true
+  });
+  assert.equal(0, r.matchedCount);
+  assert.equal(1, r.upsertedCount);
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+
+&lt;p&gt;The &lt;code&gt;update&lt;/code&gt; method also accepts a third argument which can be an options object. This object can have the following fields:&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;w&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;wtimeout&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;set the timeout for waiting for write concern to finish (combines with w option).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;j&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;write waits for journal sync.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;multi&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Update one/all documents with operation.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;upsert&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Update operation is an upsert.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Just as for &lt;code&gt;insert&lt;/code&gt;, the &lt;code&gt;update&lt;/code&gt; method allows you to specify a per operation write concern using the &lt;code&gt;w&lt;/code&gt;, &lt;code&gt;wtimeout&lt;/code&gt; and &lt;code&gt;fsync&lt;/code&gt; parameters.&lt;/p&gt;
+
+&lt;h3 id=&#34;removing-documents&#34;&gt;Removing Documents&lt;/h3&gt;
+
+&lt;p&gt;The &lt;code&gt;deleteOne&lt;/code&gt; and &lt;code&gt;deleteMany&lt;/code&gt; methods exist on the &lt;code&gt;Collection&lt;/code&gt; class and are used to remove documents from MongoDB.&lt;/p&gt;
+
+&lt;section class=&#34;javascript5&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  var col = db.collection(&#39;removes&#39;);
+  // Insert a single document
+  col.insertMany([{a:1}, {a:2}, {a:2}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.insertedCount);
+
+    // Remove a single document
+    col.deleteOne({a:1}, function(err, r) {
+      assert.equal(null, err);
+      assert.equal(1, r.deletedCount);
+
+      // Update multiple documents
+      col.deleteMany({a:2}, function(err, r) {
+        assert.equal(null, err);
+        assert.equal(2, r.deletedCount);
+        db.close();
+      });
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+&lt;section class=&#34;javascript6 hidden&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  // Get the removes collection
+  var col = db.collection(&#39;removes&#39;);
+  // Insert a single document
+  var r = yield col.insertMany([{a:1}, {a:2}, {a:2}]);
+  assert.equal(3, r.insertedCount);
+
+  // Remove a single document
+  var r = yield col.deleteOne({a:1});
+  assert.equal(1, r.deletedCount);
+
+  // Update multiple documents
+  var r = yield col.deleteMany({a:2});
+  assert.equal(2, r.deletedCount);
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+
+&lt;p&gt;The &lt;code&gt;deleteOne&lt;/code&gt; and &lt;code&gt;deleteMany&lt;/code&gt; methods also accept a second argument which can be an options object. This object can have the following fields:&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;w&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;wtimeout&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;set the timeout for waiting for write concern to finish (combines with w option).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;j&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;write waits for journal sync.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;single&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Removes the first document found.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Just as for &lt;code&gt;updateOne/updateMany&lt;/code&gt; and &lt;code&gt;insertOne/insertMany&lt;/code&gt;, the &lt;code&gt;deleteOne/deleteMany&lt;/code&gt; method allows you to specify a per operation write concern using the &lt;code&gt;w&lt;/code&gt;, &lt;code&gt;wtimeout&lt;/code&gt; and &lt;code&gt;fsync&lt;/code&gt; parameters.&lt;/p&gt;
+
+&lt;h3 id=&#34;findoneandupdate-findoneanddelete-and-findoneandreplace&#34;&gt;findOneAndUpdate, findOneAndDelete, and findOneAndReplace&lt;/h3&gt;
+
+&lt;p&gt;The three methods &lt;code&gt;findOneAndUpdate&lt;/code&gt;, &lt;code&gt;findOneAndDelete&lt;/code&gt; and &lt;code&gt;findOneAndReplace&lt;/code&gt; are special commands which
+allow the user to update or upsert a document and have the modified or existing document returned. When using these
+methods, the operation takes a write lock for the duration of the operation in order to ensure the modification is
+&lt;a href=&#34;https://docs.mongodb.org/manual/core/write-operations-atomicity/&#34;&gt;atomic&lt;/a&gt;.&lt;/p&gt;
+
+&lt;section class=&#34;javascript5&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  var col = db.collection(&#39;findAndModify&#39;);
+  // Insert a single document
+  col.insert([{a:1}, {a:2}, {a:2}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.result.n);
+
+    // Modify and return the modified document
+    col.findOneAndUpdate({a:1}, {$set: {b: 1}}, {
+        returnOriginal: false
+      , sort: [[a,1]]
+      , upsert: true
+    }, function(err, r) {
+      assert.equal(null, err);
+      assert.equal(1, r.value.b);
+
+      // Remove and return a document
+      col.findOneAndDelete({a:2}, function(err, r) {
+        assert.equal(null, err);
+        assert.ok(r.value.b == null);
+        db.close();
+      });
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+&lt;section class=&#34;javascript6 hidden&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  // Get the findAndModify collection
+  var col = db.collection(&#39;findAndModify&#39;);
+  // Insert a single document
+  var r = yield col.insert([{a:1}, {a:2}, {a:2}]);
+  assert.equal(3, r.result.n);
+
+  // Modify and return the modified document
+  var r = yield col.findOneAndUpdate({a:1}, {$set: {b: 1}}, {
+      returnOriginal: false
+    , sort: [[a,1]]
+    , upsert: true
+  });
+  assert.equal(1, r.value.b);
+
+  // Remove and return a document
+  var r = yield col.findOneAndDelete({a:2});
+  assert.ok(r.value.b == null);
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+
+&lt;p&gt;The &lt;code&gt;findOneAndUpdate&lt;/code&gt; method also accepts a third argument which can be an options object. This object can have the following fields:&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;w&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;wtimeout&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;set the timeout for waiting for write concern to finish (combines with w option).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;j&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;write waits for journal sync.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;upsert&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Perform an upsert operation.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sort&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Object, default:null)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Sort for find operation.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;projection&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Object, default:null)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Projection for returned result&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;returnOriginal&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:true)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Set to false if you want to return the modified object rather than the original. Ignored for remove.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;The &lt;code&gt;findOneAndDelete&lt;/code&gt; function is designed to help remove a document.&lt;/p&gt;
+
+&lt;section class=&#34;javascript5&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  var col = db.collection(&#39;findAndModify&#39;);
+  // Insert a single document
+  col.insert([{a:1}, {a:2}, {a:2}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.result.n);
+
+    // Remove a document from MongoDB and return it
+    col.findOneAndDelete({a:1}, {
+        sort: [[a,1]]
+      }
+      , function(err, r) {
+        assert.equal(null, err);
+        assert.ok(r.value.b == null);
+        db.close();
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+&lt;section class=&#34;javascript6 hidden&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  // Get the findAndModify collection
+  var col = db.collection(&#39;findAndModify&#39;);
+  // Insert a single document
+  var r = yield col.insert([{a:1}, {a:2}, {a:2}]);
+  assert.equal(3, r.result.n);
+
+  // Remove a document from MongoDB and return it
+  var r = yield col.findOneAndDelete({a:1}, {
+      sort: [[a,1]]
+    });
+  assert.ok(r.value.b == null);
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+
+&lt;p&gt;Like &lt;code&gt;findOneAndUpdate&lt;/code&gt;, it allows an object of options to be passed in which can have the following fields:&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;w&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;wtimeout&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;set the timeout for waiting for write concern to finish (combines with w option).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;j&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;write waits for journal sync.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sort&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Object, default:null)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Sort for find operation.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h3 id=&#34;bulkwrite&#34;&gt;BulkWrite&lt;/h3&gt;
+
+&lt;p&gt;The &lt;code&gt;bulkWrite&lt;/code&gt; function allows a simple set of bulk operations to run in a non-fluent way, in comparison to the bulk API discussed next.&lt;/p&gt;
+
+&lt;section class=&#34;javascript5&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  // Get the collection
+  var col = db.collection(&#39;bulk_write&#39;);
+  col.bulkWrite([
+      { insertOne: { document: { a: 1 } } }
+    , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+    , { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+    , { deleteOne: { filter: {c:1} } }
+    , { deleteMany: { filter: {c:1} } }
+    , { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}]
+  , {ordered:true, w:1}, function(err, r) {
+    assert.equal(null, err);
+    assert.equal(1, r.insertedCount);
+    assert.equal(1, Object.keys(r.insertedIds).length);
+    assert.equal(1, r.matchedCount);
+    assert.equal(0, r.modifiedCount);
+    assert.equal(0, r.deletedCount);
+    assert.equal(2, r.upsertedCount);
+    assert.equal(2, Object.keys(r.upsertedIds).length);
+
+    // Ordered bulk operation
+    db.close();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+&lt;section class=&#34;javascript6 hidden&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  // Get the collection
+  var col = db.collection(&#39;bulk_write&#39;);
+  var r = yield col.bulkWrite([
+      { insertOne: { document: { a: 1 } } }
+    , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+    , { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+    , { deleteOne: { filter: {c:1} } }
+    , { deleteMany: { filter: {c:1} } }
+    , { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}]
+  , {ordered:true, w:1});
+  assert.equal(1, r.insertedCount);
+  assert.equal(1, Object.keys(r.insertedIds).length);
+  assert.equal(1, r.matchedCount);
+  assert.equal(0, r.modifiedCount);
+  assert.equal(0, r.deletedCount);
+  assert.equal(2, r.upsertedCount);
+  assert.equal(2, Object.keys(r.upsertedIds).length);
+
+  // Ordered bulk operation
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+
+&lt;p&gt;The &lt;code&gt;bulkWrite&lt;/code&gt; function takes an array of operations which can be objects of either &lt;code&gt;insertOne&lt;/code&gt;, &lt;code&gt;insertMany&lt;/code&gt;, &lt;code&gt;updateOne&lt;/code&gt;, &lt;code&gt;updateMany&lt;/code&gt;, &lt;code&gt;deleteOne&lt;/code&gt; or &lt;code&gt;deleteMany&lt;/code&gt;. It also takes a second parameter which takes the following options:&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;ordered&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:true)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Execute in order or out of order.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;w&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;wtimeout&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;set the timeout for waiting for write concern to finish (combines with w option).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;j&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;write waits for journal sync.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h2 id=&#34;bulk-write-operations&#34;&gt;Bulk Write Operations&lt;/h2&gt;
+
+&lt;p&gt;Bulk write operations make it easy to write groups of operations together to MongoDB. There are some caveats and to get the best performance you need to be running against MongoDB version 2.6 or higher, which supports the new write commands. Bulk operations are split into &lt;em&gt;ordered&lt;/em&gt; and &lt;em&gt;unordered&lt;/em&gt; bulk operations. An &lt;em&gt;ordered&lt;/em&gt; bulk operation guarantees the order of execution of writes while the &lt;em&gt;unordered&lt;/em&gt; bulk operation makes no assumptions about the order of execution. In the Node.js driver the &lt;em&gt;unordered&lt;/em&gt; bulk operations will group operations according to type and write them in parallel.&lt;/p&gt;
+
+&lt;section class=&#34;javascript5&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  var col = db.collection(&#39;bulkops&#39;);
+  // Create ordered bulk, for unordered initializeUnorderedBulkOp()
+  var bulk = col.initializeOrderedBulkOp();
+  // Insert 10 documents
+  for(var i = 0; i &lt; 10; i++) {
+    bulk.insert({a: i});
+  }
+
+  // Next perform some upserts
+  for(var i = 0; i &lt; 10; i++) {
+    bulk.find({b:i}).upsert().updateOne({b:1});
+  }
+
+  // Finally perform a remove operation
+  bulk.find({b:1}).deleteOne();
+
+  // Execute the bulk with a journal write concern
+  bulk.execute(function(err, result) {
+    assert.equal(null, err);
+    db.close();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+&lt;section class=&#34;javascript6 hidden&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  // Get the collection
+  var col = db.collection(&#39;bulkops&#39;);
+  // Create ordered bulk, for unordered initializeUnorderedBulkOp()
+  var bulk = col.initializeOrderedBulkOp();
+  // Insert 10 documents
+  for(var i = 0; i &lt; 10; i++) {
+    bulk.insert({a: i});
+  }
+
+  // Next perform some upserts
+  for(var i = 0; i &lt; 10; i++) {
+    bulk.find({b:i}).upsert().updateOne({b:1});
+  }
+
+  // Finally perform a remove operation
+  bulk.find({b:1}).deleteOne();
+
+  // Execute the bulk with a journal write concern
+  var result = yield bulk.execute();
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+
+&lt;p&gt;The Bulk API handles all the splitting of operations into multiple writes and also emulates 2.6 and higher write commands for 2.4 and earlier servers.&lt;/p&gt;
+
+&lt;p&gt;There are some important things to keep in mind when using the bulk API and especially the &lt;em&gt;ordered&lt;/em&gt; bulk API mode. The write commands are single operation type. That means they can only do insert/update and remove. If you f.ex do the following combination of operations:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Insert {a:1}
+Update {a:1} to {a:1, b:1}
+Insert {a:2}
+Remove {b:1}
+Insert {a:3}
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;You must ensure &lt;code&gt;server1&lt;/code&gt;, &lt;code&gt;server2&lt;/code&gt; and &lt;code&gt;server3&lt;/code&gt; are resolvable from the driver for the Replicaset discovery and failover to work correctly.&lt;/p&gt;
+&lt;p&gt;This will result in the driver issuing four write commands to the server:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Insert Command with {a:1}
+Update Command {a:1} to {a:1, b:1}
+Insert Command with {a:2}
+Remove Command with {b:1}
+Insert Command with {a:3}    
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you instead organize your &lt;em&gt;ordered&lt;/em&gt; in the following manner:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Insert {a:1}
+Insert {a:2}
+Insert {a:3}
+Update {a:1} to {a:1, b:1}
+Remove {b:1}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The number of write commands issued by the driver will be:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Insert Command with {a:1}, {a:2}, {a:3}
+Update Command {a:1} to {a:1, b:1}
+Remove Command with {b:1}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Attention to the order of operations results in more efficient and faster bulk write operation.&lt;/p&gt;
+
+&lt;p&gt;For &lt;em&gt;unordered&lt;/em&gt; bulk operations this is not important, as the driver sorts operations by type and executes them in parallel.&lt;/p&gt;
+
+&lt;h2 id=&#34;read-methods&#34;&gt;Read Methods&lt;/h2&gt;
+
+&lt;p&gt;The main method for querying the database is the &lt;code&gt;find&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;find&lt;/code&gt; returns a cursor which allows the user to operate on the data. The &lt;em&gt;cursor&lt;/em&gt; also implements the Node.js 0.10.x or higher stream interface, allowing the user to pipe the results to other streams.&lt;/p&gt;
+
+&lt;p&gt;The following example materializes all the documents from a query using the &lt;code&gt;toArray&lt;/code&gt; method, but limits the number of returned results to two documents.&lt;/p&gt;
+
+&lt;section class=&#34;javascript5&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  var col = db.collection(&#39;find&#39;);
+  // Insert a single document
+  col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.insertedCount);
+
+    // Get first two documents that match the query
+    col.find({a:1}).limit(2).toArray(function(err, docs) {
+      assert.equal(null, err);
+      assert.equal(2, docs.length);
+      db.close();
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+&lt;section class=&#34;javascript6 hidden&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  // Get the collection
+  var col = db.collection(&#39;find&#39;);
+  // Insert a single document
+  var r = yield col.insertMany([{a:1}, {a:1}, {a:1}]);
+  assert.equal(3, r.insertedCount);
+
+  // Get first two documents that match the query
+  var docs = yield col.find({a:1}).limit(2).toArray();
+  assert.equal(2, docs.length);
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+
+&lt;p&gt;The cursor returned by the &lt;code&gt;find&lt;/code&gt; method has several methods that allow for chaining of options for a query. Once the query is ready to be executed you can retrieve the documents using the &lt;code&gt;next&lt;/code&gt;, &lt;code&gt;each&lt;/code&gt; and &lt;code&gt;toArray&lt;/code&gt; methods. If the query returns many documents it&amp;rsquo;s preferable to use the &lt;code&gt;next&lt;/code&gt; or &lt;code&gt;each&lt;/code&gt; methods, as the &lt;code&gt;toArray&lt;/code&gt; method will materialize all the documents into memory before calling the callback function, potentially using a lot of memory if the query returns many documents.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;collection.find({}).project({a:1})                             // Create a projection of field a
+collection.find({}).skip(1).limit(10)                          // Skip 1 and limit 10
+collection.find({}).batchSize(5)                               // Set batchSize on cursor to 5
+collection.find({}).filter({a:1})                              // Set query on the cursor
+collection.find({}).comment(&#39;add a comment&#39;)                   // Add a comment to the query, allowing to correlate queries
+collection.find({}).addCursorFlag(&#39;tailable&#39;, true)            // Set cursor as tailable
+collection.find({}).addCursorFlag(&#39;oplogReplay&#39;, true)         // Set cursor as oplogReplay
+collection.find({}).addCursorFlag(&#39;noCursorTimeout&#39;, true)     // Set cursor as noCursorTimeout
+collection.find({}).addCursorFlag(&#39;awaitData&#39;, true)           // Set cursor as awaitData
+collection.find({}).addCursorFlag(&#39;exhaust&#39;, true)             // Set cursor as exhaust
+collection.find({}).addCursorFlag(&#39;partial&#39;, true)             // Set cursor as partial
+collection.find({}).addQueryModifier(&#39;$orderby&#39;, {a:1})        // Set $orderby {a:1}
+collection.find({}).max(10)                                    // Set the cursor maxScan
+collection.find({}).maxScan(10)                                // Set the cursor maxScan
+collection.find({}).maxTimeMS(1000)                            // Set the cursor maxTimeMS
+collection.find({}).min(100)                                   // Set the cursor min
+collection.find({}).returnKey(10)                              // Set the cursor returnKey
+collection.find({}).setReadPreference(ReadPreference.PRIMARY)  // Set the cursor readPreference
+collection.find({}).showRecordId(true)                         // Set the cursor showRecordId
+collection.find({}).snapshot(true)                             // Set the cursor snapshot
+collection.find({}).sort([[&#39;a&#39;, 1]])                           // Sets the sort order of the cursor query
+collection.find({}).hint(&#39;a_1&#39;)                                // Set the cursor hint
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;All options are chainable, so you can combine settings in the following way:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;collection.find({}).maxTimeMS(1000).maxScan(100).skip(1).toArray(..)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;More information can be found in the &lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.0/api/Cursor.html&#34;&gt;Cursor API documentation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The following example uses the &lt;code&gt;next&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;section class=&#34;javascript5&#34;&gt;&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  var col = db.collection(&#39;find&#39;);
+  // Insert a single document
+  col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.insertedCount);
+
+    // Get first documents from cursor
+    col.find({a:1}).limit(2).next(function(err, doc) {
+      assert.equal(null, err);
+      assert.ok(doc != null);
+      db.close();
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+&lt;section class=&#34;javascript6 hidden&#34;&gt;
+In ECMAScript 6, The new `generator` functions allow for what is arguably a
+much cleaner and easier way to read iteration code.
+
+&lt;pre&gt;&lt;code class=&#34;hljs&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  // Get the collection
+  var col = db.collection(&#39;find&#39;);
+  // Insert a single document
+  var r = yield col.insertMany([{a:1}, {a:1}, {a:1}]);
+  assert.equal(3, r.insertedCount);
+
+  // Get the cursor
+  var cursor = col.find({a:1}).limit(2);
+
+  // Iterate over the cursor
+  while(yield cursor.hasNext()) {
+    var doc = yield cursor.next();
+    console.dir(doc);
+  }
+
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;&lt;/section&gt;
+
+&lt;p&gt;The &lt;code&gt;next&lt;/code&gt; method allows the application to read one document at a time using callbacks.&lt;/p&gt;
+
+&lt;p&gt;The following example uses the &lt;code&gt;each&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+ , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  var col = db.collection(&#39;find&#39;);
+  // Insert a single document
+  col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.insertedCount);
+
+    // Get first documents from cursor using each
+    col.find({a:1}).limit(2).each(function(err, doc) {
+      if(doc) {
+        db.close();
+        // Got a document, terminate the each
+        return false;
+      }
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;each&lt;/code&gt; method calls the supplied callback until there are no more documents available that satisfy the query. Once the available documents are exhausted it will return &lt;code&gt;null&lt;/code&gt; for the second parameter in the callback. If you wish to terminate the &lt;code&gt;each&lt;/code&gt; early you should return false in your &lt;code&gt;each&lt;/code&gt; callback. This will stop the cursor from returning documents.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Connect to MongoDB</title>
+      <link>/node-mongodb-native/2.1/tutorials/connect/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.1/tutorials/connect/</guid>
+      <description>
+
+&lt;h1 id=&#34;connect-to-mongodb&#34;&gt;Connect to MongoDB&lt;/h1&gt;
+
+&lt;div class=&#34;admonition note&#34;&gt;
+&lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
+&lt;p&gt;This reference applies to &lt;strong&gt;2.1.11&lt;/strong&gt; or higher. For &lt;strong&gt;2.1.10&lt;/strong&gt; or
+earlier, refer to the &lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/legacy-connection-settings/&#34;&gt;legacy connection settings&lt;/a&gt;. &lt;strong&gt;2.1.11&lt;/strong&gt;
+is backward compatible with the legacy settings as well as the
+simplified settings.&lt;/p&gt;
+
+&lt;/div&gt;
+
+
+&lt;p&gt;Use the &lt;code&gt;MongoClient.connect&lt;/code&gt; method to connect to a running MongoDB deployment.&lt;/p&gt;
+
+&lt;h2 id=&#34;connect-to-a-single-mongodb-instance&#34;&gt;Connect to a Single MongoDB Instance&lt;/h2&gt;
+
+&lt;p&gt;To connect to a single MongoDB instance, specify the URI of the MongoDB
+instance to connect to.&lt;/p&gt;
+
+&lt;p&gt;In the following example, the
+&lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI connection string&lt;/a&gt;
+specifies connecting to a MongoDB instance that is running on
+&lt;code&gt;localhost&lt;/code&gt; using port &lt;code&gt;27017&lt;/code&gt;. The &lt;code&gt;myproject&lt;/code&gt; indicates the database
+to use. If the database is omitted, the &lt;code&gt;MongoClient&lt;/code&gt; uses the default &lt;code&gt;test&lt;/code&gt; database:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+
+// Use connect method to connect to the server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected succesfully to server&#34;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For more information on the URI connection string, see
+&lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI Connection String &lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;connect-to-a-replica-set&#34;&gt;Connect to a Replica Set&lt;/h2&gt;
+
+&lt;p&gt;To connect to a &lt;a href=&#34;https://docs.mongodb.org/manual/core/replication-introduction/&#34;&gt;replica set&lt;/a&gt;,
+include a seedlist of replica set members and the name of the replica set in the
+&lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI connection string&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;In the following example, the connection string specifies two of the replica set members running on &lt;code&gt;localhost:27017&lt;/code&gt; and &lt;code&gt;localhost:27018&lt;/code&gt;, the database to access (&lt;code&gt;myproject&lt;/code&gt;), and the name of the replica set (&lt;code&gt;foo&lt;/code&gt;). &lt;strong&gt;When using the 2.0 driver, you must include the replica set name.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017,localhost:27018/myproject?replicaSet=foo&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected correctly to server&#34;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For more information on the URI connection string, see
+&lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI Connection String &lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;connect-to-sharded-cluster&#34;&gt;Connect to Sharded Cluster&lt;/h2&gt;
+
+&lt;p&gt;To connect to a &lt;a href=&#34;https://docs.mongodb.org/manual/core/sharded-cluster-components/&#34;&gt;sharded cluster&lt;/a&gt;, specify the &lt;code&gt;mongos&lt;/code&gt; instance or instances in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI connection string&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;In the following example, the connection string specifies the &lt;code&gt;mongos&lt;/code&gt; instances running on &lt;code&gt;localhost:50000&lt;/code&gt; and &lt;code&gt;localhost:50001&lt;/code&gt; and the database to access (&lt;code&gt;myproject&lt;/code&gt;).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:50000,localhost:50001/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&#34;Connected successfully to server&#34;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For more information on the URI connection string, see
+&lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI Connection String &lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;connection-options&#34;&gt;Connection Options&lt;/h2&gt;
+
+&lt;p&gt;You can specify various connection settings in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI Connection
+String &lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;For example, you can specify TLS/SSL and authentication setting.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;
+var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  f = require(&#39;util&#39;).format,
+  assert = require(&#39;assert&#39;),
+  fs = require(&#39;fs&#39;);
+
+  // Read the certificate authority
+  var ca = [fs.readFileSync(__dirname + &amp;quot;/ssl/ca.pem&amp;quot;)];
+  var cert = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
+
+// Connection URL
+var url = &#39;mongodb://dave:password@localhost:27017?authMechanism=DEFAULT&amp;amp;authSource=db&amp;amp;ssl=true&amp;quot;&#39;;
+
+// Use connect method to connect to the Server passing in
+// additional options
+MongoClient.connect(url,  {
+  server: {
+      sslValidate:true
+    , sslCA:ca
+    , sslCert:cert
+  }
+}, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For more information on connecting with authentication and TSL/SSL, see:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/tutorials/connect/authenticating/&#34;&gt;Authentication&lt;/a&gt;: detailed documentation of the various ways to specify authentication credentials&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/tutorials/connect/ssl/&#34;&gt;TLS/SSL&lt;/a&gt;: Detailed documentation of the various ways to specify the properties of an TLS/SSL connection&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;For more information on the connection options:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI Connection String&lt;/a&gt;: MongoDB connection string URI.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/connection-settings/&#34;&gt;Connection Settings&lt;/a&gt;: Reference on the driver-specific connection settings.&lt;/li&gt;
+&lt;/ul&gt;
 </description>
     </item>
     

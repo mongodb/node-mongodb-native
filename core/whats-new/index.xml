@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Whats-News on MongoDB Node.js Core Driver</title>
-    <link>/node-mongodb-native/core/whats-new/</link>
-    <description>Recent content in Whats-News on MongoDB Node.js Core Driver</description>
+    <title>Whats-news on MongoDB Node.js Core Driver</title>
+    <link>/node-mongodb-native/core/whats-new/index.xml</link>
+    <description>Recent content in Whats-news on MongoDB Node.js Core Driver</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 19 Mar 2015 12:53:35 -0400</lastBuildDate>

@@ -2,12 +2,6 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>/node-mongodb-native/2.0/</loc>
-    <lastmod>2015-08-05T12:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/node-mongodb-native/2.0/reference/gridfs/</loc>
     <lastmod>2015-08-05T12:00:00+00:00</lastmod>
   </url>
@@ -38,17 +32,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/reference/connecting/connection-settings/</loc>
-    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.0/reference/ecmascript6/connecting/</loc>
-    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/node-mongodb-native/2.0/reference/crud/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.0/reference/ecmascript6/crud/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
@@ -58,7 +47,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/reference/ecmascript6/crud/</loc>
+    <loc>/node-mongodb-native/2.0/reference/ecmascript6/connecting/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.0/reference/connecting/connection-settings/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
@@ -73,12 +67,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/reference/connecting/ssl/</loc>
+    <loc>/node-mongodb-native/2.0/reference/management/apm/</loc>
     <lastmod>2015-03-19T12:53:26-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/reference/management/apm/</loc>
+    <loc>/node-mongodb-native/2.0/reference/connecting/ssl/</loc>
     <lastmod>2015-03-19T12:53:26-04:00</lastmod>
   </url>
   
@@ -93,7 +87,7 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/getting-started/quick-tour/</loc>
+    <loc>/node-mongodb-native/2.0/getting-started/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   
@@ -103,7 +97,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/getting-started/</loc>
+    <loc>/node-mongodb-native/2.0/getting-started/quick-tour/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.0/reference/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   
@@ -113,8 +112,27 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/reference/</loc>
+    <loc>/node-mongodb-native/2.0/getting-started/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.0/</loc>
+    <lastmod>2015-08-05T12:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.0/reference/</loc>
+    <lastmod>2015-08-05T12:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.0/whats-new/</loc>
+    <lastmod>2015-03-19T12:53:39-04:00</lastmod>
+    <priority>0</priority>
   </url>
   
 </urlset>

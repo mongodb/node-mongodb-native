@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Installation-Guides on MongoDB Node.js Driver</title>
-    <link>/node-mongodb-native/2.2/installation-guide/</link>
-    <description>Recent content in Installation-Guides on MongoDB Node.js Driver</description>
+    <title>Installation-guides on MongoDB Node.js Driver</title>
+    <link>/node-mongodb-native/2.2/installation-guide/index.xml</link>
+    <description>Recent content in Installation-guides on MongoDB Node.js Driver</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 17 Mar 2015 15:36:56 +0000</lastBuildDate>
@@ -62,13 +62,13 @@
 
 &lt;p&gt;The &lt;code&gt;kerberos&lt;/code&gt; package is a C++ extension that requires a build environment to be installed on your system. You must be able to build Node.js itself to be able to compile and install the &lt;code&gt;kerberos&lt;/code&gt; module. Furthermore the &lt;code&gt;kerberos&lt;/code&gt; module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operating system package manager for what libraries to install.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition important&#34;&gt;
+&lt;div class=&#34;admonition important&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;important&lt;/h5&gt;
 &lt;p&gt;Windows already contains the SSPI API used for Kerberos authentication. However, you will need to install a full compiler toolchain
 using Visual Studio to correctly install the &lt;code&gt;kerberos&lt;/code&gt; extension.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;h3 id=&#34;diagnosing-on-unix&#34;&gt;Diagnosing on UNIX&lt;/h3&gt;
 

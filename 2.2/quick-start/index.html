@@ -9,7 +9,7 @@
 
     <link rel="shortcut icon" href="/node-mongodb-native/2.2//img/favicon.png">
 
-    <title>Quick Start</title>
+    <title>Quick-starts</title>
 
     <link rel="stylesheet" href="/node-mongodb-native/2.2//lib/bootstrap.css" type="text/css" />
 <link rel="stylesheet" href="/node-mongodb-native/2.2//lib/font-awesome/css/font-awesome.min.css" type="text/css" />
@@ -1301,7 +1301,7 @@
 
 
     <li class="toctree-l1">
-    <a href="/node-mongodb-native/2.2/api/">
+    <a href="/node-mongodb-native/2.2/api">
         <i class='fa fa-file-text-o'></i>
         API Documentation
     </a>
@@ -1443,355 +1443,25 @@
                     </div>
                     </p>
 
-
-   
-<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/2.2/docs/reference/content/quick-start/index.md" target="_blank" title="Edit quick-start/index.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
-
-
-
-
-
-
-
-
-
-
-<div class="bc">
-<ul>
-  
-  
-  
-  
-  
-  
-  <li>Quick Start</li>
-</ul>
+<section id="main">
+  <div>
+   <h1 id="title">Quick-starts</h1>
+        <ul id="list">
+            
+                <li class="category">
+<div>
+  <article>
+    <div>
+      <h2><a href='/node-mongodb-native/2.2/quick-start/'>Quick Start</a></h2>
+    </div>
+  </article>
 </div>
-
-
-
-
-<h1 id="quick-start">Quick Start</h1>
-
-<p>This guide will show you how to set up a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD operations. For more in-depth coverage, see the <a href="/node-mongodb-native/2.2/reference/">tutorials</a>.</p>
-
-<h2 id="create-the-package-json-file">Create the package.json file</h2>
-
-<p>First, create a directory where your application will live.</p>
-
-<pre><code>mkdir myproject
-cd myproject
-</code></pre>
-
-<p>Enter the following command and answer the questions to create the initial structure for your new project:</p>
-
-<pre><code>npm init
-</code></pre>
-
-<p>Next, install the driver dependency.</p>
-
-<pre><code>npm install mongodb --save
-</code></pre>
-
-<p>You should see <strong>NPM</strong> download a lot of files. Once it&rsquo;s done you&rsquo;ll find all the downloaded packages under the <strong>node_modules</strong> directory.</p>
-
-<h2 id="start-a-mongodb-server">Start a MongoDB Server</h2>
-
-<p>For complete MongoDB installation instructions, see <a href="https://docs.mongodb.org/manual/installation/">the manual</a>.</p>
-
-<ol>
-<li>Download the right MongoDB version from <a href="https://www.mongodb.org/downloads">MongoDB</a></li>
-<li>Create a database directory (in this case under <strong>/data</strong>).</li>
-<li>Install and start a <code>mongod</code> process.</li>
-</ol>
-
-<pre><code>mongod --dbpath=/data
-</code></pre>
-
-<p>You should see the <strong>mongod</strong> process start up and print some status information.</p>
-
-<h2 id="connect-to-mongodb">Connect to MongoDB</h2>
-
-<p>Create a new <strong>app.js</strong> file and add the following code to try out some basic CRUD
-operations using the MongoDB driver.</p>
-
-<p>Add code to connect to the server and the database <strong>myproject</strong>:</p>
-
-<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-
-// Use connect method to connect to the server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log("Connected successfully to server");
-
-  db.close();
-});
-
-</code></pre>
-
-<p>Run your app from the command line with:</p>
-
-<pre><code>node app.js
-</code></pre>
-
-<p>The application should print <strong>Connected successfully to server</strong> to the console.</p>
-
-<h2 id="insert-a-document">Insert a Document</h2>
-
-<p>Add to <strong>app.js</strong> the following function which uses the <strong>insertMany</strong>
-method to add three documents to the <strong>documents</strong> collection.</p>
-
-<pre><code class="language-js">var insertDocuments = function(db, callback) {
-  // Get the documents collection
-  var collection = db.collection('documents');
-  // Insert some documents
-  collection.insertMany([
-    {a : 1}, {a : 2}, {a : 3}
-  ], function(err, result) {
-    assert.equal(err, null);
-    assert.equal(3, result.result.n);
-    assert.equal(3, result.ops.length);
-    console.log(&quot;Inserted 3 documents into the collection&quot;);
-    callback(result);
-  });
-}
-</code></pre>
-
-<p>The <strong>insert</strong> command returns an object with the following fields:</p>
-
-<ul>
-<li><strong>result</strong> Contains the result document from MongoDB</li>
-<li><strong>ops</strong> Contains the documents inserted with added <strong>_id</strong> fields</li>
-<li><strong>connection</strong> Contains the connection used to perform the insert</li>
-</ul>
-
-<p>Add the following code to call the <strong>insertDocuments</strong> function:</p>
-
-<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&quot;Connected successfully to server&quot;);
-
-  insertDocuments(db, function() {
-    db.close();
-  });
-});
-</code></pre>
-
-<p>Run the updated <strong>app.js</strong> file:</p>
-
-<pre><code>node app.js
-</code></pre>
-
-<p>The operation returns the following output:</p>
-
-<pre><code>Connected successfully to server
-Inserted 3 documents into the collection
-</code></pre>
-
-<h2 id="find-all-documents">Find All Documents</h2>
-
-<p>Add a query that returns all the documents.</p>
-
-<pre><code class="language-js">var findDocuments = function(db, callback) {
-  // Get the documents collection
-  var collection = db.collection('documents');
-  // Find some documents
-  collection.find({}).toArray(function(err, docs) {
-    assert.equal(err, null);
-    console.log(&quot;Found the following records&quot;);
-    console.log(docs)
-    callback(docs);
-  });
-}
-</code></pre>
-
-<!---
-Changed console.dir to console.log, since most users will be running these examples from the command line
-rather than from within a browser console, and console.log returns better formatting.
--->
-
-<p>This query returns all the documents in the <strong>documents</strong> collection. Add the <strong>findDocument</strong> method to the <strong>MongoClient.connect</strong> callback:</p>
-
-<!---
-Removed the assert line for number of documents returned on the grounds that it's too brittle.
-It's better if these code examples are idempotent, and if this one
-is run repeatedly the number of documents in the collection will change.
--->
-
-<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&quot;Connected correctly to server&quot;);
-
-  insertDocuments(db, function() {
-    findDocuments(db, function() {
-      db.close();
-    });
-  });
-});
-</code></pre>
-
-<h2 id="find-documents-with-a-query-filter">Find Documents with a Query Filter</h2>
-
-<p>Add a query filter to find only documents which meet the query criteria.</p>
-
-<pre><code class="language-js">var findDocuments = function(db, callback) {
-  // Get the documents collection
-  var collection = db.collection('documents');
-  // Find some documents
-  collection.find({'a': 3}).toArray(function(err, docs) {
-    assert.equal(err, null);
-    console.log(&quot;Found the following records&quot;);
-    console.log(docs);
-    callback(docs);
-  });      
-}
-</code></pre>
-
-<p>Only the documents which match <code>'a' : 3</code> should be returned.</p>
-
-<h2 id="update-a-document">Update a document</h2>
-
-<p>The following operation updates a document in the <strong>documents</strong> collection.</p>
-
-<pre><code class="language-js">var updateDocument = function(db, callback) {
-  // Get the documents collection
-  var collection = db.collection('documents');
-  // Update document where a is 2, set b equal to 1
-  collection.updateOne({ a : 2 }
-    , { $set: { b : 1 } }, function(err, result) {
-    assert.equal(err, null);
-    assert.equal(1, result.result.n);
-    console.log(&quot;Updated the document with the field a equal to 2&quot;);
-    callback(result);
-  });  
-}
-</code></pre>
-
-<p>The method updates the first document where the field <strong>a</strong> is equal to <strong>2</strong> by adding a new field <strong>b</strong> to the document set to <strong>1</strong>. Next, update the callback function from <strong>MongoClient.connect</strong> to include the update method.</p>
-
-<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&quot;Connected successfully to server&quot;);
-
-  insertDocuments(db, function() {
-    updateDocument(db, function() {
-      db.close();
-    });
-  });
-});
-</code></pre>
-
-<h2 id="remove-a-document">Remove a document</h2>
-
-<p>Remove the document where the field <strong>a</strong> is equal to <strong>3</strong>.</p>
-
-<pre><code class="language-js">var removeDocument = function(db, callback) {
-  // Get the documents collection
-  var collection = db.collection('documents');
-  // Insert some documents
-  collection.deleteOne({ a : 3 }, function(err, result) {
-    assert.equal(err, null);
-    assert.equal(1, result.result.n);
-    console.log(&quot;Removed the document with the field a equal to 3&quot;);
-    callback(result);
-  });    
-}
-</code></pre>
-
-<p>Add the new method to the <strong>MongoClient.connect</strong> callback function.</p>
-
-<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&quot;Connected successfully to server&quot;);
-
-  insertDocuments(db, function() {
-    updateDocument(db, function() {
-      removeDocument(db, function() {
-        db.close();
-      });
-    });
-  });
-});
-</code></pre>
-
-<h2 id="index-a-collection">Index a Collection</h2>
-
-<p><a href="https://docs.mongodb.org/manual/indexes/">Indexes</a> can improve your application&rsquo;s
-performance. The following function creates an index on the <strong>a</strong> field in the
-<strong>documents</strong> collection.</p>
-
-<pre><code class="language-js">var indexCollection = function(db, callback) {
-  db.collection('documents').createIndex(
-    { "a": 1 },
-      null,
-      function(err, results) {
-        console.log(results);
-        callback();
-    }
-  );
-};
-</code></pre>
-
-<p>Add the <code>indexCollection</code> method to your app:</p>
-
-<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&quot;Connected successfully to server&quot;);
-
-  insertDocuments(db, function() {
-    indexCollection(db, function() {
-      db.close();
-    });
-  });
-});
-</code></pre>
-
-<p>For more detailed information, see the <a href="/node-mongodb-native/2.2/tutorials/">tutorials</a>.</p>
-
-
-
-
-
-
-<div id="btnv">
-  
-  
-</div>
-</div>
+</li>
+
+            
+        </ul>
+  </div>
+</section>
 
 
 <div id="disqus_thread"></div>
@@ -1812,26 +1482,6 @@ MongoClient.connect(url, function(err, db) {
 </div>
 <div class="right-column">
 <div class="wrapper">
-  
-  <div class="toc">
-    <span class="toc-header">On this page</span>
-    <nav id="TableOfContents">
-<ul>
-<li><a href="#quick-start">Quick Start</a>
-<ul>
-<li><a href="#create-the-package-json-file">Create the package.json file</a></li>
-<li><a href="#start-a-mongodb-server">Start a MongoDB Server</a></li>
-<li><a href="#connect-to-mongodb">Connect to MongoDB</a></li>
-<li><a href="#insert-a-document">Insert a Document</a></li>
-<li><a href="#find-all-documents">Find All Documents</a></li>
-<li><a href="#find-documents-with-a-query-filter">Find Documents with a Query Filter</a></li>
-<li><a href="#update-a-document">Update a document</a></li>
-<li><a href="#remove-a-document">Remove a document</a></li>
-<li><a href="#index-a-collection">Index a Collection</a></li>
-</ul></li>
-</ul>
-</nav>
-  </div>
   
 </div>
 </div>

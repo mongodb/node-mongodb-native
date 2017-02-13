@@ -1717,8 +1717,7 @@
     
     
         
-            <div class="description"><p>The <strong>Admin</strong> class is an internal class that allows convenient access to
-the admin functionality and commands for MongoDB.</p>
+            <div class="description"><p>The <strong>Admin</strong> class is an internal class that allows convenient access to<br>the admin functionality and commands for MongoDB.</p>
 <p><strong>ADMIN Cannot directly be instantiated</strong></p></div>
         
         
@@ -1753,21 +1752,8 @@ the admin functionality and commands for MongoDB.</p>
             
 
     
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
-  test = require('assert');
-// Connection url
-var url = 'mongodb://localhost:27017/test';
-// Connect using MongoClient
-MongoClient.connect(url, function(err, db) {
-  // Use the admin database for the operation
-  var adminDb = db.admin();</p>
-<p>  // List all the available databases
-  adminDb.listDatabases(function(err, dbs) {
-    test.equal(null, err);
-    test.ok(dbs.databases.length &gt; 0);
-    db.close();
-  });
-});</p></code></pre>
+    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,<br>  test = require('assert');<br>// Connection url<br>var url = 'mongodb://localhost:27017/test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, db) {<br>  // Use the admin database for the operation<br>  var adminDb = db.admin();</p>
+<p>  // List all the available databases<br>  adminDb.listDatabases(function(err, dbs) {<br>    test.equal(null, err);<br>    test.ok(dbs.databases.length &gt; 0);<br>    db.close();<br>  });<br>});</p></code></pre>
     
 
         
@@ -1815,10 +1801,7 @@ MongoClient.connect(url, function(err, db) {
     
     
         
-            <div class="description"><p>The <strong>AggregationCursor</strong> class is an internal class that embodies an aggregation cursor on MongoDB
-allowing for iteration over the results returned from the underlying query. It supports
-one by one document iteration, conversion to an array or can be iterated as a Node 0.10.X
-or higher stream</p>
+            <div class="description"><p>The <strong>AggregationCursor</strong> class is an internal class that embodies an aggregation cursor on MongoDB<br>allowing for iteration over the results returned from the underlying query. It supports<br>one by one document iteration, conversion to an array or can be iterated as a Node 0.10.X<br>or higher stream</p>
 <p><strong>AGGREGATIONCURSOR Cannot directly be instantiated</strong></p></div>
         
         
@@ -1853,27 +1836,7 @@ or higher stream</p>
             
 
     
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
-  test = require('assert');
-// Connection url
-var url = 'mongodb://localhost:27017/test';
-// Connect using MongoClient
-MongoClient.connect(url, function(err, db) {
-  // Create a collection we want to drop later
-  var col = db.collection('createIndexExample1');
-  // Insert a bunch of documents
-  col.insert([{a:1, b:1}
-    , {a:2, b:2}, {a:3, b:3}
-    , {a:4, b:4}], {w:1}, function(err, result) {
-    test.equal(null, err);
-    // Show that duplicate records got dropped
-    col.aggregation({}, {cursor: {}}).toArray(function(err, items) {
-      test.equal(null, err);
-      test.equal(4, items.length);
-      db.close();
-    });
-  });
-});</p></code></pre>
+    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,<br>  test = require('assert');<br>// Connection url<br>var url = 'mongodb://localhost:27017/test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, db) {<br>  // Create a collection we want to drop later<br>  var col = db.collection('createIndexExample1');<br>  // Insert a bunch of documents<br>  col.insert([{a:1, b:1}<br>    , {a:2, b:2}, {a:3, b:3}<br>    , {a:4, b:4}], {w:1}, function(err, result) {<br>    test.equal(null, err);<br>    // Show that duplicate records got dropped<br>    col.aggregation({}, {cursor: {}}).toArray(function(err, items) {<br>      test.equal(null, err);<br>      test.equal(4, items.length);<br>      db.close();<br>    });<br>  });<br>});</p></code></pre>
     
 
         
@@ -1921,8 +1884,7 @@ MongoClient.connect(url, function(err, db) {
     
     
         
-            <div class="description"><p>The <strong>Collection</strong> class is an internal class that embodies a MongoDB collection
-allowing for insert/update/remove/find and other command operation on that MongoDB collection.</p>
+            <div class="description"><p>The <strong>Collection</strong> class is an internal class that embodies a MongoDB collection<br>allowing for insert/update/remove/find and other command operation on that MongoDB collection.</p>
 <p><strong>COLLECTION Cannot directly be instantiated</strong></p></div>
         
         
@@ -1957,21 +1919,7 @@ allowing for insert/update/remove/find and other command operation on that Mongo
             
 
     
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
-  test = require('assert');
-// Connection url
-var url = 'mongodb://localhost:27017/test';
-// Connect using MongoClient
-MongoClient.connect(url, function(err, db) {
-  // Create a collection we want to drop later
-  var col = db.collection('createIndexExample1');
-  // Show that duplicate records got dropped
-  col.find({}).toArray(function(err, items) {
-    test.equal(null, err);
-    test.equal(4, items.length);
-    db.close();
-  });
-});</p></code></pre>
+    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,<br>  test = require('assert');<br>// Connection url<br>var url = 'mongodb://localhost:27017/test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, db) {<br>  // Create a collection we want to drop later<br>  var col = db.collection('createIndexExample1');<br>  // Show that duplicate records got dropped<br>  col.find({}).toArray(function(err, items) {<br>    test.equal(null, err);<br>    test.equal(4, items.length);<br>    db.close();<br>  });<br>});</p></code></pre>
     
 
         
@@ -2019,10 +1967,7 @@ MongoClient.connect(url, function(err, db) {
     
     
         
-            <div class="description"><p>The <strong>CommandCursor</strong> class is an internal class that embodies a
-generalized cursor based on a MongoDB command allowing for iteration over the
-results returned. It supports one by one document iteration, conversion to an
-array or can be iterated as a Node 0.10.X or higher stream</p>
+            <div class="description"><p>The <strong>CommandCursor</strong> class is an internal class that embodies a<br>generalized cursor based on a MongoDB command allowing for iteration over the<br>results returned. It supports one by one document iteration, conversion to an<br>array or can be iterated as a Node 0.10.X or higher stream</p>
 <p><strong>CommandCursor Cannot directly be instantiated</strong></p></div>
         
         
@@ -2057,25 +2002,12 @@ array or can be iterated as a Node 0.10.X or higher stream</p>
             
 
     
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
-  test = require('assert');
-// Connection url
-var url = 'mongodb://localhost:27017/test';
-// Connect using MongoClient
-MongoClient.connect(url, function(err, db) {
-  // Create a collection we want to drop later
-  var col = db.collection('listCollectionsExample1');
-  // Insert a bunch of documents
-  col.insert([{a:1, b:1}
-    , {a:2, b:2}, {a:3, b:3}
-    , {a:4, b:4}], {w:1}, function(err, result) {
-    test.equal(null, err);</p>
+    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,<br>  test = require('assert');<br>// Connection url<br>var url = 'mongodb://localhost:27017/test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, db) {<br>  // Create a collection we want to drop later<br>  var col = db.collection('listCollectionsExample1');<br>  // Insert a bunch of documents<br>  col.insert([{a:1, b:1}<br>    , {a:2, b:2}, {a:3, b:3}<br>    , {a:4, b:4}], {w:1}, function(err, result) {<br>    test.equal(null, err);</p>
 <pre class="prettyprint source"><code>// List the database collections available
 db.listCollections().toArray(function(err, items) {
   test.equal(null, err);
   db.close();
-});</code></pre><p>  });
-});</p></code></pre>
+});</code></pre><p>  });<br>});</p></code></pre>
     
 
         
@@ -2123,10 +2055,7 @@ db.listCollections().toArray(function(err, items) {
     
     
         
-            <div class="description"><p>The <strong>Cursor</strong> class is an internal class that embodies a cursor on MongoDB
-allowing for iteration over the results returned from the underlying query. It supports
-one by one document iteration, conversion to an array or can be iterated as a Node 0.10.X
-or higher stream</p>
+            <div class="description"><p>The <strong>Cursor</strong> class is an internal class that embodies a cursor on MongoDB<br>allowing for iteration over the results returned from the underlying query. It supports<br>one by one document iteration, conversion to an array or can be iterated as a Node 0.10.X<br>or higher stream</p>
 <p><strong>CURSORS Cannot directly be instantiated</strong></p></div>
         
         
@@ -2161,26 +2090,13 @@ or higher stream</p>
             
 
     
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
-  test = require('assert');
-// Connection url
-var url = 'mongodb://localhost:27017/test';
-// Connect using MongoClient
-MongoClient.connect(url, function(err, db) {
-  // Create a collection we want to drop later
-  var col = db.collection('createIndexExample1');
-  // Insert a bunch of documents
-  col.insert([{a:1, b:1}
-    , {a:2, b:2}, {a:3, b:3}
-    , {a:4, b:4}], {w:1}, function(err, result) {
-    test.equal(null, err);</p>
+    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,<br>  test = require('assert');<br>// Connection url<br>var url = 'mongodb://localhost:27017/test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, db) {<br>  // Create a collection we want to drop later<br>  var col = db.collection('createIndexExample1');<br>  // Insert a bunch of documents<br>  col.insert([{a:1, b:1}<br>    , {a:2, b:2}, {a:3, b:3}<br>    , {a:4, b:4}], {w:1}, function(err, result) {<br>    test.equal(null, err);</p>
 <pre class="prettyprint source"><code>// Show that duplicate records got dropped
 col.find({}).toArray(function(err, items) {
   test.equal(null, err);
   test.equal(4, items.length);
   db.close();
-});</code></pre><p>  });
-});</p></code></pre>
+});</code></pre><p>  });<br>});</p></code></pre>
     
 
         
@@ -2262,16 +2178,7 @@ col.find({}).toArray(function(err, items) {
             
 
     
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
-  test = require('assert');
-// Connection url
-var url = 'mongodb://localhost:27017/test';
-// Connect using MongoClient
-MongoClient.connect(url, function(err, db) {
-  // Get an additional db
-  var testDb = db.db('test');
-  db.close();
-});</p></code></pre>
+    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,<br>  test = require('assert');<br>// Connection url<br>var url = 'mongodb://localhost:27017/test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, db) {<br>  // Get an additional db<br>  var testDb = db.db('test');<br>  db.close();<br>});</p></code></pre>
     
 
         
@@ -2319,12 +2226,7 @@ MongoClient.connect(url, function(err, db) {
     
     
         
-            <div class="description"><p>GridFS is a tool for MongoDB to store files to the database.
-Because of the restrictions of the object size the database can hold, a
-facility to split a file into several chunks is needed. The <a href="GridStore.html"><code>GridStore</code></a>
-class offers a simplified api to interact with files while managing the
-chunks of split files behind the scenes. More information about GridFS can be
-found <a href="http://www.mongodb.org/display/DOCS/GridFS">here</a>.</p></div>
+            <div class="description"><p>GridFS is a tool for MongoDB to store files to the database.<br>Because of the restrictions of the object size the database can hold, a<br>facility to split a file into several chunks is needed. The <a href="GridStore.html"><code>GridStore</code></a><br>class offers a simplified api to interact with files while managing the<br>chunks of split files behind the scenes. More information about GridFS can be<br>found <a href="http://www.mongodb.org/display/DOCS/GridFS">here</a>.</p></div>
         
         
         
@@ -2358,18 +2260,8 @@ found <a href="http://www.mongodb.org/display/DOCS/GridFS">here</a>.</p></div>
             
 
     
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
-  GridStore = require('mongodb').GridStore,
-  ObjectID = require('mongodb').ObjectID,
-  test = require('assert');</p>
-<p>// Connection url
-var url = 'mongodb://localhost:27017/test';
-// Connect using MongoClient
-MongoClient.connect(url, function(err, db) {
-  var gridStore = new GridStore(db, null, &quot;w&quot;);
-  gridStore.open(function(err, gridStore) {
-    gridStore.write(&quot;hello world!&quot;, function(err, gridStore) {
-      gridStore.close(function(err, result) {</p>
+    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,<br>  GridStore = require('mongodb').GridStore,<br>  ObjectID = require('mongodb').ObjectID,<br>  test = require('assert');</p>
+<p>// Connection url<br>var url = 'mongodb://localhost:27017/test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, db) {<br>  var gridStore = new GridStore(db, null, &quot;w&quot;);<br>  gridStore.open(function(err, gridStore) {<br>    gridStore.write(&quot;hello world!&quot;, function(err, gridStore) {<br>      gridStore.close(function(err, result) {</p>
 <pre class="prettyprint source"><code>    // Let's read the file using object Id
     GridStore.read(db, result._id, function(err, data) {
       test.equal('hello world!', data);
@@ -2377,8 +2269,7 @@ MongoClient.connect(url, function(err, db) {
       test.done();
     });
   });
-});</code></pre><p>  });
-});</p></code></pre>
+});</code></pre><p>  });<br>});</p></code></pre>
     
 
         
@@ -2460,15 +2351,7 @@ MongoClient.connect(url, function(err, db) {
             
 
     
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
-  test = require('assert');
-// Connection url
-var url = 'mongodb://localhost:27017/test';
-// Connect using MongoClient
-MongoClient.connect(url, function(err, db) {
-  // Get an additional db
-  db.close();
-});</p></code></pre>
+    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,<br>  test = require('assert');<br>// Connection url<br>var url = 'mongodb://localhost:27017/test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, db) {<br>  // Get an additional db<br>  db.close();<br>});</p></code></pre>
     
 
         
@@ -2516,8 +2399,7 @@ MongoClient.connect(url, function(err, db) {
     
     
         
-            <div class="description"><p>The <strong>Mongos</strong> class is a class that represents a Mongos Proxy topology and is
-used to construct connections.</p>
+            <div class="description"><p>The <strong>Mongos</strong> class is a class that represents a Mongos Proxy topology and is<br>used to construct connections.</p>
 <p><strong>Mongos Should not be used, use MongoClient.connect</strong></p></div>
         
         
@@ -2552,17 +2434,7 @@ used to construct connections.</p>
             
 
     
-    <pre class="prettyprint"><code><p>var Db = require('mongodb').Db,
-  Mongos = require('mongodb').Mongos,
-  Server = require('mongodb').Server,
-  test = require('assert');
-// Connect using Mongos
-var server = new Server('localhost', 27017);
-var db = new Db('test', new Mongos([server]));
-db.open(function(err, db) {
-  // Get an additional db
-  db.close();
-});</p></code></pre>
+    <pre class="prettyprint"><code><p>var Db = require('mongodb').Db,<br>  Mongos = require('mongodb').Mongos,<br>  Server = require('mongodb').Server,<br>  test = require('assert');<br>// Connect using Mongos<br>var server = new Server('localhost', 27017);<br>var db = new Db('test', new Mongos([server]));<br>db.open(function(err, db) {<br>  // Get an additional db<br>  db.close();<br>});</p></code></pre>
     
 
         
@@ -2610,8 +2482,7 @@ db.open(function(err, db) {
     
     
         
-            <div class="description"><p>The <strong>ReadPreference</strong> class is a class that represents a MongoDB ReadPreference and is
-used to construct connections.</p></div>
+            <div class="description"><p>The <strong>ReadPreference</strong> class is a class that represents a MongoDB ReadPreference and is<br>used to construct connections.</p></div>
         
         
         
@@ -2645,24 +2516,7 @@ used to construct connections.</p></div>
             
 
     
-    <pre class="prettyprint"><code><p>var Db = require('mongodb').Db,
-  ReplSet = require('mongodb').ReplSet,
-  Server = require('mongodb').Server,
-  ReadPreference = require('mongodb').ReadPreference,
-  test = require('assert');
-// Connect using ReplSet
-var server = new Server('localhost', 27017);
-var db = new Db('test', new ReplSet([server]));
-db.open(function(err, db) {
-  test.equal(null, err);
-  // Perform a read
-  var cursor = db.collection('t').find({});
-  cursor.setReadPreference(ReadPreference.PRIMARY);
-  cursor.toArray(function(err, docs) {
-    test.equal(null, err);
-    db.close();
-  });
-});</p></code></pre>
+    <pre class="prettyprint"><code><p>var Db = require('mongodb').Db,<br>  ReplSet = require('mongodb').ReplSet,<br>  Server = require('mongodb').Server,<br>  ReadPreference = require('mongodb').ReadPreference,<br>  test = require('assert');<br>// Connect using ReplSet<br>var server = new Server('localhost', 27017);<br>var db = new Db('test', new ReplSet([server]));<br>db.open(function(err, db) {<br>  test.equal(null, err);<br>  // Perform a read<br>  var cursor = db.collection('t').find({});<br>  cursor.setReadPreference(ReadPreference.PRIMARY);<br>  cursor.toArray(function(err, docs) {<br>    test.equal(null, err);<br>    db.close();<br>  });<br>});</p></code></pre>
     
 
         
@@ -2710,8 +2564,7 @@ db.open(function(err, db) {
     
     
         
-            <div class="description"><p>The <strong>ReplSet</strong> class is a class that represents a Replicaset topology and is
-used to construct connections.</p>
+            <div class="description"><p>The <strong>ReplSet</strong> class is a class that represents a Replicaset topology and is<br>used to construct connections.</p>
 <p><strong>ReplSet Should not be used, use MongoClient.connect</strong></p></div>
         
         
@@ -2746,17 +2599,7 @@ used to construct connections.</p>
             
 
     
-    <pre class="prettyprint"><code><p>var Db = require('mongodb').Db,
-  ReplSet = require('mongodb').ReplSet,
-  Server = require('mongodb').Server,
-  test = require('assert');
-// Connect using ReplSet
-var server = new Server('localhost', 27017);
-var db = new Db('test', new ReplSet([server]));
-db.open(function(err, db) {
-  // Get an additional db
-  db.close();
-});</p></code></pre>
+    <pre class="prettyprint"><code><p>var Db = require('mongodb').Db,<br>  ReplSet = require('mongodb').ReplSet,<br>  Server = require('mongodb').Server,<br>  test = require('assert');<br>// Connect using ReplSet<br>var server = new Server('localhost', 27017);<br>var db = new Db('test', new ReplSet([server]));<br>db.open(function(err, db) {<br>  // Get an additional db<br>  db.close();<br>});</p></code></pre>
     
 
         
@@ -2804,8 +2647,7 @@ db.open(function(err, db) {
     
     
         
-            <div class="description"><p>The <strong>Server</strong> class is a class that represents a single server topology and is
-used to construct connections.</p>
+            <div class="description"><p>The <strong>Server</strong> class is a class that represents a single server topology and is<br>used to construct connections.</p>
 <p><strong>Server Should not be used, use MongoClient.connect</strong></p></div>
         
         
@@ -2840,15 +2682,7 @@ used to construct connections.</p>
             
 
     
-    <pre class="prettyprint"><code><p>var Db = require('mongodb').Db,
-  Server = require('mongodb').Server,
-  test = require('assert');
-// Connect using single Server
-var db = new Db('test', new Server('localhost', 27017););
-db.open(function(err, db) {
-  // Get an additional db
-  db.close();
-});</p></code></pre>
+    <pre class="prettyprint"><code><p>var Db = require('mongodb').Db,<br>  Server = require('mongodb').Server,<br>  test = require('assert');<br>// Connect using single Server<br>var db = new Db('test', new Server('localhost', 27017););<br>db.open(function(err, db) {<br>  // Get an additional db<br>  db.close();<br>});</p></code></pre>
     
 
         
@@ -2900,7 +2734,7 @@ db.open(function(err, db) {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Jan 03 2017 12:52:46 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 13 2017 11:58:13 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

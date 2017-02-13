@@ -1908,7 +1908,7 @@
 
 
     <li class="toctree-l1">
-    <a href="/node-mongodb-native/2.1/api/">
+    <a href="/node-mongodb-native/2.1/api">
         <i class='fa fa-file-text-o'></i>
         API Documentation
     </a>
@@ -2237,12 +2237,12 @@ this with the <code>ulimit</code> shell command.</p>
 
 <h1 id="how-can-i-prevent-a-slow-operation-from-delaying-other-operations">How can I prevent a slow operation from delaying other operations?</h1>
 
-<p><div class="admonition note">
+<div class="admonition note">
 <h5 class="admonition-title">Note</h5>
 <p>Create a separate connection pool for the slow executing operations, thus isolating the slow operations from the fast operations.</p>
 
 </div>
-</p>
+
 
 <p>While Node.js is asynchronous, MongoDB is not. Currently, MongoDB uses a single execution thread per socket. This means that it will only execute a single operation on a socket at any given point in time. Any other operations sent to that socket will have to wait until the current operation is finished. If you have a slow-running operation which holds up other operations,
 the best solution is to create a separate connection pool for the slow operation, isolating it from other, faster

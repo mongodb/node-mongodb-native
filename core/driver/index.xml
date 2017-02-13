@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Drivers on MongoDB Node.js Core Driver</title>
-    <link>/node-mongodb-native/core/driver/</link>
+    <link>/node-mongodb-native/core/driver/index.xml</link>
     <description>Recent content in Drivers on MongoDB Node.js Core Driver</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
@@ -766,7 +766,8 @@ server.connect();
 
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/getting-started/installation-guide/&#34;&gt;Installation&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/getting-started/quick-tour/&#34;&gt;Quick Tour&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/getting-started/quick-tour/&#34;&gt;Quick Tour&lt;/a&gt;
+&lt;br /&gt;&lt;/li&gt;
 &lt;/ul&gt;
 </description>
     </item>
@@ -803,12 +804,12 @@ server.connect();
 
 &lt;p&gt;The &lt;code&gt;kerberos&lt;/code&gt; package is a C++ extension that requires a build environment to be installed on your system. You must be able to build node.js itself to be able to compile and install the &lt;code&gt;kerberos&lt;/code&gt; module. Furthermore the &lt;code&gt;kerberos&lt;/code&gt; module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operation system package manager what libraries to install.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition important&#34;&gt;
+&lt;div class=&#34;admonition important&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;important&lt;/h5&gt;
 &lt;p&gt;Windows already contains the SSPI API used for Kerberos authentication. However you will need to install a full compiler tool chain using visual studio C++ to correctly install the kerberos extension.&lt;/p&gt;
 
 &lt;/div&gt;
-&lt;/p&gt;
+
 
 &lt;h3 id=&#34;diagnosing-on-unix&#34;&gt;Diagnosing on UNIX&lt;/h3&gt;
 

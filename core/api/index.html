@@ -984,8 +984,7 @@
     
     
         
-            <div class="description"><p>The <strong>Cursor</strong> class is an internal class that embodies a cursor on MongoDB
-allowing for iteration over the results returned from the underlying query.</p>
+            <div class="description"><p>The <strong>Cursor</strong> class is an internal class that embodies a cursor on MongoDB<br>allowing for iteration over the results returned from the underlying query.</p>
 <p><strong>CURSORS Cannot directly be instantiated</strong></p></div>
         
         
@@ -1020,28 +1019,11 @@ allowing for iteration over the results returned from the underlying query.</p>
             
 
     
-    <pre class="prettyprint"><code><p>var Server = require('mongodb-core').Server
-  , ReadPreference = require('mongodb-core').ReadPreference
-  , assert = require('assert');</p>
-<p>var server = new Server({host: 'localhost', port: 27017});
-// Wait for the connection event
-server.on('connect', function(server) {
-  assert.equal(null, err);</p>
-<p>  // Execute the write
-  var cursor = _server.cursor('integration_tests.inserts_example4', {
-      find: 'integration_tests.example4'
-    , query: {a:1}
-  }, {
-    readPreference: new ReadPreference('secondary');
-  });</p>
-<p>  // Get the first document
-  cursor.next(function(err, doc) {
-    assert.equal(null, err);
-    server.destroy();
-  });
-});</p>
-<p>// Start connecting
-server.connect();</p></code></pre>
+    <pre class="prettyprint"><code><p>var Server = require('mongodb-core').Server<br>  , ReadPreference = require('mongodb-core').ReadPreference<br>  , assert = require('assert');</p>
+<p>var server = new Server({host: 'localhost', port: 27017});<br>// Wait for the connection event<br>server.on('connect', function(server) {<br>  assert.equal(null, err);</p>
+<p>  // Execute the write<br>  var cursor = _server.cursor('integration_tests.inserts_example4', {<br>      find: 'integration_tests.example4'<br>    , query: {a:1}<br>  }, {<br>    readPreference: new ReadPreference('secondary');<br>  });</p>
+<p>  // Get the first document<br>  cursor.next(function(err, doc) {<br>    assert.equal(null, err);<br>    server.destroy();<br>  });<br>});</p>
+<p>// Start connecting<br>server.connect();</p></code></pre>
     
 
         
@@ -1089,8 +1071,7 @@ server.connect();</p></code></pre>
     
     
         
-            <div class="description"><p>The <strong>Mongos</strong> class is a class that represents a Mongos Proxy topology and is
-used to construct connections.</p></div>
+            <div class="description"><p>The <strong>Mongos</strong> class is a class that represents a Mongos Proxy topology and is<br>used to construct connections.</p></div>
         
         
         
@@ -1124,16 +1105,9 @@ used to construct connections.</p></div>
             
 
     
-    <pre class="prettyprint"><code><p>var Mongos = require('mongodb-core').Mongos
-  , ReadPreference = require('mongodb-core').ReadPreference
-  , assert = require('assert');</p>
-<p>var server = new Mongos([{host: 'localhost', port: 30000}]);
-// Wait for the connection event
-server.on('connect', function(server) {
-  server.destroy();
-});</p>
-<p>// Start connecting
-server.connect();</p></code></pre>
+    <pre class="prettyprint"><code><p>var Mongos = require('mongodb-core').Mongos<br>  , ReadPreference = require('mongodb-core').ReadPreference<br>  , assert = require('assert');</p>
+<p>var server = new Mongos([{host: 'localhost', port: 30000}]);<br>// Wait for the connection event<br>server.on('connect', function(server) {<br>  server.destroy();<br>});</p>
+<p>// Start connecting<br>server.connect();</p></code></pre>
     
 
         
@@ -1181,8 +1155,7 @@ server.connect();</p></code></pre>
     
     
         
-            <div class="description"><p>The <strong>ReadPreference</strong> class is a class that represents a MongoDB ReadPreference and is
-used to construct connections.</p></div>
+            <div class="description"><p>The <strong>ReadPreference</strong> class is a class that represents a MongoDB ReadPreference and is<br>used to construct connections.</p></div>
         
         
         
@@ -1216,21 +1189,9 @@ used to construct connections.</p></div>
             
 
     
-    <pre class="prettyprint"><code><p>var ReplSet = require('mongodb-core').ReplSet
-  , ReadPreference = require('mongodb-core').ReadPreference
-  , assert = require('assert');</p>
-<p>var server = new ReplSet([{host: 'localhost', port: 30000}], {setName: 'rs'});
-// Wait for the connection event
-server.on('connect', function(server) {
-  var cursor = server.cursor('db.test'
-    , {find: 'db.test', query: {}}
-    , {readPreference: new ReadPreference('secondary')});
-  cursor.next(function(err, doc) {
-    server.destroy();
-  });
-});</p>
-<p>// Start connecting
-server.connect();</p></code></pre>
+    <pre class="prettyprint"><code><p>var ReplSet = require('mongodb-core').ReplSet<br>  , ReadPreference = require('mongodb-core').ReadPreference<br>  , assert = require('assert');</p>
+<p>var server = new ReplSet([{host: 'localhost', port: 30000}], {setName: 'rs'});<br>// Wait for the connection event<br>server.on('connect', function(server) {<br>  var cursor = server.cursor('db.test'<br>    , {find: 'db.test', query: {}}<br>    , {readPreference: new ReadPreference('secondary')});<br>  cursor.next(function(err, doc) {<br>    server.destroy();<br>  });<br>});</p>
+<p>// Start connecting<br>server.connect();</p></code></pre>
     
 
         
@@ -1282,7 +1243,7 @@ server.connect();</p></code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Jan 03 2017 12:52:48 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 13 2017 11:58:15 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

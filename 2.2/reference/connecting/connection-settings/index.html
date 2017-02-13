@@ -1759,7 +1759,7 @@
 
 
     <li class="toctree-l1">
-    <a href="/node-mongodb-native/2.2/api/">
+    <a href="/node-mongodb-native/2.2/api">
         <i class='fa fa-file-text-o'></i>
         API Documentation
     </a>
@@ -2197,6 +2197,30 @@ MongoClient.connect(url, {
 </tr>
 
 <tr>
+<td align="left"><strong>promoteBuffers</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">boolean</td>
+<td align="left">false</td>
+<td align="left">Promotes Binary BSON values to native Node Buffers.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>promoteValues</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">boolean</td>
+<td align="left">true</td>
+<td align="left">Promotes BSON values to native types where possible, set to false to only receive wrapper types.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>domainsEnabled</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">boolean</td>
+<td align="left">false</td>
+<td align="left">Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit.</td>
+</tr>
+
+<tr>
 <td align="left"><strong>bufferMaxEntries</strong></td>
 <td align="left">Server, ReplicaSet, Mongos</td>
 <td align="left">integer</td>
@@ -2237,11 +2261,27 @@ MongoClient.connect(url, {
 </tr>
 
 <tr>
-<td align="left">**maxStalenessSeconds</td>
+<td align="left"><strong>maxStalenessSeconds</strong></td>
 <td align="left">Replicaset</td>
 <td align="left">number</td>
 <td align="left">null</td>
 <td align="left">Specify a maxStalenessSeconds value for secondary reads, minimum is 90 seconds</td>
+</tr>
+
+<tr>
+<td align="left"><strong>loggerLevel</strong></td>
+<td align="left">Server, Replicaset, Mongos</td>
+<td align="left">string</td>
+<td align="left">null</td>
+<td align="left">Specify the log level used by the driver logger (error/warn/info/debug)</td>
+</tr>
+
+<tr>
+<td align="left"><strong>logger</strong></td>
+<td align="left">Server, Replicaset, Mongos</td>
+<td align="left">object</td>
+<td align="left">null</td>
+<td align="left">Specify a customer logger mechanism, can be used to log using your app level logger</td>
 </tr>
 </tbody>
 </table>
