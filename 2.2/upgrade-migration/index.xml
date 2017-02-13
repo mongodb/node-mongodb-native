@@ -99,10 +99,10 @@ some behavior changes for the cursor streams).&lt;/p&gt;
     
     <item>
       <title>Upgrade Guide</title>
-      <link>/node-mongodb-native/2.2/upgrade-migration/</link>
+      <link>/node-mongodb-native/2.2/upgrade-migration/main/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:35 -0400</pubDate>
       
-      <guid>/node-mongodb-native/2.2/upgrade-migration/</guid>
+      <guid>/node-mongodb-native/2.2/upgrade-migration/main/</guid>
       <description>
 
 &lt;h1 id=&#34;what-s-new-in-2-3&#34;&gt;What&amp;rsquo;s New in 2.3&lt;/h1&gt;

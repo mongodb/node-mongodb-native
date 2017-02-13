@@ -1102,7 +1102,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;h1 id=&#34;crud-operations&#34;&gt;CRUD Operations&lt;/h1&gt;
 
 &lt;p&gt;For a walkthrough of the main CRUD operations please refer to the
-&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/quick-start/&#34;&gt;Quick Start guide&lt;/a&gt;.&lt;/p&gt;
+&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/quick-start/quick-start/&#34;&gt;Quick Start guide&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;Driver CRUD operations are defined as the operations performed to create, read, update, and delete documents.
 This tutorial covers both the basic CRUD methods and the specialized &lt;code&gt;findAndModify&lt;/code&gt; based methods

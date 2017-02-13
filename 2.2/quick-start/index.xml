@@ -11,15 +11,15 @@
     
     <item>
       <title>Quick Start</title>
-      <link>/node-mongodb-native/2.2/quick-start/</link>
+      <link>/node-mongodb-native/2.2/quick-start/quick-start/</link>
       <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
       
-      <guid>/node-mongodb-native/2.2/quick-start/</guid>
+      <guid>/node-mongodb-native/2.2/quick-start/quick-start/</guid>
       <description>
 
 &lt;h1 id=&#34;quick-start&#34;&gt;Quick Start&lt;/h1&gt;
 
-&lt;p&gt;This guide will show you how to set up a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD operations. For more in-depth coverage, see the &lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/reference/&#34;&gt;tutorials&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;This guide will show you how to set up a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD operations. For more in-depth coverage, see the &lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/reference/main/&#34;&gt;tutorials&lt;/a&gt;.&lt;/p&gt;
 
 &lt;h2 id=&#34;create-the-package-json-file&#34;&gt;Create the package.json file&lt;/h2&gt;
 
@@ -326,7 +326,7 @@ MongoClient.connect(url, function(err, db) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;For more detailed information, see the &lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/&#34;&gt;tutorials&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;For more detailed information, see the &lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/main/&#34;&gt;tutorials&lt;/a&gt;.&lt;/p&gt;
 </description>
     </item>
     

@@ -2978,10 +2978,10 @@ MongoClient.connect(url, function(err, db) {
     
     <item>
       <title>Reference</title>
-      <link>/node-mongodb-native/2.2/reference/</link>
+      <link>/node-mongodb-native/2.2/reference/main/</link>
       <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
       
-      <guid>/node-mongodb-native/2.2/reference/</guid>
+      <guid>/node-mongodb-native/2.2/reference/main/</guid>
       <description>
 
 &lt;h2 id=&#34;reference&#34;&gt;Reference&lt;/h2&gt;

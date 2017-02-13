@@ -57,7 +57,7 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/upgrade-migration/</loc>
+    <loc>/node-mongodb-native/2.2/upgrade-migration/main/</loc>
     <lastmod>2015-03-19T12:53:35-04:00</lastmod>
   </url>
   
@@ -152,22 +152,22 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/installation-guide/</loc>
+    <loc>/node-mongodb-native/2.2/installation-guide/installation-guide/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/quick-start/</loc>
+    <loc>/node-mongodb-native/2.2/quick-start/quick-start/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/reference/</loc>
+    <loc>/node-mongodb-native/2.2/reference/main/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/tutorials/</loc>
+    <loc>/node-mongodb-native/2.2/tutorials/main/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   
