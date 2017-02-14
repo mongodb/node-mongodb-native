@@ -53,7 +53,7 @@ exports['should error on unexpected options'] = {
     var connect = configuration.require;
 
     connect(configuration.url(), {
-      autoReconnect: true, poolSize: 4, notlegal: {}
+      autoReconnect: true, poolSize: 4, notlegal: {}, validateOptions:true
     }, function(err, db) {
       test.ok(err.message.indexOf('option notlegal is not supported') != -1);
       test.done();
