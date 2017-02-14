@@ -1,3 +1,7 @@
+2.2.24 2017-02-14
+-----------------
+* NODE-935, NODE-931 Make MongoClient strict options validation optional and instead print annoying console.warn entries.
+
 2.2.23 2017-02-13
 -----------------
 * Updated mongodb-core to 2.1.8.
