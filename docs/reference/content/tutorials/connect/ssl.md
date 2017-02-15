@@ -106,7 +106,7 @@ MongoClient.connect("mongodb://localhost:27017/test?ssl=true", {
 ## Connect with X.509
 [X.509](http://docs.mongodb.org/manual/core/authentication/#x-509-certificate-authentication) authentication requires the use of TLS/SSL connections with certificate validation. MongoDB uses the X.509 certificate presented during SSL negotiation to authenticate a user whose name is derived from the distinguished name of the X.509 certificate.
 
-To connect using the X.509 authentication mechanism, specify `MONGODB-CR` as the mechanism in the [URI connection string](https://docs.mongodb.org/manual/reference/connection-string/), `ssl=true`, and the username. Use `enodeURIComponent` to encode the username string.
+To connect using the X.509 authentication mechanism, specify `MONGODB-X509` as the mechanism in the [URI connection string](https://docs.mongodb.org/manual/reference/connection-string/), `ssl=true`, and the username. Use `enodeURIComponent` to encode the username string.
 
 In addition to the connection string, pass to the `MongoClient.connect` method
 a connections options with  the X.509 certificate and other [TLS/SSL connections]({{< relref "reference/connecting/connection-settings.md" >}}) options.
