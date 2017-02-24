@@ -121,7 +121,7 @@ exports['Should correctly parse mongodb://fred:foo%20bar@localhost/baz'] = {
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://fred:foo%20bar@localhost/baz", {uri_decode_auth:true});
+    var object = parse("mongodb://fred:foo%20bar@localhost/baz");
     test.equal(1, object.servers.length);
     test.equal('localhost', object.servers[0].host);
     test.equal('27017', object.servers[0].port);
@@ -141,7 +141,7 @@ exports['Should correctly parse mongodb:///tmp/mongodb-27017.sock'] = {
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb:///tmp/mongodb-27017.sock", {uri_decode_auth:true});
+    var object = parse("mongodb:///tmp/mongodb-27017.sock");
     test.equal(1, object.servers.length);
     test.equal('/tmp/mongodb-27017.sock', object.servers[0].domain_socket);
     test.equal('admin', object.dbName);
@@ -158,7 +158,7 @@ exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock'] = {
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://fred:foo@/tmp/mongodb-27017.sock", {uri_decode_auth:true});
+    var object = parse("mongodb://fred:foo@/tmp/mongodb-27017.sock");
     test.equal(1, object.servers.length);
     test.equal('/tmp/mongodb-27017.sock', object.servers[0].domain_socket);
     test.equal('admin', object.dbName);
