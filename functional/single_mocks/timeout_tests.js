@@ -96,10 +96,13 @@ exports['Should correctly timeout socket operation and then correctly re-execute
 
     // Not done
     var done = false;
+    // console.log("--------- -1")
 
     // Add event listeners
     replset.once('connect', function(_server) {
+      // console.log("--------- 0")
       _server.insert('test.test', [{created:new Date()}], function(err, r) {
+        // console.log("--------- 1")
         test.ok(err != null);
         // console.dir(err)
 
@@ -224,47 +227,47 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
       size: 1
     });
 
+    // console.log("!!!! server connect")
+    var docs = [];
+    // Create big insert message
+    for(var i = 0; i < 1000; i++) {
+      docs.push({
+        a:i,
+        string: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string1: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string2: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string3: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string4: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string5: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string6: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string7: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string8: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string9: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string10: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string11: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string12: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string13: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string14: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string15: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string16: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string17: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string18: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string19: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string20: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string21: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string22: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string23: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string24: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string25: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string26: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string27: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        string28: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+      });
+    }
+
     // Add event listeners
     server.once('connect', function(_server) {
       // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
-      // console.log("!!!! server connect")
-      var docs = [];
-      // Create big insert message
-      for(var i = 0; i < 1000; i++) {
-        docs.push({
-          a:i,
-          string: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string1: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string2: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string3: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string4: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string5: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string6: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string7: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string8: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string9: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string10: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string11: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string12: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string13: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string14: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string15: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string16: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string17: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string18: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string19: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string20: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string21: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string22: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string23: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string24: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string25: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string26: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string27: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string28: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-        });
-      }
-
       _server.insert('test.test', docs, function(err, r) {
         // console.log("!!!! insert")
         test.ok(err != null);

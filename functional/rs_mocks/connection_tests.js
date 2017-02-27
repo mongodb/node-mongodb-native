@@ -1502,3 +1502,112 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
     }, 100)
   }
 }
+
+exports['Correctly return lastIsMaster when connected to a secondary only for a replicaset connection'] = {
+  metadata: {
+    requires: {
+      generators: true,
+      topology: "single"
+    }
+  },
+
+  test: function(configuration, test) {
+    var ReplSet = configuration.require.ReplSet,
+      ObjectId = configuration.require.BSON.ObjectId,
+      Connection = require('../../../../lib/connection/connection'),
+      ReadPreference = configuration.require.ReadPreference,
+      Long = configuration.require.BSON.Long,
+      co = require('co'),
+      mockupdb = require('../../../mock');
+
+    // Contain mock server
+    var firstSecondaryServer = null;
+    var arbiterServer = null;
+    var running = true;
+    var electionIds = [new ObjectId(), new ObjectId()];
+
+    // Default message fields
+    var defaultFields = {
+      "setName": "rs", "setVersion": 1, "electionId": electionIds[0],
+      "maxBsonObjectSize" : 16777216, "maxMessageSizeBytes" : 48000000,
+      "maxWriteBatchSize" : 1000, "localTime" : new Date(), "maxWireVersion" : 4,
+      "minWireVersion" : 0, "ok" : 1, "hosts": ["localhost:32000", "localhost:32001", "localhost:32002"], "arbiters": ["localhost:32002"]
+    }
+
+    // Primary server states
+    var firstSecondary = [extend(defaultFields, {
+      "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
+    })];
+
+    // Primary server states
+    var arbiter = [extend(defaultFields, {
+      "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
+    })];
+
+    // Boot the mock
+    co(function*() {
+      firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
+      arbiterServer = yield mockupdb.createServer(32002, 'localhost');
+
+      // First secondary state machine
+      co(function*() {
+        while(running) {
+          var request = yield firstSecondaryServer.receive();
+          var doc = request.document;
+
+          if(doc.ismaster) {
+            request.reply(firstSecondary[0]);
+          }
+        }
+      }).catch(function(err) {
+        // console.log(err.stack);
+      });
+
+      // Second secondary state machine
+      co(function*() {
+        while(running) {
+          var request = yield arbiterServer.receive();
+          var doc = request.document;
+
+          if(doc.ismaster) {
+            request.reply(arbiter[0]);
+          }
+        }
+      }).catch(function(err) {
+        // console.log(err.stack);
+      });
+    });
+
+    Connection.enableConnectionAccounting();
+    // Attempt to connect
+    var server = new ReplSet([
+      { host: 'localhost', port: 32000 },
+      { host: 'localhost', port: 32001 },
+      { host: 'localhost', port: 32002 }], {
+        setName: 'rs',
+        connectionTimeout: 3000,
+        socketTimeout: 0,
+        haInterval: 2000,
+        size: 1,
+        secondaryOnlyConnectionAllowed: true
+    });
+
+    server.on('connect', function(e) {
+      server.__connected = true;
+
+      var result = server.lastIsMaster();
+      test.ok(result);
+
+      firstSecondaryServer.destroy();
+      arbiterServer.destroy();
+      server.destroy();
+      running = false;
+      test.done();
+    });
+
+    // Gives proxies a chance to boot up
+    setTimeout(function() {
+      server.connect();
+    }, 100)
+  }
+}
