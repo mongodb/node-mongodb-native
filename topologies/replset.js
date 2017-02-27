@@ -873,6 +873,14 @@ ReplSet.prototype.unref = function() {
  * @return {object}
  */
 ReplSet.prototype.lastIsMaster = function() {
+  // If secondaryOnlyConnectionAllowed and no primary but secondary
+  // return the secondaries ismaster result.
+  if (this.s.options.secondaryOnlyConnectionAllowed
+    && !this.s.replicaSetState.hasPrimary()
+    && this.s.replicaSetState.hasSecondary()) {
+      return this.s.replicaSetState.secondaries[0].lastIsMaster();
+    }
+
   return this.s.replicaSetState.primary
     ? this.s.replicaSetState.primary.lastIsMaster() : this.ismaster;
 }

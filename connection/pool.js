@@ -507,7 +507,7 @@ Pool.prototype.socketCount = function() {
 /**
  * Return all pool connections
  * @method
- * @return {Connectio[]} The pool connections
+ * @return {Connection[]} The pool connections
  */
 Pool.prototype.allConnections = function() {
   return this.availableConnections
@@ -1051,7 +1051,7 @@ function _createConnection(self) {
           return _connection.destroy();
         }
 
-        // If we are authenticating at the moment
+        // If we are c at the moment
         // Do not automatially put in available connections
         // As we need to apply the credentials first
         if(self.authenticating) {
