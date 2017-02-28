@@ -10,6 +10,7 @@ var inherits = require('util').inherits,
   Server = require('./server'),
   assign = require('./shared').assign,
   clone = require('./shared').clone,
+  cloneOptions = require('./shared').cloneOptions,
   createClientInfo = require('./shared').createClientInfo;
 
 var BSON = retrieveBSON();
@@ -879,8 +880,12 @@ Mongos.prototype.command = function(ns, cmd, options, callback) {
     return callback(new MongoError('no mongos proxy available'));
   }
 
+  // Cloned options
+  var clonedOptions = cloneOptions(options);
+  clonedOptions.topology = self;
+
   // Execute the command
-  server.command(ns, cmd, options, callback);
+  server.command(ns, cmd, clonedOptions, callback);
 }
 
 /**
