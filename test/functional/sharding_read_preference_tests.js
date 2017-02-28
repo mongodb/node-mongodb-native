@@ -326,3 +326,84 @@ exports.shouldCorrectlyEmitOpenEvent = {
     });
   }
 }
+
+/**
+ *
+ * @ignore
+ */
+exports['Should correctly apply readPreference when performing inline mapReduce'] = {
+  metadata: { requires: { topology: 'sharded' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Mongos = configuration.require.Mongos
+      , MongoClient = configuration.require.MongoClient
+      , Server = configuration.require.Server
+      , Db = configuration.require.Db
+      , ReadPreference = configuration.require.ReadPreference;
+
+    // Set up mongos connection
+    var mongos = new Mongos([
+        new Server(configuration.host, configuration.port, { auto_reconnect: true }),
+        // new Server(configuration.host, configuration.port + 1, { auto_reconnect: true })
+      ])
+
+    // Connect using the mongos connections
+    new Db('integration_test_2', mongos).open(function(err, db) {
+      test.equal(null, err);
+
+      // Get the collection
+      var col = db.collection('items');
+      // Insert some items
+      col.insertMany([{a:1}, {a:2}, {a:3}], function(err, r) {
+        test.equal(null, err);
+
+        db.db('admin').command({enableSharding: 'integration_test_2'}, function(err, r) {
+          // console.log("============================================= 0")
+          // console.dir(err)
+          // console.dir(r)
+          test.equal(null, err);
+
+          col.createIndex( { _id: "hashed" }, function(err, r) {
+            test.equal(null, err);
+
+            db.db('admin').command({
+              shardCollection: 'integration_test_2.items',
+              key: {'_id': 'hashed'},
+            }, function(err, r) {
+              // console.log("============================================= 1")
+              // console.dir(err)
+              // console.dir(r)
+              test.equal(null, err);
+
+              var map = function() {
+                emit(this._id, this._id);
+              };
+
+              var reduce = function(key, values) {
+                return 123;
+              };
+
+              col.mapReduce(map, reduce, {
+                out: {
+                    inline: 1
+                },
+                readPreference: ReadPreference.SECONDARY_PREFERRED
+              }, function(err, r) {
+                test.equal(null, err);
+                test.equal(3, r.length);
+                // console.log("=================================================")
+                // console.dir(err)
+                // console.dir(r)
+                // throw new Error('')
+
+                db.close();
+                test.done();
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+}
