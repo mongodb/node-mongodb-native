@@ -323,7 +323,7 @@ var eventHandler = function(self, event) {
       // On first connect fail
       if(self.s.pool.state == 'disconnected' && self.initalConnect && ['close', 'timeout', 'error', 'parseError'].indexOf(event) != -1) {
         self.initalConnect = false;
-        return self.emit('error', new MongoError(f('failed to connect to server [%s] on first connect', self.name)));
+        return self.emit('error', new MongoError(f('failed to connect to server [%s] on first connect [%s]', self.name, err)));
       }
 
       // Reconnect event, emit the server

@@ -241,10 +241,11 @@ function rexecuteOperations(self) {
 function connectNewServers(self, servers, callback) {
   // Count lefts
   var count = servers.length;
+  var error = null;
 
   // Handle events
   var _handleEvent = function(self, event) {
-    return function() {
+    return function(err) {
       var _self = this;
       count = count - 1;
 
@@ -294,13 +295,15 @@ function connectNewServers(self, servers, callback) {
         });
       } else if(event == 'connect' && self.authenticating) {
         this.destroy();
+      } else if(event == 'error') {
+        error = err;
       }
 
       // Rexecute any stalled operation
       rexecuteOperations(self);
 
       // Are we done finish up callback
-      if(count == 0) { callback(); }
+      if(count == 0) { callback(error); }
     }
   }
 
@@ -519,11 +522,13 @@ function topologyMonitor(self, options) {
   }
 
   if(_process === setTimeout) {
-    return connectNewServers(self, self.s.replicaSetState.unknownServers, function() {
+    return connectNewServers(self, self.s.replicaSetState.unknownServers, function(err) {
       if(!self.s.replicaSetState.hasPrimary() && !self.s.options.secondaryOnlyConnectionAllowed) {
+        if(err) return self.emit('error', err);
         self.emit('error', new MongoError('no primary found in replicaset'));
         return self.destroy();
       } else if(!self.s.replicaSetState.hasSecondary() && self.s.options.secondaryOnlyConnectionAllowed) {
+        if(err) return self.emit('error', err);
         self.emit('error', new MongoError('no secondary found in replicaset'));
         return self.destroy();
       }
