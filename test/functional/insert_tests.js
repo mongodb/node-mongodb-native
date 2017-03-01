@@ -2219,6 +2219,40 @@ exports['Correctly allow forceServerObjectId for insertMany'] = {
   }
 }
 
+exports['should return correct number of ids for insertMany { ordered: true }'] = {
+  metadata: { requires: { topology: [ 'single' ] } },
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+    db.open(function(err, db) {
+      test.equal(null, err);
+      db.collection('inserted_ids_test').insertMany([{}, {}, {}], { ordered: true })
+        .then(function(r) {
+          test.equal(null, err);
+          test.equal(3, r.insertedIds.length);
+          db.close();
+          test.done();
+        });
+    });
+  }
+}
+
+exports['should return correct number of ids for insertMany { ordered: false }'] = {
+  metadata: { requires: { topology: [ 'single' ] } },
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({ w: 1 }, { poolSize:1, auto_reconnect:false });
+    db.open(function(err, db) {
+      test.equal(null, err);
+      db.collection('inserted_ids_test').insertMany([{}, {}, {}], { ordered: false })
+        .then(function(r) {
+          test.equal(null, err);
+          test.equal(3, r.insertedIds.length);
+          db.close();
+          test.done();
+        });
+    });
+  }
+}
+
 exports['Insert document including sub documents'] = {
   metadata: { requires: { topology: ['single'] } },
 
