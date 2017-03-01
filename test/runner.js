@@ -4,7 +4,6 @@ var Runner = require('integra').Runner
   , Cover = require('integra').Cover
   , RCover = require('integra').RCover
   , f = require('util').format
-  , m = require('mongodb-version-manager')
   , path = require('path')
   , NodeVersionFilter = require('./filters/node_version_filter')
   , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
@@ -101,6 +100,7 @@ var Configuration = function(options) {
         manager.discover().then(function(result) {
           // Create string representation
           var currentVersion = result.version.join('.');
+          console.log("==== Running against MongodDB " + currentVersion);
           // If we have a ReplSetManager and the version is >= 3.4.0
           if(semver.satisfies(currentVersion, ">=3.4.0")) {
             if(manager instanceof ReplSetManager) {
@@ -141,28 +141,19 @@ var Configuration = function(options) {
       },
 
       stop: function(callback) {
-        // console.log("=================== STOP 0")
         if(skipTermination) return callback();
-        // console.log("=================== STOP 1")
         // Stop the servers
         manager.stop(9).then(function() {
-          // console.log("=================== STOP 1")
           callback();
         });
       },
 
       restart: function(options, callback) {
-        // console.log("------------ restart 0")
-        // console.log("=================== RESTART 0")
         if(typeof options == 'function') callback = options, options = {purge:true, kill:true};
-        // console.log("=================== RESTART 1")
         if(skipTermination) return callback();
-        // console.log("=================== RESTART 2")
-        // console.log("------------ restart 1")
 
         // Stop the servers
         manager.restart().then(function() {
-          // console.log("=================== RESTART 3")
           callback();
         });
       },
@@ -255,8 +246,8 @@ var Configuration = function(options) {
 
 // Set up the runner
 var runner = new Runner({
-    // logLevel:'error'
-    logLevel:'info'
+    logLevel:'error'
+    // logLevel:'info'
   , runners: 1
   , failFast: true
 });
@@ -468,15 +459,14 @@ if(argv.t == 'functional') {
       return runner.run(Configuration(_config));
     }
 
-    // console.log("!!!!!!!!!!! RUN 0")
+    // Get the mongodb-version-manager
+    var m = require('mongodb-version-manager');
     // Kill any running MongoDB processes and
     // `install $MONGODB_VERSION` || `use existing installation` || `install stable`
     m(function(err){
-      // console.log("!!!!!!!!!!! RUN 1")
       if(err) return console.error(err) && process.exit(1);
 
       m.current(function(err, version){
-        // console.log("!!!!!!!!!!! RUN 2")
         if(err) return console.error(err) && process.exit(1);
         console.log('Running tests against MongoDB version `%s`', version);
         // Run the configuration
@@ -488,7 +478,6 @@ if(argv.t == 'functional') {
   //
   // Replicaset configuration
   if(argv.e == 'replicaset') {
-    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     // Establish the server version
     new ServerManager('mongod').discover().then(function(r) {
       // The individual nodes

@@ -1149,3 +1149,65 @@ exports['should correctly connect using SSL to replicaset with requireSSL'] = {
     });
   }
 }
+
+// /**
+//  * @ignore
+//  */
+// exports['should fail due to accessing using ip address'] = {
+//   metadata: { requires: { topology: 'ssl' } },
+//
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var ServerManager = require('mongodb-topology-manager').Server
+//       , MongoClient = configuration.require.MongoClient;
+//
+//     // All inserted docs
+//     var docs = [];
+//     var errs = [];
+//     var insertDocs = [];
+//
+//     // Read the ca
+//     var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+//
+//     // Start server
+//     var serverManager = new ServerManager('mongod', {
+//         journal:null
+//       , sslOnNormalPorts: null
+//       , sslPEMKeyFile: __dirname + "/ssl/server.pem"
+//       // EnsureUp options
+//       , dbpath: path.join(path.resolve('db'), f("data-%d", 27019))
+//       , bind_ip: 'server'
+//       , port: 27019
+//     });
+//
+//     console.log("=============================== commandLine 0")
+//     // console.log(commandLine)
+//     serverManager.purge().then(function() {
+//       console.log("=============================== commandLine 1")
+//       // Start the server
+//       serverManager.start().then(function() {
+//         setTimeout(function() {
+//           console.log("=============================== commandLine 2")
+//           // Connect and validate the server certificate
+//           // MongoClient.connect("mongodb://127.0.0.1:27019/test?ssl=true&maxPoolSize=1", {
+//           // MongoClient.connect("mongodb://foo:bar@ds015564-a0.sjf52.fleet.mongolab.com:15564,ds015564-a1.sjf52.fleet.mongolab.com:15564/test?replicaSet=rs-ds015564&ssl=true", {          // MongoClient.connect("mongodb://server:27019/test?ssl=true&maxPoolSize=1", {
+//           MongoClient.connect("mongodb://foo:bar@54.161.72.61:15564,54.204.126.162:15564/test?replicaSet=rs-ds015564&ssl=true", {
+//               sslValidate:true,
+//               // checkServerIdentity:true
+//             // , sslCA:ca
+//           }, function(err, db) {
+//             console.dir(err)
+//             test.equal(null, err);
+//             test.ok(db != null);
+//
+//             db.close();
+//
+//             serverManager.stop().then(function() {
+//               test.done();
+//             });
+//           });
+//         }, 1000);
+//       });
+//     });
+//   }
+// }
