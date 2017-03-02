@@ -90,6 +90,7 @@ var handlers = ['connect', 'close', 'error', 'timeout', 'parseError'];
  * @param {boolean} [options.ssl=false] Use SSL for connection
  * @param {boolean|function} [options.checkServerIdentity=true] Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.
  * @param {Buffer} [options.ca] SSL Certificate store binary buffer
+ * @param {Buffer} [options.crl] SSL Certificate revocation store binary buffer
  * @param {Buffer} [options.cert] SSL Certificate binary buffer
  * @param {Buffer} [options.key] SSL Key file binary buffer
  * @param {string} [options.passphrase] SSL Certificate pass phrase
