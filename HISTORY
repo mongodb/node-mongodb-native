@@ -1,6 +1,6 @@
 1.3.23 2013-12-13
 -----------------
-- Bumped bson package to 0.2.4 to work around resolution of include files issues for a lot of node.js installs
+- Bumped bson package to 0.2.5 to work around resolution of include files issues for a lot of node.js installs
 
 1.3.22 2013-12-12
 -----------------
