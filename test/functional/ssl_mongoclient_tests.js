@@ -57,6 +57,60 @@ exports.shouldCorrectlyCommunicateUsingSSLSocket = {
 /**
  * @ignore
  */
+exports['should fail due to CRL list passed in'] = {
+  metadata: { requires: { topology: 'ssl' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var ServerManager = require('mongodb-topology-manager').Server
+      , MongoClient = configuration.require.MongoClient;
+
+    // All inserted docs
+    var docs = [];
+    var errs = [];
+    var insertDocs = [];
+
+    // Start server
+    var serverManager = new ServerManager('mongod', {
+        journal: null
+      , port: 27019
+      , sslOnNormalPorts: null
+      , sslPEMKeyFile: __dirname + "/ssl/server.pem"
+      , dbpath: path.join(path.resolve('db'), f("data-%d", 27019))
+    }, {
+      ssl:true
+    });
+
+    // Read the ca
+    var crl = [fs.readFileSync(__dirname + "/ssl/crl_expired.pem")];
+    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+
+    serverManager.purge().then(function() {
+      // Start the server
+      serverManager.start().then(function() {
+        setTimeout(function() {
+          // Connect
+          MongoClient.connect("mongodb://server:27019/test?ssl=true", {
+            sslValidate: true,
+            sslCA: ca,
+            sslCRL: crl,
+          }, function(err, db) {
+            test.ok(err);
+            test.ok(err.message.indexOf('CRL has expired') != -1);
+
+            serverManager.stop().then(function() {
+              test.done();
+            });
+          });
+        }, 10000);
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyValidateServerCertificate = {
   metadata: { requires: { topology: 'ssl' } },
 

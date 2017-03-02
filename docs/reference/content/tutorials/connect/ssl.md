@@ -142,6 +142,7 @@ The following TLS/SSL options are available.
 | `ssl` | {Boolean, default: false} | Use ssl connection |
 | `sslValidate` | {Boolean, default: true} | Validate server certificate against certificate authority. |
 | `sslCA` | {Buffer[]\|string[], default: null} | Array of valid certificates for Certificate Authority either as Buffers or Strings. |
+| `sslCRL` | {Buffer[]\|string[], default: null} | Array of revocation certificates as Buffers or Strings. |
 | `sslCert` | {Buffer\|string, default: null} | String or buffer containing the client certificate. |
 | `sslPass` | {Buffer\|string, default: null} | String or buffer containing the client certificate password. |
 
