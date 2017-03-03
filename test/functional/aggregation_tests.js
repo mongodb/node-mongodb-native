@@ -863,6 +863,8 @@ exports['should maintain batch size between calls to receive new batches'] = {
       test.equal(count, 6);
       db.close();
       test.done();
+    }).catch(err => {
+      console.log(err)
     });
   }
 }
