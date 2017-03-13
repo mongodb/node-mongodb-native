@@ -388,13 +388,24 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
   if(cmd.skip) findCmd.skip = cmd.skip;
   // Add a limit
   if(cmd.limit) findCmd.limit = cmd.limit;
-  // Add a batchSize
-  if(typeof cmd.batchSize == 'number') findCmd.batchSize = Math.abs(cmd.batchSize);
 
   // Check if we wish to have a singleBatch
   if(cmd.limit < 0) {
     findCmd.limit = Math.abs(cmd.limit);
     findCmd.singleBatch = true;
+  }
+
+  // Add a batchSize
+  if(typeof cmd.batchSize == 'number') {
+    if (cmd.batchSize < 0) {
+      if (cmd.limit != 0 && Math.abs(cmd.batchSize) < Math.abs(cmd.limit)) {
+        findCmd.limit = Math.abs(cmd.batchSize);
+      }
+
+      findCmd.singleBatch = true;
+    }
+
+    findCmd.batchSize = Math.abs(cmd.batchSize);
   }
 
   // If we have comment set
