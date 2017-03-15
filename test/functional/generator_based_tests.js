@@ -1,6 +1,7 @@
 exports['should maintain batch size between calls to receive new batches'] = {
   metadata: {
-    requires: { generators: true, topology: 'single' , node: ">6.0.0" }
+    // MongoDb must be > 2.6.0 as aggregate did not return a cursor before this version
+    requires: { generators: true, topology: 'single' , node: ">6.0.0", mongodb: ">=2.6.0" }
   },
 
   // The actual test we wish to run

@@ -358,13 +358,13 @@ try {
   testFiles.push('/test/functional/operation_generators_example_tests.js');
   // Mock tests
   testFiles.push('/test/functional/command_write_concern_tests.js');
-  testFiles.push('/test/functional/replicaset_mock_tests.js');
   testFiles.push('/test/functional/collations_tests.js');
   testFiles.push('/test/functional/max_staleness_tests.js');
   testFiles.push('/test/functional/buffering_proxy_tests.js');
   testFiles.push('/test/functional/view_tests.js');
   testFiles.push('/test/functional/crud_spec_tests.js');
   testFiles.push('/test/functional/generator_based_tests.js');
+  testFiles.push('/test/functional/replicaset_mock_tests.js');
 } catch(err) {}
 
 // Add all the tests to run
