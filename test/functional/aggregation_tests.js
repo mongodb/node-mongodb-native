@@ -830,7 +830,7 @@ exports['Should correctly handle ISODate date matches in aggregation framework']
 
 exports['should maintain batch size between calls to receive new batches'] = {
   metadata: {
-    requires: { generators: true, topology: 'single' , node: ">0.10.0" }
+    requires: { generators: true, topology: 'single' , node: ">6.0.0" }
   },
 
   // The actual test we wish to run
