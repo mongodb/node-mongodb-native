@@ -1,3 +1,11 @@
+2.1.9 2017-03-17
+----------------
+* Return lastIsMaster correctly when connecting with secondaryOnlyConnectionAllowed is set to true and only a secondary is available in replica state.
+* Clone options when passed to wireProtocol handler to avoid intermittent modifications causing errors.
+* Ensure SSL error propegates better for Replset connections when there is a SSL validation error.
+* NODE-957 Fixed issue where < batchSize not causing cursor to be closed on execution of first batch.
+* NODE-958 Store reconnectConnection on pool object to allow destroy to close immediately.
+
 2.1.8 2017-02-13
 ----------------
 * NODE-925 ensure we reschedule operations while pool is < poolSize while pool is growing and there are no connections with not currently performing work.
