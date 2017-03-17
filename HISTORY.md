@@ -1,3 +1,20 @@
+2.2.25 2017-03-17
+-----------------
+* Don't rely on global toString() for checking if object (Issue #1494, https://github.com/vkarpov15).
+* Remove obsolete option uri_decode_auth (Issue #1488, https://github.com/kamagatos).
+* NODE-936 Correctly translate ReadPreference to CoreReadPreference for mongos queries.
+* Exposed BSONRegExp type.
+* NODE-950 push correct index for INSERT ops (https://github.com/mbroadst).
+* NODE-951 Added support for sslCRL option and added a test case for it.
+* NODE-953 Made batchSize issue general at cursor level.
+* NODE-954 Remove write concern from reindex helper as it will not be supported in 3.6.
+* Updated mongodb-core to 2.1.9.
+    * Return lastIsMaster correctly when connecting with secondaryOnlyConnectionAllowed is set to true and only a secondary is available in replica state.
+    * Clone options when passed to wireProtocol handler to avoid intermittent modifications causing errors.
+    * Ensure SSL error propegates better for Replset connections when there is a SSL validation error.
+    * NODE-957 Fixed issue where < batchSize not causing cursor to be closed on execution of first batch.
+    * NODE-958 Store reconnectConnection on pool object to allow destroy to close immediately.
+
 2.2.24 2017-02-14
 -----------------
 * NODE-935, NODE-931 Make MongoClient strict options validation optional and instead print annoying console.warn entries.
