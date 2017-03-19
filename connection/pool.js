@@ -852,6 +852,8 @@ Pool.prototype.destroy = function(force) {
 
   // Wait for the operations to drain before we close the pool
   function checkStatus() {
+    flushMonitoringOperations(self.queue);
+
     if(self.queue.length == 0) {
       // Get all the known connections
       var connections = self.availableConnections
@@ -869,6 +871,8 @@ Pool.prototype.destroy = function(force) {
       }
 
       destroy(self, connections);
+    // } else if (self.queue.length > 0 && !this.reconnectId) {
+      
     } else {
       // Ensure we empty the queue
       _execute(self)();
@@ -1196,9 +1200,6 @@ function _execute(self) {
             if(!foundValidConnection) {
               // Put workItem back on the queue
               self.queue.unshift(workItem);
-
-              // // Flush any monitoring operations in the queue, failing fast
-              // flushMonitoringOperations(self.queue);
 
               // Attempt to grow the pool if it's not yet maxsize
               if(totalConnections < self.options.size
