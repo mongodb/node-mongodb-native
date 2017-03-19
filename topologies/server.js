@@ -217,7 +217,7 @@ function monitoringProcess(self) {
 
     // Execute the ismaster query
     self.s.pool.write(query, {
-      socketTimeout: self.s.options.connectionTimeout || 2000,
+      socketTimeout: (typeof self.s.options.connectionTimeout !== 'number') ? 2000 : self.s.options.connectionTimeout,
       monitoring: true,
     }, function(err, result) {
       // Set initial lastIsMasterMS
