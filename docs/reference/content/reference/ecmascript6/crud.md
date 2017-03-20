@@ -171,7 +171,7 @@ co(function*() {
   // Modify and return the modified document
   var r = yield col.findOneAndUpdate({a:1}, {$set: {b: 1}}, {
       returnOriginal: false
-    , sort: [[a,1]]
+    , sort: [['a',1]]
     , upsert: true
   });
   assert.equal(1, r.value.b);
@@ -205,7 +205,7 @@ co(function*() {
 
   // Remove a document from MongoDB and return it
   var r = yield col.findOneAndDelete({a:1}, {
-      sort: [[a,1]]
+      sort: [['a',1]]
     });
   assert.ok(r.value.b == null);
   db.close();
