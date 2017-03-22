@@ -2449,3 +2449,48 @@ exports['should execute query using limit of 101'] = {
     });
   }
 }
+
+/**
+ * Test a simple find
+ * @ignore
+ */
+exports['Should correctly apply db level options to find cursor'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var listener = require('../..').instrument(function(err, instrumentations) {
+    });
+
+    listener.on('started', function(event) {
+      // console.dir(event)
+    });
+
+    var MongoClient = configuration.require.MongoClient;
+    MongoClient.connect(configuration.url(), {
+      ignoreUndefined: true
+    }, function(err, db) {
+      var collection = db.collection('test_find_simple_cursor_inheritance');
+      var doc1 = null;
+      var doc2 = null;
+
+      // Insert some test documents
+      collection.insert([{a:2}, {b:3, c: undefined}], function(err, r) {
+        // Ensure correct insertion testing via the cursor and the count function
+        var cursor = collection.find({c:undefined});
+        test.equal(true, cursor.s.options.ignoreUndefined);
+
+        cursor.toArray(function(err, documents) {
+          // console.dir(documents)
+          test.equal(2, documents.length);
+          // process.exit(0)
+          listener.uninstrument();
+
+          // Let's close the db
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}

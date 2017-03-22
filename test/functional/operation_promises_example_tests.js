@@ -6436,6 +6436,7 @@ exports['Should correctly add capped collection options to cursor With Promises'
           });
 
           cursor.on('end', function() {
+            console.dir(new Date().getTime() - s.getTime())
             test.ok((new Date().getTime() - s.getTime()) > 1000);
 
             db.close();
