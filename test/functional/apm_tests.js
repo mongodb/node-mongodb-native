@@ -47,6 +47,57 @@ exports['Correctly receive the APM events for an insert'] = {
   }
 }
 
+exports['Correctly handle cursor.close when no cursor existed'] = {
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+    var callbackTriggered = false;
+
+    var listener = require('../..').instrument(function(err, instrumentations) {
+      callbackTriggered = true;
+    });
+
+    listener.on('started', function(event) {
+      if(event.commandName == 'insert')
+        started.push(event);
+    });
+
+    listener.on('succeeded', function(event) {
+      if(event.commandName == 'insert')
+        succeeded.push(event);
+    });
+
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      test.equal(null, err);
+      var collection = db.collection('apm_test_cursor');
+
+      collection.insertMany([
+        {a : 1}, {a : 2}, {a : 3}
+      ]).then(function(r) {
+        test.equal(3, r.insertedCount);
+        test.ok(callbackTriggered);
+        
+        var cursor = collection.find({})
+        cursor.count(
+          function (err, count) {
+            cursor.close() // <-- Will cause error in APM module.
+        
+            listener.uninstrument();
+
+            db.close();
+            test.done();
+          }
+        )
+      });
+    });
+  }
+}
+
 exports['Correctly receive the APM events for a listCollections command'] = {
   metadata: { requires: { topology: ['replicaset'], mongodb:">=3.0.0" } },
 
