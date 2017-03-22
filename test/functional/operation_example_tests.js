@@ -2773,8 +2773,6 @@ exports.shouldCorrectlyUpdateMultipleDocuments = {
       collection.insertMany([{a:1, b:1}, {a:1, b:2}], configuration.writeConcernMax(), function(err, result) {
 
         var o = configuration.writeConcernMax();
-        o.multi = true
-        // Update multiple documents using the multi option
         collection.updateMany({a:1}, {$set:{b:0}}, o, function(err, r) {
           test.equal(null, err);
           test.equal(2, r.result.n);
