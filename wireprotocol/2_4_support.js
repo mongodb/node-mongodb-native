@@ -121,26 +121,29 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
     callback(null, null, r.connection);
   }
 
+  // Contains any query options
+  var queryOptions = {};
+
   // If we have a raw query decorate the function
   if(raw) {
-    queryCallback.raw = raw;
+    queryOptions.raw = raw;
   }
 
   // Check if we need to promote longs
   if(typeof cursorState.promoteLongs == 'boolean') {
-    queryCallback.promoteLongs = cursorState.promoteLongs;
+    queryOptions.promoteLongs = cursorState.promoteLongs;
   }
 
   if(typeof cursorState.promoteValues == 'boolean') {
-    queryCallback.promoteValues = cursorState.promoteValues;
+    queryOptions.promoteValues = cursorState.promoteValues;
   }
 
   if(typeof cursorState.promoteBuffers == 'boolean') {
-    queryCallback.promoteBuffers = cursorState.promoteBuffers;
+    queryOptions.promoteBuffers = cursorState.promoteBuffers;
   }
 
   // Write out the getMore command
-  connection.write(getMore, queryCallback);
+  connection.write(getMore, queryOptions, queryCallback);
 }
 
 WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, options) {
