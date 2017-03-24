@@ -761,42 +761,5 @@ exports['Should correctly promoteValues when calling getMore on queries'] = {
 
     // Start connection
     server.connect();
-
-    // var MongoClient = configuration.require.MongoClient;
-    // var Long = configuration.require.Long;
-    
-    // MongoClient.connect(configuration.url(), function(err, db) {
-    //   var docs = new Array(150).fill(0).map(function(_, i) {
-    //     return {
-    //       _id: 'needle_' + i,
-    //       is_even: i % 2,
-    //       long: Long.fromString('1234567890'),
-    //       double: 0.23456,
-    //       int: 1234
-    //     };
-    //   });
-      
-    //   db.collection('haystack').insert(docs, function(errInsert) {
-    //     if (errInsert) throw errInsert;
-    //     // change limit from 102 to 101 and this test passes.
-    //     // seems to indicate that the promoteValues flag is used for the
-    //     // initial find, but not for subsequent getMores
-    //     db.collection('haystack').find({}, {limit: 102, promoteValues: false})
-    //       .on('data', function(doc) {
-    //         test.equal(typeof doc.int, 'object');
-    //         test.equal(doc.int._bsontype, 'Int32');
-    //         test.equal(typeof doc.long, 'object');
-    //         test.equal(doc.long._bsontype, 'Long');
-    //         test.equal(typeof doc.double, 'object');
-    //         test.equal(doc.double._bsontype, 'Double');
-    //       })
-    //       .on('end', function() {
-    //         db.dropCollection('haystack', function() {
-    //           db.close();
-    //           test.done();
-    //         });
-    //       });
-    //   });
-    // });
   }
 }
