@@ -688,3 +688,115 @@ exports['Should correctly connect execute 5 evals in parallel'] = {
     server.connect();
   }
 }
+
+exports['Should correctly promoteValues when calling getMore on queries'] = {
+  metadata: {
+    requires: {
+      node: ">0.8.0",
+      topology: ['single', 'ssl', 'wiredtiger']
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Server = require('../../../lib/topologies/server')
+      , bson = require('bson');
+
+    // Attempt to connect
+    var server = new Server({
+        host: configuration.host
+      , port: configuration.port
+      , size: 10
+      , bson: new bson()
+    });
+    // Namespace
+    var ns = 'integration_tests.remove_example';
+
+    // Add event listeners
+    server.on('connect', function(server) {
+      var docs = new Array(150).fill(0).map(function(_, i) {
+        return {
+          _id: 'needle_' + i,
+          is_even: i % 2,
+          long: bson.Long.fromString('1234567890'),
+          double: 0.23456,
+          int: 1234
+        };
+      });
+
+      server.insert(ns, docs, function(err, r) {
+        test.equal(null, err);
+        test.equal(true, r.result.ok);
+
+        // Execute find
+        var cursor = server.cursor(ns, {
+            find: ns
+          , query: {}
+          , limit: 102          
+        }, {
+          promoteValues: false
+        });
+
+        function callNext(cursor) {
+          cursor.next(function(err, doc) {
+            if(!doc) {
+              return test.done();
+            }
+
+            test.equal(typeof doc.int, 'object');
+            test.equal(doc.int._bsontype, 'Int32');
+            test.equal(typeof doc.long, 'object');
+            test.equal(doc.long._bsontype, 'Long');
+            test.equal(typeof doc.double, 'object');
+            test.equal(doc.double._bsontype, 'Double');          
+
+            // Call next
+            callNext(cursor);
+          });
+        }
+
+        callNext(cursor);
+      });        
+    });
+
+    // Start connection
+    server.connect();
+
+    // var MongoClient = configuration.require.MongoClient;
+    // var Long = configuration.require.Long;
+    
+    // MongoClient.connect(configuration.url(), function(err, db) {
+    //   var docs = new Array(150).fill(0).map(function(_, i) {
+    //     return {
+    //       _id: 'needle_' + i,
+    //       is_even: i % 2,
+    //       long: Long.fromString('1234567890'),
+    //       double: 0.23456,
+    //       int: 1234
+    //     };
+    //   });
+      
+    //   db.collection('haystack').insert(docs, function(errInsert) {
+    //     if (errInsert) throw errInsert;
+    //     // change limit from 102 to 101 and this test passes.
+    //     // seems to indicate that the promoteValues flag is used for the
+    //     // initial find, but not for subsequent getMores
+    //     db.collection('haystack').find({}, {limit: 102, promoteValues: false})
+    //       .on('data', function(doc) {
+    //         test.equal(typeof doc.int, 'object');
+    //         test.equal(doc.int._bsontype, 'Int32');
+    //         test.equal(typeof doc.long, 'object');
+    //         test.equal(doc.long._bsontype, 'Long');
+    //         test.equal(typeof doc.double, 'object');
+    //         test.equal(doc.double._bsontype, 'Double');
+    //       })
+    //       .on('end', function() {
+    //         db.dropCollection('haystack', function() {
+    //           db.close();
+    //           test.done();
+    //         });
+    //       });
+    //   });
+    // });
+  }
+}
