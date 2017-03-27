@@ -553,3 +553,41 @@ exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = {
       });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Should get proper error when strict is set and only a secondary is available and readPreference is nearest'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , MongoClient = mongo.MongoClient
+      , ReadPreference = mongo.ReadPreference;
+
+    var manager = configuration.manager;
+
+    var url = format("mongodb://localhost:%s,localhost:%s,localhost:%s/integration_test_?rs_name=%s"
+      , configuration.port, configuration.port + 1, configuration.port + 1, configuration.replicasetName);
+
+    MongoClient.connect(url, { readPreference: ReadPreference.NEAREST }, function(err,db) {
+      test.equal(null, err)
+
+      // Shut down primary server
+      manager.primary().then(function(primary) {
+
+        // Stop the primary
+        primary.stop().then(function() {
+
+          db.collection('notempty_does_not_exist', {strict: true}, function(err) {
+            test.ok(err != null);
+            test.ok(err.message.indexOf("Currently in strict mode") != -1);
+
+            db.close();
+            restartAndDone(configuration, test);
+          });
+        });
+      });
+    });
+  }
+}
