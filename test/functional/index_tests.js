@@ -1015,3 +1015,24 @@ exports['should correctly fail detect error code 85 when peforming createIndex']
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['should correctly create Index with sub element running in background'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      // insert a doc
+      db.collection('messed_up_index_2').createIndex({'accessControl.get': 1}, {background: true}, function(err, r) {
+        test.equal(null, err);
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
