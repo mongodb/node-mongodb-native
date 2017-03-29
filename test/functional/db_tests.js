@@ -332,6 +332,29 @@ exports.shouldCorrectlyReconnectWhenError = {
   }
 }
 
+exports['should not cut collection name when it is the same as the database'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize:1, auto_reconnect: false });
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      var db1 = db.db('node972');
+      db1.collection('node972.test').insertOne({ a: 1 }, function(err) {
+        test.equal(null, err);
+
+        db1.collections(function(err, collections) {
+          test.equal(null, err);
+          collections = collections.map(function(c) { return c.collectionName; });
+          test.notEqual(-1, collections.indexOf('node972.test'));
+          test.done();
+        });
+      });
+    });
+  }
+}
+
 /**
  * @ignore
  */
