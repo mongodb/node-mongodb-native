@@ -474,6 +474,9 @@ Server.prototype.command = function(ns, cmd, options, callback) {
   var result = basicReadValidations(self, options);
   if(result) return callback(result);
 
+  // Clone the options
+  options = assign({}, options, { wireProtocolCommand: false });
+
   // Debug log
   if(self.s.logger.isDebug()) self.s.logger.debug(f('executing command [%s] against %s', JSON.stringify({
     ns: ns, cmd: cmd, options: debugOptions(debugFields, options)
