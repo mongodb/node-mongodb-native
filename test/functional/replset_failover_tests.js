@@ -553,3 +553,61 @@ exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = {
       });
   }
 }
+
+// /**
+//  * @ignore
+//  */
+// exports['Should correctly re-execute createIndex against primary after step-down'] = {
+//   metadata: { requires: { topology: 'replicaset' } },
+
+//   test: function(configuration, test) {
+//     // The state
+//     var manager = configuration.manager;
+
+//     var db = configuration.newDbInstance({w:1}, {poolSize:1});
+//     db.open(function(err, db) {
+//       db.once('fullsetup', function() {
+//         // Wait for close event due to primary stepdown
+//         db.serverConfig.on('joined', function(t, d, s) {
+//           if(t == 'primary') console.log("primary joined " + s.name)
+//         });
+
+//         db.serverConfig.on('left', function(t, s) {
+//           if(t == 'primary') {
+//           }
+//         });
+
+//         manager.primary().then(function(primary) {
+//           primary.stop(9).then(function() {
+//           });
+
+//             // // Execute createIndex
+//             // db.collection('t').createIndex({'accessControl.get': 1}, {background: true}, function(err, r) {
+//             //   console.dir(err)
+//             //   console.dir(r)
+
+//             //   test.ok(err != null);
+//             //   test.ok(err.message.indexOf('key accessControl.get must not contain') == -1);
+
+//             //   db.close();
+//             //   test.done();
+//             // });
+
+//           setTimeout(function() {
+//             // Execute createIndex
+//             db.collection('t').createIndex({'accessControl.get': 1}, {background: true}, function(err, r) {
+//               console.dir(err)
+//               console.dir(r)
+
+//               test.ok(err != null);
+//               test.ok(err.message.indexOf('key accessControl.get must not contain') == -1);
+
+//               db.close();
+//               test.done();
+//             });
+//           }, 100);
+//         });
+//       });
+//     });
+//   }
+// }
