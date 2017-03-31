@@ -1025,3 +1025,30 @@ exports['Ensure killcursor commands are sent on 3.0 or earlier when APM is enabl
     });
   }
 }
+
+exports['Ensure killcursor commands are sent on 3.0 or earlier when APM is enabled'] = {
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+    var callbackTriggered = false;
+
+    var listener = require('../..').instrument(function(err, instrumentations) {});
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      var collection = db.collection('apm_killcursor_tests_1');
+
+      // make sure collection has records (more than 2)
+      collection.insert({}, function(err, r) {
+        test.equal(null, err);
+
+        listener.uninstrument();
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
