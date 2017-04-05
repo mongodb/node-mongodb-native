@@ -491,7 +491,9 @@ Connection.prototype.destroy = function() {
   // Set the connections
   if(connectionAccounting) deleteConnection(this.id);
   if(this.connection) {
-    this.connection.end();
+    // Catch posssible exception thrown by node 0.10.x
+    try { this.connection.end(); } catch (err) {}
+    // Destroy connection
     this.connection.destroy();
   }
 
