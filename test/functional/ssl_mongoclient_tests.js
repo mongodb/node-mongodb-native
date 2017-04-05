@@ -1204,6 +1204,82 @@ exports['should correctly connect using SSL to replicaset with requireSSL'] = {
   }
 }
 
+/**
+ * @ignore
+ */
+exports['should correctly connect to Replicaset using SSL when secondary down'] = {
+  metadata: { requires: { topology: 'ssl' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var ReplSetManager = require('mongodb-topology-manager').ReplSet
+      , MongoClient = configuration.require.MongoClient;
+
+    // All inserted docs
+    var docs = [];
+    var errs = [];
+    var insertDocs = [];
+
+    // Read the ca
+    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+    var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
+    var key = fs.readFileSync(__dirname + "/ssl/client.pem");
+
+    var replicasetManager = new ReplSetManager('mongod', [{
+      options: {
+        bind_ip: 'server', port: 31000,
+        dbpath: f('%s/../db/31000', __dirname),
+        sslOnNormalPorts: null, sslPEMKeyFile: __dirname + "/ssl/server.pem"
+      }
+    }, {
+      options: {
+        bind_ip: 'server', port: 31001,
+        dbpath: f('%s/../db/31001', __dirname),
+        sslOnNormalPorts: null, sslPEMKeyFile: __dirname + "/ssl/server.pem"
+      }
+    }, {
+      options: {
+        bind_ip: 'server', port: 31002,
+        dbpath: f('%s/../db/31002', __dirname),
+        sslOnNormalPorts: null, sslPEMKeyFile: __dirname + "/ssl/server.pem"
+      }
+    }], {
+      replSet: 'rs', ssl:true, rejectUnauthorized: false, ca: ca, host: 'server'
+    });
+
+    replicasetManager.purge().then(function() {
+      // Start the server
+      replicasetManager.start().then(function() {
+
+        replicasetManager.secondaries().then(function(managers) {
+          var secondaryServerManager = managers[0];
+
+          secondaryServerManager.stop().then(function() {
+            setTimeout(function() {
+              // Connect and validate the server certificate
+              MongoClient.connect("mongodb://server:31000,server:31001,server:31002/test?ssl=true&replicaSet=rs&maxPoolSize=1", {
+                  ssl:true
+                , sslValidate:false
+                , sslCA:ca
+              }, function(err, db) {
+                if(err) console.dir(err)
+                test.equal(null, err);
+                test.ok(db != null);
+
+                db.close();
+
+                replicasetManager.stop().then(function() {
+                  test.done();
+                });
+              });
+            }, 1000);
+          });
+        });
+      });
+    });
+  }
+}
+
 // /**
 //  * @ignore
 //  */
