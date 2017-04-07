@@ -365,6 +365,9 @@ try {
   testFiles.push('/test/functional/crud_spec_tests.js');
   testFiles.push('/test/functional/generator_based_tests.js');
   testFiles.push('/test/functional/replicaset_mock_tests.js');
+
+  // Test examples
+  testFiles.push('/test/functional/test_examples.js');
 } catch(err) {}
 
 // Add all the tests to run
