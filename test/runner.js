@@ -367,7 +367,7 @@ try {
   testFiles.push('/test/functional/replicaset_mock_tests.js');
 
   // Test examples
-  testFiles.push('/test/functional/test_examples.js');
+  testFiles.push('/test/functional/examples_tests.js');
 } catch(err) {}
 
 // Add all the tests to run
