@@ -599,6 +599,20 @@ Pool.prototype.connect = function() {
   connection.once('connect', function(connection) {
     if(self.state == DESTROYED || self.state == DESTROYING) return self.destroy();
 
+    // If we are in a topology, delegate the auth to it
+    // This is to avoid issues where we would auth against an
+    // arbiter
+    if(self.options.inTopology) {
+      // Set connected mode
+      stateTransition(self, CONNECTED);
+
+      // Move the active connection
+      moveConnectionBetween(connection, self.connectingConnections, self.availableConnections);
+
+      // Emit the connect event
+      return self.emit('connect', self);      
+    }
+
     // Apply any store credentials
     reauthenticate(self, connection, function(err) {
       if(self.state == DESTROYED || self.state == DESTROYING) return self.destroy();
