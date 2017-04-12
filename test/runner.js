@@ -365,6 +365,9 @@ try {
   testFiles.push('/test/functional/crud_spec_tests.js');
   testFiles.push('/test/functional/generator_based_tests.js');
   testFiles.push('/test/functional/replicaset_mock_tests.js');
+
+  // Test examples
+  testFiles.push('/test/functional/examples_tests.js');
 } catch(err) {}
 
 // Add all the tests to run
@@ -674,3 +677,8 @@ if(argv.t == 'functional') {
     executeTestSuite(config);
   }
 }
+
+process.on('unhandledRejection', (reason, p) => {
+  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+  // application specific logging, throwing an error, or other logic here
+});
