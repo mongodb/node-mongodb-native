@@ -64,7 +64,8 @@ exports['first three examples'] = {
           { item: "mousepad",
             qty: 25,
             tags: ["gel", "blue"],
-            size: { h: 19, w: 22.85, uom: "cm" }}])
+            size: { h: 19, w: 22.85, uom: "cm" }}
+        ])
         .then(function(result) {
           // process result
         })
@@ -123,7 +124,8 @@ exports['query top level fields'] = {
           { item: "postcard",
             qty: 45,
             size: { h: 10, w: 15.25, uom: "cm" },
-            status: "A"}])
+            status: "A"}
+        ])
         .then(function(result) {
           // process result
         })
@@ -151,7 +153,8 @@ exports['query top level fields'] = {
 
         // Start Example 11
         var cursor = db.collection('inventory').find({ 
-          status: "A", qty: { $lt: 30 }
+          status: "A", 
+          qty: { $lt: 30 }
         });
         // End Example 11
         assert.equal(1, yield cursor.count());
@@ -219,7 +222,8 @@ exports['query embedded documents'] = {
           { item: "postcard",
             qty: 45,
             size: { h: 10, w: 15.25, uom: "cm" },
-            status: "A"}])
+            status: "A"}
+        ])
         .then(function(result) {
           // process result
         })
@@ -256,7 +260,9 @@ exports['query embedded documents'] = {
 
         // Start Example 19
         var cursor = db.collection('inventory').find({ 
-          "size.h": { $lt: 15 }, "size.uom": "in", status: "D"
+          "size.h": { $lt: 15 }, 
+          "size.uom": "in", 
+          status: "D"
         });
         // End Example 19
         assert.equal(1, yield cursor.count());
@@ -310,7 +316,8 @@ exports['query arrays'] = {
           { item: "postcard",
             qty: 45,
             tags: ["blue"],
-            dim_cm: [10, 15.25]}])
+            dim_cm: [10, 15.25]}
+        ])
         .then(function(result) {
           // process result
         })
@@ -421,7 +428,8 @@ exports['query array of documents'] = {
           { item: "postcard",
             instock: [
               { warehouse: "B", qty: 15 },
-              { warehouse: "C", qty: 35 }]}])
+              { warehouse: "C", qty: 35 }]}
+        ])
         .then(function(result) {
           // process result
         })
@@ -595,7 +603,8 @@ exports['projection'] = {
             size: { h: 10, w: 15.25, uom: "cm" },
             instock: [
                 { warehouse: "B", qty: 15 },
-                { warehouse: "C", qty: 35 }]}])
+                { warehouse: "C", qty: 35 }]}
+        ])
         .then(function(result) {
           // process result
         })
@@ -788,7 +797,8 @@ exports['update and replace'] = {
           { item: "sketch pad",
             qty: 95,
             size: {h: 22.85, w: 30.5, uom: "cm"},
-            status: "A"}])
+            status: "A"}
+        ])
         .then(function(result) {
           // process result
         })
@@ -914,7 +924,8 @@ exports['delete'] = {
           { item: "postcard",
             qty: 45,
             size: { h: 10, w: 15.25, uom: "cm" },
-            status: "A"}])
+            status: "A"}
+        ])
         .then(function(result) {
           // process result
         })
