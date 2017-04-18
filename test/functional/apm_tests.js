@@ -1052,3 +1052,108 @@ exports['Ensure killcursor commands are sent on 3.0 or earlier when APM is enabl
     });
   }
 }
+
+exports['Correcly decorate the apm result for aggregation with cursorId'] = {
+  metadata: { requires: { topology: ['single', 'replicaset'], mongodb: ">=3.0.0" } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+    var callbackTriggered = false;
+
+    var listener = require('../..').instrument(function(err, instrumentations) {});
+    listener.on('started', function(event) {
+      if(event.commandName == 'aggregate' || event.commandName == 'getMore')
+        started.push(event);
+    });
+
+    listener.on('succeeded', function(event) {
+      if(event.commandName == 'aggregate' || event.commandName == 'getMore')
+        succeeded.push(event);
+    });
+
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      // Generate docs
+      var docs = [];
+      for(var i = 0; i < 2500; i++) {
+        docs.push({a:i});
+      }
+
+      db.collection('apm_test_u_4').insertMany(docs).then(function(r) {
+
+        db.collection('apm_test_u_4').aggregate([{$match: {}}]).toArray().then(function(r) {
+          test.equal(3, started.length);
+          test.equal(3, succeeded.length);
+          var cursors = succeeded.map(x => x.reply.cursor);
+
+          // Check we have a cursor
+          test.ok(cursors[0].id);
+          test.equal(cursors[0].id.toString(), cursors[1].id.toString());
+          test.equal(0, cursors[2].id.toString());
+
+          listener.uninstrument();
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
+
+exports['Correcly decorate the apm result for listCollections with cursorId'] = {
+  metadata: { requires: { topology: ['single', 'replicaset'], mongodb: ">=3.0.0" } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+    var callbackTriggered = false;
+
+    var listener = require('../..').instrument(function(err, instrumentations) {});
+    listener.on('started', function(event) {
+      if(event.commandName == 'listCollections')
+        started.push(event);
+    });
+
+    listener.on('succeeded', function(event) {
+      // console.dir(event.commandName)
+      if(event.commandName == 'listCollections')
+        succeeded.push(event);
+    });
+
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      var promises = [];
+
+      for(var i = 0; i < 20; i++) {
+        promises.push(db.collection('_mass_collection_' + i).insertOne({a:1}));
+      }
+
+      Promise.all(promises).then(function(r) {
+        db.listCollections().batchSize(10).toArray().then(function(r) {
+          test.equal(1, started.length);
+          test.equal(1, succeeded.length);
+
+          var cursors = succeeded.map(x => x.reply.cursor);
+
+          // Check we have a cursor
+          test.ok(cursors[0].id);
+
+          listener.uninstrument();
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
