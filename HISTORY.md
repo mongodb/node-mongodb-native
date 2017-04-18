@@ -1,3 +1,13 @@
+2.1.10 2017-04-18
+-----------------
+* NODE-981 delegate auth to replset/mongos if inTopology is set.
+* NODE-978 Wrap connection.end in try/catch for node 0.10.x issue causing exceptions to be thrown, Also surfaced getConnection for mongos and replset.
+* Remove dynamic require (Issue #175, https://github.com/tellnes).
+* NODE-696 Handle interrupted error for createIndexes.
+* Fixed isse when user is executing find command using Server.command and it get interpreted as a wire protcol message, #172.
+* NODE-966 promoteValues not being promoted correctly to getMore.
+* Merged in fix for flushing out monitoring operations.
+
 2.1.9 2017-03-17
 ----------------
 * Return lastIsMaster correctly when connecting with secondaryOnlyConnectionAllowed is set to true and only a secondary is available in replica state.
