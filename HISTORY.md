@@ -1,3 +1,26 @@
+2.2.26 2017-04-18
+-----------------
+* Updated mongodb-core to 2.1.10
+    * NODE-981 delegate auth to replset/mongos if inTopology is set.
+    * NODE-978 Wrap connection.end in try/catch for node 0.10.x issue causing exceptions to be thrown, Also surfaced getConnection for mongos and replset.
+    * Remove dynamic require (Issue #175, https://github.com/tellnes).
+    * NODE-696 Handle interrupted error for createIndexes.
+    * Fixed isse when user is executing find command using Server.command and it get interpreted as a wire protcol message, #172.
+    * NODE-966 promoteValues not being promoted correctly to getMore.
+    * Merged in fix for flushing out monitoring operations.
+* NODE-983 Add cursorId to aggregate and listCollections commands (Issue, #1510).
+* Mark group and profilingInfo as deprecated methods
+* NODE-956 DOCS Examples.
+* Update readable-stream to version 2.2.7.
+* NODE-978 Added test case to uncover connection.end issue for node 0.10.x.
+* NODE-972 Fix(db): don't remove database name if collectionName == dbName (Issue, #1502)
+* Fixed merging of writeConcerns on db.collection method.
+* NODE-970 mix in readPreference for strict mode listCollections callback.
+* NODE-966 added testcase for promoteValues being applied to getMore commands.
+* NODE-962 Merge in ignoreUndefined from collection level for find/findOne.
+* Remove multi option from updateMany tests/docs (Issue #1499, https://github.com/spratt).
+* NODE-963 Correctly handle cursor.count when using APM.
+
 2.2.25 2017-03-17
 -----------------
 * Don't rely on global toString() for checking if object (Issue #1494, https://github.com/vkarpov15).
