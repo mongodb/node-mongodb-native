@@ -34,7 +34,7 @@ The table below shows all settings and what topology they affect.
 
 | Option | Affects | Type | Default | Description |
 | :----------| :------------------ | :------ | :------ |:------------- |
-| **poolSize** | Server, ReplicaSet, Mongos | integer | 5 | Set the maximum poolSize for each individual server or proxy connection.|
+| **poolSize** | Server, ReplicaSet, Mongos | integer | 100 | Set the maximum poolSize for each individual server or proxy connection.|
 | **ssl** | Server, ReplicaSet, Mongos | boolean | false | Use ssl connection (needs to have a mongod server with ssl support) |
 | **sslValidate** | Server, ReplicaSet, Mongos | boolean | true | Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher) |
 | **sslCA** | Server, ReplicaSet, Mongos | Array | null | Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher) |
