@@ -757,8 +757,9 @@ The following example uses the ``each`` method.
     // Get first documents from cursor using each
     col.find({a:1}).limit(2).each(function(err, doc) {
       if(doc) {
+        // Got a document
+      } else {
         db.close();
-        // Got a document, terminate the each
         return false;
       }
     });
