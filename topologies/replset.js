@@ -432,9 +432,6 @@ function topologyMonitor(self, options) {
   if(self.state == DESTROYED || self.state == UNREFERENCED) return;
   options = options || {};
 
-  // Filter out all called intervaliIds
-  self.intervalIds = self.intervalIds.filter(function(intervalId) { return !intervalId._called } );
-
   // Get the servers
   var servers = Object.keys(self.s.replicaSetState.set);
 
@@ -466,6 +463,9 @@ function topologyMonitor(self, options) {
             clearInterval(intervalId);
             return;
           }
+
+          // Filter out all called intervaliIds
+          self.intervalIds = self.intervalIds.filter(function(intervalId) { return !intervalId._called } );
 
           // Initial sweep
           if(_process === setTimeout) {
