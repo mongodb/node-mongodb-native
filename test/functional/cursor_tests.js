@@ -3324,11 +3324,15 @@ exports['Correcly decorate the cursor count command with skip, limit, hint, read
     db.open(function(err, db) {
       test.equal(null, err);
 
-      db.collection('test', {readConcern: {level: 'local'}})
+      db.collection('cursor_count_test', {readConcern: {level: 'local'}})
         .find({project: '123'})
         .limit(5)
         .skip(5)
         .hint({project:1}).count(true, function(err, r) {
+          console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+          console.dir(started[0].command)
+          console.dir(err)
+
           test.equal(null, err);
           test.equal(1, started.length);
           test.deepEqual({level: 'local'}, started[0].command.readConcern);
@@ -3364,7 +3368,7 @@ exports['Correcly decorate the collection cursor count command with skip, limit,
     db.open(function(err, db) {
       test.equal(null, err);
 
-      db.collection('test', {readConcern: {level: 'local'}}).count({project: '123'}, {
+      db.collection('cursor_count_test1', {readConcern: {level: 'local'}}).count({project: '123'}, {
         readConcern: {level: 'local'},
         limit: 5,
         skip: 5,
