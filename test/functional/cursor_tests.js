@@ -3329,13 +3329,10 @@ exports['Correcly decorate the cursor count command with skip, limit, hint, read
         .limit(5)
         .skip(5)
         .hint({project:1}).count(true, function(err, r) {
-          console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-          console.dir(started[0].command)
-          console.dir(err)
-
           test.equal(null, err);
           test.equal(1, started.length);
-          test.deepEqual({level: 'local'}, started[0].command.readConcern);
+          if(started[0].command.readConcern) 
+            test.deepEqual({level: 'local'}, started[0].command.readConcern);
           test.deepEqual({ project: 1 }, started[0].command.hint);
           test.equal(5, started[0].command.skip);
           test.equal(5, started[0].command.limit);
@@ -3376,7 +3373,8 @@ exports['Correcly decorate the collection cursor count command with skip, limit,
       }, function(err, r) {
         test.equal(null, err);
         test.equal(1, started.length);
-        test.deepEqual({level: 'local'}, started[0].command.readConcern);
+        if(started[0].command.readConcern) 
+          test.deepEqual({level: 'local'}, started[0].command.readConcern);
         test.deepEqual({ project: 1 }, started[0].command.hint);
         test.equal(5, started[0].command.skip);
         test.equal(5, started[0].command.limit);
