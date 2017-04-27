@@ -3344,3 +3344,44 @@ exports['Correcly decorate the cursor count command with skip, limit, hint, read
     });
   }
 }
+
+exports['Correcly decorate the collection cursor count command with skip, limit, hint, readConcern'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var started = [];
+
+    var listener = require('../..').instrument(function(err, instrumentations) {});
+    listener.on('started', function(event) {
+      if(event.commandName == 'count')
+        started.push(event);
+    });
+
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection('test', {readConcern: {level: 'local'}}).count({project: '123'}, {
+        readConcern: {level: 'local'},
+        limit: 5,
+        skip: 5,
+        hint: {project:1},
+      }, function(err, r) {
+        test.equal(null, err);
+        test.equal(1, started.length);
+        test.deepEqual({level: 'local'}, started[0].command.readConcern);
+        test.deepEqual({ project: 1 }, started[0].command.hint);
+        test.equal(5, started[0].command.skip);
+        test.equal(5, started[0].command.limit);
+
+        listener.uninstrument();
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
