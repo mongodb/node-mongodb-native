@@ -63,7 +63,7 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using MongoCli
     var command = null;
     // Boot the mock
     co(function*() {
-      mongos1 = yield mockupdb.createServer(52000, 'localhost');
+      mongos1 = yield mockupdb.createServer(62001, 'localhost');
 
       // Mongos
       co(function*() {
@@ -92,7 +92,7 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using MongoCli
         }
       });
 
-      MongoClient.connect('mongodb://localhost:52000/test?readPreference=secondary&maxStalenessSeconds=250', function(err, db) {
+      MongoClient.connect('mongodb://localhost:62001/test?readPreference=secondary&maxStalenessSeconds=250', function(err, db) {
         test.equal(null, err);
 
         db.collection('test').find({}).toArray(function(err, r) {
@@ -161,7 +161,7 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using db level
     var command = null;
     // Boot the mock
     co(function*() {
-      mongos1 = yield mockupdb.createServer(52000, 'localhost');
+      mongos1 = yield mockupdb.createServer(62002, 'localhost');
 
       // Mongos
       co(function*() {
@@ -190,7 +190,7 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using db level
         }
       });
 
-      MongoClient.connect('mongodb://localhost:52000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:62002/test', function(err, db) {
         test.equal(null, err);
 
         // Get a db with a new readPreference
@@ -261,7 +261,7 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using collecti
     var command = null;
     // Boot the mock
     co(function*() {
-      mongos1 = yield mockupdb.createServer(52000, 'localhost');
+      mongos1 = yield mockupdb.createServer(62003, 'localhost');
 
       // Mongos
       co(function*() {
@@ -290,7 +290,7 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using collecti
         }
       });
 
-      MongoClient.connect('mongodb://localhost:52000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:62003/test', function(err, db) {
         test.equal(null, err);
 
         // Get a db with a new readPreference
@@ -360,7 +360,7 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using cursor l
     var command = null;
     // Boot the mock
     co(function*() {
-      mongos1 = yield mockupdb.createServer(52000, 'localhost');
+      mongos1 = yield mockupdb.createServer(62004, 'localhost');
 
       // Mongos
       co(function*() {
@@ -389,7 +389,7 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using cursor l
         }
       });
 
-      MongoClient.connect('mongodb://localhost:52000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:62004/test', function(err, db) {
         test.equal(null, err);
 
         // Get a db with a new readPreference
