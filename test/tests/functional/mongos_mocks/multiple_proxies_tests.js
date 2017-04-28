@@ -55,8 +55,8 @@ exports['Should correctly load-balance the operations'] = {
     var serverIsMaster = [extend(defaultFields, {})];
     // Boot the mock
     co(function*() {
-      mongos1 = yield mockupdb.createServer(52000, 'localhost');
-      mongos2 = yield mockupdb.createServer(52001, 'localhost');
+      mongos1 = yield mockupdb.createServer(11000, 'localhost');
+      mongos2 = yield mockupdb.createServer(11001, 'localhost');
 
       // Mongos
       co(function*() {
@@ -98,8 +98,8 @@ exports['Should correctly load-balance the operations'] = {
 
       // Attempt to connect
       var server = new Mongos([
-          { host: 'localhost', port: 52000 },
-          { host: 'localhost', port: 52001 },
+          { host: 'localhost', port: 11000 },
+          { host: 'localhost', port: 11001 },
         ], {
         connectionTimeout: 3000,
         socketTimeout: 1000,
@@ -115,8 +115,8 @@ exports['Should correctly load-balance the operations'] = {
           // console.log("=================================== 1")
           // if(r) console.log(r.connection.port)
           test.equal(null, err);
-          test.ok(r.connection.port == 52000 || r.connection.port == 52001);
-          global.port = r.connection.port == 52000 ? 52001 : 52000;
+          test.ok(r.connection.port == 11000 || r.connection.port == 11001);
+          global.port = r.connection.port == 11000 ? 11001 : 11000;
           // console.log("=================================== 1 :: " + global.port)
 
           _server.insert('test.test', [{created:new Date()}], function(err, r) {
@@ -126,7 +126,7 @@ exports['Should correctly load-balance the operations'] = {
 
             test.equal(null, err);
             test.equal(global.port, r.connection.port);
-            global.port = r.connection.port == 52000 ? 52001 : 52000;
+            global.port = r.connection.port == 11000 ? 11001 : 11000;
 
             _server.insert('test.test', [{created:new Date()}], function(err, r) {
               // console.log("=================================== 3 :: " + global.port)
@@ -195,8 +195,8 @@ exports['Should ignore one of the mongos instances due to being outside the late
     var serverIsMaster = [extend(defaultFields, {})];
     // Boot the mock
     co(function*() {
-      mongos1 = yield mockupdb.createServer(52000, 'localhost');
-      mongos2 = yield mockupdb.createServer(52001, 'localhost');
+      mongos1 = yield mockupdb.createServer(11002, 'localhost');
+      mongos2 = yield mockupdb.createServer(11003, 'localhost');
 
       // Mongos
       co(function*() {
@@ -240,8 +240,8 @@ exports['Should ignore one of the mongos instances due to being outside the late
 
     // Attempt to connect
     var server = new Mongos([
-        { host: 'localhost', port: 52000 },
-        { host: 'localhost', port: 52001 },
+        { host: 'localhost', port: 11002 },
+        { host: 'localhost', port: 11003 },
       ], {
       connectionTimeout: 3000,
       localThresholdMS: 50,
@@ -257,20 +257,20 @@ exports['Should ignore one of the mongos instances due to being outside the late
       server.insert('test.test', [{created:new Date()}], function(err, r) {
         console.log("---------------------------------------------- 2")
         test.equal(null, err);
-        test.equal(52000, r.connection.port);
+        test.equal(11002, r.connection.port);
 
         server.insert('test.test', [{created:new Date()}], function(err, r) {
           console.log("---------------------------------------------- 3")
           if(r) console.log(r.connection.port)
           test.equal(null, err);
-          test.equal(52000, r.connection.port);
+          test.equal(11002, r.connection.port);
 
           server.destroy();
 
           // Attempt to connect
           var server2 = new Mongos([
-              { host: 'localhost', port: 52000 },
-              { host: 'localhost', port: 52001 },
+              { host: 'localhost', port: 11002 },
+              { host: 'localhost', port: 11003 },
             ], {
             connectionTimeout: 3000,
             localThresholdMS: 1000,
@@ -286,13 +286,13 @@ exports['Should ignore one of the mongos instances due to being outside the late
               console.log("---------------------------------------------- 5")
               if(r)console.dir(r.connection.port)
               test.equal(null, err);
-              test.equal(52000, r.connection.port);
+              test.equal(11002, r.connection.port);
 
               server2.insert('test.test', [{created:new Date()}], function(err, r) {
                 console.log("---------------------------------------------- 6")
                 if(r)console.dir(r.connection.port)
                 test.equal(null, err);
-                test.equal(52001, r.connection.port);
+                test.equal(11003, r.connection.port);
 
                 server2.destroy();
                 mongos1.destroy();
