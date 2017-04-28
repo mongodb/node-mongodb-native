@@ -50,8 +50,8 @@ exports['SDAM Monitoring Should correctly connect to two proxies'] = {
     var serverIsMaster = [extend(defaultFields, {})];
     // Boot the mock
     co(function*() {
-      mongos1 = yield mockupdb.createServer(52000, 'localhost');
-      mongos2 = yield mockupdb.createServer(52001, 'localhost');
+      mongos1 = yield mockupdb.createServer(62000, 'localhost');
+      mongos2 = yield mockupdb.createServer(62001, 'localhost');
 
       // Mongos
       co(function*() {
@@ -86,8 +86,8 @@ exports['SDAM Monitoring Should correctly connect to two proxies'] = {
 
     // Attempt to connect
     var server = new Mongos([
-        { host: 'localhost', port: 52000 },
-        { host: 'localhost', port: 52001 },
+        { host: 'localhost', port: 62000 },
+        { host: 'localhost', port: 62001 },
       ], {
       connectionTimeout: 3000,
       socketTimeout: 1500,
@@ -103,7 +103,7 @@ exports['SDAM Monitoring Should correctly connect to two proxies'] = {
           // validate that it's the expected proxy
           if(r) {
             clearInterval(intervalId);
-            test.equal(52001, r.connection.port);
+            test.equal(62001, r.connection.port);
 
             // Proxies seen
             var proxies = {};
@@ -137,11 +137,11 @@ exports['SDAM Monitoring Should correctly connect to two proxies'] = {
                         "servers": [
                           {
                             "type": "Mongos",
-                            "address": "localhost:52000"
+                            "address": "localhost:62000"
                           },
                           {
                             "type": "Unknown",
-                            "address": "localhost:52001"
+                            "address": "localhost:62001"
                           }
                         ]
                       }
@@ -153,11 +153,11 @@ exports['SDAM Monitoring Should correctly connect to two proxies'] = {
                         "servers": [
                           {
                             "type": "Mongos",
-                            "address": "localhost:52000"
+                            "address": "localhost:62000"
                           },
                           {
                             "type": "Unknown",
-                            "address": "localhost:52001"
+                            "address": "localhost:62001"
                           }
                         ]
                       },
@@ -166,11 +166,11 @@ exports['SDAM Monitoring Should correctly connect to two proxies'] = {
                         "servers": [
                           {
                             "type": "Mongos",
-                            "address": "localhost:52000"
+                            "address": "localhost:62000"
                           },
                           {
                             "type": "Mongos",
-                            "address": "localhost:52001"
+                            "address": "localhost:62001"
                           }
                         ]
                       }
@@ -284,8 +284,8 @@ exports['SDAM Monitoring Should correctly failover due to proxy going away causi
     var serverIsMaster = [extend(defaultFields, {})];
     // Boot the mock
     co(function*() {
-      mongos1 = yield mockupdb.createServer(52000, 'localhost');
-      mongos2 = yield mockupdb.createServer(52001, 'localhost');
+      mongos1 = yield mockupdb.createServer(62002, 'localhost');
+      mongos2 = yield mockupdb.createServer(62003, 'localhost');
 
       // Mongos
       co(function*() {
@@ -327,8 +327,8 @@ exports['SDAM Monitoring Should correctly failover due to proxy going away causi
 
     // Attempt to connect
     var server = new Mongos([
-        { host: 'localhost', port: 52000 },
-        { host: 'localhost', port: 52001 },
+        { host: 'localhost', port: 62002 },
+        { host: 'localhost', port: 62003 },
       ], {
       connectionTimeout: 3000,
       socketTimeout: 5000,
@@ -346,7 +346,7 @@ exports['SDAM Monitoring Should correctly failover due to proxy going away causi
             clearInterval(intervalId);
             // Wait to allow at least one heartbeat to pass
             setTimeout(function() {
-              test.equal(52001, r.connection.port);
+              test.equal(62003, r.connection.port);
               server.destroy();
               mongos1.destroy();
               mongos2.destroy();
@@ -373,11 +373,11 @@ exports['SDAM Monitoring Should correctly failover due to proxy going away causi
                     "servers": [
                       {
                         "type": "Mongos",
-                        "address": "localhost:52000"
+                        "address": "localhost:62002"
                       },
                       {
                         "type": "Unknown",
-                        "address": "localhost:52001"
+                        "address": "localhost:62003"
                       }
                     ]
                   }
@@ -389,11 +389,11 @@ exports['SDAM Monitoring Should correctly failover due to proxy going away causi
                     "servers": [
                       {
                         "type": "Mongos",
-                        "address": "localhost:52000"
+                        "address": "localhost:62002"
                       },
                       {
                         "type": "Unknown",
-                        "address": "localhost:52001"
+                        "address": "localhost:62003"
                       }
                     ]
                   },
@@ -402,11 +402,11 @@ exports['SDAM Monitoring Should correctly failover due to proxy going away causi
                     "servers": [
                       {
                         "type": "Mongos",
-                        "address": "localhost:52000"
+                        "address": "localhost:62002"
                       },
                       {
                         "type": "Mongos",
-                        "address": "localhost:52001"
+                        "address": "localhost:62003"
                       }
                     ]
                   }
@@ -515,8 +515,8 @@ exports['SDAM Monitoring Should correctly bring back proxy and use it'] = {
     var serverIsMaster = [extend(defaultFields, {})];
     // Boot the mock
     co(function*() {
-      mongos1 = yield mockupdb.createServer(52000, 'localhost');
-      mongos2 = yield mockupdb.createServer(52001, 'localhost');
+      mongos1 = yield mockupdb.createServer(62004, 'localhost');
+      mongos2 = yield mockupdb.createServer(62005, 'localhost');
 
       // Mongos
       co(function*() {
@@ -567,8 +567,8 @@ exports['SDAM Monitoring Should correctly bring back proxy and use it'] = {
 
     // Attempt to connect
     var server = new Mongos([
-        { host: 'localhost', port: 52000 },
-        { host: 'localhost', port: 52001 },
+        { host: 'localhost', port: 62004 },
+        { host: 'localhost', port: 62005 },
       ], {
       connectionTimeout: 3000,
       socketTimeout: 1500,

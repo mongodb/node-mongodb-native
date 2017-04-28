@@ -48,7 +48,7 @@ exports['Should correctly set query and readpreference field on wire protocol fo
     var command = null;
     // Boot the mock
     co(function*() {
-      mongos1 = yield mockupdb.createServer(52000, 'localhost');
+      mongos1 = yield mockupdb.createServer(52013, 'localhost');
 
       // Mongos
       co(function*() {
@@ -86,7 +86,7 @@ exports['Should correctly set query and readpreference field on wire protocol fo
 
     // Attempt to connect
     var server = new Mongos([
-        { host: 'localhost', port: 52000 }
+        { host: 'localhost', port: 52013 }
       ], {
       connectionTimeout: 3000,
       socketTimeout: 5000,
@@ -178,7 +178,7 @@ exports['Should correctly set query and near readpreference field on wire protoc
     var command = null;
     // Boot the mock
     co(function*() {
-      mongos1 = yield mockupdb.createServer(52000, 'localhost');
+      mongos1 = yield mockupdb.createServer(52014, 'localhost');
 
       // Mongos
       co(function*() {
@@ -216,7 +216,7 @@ exports['Should correctly set query and near readpreference field on wire protoc
 
     // Attempt to connect
     var server = new Mongos([
-        { host: 'localhost', port: 52000 }
+        { host: 'localhost', port: 52014 }
       ], {
       connectionTimeout: 3000,
       socketTimeout: 5000,
@@ -305,7 +305,7 @@ exports['Should correctly set query and readpreference field on wire protocol fo
     var command = null;
     // Boot the mock
     co(function*() {
-      mongos1 = yield mockupdb.createServer(52000, 'localhost');
+      mongos1 = yield mockupdb.createServer(52015, 'localhost');
 
       // Mongos
       co(function*() {
@@ -330,7 +330,7 @@ exports['Should correctly set query and readpreference field on wire protocol fo
     // console.log("----------------------- -3")
     // Attempt to connect
     var server = new Mongos([
-        { host: 'localhost', port: 52000 }
+        { host: 'localhost', port: 52015 }
       ], {
       connectionTimeout: 3000,
       socketTimeout: 5000,
@@ -424,7 +424,7 @@ exports['Should correctly set query and readpreference field on wire protocol fo
     var command = null;
     // Boot the mock
     co(function*() {
-      mongos1 = yield mockupdb.createServer(52000, 'localhost');
+      mongos1 = yield mockupdb.createServer(52016, 'localhost');
 
       // Mongos
       co(function*() {
@@ -454,7 +454,7 @@ exports['Should correctly set query and readpreference field on wire protocol fo
 
     // Attempt to connect
     var server = new Mongos([
-        { host: 'localhost', port: 52000 }
+        { host: 'localhost', port: 52016 }
       ], {
       connectionTimeout: 3000,
       socketTimeout: 5000,

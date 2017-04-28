@@ -54,7 +54,7 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
 
     // Boot the mock
     co(function*() {
-      server = yield mockupdb.createServer(52000, 'localhost');
+      server = yield mockupdb.createServer(52017, 'localhost');
 
       // Primary state machine
       co(function*() {
@@ -96,7 +96,7 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
     // console.log("--------------------------------------- 0")
     // Attempt to connect
     var _server = new Mongos([
-        { host: 'localhost', port: 52000 },
+        { host: 'localhost', port: 52017 },
       ], {
       connectionTimeout: 3000,
       socketTimeout: 1000,
@@ -123,7 +123,7 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
           if(r && !done) {
             done = true;
             clearInterval(intervalId);
-            test.equal(52000, r.connection.port);
+            test.equal(52017, r.connection.port);
             running = false;
             server.destroy();
             test.done();
@@ -190,7 +190,7 @@ exports['Should not fail due to available connections equal to 0 during ha proce
 
     // Boot the mock
     co(function*() {
-      server = yield mockupdb.createServer(52000, 'localhost');
+      server = yield mockupdb.createServer(52018, 'localhost');
 
       // Primary state machine
       co(function*() {
@@ -236,7 +236,7 @@ exports['Should not fail due to available connections equal to 0 during ha proce
 
     // Attempt to connect
     var _server = new Mongos([
-        { host: 'localhost', port: 52000 },
+        { host: 'localhost', port: 52018 },
       ], {
       connectionTimeout: 30000,
       socketTimeout: 30000,

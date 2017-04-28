@@ -57,8 +57,8 @@ exports['Should correctly print warning when non mongos proxy passed in seed lis
 
     // Boot the mock
     co(function*() {
-      mongos1 = yield mockupdb.createServer(52000, 'localhost');
-      mongos2 = yield mockupdb.createServer(52001, 'localhost');
+      mongos1 = yield mockupdb.createServer(52005, 'localhost');
+      mongos2 = yield mockupdb.createServer(52006, 'localhost');
 
       // Mongos
       co(function*() {
@@ -94,8 +94,8 @@ exports['Should correctly print warning when non mongos proxy passed in seed lis
 
       // Attempt to connect
       var server = new Mongos([
-          { host: 'localhost', port: 52000 },
-          { host: 'localhost', port: 52001 },
+          { host: 'localhost', port: 52005 },
+          { host: 'localhost', port: 52006 },
         ], {
         connectionTimeout: 3000,
         socketTimeout: 1000,
@@ -107,7 +107,7 @@ exports['Should correctly print warning when non mongos proxy passed in seed lis
       var logger = Logger.currentLogger();
       Logger.setCurrentLogger(function(msg, state) {
         test.equal('warn', state.type);
-        test.equal('expected mongos proxy, but found replicaset member mongod for server localhost:52001', state.message);
+        test.equal('expected mongos proxy, but found replicaset member mongod for server localhost:52006', state.message);
       });
 
       // Add event listeners
@@ -171,8 +171,8 @@ exports['Should correctly print warning and error when no mongos proxies in seed
 
     // Boot the mock
     co(function*() {
-      mongos1 = yield mockupdb.createServer(52000, 'localhost');
-      mongos2 = yield mockupdb.createServer(52001, 'localhost');
+      mongos1 = yield mockupdb.createServer(52002, 'localhost');
+      mongos2 = yield mockupdb.createServer(52003, 'localhost');
 
       // Mongos
       co(function*() {
@@ -208,8 +208,8 @@ exports['Should correctly print warning and error when no mongos proxies in seed
 
       // Attempt to connect
       var server = new Mongos([
-          { host: 'localhost', port: 52000 },
-          { host: 'localhost', port: 52001 },
+          { host: 'localhost', port: 52002 },
+          { host: 'localhost', port: 52003 },
         ], {
         connectionTimeout: 3000,
         socketTimeout: 1000,
@@ -232,8 +232,8 @@ exports['Should correctly print warning and error when no mongos proxies in seed
 
       server.on('error', function(){
         Logger.setCurrentLogger(logger);
-        test.equal('expected mongos proxy, but found replicaset member mongod for server localhost:52000', warnings[0].message);
-        test.equal('expected mongos proxy, but found replicaset member mongod for server localhost:52001', warnings[1].message);
+        test.equal('expected mongos proxy, but found replicaset member mongod for server localhost:52002', warnings[0].message);
+        test.equal('expected mongos proxy, but found replicaset member mongod for server localhost:52003', warnings[1].message);
         test.equal('no mongos proxies found in seed list, did you mean to connect to a replicaset', warnings[2].message);
 
         running = false;
