@@ -12,6 +12,8 @@ var inherits = require('util').inherits,
   ReplSetState = require('./replset_state'),
   assign = require('./shared').assign,
   clone = require('./shared').clone,
+  Timeout = require('./shared').Timeout,
+  Interval = require('./shared').Interval,
   createClientInfo = require('./shared').createClientInfo;
 
 var MongoCR = require('../auth/mongocr')
@@ -288,6 +290,9 @@ function connectNewServers(self, servers, callback) {
             _self.on('timeout', handleEvent(self, 'timeout'));
             _self.on('parseError', handleEvent(self, 'parseError'));
 
+            // Enalbe the monitoring of the new server
+            monitorServer(_self.lastIsMaster().me, self, {});
+
             // Rexecute any stalled operation
             rexecuteOperations(self);
           } else {
@@ -428,6 +433,107 @@ var pingServer = function(self, server, cb) {
   });
 }
 
+// Each server is monitored in parallel in their own timeout loop
+var monitorServer = function(host, self, options) {
+  // Is this server already being monitoried, then skip monitoring
+  for(var i = 0; i < self.intervalIds.length; i++) {
+    if(self.intervalIds[i].__host === host) {
+      return;
+    }
+  }
+
+  // Get the haInterval
+  var _process = options.haInterval ? Timeout : Interval;
+  var _haInterval = options.haInterval ? options.haInterval : self.s.haInterval;
+
+  // Create the interval
+  var intervalId = new _process(function() {
+    if(self.state == DESTROYED || self.state == UNREFERENCED) {
+      // clearInterval(intervalId);
+      intervalId.stop();
+      return;
+    }
+
+    // Do we already have server connection available for this host
+    var _server = self.s.replicaSetState.get(host);
+
+    // Check if we have a known server connection and reuse
+    if(_server) {
+      // Ping the server
+      return pingServer(self, _server, function(err) {
+        if(self.state == DESTROYED || self.state == UNREFERENCED) {
+          intervalId.stop();
+          return;
+        }
+
+        // Filter out all called intervaliIds
+        self.intervalIds = self.intervalIds.filter(function(intervalId) { 
+          return intervalId.isRunning();
+        } );
+
+        // Initial sweep
+        if(_process === Timeout) {
+          if(self.state == CONNECTING && (
+            (
+              self.s.replicaSetState.hasSecondary()
+              && self.s.options.secondaryOnlyConnectionAllowed
+            )
+            || self.s.replicaSetState.hasPrimary()
+          )) {
+            self.state = CONNECTED;
+
+            // Emit connected sign
+            process.nextTick(function() {
+              self.emit('connect', self);
+            });
+
+            // Start topology interval check
+            topologyMonitor(self, {});
+          }
+        } else {
+          if(self.state == DISCONNECTED && (
+            (
+              self.s.replicaSetState.hasSecondary()
+              && self.s.options.secondaryOnlyConnectionAllowed
+            )
+            || self.s.replicaSetState.hasPrimary()
+          )) {
+            self.state = CONNECTED;
+
+            // Rexecute any stalled operation
+            rexecuteOperations(self);
+
+            // Emit connected sign
+            process.nextTick(function() {
+              self.emit('reconnect', self);
+            });
+          }
+        }
+
+        if(self.initialConnectState.connect
+          && !self.initialConnectState.fullsetup
+          && self.s.replicaSetState.hasPrimaryAndSecondary()) {
+            // Set initial connect state
+            self.initialConnectState.fullsetup = true;
+            self.initialConnectState.all = true;
+
+            process.nextTick(function() {
+              self.emit('fullsetup', self);
+              self.emit('all', self);
+            });
+        }
+      });
+    }
+  }, _haInterval);
+
+  // Start the interval
+  intervalId.start();
+  // Add the intervalId host name
+  intervalId.__host = host;
+  // Add the intervalId to our list of intervalIds
+  self.intervalIds.push(intervalId);
+}
+
 function topologyMonitor(self, options) {
   if(self.state == DESTROYED || self.state == UNREFERENCED) return;
   options = options || {};
@@ -436,97 +542,10 @@ function topologyMonitor(self, options) {
   var servers = Object.keys(self.s.replicaSetState.set);
 
   // Get the haInterval
-  var _process = options.haInterval ? setTimeout : setInterval;
+  var _process = options.haInterval ? Timeout : Interval;
   var _haInterval = options.haInterval ? options.haInterval : self.s.haInterval;
 
-  // Count of initial sweep servers to check
-  var count = servers.length;
-
-  // Each server is monitored in parallel in their own timeout loop
-  var monitorServer = function(_host, _self, _options) {
-    var intervalId = _process(function() {
-      if(self.state == DESTROYED || self.state == UNREFERENCED) {
-        clearInterval(intervalId);
-        return;
-      }
-
-      // Adjust the count
-      count = count - 1;
-
-      // Do we already have server connection available for this host
-      var _server = _self.s.replicaSetState.get(_host);
-
-      // Check if we have a known server connection and reuse
-      if(_server) {
-        return pingServer(_self, _server, function(err) {
-          if(self.state == DESTROYED || self.state == UNREFERENCED) {
-            clearInterval(intervalId);
-            return;
-          }
-
-          // Filter out all called intervaliIds
-          self.intervalIds = self.intervalIds.filter(function(intervalId) { return !intervalId._called } );
-
-          // Initial sweep
-          if(_process === setTimeout) {
-            if(_self.state == CONNECTING && (
-              (
-                self.s.replicaSetState.hasSecondary()
-                && self.s.options.secondaryOnlyConnectionAllowed
-              )
-              || self.s.replicaSetState.hasPrimary()
-            )) {
-              _self.state = CONNECTED;
-
-              // Emit connected sign
-              process.nextTick(function() {
-                self.emit('connect', self);
-              });
-
-              // Start topology interval check
-              topologyMonitor(_self, {});
-            }
-          } else {
-            if(_self.state == DISCONNECTED && (
-              (
-                self.s.replicaSetState.hasSecondary()
-                && self.s.options.secondaryOnlyConnectionAllowed
-              )
-              || self.s.replicaSetState.hasPrimary()
-            )) {
-              _self.state = CONNECTED;
-
-              // Rexecute any stalled operation
-              rexecuteOperations(self);
-
-              // Emit connected sign
-              process.nextTick(function() {
-                self.emit('reconnect', self);
-              });
-            }
-          }
-
-          if(self.initialConnectState.connect
-            && !self.initialConnectState.fullsetup
-            && self.s.replicaSetState.hasPrimaryAndSecondary()) {
-              // Set initial connect state
-              self.initialConnectState.fullsetup = true;
-              self.initialConnectState.all = true;
-
-              process.nextTick(function() {
-                self.emit('fullsetup', self);
-                self.emit('all', self);
-              });
-          }
-        });
-      }
-    }, _haInterval);
-
-    // Add the intervalId to our list of intervalIds
-    self.intervalIds.push(intervalId);
-  }
-
-  if(_process === setTimeout) {
+  if(_process === Timeout) {
     return connectNewServers(self, self.s.replicaSetState.unknownServers, function(err) {
       if(!self.s.replicaSetState.hasPrimary() && !self.s.options.secondaryOnlyConnectionAllowed) {
         if(err) return self.emit('error', err);
@@ -556,11 +575,11 @@ function topologyMonitor(self, options) {
       }
 
       connectNewServers(self, self.s.replicaSetState.unknownServers, function() {
-        if(self.s.replicaSetState.hasPrimary()) {
-          self.intervalIds.push(setTimeout(executeReconnect(self), _haInterval));
-        } else {
-          self.intervalIds.push(setTimeout(executeReconnect(self), self.s.minHeartbeatFrequencyMS));
-        }
+        var monitoringFrequencey = self.s.replicaSetState.hasPrimary() 
+          ? _haInterval : self.s.minHeartbeatFrequencyMS;
+
+        // Create a timeout
+        self.intervalIds.push(new Timeout(executeReconnect(self), monitoringFrequencey).start());
       });
     }
   }
@@ -570,7 +589,7 @@ function topologyMonitor(self, options) {
     ? self.s.minHeartbeatFrequencyMS
     : _haInterval
 
-  self.intervalIds.push(setTimeout(executeReconnect(self), intervalTime));
+  self.intervalIds.push(new Timeout(executeReconnect(self), intervalTime).start());
 }
 
 function addServerToList(list, server) {
@@ -851,8 +870,8 @@ ReplSet.prototype.destroy = function(options) {
 
   // Clear out all monitoring
   for(var i = 0; i < this.intervalIds.length; i++) {
-    clearInterval(this.intervalIds[i]);
-    clearTimeout(this.intervalIds[i]);
+    this.intervalIds[i].stop();
+    this.intervalIds[i].stop();
   }
 
   // Reset list of intervalIds
