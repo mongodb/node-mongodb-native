@@ -503,8 +503,6 @@ ReplSetState.prototype.update = function(server) {
         self.emit('left', 'primary', server);
     }
 
-    // Add the secondary to the set
-
     // Emit secondary joined replicaset
     self.emit('joined', 'secondary', server);
     emitTopologyDescriptionChanged(self);

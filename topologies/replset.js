@@ -435,10 +435,13 @@ var pingServer = function(self, server, cb) {
 
 // Each server is monitored in parallel in their own timeout loop
 var monitorServer = function(host, self, options) {
+  // If this is not the initial scan  
   // Is this server already being monitoried, then skip monitoring
-  for(var i = 0; i < self.intervalIds.length; i++) {
-    if(self.intervalIds[i].__host === host) {
-      return;
+  if(!options.haInterval) {
+    for(var i = 0; i < self.intervalIds.length; i++) {
+      if(self.intervalIds[i].__host === host) {
+        return;
+      }
     }
   }
 
