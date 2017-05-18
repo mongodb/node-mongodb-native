@@ -19,7 +19,7 @@
     "readable-stream": "2.2.7"
   },
   "devDependencies": {
-    "JSONStream": "^1.0.7",
+    "JSONStream": "^1.2.0",
     "betterbenchmarks": "^0.1.0",
     "bluebird": "3.4.6",
     "bson": "latest",
