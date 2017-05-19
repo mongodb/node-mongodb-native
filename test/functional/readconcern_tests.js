@@ -236,6 +236,49 @@ exports['Should set majority readConcern using MongoClient'] = {
   }
 }
 
+exports['Should set majority readConcern using MongoClient with options'] = {
+  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.1.7" } },
+
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var listener = require('../..').instrument(function(err, instrumentations) {});
+    // Contains all the apm events
+    var started = [];
+    var url = configuration.url();
+    var options = {
+      readConcern: {
+        level: 'majority'
+      }
+    }
+
+    // Connect using mongoclient
+    MongoClient.connect(url, options, function(err, db) {
+      test.equal(null, err);
+      test.deepEqual({level: 'majority'}, db.s.readConcern);
+
+      // Get a collection
+      var collection = db.collection('readConcernCollection');
+      // Validate readConcern
+      test.deepEqual({level: 'majority'}, collection.s.readConcern);
+      // Perform a find using the readConcern
+      listener.on('started', function(event) {
+        if(event.commandName == 'find')
+          started.push(event);
+      });
+
+      // Execute find
+      collection.find().toArray(function(err, r) {
+        test.equal(1, started.length);
+        test.deepEqual({level:'majority'}, started[0].command.readConcern);
+
+        listener.uninstrument();
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
 exports['Should error out with readConcern level set to majority'] = {
   metadata: { requires: { topology: 'replicaset', mongodb: "<= 3.0.X" } },
 
