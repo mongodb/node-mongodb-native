@@ -274,8 +274,8 @@ exports['Should correctly set socketTimeoutMS and connectTimeoutMS for mongos'] 
     var command = null;
     // Boot the mock
     co(function*() {
-      mongos1 = yield mockupdb.createServer(52004, 'localhost');
-      mongos2 = yield mockupdb.createServer(52005, 'localhost');
+      mongos1 = yield mockupdb.createServer(12004, 'localhost');
+      mongos2 = yield mockupdb.createServer(12005, 'localhost');
 
       // Mongos
       co(function*() {
@@ -305,7 +305,7 @@ exports['Should correctly set socketTimeoutMS and connectTimeoutMS for mongos'] 
         }
       });
 
-      MongoClient.connect('mongodb://localhost:52004,localhost:52005/test?socketTimeoutMS=120000&connectTimeoutMS=15000', function(err, db) {
+      MongoClient.connect('mongodb://localhost:12004,localhost:12005/test?socketTimeoutMS=120000&connectTimeoutMS=15000', function(err, db) {
         test.equal(null, err);
         test.equal(15000, db.serverConfig.s.mongos.s.options.connectionTimeout);
         test.equal(120000, db.serverConfig.s.mongos.s.options.socketTimeout);

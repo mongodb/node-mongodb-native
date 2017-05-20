@@ -314,6 +314,7 @@ var testFiles = [
   , '/test/functional/replset_operations_tests.js'
   , '/test/functional/replset_failover_tests.js'
   , '/test/functional/replset_connection_tests.js'
+  , '/test/functional/sdam_tests.js'
 
   // Sharding tests
   , '/test/functional/sharding_failover_tests.js'
