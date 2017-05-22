@@ -1,3 +1,10 @@
+2.1.11 2017-05-22
+-----------------
+* NODE-987 Clear out old intervalIds on when calling topologyMonitor.
+* NODE-987 Moved filtering to pingServer method and added test case.
+* Check for connection destroyed just before writing out and flush out operations correctly if it is (Issue #179, https://github.com/jmholzinger).
+* NODE-989 Refactored Replicaset monitoring to correcly monitor newly added servers, Also extracted setTimeout and setInterval to use custom wrappers Timeout and Interva.
+
 2.1.10 2017-04-18
 -----------------
 * NODE-981 delegate auth to replset/mongos if inTopology is set.
