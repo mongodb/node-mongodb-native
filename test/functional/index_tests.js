@@ -672,6 +672,29 @@ exports['should correctly use listIndexes to retrieve index list'] = {
   }
 }
 
+exports['should correctly use listIndexes to retrieve index list using hasNext'] = {
+  metadata: { requires: { mongodb: ">=2.4.0", topology: ['single', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      db.collection('testListIndexes_2').ensureIndex({a:1}, function(err, r) {
+        test.equal(null, err);
+
+        // Get the list of indexes
+        db.collection('testListIndexes_2').listIndexes().hasNext(function(err, result) {
+          test.equal(null, err);
+          test.equal(true, result);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
+
 exports['should correctly ensureIndex for nested style index name c.d'] = {
   metadata: { requires: { mongodb: ">=2.4.0", topology: ['single', 'ssl', 'heap', 'wiredtiger'] } },
 

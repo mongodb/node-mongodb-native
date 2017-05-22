@@ -827,3 +827,50 @@ exports['Should correctly handle ISODate date matches in aggregation framework']
     // DOC_END
   }
 }
+
+/**
+ * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
+ *
+ * @ignore
+ */
+exports['Should correctly exercise hasNext function on aggregation cursor'] = {
+  metadata: {
+    requires: {
+        mongodb: ">=2.6.0"
+      , topology: 'single'
+      , node: ">0.10.0"
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var db = configure.newDbInstance({w:1}, {poolSize:1});
+
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
+    // DOC_START
+    db.open(function(err, db) {
+      // Create a collection
+      var collection = db.collection('shouldCorrectlyQueryUsingISODate3');
+      // Insert the docs
+      collection.insertMany([
+        {a:1}, {b:1}
+      ], {w: 1}, function(err, result) {
+
+        // Execute aggregate, notice the pipeline is expressed as an Array
+        var cursor = collection.aggregate([{
+          $match: {}
+        }]);
+
+        // Iterate over all the items in the cursor
+        cursor.hasNext(function(err, result) {
+          test.equal(null, err);
+          test.equal(true, result);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+    // DOC_END
+  }
+}
