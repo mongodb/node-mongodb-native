@@ -1,3 +1,17 @@
+2.2.27 2017-05-22
+-----------------
+* Updated mongodb-core to 2.1.11
+    * NODE-987 Clear out old intervalIds on when calling topologyMonitor.
+    * NODE-987 Moved filtering to pingServer method and added test case.
+    * Check for connection destroyed just before writing out and flush out operations correctly if it is (Issue #179, https://github.com/jmholzinger).
+    * NODE-989 Refactored Replicaset monitoring to correcly monitor newly added servers, Also extracted setTimeout and setInterval to use custom wrappers Timeout and Interval.
+* NODE-985 Deprecated Db.authenticate and Admin.authenticate and moved auth methods into authenticate.js to ensure MongoClient.connect does not print deprecation warnings.
+* NODE-988 Merged readConcern and hint correctly on collection(...).find(...).count()
+* Fix passing the readConcern option to MongoClient.connect (Issue #1514, https://github.com/bausmeier).
+* NODE-996 Propegate all events up to a MongoClient instance.
+* Allow saving doc with null `_id` (Issue #1517, https://github.com/vkarpov15).
+* NODE-993 Expose hasNext for command cursor and add docs for both CommandCursor and Aggregation Cursor.
+
 2.2.26 2017-04-18
 -----------------
 * Updated mongodb-core to 2.1.10
