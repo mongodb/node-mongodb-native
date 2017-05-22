@@ -150,6 +150,8 @@
             
                 <li data-name="AggregationCursor#group"><a href="AggregationCursor.html#group">group</a></li>
             
+                <li data-name="AggregationCursor#hasNext"><a href="AggregationCursor.html#hasNext">hasNext</a></li>
+            
                 <li data-name="AggregationCursor#isClosed"><a href="AggregationCursor.html#isClosed">isClosed</a></li>
             
                 <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
@@ -517,6 +519,8 @@
                 <li data-name="CommandCursor#close"><a href="CommandCursor.html#close">close</a></li>
             
                 <li data-name="CommandCursor#each"><a href="CommandCursor.html#each">each</a></li>
+            
+                <li data-name="CommandCursor#hasNext"><a href="CommandCursor.html#hasNext">hasNext</a></li>
             
                 <li data-name="CommandCursor#isClosed"><a href="CommandCursor.html#isClosed">isClosed</a></li>
             
@@ -1908,7 +1912,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line98">line 98</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line100">line 100</a>
         </div>
         
     </div>
@@ -2393,6 +2397,42 @@
                     
                 
                 <p>Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher)</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>sslCRL</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Array of revocation certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher)</p></td>
         </tr>
 	
 	
@@ -2986,7 +3026,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line496">line 496</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line523">line 523</a>
         </div>
         
     </div>
@@ -3062,7 +3102,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line453">line 453</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line480">line 480</a>
         </div>
         
     </div>
@@ -3141,7 +3181,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line552">line 552</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line579">line 579</a>
         </div>
         
     </div>
@@ -3222,7 +3262,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line502">line 502</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line529">line 529</a>
         </div>
         
     </div>
@@ -3303,7 +3343,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line559">line 559</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line586">line 586</a>
         </div>
         
     </div>
@@ -3384,7 +3424,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line545">line 545</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line572">line 572</a>
         </div>
         
     </div>
@@ -3465,7 +3505,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line509">line 509</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line536">line 536</a>
         </div>
         
     </div>
@@ -3660,7 +3700,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line529">line 529</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line556">line 556</a>
         </div>
         
     </div>
@@ -3809,7 +3849,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line520">line 520</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line547">line 547</a>
         </div>
         
     </div>
@@ -3958,7 +3998,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line538">line 538</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line565">line 565</a>
         </div>
         
     </div>
@@ -4039,7 +4079,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line573">line 573</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line600">line 600</a>
         </div>
         
     </div>
@@ -4120,7 +4160,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line566">line 566</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line593">line 593</a>
         </div>
         
     </div>
@@ -4220,7 +4260,7 @@ ReplSet instance.
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 13 2017 12:31:10 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon May 22 2017 14:32:59 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

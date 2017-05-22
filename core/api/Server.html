@@ -513,6 +513,8 @@
             
                 <li data-name="Mongos#destroy"><a href="Mongos.html#destroy">destroy</a></li>
             
+                <li data-name="Mongos#getConnection"><a href="Mongos.html#getConnection">getConnection</a></li>
+            
                 <li data-name="Mongos#getServer"><a href="Mongos.html#getServer">getServer</a></li>
             
                 <li data-name="Mongos#insert"><a href="Mongos.html#insert">insert</a></li>
@@ -667,6 +669,8 @@
                 <li data-name="ReplSet#cursor"><a href="ReplSet.html#cursor">cursor</a></li>
             
                 <li data-name="ReplSet#destroy"><a href="ReplSet.html#destroy">destroy</a></li>
+            
+                <li data-name="ReplSet#getConnection"><a href="ReplSet.html#getConnection">getConnection</a></li>
             
                 <li data-name="ReplSet#getServer"><a href="ReplSet.html#getServer">getServer</a></li>
             
@@ -971,7 +975,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line81">line 81</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line82">line 82</a>
         </div>
         
     </div>
@@ -1620,6 +1624,40 @@
 	
         <tr>
             
+                <td class="name"><code>options.crl</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>SSL Certificate revocation store binary buffer</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>options.cert</code></td>
             
             
@@ -2155,7 +2193,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line647">line 647</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line655">line 655</a>
         </div>
         
     </div>
@@ -2362,7 +2400,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line469">line 469</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line472">line 472</a>
         </div>
         
     </div>
@@ -2534,6 +2572,42 @@ cursor instance
                     
                 
                 <p>Specify if functions on an object should be serialized.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.checkKeys</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify if the bson parser should validate keys.</p></td>
         </tr>
 	
 	
@@ -2718,7 +2792,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line345">line 345</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line347">line 347</a>
         </div>
         
     </div>
@@ -2849,7 +2923,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line696">line 696</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line704">line 704</a>
         </div>
         
     </div>
@@ -2925,7 +2999,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line620">line 620</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line628">line 628</a>
         </div>
         
     </div>
@@ -3336,7 +3410,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line727">line 727</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line735">line 735</a>
         </div>
         
     </div>
@@ -3539,7 +3613,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line685">line 685</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line693">line 693</a>
         </div>
         
     </div>
@@ -3660,7 +3734,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line714">line 714</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line722">line 722</a>
         </div>
         
     </div>
@@ -3736,7 +3810,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line393">line 393</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line395">line 395</a>
         </div>
         
     </div>
@@ -3812,7 +3886,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line705">line 705</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line713">line 713</a>
         </div>
         
     </div>
@@ -3888,7 +3962,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line530">line 530</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line538">line 538</a>
         </div>
         
     </div>
@@ -4250,7 +4324,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line430">line 430</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line432">line 432</a>
         </div>
         
     </div>
@@ -4326,7 +4400,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line440">line 440</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line442">line 442</a>
         </div>
         
     </div>
@@ -4402,7 +4476,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line413">line 413</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line415">line 415</a>
         </div>
         
     </div>
@@ -4478,7 +4552,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line635">line 635</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line643">line 643</a>
         </div>
         
     </div>
@@ -4617,7 +4691,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line588">line 588</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line596">line 596</a>
         </div>
         
     </div>
@@ -4989,7 +5063,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line421">line 421</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line423">line 423</a>
         </div>
         
     </div>
@@ -5060,7 +5134,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line557">line 557</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line565">line 565</a>
         </div>
         
     </div>
@@ -5440,7 +5514,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line838">line 838</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line846">line 846</a>
         </div>
         
     </div>
@@ -5521,7 +5595,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line775">line 775</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line783">line 783</a>
         </div>
         
     </div>
@@ -5602,7 +5676,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line852">line 852</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line860">line 860</a>
         </div>
         
     </div>
@@ -5683,7 +5757,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line845">line 845</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line853">line 853</a>
         </div>
         
     </div>
@@ -5764,7 +5838,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line782">line 782</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line790">line 790</a>
         </div>
         
     </div>
@@ -5845,7 +5919,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line831">line 831</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line839">line 839</a>
         </div>
         
     </div>
@@ -5926,7 +6000,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line796">line 796</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line804">line 804</a>
         </div>
         
     </div>
@@ -6007,7 +6081,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line803">line 803</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line811">line 811</a>
         </div>
         
     </div>
@@ -6088,7 +6162,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line789">line 789</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line797">line 797</a>
         </div>
         
     </div>
@@ -6169,7 +6243,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line817">line 817</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line825">line 825</a>
         </div>
         
     </div>
@@ -6250,7 +6324,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line824">line 824</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line832">line 832</a>
         </div>
         
     </div>
@@ -6331,7 +6405,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line810">line 810</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line818">line 818</a>
         </div>
         
     </div>
@@ -6431,7 +6505,7 @@ server.connect();</code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 13 2017 12:31:19 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon May 22 2017 14:33:09 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

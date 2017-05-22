@@ -150,6 +150,8 @@
             
                 <li data-name="AggregationCursor#group"><a href="AggregationCursor.html#group">group</a></li>
             
+                <li data-name="AggregationCursor#hasNext"><a href="AggregationCursor.html#hasNext">hasNext</a></li>
+            
                 <li data-name="AggregationCursor#isClosed"><a href="AggregationCursor.html#isClosed">isClosed</a></li>
             
                 <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
@@ -517,6 +519,8 @@
                 <li data-name="CommandCursor#close"><a href="CommandCursor.html#close">close</a></li>
             
                 <li data-name="CommandCursor#each"><a href="CommandCursor.html#each">each</a></li>
+            
+                <li data-name="CommandCursor#hasNext"><a href="CommandCursor.html#hasNext">hasNext</a></li>
             
                 <li data-name="CommandCursor#isClosed"><a href="CommandCursor.html#isClosed">isClosed</a></li>
             
@@ -1908,7 +1912,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line91">line 91</a>
+            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line93">line 93</a>
         </div>
         
     </div>
@@ -2249,6 +2253,42 @@
                     
                 
                 <p>Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher)</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>sslCRL</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Array of revocation certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher)</p></td>
         </tr>
 	
 	
@@ -2980,7 +3020,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line463">line 463</a>
+            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line465">line 465</a>
         </div>
         
     </div>
@@ -3056,7 +3096,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line429">line 429</a>
+            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line431">line 431</a>
         </div>
         
     </div>
@@ -3135,7 +3175,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line476">line 476</a>
+            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line478">line 478</a>
         </div>
         
     </div>
@@ -3216,7 +3256,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line469">line 469</a>
+            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line471">line 471</a>
         </div>
         
     </div>
@@ -3297,7 +3337,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line490">line 490</a>
+            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line492">line 492</a>
         </div>
         
     </div>
@@ -3378,7 +3418,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line504">line 504</a>
+            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line506">line 506</a>
         </div>
         
     </div>
@@ -3459,7 +3499,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line483">line 483</a>
+            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line485">line 485</a>
         </div>
         
     </div>
@@ -3540,7 +3580,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line497">line 497</a>
+            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line499">line 499</a>
         </div>
         
     </div>
@@ -3640,7 +3680,7 @@ Server instance.
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 13 2017 12:31:10 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon May 22 2017 14:32:59 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

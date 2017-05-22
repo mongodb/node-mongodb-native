@@ -150,6 +150,8 @@
             
                 <li data-name="AggregationCursor#group"><a href="AggregationCursor.html#group">group</a></li>
             
+                <li data-name="AggregationCursor#hasNext"><a href="AggregationCursor.html#hasNext">hasNext</a></li>
+            
                 <li data-name="AggregationCursor#isClosed"><a href="AggregationCursor.html#isClosed">isClosed</a></li>
             
                 <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
@@ -517,6 +519,8 @@
                 <li data-name="CommandCursor#close"><a href="CommandCursor.html#close">close</a></li>
             
                 <li data-name="CommandCursor#each"><a href="CommandCursor.html#each">each</a></li>
+            
+                <li data-name="CommandCursor#hasNext"><a href="CommandCursor.html#hasNext">hasNext</a></li>
             
                 <li data-name="CommandCursor#isClosed"><a href="CommandCursor.html#isClosed">isClosed</a></li>
             
@@ -1892,13 +1896,16 @@ var parse = require('./url_parser')
   , Server = require('./server')
   , Mongos = require('./mongos')
   , ReplSet = require('./replset')
+  , EventEmitter = require('events').EventEmitter
+  , inherits = require('util').inherits
   , Define = require('./metadata')
   , ReadPreference = require('./read_preference')
   , Logger = require('mongodb-core').Logger
   , MongoError = require('mongodb-core').MongoError
   , Db = require('./db')
   , f = require('util').format
-  , shallowClone = require('./utils').shallowClone;
+  , shallowClone = require('./utils').shallowClone
+  , authenticate = require('./authenticate');
 
 /**
  * @fileOverview The **MongoClient** class is a class that allows for making Connections to MongoDB.
@@ -1915,14 +1922,14 @@ var parse = require('./url_parser')
  * });
  */
 var validOptionNames = ['poolSize', 'ssl', 'sslValidate', 'sslCA', 'sslCert',
-  'sslKey', 'sslPass', 'autoReconnect', 'noDelay', 'keepAlive', 'connectTimeoutMS',
+  'sslKey', 'sslPass', 'sslCRL', 'autoReconnect', 'noDelay', 'keepAlive', 'connectTimeoutMS',
   'socketTimeoutMS', 'reconnectTries', 'reconnectInterval', 'ha', 'haInterval',
   'replicaSet', 'secondaryAcceptableLatencyMS', 'acceptableLatencyMS',
   'connectWithNoPrimary', 'authSource', 'w', 'wtimeout', 'j', 'forceServerObjectId',
   'serializeFunctions', 'ignoreUndefined', 'raw', 'promoteLongs', 'bufferMaxEntries',
   'readPreference', 'pkFactory', 'promiseLibrary', 'readConcern', 'maxStalenessSeconds',
   'loggerLevel', 'logger', 'promoteValues', 'promoteBuffers', 'promoteLongs',
-  'domainsEnabled', 'keepAliveInitialDelay', 'checkServerIdentity'];
+  'domainsEnabled', 'keepAliveInitialDelay', 'checkServerIdentity', 'validateOptions'];
 var ignoreOptionNames = ['native_parser'];
 var legacyOptionNames = ['server', 'replset', 'replSet', 'mongos', 'db'];
 
@@ -1934,11 +1941,13 @@ function validOptions(options) {
       continue;
     }
 
-    if(_validOptions.indexOf(name) == -1) {
+    if(_validOptions.indexOf(name) == -1 &amp;&amp; options.validateOptions) {
       return new MongoError(f('option %s is not supported', name));
+    } else if(_validOptions.indexOf(name) == -1) {
+      console.warn(f('the options [%s] is not supported', name));
     }
 
-    if(legacyOptionNames.indexOf(name) == -1) {
+    if(legacyOptionNames.indexOf(name) != -1) {
       console.warn(f('the server/replset/mongos options are deprecated, '
       + 'all their options are supported at the top level of the options object [%s]', validOptionNames));
     }
@@ -1951,6 +1960,11 @@ function validOptions(options) {
  * @return {MongoClient} a MongoClient instance.
  */
 function MongoClient() {
+  if(!(this instanceof MongoClient)) return new MongoClient();
+
+  // Set up event emitter
+  EventEmitter.call(this);
+
   /**
    * The callback format for results
    * @callback MongoClient~connectCallback
@@ -1971,6 +1985,7 @@ function MongoClient() {
    * @param {number} [options.poolSize=5] poolSize The maximum size of the individual server pool.
    * @param {boolean} [options.ssl=false] Enable SSL connection.
    * @param {Buffer} [options.sslCA=undefined] SSL Certificate store binary buffer
+   * @param {Buffer} [options.sslCRL=undefined] SSL Certificate revocation list binary buffer
    * @param {Buffer} [options.sslCert=undefined] SSL Certificate binary buffer
    * @param {Buffer} [options.sslKey=undefined] SSL Key file binary buffer
    * @param {string} [options.sslPass=undefined] SSL Certificate pass phrase
@@ -2005,15 +2020,21 @@ function MongoClient() {
    * @param {object} [options.pkFactory=null] A primary key factory object for generation of custom _id keys.
    * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
    * @param {object} [options.readConcern=null] Specify a read concern for the collection. (only MongoDB 3.2 or higher supported)
-   * @param {object} [options.readConcern.level='local'] Specify a read concern level for the collection operations, one of [local|majority]. (only MongoDB 3.2 or higher supported)
+   * @param {string} [options.readConcern.level='local'] Specify a read concern level for the collection operations, one of [local|majority]. (only MongoDB 3.2 or higher supported)
    * @param {number} [options.maxStalenessSeconds=undefined] The max staleness to secondary reads (values under 10 seconds cannot be guaranteed);
    * @param {string} [options.loggerLevel=undefined] The logging level (error/warn/info/debug)
    * @param {object} [options.logger=undefined] Custom logger object
+   * @param {object} [options.validateOptions=false] Validate MongoClient passed in options for correctness.
    * @param {MongoClient~connectCallback} [callback] The command result callback
    * @return {Promise} returns Promise if no callback passed
    */
   this.connect = MongoClient.connect;
 }
+
+/**
+ * @ignore
+ */
+inherits(MongoClient, EventEmitter);
 
 var define = MongoClient.define = new Define('MongoClient', MongoClient, false);
 
@@ -2031,6 +2052,7 @@ var define = MongoClient.define = new Define('MongoClient', MongoClient, false);
  * @param {number} [options.poolSize=5] poolSize The maximum size of the individual server pool.
  * @param {boolean} [options.ssl=false] Enable SSL connection.
  * @param {Buffer} [options.sslCA=undefined] SSL Certificate store binary buffer
+ * @param {Buffer} [options.sslCRL=undefined] SSL Certificate revocation list binary buffer
  * @param {Buffer} [options.sslCert=undefined] SSL Certificate binary buffer
  * @param {Buffer} [options.sslKey=undefined] SSL Key file binary buffer
  * @param {string} [options.sslPass=undefined] SSL Certificate pass phrase
@@ -2065,10 +2087,11 @@ var define = MongoClient.define = new Define('MongoClient', MongoClient, false);
  * @param {object} [options.pkFactory=null] A primary key factory object for generation of custom _id keys.
  * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
  * @param {object} [options.readConcern=null] Specify a read concern for the collection. (only MongoDB 3.2 or higher supported)
- * @param {object} [options.readConcern.level='local'] Specify a read concern level for the collection operations, one of [local|majority]. (only MongoDB 3.2 or higher supported)
+ * @param {string} [options.readConcern.level='local'] Specify a read concern level for the collection operations, one of [local|majority]. (only MongoDB 3.2 or higher supported)
  * @param {number} [options.maxStalenessSeconds=undefined] The max staleness to secondary reads (values under 10 seconds cannot be guaranteed);
  * @param {string} [options.loggerLevel=undefined] The logging level (error/warn/info/debug)
  * @param {object} [options.logger=undefined] Custom logger object
+ * @param {object} [options.validateOptions=false] Validate MongoClient passed in options for correctness.
  * @param {MongoClient~connectCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
@@ -2077,6 +2100,7 @@ MongoClient.connect = function(url, options, callback) {
   callback = typeof args[args.length - 1] == 'function' ? args.pop() : null;
   options = args.length ? args.shift() : null;
   options = options || {};
+  var self = this;
 
   // Validate options object
   var err = validOptions(options);
@@ -2096,7 +2120,7 @@ MongoClient.connect = function(url, options, callback) {
       // Did we have a validation error
       if(err) return reject(err);
       // Attempt to connect
-      connect(url, options, function(err, db) {
+      connect(self, url, options, function(err, db) {
         if(err) return reject(err);
         resolve(db);
       });
@@ -2106,7 +2130,7 @@ MongoClient.connect = function(url, options, callback) {
   // Did we have a validation error
   if(err) return callback(err);
   // Fallback to callback based connect
-  connect(url, options, callback);
+  connect(self, url, options, callback);
 }
 
 define.staticMethod('connect', {callback: true, promise:true});
@@ -2126,7 +2150,7 @@ var mergeOptions = function(target, source, flatten) {
 var createUnifiedOptions = function(finalOptions, options) {
   var childOptions = ['mongos', 'server', 'db'
     , 'replset', 'db_options', 'server_options', 'rs_options', 'mongos_options'];
-  var noMerge = [];
+  var noMerge = ['readconcern'];
 
   for(var name in options) {
     if(noMerge.indexOf(name.toLowerCase()) != -1) {
@@ -2173,25 +2197,50 @@ function translateOptions(options) {
   });
 }
 
-function createReplicaset(options, callback) {
-  // Set default options
-  var servers = translateOptions(options);
-  // Create Db instance
-  new Db(options.dbName, new ReplSet(servers, options), options).open(callback);
+function relayEvents(self, db) {
+  if(self instanceof MongoClient) {
+    var events = ["timeout", "close", 'serverOpening', 'serverDescriptionChanged', 'serverHeartbeatStarted',
+      'serverHeartbeatSucceeded', 'serverHeartbeatFailed', 'serverClosed', 'topologyOpening',
+      'topologyClosed', 'topologyDescriptionChanged', 'joined', 'left', 'ping', 'ha', 'all', 'fullsetup'];
+    events.forEach(function(event) {
+      db.serverConfig.on(event, function(object1, object2) {
+        self.emit(event, object1, object2);
+      });
+    });
+  }
 }
 
-function createMongos(options, callback) {
+function createReplicaset(self, options, callback) {
   // Set default options
   var servers = translateOptions(options);
   // Create Db instance
-  new Db(options.dbName, new Mongos(servers, options), options).open(callback);
+  var db = new Db(options.dbName, new ReplSet(servers, options), options);
+  // Propegate the events to the client
+  relayEvents(self, db);
+  // Open the connection  
+  db.open(callback);
 }
 
-function createServer(options, callback) {
+function createMongos(self, options, callback) {
   // Set default options
   var servers = translateOptions(options);
   // Create Db instance
-  new Db(options.dbName, servers[0], options).open(function(err, db) {
+  var db = new Db(options.dbName, new Mongos(servers, options), options)
+  // Propegate the events to the client
+  relayEvents(self, db);
+  // Open the connection  
+  db.open(callback);
+}
+
+function createServer(self, options, callback) {
+  // Set default options
+  var servers = translateOptions(options);
+  // Create db instance
+  var db = new Db(options.dbName, servers[0], options);
+  // Propegate the events to the client
+  relayEvents(self, db);
+  // Create Db instance
+  db.open(function(err, db) {
     if(err) return callback(err);
     // Check if we are really speaking to a mongos
     var ismaster = db.serverConfig.lastIsMaster();
@@ -2201,7 +2250,7 @@ function createServer(options, callback) {
       // Destroy the current connection
       db.close();
       // Create mongos connection instead
-      return createMongos(options, callback);
+      return createMongos(self, options, callback);
     }
 
     // Otherwise callback
@@ -2241,7 +2290,7 @@ function connectHandler(options, callback) {
     }
 
     // Authenticate
-    authentication_db.authenticate(options.user, options.password, options, function(err, success){
+    authenticate(authentication_db, options.user, options.password, options, function(err, success) {
       if(success){
         process.nextTick(function() {
           try {
@@ -2269,7 +2318,7 @@ function connectHandler(options, callback) {
 /*
  * Connect using MongoClient
  */
-var connect = function(url, options, callback) {
+var connect = function(self, url, options, callback) {
   options = options || {};
   options = shallowClone(options);
 
@@ -2312,11 +2361,11 @@ var connect = function(url, options, callback) {
 
   // Do we have a replicaset then skip discovery and go straight to connectivity
   if(_finalOptions.replicaSet || _finalOptions.rs_name) {
-    return createReplicaset(_finalOptions, connectHandler(_finalOptions, connectCallback));
+    return createReplicaset(self, _finalOptions, connectHandler(_finalOptions, connectCallback));
   } else if(object.servers.length > 1) {
-    return createMongos(_finalOptions, connectHandler(_finalOptions, connectCallback));
+    return createMongos(self, _finalOptions, connectHandler(_finalOptions, connectCallback));
   } else {
-    return createServer(_finalOptions, connectHandler(_finalOptions, connectCallback));
+    return createServer(self, _finalOptions, connectHandler(_finalOptions, connectCallback));
   }
 }
 
@@ -2350,7 +2399,7 @@ module.exports = MongoClient
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 13 2017 12:31:10 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon May 22 2017 14:32:59 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

@@ -150,6 +150,8 @@
             
                 <li data-name="AggregationCursor#group"><a href="AggregationCursor.html#group">group</a></li>
             
+                <li data-name="AggregationCursor#hasNext"><a href="AggregationCursor.html#hasNext">hasNext</a></li>
+            
                 <li data-name="AggregationCursor#isClosed"><a href="AggregationCursor.html#isClosed">isClosed</a></li>
             
                 <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
@@ -517,6 +519,8 @@
                 <li data-name="CommandCursor#close"><a href="CommandCursor.html#close">close</a></li>
             
                 <li data-name="CommandCursor#each"><a href="CommandCursor.html#each">each</a></li>
+            
+                <li data-name="CommandCursor#hasNext"><a href="CommandCursor.html#hasNext">hasNext</a></li>
             
                 <li data-name="CommandCursor#isClosed"><a href="CommandCursor.html#isClosed">isClosed</a></li>
             
@@ -1908,7 +1912,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line65">line 65</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line70">line 70</a>
         </div>
         
     </div>
@@ -2006,7 +2010,7 @@ MongoClient instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line127">line 127</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line139">line 139</a>
         </div>
         
     </div>
@@ -2226,6 +2230,40 @@ MongoClient instance.
                     
                 
                 <p>SSL Certificate store binary buffer</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>sslCRL</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>SSL Certificate revocation list binary buffer</p></td>
         </tr>
 	
 	
@@ -3479,7 +3517,7 @@ MongoClient instance.
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">string</span>
 
 
             
@@ -3611,6 +3649,42 @@ MongoClient instance.
                     
                 
                 <p>Custom logger object</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>validateOptions</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Validate MongoClient passed in options for correctness.</p></td>
         </tr>
 	
 	
@@ -3713,7 +3787,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line187">line 187</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line206">line 206</a>
         </div>
         
     </div>
@@ -3933,6 +4007,40 @@ Promise if no callback passed
                     
                 
                 <p>SSL Certificate store binary buffer</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>sslCRL</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Buffer</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>SSL Certificate revocation list binary buffer</p></td>
         </tr>
 	
 	
@@ -5186,7 +5294,7 @@ Promise if no callback passed
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">string</span>
 
 
             
@@ -5318,6 +5426,42 @@ Promise if no callback passed
                     
                 
                 <p>Custom logger object</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>validateOptions</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Validate MongoClient passed in options for correctness.</p></td>
         </tr>
 	
 	
@@ -5426,7 +5570,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line66">line 66</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line76">line 76</a>
         </div>
         
     </div>
@@ -5586,7 +5730,7 @@ Promise if no callback passed
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 13 2017 12:31:10 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon May 22 2017 14:32:59 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

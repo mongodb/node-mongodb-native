@@ -150,6 +150,8 @@
             
                 <li data-name="AggregationCursor#group"><a href="AggregationCursor.html#group">group</a></li>
             
+                <li data-name="AggregationCursor#hasNext"><a href="AggregationCursor.html#hasNext">hasNext</a></li>
+            
                 <li data-name="AggregationCursor#isClosed"><a href="AggregationCursor.html#isClosed">isClosed</a></li>
             
                 <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
@@ -517,6 +519,8 @@
                 <li data-name="CommandCursor#close"><a href="CommandCursor.html#close">close</a></li>
             
                 <li data-name="CommandCursor#each"><a href="CommandCursor.html#each">each</a></li>
+            
+                <li data-name="CommandCursor#hasNext"><a href="CommandCursor.html#hasNext">hasNext</a></li>
             
                 <li data-name="CommandCursor#isClosed"><a href="CommandCursor.html#isClosed">isClosed</a></li>
             
@@ -1905,6 +1909,7 @@ var EventEmitter = require('events').EventEmitter
   , MAX_JS_INT = require('./utils').MAX_JS_INT
   , translateOptions = require('./utils').translateOptions
   , filterOptions = require('./utils').filterOptions
+  , getReadPreference = require('./utils').getReadPreference
   , mergeOptions = require('./utils').mergeOptions
   , os = require('os');
 /**
@@ -1929,14 +1934,14 @@ var EventEmitter = require('events').EventEmitter
 // Allowed parameters
 var legalOptionNames = ['ha', 'haInterval', 'replicaSet', 'rs_name', 'secondaryAcceptableLatencyMS'
   , 'connectWithNoPrimary', 'poolSize', 'ssl', 'checkServerIdentity', 'sslValidate'
-  , 'sslCA', 'sslCert', 'sslKey', 'sslPass', 'socketOptions', 'bufferMaxEntries'
+  , 'sslCA', 'sslCert', 'sslCRL', 'sslKey', 'sslPass', 'socketOptions', 'bufferMaxEntries'
   , 'store', 'auto_reconnect', 'autoReconnect', 'emitError'
   , 'keepAlive', 'noDelay', 'connectTimeoutMS', 'socketTimeoutMS', 'strategy', 'debug'
   , 'loggerLevel', 'logger', 'reconnectTries', 'appname', 'domainsEnabled'
   , 'servername', 'promoteLongs', 'promoteValues', 'promoteBuffers', 'maxStalenessSeconds'];
 
 // Get package.json variable
-var driverVersion = require(__dirname + '/../package.json').version;
+var driverVersion = require('../package.json').version;
 var nodejsversion = f('Node.js %s, %s', process.version, os.endianness());
 var type = os.type();
 var name = process.platform;
@@ -1959,6 +1964,7 @@ var release = os.release();
  * @param {boolean|function} [options.checkServerIdentity=true] Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.
  * @param {object} [options.sslValidate=true] Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher)
  * @param {array} [options.sslCA=null] Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher)
+ * @param {array} [options.sslCRL=null] Array of revocation certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher)
  * @param {(Buffer|string)} [options.sslCert=null] String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher)
  * @param {(Buffer|string)} [options.sslKey=null] String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher)
  * @param {(Buffer|string)} [options.sslPass=null] String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher)
@@ -2156,69 +2162,95 @@ ReplSet.prototype.connect = function(db, _options, callback) {
     }
   }
 
+  // Clear out all the current handlers left over
+  var events = ["timeout", "error", "close", 'serverOpening', 'serverDescriptionChanged', 'serverHeartbeatStarted',
+    'serverHeartbeatSucceeded', 'serverHeartbeatFailed', 'serverClosed', 'topologyOpening',
+    'topologyClosed', 'topologyDescriptionChanged', 'joined', 'left', 'ping', 'ha'];
+  events.forEach(function(e) {
+    self.s.replset.removeAllListeners(e);
+  });
+
+  // relay the event
+  var relay = function(event) {
+    return function(t, server) {
+      self.emit(event, t, server);
+    }
+  }
+
+  // Replset events relay
+  var replsetRelay = function(event) {
+    return function(t, server) {
+      self.emit(event, t, server.lastIsMaster(), server);
+    }
+  }
+
+  // Relay ha
+  var relayHa = function(t, state) {
+    self.emit('ha', t, state);
+
+    if(t == 'start') {
+      self.emit('ha_connect', t, state);
+    } else if(t == 'end') {
+      self.emit('ha_ismaster', t, state);
+    }
+  }
+
+  // Set up serverConfig listeners
+  self.s.replset.on('joined', replsetRelay('joined'));
+  self.s.replset.on('left', relay('left'));
+  self.s.replset.on('ping', relay('ping'));
+  self.s.replset.on('ha', relayHa);
+
+  // Set up SDAM listeners
+  self.s.replset.on('serverDescriptionChanged', relay('serverDescriptionChanged'));
+  self.s.replset.on('serverHeartbeatStarted', relay('serverHeartbeatStarted'));
+  self.s.replset.on('serverHeartbeatSucceeded', relay('serverHeartbeatSucceeded'));
+  self.s.replset.on('serverHeartbeatFailed', relay('serverHeartbeatFailed'));
+  self.s.replset.on('serverOpening', relay('serverOpening'));
+  self.s.replset.on('serverClosed', relay('serverClosed'));
+  self.s.replset.on('topologyOpening', relay('topologyOpening'));
+  self.s.replset.on('topologyClosed', relay('topologyClosed'));
+  self.s.replset.on('topologyDescriptionChanged', relay('topologyDescriptionChanged'));
+
+  self.s.replset.on('fullsetup', function() {
+    self.emit('fullsetup', null, self);
+  });
+
+  self.s.replset.on('all', function() {
+    self.emit('all', null, self);
+  });
+
   // Connect handler
   var connectHandler = function() {
-    // Clear out all the current handlers left over
-    ["timeout", "error", "close", 'serverOpening', 'serverDescriptionChanged', 'serverHeartbeatStarted',
-      'serverHeartbeatSucceeded', 'serverHeartbeatFailed', 'serverClosed', 'topologyOpening',
-      'topologyClosed', 'topologyDescriptionChanged'].forEach(function(e) {
-      self.s.replset.removeAllListeners(e);
-    });
-
     // Set up listeners
     self.s.replset.once('timeout', errorHandler('timeout'));
     self.s.replset.once('error', errorHandler('error'));
     self.s.replset.once('close', errorHandler('close'));
 
-    // relay the event
-    var relay = function(event) {
-      return function(t, server) {
-        self.emit(event, t, server);
-      }
-    }
+    // // Set up serverConfig listeners
+    // self.s.replset.on('joined', replsetRelay('joined'));
+    // self.s.replset.on('left', relay('left'));
+    // self.s.replset.on('ping', relay('ping'));
+    // self.s.replset.on('ha', relayHa);
 
-    // Replset events relay
-    var replsetRelay = function(event) {
-      return function(t, server) {
-        self.emit(event, t, server.lastIsMaster(), server);
-      }
-    }
+    // // Set up SDAM listeners
+    // self.s.replset.on('serverDescriptionChanged', relay('serverDescriptionChanged'));
+    // self.s.replset.on('serverHeartbeatStarted', relay('serverHeartbeatStarted'));
+    // self.s.replset.on('serverHeartbeatSucceeded', relay('serverHeartbeatSucceeded'));
+    // self.s.replset.on('serverHeartbeatFailed', relay('serverHeartbeatFailed'));
+    // self.s.replset.on('serverOpening', relay('serverOpening'));
+    // self.s.replset.on('serverClosed', relay('serverClosed'));
+    // self.s.replset.on('topologyOpening', relay('topologyOpening'));
+    // self.s.replset.on('topologyClosed', relay('topologyClosed'));
+    // self.s.replset.on('topologyDescriptionChanged', relay('topologyDescriptionChanged'));
 
-    // Relay ha
-    var relayHa = function(t, state) {
-      self.emit('ha', t, state);
+    // self.s.replset.on('fullsetup', function() {
+    //   self.emit('fullsetup', null, self);
+    // });
 
-      if(t == 'start') {
-        self.emit('ha_connect', t, state);
-      } else if(t == 'end') {
-        self.emit('ha_ismaster', t, state);
-      }
-    }
-
-    // Set up serverConfig listeners
-    self.s.replset.on('joined', replsetRelay('joined'));
-    self.s.replset.on('left', relay('left'));
-    self.s.replset.on('ping', relay('ping'));
-    self.s.replset.on('ha', relayHa);
-
-    // Set up SDAM listeners
-    self.s.replset.on('serverDescriptionChanged', relay('serverDescriptionChanged'));
-    self.s.replset.on('serverHeartbeatStarted', relay('serverHeartbeatStarted'));
-    self.s.replset.on('serverHeartbeatSucceeded', relay('serverHeartbeatSucceeded'));
-    self.s.replset.on('serverHeartbeatFailed', relay('serverHeartbeatFailed'));
-    self.s.replset.on('serverOpening', relay('serverOpening'));
-    self.s.replset.on('serverClosed', relay('serverClosed'));
-    self.s.replset.on('topologyOpening', relay('topologyOpening'));
-    self.s.replset.on('topologyClosed', relay('topologyClosed'));
-    self.s.replset.on('topologyDescriptionChanged', relay('topologyDescriptionChanged'));
-
-    self.s.replset.on('fullsetup', function() {
-      self.emit('fullsetup', null, self);
-    });
-
-    self.s.replset.on('all', function() {
-      self.emit('all', null, self);
-    });
+    // self.s.replset.on('all', function() {
+    //   self.emit('all', null, self);
+    // });
 
     // Emit open event
     self.emit('open', null, self);
@@ -2274,8 +2306,7 @@ define.classMethod('capabilities', {callback: false, promise:false, returns: [Se
 
 // Command
 ReplSet.prototype.command = function(ns, cmd, options, callback) {
-  options = translateReadPreference(options);
-  this.s.replset.command(ns, cmd, options, callback);
+  this.s.replset.command(ns, cmd, getReadPreference(options), callback);
 }
 
 define.classMethod('command', {callback: true, promise:false});
@@ -2495,7 +2526,7 @@ module.exports = ReplSet;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 13 2017 12:31:10 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon May 22 2017 14:32:59 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

@@ -150,6 +150,8 @@
             
                 <li data-name="AggregationCursor#group"><a href="AggregationCursor.html#group">group</a></li>
             
+                <li data-name="AggregationCursor#hasNext"><a href="AggregationCursor.html#hasNext">hasNext</a></li>
+            
                 <li data-name="AggregationCursor#isClosed"><a href="AggregationCursor.html#isClosed">isClosed</a></li>
             
                 <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
@@ -517,6 +519,8 @@
                 <li data-name="CommandCursor#close"><a href="CommandCursor.html#close">close</a></li>
             
                 <li data-name="CommandCursor#each"><a href="CommandCursor.html#each">each</a></li>
+            
+                <li data-name="CommandCursor#hasNext"><a href="CommandCursor.html#hasNext">hasNext</a></li>
             
                 <li data-name="CommandCursor#isClosed"><a href="CommandCursor.html#isClosed">isClosed</a></li>
             
@@ -1908,7 +1912,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line94">line 94</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line96">line 96</a>
         </div>
         
     </div>
@@ -2323,6 +2327,42 @@
                     
                 
                 <p>Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher)</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>sslCRL</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Array of revocation certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher)</p></td>
         </tr>
 	
 	
@@ -2882,7 +2922,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line440">line 440</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line442">line 442</a>
         </div>
         
     </div>
@@ -2958,7 +2998,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line404">line 404</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line406">line 406</a>
         </div>
         
     </div>
@@ -3037,7 +3077,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line496">line 496</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line498">line 498</a>
         </div>
         
     </div>
@@ -3118,7 +3158,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line446">line 446</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line448">line 448</a>
         </div>
         
     </div>
@@ -3199,7 +3239,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line503">line 503</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line505">line 505</a>
         </div>
         
     </div>
@@ -3280,7 +3320,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line482">line 482</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line484">line 484</a>
         </div>
         
     </div>
@@ -3361,7 +3401,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line453">line 453</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line455">line 455</a>
         </div>
         
     </div>
@@ -3556,7 +3596,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line473">line 473</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line475">line 475</a>
         </div>
         
     </div>
@@ -3705,7 +3745,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line464">line 464</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line466">line 466</a>
         </div>
         
     </div>
@@ -3854,7 +3894,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line489">line 489</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line491">line 491</a>
         </div>
         
     </div>
@@ -3935,7 +3975,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line517">line 517</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line519">line 519</a>
         </div>
         
     </div>
@@ -4016,7 +4056,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line510">line 510</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line512">line 512</a>
         </div>
         
     </div>
@@ -4116,7 +4156,7 @@ Mongos instance.
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 13 2017 12:31:10 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon May 22 2017 14:32:59 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

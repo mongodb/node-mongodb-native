@@ -2231,54 +2231,55 @@ joining or leaving a replica set.</p>
 <pre><code class="language-js">var MongoClient = require('mongodb').MongoClient;
 
 var url = 'mongodb://localhost:31000,localhost:31001/db?replicaSet=rs';
+var client = new MongoClient();
 
-MongoClient.connect(url, function(err, db) {
+client.on('serverDescriptionChanged', function(event) {
+  console.log('received serverDescriptionChanged');
+  console.log(JSON.stringify(event, null, 2));
+});
+
+client.on('serverHeartbeatStarted', function(event) {
+  console.log('received serverHeartbeatStarted');
+  console.log(JSON.stringify(event, null, 2));
+});
+
+client.on('serverHeartbeatSucceeded', function(event) {
+  console.log('received serverHeartbeatSucceeded');
+  console.log(JSON.stringify(event, null, 2));
+});
+
+client.on('serverHeartbeatFailed', function(event) {
+  console.log('received serverHeartbeatFailed');
+  console.log(JSON.stringify(event, null, 2));
+});
+
+client.on('serverOpening', function(event) {
+  console.log('received serverOpening');
+  console.log(JSON.stringify(event, null, 2));
+});
+
+client.on('serverClosed', function(event) {
+  console.log('received serverClosed');
+  console.log(JSON.stringify(event, null, 2));
+});
+
+client.on('topologyOpening', function(event) {
+  console.log('received topologyOpening');
+  console.log(JSON.stringify(event, null, 2));
+});
+
+client.on('topologyClosed', function(event) {
+  console.log('received topologyClosed');
+  console.log(JSON.stringify(event, null, 2));
+});
+
+client.on('topologyDescriptionChanged', function(event) {
+  console.log('received topologyDescriptionChanged');
+  console.log(JSON.stringify(event, null, 2));
+});
+
+client.connect(url, function(err, db) {
   if(err) throw err;
-
-  db.topology.on('serverDescriptionChanged', function(event) {
-    console.log('received serverDescriptionChanged');
-    console.log(JSON.stringify(event, null, 2));
-  });
-
-  db.topology.on('serverHeartbeatStarted', function(event) {
-    console.log('received serverHeartbeatStarted');
-    console.log(JSON.stringify(event, null, 2));
-  });
-
-  db.topology.on('serverHeartbeatSucceeded', function(event) {
-    console.log('received serverHeartbeatSucceeded');
-    console.log(JSON.stringify(event, null, 2));
-  });
-
-  db.topology.on('serverHeartbeatFailed', function(event) {
-    console.log('received serverHeartbeatFailed');
-    console.log(JSON.stringify(event, null, 2));
-  });
-
-  db.topology.on('serverOpening', function(event) {
-    console.log('received serverOpening');
-    console.log(JSON.stringify(event, null, 2));
-  });
-
-  db.topology.on('serverClosed', function(event) {
-    console.log('received serverClosed');
-    console.log(JSON.stringify(event, null, 2));
-  });
-
-  db.topology.on('topologyOpening', function(event) {
-    console.log('received topologyOpening');
-    console.log(JSON.stringify(event, null, 2));
-  });
-
-  db.topology.on('topologyClosed', function(event) {
-    console.log('received topologyClosed');
-    console.log(JSON.stringify(event, null, 2));
-  });
-
-  db.topology.on('topologyDescriptionChanged', function(event) {
-    console.log('received topologyDescriptionChanged');
-    console.log(JSON.stringify(event, null, 2));
-  });
 });
 </code></pre>
 

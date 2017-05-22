@@ -1435,7 +1435,7 @@ co(function*() {
   // Modify and return the modified document
   var r = yield col.findOneAndUpdate({a:1}, {$set: {b: 1}}, {
       returnOriginal: false
-    , sort: [[a,1]]
+    , sort: [[&#39;a&#39;,1]]
     , upsert: true
   });
   assert.equal(1, r.value.b);
@@ -1468,7 +1468,7 @@ co(function*() {
 
   // Remove a document from MongoDB and return it
   var r = yield col.findOneAndDelete({a:1}, {
-      sort: [[a,1]]
+      sort: [[&#39;a&#39;,1]]
     });
   assert.ok(r.value.b == null);
   db.close();
@@ -2815,8 +2815,9 @@ MongoClient.connect(url, function(err, db) {
     // Get first documents from cursor using each
     col.find({a:1}).limit(2).each(function(err, doc) {
       if(doc) {
+        // Got a document
+      } else {
         db.close();
-        // Got a document, terminate the each
         return false;
       }
     });

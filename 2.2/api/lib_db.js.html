@@ -150,6 +150,8 @@
             
                 <li data-name="AggregationCursor#group"><a href="AggregationCursor.html#group">group</a></li>
             
+                <li data-name="AggregationCursor#hasNext"><a href="AggregationCursor.html#hasNext">hasNext</a></li>
+            
                 <li data-name="AggregationCursor#isClosed"><a href="AggregationCursor.html#isClosed">isClosed</a></li>
             
                 <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
@@ -517,6 +519,8 @@
                 <li data-name="CommandCursor#close"><a href="CommandCursor.html#close">close</a></li>
             
                 <li data-name="CommandCursor#each"><a href="CommandCursor.html#each">each</a></li>
+            
+                <li data-name="CommandCursor#hasNext"><a href="CommandCursor.html#hasNext">hasNext</a></li>
             
                 <li data-name="CommandCursor#isClosed"><a href="CommandCursor.html#isClosed">isClosed</a></li>
             
@@ -1889,6 +1893,7 @@
             <pre class="prettyprint source linenums"><code>"use strict";
 
 var EventEmitter = require('events').EventEmitter
+  , authenticate = require('./authenticate')
   , inherits = require('util').inherits
   , getSingleProperty = require('./utils').getSingleProperty
   , shallowClone = require('./utils').shallowClone
@@ -1909,6 +1914,7 @@ var EventEmitter = require('events').EventEmitter
   , Logger = require('mongodb-core').Logger
   , Collection = require('./collection')
   , crypto = require('crypto')
+  , mergeOptionsAndWriteConcern = require('./utils').mergeOptionsAndWriteConcern
   , assign = require('./utils').assign;
 
 var debugFields = ['authSource', 'w', 'wtimeout', 'j', 'native_parser', 'forceServerObjectId'
@@ -2299,6 +2305,9 @@ define.classMethod('admin', {callback: false, promise:false, returns: [Admin]});
  * @param {Collection} collection The collection instance.
  */
 
+var collectionKeys = ['pkFactory', 'readPreference'
+  , 'serializeFunctions', 'strict', 'readConcern', 'ignoreUndefined', 'promoteValues', 'promoteBuffers', 'promoteLongs'];
+
 /**
  * Fetch a specific collection (containing the actual collection information). If the application does not use strict mode you can
  * can use it without a callback in the following way: `var collection = db.collection('mycollection');`
@@ -2335,6 +2344,9 @@ Db.prototype.collection = function(name, options, callback) {
     options.ignoreUndefined = this.s.options.ignoreUndefined;
   }
 
+  // Merge in all needed options and ensure correct writeConcern merging from db level
+  options = mergeOptionsAndWriteConcern(options, this.s.options, collectionKeys, true);
+
   // Execute
   if(options == null || !options.strict) {
     try {
@@ -2358,7 +2370,7 @@ Db.prototype.collection = function(name, options, callback) {
   }
 
   // Strict mode
-  this.listCollections({name:name}).toArray(function(err, collections) {
+  this.listCollections({name:name}, options).toArray(function(err, collections) {
     if(err != null) return handleCallback(callback, err, null);
     if(collections.length == 0) return handleCallback(callback, toError(f("Collection %s does not exist. Currently in strict mode.", name)), null);
 
@@ -2818,7 +2830,7 @@ var collections = function(self, callback) {
 
     // Return the collection objects
     handleCallback(callback, null, documents.map(function(d) {
-      return new Collection(self, self.s.topology, self.s.databaseName, d.name.replace(self.s.databaseName + ".", ''), self.s.pkFactory, self.s.options);
+      return new Collection(self, self.s.topology, self.s.databaseName, d.name, self.s.pkFactory, self.s.options);
     }));
   });
 }
@@ -2953,9 +2965,10 @@ var createIndex = function(self, name, fieldOrSpec, options, callback) {
     // 67 = 'CannotCreateIndex' (malformed index options)
     // 85 = 'IndexOptionsConflict' (index already exists with different options)
     // 11000 = 'DuplicateKey' (couldn't build unique index because of dupes)
+    // 11600 = 'InterruptedAtShutdown' (interrupted at shutdown)
     // These errors mean that the server recognized `createIndex` as a command
     // and so we don't need to fallback to an insert.
-    if(err.code === 67 || err.code == 11000 || err.code === 85) {
+    if(err.code === 67 || err.code == 11000 || err.code === 85 || err.code == 11600) {
       return handleCallback(callback, err, result);
     }
 
@@ -3349,74 +3362,6 @@ Db.prototype.removeUser = function(username, options, callback) {
   });
 };
 
-var authenticate = function(self, username, password, options, callback) {
-  // Did the user destroy the topology
-  if(self.serverConfig &amp;&amp; self.serverConfig.isDestroyed()) return callback(new MongoError('topology was destroyed'));
-
-  // the default db to authenticate against is 'self'
-  // if authententicate is called from a retry context, it may be another one, like admin
-  var authdb = options.dbName ? options.dbName : self.databaseName;
-  authdb = self.authSource ? self.authSource : authdb;
-  authdb = options.authdb ? options.authdb : authdb;
-  authdb = options.authSource ? options.authSource : authdb;
-
-  // Callback
-  var _callback = function(err, result) {
-    if(self.listeners('authenticated').length > 0) {
-      self.emit('authenticated', err, result);
-    }
-
-    // Return to caller
-    handleCallback(callback, err, result);
-  }
-
-  // authMechanism
-  var authMechanism = options.authMechanism || '';
-  authMechanism = authMechanism.toUpperCase();
-
-  // If classic auth delegate to auth command
-  if(authMechanism == 'MONGODB-CR') {
-    self.s.topology.auth('mongocr', authdb, username, password, function(err) {
-      if(err) return handleCallback(callback, err, false);
-      _callback(null, true);
-    });
-  } else if(authMechanism == 'PLAIN') {
-    self.s.topology.auth('plain', authdb, username, password, function(err) {
-      if(err) return handleCallback(callback, err, false);
-      _callback(null, true);
-    });
-  } else if(authMechanism == 'MONGODB-X509') {
-    self.s.topology.auth('x509', authdb, username, password, function(err) {
-      if(err) return handleCallback(callback, err, false);
-      _callback(null, true);
-    });
-  } else if(authMechanism == 'SCRAM-SHA-1') {
-    self.s.topology.auth('scram-sha-1', authdb, username, password, function(err) {
-      if(err) return handleCallback(callback, err, false);
-      _callback(null, true);
-    });
-  } else if(authMechanism == 'GSSAPI') {
-    if(process.platform == 'win32') {
-      self.s.topology.auth('sspi', authdb, username, password, options, function(err) {
-        if(err) return handleCallback(callback, err, false);
-        _callback(null, true);
-      });
-    } else {
-      self.s.topology.auth('gssapi', authdb, username, password, options, function(err) {
-        if(err) return handleCallback(callback, err, false);
-        _callback(null, true);
-      });
-    }
-  } else if(authMechanism == 'DEFAULT') {
-    self.s.topology.auth('default', authdb, username, password, function(err) {
-      if(err) return handleCallback(callback, err, false);
-      _callback(null, true);
-    });
-  } else {
-    handleCallback(callback, MongoError.create({message: f("authentication mechanism %s not supported", options.authMechanism), driver:true}));
-  }
-}
-
 /**
  * Authenticate a user against the server.
  * @method
@@ -3426,44 +3371,11 @@ var authenticate = function(self, username, password, options, callback) {
  * @param {string} [options.authMechanism=MONGODB-CR] The authentication mechanism to use, GSSAPI, MONGODB-CR, MONGODB-X509, PLAIN
  * @param {Db~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated This method will no longer be available in the next major release 3.x as MongoDB 3.6 will only allow auth against users in the admin db and will no longer allow multiple credentials on a socket. Please authenticate using MongoClient.connect with auth credentials.
  */
 Db.prototype.authenticate = function(username, password, options, callback) {
-  if(typeof options == 'function') callback = options, options = {};
-  var self = this;
-  // Shallow copy the options
-  options = shallowClone(options);
-
-  // Set default mechanism
-  if(!options.authMechanism) {
-    options.authMechanism = 'DEFAULT';
-  } else if(options.authMechanism != 'GSSAPI'
-    &amp;&amp; options.authMechanism != 'DEFAULT'
-    &amp;&amp; options.authMechanism != 'MONGODB-CR'
-    &amp;&amp; options.authMechanism != 'MONGODB-X509'
-    &amp;&amp; options.authMechanism != 'SCRAM-SHA-1'
-    &amp;&amp; options.authMechanism != 'PLAIN') {
-      return handleCallback(callback, MongoError.create({message: "only DEFAULT, GSSAPI, PLAIN, MONGODB-X509, SCRAM-SHA-1 or MONGODB-CR is supported by authMechanism", driver:true}));
-  }
-
-  // If we have a callback fallback
-  if(typeof callback == 'function') return authenticate(self, username, password, options, function(err, r) {
-    // Support failed auth method
-    if(err &amp;&amp; err.message &amp;&amp; err.message.indexOf('saslStart') != -1) err.code = 59;
-    // Reject error
-    if(err) return callback(err, r);
-    callback(null, r);
-  });
-
-  // Return a promise
-  return new this.s.promiseLibrary(function(resolve, reject) {
-    authenticate(self, username, password, options, function(err, r) {
-      // Support failed auth method
-      if(err &amp;&amp; err.message &amp;&amp; err.message.indexOf('saslStart') != -1) err.code = 59;
-      // Reject error
-      if(err) return reject(err);
-      resolve(r);
-    });
-  });
+  console.warn("Db.prototype.authenticate method will no longer be available in the next major release 3.x as MongoDB 3.6 will only allow auth against users in the admin db and will no longer allow multiple credentials on a socket. Please authenticate using MongoClient.connect with auth credentials.");  
+  return authenticate.apply(this, [this].concat(Array.prototype.slice.call(arguments)));
 };
 
 define.classMethod('authenticate', {callback: true, promise:true});
@@ -3808,7 +3720,7 @@ module.exports = Db;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 13 2017 12:31:10 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon May 22 2017 14:32:59 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

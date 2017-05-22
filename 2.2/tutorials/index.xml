@@ -2221,8 +2221,9 @@ MongoClient.connect(url, function(err, db) {
     // Get first documents from cursor using each
     col.find({a:1}).limit(2).each(function(err, doc) {
       if(doc) {
+        // Got a document
+      } else {
         db.close();
-        // Got a document, terminate the each
         return false;
       }
     });
@@ -2924,7 +2925,7 @@ MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;,
 
 &lt;p&gt;&lt;a href=&#34;http://docs.mongodb.org/manual/core/authentication/#x-509-certificate-authentication&#34;&gt;X.509&lt;/a&gt; authentication requires the use of TLS/SSL connections with certificate validation. MongoDB uses the X.509 certificate presented during SSL negotiation to authenticate a user whose name is derived from the distinguished name of the X.509 certificate.&lt;/p&gt;
 
-&lt;p&gt;To connect using the X.509 authentication mechanism, specify &lt;code&gt;MONGODB-CR&lt;/code&gt; as the mechanism in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI connection string&lt;/a&gt;, &lt;code&gt;ssl=true&lt;/code&gt;, and the username. Use &lt;code&gt;enodeURIComponent&lt;/code&gt; to encode the username string.&lt;/p&gt;
+&lt;p&gt;To connect using the X.509 authentication mechanism, specify &lt;code&gt;MONGODB-X509&lt;/code&gt; as the mechanism in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI connection string&lt;/a&gt;, &lt;code&gt;ssl=true&lt;/code&gt;, and the username. Use &lt;code&gt;enodeURIComponent&lt;/code&gt; to encode the username string.&lt;/p&gt;
 
 &lt;p&gt;In addition to the connection string, pass to the &lt;code&gt;MongoClient.connect&lt;/code&gt; method
 a connections options with  the X.509 certificate and other &lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/reference/connecting/connection-settings/&#34;&gt;TLS/SSL connections&lt;/a&gt; options.&lt;/p&gt;
@@ -2980,6 +2981,12 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test?authMechanism=%s&amp;a
 &lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslCA&lt;/code&gt;&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;{Buffer[]|string[], default: null}&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Array of valid certificates for Certificate Authority either as Buffers or Strings.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslCRL&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer[]|string[], default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Array of revocation certificates as Buffers or Strings.&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;

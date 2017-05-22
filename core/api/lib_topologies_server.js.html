@@ -513,6 +513,8 @@
             
                 <li data-name="Mongos#destroy"><a href="Mongos.html#destroy">destroy</a></li>
             
+                <li data-name="Mongos#getConnection"><a href="Mongos.html#getConnection">getConnection</a></li>
+            
                 <li data-name="Mongos#getServer"><a href="Mongos.html#getServer">getServer</a></li>
             
                 <li data-name="Mongos#insert"><a href="Mongos.html#insert">insert</a></li>
@@ -667,6 +669,8 @@
                 <li data-name="ReplSet#cursor"><a href="ReplSet.html#cursor">cursor</a></li>
             
                 <li data-name="ReplSet#destroy"><a href="ReplSet.html#destroy">destroy</a></li>
+            
+                <li data-name="ReplSet#getConnection"><a href="ReplSet.html#getConnection">getConnection</a></li>
             
                 <li data-name="ReplSet#getServer"><a href="ReplSet.html#getServer">getServer</a></li>
             
@@ -973,7 +977,7 @@ var inherits = require('util').inherits,
 // Used for filtering out fields for loggin
 var debugFields = ['reconnect', 'reconnectTries', 'reconnectInterval', 'emitError', 'cursorFactory', 'host'
   , 'port', 'size', 'keepAlive', 'keepAliveInitialDelay', 'noDelay', 'connectionTimeout', 'checkServerIdentity'
-  , 'socketTimeout', 'singleBufferSerializtion', 'ssl', 'ca', 'cert', 'key', 'rejectUnauthorized', 'promoteLongs', 'promoteValues'
+  , 'socketTimeout', 'singleBufferSerializtion', 'ssl', 'ca', 'crl', 'cert', 'key', 'rejectUnauthorized', 'promoteLongs', 'promoteValues'
   , 'promoteBuffers', 'servername'];
 
 // Server instance id
@@ -1002,6 +1006,7 @@ var BSON = retrieveBSON();
  * @param {boolean} [options.ssl=false] Use SSL for connection
  * @param {boolean|function} [options.checkServerIdentity=true] Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.
  * @param {Buffer} [options.ca] SSL Certificate store binary buffer
+ * @param {Buffer} [options.crl] SSL Certificate revocation store binary buffer
  * @param {Buffer} [options.cert] SSL Certificate binary buffer
  * @param {Buffer} [options.key] SSL Key file binary buffer
  * @param {string} [options.passphrase] SSL Certificate pass phrase
@@ -1167,7 +1172,8 @@ function monitoringProcess(self) {
 
     // Execute the ismaster query
     self.s.pool.write(query, {
-      socketTimeout: self.s.options.connectionTimeout || 2000,
+      socketTimeout: (typeof self.s.options.connectionTimeout !== 'number') ? 2000 : self.s.options.connectionTimeout,
+      monitoring: true,
     }, function(err, result) {
       // Set initial lastIsMasterMS
       self.lastIsMasterMS = new Date().getTime() - start;
@@ -1274,7 +1280,7 @@ var eventHandler = function(self, event) {
       // On first connect fail
       if(self.s.pool.state == 'disconnected' &amp;&amp; self.initalConnect &amp;&amp; ['close', 'timeout', 'error', 'parseError'].indexOf(event) != -1) {
         self.initalConnect = false;
-        return self.emit('error', new MongoError(f('failed to connect to server [%s] on first connect', self.name)));
+        return self.emit('error', new MongoError(f('failed to connect to server [%s] on first connect [%s]', self.name, err)));
       }
 
       // Reconnect event, emit the server
@@ -1413,6 +1419,7 @@ function basicReadValidations(self, options) {
  * @param {object} cmd The command hash
  * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
  * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
+ * @param {Boolean} [options.checkKeys=false] Specify if the bson parser should validate keys.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {Boolean} [options.fullResult=false] Return the full envelope instead of just the result document.
  * @param {opResultCallback} callback A callback function
@@ -1422,6 +1429,9 @@ Server.prototype.command = function(ns, cmd, options, callback) {
   if(typeof options == 'function') callback = options, options = {}, options = options || {};
   var result = basicReadValidations(self, options);
   if(result) return callback(result);
+
+  // Clone the options
+  options = assign({}, options, { wireProtocolCommand: false });
 
   // Debug log
   if(self.s.logger.isDebug()) self.s.logger.debug(f('executing command [%s] against %s', JSON.stringify({
@@ -1445,8 +1455,10 @@ Server.prototype.command = function(ns, cmd, options, callback) {
     ignoreUndefined: typeof options.ignoreUndefined == 'boolean' ? options.ignoreUndefined : false
   };
 
-  // Create a query instance
-  var query = new Query(self.s.bson, ns, cmd, queryOptions);
+  // Are we executing against a specific topology
+  var topology = options.topology || {};
+  // Create the query object
+  var query = self.wireProtocolHandler.command(self.s.bson, ns, cmd, {}, topology, options);
   // Set slave OK of the query
   query.slaveOk = options.readPreference ? options.readPreference.slaveOk() : false;
 
@@ -1837,7 +1849,7 @@ module.exports = Server;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Feb 13 2017 12:31:19 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon May 22 2017 14:33:08 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>
