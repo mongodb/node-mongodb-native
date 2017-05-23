@@ -159,9 +159,7 @@ exports['Correctly receive the APM events for a listIndexes command'] = {
     var failed = [];
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.on('fullsetup', function(err, db) {
-      test.equal(null, err);
-
+    db.on('fullsetup', function(topology, db) {
       db.collection('apm_test_list_collections').insertOne({a:1}, configuration.writeConcernMax()).then(function(r) {
         test.equal(1, r.insertedCount);
 
