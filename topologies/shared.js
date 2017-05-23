@@ -123,8 +123,8 @@ var getTopologyType = function(self, ismaster) {
   }
 
   if(!ismaster) return 'Unknown';
-  if(ismaster.ismaster && !ismaster.hosts) return 'Standalone';
   if(ismaster.ismaster && ismaster.msg == 'isdbgrid') return 'Mongos';
+  if(ismaster.ismaster && !ismaster.hosts) return 'Standalone';
   if(ismaster.ismaster) return 'RSPrimary';
   if(ismaster.secondary) return 'RSSecondary';
   if(ismaster.arbiterOnly) return 'RSArbiter';
@@ -259,6 +259,88 @@ function Timeout(fn, time) {
   };  
 }
 
+function diff(previous, current) {
+  // Difference document
+  var diff = {
+    servers: []
+  }
+
+  // Previous entry
+  if(!previous) {
+    previous = { servers: [] };
+  }
+
+  // Check if we have any previous servers missing in the current ones
+  for(var i = 0; i < previous.servers.length; i++) {
+    var found = false;
+
+    for(var j = 0; j < current.servers.length; j++) {
+      if(current.servers[j].address.toLowerCase()
+        === previous.servers[i].address.toLowerCase()) {
+          found = true;
+          break;
+        }
+    }
+
+    if(!found) {
+      // Add to the diff
+      diff.servers.push({
+        address: previous.servers[i].address,
+        from: previous.servers[i].type,
+        to: 'Unknown',
+      });
+    }
+  }
+
+  // Check if there are any severs that don't exist
+  for(var j = 0; j < current.servers.length; j++) {
+    var found = false;
+
+    // Go over all the previous servers
+    for(var i = 0; i < previous.servers.length; i++) {
+      if(previous.servers[i].address.toLowerCase() 
+        === current.servers[j].address.toLowerCase()) {
+        found = true;
+        break;
+      }
+    }
+
+    // Add the server to the diff
+    if(!found) {
+      diff.servers.push({
+        address: current.servers[j].address,
+        from: 'Unknown',
+        to: current.servers[j].type,
+      });
+    }
+  }
+
+  // Got through all the servers
+  for(var i = 0; i < previous.servers.length; i++) {
+    var prevServer = previous.servers[i];
+
+    // Go through all current servers
+    for(var j = 0; j < current.servers.length; j++) {
+      var currServer = current.servers[j];
+
+      // Matching server
+      if(prevServer.address.toLowerCase() === currServer.address.toLowerCase()) {
+        // We had a change in state
+        if(prevServer.type != currServer.type) {
+          diff.servers.push({
+            address: prevServer.address,
+            from: prevServer.type,
+            to: currServer.type
+          });
+        }
+      }
+    }
+  }
+
+  // Return difference
+  return diff;
+}
+
 module.exports.inquireServerState = inquireServerState
 module.exports.getTopologyType = getTopologyType;
 module.exports.emitServerDescriptionChanged = emitServerDescriptionChanged;
@@ -267,5 +349,6 @@ module.exports.cloneOptions = cloneOptions;
 module.exports.assign = assign;
 module.exports.createClientInfo = createClientInfo;
 module.exports.clone = clone;
+module.exports.diff = diff;
 module.exports.Interval = Interval;
 module.exports.Timeout = Timeout;

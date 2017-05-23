@@ -282,13 +282,15 @@ var eventHandler = function(self, event) {
 
         // Emit server description changed if something listening
         sdam.emitServerDescriptionChanged(self, {
-          address: self.name, arbiters: [], hosts: [], passives: [], type: !self.s.inTopology ? 'Standalone' : sdam.getTopologyType(self)
+          address: self.name, arbiters: [], hosts: [], passives: [], type: sdam.getTopologyType(self)
         });
 
-        // Emit topology description changed if something listening
-        sdam.emitTopologyDescriptionChanged(self, {
-          topologyType: 'Single', servers: [{address: self.name, arbiters: [], hosts: [], passives: [], type: 'Standalone'}]
-        });
+        if(!self.s.inTopology) {
+          // Emit topology description changed if something listening
+          sdam.emitTopologyDescriptionChanged(self, {
+            topologyType: 'Single', servers: [{address: self.name, arbiters: [], hosts: [], passives: [], type: 'Standalone'}]
+          });
+        }
 
         // Log the ismaster if available
         if(self.s.logger.isInfo()) {

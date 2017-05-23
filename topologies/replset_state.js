@@ -2,6 +2,7 @@
 
 var inherits = require('util').inherits,
   f = require('util').format,
+  diff = require('./shared').diff,
   EventEmitter = require('events').EventEmitter,
   Logger = require('../connection/logger'),
   ReadPreference = require('./read_preference'),
@@ -117,6 +118,9 @@ ReplSetState.prototype.destroy = function(options) {
   this.ghosts = [];
   this.unknownServers = [];
   this.set = {};
+  this.primary = null;
+  // Emit the topology changed
+  emitTopologyDescriptionChanged(this);
 }
 
 ReplSetState.prototype.remove = function(server, options) {
@@ -955,57 +959,25 @@ function emitTopologyDescriptionChanged(self) {
       return description;
     }));
 
+    // Get the diff
+    var diffResult = diff(self.replicasetDescription, description);
+
     // Create the result
     var result = {
       topologyId: self.id,
       previousDescription: self.replicasetDescription,
       newDescription: description,
-      diff: diff(self.replicasetDescription, description)
+      diff: diffResult,
     };
 
     // Emit the topologyDescription change
-    self.emit('topologyDescriptionChanged', result);
+    // if(diffResult.servers.length > 0) {
+      self.emit('topologyDescriptionChanged', result);
+    // }
 
     // Set the new description
     self.replicasetDescription = description;
   }
-}
-
-function diff(previous, current) {
-  // Difference document
-  var diff = {
-    servers: []
-  }
-
-  // Previous entry
-  if(!previous) {
-    previous = { servers: [] };
-  }
-
-  // Got through all the servers
-  for(var i = 0; i < previous.servers.length; i++) {
-    var prevServer = previous.servers[i];
-
-    // Go through all current servers
-    for(var j = 0; j < current.servers.length; j++) {
-      var currServer = current.servers[j];
-
-      // Matching server
-      if(prevServer.address.toLowerCase() === currServer.address.toLowerCase()) {
-        // We had a change in state
-        if(prevServer.type != currServer.type) {
-          diff.servers.push({
-            address: prevServer.address,
-            from: prevServer.type,
-            to: currServer.type
-          });
-        }
-      }
-    }
-  }
-
-  // Return difference
-  return diff;
 }
 
 module.exports = ReplSetState;
