@@ -275,8 +275,14 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
         ]
       },
       "diff": {
-        "servers": []
-      }
+        "servers": [
+          {
+            "address": "localhost:32000",
+            "from": "Unknown",
+            "to": "RSPrimary"
+          }
+        ]
+      }      
     };
 
     var document2 = {
@@ -330,7 +336,13 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
         ]
       },
       "diff": {
-        "servers": []
+        "servers": [
+          {
+            "address": "localhost:32001",
+            "from": "Unknown",
+            "to": "RSSecondary"
+          }
+        ]
       }
     };
 
@@ -409,7 +421,13 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
         ]
       },
       "diff": {
-        "servers": []
+        "servers": [
+          {
+            "address": "localhost:32002",
+            "from": "Unknown",
+            "to": "RSArbiter"
+          }
+        ]
       }
     };
 

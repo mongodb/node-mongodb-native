@@ -291,6 +291,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
 
             test.ok(server.s.replicaSetState.primary != null);
             test.equal('localhost:32000', server.s.replicaSetState.primary.name);
+        // console.log("DONE")
 
             primaryServer.destroy();
             firstSecondaryServer.destroy();
