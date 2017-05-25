@@ -33,7 +33,7 @@
     "integra": "0.1.8",
     "jsdoc": "3.4.0",
     "ldjson-stream": "^1.2.1",
-    "mongodb-extended-json": "1.7.1",
+    "mongodb-extended-json": "1.8.0",
     "mongodb-topology-manager": "1.0.x",
     "mongodb-version-manager": "christkv/mongodb-version-manager#master",
     "nyc": "^8.1.0",
