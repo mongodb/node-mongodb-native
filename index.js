@@ -1,4 +1,5 @@
 var BSON = require('bson');
+var require_optional = require('require_optional');
 
 try {
   // try { BSON = require('bson-ext'); } catch(err) {
