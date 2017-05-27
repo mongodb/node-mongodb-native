@@ -562,3 +562,28 @@ exports['should correctly execute close function in order'] = {
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyGetErrorCreatingExistingView = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+
+    // Establish connection to db
+    db.open(function(err, db) {
+      var _db = db.db("nonexistingdb");
+      // Let's create the view
+      _db.createView('test_create_view', 'test_resave_dbref', function(err, result) {
+        test.equal(null, err);
+        test.equal(true, result);
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
