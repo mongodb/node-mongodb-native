@@ -19,11 +19,12 @@ exports['Should correctly execute Collection.prototype.insertOne as promise'] = 
       ? f('%s&%s', url, 'maxPoolSize=100')
       : f('%s?%s', url, 'maxPoolSize=100');
 
-    MongoClient.connect(url).then(function(db) {
-      test.equal(1, db.serverConfig.connections().length);
+    MongoClient.connect(url).then(function(client) {
+      var db = client.db(configuration.database);
+      test.equal(1, client.topology.connections().length);
 
       db.collection('insertOne').insertOne({a:1}).then(function(r) {
-        db.close();
+        client.close();
         test.done();
       });
     });

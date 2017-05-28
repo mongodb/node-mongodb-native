@@ -5,6 +5,7 @@ var Runner = require('integra').Runner
   , RCover = require('integra').RCover
   , f = require('util').format
   , path = require('path')
+  , assign = require('../lib/utils').assign
   , NodeVersionFilter = require('./filters/node_version_filter')
   , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
   , MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
@@ -58,8 +59,12 @@ if(argv.s) {
  * Standalone MongoDB Configuration
  */
 var f = require('util').format;
-var mongo = require('..');
-var Logger = mongo.Logger;
+var Server = require('..').Server,
+  ReplSet = require('..').ReplSet,
+  Mongos = require('..').Mongos, 
+  Db = require('..').Db, 
+  MongoClient = require('..').MongoClient, 
+  Logger = require('..').Logger;
 
 var clone = function(obj) {
   var copy = {};
@@ -85,7 +90,7 @@ var Configuration = function(options) {
 
   // Default function
   var defaultFunction = function(host, port, options) {
-    return new mongo.Server(host, port, options || {});
+    return new Server(host, port, options || {});
   };
 
   // Create a topology function
@@ -120,12 +125,13 @@ var Configuration = function(options) {
               console.log("[started the topology]");
               var Logger = require('mongodb-topology-manager').Logger;
               // Logger.setLevel('info');
+              
               // Create an instance
-              new mongo.Db(self.db, topology(host, port)).open(function(err, db) {
+              new MongoClient(topology(host, port)).connect(function(err, client) {
                 if(err) return callback(err);
 
-                db.dropDatabase(function(err) {
-                  db.close();
+                client.db(self.db).dropDatabase(function(err) {
+                  client.close();
                   callback();
                 });
               });
@@ -182,14 +188,17 @@ var Configuration = function(options) {
         var host = serverOptions && serverOptions.host || 'localhost';
 
         // Default topology
-        var topology = mongo.Server;
+        var topology = Server;
         // If we have a specific topology
         if(options.topology) {
           topology = options.topology;
         }
 
-        // Return a new db instance
-        return new mongo.Db(db, new topology(host, port, serverOptions), dbOptions);
+        // Return a new MongoClient instance
+        return new MongoClient(new topology(host, port, serverOptions), dbOptions);
+
+        // // Return a new db instance
+        // return new Db(db, new topology(host, port, serverOptions), dbOptions);
       },
 
       newDbInstanceWithDomainSocket: function(dbOptions, serverOptions) {
@@ -197,7 +206,7 @@ var Configuration = function(options) {
         if(options.newDbInstanceWithDomainSocket) return options.newDbInstanceWithDomainSocket(dbOptions, serverOptions);
 
         // Default topology
-        var topology = mongo.Server;
+        var topology = Server;
         // If we have a specific topology
         if(options.topology) {
           topology = options.topology;
@@ -211,11 +220,11 @@ var Configuration = function(options) {
         if(keys.indexOf('sslOnNormalPorts') != -1) serverOptions.ssl = true;
         // If we explicitly testing undefined port behavior
         if(serverOptions && serverOptions.port == 'undefined') {
-          return new mongo.Db(db, topology(host, undefined, serverOptions), dbOptions);
+          return new Db(db, topology(host, undefined, serverOptions), dbOptions);
         }
 
         // Normal socket connection
-        return new mongo.Db(db, topology(host, serverOptions), dbOptions);
+        return new Db(db, topology(host, serverOptions), dbOptions);
       },
 
       url: function(username, password) {
@@ -231,7 +240,7 @@ var Configuration = function(options) {
 
       // Additional parameters needed
       database: db || options.db,
-      require: mongo,
+      require: require('..'),
       port: port,
       host: host,
       setName: setName,
@@ -552,8 +561,8 @@ if(argv.t == 'functional') {
             serverOptions.rs_name = 'rs';
             serverOptions.poolSize = 1;
             serverOptions.autoReconnect = false;
-            return new mongo.ReplSet([
-              new mongo.Server(host, port, serverOptions)
+            return new ReplSet([
+              new Server(host, port, serverOptions)
             ], serverOptions);
           }
         , manager: new ReplSetManager('mongod', nodes, {
@@ -582,8 +591,8 @@ if(argv.t == 'functional') {
         var options = options || {};
         options.autoReconnect = false;
 
-        return new mongo.Mongos([
-          new mongo.Server(host, port, options)
+        return new Mongos([
+          new Server(host, port, options)
         ], options);
       }, manager: new ShardingManager({})
     }
@@ -607,7 +616,7 @@ if(argv.t == 'functional') {
         serverOptions.poolSize = 1;
         serverOptions.ssl = true;
         serverOptions.sslValidate = false;
-        return new mongo.Server(host, port, serverOptions);
+        return new Server(host, port, serverOptions);
       }, manager: new ServerManager('mongod', {
         dbpath: path.join(path.resolve('db'), f("data-%d", 27017)),
         sslOnNormalPorts: null,
@@ -630,7 +639,7 @@ if(argv.t == 'functional') {
         port = port || 27017;
         serverOptions = clone(serverOptions);
         serverOptions.poolSize = 1;
-        return new mongo.Server(host, port, serverOptions);
+        return new Server(host, port, serverOptions);
       }, manager: new ServerManager('mongod', {
         dbpath: path.join(path.resolve('db'), f("data-%d", 27017)),
         auth:null
@@ -651,7 +660,7 @@ if(argv.t == 'functional') {
         port = port || 27017;
         serverOptions = clone(serverOptions);
         serverOptions.poolSize = 1;
-        return new mongo.Server(host, port, serverOptions);
+        return new Server(host, port, serverOptions);
       }, manager: new ServerManager('mongod', {
         dbpath: path.join(path.resolve('db'), f("data-%d", 27017)),
         auth:null

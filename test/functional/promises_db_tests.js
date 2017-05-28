@@ -19,10 +19,12 @@ exports['Should correctly connect with MongoClient.connect using Promise'] = {
       ? f('%s&%s', url, 'maxPoolSize=100')
       : f('%s?%s', url, 'maxPoolSize=100');
 
-    MongoClient.connect(url).then(function(db) {
-      test.equal(1, db.serverConfig.connections().length);
+    MongoClient.connect(url).then(function(client) {
+      test.equal(1, client
+        .topology
+        .connections().length);
 
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -39,9 +41,9 @@ exports['Should correctly connect using Db.open and promise'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    db.open().then(function(db) {
-      db.close();
+    var client = configuration.newDbInstance({w:1}, {poolSize:1});
+    client.connect().then(function(client) {
+      client.close();
       test.done();
     });
   }
@@ -64,12 +66,12 @@ exports['Should correctly execute ismaster using Promise'] = {
       ? f('%s&%s', url, 'maxPoolSize=5')
       : f('%s?%s', url, 'maxPoolSize=5');
 
-    MongoClient.connect(url).then(function(db) {
+    MongoClient.connect(url).then(function(client) {
       // Execute ismaster
-      db.command({ismaster:true}).then(function(result) {
+      client.db(configuration.database).command({ismaster:true}).then(function(result) {
         test.ok(result != null);
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -93,13 +95,13 @@ exports['Should correctly catch command error using Promise'] = {
       ? f('%s&%s', url, 'maxPoolSize=5')
       : f('%s?%s', url, 'maxPoolSize=5');
 
-    MongoClient.connect(url).then(function(db) {
+    MongoClient.connect(url).then(function(client) {
       // Execute ismaster
-      db.command({nosuchcommand:true}).then(function(result) {
+      client.db(configuration.database).command({nosuchcommand:true}).then(function(result) {
       }).catch(function(err) {
 
         // Execute close using promise
-        db.close().then(function() {
+        client.close().then(function() {
           test.done();
         });
       });
@@ -124,11 +126,11 @@ exports['Should correctly createCollecton using Promise'] = {
       ? f('%s&%s', url, 'maxPoolSize=5')
       : f('%s?%s', url, 'maxPoolSize=5');
 
-    MongoClient.connect(url).then(function(db) {
-      db.createCollection('promiseCollection').then(function(col) {
+    MongoClient.connect(url).then(function(client) {
+      client.db(configuration.database).createCollection('promiseCollection').then(function(col) {
         test.ok(col != null);
 
-        db.close();
+        client.close();
         test.done();
       }).catch(function(err) {
         console.log(err.stack)
@@ -154,11 +156,11 @@ exports['Should correctly execute stats using Promise'] = {
       ? f('%s&%s', url, 'maxPoolSize=5')
       : f('%s?%s', url, 'maxPoolSize=5');
 
-    MongoClient.connect(url).then(function(db) {
-      db.stats().then(function(stats) {
+    MongoClient.connect(url).then(function(client) {
+      client.db(configuration.database).stats().then(function(stats) {
         test.ok(stats != null);
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -182,11 +184,11 @@ exports['Should correctly execute eval using Promise'] = {
       ? f('%s&%s', url, 'maxPoolSize=5')
       : f('%s?%s', url, 'maxPoolSize=5');
 
-    MongoClient.connect(url).then(function(db) {
-      db.eval('function (x) {return x;}', [3], {nolock:true}).then(function(result) {
+    MongoClient.connect(url).then(function(client) {
+      client.db(configuration.database).eval('function (x) {return x;}', [3], {nolock:true}).then(function(result) {
         test.ok(result != null);
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -210,9 +212,12 @@ exports['Should correctly rename and drop collection using Promise'] = {
       ? f('%s&%s', url, 'maxPoolSize=5')
       : f('%s?%s', url, 'maxPoolSize=5');
 
-    MongoClient.connect(url).then(function(db) {
+    MongoClient.connect(url).then(function(client) {
+      var db = client.db(configuration.database);
+
       db.createCollection('promiseCollection1').then(function(col) {
         test.ok(col != null);
+        var db = client.db(configuration.database);
 
         // console.log("--- 0")
         db.renameCollection('promiseCollection1', 'promiseCollection2').then(function(col) {
@@ -223,7 +228,7 @@ exports['Should correctly rename and drop collection using Promise'] = {
             // console.log("--- 2")
             test.ok(r);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -249,11 +254,11 @@ exports['Should correctly drop database using Promise'] = {
       ? f('%s&%s', url, 'maxPoolSize=5')
       : f('%s?%s', url, 'maxPoolSize=5');
 
-    MongoClient.connect(url).then(function(db) {
-      db.dropDatabase().then(function(r) {
+    MongoClient.connect(url).then(function(client) {
+      client.db(configuration.database).dropDatabase().then(function(r) {
         test.ok(r);
 
-        db.close();
+        client.close();
         test.done();
       }).catch(function(e) {
         console.dir(e)
@@ -279,7 +284,9 @@ exports['Should correctly createCollections and call collections with Promise'] 
       ? f('%s&%s', url, 'maxPoolSize=5')
       : f('%s?%s', url, 'maxPoolSize=5');
 
-    MongoClient.connect(url).then(function(db) {
+    MongoClient.connect(url).then(function(client) {
+      var db = client.db(configuration.database);
+
       db.createCollection('promiseCollectionCollections1').then(function(col) {
         test.ok(col != null);
 
@@ -289,7 +296,7 @@ exports['Should correctly createCollections and call collections with Promise'] 
           db.collections().then(function(r) {
             test.ok(Array.isArray(r));
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -315,12 +322,13 @@ exports['Should correctly execute executeDbAdminCommand using Promise'] = {
       ? f('%s&%s', url, 'maxPoolSize=5')
       : f('%s?%s', url, 'maxPoolSize=5');
 
-    MongoClient.connect(url).then(function(db) {
-      db.executeDbAdminCommand({ismaster:true}).then(function(r) {
-        test.ok(r);
+    MongoClient.connect(url).then(function(client) {
+      client.db(configuration.database)
+        .executeDbAdminCommand({ismaster:true}).then(function(r) {
+          test.ok(r);
 
-        db.close();
-        test.done();
+          client.close();
+          test.done();
       });
     });
   }
@@ -343,13 +351,15 @@ exports['Should correctly execute creatIndex using Promise'] = {
       ? f('%s&%s', url, 'maxPoolSize=5')
       : f('%s?%s', url, 'maxPoolSize=5');
 
-    MongoClient.connect(url).then(function(db) {
+    MongoClient.connect(url).then(function(client) {
       // Create an index
-      db.createIndex('promiseCollectionCollections1', {a:1}).then(function(r) {
-        test.ok(r != null);
+      client
+        .db(configuration.database)
+        .createIndex('promiseCollectionCollections1', {a:1}).then(function(r) {
+          test.ok(r != null);
 
-        db.close();
-        test.done();
+          client.close();
+          test.done();
       });
     });
   }
@@ -372,13 +382,15 @@ exports['Should correctly execute ensureIndex using Promise'] = {
       ? f('%s&%s', url, 'maxPoolSize=5')
       : f('%s?%s', url, 'maxPoolSize=5');
 
-    MongoClient.connect(url).then(function(db) {
+    MongoClient.connect(url).then(function(client) {
       // Create an index
-      db.ensureIndex('promiseCollectionCollections2', {a:1}).then(function(r) {
-        test.ok(r != null);
+      client
+        .db(configuration.database)
+        .ensureIndex('promiseCollectionCollections2', {a:1}).then(function(r) {
+          test.ok(r != null);
 
-        db.close();
-        test.done();
+          client.close();
+          test.done();
       });
     });
   }
@@ -397,15 +409,17 @@ exports['Should correctly execute createCollection using passed down bluebird Pr
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     var db = null;
+    var client = null;
     var BlueBird = require('bluebird');
 
-    MongoClient.connect(configuration.url(), {promiseLibrary: BlueBird}).then(function(conn) {
-      db = conn;
+    MongoClient.connect(configuration.url(), {promiseLibrary: BlueBird}).then(function(_client) {
+      client = _client;
+      db = client.db(configuration.database);
       return db.createCollection('test');
     }).then(function(col) {
       test.ok(col.s.options.promiseLibrary != null);
 
-      db.close();
+      client.close();
       test.done();
     });
   }
