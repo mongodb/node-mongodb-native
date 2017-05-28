@@ -15,23 +15,21 @@ exports['Should Correctly Do MongoClient with bufferMaxEntries:0 and ordered exe
     var MongoClient = configuration.require.MongoClient;
     MongoClient.connect(configuration.url(), {
       db: {bufferMaxEntries:0}, server: { sslValidate: false },
-    }, function(err, db) {
+    }, function(err, client) {
+      var db = client.db(configuration.database);
       // Listener for closing event
       var closeListener = function(has_error) {
-        // console.log("!!!!!!!!! closeListener")
         // Let's insert a document
         var collection = db.collection('test_object_id_generation.data2');
         // Insert another test document and collect using ObjectId
         var docs = [];
         for(var i = 0; i < 1500; i++) docs.push({a:i})
 
-        // console.log("!!!!!!!!! closeListener 1")
         collection.insert(docs, configuration.writeConcern(), function(err, ids) {
-          // console.log("!!!!!!!!! closeListener 2")
           test.ok(err != null);
           test.ok(err.message.indexOf("0") != -1)
           // Let's close the db
-          db.close();
+          client.close();
           test.done();
         });
       };
@@ -57,7 +55,8 @@ exports['Should Correctly Do MongoClient with bufferMaxEntries:0 and unordered e
     var MongoClient = configuration.require.MongoClient;
     MongoClient.connect(configuration.url(), {
       db: {bufferMaxEntries:0}, server: { sslValidate: false },
-    }, function(err, db) {
+    }, function(err, client) {
+      var db = client.db(configuration.database);
       // Listener for closing event
       var closeListener = function(has_error) {
         // Let's insert a document
@@ -73,7 +72,7 @@ exports['Should Correctly Do MongoClient with bufferMaxEntries:0 and unordered e
           test.ok(err != null);
           test.ok(err.message.indexOf("0") != -1)
           // Let's close the db
-          db.close();
+          client.close();
           test.done();
         });
       };
@@ -114,7 +113,10 @@ exports['Should correctly pass through extra db options'] = {
         , numberOfRetries: 10
         , bufferMaxEntries: 0
       },
-    }, function(err, db) {
+    }, function(err, client) {
+      var db = client.db(configuration.database);
+      console.dir(db.writeConcern)
+
       test.equal(1, db.writeConcern.w);
       test.equal(1000, db.writeConcern.wtimeout);
       test.equal(true, db.writeConcern.fsync);
@@ -132,7 +134,7 @@ exports['Should correctly pass through extra db options'] = {
       test.equal(10, db.s.options.numberOfRetries);
       test.equal(0, db.s.options.bufferMaxEntries);
 
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -160,7 +162,9 @@ exports['Should correctly pass through extra server options'] = {
           , socketTimeoutMS: 555555
         }
       },
-    }, function(err, db) {
+    }, function(err, client) {
+      var db = client.db(configuration.database);
+
       test.equal(10, db.s.topology.s.poolSize);
       test.equal(false, db.s.topology.autoReconnect);
       test.equal(444444, db.s.topology.s.clonedOptions.connectionTimeout);
@@ -168,7 +172,7 @@ exports['Should correctly pass through extra server options'] = {
       test.equal(true, db.s.topology.s.clonedOptions.keepAlive);
       test.equal(100, db.s.topology.s.clonedOptions.keepAliveInitialDelay);
 
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -201,7 +205,9 @@ exports['Should correctly pass through extra replicaset options'] = {
           , socketTimeoutMS: 555555
         }
       }
-    }, function(err, db) {
+    }, function(err, client) {
+      var db = client.db(configuration.database);
+
       test.equal(false, db.s.topology.s.clonedOptions.ha);
       test.equal(10000, db.s.topology.s.clonedOptions.haInterval);
       test.equal('rs', db.s.topology.s.clonedOptions.setName);
@@ -214,7 +220,7 @@ exports['Should correctly pass through extra replicaset options'] = {
       test.equal(true, db.s.topology.s.clonedOptions.keepAlive);
       test.equal(100, db.s.topology.s.clonedOptions.keepAliveInitialDelay);
 
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -244,7 +250,9 @@ exports['Should correctly pass through extra sharded options'] = {
           , socketTimeoutMS: 555555
         }
       }
-    }, function(err, db) {
+    }, function(err, client) {
+      var db = client.db(configuration.database);
+
       test.equal(false, db.s.topology.s.clonedOptions.ha);
       test.equal(10000, db.s.topology.s.clonedOptions.haInterval);
       test.equal(100, db.s.topology.s.clonedOptions.localThresholdMS);
@@ -255,7 +263,7 @@ exports['Should correctly pass through extra sharded options'] = {
       test.equal(true, db.s.topology.s.clonedOptions.keepAlive);
       test.equal(100, db.s.topology.s.clonedOptions.keepAliveInitialDelay);
 
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -277,11 +285,13 @@ exports['Should correctly set MaxPoolSize on single server'] = {
       ? f('%s&%s', url, 'maxPoolSize=100')
       : f('%s?%s', url, 'maxPoolSize=100');
 
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
+      var db = client.db(configuration.database);
+
       test.equal(1, db.serverConfig.connections().length);
       test.equal(100, db.serverConfig.s.server.s.pool.size);
 
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -303,53 +313,35 @@ exports['Should correctly set MaxPoolSize on replicaset server'] = {
       ? f('%s&%s', url, 'maxPoolSize=100')
       : f('%s?%s', url, 'maxPoolSize=100');
 
-    MongoClient.connect(url, {}, function(err, db) {
-      // console.log("============================= 0")
-      // console.dir(db.serverConfig.connections().length)
+    MongoClient.connect(url, {}, function(err, client) {
+      var db = client.db(configuration.database);
       test.ok(db.serverConfig.connections().length >= 1);
 
-      // db.on('all', function() {
-        // console.log("============================= 1")
+      var connections = db.serverConfig.connections();
+
+      for(var i = 0; i < connections.length; i++) {
+        test.equal(30000, connections[i].connectionTimeout);
+        test.equal(30000, connections[i].socketTimeout);
+      }
+
+      client.close();
+
+      MongoClient.connect(url, {
+        connectTimeoutMS: 15000,
+        socketTimeoutMS: 30000
+      }, function(err, client) {
+        test.ok(db.serverConfig.connections().length >= 1);
+
         var connections = db.serverConfig.connections();
 
         for(var i = 0; i < connections.length; i++) {
-          // console.log("=============================================")
-          // console.log(`connections[i].connectionTimeout = ${connections[i].connectionTimeout}`)
-          // console.log(`connections[i].socketTimeout = ${connections[i].socketTimeout}`)
-          test.equal(30000, connections[i].connectionTimeout);
+          test.equal(15000, connections[i].connectionTimeout);
           test.equal(30000, connections[i].socketTimeout);
         }
 
-        // console.log("============================= 2")
-
-        db.close();
-
-        MongoClient.connect(url, {
-          connectTimeoutMS: 15000,
-          socketTimeoutMS: 30000
-        }, function(err, db) {
-          // console.log("============================= 3")
-          test.ok(db.serverConfig.connections().length >= 1);
-          // console.log("============================= 4")
-
-          // db.on('all', function() {
-            // console.log("============================= 5")
-            var connections = db.serverConfig.connections();
-
-            // console.log("============================= 6")
-
-            for(var i = 0; i < connections.length; i++) {
-              test.equal(15000, connections[i].connectionTimeout);
-              test.equal(30000, connections[i].socketTimeout);
-            }
-
-            // console.log("============================= 7")
-
-            db.close();
-            test.done();
-          // });
-        });
-      // });
+        client.close();
+        test.done();
+      });
     });
   }
 }
@@ -370,10 +362,11 @@ exports['Should correctly set MaxPoolSize on sharded server'] = {
       ? f('%s&%s', url, 'maxPoolSize=100')
       : f('%s?%s', url, 'maxPoolSize=100');
 
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
+      var db = client.db(configuration.database);
       test.ok(db.serverConfig.connections().length >= 1);
 
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -390,34 +383,14 @@ exports['Should fail due to wrong uri user:password@localhost'] = {
     var MongoClient = configuration.require.MongoClient;
 
     try {
-      MongoClient.connect('user:password@localhost:27017/test', function(err, db) {
-        db.close();
+      MongoClient.connect('user:password@localhost:27017/test', function(err, client) {
+        client.close();
       });
     } catch(err) {
       test.done();
     }
   }
 }
-
-// /**
-//  * @ignore
-//  */
-// exports["correctly timeout MongoClient connect using custom connectTimeoutMS"] = {
-//   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-//
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var MongoClient = configuration.require.MongoClient;
-//
-//     var start = new Date();
-//
-//     MongoClient.connect('mongodb://example.com/test?connectTimeoutMS=1000&maxPoolSize=1', function(err, db) {
-//       test.ok(err != null);
-//       test.ok((new Date().getTime() - start.getTime()) >= 1000)
-//       test.done();
-//     });
-//   }
-// }
 
 /**
  * @ignore
@@ -428,7 +401,7 @@ exports["correctly error out when no socket available on MongoClient.connect"] =
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
-    MongoClient.connect('mongodb://localhost:27088/test', function(err, db) {
+    MongoClient.connect('mongodb://localhost:27088/test', function(err, client) {
       test.ok(err != null);
 
       test.done();
@@ -442,7 +415,7 @@ exports["should correctly connect to mongodb using domain socket"] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
-    MongoClient.connect('mongodb:///tmp/mongodb-27017.sock/test', function(err, db) {
+    MongoClient.connect('mongodb:///tmp/mongodb-27017.sock/test', function(err, client) {
       test.equal(null, err);
       test.done();
     });
@@ -459,7 +432,7 @@ exports["correctly error out when no socket available on MongoClient.connect wit
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
 
-    MongoClient.connect('mongodb://test.com:80/test', function(err, db) {
+    MongoClient.connect('mongodb://test.com:80/test', function(err, client) {
       test.ok(err != null);
 
       test.done();
@@ -479,24 +452,25 @@ exports["correctly connect setting keepAlive to 100"] = {
 
     MongoClient.connect(configuration.url(), {
       keepAlive: 100
-    }, function(err, db) {
+    }, function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       var connection = db.serverConfig.connections()[0];
       test.equal(true, connection.keepAlive);
       test.equal(100, connection.keepAliveInitialDelay);
 
-      db.close();
+      client.close();
 
       MongoClient.connect(configuration.url(), {
         keepAlive: 0
-      }, function(err, db) {
+      }, function(err, client) {
         test.equal(null, err);
 
         db.serverConfig.connections().forEach(function(x) {
           test.equal(false, x.keepAlive);
         })
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -514,14 +488,15 @@ exports["default keepAlive behavior"] = {
     var MongoClient = configuration.require.MongoClient;
 
     MongoClient.connect(configuration.url(), {
-    }, function(err, db) {
+    }, function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       db.serverConfig.connections().forEach(function(x) {
         test.equal(true, x.keepAlive);
       });
 
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -539,7 +514,7 @@ exports['should fail dure to garbage connection string'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     MongoClient.connect('mongodb://unknownhost:36363/ddddd', {
-    }, function(err, db) {
+    }, function(err, client) {
       test.ok(err != null);
       test.done();
     });
@@ -560,7 +535,7 @@ exports['Should fail to connect due to instances not being mongos proxies'] = {
     var url = configuration.url()
       .replace('rs_name=rs', '')
       .replace('localhost:31000', 'localhost:31000,localhost:31001');
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
       test.ok(err != null);
       test.done();
     });
@@ -585,13 +560,12 @@ exports['Should correctly pass through appname'] = {
       url = f('%s?appname=hello%20world', configuration.url());
     }
 
-    // var url = f('%s?appname=hello%20world', configuration.url());
-    // console.dir(url)
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       test.equal('hello world', db.serverConfig.clientInfo.application.name);
 
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -611,8 +585,9 @@ exports['Should correctly pass through socketTimeoutMS and connectTimeoutMS'] = 
     MongoClient.connect(configuration.url(), {
       socketTimeoutMS: 0,
       connectTimeoutMS: 0
-    }, function(err, db) {
+    }, function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       if(db.s.topology.s.clonedOptions) {
         test.equal(0, db.s.topology.s.clonedOptions.connectionTimeout);
@@ -622,7 +597,7 @@ exports['Should correctly pass through socketTimeoutMS and connectTimeoutMS'] = 
         test.equal(0, db.s.topology.s.options.socketTimeout);
       }
 
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -642,13 +617,77 @@ exports['Should correctly pass through socketTimeoutMS and connectTimeoutMS from
     var uri = f("%s?socketTimeoutMS=120000&connectTimeoutMS=15000", configuration.url());
 
     MongoClient.connect(uri, {
-    }, function(err, db) {
+    }, function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
       test.equal(120000, db.serverConfig.s.server.s.options.socketTimeout);
       test.equal(15000, db.serverConfig.s.server.s.options.connectionTimeout);
 
-      db.close();
+      client.close();
       test.done();
     });
   }
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+// new MongoClient connection tests
+//
+//////////////////////////////////////////////////////////////////////////////////////////
+exports['Should open a new MongoClient connection'] = {
+  metadata: {
+    requires: {
+      node: ">0.8.0",
+      topology: ['single']
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    
+    new MongoClient(configuration.url()).connect(function(err, mongoclient) {
+      test.equal(null, err);
+
+      mongoclient
+        .db('integration_tests')
+        .collection('new_mongo_client_collection')
+        .insertOne({a:1}, function(err, r) {
+          test.equal(null, err);
+          test.ok(r);
+
+          mongoclient.close();
+          test.done();
+        });
+    });
+  }
+}
+
+exports['Should open a new MongoClient connection using promise'] = {
+  metadata: {
+    requires: {
+      node: ">0.8.0",
+      topology: ['single']
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    
+    new MongoClient(configuration.url())
+      .connect()
+      .then(function(mongoclient) {
+        mongoclient
+          .db('integration_tests')
+          .collection('new_mongo_client_collection')
+          .insertOne({a:1}).then(function(r) {
+            test.ok(r);
+
+            mongoclient.close();
+            test.done();
+          });
+      });
+  }
+}
+

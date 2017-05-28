@@ -1,5 +1,7 @@
 "use strict";
 
+var connectToDb = require('./shared').connectToDb;
+
 /**
  * Test a simple find
  * @ignore
@@ -11,8 +13,9 @@ exports['Should correctly Enable logging'] = {
   test: function(configuration, test) {
     var Logger = configuration.require.Logger
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       var collection = db.collection('enable_logging_1');
 
@@ -38,7 +41,7 @@ exports['Should correctly Enable logging'] = {
 
         // Clean up
         Logger.reset();
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -61,7 +64,7 @@ exports['Should not fail with undefined id'] = {
     Logger.setCurrentLogger(function() {});
     Logger.setLevel('debug');
 
-    MongoClient.connect('mongodb://localhost:27017/test', {}, function(err, db) {
+    connectToDb('mongodb://localhost:27017/test', configuration.database, function(err, db, client) {
       test.equal(null, err);
 
       // perform any operation that gets logged
@@ -70,7 +73,7 @@ exports['Should not fail with undefined id'] = {
 
         // Clean up
         Logger.reset();
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -89,7 +92,7 @@ exports['Should correctly log cursor'] = {
     var MongoClient = configuration.require.MongoClient
       , Logger = configuration.require.Logger;
 
-    MongoClient.connect('mongodb://localhost:27017/test', {}, function(err, db) {
+    connectToDb('mongodb://localhost:27017/test', configuration.database, function(err, db, client) {
       test.equal(null, err);
 
       // Status
@@ -114,7 +117,7 @@ exports['Should correctly log cursor'] = {
 
         // Clean up
         Logger.reset();
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -136,9 +139,9 @@ exports['Pass the logLevel down through the options'] = {
     Logger.filter('class', ['Cursor']);
     var logged = false;
 
-    MongoClient.connect('mongodb://localhost:27017/test', {
+    connectToDb('mongodb://localhost:27017/test', configuration.database, {
       loggerLevel: 'debug', logger: function() { logged = true; }
-    }, function(err, db) {
+    }, function(err, db, client) {
       test.equal(null, err);
 
       // perform any operation that gets logged
@@ -148,7 +151,7 @@ exports['Pass the logLevel down through the options'] = {
 
         // Clean up
         Logger.reset();
-        db.close();
+        client.close();
         test.done();
       });
     });

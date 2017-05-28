@@ -28,7 +28,8 @@ exports['Correctly receive the APM events for an insert'] = {
     });
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.collection('apm_test').insertOne({a:1}).then(function(r) {
@@ -40,7 +41,7 @@ exports['Correctly receive the APM events for an insert'] = {
         test.ok(callbackTriggered);
         listener.uninstrument();
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -72,7 +73,8 @@ exports['Correctly handle cursor.close when no cursor existed'] = {
     });
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       var collection = db.collection('apm_test_cursor');
 
@@ -89,7 +91,7 @@ exports['Correctly handle cursor.close when no cursor existed'] = {
         
             listener.uninstrument();
 
-            db.close();
+            client.close();
             test.done();
           }
         )
@@ -239,7 +241,9 @@ exports['Correctly receive the APM events for an insert using custom operationId
     });
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.connect(function(err, client) {
+      var db = client.db(configuration.database);
+
       db.collection('apm_test_1').insertOne({a:1}).then(function(r) {
         test.equal(1, started.length);
         test.equal(1, succeeded.length);
@@ -250,7 +254,7 @@ exports['Correctly receive the APM events for an insert using custom operationId
         test.ok(callbackTriggered);
         listener.uninstrument();
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -574,7 +578,8 @@ exports['Correctly receive the APM events for a find with getmore and killcursor
     });
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Drop the collection
@@ -614,7 +619,7 @@ exports['Correctly receive the APM events for a find with getmore and killcursor
               test.equal(started[0].operationId, started[2].operationId);
 
               listener.uninstrument();
-              db.close();
+              client.close();
               test.done();
           }).catch(function(err) {
             console.log(err.stack)
@@ -654,7 +659,8 @@ exports['Correctly receive the APM failure event for find'] = {
     });
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Drop the collection
@@ -680,7 +686,7 @@ exports['Correctly receive the APM failure event for find'] = {
             test.equal(1, failed.length);
 
             listener.uninstrument();
-            db.close();
+            client.close();
             test.done();
           });
         }).catch(function(e) {
@@ -718,7 +724,8 @@ exports['Correctly receive the APM events for a bulk operation'] = {
     });
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('apm_test_3').bulkWrite([
             { insertOne: { a: 1 } }
           , { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
@@ -732,7 +739,7 @@ exports['Correctly receive the APM events for a bulk operation'] = {
         test.equal(succeeded[0].operationId, succeeded[2].operationId);
 
         listener.uninstrument();
-        db.close();
+        client.close();
         test.done();
       }).catch(function(err) {
         console.log(err.stack)
@@ -769,7 +776,8 @@ exports['Correctly receive the APM explain command'] = {
     });
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Drop the collection
@@ -794,7 +802,7 @@ exports['Correctly receive the APM explain command'] = {
 
               // Remove instrumentation
               listener.uninstrument();
-              db.close();
+              client.close();
               test.done();
           }).catch(function(err) {
             console.log(err.stack)
@@ -834,7 +842,8 @@ exports['Correctly filter out sensitive commands'] = {
     });
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.command({getnonce:true}, function(err, r) {
@@ -848,7 +857,7 @@ exports['Correctly filter out sensitive commands'] = {
 
         // Remove instrumentation
         listener.uninstrument();
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -877,7 +886,8 @@ exports['Correctly receive the APM events for an updateOne'] = {
     });
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.collection('apm_test_u_1').updateOne({a:1}, {$set:{b:1}}, {upsert:true}).then(function(r) {
@@ -887,7 +897,7 @@ exports['Correctly receive the APM events for an updateOne'] = {
         test.equal(1, succeeded.length);
         listener.uninstrument();
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -916,7 +926,8 @@ exports['Correctly receive the APM events for an updateMany'] = {
     });
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.collection('apm_test_u_2').updateMany({a:1}, {$set:{b:1}}, {upsert:true}).then(function(r) {
@@ -926,7 +937,7 @@ exports['Correctly receive the APM events for an updateMany'] = {
         test.equal(1, succeeded.length);
         listener.uninstrument();
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -955,7 +966,8 @@ exports['Correctly receive the APM events for deleteOne'] = {
     });
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.collection('apm_test_u_3').deleteOne({a:1}).then(function(r) {
@@ -965,7 +977,7 @@ exports['Correctly receive the APM events for deleteOne'] = {
         test.equal(1, succeeded.length);
         listener.uninstrument();
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -984,7 +996,8 @@ exports['Ensure killcursor commands are sent on 3.0 or earlier when APM is enabl
 
     var listener = require('../..').instrument(function(err, instrumentations) {});
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var admindb = db.admin();
       var cursorCountBefore;
       var cursorCountAfter;
@@ -1014,7 +1027,7 @@ exports['Ensure killcursor commands are sent on 3.0 or earlier when APM is enabl
               test.equal(cursorCountBefore, cursorCountAfter);
 
               listener.uninstrument();
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -1046,7 +1059,8 @@ exports['Correcly decorate the apm result for aggregation with cursorId'] = {
     });
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Generate docs
@@ -1071,7 +1085,7 @@ exports['Correcly decorate the apm result for aggregation with cursorId'] = {
 
           listener.uninstrument();
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1102,7 +1116,8 @@ exports['Correcly decorate the apm result for listCollections with cursorId'] = 
     });
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       var promises = [];
@@ -1125,7 +1140,7 @@ exports['Correcly decorate the apm result for listCollections with cursorId'] = 
 
           listener.uninstrument();
 
-          db.close();
+          client.close();
           test.done();
         });
       });
