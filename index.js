@@ -2,9 +2,13 @@ var BSON = require('bson');
 var require_optional = require('require_optional');
 
 try {
-  // try { BSON = require('bson-ext'); } catch(err) {
-    BSON = require_optional('bson-ext');
-  // }
+  // Attempt to grab the native BSON parser
+  var BSONNative = require_optional('bson-ext');
+  // If we got the native parser, use it instead of the
+  // Javascript one
+  if(BSONNative) {
+    BSON = BSONNative
+  }
 } catch(err) {}
 
 module.exports = {
