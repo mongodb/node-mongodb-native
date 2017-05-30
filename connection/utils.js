@@ -68,16 +68,11 @@ var retrieveBSON = function() {
   BSON.native = false;
 
   try {
-    // try {
-    //   BSON = require('bson-ext');
-    //   BSON.native = true;
-    // } catch(err) {
-      var optionalBSON = require_optional('bson-ext');
-      if(optionalBSON) {
-        optionalBSON.native = true;
-        return optionalBSON;
-      }
-    // }
+    var optionalBSON = require_optional('bson-ext');
+    if(optionalBSON) {
+      optionalBSON.native = true;
+      return optionalBSON;
+    }
   } catch(err) {}
 
   return BSON;

@@ -1,7 +1,6 @@
 "use strict"
 
 var inherits = require('util').inherits,
-  require_optional = require('require_optional'),
   f = require('util').format,
   EventEmitter = require('events').EventEmitter,
   ReadPreference = require('./read_preference'),
