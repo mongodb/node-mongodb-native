@@ -426,7 +426,27 @@ exports['Parse mongodb://localhost/db?w=-1'] = {
 /**
  * @ignore
  */
-exports['Throw on unsuported options'] = {
+exports['Should be able to parse mongodb://localhost/?compressors=snappy,zlib&zlibCompressionLevel=-1'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The test we wish to run
+  test: function(configure, test) {
+    var object = parse("mongodb://localhost/?compressors=snappy,zlib&zlibCompressionLevel=-1");
+    test.equal(1, object.servers.length);
+    test.equal("localhost", object.servers[0].host);
+    test.equal('27017', object.servers[0].port);
+    test.equal('admin', object.dbName);
+    test.equal('snappy', object.server_options.compression.compressors[0]);
+    test.equal('zlib', object.server_options.compression.compressors[1]);
+    test.equal(-1, object.server_options.compression.zlibCompressionLevel);
+    test.done();
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Throw on unsuported options'] = { 
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run

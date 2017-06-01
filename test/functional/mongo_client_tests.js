@@ -409,6 +409,20 @@ exports["correctly error out when no socket available on MongoClient.connect"] =
   }
 }
 
+exports["correctly handles compression"] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    MongoClient.connect('mongodb://localhost:27088/test?compressors=snappy&zlibCompressionLevel=-1', { compression: { zlibCompressionLevel: 0} }, function(err, db) {
+      test.ok(err != null);
+
+      test.done();
+    });
+  }
+}
+
 exports["should correctly connect to mongodb using domain socket"] = {
   metadata: { requires: { topology: ['single'] } },
 
