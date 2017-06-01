@@ -45,7 +45,7 @@ The table below shows all settings and what topology they affect.
 | **noDelay** | Server, ReplicaSet, Mongos | boolean | true | TCP Socket NoDelay option. |
 | **keepAlive** | Server, ReplicaSet, Mongos | integer | 0 | The number of milliseconds to wait before initiating keepAlive on the TCP socket. |
 | **connectTimeoutMS** | Server, ReplicaSet, Mongos | integer | 30000 | TCP Connection timeout setting. |
-| **socketTimeoutMS** | Server, ReplicaSet, Mongos | integer | 30000 | TCP Socket timeout setting. |
+| **socketTimeoutMS** | Server, ReplicaSet, Mongos | integer | 360000 | TCP Socket timeout setting. |
 | **reconnectTries** | Server | integer | 30 | Server attempt to reconnect #times |
 | **reconnectInterval** | Server | integer | 1000 | Server will wait # milliseconds between retries. |
 | **ha** | ReplicaSet, Mongos | boolean | true | Turn on high availability monitoring. |
