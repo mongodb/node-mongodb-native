@@ -67,8 +67,10 @@ exports.shouldCorrectlyPerformAutomaticConnect = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var automatic_connect_client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:true});
-    automatic_connect_client.open(function(err, automatic_connect_client) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:true});
+    client.connect(function(err, client) {
+      var automatic_connect_client = client.db(configuration.database);
+    
       // Listener for closing event
       var closeListener = function(has_error) {
         // Let's insert a document
@@ -89,7 +91,7 @@ exports.shouldCorrectlyPerformAutomaticConnect = {
             // console.log(document)
             test.equal(r.ops[0]._id.toHexString(), document._id.toHexString());
             // Let's close the db
-            automatic_connect_client.close();
+            client.close();
             test.done();
           });
         });
@@ -111,8 +113,9 @@ exports.shouldCorrectlyPerformAutomaticConnectWithMaxBufferSize0 = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var automatic_connect_client = configuration.newDbInstance({w:1, bufferMaxEntries:0}, {poolSize:1, auto_reconnect:true});
-    automatic_connect_client.open(function(err, automatic_connect_client) {
+    var client = configuration.newDbInstance({w:1, bufferMaxEntries:0}, {poolSize:1, auto_reconnect:true});
+    client.connect(function(err, client) {
+      var automatic_connect_client = client.db(configuration.database);
       // Listener for closing event
       var closeListener = function(has_error) {
         // Let's insert a document
@@ -122,7 +125,7 @@ exports.shouldCorrectlyPerformAutomaticConnectWithMaxBufferSize0 = {
           test.ok(err != null);
           test.ok(err.message.indexOf("0") != -1)
           // Let's close the db
-          automatic_connect_client.close();
+          client.close();
           test.done();
         });
       };
@@ -143,10 +146,11 @@ exports.shouldCorrectlyHandleFailedConnection = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var Db = configuration.require.Db
+    var MongoClient = configuration.require.MongoClient
       , Server = configuration.require.Server;
-    var fs_client = new Db(configuration.database, new Server("127.0.0.1", 25117, {auto_reconnect: false}), configuration.writeConcernMax());
-    fs_client.open(function(err, fs_client) {
+
+    var fs_client = new MongoClient(new Server("127.0.0.1", 25117, {auto_reconnect: false}), configuration.writeConcernMax());
+    fs_client.connect(function(err, fs_client) {
       test.ok(err != null)
       test.done();
     })
@@ -163,8 +167,9 @@ exports.shouldCorrectlyResaveDBRef = {
   test: function(configuration, test) {
     var DBRef = configuration.require.DBRef;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.dropCollection('test_resave_dbref', function() {
@@ -191,7 +196,7 @@ exports.shouldCorrectlyResaveDBRef = {
                   collection.findOne({'parent' : new DBRef("test_resave_dbref",  parent._id)},
                     function(err, child) {
                       test.ok(child != null);//!!!! Main test point!
-                      db.close();
+                      client.close();
                       test.done();
                   })
                 });
@@ -214,12 +219,13 @@ exports.shouldCorrectlyForceReindexOnCollection = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+      
+    // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
-    db.open(function(err, db) {
+    client.connect(function(err, client) {
+      var db = client.db('integration_tests');
 
       // Create a collection we want to drop later
       db.createCollection('create_and_drop_all_indexes', function(err, collection) {
@@ -244,7 +250,7 @@ exports.shouldCorrectlyForceReindexOnCollection = {
                 test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
                 test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
 
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -264,17 +270,15 @@ exports.shouldCorrectlyGetErrorDroppingNonExistingDb = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    // Establish connection to db
-    db.open(function(err, db) {
-      var _db = db.db("nonexistingdb");
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var _db = client.db("nonexistingdb");
       // Let's drop the database
       _db.dropDatabase(function(err, result) {
         test.equal(null, err);
         test.equal(true, result);
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -289,17 +293,17 @@ exports.shouldCorrectlyThrowWhenTryingToReOpenConnection = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
       try {
-        db.open(function(err, db) {
+        client.connect(function(err, db) {
         });
 
         test.ok(false);
-      } catch (err) {
-        db.close();
+      } catch (err) {        
+        console.dir(err)
+        throw "";
+        client.close();
         test.done();
       }
     });
@@ -325,7 +329,7 @@ exports.shouldCorrectlyReconnectWhenError = {
 
       db.open(function(err, _db) {
         test.ok(err != null);
-        db.close();
+        client.close();
         test.done();
       })
     });
@@ -340,7 +344,7 @@ exports['should not cut collection name when it is the same as the database'] = 
     db.open(function(err, db) {
       test.equal(null, err);
 
-      var db1 = db.db('node972');
+      var db1 = client.db('node972');
       db1.collection('node972.test').insertOne({ a: 1 }, function(err) {
         test.equal(null, err);
 
@@ -372,7 +376,7 @@ exports.shouldCorrectlyUseCursorWithListCollectionsCommand = {
       test.equal(null, err);
 
       // Get a db we that does not have any collections
-      var db1 = db.db('shouldCorrectlyUseCursorWithListCollectionsCommand');
+      var db1 = client.db('shouldCorrectlyUseCursorWithListCollectionsCommand');
 
       // Create a collection
       db1.collection('test').insertOne({a:1}, function(err) {
@@ -388,7 +392,7 @@ exports.shouldCorrectlyUseCursorWithListCollectionsCommand = {
             test.equal(null, err);
             test.equal(1, names.length);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -414,7 +418,7 @@ exports.shouldCorrectlyUseCursorWithListCollectionsCommandAndBatchSize = {
       test.equal(null, err);
 
       // Get a db we that does not have any collections
-      var db1 = db.db('shouldCorrectlyUseCursorWithListCollectionsCommandAndBatchSize');
+      var db1 = client.db('shouldCorrectlyUseCursorWithListCollectionsCommandAndBatchSize');
 
       // Create a collection
       db1.collection('test').insertOne({a:1}, function(err) {
@@ -430,7 +434,7 @@ exports.shouldCorrectlyUseCursorWithListCollectionsCommandAndBatchSize = {
             test.equal(null, err);
             test.equal(1, names.length);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -456,7 +460,7 @@ exports['should correctly list collection names with . in the middle'] = {
       test.equal(null, err);
 
       // Get a db we that does not have any collections
-      var db1 = db.db('shouldCorrectlyListCollectionsWithDotsOnThem');
+      var db1 = client.db('shouldCorrectlyListCollectionsWithDotsOnThem');
 
       // Create a collection
       db1.collection('test.collection1').insertOne({a:1}, function(err) {
@@ -478,7 +482,7 @@ exports['should correctly list collection names with . in the middle'] = {
               test.equal(null, err);
               test.equal(1, names.length);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -508,7 +512,7 @@ exports['should correctly list collection names with batchSize 1 for 2.8 or high
       test.equal(null, err);
 
       // Get a db we that does not have any collections
-      var db1 = db.db('shouldCorrectlyListCollectionsWithDotsOnThemFor28');
+      var db1 = client.db('shouldCorrectlyListCollectionsWithDotsOnThemFor28');
 
       // Create a collection
       db1.collection('test.collection1').insertOne({a:1}, function(err) {
@@ -524,7 +528,7 @@ exports['should correctly list collection names with batchSize 1 for 2.8 or high
             test.equal(null, err);
             test.equal(2, names.length);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
