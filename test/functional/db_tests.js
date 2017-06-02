@@ -62,6 +62,39 @@ exports.shouldCorrectlyHandleIllegalDbNames = {
 /**
  * @ignore
  */
+exports['should not call callback twice on collection() with callback'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      test.equal(null, err);
+      var count = 0;
+
+      let coll = db.collection('coll_name', function(e,coll) {
+        // console.log('hello1')
+        count = count + 1;
+      });
+
+      try {
+        coll.findOne({}, null, function(e, data) {
+          //e - Cannot convert undefined or null to object
+          // console.log('hello2')
+        });
+      } catch(e) {
+        process.nextTick(function() {
+          test.equal(1, count);
+          test.done();
+        });
+      }
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyPerformAutomaticConnect = {
   metadata: { requires: { topology: 'single' } },
 
