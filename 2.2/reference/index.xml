@@ -620,7 +620,7 @@ MongoClient.connect(url, {
 &lt;td align=&#34;left&#34;&gt;&lt;strong&gt;keepAlive&lt;/strong&gt;&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;integer&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;0&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;30000&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;The number of milliseconds to wait before initiating keepAlive on the TCP socket.&lt;/td&gt;
 &lt;/tr&gt;
 
@@ -636,7 +636,7 @@ MongoClient.connect(url, {
 &lt;td align=&#34;left&#34;&gt;&lt;strong&gt;socketTimeoutMS&lt;/strong&gt;&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Server, ReplicaSet, Mongos&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;integer&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;30000&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;360000&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;TCP Socket timeout setting.&lt;/td&gt;
 &lt;/tr&gt;
 
@@ -953,8 +953,8 @@ MongoClient.connect(url, {
 
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;socketTimeoutMS&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;30000&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The socketTimeoutMS sets the number of milliseconds a socket stays inactive after the driver has successfully connected before closing. If the value is set to 30000 milliseconds, the socket closes if there is no activity during a 30 seconds window.&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;360000&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;The socketTimeoutMS sets the number of milliseconds a socket stays inactive after the driver has successfully connected before closing. If the value is set to 360000 milliseconds, the socket closes if there is no activity during a 30 seconds window.&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
@@ -1568,7 +1568,7 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.keepAlive&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;{Number, default: 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 30000}&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;The number of milliseconds to wait before initiating keepAlive on the TCP socket.&lt;/td&gt;
 &lt;/tr&gt;
 
@@ -1580,7 +1580,7 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;{Number, default: 30000}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 360000}&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;TCP Socket timeout setting.&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
@@ -1701,19 +1701,19 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.keepAlive&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;{Number, default: 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 30000}&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;The number of milliseconds to wait before initiating keepAlive on the TCP socket.&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;{Number, default: 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 30000}&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;TCP Connection timeout setting.&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;{Number, default: 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 360000}&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;TCP Socket timeout setting.&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
@@ -1822,19 +1822,19 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.keepAlive&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;{Number, default: 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 30000}&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;The number of milliseconds to wait before initiating keepAlive on the TCP socket.&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;{Number, default: 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 30000}&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;TCP Connection timeout setting.&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;{Number, default: 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 360000}&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;TCP Socket timeout setting.&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;

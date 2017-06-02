@@ -1904,6 +1904,7 @@ var parse = require('./url_parser')
   , MongoError = require('mongodb-core').MongoError
   , Db = require('./db')
   , f = require('util').format
+  , assign = require('./utils').assign
   , shallowClone = require('./utils').shallowClone
   , authenticate = require('./authenticate');
 
@@ -1922,7 +1923,7 @@ var parse = require('./url_parser')
  * });
  */
 var validOptionNames = ['poolSize', 'ssl', 'sslValidate', 'sslCA', 'sslCert',
-  'sslKey', 'sslPass', 'sslCRL', 'autoReconnect', 'noDelay', 'keepAlive', 'connectTimeoutMS',
+  'sslKey', 'sslPass', 'sslCRL', 'autoReconnect', 'noDelay', 'keepAlive', 'connectTimeoutMS', 'family',
   'socketTimeoutMS', 'reconnectTries', 'reconnectInterval', 'ha', 'haInterval',
   'replicaSet', 'secondaryAcceptableLatencyMS', 'acceptableLatencyMS',
   'connectWithNoPrimary', 'authSource', 'w', 'wtimeout', 'j', 'forceServerObjectId',
@@ -1992,9 +1993,10 @@ function MongoClient() {
    * @param {boolean|function} [options.checkServerIdentity=true] Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.
    * @param {boolean} [options.autoReconnect=true] Enable autoReconnect for single server instances
    * @param {boolean} [options.noDelay=true] TCP Connection no delay
-   * @param {boolean} [options.keepAlive=0] The number of milliseconds to wait before initiating keepAlive on the TCP socket.
+   * @param {number} [options.family=4] Version of IP stack. Defaults to 4.
+   * @param {boolean} [options.keepAlive=30000] The number of milliseconds to wait before initiating keepAlive on the TCP socket.
    * @param {number} [options.connectTimeoutMS=30000] TCP Connection timeout setting
-   * @param {number} [options.socketTimeoutMS=30000] TCP Socket timeout setting
+   * @param {number} [options.socketTimeoutMS=360000] TCP Socket timeout setting
    * @param {number} [options.reconnectTries=30] Server attempt to reconnect #times
    * @param {number} [options.reconnectInterval=1000] Server will wait # milliseconds between retries
    * @param {boolean} [options.ha=true] Control if high availability monitoring runs for Replicaset or Mongos proxies.
@@ -2059,9 +2061,10 @@ var define = MongoClient.define = new Define('MongoClient', MongoClient, false);
  * @param {boolean|function} [options.checkServerIdentity=true] Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.
  * @param {boolean} [options.autoReconnect=true] Enable autoReconnect for single server instances
  * @param {boolean} [options.noDelay=true] TCP Connection no delay
- * @param {boolean} [options.keepAlive=0] The number of milliseconds to wait before initiating keepAlive on the TCP socket.
+ * @param {number} [options.family=4] Version of IP stack. Defaults to 4.
+ * @param {boolean} [options.keepAlive=30000] The number of milliseconds to wait before initiating keepAlive on the TCP socket.
  * @param {number} [options.connectTimeoutMS=30000] TCP Connection timeout setting
- * @param {number} [options.socketTimeoutMS=30000] TCP Socket timeout setting
+ * @param {number} [options.socketTimeoutMS=360000] TCP Socket timeout setting
  * @param {number} [options.reconnectTries=30] Server attempt to reconnect #times
  * @param {number} [options.reconnectInterval=1000] Server will wait # milliseconds between retries
  * @param {boolean} [options.ha=true] Control if high availability monitoring runs for Replicaset or Mongos proxies.
@@ -2186,7 +2189,7 @@ function translateOptions(options) {
   }
 
   // Set the socket and connection timeouts
-  if(options.socketTimeoutMS == null) options.socketTimeoutMS = 30000;
+  if(options.socketTimeoutMS == null) options.socketTimeoutMS = 360000;
   if(options.connectTimeoutMS == null) options.connectTimeoutMS = 30000;
 
   // Create server instances
@@ -2195,6 +2198,37 @@ function translateOptions(options) {
       new Server(serverObj.domain_socket, 27017, options)
     : new Server(serverObj.host, serverObj.port, options);
   });
+}
+
+//
+// Collect all events in order from SDAM
+//
+function collectEvents(self, db) {
+  var collectedEvents = [];
+
+  if(self instanceof MongoClient) {
+    var events = ["timeout", "close", 'serverOpening', 'serverDescriptionChanged', 'serverHeartbeatStarted',
+      'serverHeartbeatSucceeded', 'serverHeartbeatFailed', 'serverClosed', 'topologyOpening',
+      'topologyClosed', 'topologyDescriptionChanged', 'joined', 'left', 'ping', 'ha', 'all', 'fullsetup'];
+    events.forEach(function(event) {
+      db.serverConfig.on(event, function(object1, object2) {
+        collectedEvents.push({
+          event: event, object1: object1, object2: object2
+        });
+      });
+    });
+  }
+
+  return collectedEvents;
+}
+
+//
+// Replay any events due to single server connection switching to Mongos
+//
+function replayEvents(self, events) {
+  for(var i = 0; i &lt; events.length; i++) {
+    self.emit(events[i].event, events[i].object1, events[i].object2);
+  }
 }
 
 function relayEvents(self, db) {
@@ -2217,7 +2251,7 @@ function createReplicaset(self, options, callback) {
   var db = new Db(options.dbName, new ReplSet(servers, options), options);
   // Propegate the events to the client
   relayEvents(self, db);
-  // Open the connection  
+  // Open the connection
   db.open(callback);
 }
 
@@ -2228,7 +2262,7 @@ function createMongos(self, options, callback) {
   var db = new Db(options.dbName, new Mongos(servers, options), options)
   // Propegate the events to the client
   relayEvents(self, db);
-  // Open the connection  
+  // Open the connection
   db.open(callback);
 }
 
@@ -2238,7 +2272,7 @@ function createServer(self, options, callback) {
   // Create db instance
   var db = new Db(options.dbName, servers[0], options);
   // Propegate the events to the client
-  relayEvents(self, db);
+  var collectedEvents = collectEvents(self, db);
   // Create Db instance
   db.open(function(err, db) {
     if(err) return callback(err);
@@ -2253,6 +2287,10 @@ function createServer(self, options, callback) {
       return createMongos(self, options, callback);
     }
 
+    // Fire all the events
+    replayEvents(self, collectedEvents);
+    // Propegate the events to the client
+    relayEvents(self, db);
     // Otherwise callback
     callback(err, db);
   });
@@ -2337,7 +2375,7 @@ var connect = function(self, url, options, callback) {
   _finalOptions = createUnifiedOptions(_finalOptions, options);
 
   // Check if we have connection and socket timeout set
-  if(_finalOptions.socketTimeoutMS == null) _finalOptions.socketTimeoutMS = 30000;
+  if(_finalOptions.socketTimeoutMS == null) _finalOptions.socketTimeoutMS = 360000;
   if(_finalOptions.connectTimeoutMS == null) _finalOptions.connectTimeoutMS = 30000;
 
   // Failure modes
@@ -2399,7 +2437,7 @@ module.exports = MongoClient
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon May 22 2017 14:32:59 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Jun 02 2017 15:48:59 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

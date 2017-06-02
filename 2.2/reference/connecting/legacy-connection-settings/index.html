@@ -2381,7 +2381,7 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 
 <tr>
 <td align="left"><code>socketOptions.keepAlive</code></td>
-<td align="left">{Number, default: 0}</td>
+<td align="left">{Number, default: 30000}</td>
 <td align="left">The number of milliseconds to wait before initiating keepAlive on the TCP socket.</td>
 </tr>
 
@@ -2393,7 +2393,7 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 
 <tr>
 <td align="left"><code>socketOptions.socketTimeoutMS</code></td>
-<td align="left">{Number, default: 30000}</td>
+<td align="left">{Number, default: 360000}</td>
 <td align="left">TCP Socket timeout setting.</td>
 </tr>
 </tbody>
@@ -2514,19 +2514,19 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 
 <tr>
 <td align="left"><code>socketOptions.keepAlive</code></td>
-<td align="left">{Number, default: 0}</td>
+<td align="left">{Number, default: 30000}</td>
 <td align="left">The number of milliseconds to wait before initiating keepAlive on the TCP socket.</td>
 </tr>
 
 <tr>
 <td align="left"><code>socketOptions.connectTimeoutMS</code></td>
-<td align="left">{Number, default: 0}</td>
+<td align="left">{Number, default: 30000}</td>
 <td align="left">TCP Connection timeout setting.</td>
 </tr>
 
 <tr>
 <td align="left"><code>socketOptions.socketTimeoutMS</code></td>
-<td align="left">{Number, default: 0}</td>
+<td align="left">{Number, default: 360000}</td>
 <td align="left">TCP Socket timeout setting.</td>
 </tr>
 </tbody>
@@ -2635,19 +2635,19 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 
 <tr>
 <td align="left"><code>socketOptions.keepAlive</code></td>
-<td align="left">{Number, default: 0}</td>
+<td align="left">{Number, default: 30000}</td>
 <td align="left">The number of milliseconds to wait before initiating keepAlive on the TCP socket.</td>
 </tr>
 
 <tr>
 <td align="left"><code>socketOptions.connectTimeoutMS</code></td>
-<td align="left">{Number, default: 0}</td>
+<td align="left">{Number, default: 30000}</td>
 <td align="left">TCP Connection timeout setting.</td>
 </tr>
 
 <tr>
 <td align="left"><code>socketOptions.socketTimeoutMS</code></td>
-<td align="left">{Number, default: 0}</td>
+<td align="left">{Number, default: 360000}</td>
 <td align="left">TCP Socket timeout setting.</td>
 </tr>
 </tbody>
