@@ -43,7 +43,7 @@ The table below shows all settings and what topology they affect.
 | **sslPass** | Server, ReplicaSet, Mongos | Buffer/String | null | String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher) |
 | **autoReconnect** | Server | boolean | true | Reconnect on error. |
 | **noDelay** | Server, ReplicaSet, Mongos | boolean | true | TCP Socket NoDelay option. |
-| **keepAlive** | Server, ReplicaSet, Mongos | integer | 0 | The number of milliseconds to wait before initiating keepAlive on the TCP socket. |
+| **keepAlive** | Server, ReplicaSet, Mongos | integer | 30000 | The number of milliseconds to wait before initiating keepAlive on the TCP socket. |
 | **connectTimeoutMS** | Server, ReplicaSet, Mongos | integer | 30000 | TCP Connection timeout setting. |
 | **socketTimeoutMS** | Server, ReplicaSet, Mongos | integer | 360000 | TCP Socket timeout setting. |
 | **reconnectTries** | Server | integer | 30 | Server attempt to reconnect #times |

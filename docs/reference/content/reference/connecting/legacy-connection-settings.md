@@ -184,7 +184,7 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 | `sslPass` | {Buffer\|string, default: null} | String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher). |
 | `autoReconnect` | {Boolean, default: true} | Reconnect on error. |
 | `socketOptions.noDelay` | {Boolean, default: true} | TCP Socket NoDelay option. |
-| `socketOptions.keepAlive` | {Number, default: 0} | The number of milliseconds to wait before initiating keepAlive on the TCP socket. |
+| `socketOptions.keepAlive` | {Number, default: 30000} | The number of milliseconds to wait before initiating keepAlive on the TCP socket. |
 | `socketOptions.connectTimeoutMS` | {Number, default: 30000} | TCP Connection timeout setting. |
 | `socketOptions.socketTimeoutMS` | {Number, default: 360000} | TCP Socket timeout setting. |
 
@@ -224,9 +224,9 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 | `sslKey` | {Buffer\|string, default: null} | String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
 | `sslPass` | {Buffer\|string, default: null} | String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher). |
 | `socketOptions.noDelay` | {Boolean, default: true} | TCP Socket NoDelay option. |
-| `socketOptions.keepAlive` | {Number, default: 0} | The number of milliseconds to wait before initiating keepAlive on the TCP socket. |
-| `socketOptions.connectTimeoutMS` | {Number, default: 0} | TCP Connection timeout setting. |
-| `socketOptions.socketTimeoutMS` | {Number, default: 0} | TCP Socket timeout setting. |
+| `socketOptions.keepAlive` | {Number, default: 30000} | The number of milliseconds to wait before initiating keepAlive on the TCP socket. |
+| `socketOptions.connectTimeoutMS` | {Number, default: 30000} | TCP Connection timeout setting. |
+| `socketOptions.socketTimeoutMS` | {Number, default: 360000} | TCP Socket timeout setting. |
 
 If you are connecting to a MongoDB replicaset, you pass the parameters using the `replset` options field.
 
@@ -262,9 +262,9 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 | `sslKey` | {Buffer\|string, default: null} | String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
 | `sslPass` | {Buffer\|string, default: null} | String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher). |
 | `socketOptions.noDelay` | {Boolean, default: true} | TCP Socket NoDelay option. |
-| `socketOptions.keepAlive` | {Number, default: 0} | The number of milliseconds to wait before initiating keepAlive on the TCP socket. |
-| `socketOptions.connectTimeoutMS` | {Number, default: 0} | TCP Connection timeout setting. |
-| `socketOptions.socketTimeoutMS` | {Number, default: 0} | TCP Socket timeout setting. |
+| `socketOptions.keepAlive` | {Number, default: 30000} | The number of milliseconds to wait before initiating keepAlive on the TCP socket. |
+| `socketOptions.connectTimeoutMS` | {Number, default: 30000} | TCP Connection timeout setting. |
+| `socketOptions.socketTimeoutMS` | {Number, default: 360000} | TCP Socket timeout setting. |
 
 If you are connecting to a MongoDB replicaset, you pass the parameters using the `mongos` options field.
 
