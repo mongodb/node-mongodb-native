@@ -24,10 +24,10 @@ var connections = {};
  * @param {string} options.host The server host
  * @param {number} options.port The server port
  * @param {boolean} [options.keepAlive=true] TCP Connection keep alive enabled
- * @param {number} [options.keepAliveInitialDelay=0] Initial delay before TCP keep alive enabled
+ * @param {number} [options.keepAliveInitialDelay=300000] Initial delay before TCP keep alive enabled
  * @param {boolean} [options.noDelay=true] TCP Connection no delay
- * @param {number} [options.connectionTimeout=0] TCP Connection timeout setting
- * @param {number} [options.socketTimeout=0] TCP Socket timeout setting
+ * @param {number} [options.connectionTimeout=30000] TCP Connection timeout setting
+ * @param {number} [options.socketTimeout=360000] TCP Socket timeout setting
  * @param {boolean} [options.singleBufferSerializtion=true] Serialize into single buffer, trade of peak memory for serialization speed
  * @param {boolean} [options.ssl=false] Use SSL for connection
  * @param {boolean|function} [options.checkServerIdentity=true] Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.
@@ -74,10 +74,18 @@ var Connection = function(messageHandler, options) {
   this.port = options.port || 27017;
   this.host = options.host || 'localhost';
   this.keepAlive = typeof options.keepAlive == 'boolean' ? options.keepAlive : true;
-  this.keepAliveInitialDelay = options.keepAliveInitialDelay || 0;
+  this.keepAliveInitialDelay = typeof options.keepAliveInitialDelay == 'number' 
+    ? options.keepAliveInitialDelay : 300000;
   this.noDelay = typeof options.noDelay == 'boolean' ? options.noDelay : true;
-  this.connectionTimeout = options.connectionTimeout || 0;
-  this.socketTimeout = options.socketTimeout || 0;
+  this.connectionTimeout = typeof options.connectionTimeout == 'number'
+    ? options.connectionTimeout : 30000;
+  this.socketTimeout = typeof options.socketTimeout == 'number'
+    ? options.socketTimeout : 360000;
+
+  // Is the keepAliveInitialDelay > socketTimeout set it to half of socketTimeout
+  if(this.keepAliveInitialDelay > this.socketTimeout) {
+    this.keepAliveInitialDelay = Math.round(this.socketTimeout/2);
+  }
 
   // If connection was destroyed
   this.destroyed = false;

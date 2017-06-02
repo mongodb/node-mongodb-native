@@ -43,10 +43,10 @@ var BSON = retrieveBSON();
  * @param {number} options.port The server port
  * @param {number} [options.size=5] Server connection pool size
  * @param {boolean} [options.keepAlive=true] TCP Connection keep alive enabled
- * @param {number} [options.keepAliveInitialDelay=0] Initial delay before TCP keep alive enabled
+ * @param {number} [options.keepAliveInitialDelay=300000] Initial delay before TCP keep alive enabled
  * @param {boolean} [options.noDelay=true] TCP Connection no delay
- * @param {number} [options.connectionTimeout=0] TCP Connection timeout setting
- * @param {number} [options.socketTimeout=0] TCP Socket timeout setting
+ * @param {number} [options.connectionTimeout=30000] TCP Connection timeout setting
+ * @param {number} [options.socketTimeout=360000] TCP Socket timeout setting
  * @param {boolean} [options.ssl=false] Use SSL for connection
  * @param {boolean|function} [options.checkServerIdentity=true] Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.
  * @param {Buffer} [options.ca] SSL Certificate store binary buffer
