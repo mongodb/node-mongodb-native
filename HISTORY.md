@@ -1,3 +1,18 @@
+2.2.28 2017-06-02
+-----------------
+* Update mongodb-core to 2.1.12
+  * NODE-1019 Set keepAlive to 300 seconds or 1/2 of socketTimeout if socketTimeout < keepAlive.
+  * Minor fix to report the correct state on error.
+  * NODE-1020 'family' was added to options to provide high priority for ipv6 addresses (Issue #1518, https://github.com/firej).
+  * Fix require_optional loading of bson-ext.
+  * Ensure no errors are thrown by replset if topology is destroyed before it finished connecting.
+  * NODE-999 SDAM fixes for Mongos and single Server event emitting.
+  * NODE-1014 Set socketTimeout to default to 360 seconds.
+  * NODE-1019 Set keepAlive to 300 seconds or 1/2 of socketTimeout if socketTimeout < keepAlive.
+* Just handle Collection name errors distinctly from general callback errors avoiding double callbacks in Db.collection.
+* NODE-999 SDAM fixes for Mongos and single Server event emitting.
+* NODE-1000 Added guard condition for upload.js checkDone function in case of race condition caused by late arriving chunk write.
+
 2.2.27 2017-05-22
 -----------------
 * Updated mongodb-core to 2.1.11
