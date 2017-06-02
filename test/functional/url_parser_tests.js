@@ -426,6 +426,61 @@ exports['Parse mongodb://localhost/db?w=-1'] = {
 /**
  * @ignore
  */
+exports['Should be able to parse mongodb://localhost/?compressors=snappy, with one compressor specified'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The test we wish to run
+  test: function(configure, test) {
+    var object = parse("mongodb://localhost/?compressors=snappy");
+    test.equal(1, object.servers.length);
+    test.equal("localhost", object.servers[0].host);
+    test.equal('27017', object.servers[0].port);
+    test.equal('admin', object.dbName);
+    test.equal('snappy', object.server_options.compression.compressors[0]);
+    test.done();
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Should be able to parse mongodb://localhost/?zlibCompressionLevel=-1 without issuing a warning'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The test we wish to run
+  test: function(configure, test) {
+    var object = parse("mongodb://localhost/?zlibCompressionLevel=-1 ");
+    test.equal(1, object.servers.length);
+    test.equal("localhost", object.servers[0].host);
+    test.equal('27017', object.servers[0].port);
+    test.equal('admin', object.dbName);
+    test.equal(-1, object.server_options.compression.zlibCompressionLevel);
+    test.done();
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Should be able to parse mongodb://localhost/?compressors=snappy&zlibCompressionLevel=3 without issuing a warning'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The test we wish to run
+  test: function(configure, test) {
+    var object = parse("mongodb://localhost/?compressors=snappy&zlibCompressionLevel=3");
+    test.equal(1, object.servers.length);
+    test.equal("localhost", object.servers[0].host);
+    test.equal('27017', object.servers[0].port);
+    test.equal('admin', object.dbName);
+    test.equal('snappy', object.server_options.compression.compressors[0]);
+    test.equal(3, object.server_options.compression.zlibCompressionLevel);
+    test.done();
+  }
+}
+
+/**
+ * @ignore
+ */
 exports['Should be able to parse mongodb://localhost/?compressors=snappy,zlib&zlibCompressionLevel=-1'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
@@ -439,6 +494,46 @@ exports['Should be able to parse mongodb://localhost/?compressors=snappy,zlib&zl
     test.equal('snappy', object.server_options.compression.compressors[0]);
     test.equal('zlib', object.server_options.compression.compressors[1]);
     test.equal(-1, object.server_options.compression.zlibCompressionLevel);
+    test.done();
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Should throw an error when parsing mongodb://localhost/?compressors=foo, where foo is an unsuported compressor'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configure, test) {
+
+    // Should throw due to unsupported compressor
+    try {
+      parse("mongodb://localhost/?compressors=foo");
+    } catch(err) {
+      test.equal("compressors must be at least one of snappy or zlib", err.message);
+    }
+
+    test.done();
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Should throw an error when parsing mongodb://localhost/?zlibCompressionLevel=10, where the integer is out of the specified bounds'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configure, test) {
+
+    // Should throw due to unsupported compressor
+    try {
+      parse("mongodb://localhost/?zlibCompressionLevel=10");
+    } catch(err) {
+      test.equal("zlibCompressionLevel must be an integer between -1 and 9", err.message);
+    }
+
     test.done();
   }
 }
