@@ -72,7 +72,7 @@ exports['should not call callback twice on collection() with callback'] = {
       test.equal(null, err);
       var count = 0;
 
-      let coll = db.collection('coll_name', function(e,coll) {
+      var coll = db.collection('coll_name', function(e,coll) {
         // console.log('hello1')
         count = count + 1;
       });
