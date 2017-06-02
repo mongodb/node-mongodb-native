@@ -354,7 +354,7 @@ Server.prototype.connect = function(options) {
 
   // Do not allow connect to be called on anything that's not disconnected
   if(self.s.pool && !self.s.pool.isDisconnected() && !self.s.pool.isDestroyed()) {
-    throw MongoError.create(f('server instance in invalid state %s', self.s.state));
+    throw MongoError.create(f('server instance in invalid state %s', self.s.pool.state));
   }
 
   // Create a pool
