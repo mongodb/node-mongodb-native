@@ -13,15 +13,16 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = {
   metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance({w:1}, {poolSize:1});
 
     // LINE var MongoClient = require('mongodb').MongoClient;
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.
     // BEGIN
-    db.open(function(err, db) {
+    client.connect(function(err, db) {
+      var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
           title : "this is my title", author : "bob", posted : new Date() ,
@@ -53,7 +54,7 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = {
             test.equal('fun', result[1]._id.tags);
             test.deepEqual(['bob'], result[1].authors);
 
-            db.close();
+            client.close();
             test.done();
         });
       });
@@ -75,15 +76,16 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray
   metadata: { requires: { mongodb: ">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance({w:1}, {poolSize:1});
 
     // LINE var MongoClient = require('mongodb').MongoClient;
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.
     // BEGIN
-    db.open(function(err, db) {
+    client.connect(function(err, db) {
+      var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
           title : "this is my title", author : "bob", posted : new Date() ,
@@ -115,7 +117,7 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray
             test.equal('fun', result[1]._id.tags);
             test.deepEqual(['bob'], result[1].authors);
 
-            db.close();
+            client.close();
             test.done();
         });
       });
@@ -137,15 +139,16 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingl
   metadata: { requires: { mongodb: ">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance({w:1}, {poolSize:1});
 
     // LINE var MongoClient = require('mongodb').MongoClient;
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.
     // BEGIN
-    db.open(function(err, db) {
+    client.connect(function(err, db) {
+      var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
           title : "this is my title", author : "bob", posted : new Date() ,
@@ -177,7 +180,7 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingl
             test.equal('fun', result[1]._id.tags);
             test.deepEqual(['bob'], result[1].authors);
 
-            db.close();
+            client.close();
             test.done();
         });
       });
@@ -205,15 +208,16 @@ exports['Should correctly return and iterate over all the cursor results'] = {
   },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance({w:1}, {poolSize:1});
 
     // LINE var MongoClient = require('mongodb').MongoClient;
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.
     // BEGIN
-    db.open(function(err, db) {
+    client.connect(function(err, db) {
+      var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
           title : "this is my title", author : "bob", posted : new Date() ,
@@ -246,7 +250,7 @@ exports['Should correctly return and iterate over all the cursor results'] = {
           test.equal(null, err);
           test.ok(results != null);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -274,15 +278,16 @@ exports['Should correctly return a cursor and call explain'] = {
   },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance({w:1}, {poolSize:1});
 
     // LINE var MongoClient = require('mongodb').MongoClient;
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.
     // BEGIN
-    db.open(function(err, db) {
+    client.connect(function(err, db) {
+      var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
           title : "this is my title", author : "bob", posted : new Date() ,
@@ -316,7 +321,7 @@ exports['Should correctly return a cursor and call explain'] = {
           test.equal(null, err);
           test.equal(4, result.stages.length);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -344,15 +349,16 @@ exports['Should correctly return a cursor with batchSize 1 and call next'] = {
   },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance({w:1}, {poolSize:1});
 
     // LINE var MongoClient = require('mongodb').MongoClient;
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.
     // BEGIN
-    db.open(function(err, db) {
+    client.connect(function(err, db) {
+      var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
           title : "this is my title", author : "bob", posted : new Date() ,
@@ -387,7 +393,7 @@ exports['Should correctly return a cursor with batchSize 1 and call next'] = {
           test.equal('good', result._id.tags);
           test.deepEqual(['bob'], result.authors);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -409,15 +415,16 @@ exports['Should correctly write the results out to a new collection'] = {
   metadata: { requires: { mongodb: ">2.5.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance({w:1}, {poolSize:1});
 
     // LINE var MongoClient = require('mongodb').MongoClient;
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.
     // BEGIN
-    db.open(function(err, db) {
+    client.connect(function(err, db) {
+      var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
           title : "this is my title", author : "bob", posted : new Date() ,
@@ -448,7 +455,7 @@ exports['Should correctly write the results out to a new collection'] = {
             test.equal(null, err);
             test.equal(0, results.length);
 
-            db.close();
+            client.close();
             test.done();
           });
       });
@@ -470,15 +477,16 @@ exports['Should correctly use allowDiskUse when performing an aggregation'] = {
   metadata: { requires: { mongodb: ">2.5.5", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance({w:1}, {poolSize:1});
 
     // LINE var MongoClient = require('mongodb').MongoClient;
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.
     // BEGIN
-    db.open(function(err, db) {
+    client.connect(function(err, db) {
+      var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
           title : "this is my title", author : "bob", posted : new Date() ,
@@ -512,7 +520,7 @@ exports['Should correctly use allowDiskUse when performing an aggregation'] = {
             test.equal('fun', results[1]._id.tags);
             test.deepEqual(['bob'], results[1].authors);
 
-            db.close();
+            client.close();
             test.done();
           });
       });
@@ -531,9 +539,10 @@ exports['Should perform a simple group aggregation'] = {
   metadata: { requires: { mongodb: ">2.5.5", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Create a collection
       var col = db.collection('shouldPerformSimpleGroupAggregation');
       col.remove({}, function() {
@@ -551,7 +560,7 @@ exports['Should perform a simple group aggregation'] = {
             ]).toArray(function(err, docs) {
             test.equal(null, err);
             test.equal(3, docs[0].total);
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -570,9 +579,10 @@ exports['Should correctly perform an aggregation using a collection name with do
   metadata: { requires: { mongodb: ">2.5.5", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('te.st', function(err, col){
         test.equal(null, err);
         var count = 0;
@@ -597,7 +607,7 @@ exports['Should correctly perform an aggregation using a collection name with do
                 test.equal(null, err);
                 test.notEqual(0, count);
 
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -624,9 +634,10 @@ exports['Should fail aggregation due to illegal cursor option and streams'] = {
   },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
           title : "this is my title", author : "bob", posted : new Date() ,
@@ -656,7 +667,7 @@ exports['Should fail aggregation due to illegal cursor option and streams'] = {
               cursor: 1
             });
         } catch(err) {
-          db.close();
+          client.close();
           return test.done();
         }
 
@@ -683,12 +694,13 @@ exports['Ensure MaxTimeMS is correctly passed down into command execution when u
   },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
+    // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
     // DOC_START
-    db.open(function(err, db) {
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
           title : "this is my title", author : "bob", posted : new Date() ,
@@ -759,7 +771,7 @@ exports['Ensure MaxTimeMS is correctly passed down into command execution when u
             }, function(err, r) {
               // Return the command
               db.command = cmd;
-              db.close();
+              client.close();
               test.done();
             });
         });
@@ -786,12 +798,13 @@ exports['Should correctly handle ISODate date matches in aggregation framework']
   },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
+    // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
     // DOC_START
-    db.open(function(err, db) {
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var date1 = new Date();
       date1.setHours(date1.getHours() - 1);
 
@@ -819,7 +832,7 @@ exports['Should correctly handle ISODate date matches in aggregation framework']
           test.equal(null, err);
           test.equal(1, result.b);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -843,12 +856,13 @@ exports['Should correctly exercise hasNext function on aggregation cursor'] = {
   },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
+    // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
     // DOC_START
-    db.open(function(err, db) {
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Create a collection
       var collection = db.collection('shouldCorrectlyQueryUsingISODate3');
       // Insert the docs
@@ -866,7 +880,7 @@ exports['Should correctly exercise hasNext function on aggregation cursor'] = {
           test.equal(null, err);
           test.equal(true, result);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
