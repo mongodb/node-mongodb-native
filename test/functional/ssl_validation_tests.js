@@ -164,7 +164,7 @@ exports['Should correctly receive ping and ha events using ssl'] = {
         var ha = false;
         var ping = false;
 
-        db.serverConfig.once('serverHeartbeatSucceeded', function(e) {
+        client.topology.once('serverHeartbeatSucceeded', function(e) {
           ha = true;
         });
 

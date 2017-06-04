@@ -503,14 +503,14 @@ exports['Should correctly reauthenticate against x509'] = {
                     test.equal(null, err);
                     test.equal(1, doc.a);
 
-                    db.serverConfig.once('reconnect', function() {
+                    client.topology.once('reconnect', function() {
                       // Await reconnect and re-authentication
                       db.collection('x509collection').findOne(function(err, doc) {
                         test.equal(null, err);
                         test.equal(1, doc.a);
 
                         // Attempt disconnect again
-                        db.serverConfig.connections()[0].destroy();
+                        client.topology.connections()[0].destroy();
 
                         // Await reconnect and re-authentication
                         db.collection('x509collection').findOne(function(err, doc) {
@@ -527,7 +527,7 @@ exports['Should correctly reauthenticate against x509'] = {
                     })
 
                     // Force close
-                    db.serverConfig.connections()[0].destroy();
+                    client.topology.connections()[0].destroy();
                   });
                 });
               });

@@ -210,7 +210,7 @@ exports['Should correctly connect and emit a reconnect event after mongos failov
 
       var reconnectCalled = false;
       // Add listener to the serverConfig
-      db.serverConfig.on('reconnect', function(err) {
+      client.topology.on('reconnect', function(err) {
         reconnectCalled = true;
       });
 

@@ -35,7 +35,7 @@ exports['Should correctly authenticate against scram'] = {
             test.ok(r != null);
 
             // Wait for a reconnect to happen
-            db.serverConfig.once('reconnect', function() {
+            client.topology.once('reconnect', function() {
 
               // Perform an insert after reconnect
               db.collection('test').insert({a:1}, function(err, r) {
@@ -58,7 +58,7 @@ exports['Should correctly authenticate against scram'] = {
             });
 
             // Attempt disconnect again
-            db.serverConfig.connections()[0].destroy();
+            client.topology.connections()[0].destroy();
           });
         });
       });

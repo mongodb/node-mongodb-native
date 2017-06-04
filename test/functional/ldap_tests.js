@@ -63,14 +63,14 @@ exports['Should correctly reauthenticate against ldap'] = {
         test.equal(null, err);
         test.equal(true, doc.ldap);
 
-        db.serverConfig.once('reconnect', function() {
+        client.topology.once('reconnect', function() {
           // Await reconnect and re-authentication    
           db.db('ldap').collection('test').findOne(function(err, doc) {
             test.equal(null, err);
             test.equal(true, doc.ldap);
 
             // Attempt disconnect again
-            db.serverConfig.connections()[0].destroy();
+            client.topology.connections()[0].destroy();
 
             // Await reconnect and re-authentication    
             db.db('ldap').collection('test').findOne(function(err, doc) {
@@ -83,7 +83,7 @@ exports['Should correctly reauthenticate against ldap'] = {
         })
         
         // Force close
-        db.serverConfig.connections()[0].destroy();
+        client.topology.connections()[0].destroy();
       });
     });
   }

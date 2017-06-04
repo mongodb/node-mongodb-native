@@ -3426,6 +3426,7 @@ exports['Should correctly connect with default replicasetNoOption With Promises'
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
+      , MongoClient = configuration.require.MongoClient
       , Server = configuration.require.Server
       , Db = configuration.require.Db;
 
@@ -3438,8 +3439,8 @@ exports['Should correctly connect with default replicasetNoOption With Promises'
       , {rs_name:configuration.replicasetName}
     );
 
-    var db = new Db('integration_test_', replSet, {w:0});
-    db.open(function(err, p_db) {
+    var client = new MongoClient(replSet, {w:0});
+    client.connect(function(err, client) {
       var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
@@ -3449,7 +3450,7 @@ exports['Should correctly connect with default replicasetNoOption With Promises'
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
     // BEGIN
-      p_client.close();
+      client.close();
       test.done();
     });
     // END

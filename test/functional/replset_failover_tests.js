@@ -26,21 +26,21 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
     var manager = configuration.manager;
 
     // Get a new instance
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance({w:0}, {poolSize:1});
+    client.connect(function(err, client) {
       test.equal(null, err);
 
-      db.serverConfig.on('joined', function(t, d, s) {
+      client.topology.on('joined', function(t, d, s) {
         // console.log("---- joined :: " + t + " :: " + s.name)
         if(t == 'secondary'
           && secondaryServerManager
           && s.name == f('%s:%s', secondaryServerManager.host, secondaryServerManager.port)) {
-            db.close();
+            client.close();
             restartAndDone(configuration, test);
         }
       });
 
-      db.serverConfig.on('left', function(t, s) {
+      client.topology.on('left', function(t, s) {
         // console.log("---- left :: " + t + " :: " + s.name)
         if(t == 'secondary'
           && secondaryServerManager
@@ -50,7 +50,7 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
       });
 
       // console.log("--------- 0")
-      db.once('fullsetup', function() {
+      client.once('fullsetup', function() {
         // console.log("--------- 1")
         // Get the secondary server
         manager.secondaries().then(function(managers) {
@@ -93,7 +93,7 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
 //     db.open(function(err, db) {
 //       test.equal(null, err);
 //
-//       db.serverConfig.on('ha', function(e, options) {
+//       client.topology.on('ha', function(e, options) {
 //         db.close();
 //         restartAndDone(configuration, test);
 //       });
@@ -112,14 +112,14 @@ exports['Should correctly handle primary stepDown'] = {
     // The state
     var state = 0;
 
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance({w:0}, {poolSize:1});
+    client.connect(function(err, client) {
       // Wait for close event due to primary stepdown
-      db.serverConfig.on('joined', function(t, d, s) {
+      client.topology.on('joined', function(t, d, s) {
         if(t == 'primary') state++;
       });
 
-      db.serverConfig.on('left', function(t, s) {
+      client.topology.on('left', function(t, s) {
         if(t == 'primary') state++;
       });
 
@@ -127,12 +127,12 @@ exports['Should correctly handle primary stepDown'] = {
       var interval = setInterval(function() {
         if(state == 2) {
           clearInterval(interval);
-          db.close();
+          client.close();
           restartAndDone(configuration, test);
         }
       }, 500);
 
-      db.once('fullsetup', function() {
+      client.once('fullsetup', function() {
         configuration.manager.stepDownPrimary(false, {stepDownSecs: 1, force:true}).then(function() {});
       });
     });
@@ -148,12 +148,12 @@ exports['Should correctly recover from secondary shutdowns'] = {
     var primary = false;
 
     // Get a new instance
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var client = configuration.newDbInstance({w:0}, {poolSize:1});
     // Managers
     var managers = null;
 
     // Wait for a second and shutdown secondaries
-    db.once('fullsetup', function() {
+    client.once('fullsetup', function() {
       // console.log("==================== 0")
       configuration.manager.secondaries().then(function(m) {
         managers = m;
@@ -176,21 +176,22 @@ exports['Should correctly recover from secondary shutdowns'] = {
       });
     });
 
-    db.open(function(err, db) {
+    client.connect(function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
       // The state
       var left = {};
       var joined = 0;
 
       // Wait for left events
-      db.serverConfig.on('left', function(t, s) {
+      client.topology.on('left', function(t, s) {
         left[s.name] = ({type: t, server: s});
 
         // Restart the servers
         if(Object.keys(left).length == 2) {
-          db.serverConfig.removeAllListeners('left')
+          client.topology.removeAllListeners('left')
           // Wait for close event due to primary stepdown
-          db.serverConfig.on('joined', function(t, d, s) {
+          client.topology.on('joined', function(t, d, s) {
             if('secondary' == t && left[s.name]) {
               joined++;
             }
@@ -203,7 +204,7 @@ exports['Should correctly recover from secondary shutdowns'] = {
                   , {readPreference: new ReadPreference('secondary')}
                   , function(err, result) {
                     test.equal(null, err);
-                    db.close();
+                    client.close();
                     restartAndDone(configuration, test);
                   });
               });
@@ -225,27 +226,28 @@ exports['Should correctly remove and re-add secondary with new priority and dete
 
     // console.log('start')
     // Get a new instance
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance({w:0}, {poolSize:1});
+    client.connect(function(err, client) {
       // console.log('open')
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       // Add event listeners
-      db.serverConfig.on('joined', function(t, d, s) {
+      client.topology.on('joined', function(t, d, s) {
         // console.log("joined - " + t + " - " + s.name)
         if(t == 'primary' && leftServer && s.name == f('%s:%s', leftServer.host, leftServer.port)) {
           // console.log("done")
-          db.close();
+          client.close();
           restartAndDone(configuration, test);
         }
       });
 
-      db.serverConfig.on('left', function(t, s) {
+      client.topology.on('left', function(t, s) {
         // console.log("left - " + t + " - " + s.name)
         if(t == 'secondary' && leftServer && s.name == f('%s:%s', leftServer.host, leftServer.port)) state++;
       });
 
-      db.once('fullsetup', function() {
+      client.once('fullsetup', function() {
         // console.log("fullsetup")
         configuration.manager.secondaries().then(function(managers) {
           leftServer = managers[0];
@@ -294,6 +296,7 @@ exports['Should work correctly with inserts after bringing master back'] = {
 
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
+      , MongoClient = configuration.require.MongoClient
       , Server = configuration.require.Server
       , Db = configuration.require.Db;
 
@@ -309,8 +312,9 @@ exports['Should work correctly with inserts after bringing master back'] = {
     );
 
     // Get a new instance
-    var db = new Db('integration_test_', replSet, {w:1});
-    db.on('fullsetup', function(err, db) {
+    var client = new MongoClient(replSet, {w:1});
+    client.on('fullsetup', function(client) {
+      var db = client.db(configuration.database);
       // console.log("---------------------- 0")
       // Drop collection on replicaset
       db.dropCollection('shouldWorkCorrectlyWithInserts', function(err, r) {
@@ -394,7 +398,7 @@ exports['Should work correctly with inserts after bringing master back'] = {
                             test.equal(60, items[4].a);
                             test.equal(70, items[5].a);
                             test.equal(80, items[6].a);
-                            db.close();
+                            client.close();
                             restartAndDone(configuration, test);
                           });
                         });
@@ -411,9 +415,7 @@ exports['Should work correctly with inserts after bringing master back'] = {
       });
     });
 
-    db.open(function(err, p_db) {
-      db = p_db;
-    });
+    client.connect(function(err, p_db) {});
   }
 }
 
@@ -426,6 +428,7 @@ exports['Should correctly read from secondary even if primary is down'] = {
   test: function(configuration, test) {
     var mongo = configuration.require
       , ReadPreference = mongo.ReadPreference
+      , MongoClient = configuration.require.MongoClient
       , ReplSet = mongo.ReplSet
       , Server = mongo.Server
       , Db = mongo.Db;
@@ -441,8 +444,9 @@ exports['Should correctly read from secondary even if primary is down'] = {
       , {rs_name:configuration.replicasetName, tag: "Application", poolSize: 1}
     );
 
-    var db = new Db('integration_test_', replSet, {w:0, readPreference:ReadPreference.PRIMARY_PREFERRED});
-    db.on('fullsetup', function(err, p_db) {
+    var client = new MongoClient(replSet, {w:0, readPreference:ReadPreference.PRIMARY_PREFERRED});
+    client.on('fullsetup', function(client) {
+      var p_db = client.db(configuration.database);
       var collection = p_db.collection('notempty');
 
       // Insert a document
@@ -465,7 +469,7 @@ exports['Should correctly read from secondary even if primary is down'] = {
                 test.equal(null, err);
                 test.ok(doc != null);
 
-                p_db.close();
+                client.close();
                 restartAndDone(configuration, test);
               });
             });
@@ -474,8 +478,7 @@ exports['Should correctly read from secondary even if primary is down'] = {
       });
     });
 
-    db.open(function(err, p_db) {
-      db = p_db;
+    client.connect(function(err, p_db) {
     });
   }
 }
@@ -505,9 +508,9 @@ exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = {
             connectTimeoutMS: 500
           }
         }
-      }, function(err,db){
+      }, function(err,client){
         test.equal(null, err);
-        test.ok(db != null);
+        var db = client.db(configuration.database);
 
         db.collection("replicaset_readpref_test").insert({testfield:123}, function(err, result) {
           test.equal(null, err);
@@ -536,7 +539,7 @@ exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = {
             var intervalid = setInterval(function() {
               if(counter++ >= 30){
                 clearInterval(intervalid);
-                db.close();
+                client.close();
                 return restartAndDone(configuration, test);
               }
 
@@ -570,8 +573,9 @@ exports['Should get proper error when strict is set and only a secondary is avai
     var url = format("mongodb://localhost:%s,localhost:%s,localhost:%s/integration_test_?rs_name=%s"
       , configuration.port, configuration.port + 1, configuration.port + 1, configuration.replicasetName);
 
-    MongoClient.connect(url, { readPreference: ReadPreference.NEAREST }, function(err,db) {
+    MongoClient.connect(url, { readPreference: ReadPreference.NEAREST }, function(err, client) {
       test.equal(null, err)
+      var db = client.db(configuration.database);
 
       // Shut down primary server
       manager.primary().then(function(primary) {
@@ -583,7 +587,7 @@ exports['Should get proper error when strict is set and only a secondary is avai
             test.ok(err != null);
             test.ok(err.message.indexOf("Currently in strict mode") != -1);
 
-            db.close();
+            client.close();
             restartAndDone(configuration, test);
           });
         });
@@ -606,11 +610,11 @@ exports['Should get proper error when strict is set and only a secondary is avai
 //     db.open(function(err, db) {
 //       db.once('fullsetup', function() {
 //         // Wait for close event due to primary stepdown
-//         db.serverConfig.on('joined', function(t, d, s) {
+//         client.topology.on('joined', function(t, d, s) {
 //           if(t == 'primary') console.log("primary joined " + s.name)
 //         });
 
-//         db.serverConfig.on('left', function(t, s) {
+//         client.topology.on('left', function(t, s) {
 //           if(t == 'primary') {
 //           }
 //         });

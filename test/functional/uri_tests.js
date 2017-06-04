@@ -26,7 +26,7 @@ exports['Should correctly connect using MongoClient to a single server using con
     }, function(err, client) {
       var db = client.db(configuration.database);
       test.equal(null, err);
-      test.equal(500, db.serverConfig.connections()[0].connectionTimeout);
+      test.equal(500, client.topology.connections()[0].connectionTimeout);
 
       db.collection('mongoclient_test').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
         test.equal(null, err);

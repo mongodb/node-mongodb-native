@@ -83,12 +83,13 @@ exports['Should fail due to w:5 and wtimeout:1 with ordered batch api'] = {
       });
     }
 
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       executeTests(db, function() {
         // Finish up test
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -166,12 +167,13 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
       });
     }
 
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       executeTests(db, function() {
         // Finish up test
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -247,12 +249,13 @@ exports['Should fail due to w:5 and wtimeout:1 with unordered batch api'] = {
       });
     }
 
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       executeTests(db, function() {
         // Finish up test
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -334,12 +337,13 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
       });
     }
 
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       executeTests(db, function() {
         // Finish up test
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -365,8 +369,9 @@ exports['Should fail to do map reduce to out collection'] = {
 
     var manager = configuration.manager;
 
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       var collection = db.collection('test_map_reduce_functions_notInline_map_reduce', {
             readPreference: ReadPreference.SECONDARY
@@ -383,7 +388,7 @@ exports['Should fail to do map reduce to out collection'] = {
         // Execute map reduce and return results inline
         collection.mapReduce(map, reduce
           , {out : {replace:'replacethiscollection'}, readPreference:ReadPreference.SECONDARY}, function(err, results) {
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -402,14 +407,15 @@ exports['Should correctly execute ensureIndex with readPreference primaryPreferr
 
     // MongoClient.connect(url, function(err, db) {
     MongoClient.connect('mongodb://localhost:31001/integration_test_?replicaSet=rs&readPreference=primaryPreferred')
-    .then(function(db) {
+    .then(function(client) {
       // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
+      var db = client.db(configuration.database);
       var collection = db.collection('ensureIndexWithPrimaryPreferred');
       collection.ensureIndex({a:1}, function(err, r) {
         // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 1")
         test.equal(null, err);
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -435,8 +441,9 @@ exports['Should Correctly group using replicaset'] = {
 
     var manager = configuration.manager;
 
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       var collection = db.collection('testgroup_replicaset', {
             readPreference: ReadPreference.SECONDARY
@@ -454,7 +461,7 @@ exports['Should Correctly group using replicaset'] = {
             }, true, function(err, items){
               test.equal(null, err);
               test.equal(3, items.length);
-              db.close();
+              client.close();
               restartAndDone(configuration, test);
             })
           });
@@ -483,8 +490,9 @@ exports['Should Correctly execute createIndex with secondary readPreference'] = 
 
     var manager = configuration.manager;
 
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       var collection = db.collection('testgroup_replicaset_2', {
             readPreference: ReadPreference.SECONDARY
@@ -494,7 +502,7 @@ exports['Should Correctly execute createIndex with secondary readPreference'] = 
       collection.createIndexes([{name: 'a_1', key: {a:1}}], function(err, r) {
         test.equal(null, err);
 
-        db.close();
+        client.close();
         restartAndDone(configuration, test);
       });
     });

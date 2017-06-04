@@ -37,7 +37,7 @@ exports['Should Correctly Do MongoClient with bufferMaxEntries:0 and ordered exe
       // Add listener to close event
       db.once("close", closeListener);
       // Ensure death of server instance
-      db.serverConfig.connections()[0].destroy();
+      client.topology.connections()[0].destroy();
     });
   }
 }
@@ -80,7 +80,7 @@ exports['Should Correctly Do MongoClient with bufferMaxEntries:0 and unordered e
       // Add listener to close event
       db.once("close", closeListener);
       // Ensure death of server instance
-      db.serverConfig.connections()[0].destroy();
+      client.topology.connections()[0].destroy();
     });
   }
 }
@@ -288,8 +288,8 @@ exports['Should correctly set MaxPoolSize on single server'] = {
     MongoClient.connect(url, function(err, client) {
       var db = client.db(configuration.database);
 
-      test.equal(1, db.serverConfig.connections().length);
-      test.equal(100, db.serverConfig.s.server.s.pool.size);
+      test.equal(1, client.topology.connections().length);
+      test.equal(100, client.topology.s.server.s.pool.size);
 
       client.close();
       test.done();
@@ -315,13 +315,13 @@ exports['Should correctly set MaxPoolSize on replicaset server'] = {
 
     MongoClient.connect(url, {}, function(err, client) {
       var db = client.db(configuration.database);
-      test.ok(db.serverConfig.connections().length >= 1);
+      test.ok(client.topology.connections().length >= 1);
 
-      var connections = db.serverConfig.connections();
+      var connections = client.topology.connections();
 
       for(var i = 0; i < connections.length; i++) {
         test.equal(30000, connections[i].connectionTimeout);
-        test.equal(30000, connections[i].socketTimeout);
+        test.equal(360000, connections[i].socketTimeout);
       }
 
       client.close();
@@ -330,9 +330,9 @@ exports['Should correctly set MaxPoolSize on replicaset server'] = {
         connectTimeoutMS: 15000,
         socketTimeoutMS: 30000
       }, function(err, client) {
-        test.ok(db.serverConfig.connections().length >= 1);
+        test.ok(client.topology.connections().length >= 1);
 
-        var connections = db.serverConfig.connections();
+        var connections = client.topology.connections();
 
         for(var i = 0; i < connections.length; i++) {
           test.equal(15000, connections[i].connectionTimeout);
@@ -364,7 +364,7 @@ exports['Should correctly set MaxPoolSize on sharded server'] = {
 
     MongoClient.connect(url, function(err, client) {
       var db = client.db(configuration.database);
-      test.ok(db.serverConfig.connections().length >= 1);
+      test.ok(client.topology.connections().length >= 1);
 
       client.close();
       test.done();
@@ -455,7 +455,7 @@ exports["correctly connect setting keepAlive to 100"] = {
     }, function(err, client) {
       var db = client.db(configuration.database);
       test.equal(null, err);
-      var connection = db.serverConfig.connections()[0];
+      var connection = client.topology.connections()[0];
       test.equal(true, connection.keepAlive);
       test.equal(100, connection.keepAliveInitialDelay);
 
@@ -466,7 +466,7 @@ exports["correctly connect setting keepAlive to 100"] = {
       }, function(err, client) {
         test.equal(null, err);
 
-        db.serverConfig.connections().forEach(function(x) {
+        client.topology.connections().forEach(function(x) {
           test.equal(false, x.keepAlive);
         })
 
@@ -492,7 +492,7 @@ exports["default keepAlive behavior"] = {
       test.equal(null, err);
       var db = client.db(configuration.database);
 
-      db.serverConfig.connections().forEach(function(x) {
+      client.topology.connections().forEach(function(x) {
         test.equal(true, x.keepAlive);
       });
 
@@ -563,7 +563,7 @@ exports['Should correctly pass through appname'] = {
     MongoClient.connect(url, function(err, client) {
       var db = client.db(configuration.database);
       test.equal(null, err);
-      test.equal('hello world', db.serverConfig.clientInfo.application.name);
+      test.equal('hello world', client.topology.clientInfo.application.name);
 
       client.close();
       test.done();
@@ -644,8 +644,8 @@ exports['Should correctly pass through socketTimeoutMS and connectTimeoutMS from
     }, function(err, client) {
       test.equal(null, err);
       var db = client.db(configuration.database);
-      test.equal(120000, db.serverConfig.s.server.s.options.socketTimeout);
-      test.equal(15000, db.serverConfig.s.server.s.options.connectionTimeout);
+      test.equal(120000, client.topology.s.server.s.options.socketTimeout);
+      test.equal(15000, client.topology.s.server.s.options.connectionTimeout);
 
       client.close();
       test.done();

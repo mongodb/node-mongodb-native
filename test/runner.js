@@ -260,64 +260,64 @@ var Configuration = function(options) {
 // Set up the runner
 var runner = new Runner({
     logLevel:'error'
-    // logLevel:'info'
+  , logLevel:'info'
   , runners: 1
   , failFast: true
 });
 
 var testFiles = [
-  // Logging tests
-    '/test/functional/logger_tests.js'
+  // // Logging tests
+  //   '/test/functional/logger_tests.js'
 
-  // APM tests
-  , '/test/functional/apm_tests.js'
+  // // APM tests
+  // , '/test/functional/apm_tests.js'
 
-  // Connection spec tests
-  , '/test/functional/connection_string_spec_tests.js'
+  // // Connection spec tests
+  // , '/test/functional/connection_string_spec_tests.js'
 
-  // Replicaset read concern (make sure no illegal state due to teardown tests)
-  , '/test/functional/readconcern_tests.js'
+  // // Replicaset read concern (make sure no illegal state due to teardown tests)
+  // , '/test/functional/readconcern_tests.js'
 
-  // Promise tests
-  , '/test/functional/promises_db_tests.js'
-  , '/test/functional/promises_collection_tests.js'
-  , '/test/functional/promises_cursor_tests.js'
-  , '/test/functional/operation_promises_example_tests.js'
-  , '/test/functional/byo_promises_tests.js'
+  // // Promise tests
+  // , '/test/functional/promises_db_tests.js'
+  // , '/test/functional/promises_collection_tests.js'
+  // , '/test/functional/promises_cursor_tests.js'
+  // , '/test/functional/operation_promises_example_tests.js'
+  // , '/test/functional/byo_promises_tests.js'
 
   // Functionality tests
   , '/test/functional/mongo_client_tests.js'
-  , '/test/functional/collection_tests.js'
-  , '/test/functional/db_tests.js'
-  , '/test/functional/cursor_tests.js'
-  , '/test/functional/insert_tests.js'
-  , '/test/functional/aggregation_tests.js'
-  , '/test/functional/connection_tests.js'
-  , '/test/functional/cursorstream_tests.js'
-  , '/test/functional/custom_pk_tests.js'
-  , '/test/functional/error_tests.js'
-  , '/test/functional/find_tests.js'
-  , '/test/functional/index_tests.js'
-  , '/test/functional/mapreduce_tests.js'
-  , '/test/functional/maxtimems_tests.js'
-  , '/test/functional/multiple_db_tests.js'
-  , '/test/functional/object_id_tests.js'
-  , '/test/functional/raw_tests.js'
-  , '/test/functional/readpreference_tests.js'
-  , '/test/functional/remove_tests.js'
-  , '/test/functional/unicode_tests.js'
-  , '/test/functional/uri_tests.js'
-  , '/test/functional/url_parser_tests.js'
-  , '/test/functional/gridfs_tests.js'
-  , '/test/functional/bulk_tests.js'
-  , '/test/functional/operation_example_tests.js'
-  , '/test/functional/crud_api_tests.js'
-  , '/test/functional/document_validation_tests.js'
-  , '/test/functional/ignore_undefined_tests.js'
-  , '/test/functional/mongo_client_options_tests.js'
-  , '/test/functional/decimal128_tests.js'
-  , '/test/functional/find_and_modify_tests.js'
-  , '/test/functional/hang_tests.js',
+  // , '/test/functional/collection_tests.js'
+  // , '/test/functional/db_tests.js'
+  // , '/test/functional/cursor_tests.js'
+  // , '/test/functional/insert_tests.js'
+  // , '/test/functional/aggregation_tests.js'
+  // , '/test/functional/connection_tests.js'
+  // , '/test/functional/cursorstream_tests.js'
+  // , '/test/functional/custom_pk_tests.js'
+  // , '/test/functional/error_tests.js'
+  // , '/test/functional/find_tests.js'
+  // , '/test/functional/index_tests.js'
+  // , '/test/functional/mapreduce_tests.js'
+  // , '/test/functional/maxtimems_tests.js'
+  // , '/test/functional/multiple_db_tests.js'
+  // , '/test/functional/object_id_tests.js'
+  // , '/test/functional/raw_tests.js'
+  // , '/test/functional/readpreference_tests.js'
+  // , '/test/functional/remove_tests.js'
+  // , '/test/functional/unicode_tests.js'
+  // , '/test/functional/uri_tests.js'
+  // , '/test/functional/url_parser_tests.js'
+  // , '/test/functional/gridfs_tests.js'
+  // , '/test/functional/bulk_tests.js'
+  // , '/test/functional/operation_example_tests.js'
+  // , '/test/functional/crud_api_tests.js'
+  // , '/test/functional/document_validation_tests.js'
+  // , '/test/functional/ignore_undefined_tests.js'
+  // , '/test/functional/mongo_client_options_tests.js'
+  // , '/test/functional/decimal128_tests.js'
+  // , '/test/functional/find_and_modify_tests.js'
+  // , '/test/functional/hang_tests.js',
   , '/test/functional/disconnect_handler_tests.js',
   , '/test/functional/promote_values_tests.js',
   , '/test/functional/promote_buffers_tests.js',

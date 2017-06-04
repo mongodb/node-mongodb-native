@@ -22,8 +22,10 @@ exports['Should set local readConcern on db level'] = {
     // Contains all the apm events
     var started = [];
     // Get a new instance
-    var db = configuration.newDbInstance({w:1, readConcern: {level: 'local'}}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, readConcern: {level: 'local'}});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
+
       test.equal(null, err);
       test.deepEqual({level: 'local'}, db.s.readConcern);
 
@@ -43,7 +45,7 @@ exports['Should set local readConcern on db level'] = {
         test.deepEqual({level:'local'}, started[0].command.readConcern);
 
         listener.uninstrument();
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -58,8 +60,9 @@ exports['Should set majority readConcern on db level'] = {
     // Contains all the apm events
     var started = [];
     // Get a new instance
-    var db = configuration.newDbInstance({w:1, readConcern: {level: 'majority'}}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, readConcern: {level: 'majority'}});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       test.deepEqual({level: 'majority'}, db.s.readConcern);
 
@@ -79,7 +82,7 @@ exports['Should set majority readConcern on db level'] = {
         test.deepEqual({level:'majority'}, started[0].command.readConcern);
 
         listener.uninstrument();
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -94,8 +97,9 @@ exports['Should set local readConcern at collection level'] = {
     // Contains all the apm events
     var started = [];
     // Get a new instance
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       // Get a collection
       var collection = db.collection('readConcernCollection', {readConcern: {level: 'local'}});
@@ -113,7 +117,7 @@ exports['Should set local readConcern at collection level'] = {
         test.deepEqual({level:'local'}, started[0].command.readConcern);
 
         listener.uninstrument();
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -128,8 +132,9 @@ exports['Should set majority readConcern at collection level'] = {
     // Contains all the apm events
     var started = [];
     // Get a new instance
-    var db = configuration.newDbInstance({w:1, readConcern: {level: 'majority'}}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, readConcern: {level: 'majority'}});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       // Get a collection
       var collection = db.collection('readConcernCollection', {readConcern: {level: 'majority'}});
@@ -147,7 +152,7 @@ exports['Should set majority readConcern at collection level'] = {
         test.deepEqual({level:'majority'}, started[0].command.readConcern);
 
         listener.uninstrument();
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -168,7 +173,8 @@ exports['Should set local readConcern using MongoClient'] = {
       : f('%s?%s', url, 'readConcernLevel=local');
 
     // Connect using mongoclient
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       test.deepEqual({level: 'local'}, db.s.readConcern);
 
@@ -188,7 +194,7 @@ exports['Should set local readConcern using MongoClient'] = {
         test.deepEqual({level:'local'}, started[0].command.readConcern);
 
         listener.uninstrument();
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -209,7 +215,8 @@ exports['Should set majority readConcern using MongoClient'] = {
       : f('%s?%s', url, 'readConcernLevel=majority');
 
     // Connect using mongoclient
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       test.deepEqual({level: 'majority'}, db.s.readConcern);
 
@@ -229,7 +236,7 @@ exports['Should set majority readConcern using MongoClient'] = {
         test.deepEqual({level:'majority'}, started[0].command.readConcern);
 
         listener.uninstrument();
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -252,7 +259,8 @@ exports['Should set majority readConcern using MongoClient with options'] = {
     }
 
     // Connect using mongoclient
-    MongoClient.connect(url, options, function(err, db) {
+    MongoClient.connect(url, options, function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       test.deepEqual({level: 'majority'}, db.s.readConcern);
 
@@ -272,7 +280,7 @@ exports['Should set majority readConcern using MongoClient with options'] = {
         test.deepEqual({level:'majority'}, started[0].command.readConcern);
 
         listener.uninstrument();
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -287,8 +295,9 @@ exports['Should error out with readConcern level set to majority'] = {
     // Contains all the apm events
     var started = [];
     // Get a new instance
-    var db = configuration.newDbInstance({w:1, readConcern: {level: 'majority'}}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, readConcern: {level: 'majority'}});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       test.deepEqual({level: 'majority'}, db.s.readConcern);
 
@@ -307,7 +316,7 @@ exports['Should error out with readConcern level set to majority'] = {
         test.ok(err != null);
 
         listener.uninstrument();
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -323,8 +332,9 @@ exports['Should set majority readConcern aggregate command'] = {
     var started = [];
     var succeeded = [];
     // Get a new instance
-    var db = configuration.newDbInstance({w:1, readConcern: {level: 'majority'}}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, readConcern: {level: 'majority'}});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       test.deepEqual({level: 'majority'}, db.s.readConcern);
 
@@ -346,7 +356,7 @@ exports['Should set majority readConcern aggregate command'] = {
         test.deepEqual({level:'majority'}, started[0].command.readConcern);
 
         listener.uninstrument();
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -362,8 +372,9 @@ exports['Should set majority readConcern aggregate command but ignore due to out
     var started = [];
     var succeeded = [];
     // Get a new instance
-    var db = configuration.newDbInstance({w:1, readConcern: {level: 'majority'}}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, readConcern: {level: 'majority'}});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       test.deepEqual({level: 'majority'}, db.s.readConcern);
 
@@ -393,7 +404,7 @@ exports['Should set majority readConcern aggregate command but ignore due to out
           test.equal(undefined, started[1].command.readConcern);
 
           listener.uninstrument();
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -410,8 +421,9 @@ exports['Should set majority readConcern mapReduce command but be ignored'] = {
     var started = [];
     var succeeded = [];
     // Get a new instance
-    var db = configuration.newDbInstance({w:1, readConcern: {level: 'majority'}}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, readConcern: {level: 'majority'}});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       test.deepEqual({level: 'majority'}, db.s.readConcern);
 
@@ -436,7 +448,7 @@ exports['Should set majority readConcern mapReduce command but be ignored'] = {
           test.equal(undefined, started[0].command.readConcern);
 
           listener.uninstrument();
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -453,8 +465,9 @@ exports['Should set majority readConcern distinct command'] = {
     var started = [];
     var succeeded = [];
     // Get a new instance
-    var db = configuration.newDbInstance({w:1, readConcern: {level: 'majority'}}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, readConcern: {level: 'majority'}});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       test.deepEqual({level: 'majority'}, db.s.readConcern);
 
@@ -479,7 +492,7 @@ exports['Should set majority readConcern distinct command'] = {
           test.deepEqual({level:'majority'}, started[0].command.readConcern);
 
           listener.uninstrument();
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -496,8 +509,9 @@ exports['Should set majority readConcern count command'] = {
     var started = [];
     var succeeded = [];
     // Get a new instance
-    var db = configuration.newDbInstance({w:1, readConcern: {level: 'majority'}}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, readConcern: {level: 'majority'}});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       test.deepEqual({level: 'majority'}, db.s.readConcern);
 
@@ -522,7 +536,7 @@ exports['Should set majority readConcern count command'] = {
           test.deepEqual({level:'majority'}, started[0].command.readConcern);
 
           listener.uninstrument();
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -539,8 +553,9 @@ exports['Should set majority readConcern group command'] = {
     var started = [];
     var succeeded = [];
     // Get a new instance
-    var db = configuration.newDbInstance({w:1, readConcern: {level: 'majority'}}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, readConcern: {level: 'majority'}});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       test.deepEqual({level: 'majority'}, db.s.readConcern);
 
@@ -565,7 +580,7 @@ exports['Should set majority readConcern group command'] = {
           test.deepEqual({level:'majority'}, started[0].command.readConcern);
 
           listener.uninstrument();
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -581,8 +596,9 @@ exports['Should set majority readConcern parallelCollectionScan command'] = {
     var started = [];
     var succeeded = [];
     // Get a new instance
-    var db = configuration.newDbInstance({w:1, readConcern: {level: 'majority'}}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, readConcern: {level: 'majority'}});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       test.deepEqual({level: 'majority'}, db.s.readConcern);
 
@@ -607,7 +623,7 @@ exports['Should set majority readConcern parallelCollectionScan command'] = {
           test.deepEqual({level:'majority'}, started[0].command.readConcern);
 
           listener.uninstrument();
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -624,8 +640,9 @@ exports['Should set majority readConcern geoNear command'] = {
     var started = [];
     var succeeded = [];
     // Get a new instance
-    var db = configuration.newDbInstance({w:1, readConcern: {level: 'majority'}}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, readConcern: {level: 'majority'}});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       test.deepEqual({level: 'majority'}, db.s.readConcern);
 
@@ -653,7 +670,7 @@ exports['Should set majority readConcern geoNear command'] = {
             test.deepEqual({level:'majority'}, started[0].command.readConcern);
 
             listener.uninstrument();
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -671,8 +688,9 @@ exports['Should set majority readConcern geoSearch command'] = {
     var started = [];
     var succeeded = [];
     // Get a new instance
-    var db = configuration.newDbInstance({w:1, readConcern: {level: 'majority'}}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, readConcern: {level: 'majority'}});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       test.deepEqual({level: 'majority'}, db.s.readConcern);
 
@@ -700,7 +718,7 @@ exports['Should set majority readConcern geoSearch command'] = {
             test.deepEqual({level:'majority'}, started[0].command.readConcern);
 
             listener.uninstrument();
-            db.close();
+            client.close();
             test.done();
           });
         });

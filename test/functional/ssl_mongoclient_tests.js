@@ -848,7 +848,7 @@ exports['should correctly send SNI TLS servername to replicaset members with res
                   // Wait to allow haInterval to happen
                   setTimeout(function() {
                     db.close();
-                    var connections = db.serverConfig.connections();
+                    var connections = client.topology.connections();
 
                     for(var i = 0; i < connections.length; i++) {
                       test.equal('server', connections[i].options.servername);
@@ -1164,14 +1164,14 @@ exports['should correctly connect using SSL to replicaset with requireSSL'] = {
             setTimeout(function() {
               // console.log("---------------------------- 6")
               // Force a reconnect of a server
-              var secondary = db.serverConfig.s.replset.s.replicaSetState.secondaries[0]
+              var secondary = client.topology.s.replset.s.replicaSetState.secondaries[0]
               // console.log("---------------------------- 6:1")
               secondary.destroy({emitClose:true});
               // console.log("---------------------------- 6:2")
               sets.push({});
               // console.log("---------------------------- 6:3")
 
-              db.serverConfig.once('joined', function(t, o, s) {
+              client.topology.once('joined', function(t, o, s) {
                 // console.log("---------------------------- 7")
                 setTimeout(function() {
                   // console.log("---------------------------- 8")

@@ -126,14 +126,14 @@ exports['Should Correctly Authenticate using kerberos with MongoClient and then 
         test.equal(null, err);
         test.equal(true, doc.kerberos);
 
-        db.serverConfig.once('reconnect', function() {
+        client.topology.once('reconnect', function() {
           // Await reconnect and re-authentication
           db.db('kerberos').collection('test').findOne(function(err, doc) {
             test.equal(null, err);
             test.equal(true, doc.kerberos);
 
             // Attempt disconnect again
-            db.serverConfig.connections()[0].destroy();
+            client.topology.connections()[0].destroy();
 
             // Await reconnect and re-authentication
             db.db('kerberos').collection('test').findOne(function(err, doc) {
@@ -146,7 +146,7 @@ exports['Should Correctly Authenticate using kerberos with MongoClient and then 
         })
 
         // Force close
-        db.serverConfig.connections()[0].destroy();
+        client.topology.connections()[0].destroy();
       });
     });
   }
@@ -273,14 +273,14 @@ exports['Should Correctly Authenticate using kerberos on Win32 with MongoClient 
         test.equal(null, err);
         test.equal(true, doc.kerberos);
 
-        db.serverConfig.once('reconnect', function() {
+        client.topology.once('reconnect', function() {
           // Await reconnect and re-authentication
           db.db('kerberos').collection('test').findOne(function(err, doc) {
             test.equal(null, err);
             test.equal(true, doc.kerberos);
 
             // Attempt disconnect again
-            db.serverConfig.connections()[0].destroy();
+            client.topology.connections()[0].destroy();
 
             // Await reconnect and re-authentication
             db.db('kerberos').collection('test').findOne(function(err, doc) {
@@ -293,7 +293,7 @@ exports['Should Correctly Authenticate using kerberos on Win32 with MongoClient 
         })
 
         // Force close
-        db.serverConfig.connections()[0].destroy();
+        client.topology.connections()[0].destroy();
       });
     });
   }

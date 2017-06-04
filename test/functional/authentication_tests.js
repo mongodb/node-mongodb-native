@@ -1406,7 +1406,7 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
                 test.equal(null, err);
                 test.ok(result != null);
 
-                db.serverConfig.on('joined', function(t, o, s) {
+                client.topology.on('joined', function(t, o, s) {
                   // console.log("-------------------------------------------------- joined 5 :: " + t + " :: " + s.name)
                   if(t == 'primary') {
                     // console.log("-------------------------------------------------- 6")
@@ -1437,7 +1437,7 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
                   }
                 });
 
-                db.serverConfig.on('left', function(t, s) {
+                client.topology.on('left', function(t, s) {
                   // console.log("-------------------------------------------------- left 5 :: " + t + " :: " + s.name)
                 });
 
@@ -1759,7 +1759,7 @@ exports['Should correctly reauthenticating against multiple databases'] = {
                       db.db('test2').collection('test').findOne({}, function(e, r2) {
                         test.equal(null, e);
 
-                        db.serverConfig.on('joined', function(t, s) {
+                        client.topology.on('joined', function(t, s) {
                           if(t == 'primary') {
                             db.collection('test').findOne({}, function(e, r2) {
                               test.equal(null, err);
