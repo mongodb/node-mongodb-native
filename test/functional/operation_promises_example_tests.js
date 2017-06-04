@@ -3543,7 +3543,7 @@ exports.shouldCorrectlyRetrieveBuildInfoUsingCommandWithPromises = {
 /**
  * Retrieve the current profiling level set for the MongoDB instance using a Promise.
  *
- * @example-class Admin
+ * @example-class Db
  * @example-method profilingLevel
  * @ignore
  */
@@ -3573,7 +3573,7 @@ exports.shouldCorrectlySetDefaultProfilingLevelWithPromises = {
       collection.insertOne({'a':1}, {w: 1}).then(function(doc) {
 
         // Use the admin database for the operation
-        var adminDb = db.admin();
+        var adminDb = client.db('admin');
 
         // Retrive the profiling level
         adminDb.profilingLevel().then(function(level) {
@@ -3592,7 +3592,7 @@ exports.shouldCorrectlySetDefaultProfilingLevelWithPromises = {
  * An example of how to use the setProfilingInfo using a Promise.
  * Use this command to set the Profiling level on the MongoDB server
  *
- * @example-class Admin
+ * @example-class Db
  * @example-method setProfilingLevel
  * @ignore
  */
@@ -3622,7 +3622,7 @@ exports.shouldCorrectlyChangeProfilingLevelWithPromises = {
       collection.insertOne({'a':1}, {w: 1}).then(function(doc) {
 
         // Use the admin database for the operation
-        var adminDb = db.admin();
+        var adminDb = client.db('admin');
 
         // Set the profiling level to only profile slow queries
         adminDb.setProfilingLevel('slow_only').then(function(level) {

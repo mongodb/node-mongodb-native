@@ -15,8 +15,9 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = {
   test: function(configuration, test) {
     var Buffer = require('buffer').Buffer;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('shouldCorrectlySaveDocumentsAndReturnAsRaw', function(err, collection) {
         // Insert some documents
         collection.insert([{a:1}, {b:2000}, {c:2.3}], {w:1}, function(err, result) {
@@ -38,7 +39,7 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = {
               test.ok(Buffer.isBuffer(item));
               var object = bson.deserialize(item);
               test.equal(1, object.a)
-              db.close();
+              client.close();
               test.done();
             })
           })
@@ -58,8 +59,9 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRawWithRawSetAtCollectionLevel = 
   test: function(configuration, test) {
     var Buffer = require('buffer').Buffer;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('shouldCorrectlySaveDocumentsAndReturnAsRaw_2', {raw: true}, function(err, collection) {
         // Insert some documents
         collection.insert([{a:1}, {b:2000}, {c:2.3}], {w:1}, function(err, result) {
@@ -80,7 +82,7 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRawWithRawSetAtCollectionLevel = 
               test.ok(Buffer.isBuffer(item));
               var object = bson.deserialize(item);
               test.equal(1, object.a)
-              db.close();
+              client.close();
               test.done();
             })
           })

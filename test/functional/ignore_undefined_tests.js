@@ -7,8 +7,9 @@ exports['Should correctly insert document ignoring undefined field'] = {
   metadata: { requires: { topology: ['single'] }},
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({ignoreUndefined:true}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, ignoreUndefined: true});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue');
       // console.log("!!!!!!!!!!!!!!!!! IGNORE")
 
@@ -19,7 +20,7 @@ exports['Should correctly insert document ignoring undefined field'] = {
         collection.findOne(function(err, item) {
           test.equal(1, item.a);
           test.ok(item.b === undefined);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -37,7 +38,8 @@ exports['Should correctly connect using MongoClient and perform insert document 
     var MongoClient = configuration.require.MongoClient;
     MongoClient.connect(configuration.url(), {
       db: {bufferMaxEntries:0, ignoreUndefined:true}, server: { sslValidate: false },
-    }, function(err, db) {
+    }, function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue1');
       collection.insert({a:1, b:undefined}, function(err, result) {
         collection.findOne(function(err, item) {
@@ -53,7 +55,7 @@ exports['Should correctly connect using MongoClient and perform insert document 
                 collection.findOne({a:3}, function(err, item) {
                   test.equal(3, item.a);
                   test.ok(item.b === undefined);
-                  db.close();
+                  client.close();
                   test.done();
                 });
               });
@@ -74,8 +76,9 @@ exports['Should correctly update document ignoring undefined field'] = {
   test: function(configuration, test) {
     var ObjectId = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance({ignoreUndefined:true}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, ignoreUndefined: true});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue2');
       var id = new ObjectId();
 
@@ -95,7 +98,7 @@ exports['Should correctly update document ignoring undefined field'] = {
                 collection.findOne({_id: id}, function(err, item) {
                   test.equal(1, item.a);
                   test.ok(item.b === undefined);
-                  db.close();
+                  client.close();
                   test.done();
                 });
               });

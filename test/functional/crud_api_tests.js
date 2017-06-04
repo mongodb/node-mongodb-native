@@ -17,9 +17,9 @@ exports['should correctly execute find method using crud api'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
 
       db.collection('t').insert([{a:1}, {a:1}, {a:1}, {a:1}], function(err) {
         test.equal(null, err);
@@ -148,7 +148,7 @@ exports['should correctly execute find method using crud api'] = {
             test.equal(null, err);
             test.ok(result != null);
 
-            db.close();
+            client.close();
             test.done();
           });
         }
@@ -170,9 +170,9 @@ exports['should correctly execute aggregation method using crud api'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
 
       db.collection('t1').insert([{a:1}, {a:1}, {a:2}, {a:1}], function(err) {
         test.equal(null, err);
@@ -276,7 +276,7 @@ exports['should correctly execute aggregation method using crud api'] = {
             test.equal(null, err);
             test.ok(result != null);
 
-            db.close();
+            client.close();
             test.done();
           });
         }
@@ -294,9 +294,9 @@ exports['should correctly execute insert methods using crud api'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
 
       //
       // Legacy insert method
@@ -487,7 +487,7 @@ exports['should correctly execute insert methods using crud api'] = {
             test.equal(2, r.upsertedCount);
             test.equal(2, Object.keys(r.upsertedIds).length);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -505,9 +505,9 @@ exports['should correctly execute update methods using crud api'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
 
       //
       // Legacy update method
@@ -602,7 +602,7 @@ exports['should correctly execute update methods using crud api'] = {
               test.equal(0, r.matchedCount);
               test.ok(r.upsertedId != null);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -621,9 +621,9 @@ exports['should correctly execute remove methods using crud api'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
 
       //
       // Legacy update method
@@ -675,7 +675,7 @@ exports['should correctly execute remove methods using crud api'] = {
               test.equal(2, r.result.n);
               test.equal(2, r.deletedCount);
 
-              db.close();
+              client.close();
               test.done();
           });
         });
@@ -693,9 +693,9 @@ exports['should correctly execute findAndModify methods using crud api'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
 
       //
       // findOneAndRemove method
@@ -766,7 +766,7 @@ exports['should correctly execute findAndModify methods using crud api'] = {
               test.equal(1, r.value.b);
               test.equal(1, r.value.d);
 
-              db.close();
+              client.close();
               test.done();
           });
         });
@@ -784,16 +784,16 @@ exports['should correctly execute removeMany with no selector'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Delete all items with no selector
       db.collection('t6_1').deleteMany(function(err, r) {
         test.equal(null, err);
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -807,9 +807,9 @@ exports['should correctly execute crud operations with w:0'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       var col = db.collection('shouldCorrectlyExecuteInsertOneWithW0');
@@ -837,7 +837,7 @@ exports['should correctly execute crud operations with w:0'] = {
                   test.equal(null, err);
                   test.equal(1, result.result.ok);
 
-                  db.close();
+                  client.close();
                   test.done();
                 });
               });
@@ -856,16 +856,16 @@ exports['should correctly execute updateOne operations with w:0 and upsert'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.collection('try').updateOne({_id:1}, {$set:{x:1}}, {upsert:true, w:0}, function(err, r) {
         test.equal(null, err);
         test.ok(r != null);
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -879,14 +879,14 @@ exports['should correctly execute crud operations using w:0'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       var collection = db.collection('w0crudoperations');
       collection.insertOne({}, function(err, r) {
-        db.close();
+        client.close();
         test.done();
       });
 
@@ -899,7 +899,7 @@ exports['should correctly execute crud operations using w:0'] = {
       //   test.equal(null, err);
       //   test.ok(r != null);
 
-      //   db.close();
+      //   client.close();
       //   test.done();
       // });
     });
@@ -913,9 +913,9 @@ exports['should correctly throw error on illegal callback when unordered bulkWri
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     process.once("uncaughtException", function(err) {
-      db.close();
+      client.close();
       test.done();
     })
 
@@ -927,8 +927,8 @@ exports['should correctly throw error on illegal callback when unordered bulkWri
 
     ops.push({insertOne: {_id: 0, a: i}});
 
-    // Establish connection to db
-    db.open(function(err, db) {
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.collection('t20_1').bulkWrite(ops, {ordered:false, w:1}, function(err, r) {
@@ -945,9 +945,9 @@ exports['should correctly throw error on illegal callback when ordered bulkWrite
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     process.once("uncaughtException", function(err) {
-      db.close();
+      client.close();
       test.done();
     })
 
@@ -959,8 +959,8 @@ exports['should correctly throw error on illegal callback when ordered bulkWrite
 
     ops.push({insertOne: {_id: 0, a: i}});
 
-    // Establish connection to db
-    db.open(function(err, db) {
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.collection('t20_1').bulkWrite(ops, {ordered:true, w:1}, function(err, r) {

@@ -8,8 +8,9 @@ exports.shouldCorrectlyClearOutCollection = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
   
       db.createCollection('test_clear', function(err, r) {
@@ -36,7 +37,7 @@ exports.shouldCorrectlyClearOutCollection = {
                     test.equal(null, err);
                     test.equal(0, count);
                     // Let's close the db
-                    db.close();
+                    client.close();
                     test.done();
                   });
                 });
@@ -57,8 +58,9 @@ exports.shouldCorrectlyRemoveDocumentUsingRegExp = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.createCollection('test_remove_regexp', function(err, r) {
@@ -77,7 +79,7 @@ exports.shouldCorrectlyRemoveDocumentUsingRegExp = {
               collection.count(function(err, count) {
                 test.equal(0, count);
                 // Let's close the db
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -96,8 +98,9 @@ exports.shouldCorrectlyRemoveOnlyFirstDocument = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.createCollection('shouldCorrectlyRemoveOnlyFirstDocument', function(err, r) {
@@ -115,7 +118,7 @@ exports.shouldCorrectlyRemoveOnlyFirstDocument = {
               
               collection.find({a:1}).count(function(err, result) {
                 test.equal(3, result);
-                db.close();
+                client.close();
                 test.done();
               });
             });

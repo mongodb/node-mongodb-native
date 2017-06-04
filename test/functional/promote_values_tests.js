@@ -10,8 +10,10 @@ exports['should correctly honor promoteValues when creating an instance using Db
       Double = configuration.require.Double;
 
     var o = configuration.writeConcernMax();
-    var db = configuration.newDbInstance(o, {native_parser:true, promoteValues: false})
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, promoteValues:false});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
+      
       db.collection('shouldCorrectlyHonorPromoteValues').insert({
             doc: Long.fromNumber(10)
           , int: 10
@@ -27,7 +29,7 @@ exports['should correctly honor promoteValues when creating an instance using Db
             test.deepEqual(new Int32(10), doc.int);
             test.deepEqual(new Double(2.2222), doc.double);
 
-            db.close();
+            client.close();
             test.done();
           });
       });
@@ -49,7 +51,8 @@ exports['should correctly honor promoteValues when creating an instance using Mo
 
     MongoClient.connect(configuration.url(), {
       promoteValues: false,
-    }, function(err, db) {
+    }, function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('shouldCorrectlyHonorPromoteValues').insert({
             doc: Long.fromNumber(10)
           , int: 10
@@ -65,7 +68,7 @@ exports['should correctly honor promoteValues when creating an instance using Mo
             test.deepEqual(new Int32(10), doc.int);
             test.deepEqual(new Double(2.2222), doc.double);
 
-            db.close();
+            client.close();
             test.done();
           });
       });
@@ -87,7 +90,8 @@ exports['should correctly honor promoteValues at cursor level'] = {
 
     MongoClient.connect(configuration.url(), {
       promoteValues: false,
-    }, function(err, db) {
+    }, function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('shouldCorrectlyHonorPromoteValues').insert({
             doc: Long.fromNumber(10)
           , int: 10
@@ -103,7 +107,7 @@ exports['should correctly honor promoteValues at cursor level'] = {
             test.deepEqual(new Int32(10), doc.int);
             test.deepEqual(new Double(2.2222), doc.double);
 
-            db.close();
+            client.close();
             test.done();
           });
       });
@@ -124,7 +128,8 @@ exports['should correctly honor promoteValues at cursor find level'] = {
       MongoClient = configuration.require.MongoClient;
 
     MongoClient.connect(configuration.url(), {
-    }, function(err, db) {
+    }, function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('shouldCorrectlyHonorPromoteValues').insert({
             doc: Long.fromNumber(10)
           , int: 10
@@ -140,7 +145,7 @@ exports['should correctly honor promoteValues at cursor find level'] = {
             test.deepEqual(new Int32(10), doc.int);
             test.deepEqual(new Double(2.2222), doc.double);
 
-            db.close();
+            client.close();
             test.done();
           });
       });
@@ -161,7 +166,8 @@ exports['should correctly honor promoteValues at aggregate level'] = {
       MongoClient = configuration.require.MongoClient;
 
     MongoClient.connect(configuration.url(), {
-    }, function(err, db) {
+    }, function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('shouldCorrectlyHonorPromoteValues2').insert({
             doc: Long.fromNumber(10)
           , int: 10
@@ -177,7 +183,7 @@ exports['should correctly honor promoteValues at aggregate level'] = {
             test.deepEqual(new Int32(10), doc.int);
             test.deepEqual(new Double(2.2222), doc.double);
 
-            db.close();
+            client.close();
             test.done();
           });
       });
@@ -198,7 +204,7 @@ exports['Should correctly promoteValues when calling getMore on queries'] = {
     var MongoClient = configuration.require.MongoClient;
     var Long = configuration.require.Long;
     
-    MongoClient.connect(configuration.url(), function(err, db) {
+    MongoClient.connect(configuration.url(), function(err, client) {
       var docs = new Array(150).fill(0).map(function(_, i) {
         return {
           _id: 'needle_' + i,
@@ -208,6 +214,8 @@ exports['Should correctly promoteValues when calling getMore on queries'] = {
           int: 1234
         };
       });
+      
+      var db = client.db(configuration.database);
       
       db.collection('haystack').insert(docs, function(errInsert) {
         if (errInsert) throw errInsert;
@@ -225,7 +233,7 @@ exports['Should correctly promoteValues when calling getMore on queries'] = {
           })
           .on('end', function() {
             db.dropCollection('haystack', function() {
-              db.close();
+              client.close();
               test.done();
             });
           });

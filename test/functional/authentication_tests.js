@@ -153,18 +153,19 @@ exports.shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode = {
   metadata: { requires: { topology: ['single', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({}, {poolSize:1});
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode');
       collection.insert({'a':1}, {w: 1}, function(err, doc) {
         var adminDb = db.admin();
-        adminDb.addUser('admin', 'admin', configure.writeConcernMax(), function(err, result) {
+        adminDb.addUser('admin', 'admin', configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
-          adminDb.authenticate('admin', 'admin', function(err, replies) {
+          MongoClient.connect('mongodb://admin:admin@localhost:27017/admin', function(err, client) {
             test.equal(null, err);
-            test.equal(true, replies);
 
             adminDb.validateCollection('shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode', function(err, doc) {
               test.equal(null, err);
@@ -173,7 +174,7 @@ exports.shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode = {
               adminDb.removeUser('admin', function(err) {
                 test.equal(null, err);
 
-                db.close();
+                client.close();
                 test.done();
               })
             });
@@ -191,17 +192,15 @@ exports['Should correctly issue authenticated event on successful authentication
   metadata: { requires: { topology: 'single' } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var client = configuration.newDbInstance({w:1}, {poolSize:1});
 
-    db.once('authenticated', function() {
-      test.done();
-    });
-
-    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
+    // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
-    db.open(function(err, db) {
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);     
       // Grab a collection object
       var collection = db.collection('test');
 
@@ -216,73 +215,22 @@ exports['Should correctly issue authenticated event on successful authentication
         adminDb.addUser('admin15', 'admin15', function(err, result) {
           test.equal(null, err);
           test.ok(result != null);
+          client.close();
+
+          client = new MongoClient('mongodb://admin15:admin15@localhost:27017/admin');
+          client.once('authenticated', function() {
+            test.done();
+          });
 
           // Authenticate using the newly added user
-          adminDb.authenticate('admin15', 'admin15', function(err, result) {
+          client.connect('mongodb://admin15:admin15@localhost:27017/admin', function(err, client) {
             test.equal(null, err);
-            test.equal(true, result);
-            db.close();
+            client.close();
           });
         });
       });
     });
     // DOC_END
-  }
-}
-
-exports['Should correctly authenticate against admin db'] = {
-  metadata: { requires: { topology: ['auth'] } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var Db = configuration.require.Db
-      , MongoClient = configuration.require.MongoClient
-      , Server = configuration.require.Server;
-
-    // restart server
-    configuration.manager.restart(true).then(function() {
-      var db1 = new Db('mongo-ruby-test-auth1', new Server(configuration.host, configuration.port, {auto_reconnect: true}), {w:1});
-      db1.open(function(err, db) {
-        test.equal(null, err);
-
-        db.admin().addUser('admin', 'admin', function(err, result) {
-          test.equal(null, err);
-
-          // Attempt to save a document
-          db.collection('test').insert({a:1}, function(err, result) {
-            test.ok(err != null);
-
-            // Login the user
-            db.admin().authenticate("admin", "admin", function(err, result) {
-              test.equal(null, err);
-              test.ok(result);
-
-              db.collection('test').insert({a:1}, function(err, result) {
-                test.equal(null, err);
-
-                // Logout the user
-                db.admin().logout(function(err, result) {
-                  test.equal(null, err);
-
-                  // Attempt to save a document
-                  db.collection('test').insert({a:1}, function(err, result) {
-                    // console.log("++++++++++++++++++ logout")
-                    // console.dir(err)
-                    test.ok(err != null);
-                    db1.close();
-
-                    // restart server
-                    configuration.manager.restart(true).then(function() {
-                      test.done();
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    });
   }
 }
 

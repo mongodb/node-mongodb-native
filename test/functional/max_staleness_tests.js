@@ -92,8 +92,9 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using MongoCli
         }
       });
 
-      MongoClient.connect('mongodb://localhost:62001/test?readPreference=secondary&maxStalenessSeconds=250', function(err, db) {
+      MongoClient.connect('mongodb://localhost:62001/test?readPreference=secondary&maxStalenessSeconds=250', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         db.collection('test').find({}).toArray(function(err, r) {
           test.equal(null, err);
@@ -102,7 +103,7 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using MongoCli
             '$readPreference': { mode: 'secondary', maxStalenessSeconds: 250 }
           }, command);
 
-          db.close();
+          client.close();
           mongos1.destroy();
           running = false;
           test.done();
@@ -190,11 +191,12 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using db level
         }
       });
 
-      MongoClient.connect('mongodb://localhost:62002/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:62002/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Get a db with a new readPreference
-        var db1 = db.db('test', {readPreference: new ReadPreference('secondary', {maxStalenessSeconds: 250})})
+        var db1 = client.db('test', {readPreference: new ReadPreference('secondary', {maxStalenessSeconds: 250})})
         db1.collection('test').find({}).toArray(function(err, r) {
           test.equal(null, err);
           test.deepEqual({
@@ -202,7 +204,7 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using db level
             '$readPreference': { mode: 'secondary', maxStalenessSeconds: 250 }
           }, command);
 
-          db.close();
+          client.close();
           mongos1.destroy();
           running = false;
           test.done();
@@ -290,8 +292,9 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using collecti
         }
       });
 
-      MongoClient.connect('mongodb://localhost:62003/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:62003/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Get a db with a new readPreference
         db.collection('test', {readPreference: new ReadPreference('secondary', {maxStalenessSeconds: 250})}).find({}).toArray(function(err, r) {
@@ -301,7 +304,7 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using collecti
             '$readPreference': { mode: 'secondary', maxStalenessSeconds: 250 }
           }, command);
 
-          db.close();
+          client.close();
           mongos1.destroy();
           running = false;
           test.done();
@@ -389,8 +392,9 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using cursor l
         }
       });
 
-      MongoClient.connect('mongodb://localhost:62004/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:62004/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Get a db with a new readPreference
         db.collection('test').find({}).setReadPreference(new ReadPreference('secondary', {maxStalenessSeconds: 250})).toArray(function(err, r) {
@@ -400,7 +404,7 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using cursor l
             '$readPreference': { mode: 'secondary', maxStalenessSeconds: 250 }
           }, command);
 
-          db.close();
+          client.close();
           mongos1.destroy();
           running = false;
           test.done();

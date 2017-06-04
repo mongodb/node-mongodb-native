@@ -5,8 +5,9 @@ exports['Should correctly handle ordered single batch api write command error'] 
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_1');
 
@@ -46,7 +47,7 @@ exports['Should correctly handle ordered single batch api write command error'] 
           test.equal(null, error);
 
           // Finish up test
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -59,8 +60,9 @@ exports['Should correctly handle ordered multiple batch api write command error'
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_2');
 
@@ -98,7 +100,7 @@ exports['Should correctly handle ordered multiple batch api write command error'
           test.equal(true, error.getOperation().upsert);
 
           // Finish up test
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -111,8 +113,9 @@ exports['Should fail due to ordered document being to big'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var coll = db.collection('batch_write_ordered_ops_3');
       // Set up a giant string to blow through the max message size
@@ -132,7 +135,7 @@ exports['Should fail due to ordered document being to big'] = {
       } catch(err) {}
 
       // Finish up test
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -143,8 +146,9 @@ exports['Should correctly split up ordered messages into more batches'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var coll = db.collection('batch_write_ordered_ops_4');
 
@@ -171,7 +175,7 @@ exports['Should correctly split up ordered messages into more batches'] = {
         test.equal(false, result.hasWriteErrors());
 
         // Finish up test
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -183,8 +187,9 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_5');
 
@@ -219,7 +224,7 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
             batch.execute(function(err, result) {
               test.ok(err != null);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -234,8 +239,9 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with duplica
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_6');
 
@@ -267,7 +273,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with duplica
           test.ok(error.errmsg != null);
           test.equal(1, error.getOperation().b);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -280,8 +286,9 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with upserts
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_7');
 
@@ -324,7 +331,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with upserts
           test.equal(3, ids[1].index);
           test.ok(ids[1]._id != null);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -337,8 +344,9 @@ exports['Should correctly perform ordered upsert with custom _id'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_8');
       // Initialize the Ordered Batch
@@ -362,7 +370,7 @@ exports['Should correctly perform ordered upsert with custom _id'] = {
         test.equal(2, upserts[0]._id);
 
         // Finish up test
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -396,8 +404,9 @@ exports['Should correctly execute ordered batch using w:0'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_9');
       var threw = false;
@@ -420,7 +429,7 @@ exports['Should correctly execute ordered batch using w:0'] = {
         test.equal(0, result.nRemoved);
         test.equal(false, result.hasWriteErrors());
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -432,8 +441,9 @@ exports['Should correctly handle single unordered batch API'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_unordered_ops_legacy_1');
 
@@ -477,7 +487,7 @@ exports['Should correctly handle single unordered batch API'] = {
           test.equal(null, error);
 
           // Finish up test
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -490,8 +500,9 @@ exports['Should correctly handle multiple unordered batch API'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_unordered_ops_legacy_2');
 
@@ -556,7 +567,7 @@ exports['Should correctly handle multiple unordered batch API'] = {
           }
 
           // Finish up test
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -569,8 +580,9 @@ exports['Should fail due to document being to big for unordered batch'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var coll = db.collection('batch_write_unordered_ops_legacy_3');
       // Set up a giant string to blow through the max message size
@@ -590,7 +602,7 @@ exports['Should fail due to document being to big for unordered batch'] = {
       } catch(err) {}
 
       // Finish up test
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -601,8 +613,9 @@ exports['Should correctly split up messages into more batches for unordered batc
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var coll = db.collection('batch_write_unordered_ops_legacy_4');
 
@@ -629,7 +642,7 @@ exports['Should correctly split up messages into more batches for unordered batc
         test.equal(false, result.hasWriteErrors());
 
         // Finish up test
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -641,8 +654,9 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_unordered_ops_legacy_5');
 
@@ -681,7 +695,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
             batch.execute(function(err, result) {
               test.ok(err != null);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -696,8 +710,9 @@ exports['Should Correctly Execute Unordered Batch with duplicate key errors on u
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_unordered_ops_legacy_6');
 
@@ -736,7 +751,7 @@ exports['Should Correctly Execute Unordered Batch with duplicate key errors on u
           test.ok(error.code == 11000 || error.code == 11001);
           test.ok(error.errmsg != null);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -749,8 +764,9 @@ exports['Should Correctly Execute Unordered Batch of with upserts causing duplic
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_unordered_ops_legacy_7');
 
@@ -793,7 +809,7 @@ exports['Should Correctly Execute Unordered Batch of with upserts causing duplic
           test.equal(3, ids[1].index);
           test.ok(ids[1]._id != null);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -806,8 +822,9 @@ exports['Should correctly perform unordered upsert with custom _id'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_unordered_ops_legacy_8');
       // Initialize the Ordered Batch
@@ -831,7 +848,7 @@ exports['Should correctly perform unordered upsert with custom _id'] = {
         test.equal(2, upserts[0]._id);
 
         // Finish up test
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -843,8 +860,9 @@ exports['Should prohibit batch finds with no selector'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_unordered_ops_legacy_9');
 
@@ -865,7 +883,7 @@ exports['Should prohibit batch finds with no selector'] = {
         test.equal("MongoError: Bulk find operation must specify a selector", e.toString());
       }
 
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -898,8 +916,9 @@ exports['Should correctly execute unordered batch using w:0'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_9');
       var threw = false;
@@ -922,7 +941,7 @@ exports['Should correctly execute unordered batch using w:0'] = {
         test.equal(0, result.nRemoved);
         test.equal(false, result.hasWriteErrors());
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -939,8 +958,9 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_concerns_ops_1');
       // Initialize the Ordered Batch
@@ -957,7 +977,7 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
         test.ok(err.errmsg != null);
 
         // Finish up test
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -976,10 +996,10 @@ exports['Should correctly handle bulk operation split for ordered bulk operation
   },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var docs = [];
       for(var i = 0; i < 5; i++) {
         docs.push({
@@ -994,7 +1014,7 @@ exports['Should correctly handle bulk operation split for ordered bulk operation
           test.equal(null, err);
           test.equal(5, c);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1012,8 +1032,9 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_concerns_ops_1');
       // Initialize the Ordered Batch
@@ -1029,7 +1050,7 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
         test.ok(err.errmsg != null);
 
         // Finish up test
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -1041,8 +1062,9 @@ exports['should correctly return the number of operations in the bulk'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_concerns_ops_1');
       // Initialize the Ordered Batch
@@ -1061,7 +1083,7 @@ exports['should correctly return the number of operations in the bulk'] = {
       test.equal(2, batch.length);
 
       // Finish up test
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -1072,8 +1094,9 @@ exports['should correctly split unordered bulk batch'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var insertFirst = false;
       var batchSize = 1000;
       // Get the collection
@@ -1106,7 +1129,7 @@ exports['should correctly split unordered bulk batch'] = {
         operation.execute(function(err, result) {
           test.equal(null, err);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1131,8 +1154,9 @@ exports['should correctly split ordered bulk batch'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var insertFirst = false;
       var batchSize = 1000;
       // Get the collection
@@ -1165,7 +1189,7 @@ exports['should correctly split ordered bulk batch'] = {
         operation.execute(function(err, result) {
           test.equal(null, err);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1197,10 +1221,10 @@ exports['Should correctly handle bulk operation split for unordered bulk operati
   },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var docs = [];
       for(var i = 0; i < 5; i++) {
         docs.push({
@@ -1215,7 +1239,7 @@ exports['Should correctly handle bulk operation split for unordered bulk operati
           test.equal(null, err);
           test.equal(5, c);
 
-          db.close();
+          client.close();
           test.done();
         });
       });

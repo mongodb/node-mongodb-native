@@ -10,10 +10,10 @@ exports['pass in server and db top level options'] = {
 
     connect(configuration.url(),
             { autoReconnect: true, poolSize: 4 },
-            connectionTester(test, 'testConnectServerOptions', function(db) {
-      test.equal(1, db.serverConfig.poolSize);
-      test.equal(4, db.serverConfig.s.server.s.pool.size);
-      test.equal(true, db.serverConfig.autoReconnect);
+            connectionTester(test, configuration, 'testConnectServerOptions', function(client) {
+      test.equal(1, client.topology.poolSize);
+      test.equal(4, client.topology.s.server.s.pool.size);
+      test.equal(true, client.topology.autoReconnect);
       db.close();
       test.done();
     }));
@@ -32,11 +32,11 @@ exports['pass in server and db top level options'] = {
 
     connect(configuration.url(),
             { autoReconnect: true, poolSize: 4 },
-            connectionTester(test, 'testConnectServerOptions', function(db) {
-      test.equal(1, db.serverConfig.poolSize);
-      test.equal(4, db.serverConfig.s.server.s.pool.size);
-      test.equal(true, db.serverConfig.autoReconnect);
-      db.close();
+            connectionTester(test, configuration, 'testConnectServerOptions', function(client) {
+      test.equal(1, client.topology.poolSize);
+      test.equal(4, client.topology.s.server.s.pool.size);
+      test.equal(true, client.topology.autoReconnect);
+      client.close();
       test.done();
     }));
   }
@@ -54,7 +54,7 @@ exports['should error on unexpected options'] = {
 
     connect(configuration.url(), {
       autoReconnect: true, poolSize: 4, notlegal: {}, validateOptions:true
-    }, function(err, db) {
+    }, function(err, client) {
       test.ok(err.message.indexOf('option notlegal is not supported') != -1);
       test.done();
     });
@@ -64,9 +64,11 @@ exports['should error on unexpected options'] = {
 /**
  * @ignore
  */
-function connectionTester(test, testName, callback) {
-  return function(err, db) {
+function connectionTester(test, configuration, testName, callback) {
+  return function(err, client) {
     test.equal(err, null);
+    var db = client.db(configuration.database);
+
     db.collection(testName, function(err, collection) {
       test.equal(err, null);
       var doc = {foo:123};
@@ -75,7 +77,7 @@ function connectionTester(test, testName, callback) {
         db.dropDatabase(function(err, done) {
           test.equal(err, null);
           test.ok(done);
-          if(callback) return callback(db);
+          if(callback) return callback(client);
           test.done();
         });
       });

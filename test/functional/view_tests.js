@@ -66,8 +66,9 @@ exports['Successfully pass through collation to findAndModify command'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
         db.createCollection('test', {viewOn: 'users', pipeline: [{$match: {}}]}, function(err, r) {
@@ -77,7 +78,7 @@ exports['Successfully pass through collation to findAndModify command'] = {
           singleServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
         });
       });

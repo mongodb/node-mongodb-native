@@ -15,8 +15,9 @@ exports['should correctly insert decimal128 value'] = {
   test: function(configuration, test) {
     var Decimal128 = configuration.require.Decimal128;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var object = {
         id: 1,
         value: Decimal128.fromString("1")
@@ -32,7 +33,7 @@ exports['should correctly insert decimal128 value'] = {
           test.ok(doc.value instanceof Decimal128);
           test.equal("1", doc.value.toString());
 
-          db.close();
+          client.close();
           test.done();
         });
       });

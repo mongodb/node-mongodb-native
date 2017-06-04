@@ -155,8 +155,9 @@ exports['Successfully handle buffering store execution for primary server'] = {
       MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         , {
           socketTimeoutMS: 2000, haInterval: 1000
-        }, function(err, db) {
+        }, function(err, client) {
           test.equal(null, err);
+          var db = client.db(configuration.database);
           var results = [];
 
           setTimeout(function() {
@@ -204,7 +205,7 @@ exports['Successfully handle buffering store execution for primary server'] = {
                   test.deepEqual(['insertOne', 'aggregate'].sort(), results.sort());
 
                   running = false;
-                  db.close();
+                  client.close();
                   // test.deepEqual(['insertOne', 'aggregate', 'count', 'find'], results);
 
                   primaryServer.destroy();
@@ -368,8 +369,9 @@ exports['Successfully handle buffering store execution for secondary server'] = 
       MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
         , {
           socketTimeoutMS: 2000, haInterval: 1000
-        }, function(err, db) {
+        }, function(err, client) {
           test.equal(null, err);
+          var db = client.db(configuration.database);
 
           // console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 0")
           setTimeout(function() {
@@ -426,7 +428,7 @@ exports['Successfully handle buffering store execution for secondary server'] = 
                   test.deepEqual(['count', 'find'].sort(), results.sort());
 
                   running = false;
-                  db.close();
+                  client.close();
 
                   // test.deepEqual(['count', 'find', 'insertOne', 'aggregate'], results);
 

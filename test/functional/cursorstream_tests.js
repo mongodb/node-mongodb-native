@@ -17,10 +17,9 @@ exports.shouldStreamDocumentsWithPauseAndResumeForFetching = {
       allDocs.push(docs.splice(0, 1000));
     }
 
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_streaming_function_with_limit_for_fetching2', function(err, collection) {
 
         var left = allDocs.length;
@@ -47,7 +46,7 @@ exports.shouldStreamDocumentsWithPauseAndResumeForFetching = {
               // When the stream is done
               stream.on("end", function() {
                 test.equal(3000, data.length);
-                db.close();
+                client.close();
                 test.done();
               });
             }
@@ -70,7 +69,6 @@ exports.shouldStream10KDocuments = {
       docs.push({'a':i, bin: new Binary(new Buffer(256))})
     }
 
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
     var j = 0;
 
     var allDocs = [];
@@ -78,8 +76,9 @@ exports.shouldStream10KDocuments = {
       allDocs.push(docs.splice(0, 1000));
     }
 
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_streaming_function_with_limit_for_fetching_2', function(err, collection) {
 
         var left = allDocs.length;
@@ -106,7 +105,7 @@ exports.shouldStream10KDocuments = {
               // When the stream is done
               stream.on("end", function() {
                 test.equal(10000, data.length);
-                db.close();
+                client.close();
                 test.done();
               });
             }
@@ -131,10 +130,9 @@ exports.shouldTriggerMassiveAmountOfGetMores = {
       docs.push({'a':i, bin: new Binary(new Buffer(256))})
     }
 
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_streaming_function_with_limit_for_fetching_3', function(err, collection) {
 
         collection.insert(docs, {w:1}, function(err, ids) {
@@ -154,7 +152,7 @@ exports.shouldTriggerMassiveAmountOfGetMores = {
           stream.on("end", function() {
             test.equal(1000, counter);
             test.equal(1000, counter2);
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -171,8 +169,9 @@ exports.shouldStreamDocumentsAcrossGetMoreCommandAndCountCorrectly = {
     var ObjectID = configuration.require.ObjectID
       , Binary = configuration.require.Binary;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var docs = []
 
       for(var i = 0; i < 2000; i++) {
@@ -202,7 +201,7 @@ exports.shouldStreamDocumentsAcrossGetMoreCommandAndCountCorrectly = {
                 test.equal(null, err);
                 test.equal(2000, doc.count);
 
-                db.close();
+                client.close();
                 test.done();
               })
             });
@@ -227,8 +226,9 @@ exports['should correctly error out stream'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
 
-    // Should cause error
-    configuration.newDbInstance({w:1}, {poolSize:1}).open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var cursor = db.collection('myCollection').find({
         timestamp: { $ltx: '1111' } // Error in query.
       });
@@ -247,7 +247,7 @@ exports['should correctly error out stream'] = {
       cursor.on('end', function() {
         test.ok(error !== undefined && error !== null);
         test.ok(streamIsClosed === true);
-        db.close();
+        client.close();
         test.done();
       });
 
@@ -262,8 +262,9 @@ exports['should correctly stream cursor after stream']  = {
   // The actual test we wish to run
   test: function(configuration, test) {
 
-    // Should cause error
-    configuration.newDbInstance({}, {}).open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var docs = [];
       var received = [];
 
@@ -280,7 +281,7 @@ exports['should correctly stream cursor after stream']  = {
         cursor.on('end', function() {
           test.equal(1000, received.length);
 
-          db.close();
+          client.close();
           test.done();
         })
 

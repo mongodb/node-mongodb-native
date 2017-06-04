@@ -60,8 +60,9 @@ exports['Successfully pass through collation to findAndModify command'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
         db.collection('test').findAndModify({a:1}, [['a', 1]], {$set:{b1:1}}, {new:true, collation: {caseLevel:true}}, function(err, doc) {
@@ -71,7 +72,7 @@ exports['Successfully pass through collation to findAndModify command'] = {
           singleServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -127,8 +128,9 @@ exports['Successfully pass through collation to count command'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
         db.collection('test').count({}, {collation: {caseLevel:true}}, function(err, doc) {
@@ -138,7 +140,7 @@ exports['Successfully pass through collation to count command'] = {
           singleServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -194,8 +196,9 @@ exports['Successfully pass through collation to aggregation command'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
         db.collection('test').aggregate([
@@ -208,7 +211,7 @@ exports['Successfully pass through collation to aggregation command'] = {
           singleServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -264,8 +267,9 @@ exports['Successfully pass through collation to distinct command'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
         db.collection('test').distinct('a', {}, {collation: {caseLevel:true}}, function(err, doc) {
@@ -275,7 +279,7 @@ exports['Successfully pass through collation to distinct command'] = {
           singleServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -331,8 +335,9 @@ exports['Successfully pass through collation to geoNear command'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
         db.collection('test').geoNear(50, 50, {query:{a:1}, num:1, collation: {caseLevel:true}}, function(err, doc) {
@@ -342,7 +347,7 @@ exports['Successfully pass through collation to geoNear command'] = {
           singleServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -398,8 +403,9 @@ exports['Successfully pass through collation to group command'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
         db.collection('test').group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }"
@@ -411,7 +417,7 @@ exports['Successfully pass through collation to group command'] = {
           singleServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -468,8 +474,9 @@ exports['Successfully pass through collation to mapreduce command'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // String functions
         var map = new Code("function() { emit(this.user_id, 1); }");
@@ -486,7 +493,7 @@ exports['Successfully pass through collation to mapreduce command'] = {
           singleServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -542,8 +549,9 @@ exports['Successfully pass through collation to remove command'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
         db.collection('test').deleteMany({}, {collation: {caseLevel:true}}, function(err, results) {
@@ -553,7 +561,7 @@ exports['Successfully pass through collation to remove command'] = {
           singleServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -609,8 +617,9 @@ exports['Successfully pass through collation to update command'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
         db.collection('test').updateOne({a:1}, {$set:{b:1}}, {collation: {caseLevel:true}}, function(err, results) {
@@ -620,7 +629,7 @@ exports['Successfully pass through collation to update command'] = {
           singleServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -676,8 +685,9 @@ exports['Successfully pass through collation to find command via options'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
         db.collection('test').find({a:1}, {collation: {caseLevel:true}}).toArray(function(err, results) {
@@ -687,7 +697,7 @@ exports['Successfully pass through collation to find command via options'] = {
           singleServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -743,8 +753,9 @@ exports['Successfully pass through collation to find command via cursor'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
         db.collection('test').find({a:1}).collation({caseLevel:true}).toArray(function(err, results) {
@@ -754,7 +765,7 @@ exports['Successfully pass through collation to find command via cursor'] = {
           singleServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -810,8 +821,9 @@ exports['Successfully pass through collation to findOne'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
         db.collection('test').findOne({a:1}, {collation: { caseLevel: true }}, function(err, results) {
@@ -821,7 +833,7 @@ exports['Successfully pass through collation to findOne'] = {
           singleServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -882,8 +894,9 @@ exports['Successfully pass through collation to createCollection'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
         db.createCollection('test', {collation: { caseLevel: true }}, function(err, results) {
@@ -893,7 +906,7 @@ exports['Successfully pass through collation to createCollection'] = {
           singleServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -949,8 +962,9 @@ exports['Fail due to no support for collation'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
         db.collection('test').findOne({a:1}, {collation: { caseLevel: true }}, function(err, results) {
@@ -959,7 +973,7 @@ exports['Fail due to no support for collation'] = {
           singleServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1015,8 +1029,9 @@ exports['Fail command due to no support for collation'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
         db.command({count: 'test', query: {}, collation: { caseLevel: true }}, function(err, results) {
@@ -1025,7 +1040,7 @@ exports['Fail command due to no support for collation'] = {
           singleServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1083,8 +1098,9 @@ exports['Successfully pass through collation to bulkWrite command'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         db.collection('test').bulkWrite([
             { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true, collation: { caseLevel: true } } }
@@ -1095,7 +1111,7 @@ exports['Successfully pass through collation to bulkWrite command'] = {
             singleServer.destroy();
             running = false;
 
-            db.close();
+            client.close();
             test.done();
         });
       });
@@ -1151,8 +1167,9 @@ exports['Successfully fail bulkWrite due to unsupported collation'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         db.collection('test').bulkWrite([
               { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true, collation: {caseLevel: true} } }
@@ -1163,7 +1180,7 @@ exports['Successfully fail bulkWrite due to unsupported collation'] = {
             singleServer.destroy();
             running = false;
 
-            db.close();
+            client.close();
             test.done();
         });
       });
@@ -1260,8 +1277,9 @@ exports['Successfully fail bulkWrite due to unsupported collation using replset'
     });
 
     // Connect to the mocks
-    MongoClient.connect('mongodb://localhost:32000,localhost:32001/test?replicaSet=rs', function(err, db) {
+    MongoClient.connect('mongodb://localhost:32000,localhost:32001/test?replicaSet=rs', function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       db.collection('test').bulkWrite([
             { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true, collation: {caseLevel: true} } }
@@ -1274,7 +1292,7 @@ exports['Successfully fail bulkWrite due to unsupported collation using replset'
           arbiterServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
       });
     });
@@ -1329,8 +1347,9 @@ exports['Successfully create index with collation'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
         db.collection('test').createIndex({a:1}, {collation: { caseLevel: true }}, function(err, r) {
@@ -1340,7 +1359,7 @@ exports['Successfully create index with collation'] = {
           singleServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1396,8 +1415,9 @@ exports['Fail to create index with collation due to no capabilities'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
         db.collection('test').createIndex({a:1}, {collation: { caseLevel: true }}, function(err, r) {
@@ -1407,7 +1427,7 @@ exports['Fail to create index with collation due to no capabilities'] = {
           singleServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1463,8 +1483,9 @@ exports['Fail to create indexs with collation due to no capabilities'] = {
       var commandResult = null;
 
       // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
         db.collection('test').createIndexes([{key: {a:1}, collation: { caseLevel: true }}], function(err, r) {
@@ -1474,7 +1495,7 @@ exports['Fail to create indexs with collation due to no capabilities'] = {
           singleServer.destroy();
           running = false;
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1498,8 +1519,9 @@ exports['Should correctly create index with collation'] = {
       co = require('co');
 
     // Connect to the mocks
-    MongoClient.connect(configuration.url(), function(err, db) {
+    MongoClient.connect(configuration.url(), function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       var col = db.collection('collation_test');
       // Create collation index
@@ -1514,7 +1536,7 @@ exports['Should correctly create index with collation'] = {
           test.equal(1, indexes.length);
           test.ok(indexes[0].collation);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1530,8 +1552,9 @@ exports['Should correctly create collection with collation'] = {
       co = require('co');
 
     // Connect to the mocks
-    MongoClient.connect(configuration.url(), function(err, db) {
+    MongoClient.connect(configuration.url(), function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       // Simple findAndModify command returning the new document
       db.createCollection('collation_test2', {collation: { locale: 'nn' }}, function(err, results) {
@@ -1543,7 +1566,7 @@ exports['Should correctly create collection with collation'] = {
           test.equal('collation_test2', collections[0].name);
           test.ok(collections[0].options.collation);
 
-          db.close();
+          client.close();
           test.done();
         });
       });

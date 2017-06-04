@@ -18,16 +18,18 @@ exports.shouldUploadFromFileStream = {
   test: function(configuration, test) {
     var GridFSBucket = configuration.require.GridFSBucket;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(),
-      { poolSize:1 });
-    db.open(function(error, db) {
-      test.equal(error, null);
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       db.dropDatabase(function(error) {
         test.equal(error, null);
 
@@ -98,16 +100,18 @@ exports.shouldUploadFromFileStreamWithCustomId = {
   test: function(configuration, test) {
     var GridFSBucket = configuration.require.GridFSBucket;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(),
-      { poolSize:1 });
-    db.open(function(error, db) {
-      test.equal(error, null);
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       db.dropDatabase(function(error) {
         test.equal(error, null);
 
@@ -180,15 +184,18 @@ exports.shouldDownloadToUploadStream = {
   test: function(configuration, test) {
     var GridFSBucket = configuration.require.GridFSBucket;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(),
-      { poolSize:1 });
-    db.open(function(error, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
       var CHUNKS_COLL = 'gridfsdownload.chunks';
       var FILES_COLL = 'gridfsdownload.files';
@@ -243,9 +250,18 @@ exports['should fail to locate gridfs stream'] = {
     var GridFSBucket = configuration.require.GridFSBucket,
       ObjectId = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(),
-      { poolSize:1 });
-    db.open(function(error, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
+    // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
+    // BEGIN
+      var db = client.db(configuration.database);
       var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
       // Get an unknown file
       var downloadStream = bucket.openDownloadStream(new ObjectId());
@@ -255,7 +271,7 @@ exports['should fail to locate gridfs stream'] = {
       downloadStream.on('error', function(err) {
         test.equal('ENOENT', err.code);
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -276,15 +292,18 @@ exports['openDownloadStreamByName'] = {
   test: function(configuration, test) {
     var GridFSBucket = configuration.require.GridFSBucket;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(),
-      { poolSize:1 });
-    db.open(function(error, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
       var CHUNKS_COLL = 'gridfsdownload.chunks';
       var FILES_COLL = 'gridfsdownload.files';
@@ -331,15 +350,18 @@ exports['start/end options for openDownloadStream'] = {
   test: function(configuration, test) {
     var GridFSBucket = configuration.require.GridFSBucket;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(),
-      { poolSize:1 });
-    db.open(function(error, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var bucket = new GridFSBucket(db, {
         bucketName: 'gridfsdownload',
         chunkSizeBytes: 2
@@ -399,15 +421,18 @@ exports['Deleting a file'] = {
   test: function(configuration, test) {
     var GridFSBucket = configuration.require.GridFSBucket;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(),
-      { poolSize:1 });
-    db.open(function(error, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
       var CHUNKS_COLL = 'gridfsdownload.chunks';
       var FILES_COLL = 'gridfsdownload.files';
@@ -458,15 +483,18 @@ exports['Aborting an upload'] = {
   test: function(configuration, test) {
     var GridFSBucket = configuration.require.GridFSBucket;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(),
-      { poolSize:1 });
-    db.open(function(error, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var bucket = new GridFSBucket(db,
         { bucketName: 'gridfsabort', chunkSizeBytes: 1 });
       var CHUNKS_COLL = 'gridfsabort.chunks';
@@ -520,15 +548,18 @@ exports['Destroy an upload'] = {
   test: function(configuration, test) {
     var GridFSBucket = configuration.require.GridFSBucket;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(),
-      { poolSize:1 });
-    db.open(function(error, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var bucket = new GridFSBucket(db,
         { bucketName: 'gridfsabort', chunkSizeBytes: 1 });
       var CHUNKS_COLL = 'gridfsabort.chunks';
@@ -584,15 +615,18 @@ exports['Destroying a download stream'] = {
   test: function(configuration, test) {
     var GridFSBucket = configuration.require.GridFSBucket;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(),
-      { poolSize:1 });
-    db.open(function(error, db) {
-      // LINE var MongoClient = require('mongodb').MongoClient,
-      // LINE   test = require('assert');
-      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-      // REPLACE configuration.writeConcernMax() WITH {w:1}
-      // REMOVE-LINE test.done();
-      // BEGIN
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
+    // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
+    // BEGIN
+      var db = client.db(configuration.database);
       var bucket = new GridFSBucket(db,
         { bucketName: 'gridfsdestroy', chunkSizeBytes: 10 });
       var readStream = fs.createReadStream('./LICENSE');
@@ -649,15 +683,18 @@ exports['Deleting a file using promises'] = {
   test: function(configuration, test) {
     var GridFSBucket = configuration.require.GridFSBucket;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(),
-      { poolSize:1 });
-    db.open(function(error, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
       var CHUNKS_COLL = 'gridfsdownload.chunks';
       var FILES_COLL = 'gridfsdownload.files';
@@ -699,15 +736,18 @@ exports['find()'] = {
   test: function(configuration, test) {
     var GridFSBucket = configuration.require.GridFSBucket;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(),
-      { poolSize:1 });
-    db.open(function(error, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var bucket = new GridFSBucket(db, { bucketName: 'fs' });
 
       // We're only making sure this doesn't throw
@@ -740,15 +780,18 @@ exports['drop example'] = {
   test: function(configuration, test) {
     var GridFSBucket = configuration.require.GridFSBucket;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(),
-      { poolSize:1 });
-    db.open(function(error, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
       var CHUNKS_COLL = 'gridfsdownload.chunks';
       var FILES_COLL = 'gridfsdownload.files';
@@ -799,15 +842,18 @@ exports['drop using promises'] = {
   test: function(configuration, test) {
     var GridFSBucket = configuration.require.GridFSBucket;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(),
-      { poolSize:1 });
-    db.open(function(error, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
       var CHUNKS_COLL = 'gridfsdownload.chunks';
       var FILES_COLL = 'gridfsdownload.files';
@@ -857,15 +903,18 @@ exports['find example'] = {
   test: function(configuration, test) {
     var GridFSBucket = configuration.require.GridFSBucket;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(),
-      { poolSize:1 });
-    db.open(function(error, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload_2' });
       var CHUNKS_COLL = 'gridfsdownload.chunks';
       var FILES_COLL = 'gridfsdownload.files';
@@ -904,15 +953,18 @@ exports['rename example'] = {
   test: function(configuration, test) {
     var GridFSBucket = configuration.require.GridFSBucket;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(),
-      { poolSize:1 });
-    db.open(function(error, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload_3' });
       var CHUNKS_COLL = 'gridfsdownload.chunks';
       var FILES_COLL = 'gridfsdownload.files';
@@ -948,9 +1000,9 @@ exports['download empty doc'] = {
   test: function(configuration, test) {
     var GridFSBucket = configuration.require.GridFSBucket;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(),
-      { poolSize:1 });
-    db.open(function(error, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var bucket = new GridFSBucket(db, { bucketName: 'fs' });
 
       db.collection('fs.files').insert({ length: 0 }, function(error, result) {
@@ -989,9 +1041,9 @@ for (var i = 0; i < UPLOAD_SPEC.tests.length; ++i) {
       test: function(configuration, test) {
         var GridFSBucket = configuration.require.GridFSBucket;
 
-        var db = configuration.newDbInstance(configuration.writeConcernMax(),
-          { poolSize:1 });
-        db.open(function(error, db) {
+        var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+        client.connect(function(err, client) {
+          var db = client.db(configuration.database);
           db.dropDatabase(function(error) {
             test.equal(error, null);
 
@@ -1045,9 +1097,9 @@ for (var i = 0; i < DOWNLOAD_SPEC.tests.length; ++i) {
       test: function(configuration, test) {
         var GridFSBucket = configuration.require.GridFSBucket;
 
-        var db = configuration.newDbInstance(configuration.writeConcernMax(),
-          { poolSize:1 });
-        db.open(function(err, db) {
+        var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+        client.connect(function(err, client) {
+          var db = client.db(configuration.database);
           db.dropDatabase(function(err) {
             test.equal(err, null);
             var BUCKET_NAME = 'fs';
@@ -1204,9 +1256,18 @@ exports['should correctly handle calling end function with only a callback'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridFSBucket = configuration.require.GridFSBucket;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(),
-      { poolSize:1 });
-    db.open(function(error, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
+    // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
+    // BEGIN
+      var db = client.db(configuration.database);
       var bucket = new GridFSBucket(db,
         { bucketName: 'gridfsabort', chunkSizeBytes: 1 });
       var CHUNKS_COLL = 'gridfsabort.chunks';
@@ -1267,15 +1328,18 @@ exports['NODE-829 start/end options for openDownloadStream where start-end is < 
   test: function(configuration, test) {
     var GridFSBucket = configuration.require.GridFSBucket;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(),
-      { poolSize:1 });
-    db.open(function(error, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var bucket = new GridFSBucket(db, {
         bucketName: 'gridfsdownload',
         chunkSizeBytes: 20

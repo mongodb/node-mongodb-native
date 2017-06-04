@@ -113,10 +113,10 @@ exports['Successfully pass through writeConcern to aggregate command'] = {
     });
 
     var commandResult = null;
-
     // Connect to the mocks
-    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, db) {
+    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       db.collection('test').aggregate([
           {$match: {}}
@@ -130,7 +130,7 @@ exports['Successfully pass through writeConcern to aggregate command'] = {
         arbiterServer.destroy();
         running = false;
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -242,8 +242,9 @@ exports['Successfully pass through writeConcern to create command'] = {
     var commandResult = null;
 
     // Connect to the mocks
-    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, db) {
+    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       db.createCollection('test_collection_methods', {w:2, wtimeout: 1000}, function(err, r) {
         test.equal(null, err);
@@ -254,7 +255,7 @@ exports['Successfully pass through writeConcern to create command'] = {
         arbiterServer.destroy();
         running = false;
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -362,8 +363,9 @@ exports['Successfully pass through writeConcern to createIndexes command'] = {
     var commandResult = null;
 
     // Connect to the mocks
-    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, db) {
+    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       db.collection('indexOptionDefault').createIndex({a:1}, {
         indexOptionDefaults: true, w:2, wtimeout: 1000
@@ -376,7 +378,7 @@ exports['Successfully pass through writeConcern to createIndexes command'] = {
         arbiterServer.destroy();
         running = false;
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -484,8 +486,9 @@ exports['Successfully pass through writeConcern to drop command'] = {
     var commandResult = null;
 
     // Connect to the mocks
-    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, db) {
+    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       db.collection('indexOptionDefault').drop({
         w:2, wtimeout: 1000
@@ -498,7 +501,7 @@ exports['Successfully pass through writeConcern to drop command'] = {
         arbiterServer.destroy();
         running = false;
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -608,8 +611,9 @@ exports['Successfully pass through writeConcern to dropDatabase command'] = {
     var commandResult = null;
 
     // Connect to the mocks
-    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, db) {
+    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       db.dropDatabase({
         w:2, wtimeout: 1000
@@ -622,7 +626,7 @@ exports['Successfully pass through writeConcern to dropDatabase command'] = {
         arbiterServer.destroy();
         running = false;
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -732,8 +736,9 @@ exports['Successfully pass through writeConcern to dropIndexes command'] = {
     var commandResult = null;
 
     // Connect to the mocks
-    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, db) {
+    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       db.collection('test').dropIndexes({
         w:2, wtimeout: 1000
@@ -746,7 +751,7 @@ exports['Successfully pass through writeConcern to dropIndexes command'] = {
         arbiterServer.destroy();
         running = false;
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -857,8 +862,9 @@ exports['Successfully pass through writeConcern to dropIndexes command'] = {
     var commandResult = null;
 
     // Connect to the mocks
-    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, db) {
+    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       // String functions
       var map = new Code("function() { emit(this.user_id, 1); }");
@@ -877,7 +883,7 @@ exports['Successfully pass through writeConcern to dropIndexes command'] = {
         arbiterServer.destroy();
         running = false;
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -988,8 +994,9 @@ exports['Successfully pass through writeConcern to createUser command'] = {
     var commandResult = null;
 
     // Connect to the mocks
-    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, db) {
+    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       db.admin().addUser('kay:kay', 'abc123', {w:2, wtimeout:1000}, function(err, result) {
         test.equal(null, err);
@@ -1000,7 +1007,7 @@ exports['Successfully pass through writeConcern to createUser command'] = {
         arbiterServer.destroy();
         running = false;
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -1111,8 +1118,9 @@ exports['Successfully pass through writeConcern to dropUser command'] = {
     var commandResult = null;
 
     // Connect to the mocks
-    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, db) {
+    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       db.admin().removeUser('kay:kay', {w:2, wtimeout:1000}, function(err, result) {
         test.equal(null, err);
@@ -1123,7 +1131,7 @@ exports['Successfully pass through writeConcern to dropUser command'] = {
         arbiterServer.destroy();
         running = false;
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -1234,8 +1242,9 @@ exports['Successfully pass through writeConcern to findAndModify command'] = {
     var commandResult = null;
 
     // Connect to the mocks
-    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, db) {
+    MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs', function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       // Simple findAndModify command returning the new document
       db.collection('test').findAndModify({a:1}, [['a', 1]], {$set:{b1:1}}, {new:true, w:2, wtimeout:1000}, function(err, doc) {
@@ -1247,7 +1256,7 @@ exports['Successfully pass through writeConcern to findAndModify command'] = {
         arbiterServer.destroy();
         running = false;
 
-        db.close();
+        client.close();
         test.done();
       });
     });
