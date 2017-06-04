@@ -260,7 +260,7 @@ var Configuration = function(options) {
 // Set up the runner
 var runner = new Runner({
     logLevel:'error'
-  , logLevel:'info'
+  // , logLevel:'info'
   , runners: 1
   , failFast: true
 });
