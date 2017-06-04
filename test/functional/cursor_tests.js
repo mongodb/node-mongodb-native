@@ -13,8 +13,9 @@ exports.cursorShouldBeAbleToResetOnToArrayRunningQueryAgain = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_to_a', function(err, collection) {
 
         collection.insert({'a':1}, configuration.writeConcernMax(), function(err, ids) {
@@ -30,7 +31,7 @@ exports.cursorShouldBeAbleToResetOnToArrayRunningQueryAgain = {
 
                 // Let's close the db
                 if(!item) {
-                  db.close();
+                  client.close();
                   test.done();
                 }
               });
@@ -53,8 +54,9 @@ exports['cursor should close after first next operation'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('close_on_next', function(err, collection) {
 
         collection.insert([{'a':1}, {'a':1}, {'a':1}], configuration.writeConcernMax(), function(err, ids) {
@@ -64,7 +66,7 @@ exports['cursor should close after first next operation'] = {
             test.equal(null, err);
 
             cursor.close();
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -84,8 +86,9 @@ exports['cursor should trigger getMore'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('trigger_get_more', function(err, collection) {
 
         collection.insert([{'a':1}, {'a':1}, {'a':1}], configuration.writeConcernMax(), function(err, ids) {
@@ -94,7 +97,7 @@ exports['cursor should trigger getMore'] = {
           cursor.toArray(function(err, docs) {
             test.equal(null, err);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -114,8 +117,9 @@ exports.shouldCorrectlyExecuteCursorExplain = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_explain', function(err, collection) {
         collection.insert({'a':1}, configuration.writeConcernMax(), function(err, r) {
           collection.find({'a':1}).explain(function(err, explaination) {
@@ -123,7 +127,7 @@ exports.shouldCorrectlyExecuteCursorExplain = {
             test.ok(explaination != null);
 
             // Let's close the db
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -143,8 +147,9 @@ exports.shouldCorrectlyExecuteCursorCount = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_count', function(err, collection) {
         collection.find().count(function(err, count) {
           // test.equal(0, count);
@@ -184,7 +189,7 @@ exports.shouldCorrectlyExecuteCursorCount = {
                             test.equal(10, count2);
                             test.equal(count, count2);
                             // Let's close the db
-                            db.close();
+                            client.close();
                             test.done();
                           });
                         }
@@ -216,8 +221,9 @@ exports.shouldCorrectlyExecuteCursorCountWithDottedCollectionName = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_count.ext', function(err, collection) {
         collection.find().count(function(err, count) {
           // test.equal(0, count);
@@ -257,7 +263,7 @@ exports.shouldCorrectlyExecuteCursorCountWithDottedCollectionName = {
                             test.equal(10, count2);
                             test.equal(count, count2);
                             // Let's close the db
-                            db.close();
+                            client.close();
                             test.done();
                           });
                         }
@@ -289,8 +295,9 @@ exports.shouldCorrectlyExecuteSortOnCursor = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_sort', function(err, collection) {
         function insert(callback) {
           var total = 10;
@@ -308,7 +315,7 @@ exports.shouldCorrectlyExecuteSortOnCursor = {
           var finished = function() {
             number_of_functions = number_of_functions - 1;
             if(number_of_functions == 0) {
-              db.close();
+              client.close();
               test.done();
             }
           }
@@ -371,8 +378,9 @@ exports.shouldThrowErrorOnEachWhenMissingCallback = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_each', function(err, collection) {
         function insert(callback) {
           var total = 10;
@@ -391,7 +399,7 @@ exports.shouldThrowErrorOnEachWhenMissingCallback = {
               cursor.each();
             });
 
-            db.close();
+            client.close();
             test.done();
           });
         }
@@ -415,8 +423,9 @@ exports.shouldCorrectlyHandleLimitOnCursor = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_cursor_limit', function(err, collection) {
         function insert(callback) {
           var total = 10;
@@ -434,7 +443,7 @@ exports.shouldCorrectlyHandleLimitOnCursor = {
             test.equal(5, items.length);
 
             // Let's close the db
-            db.close();
+            client.close();
             test.done();
           });
         }
@@ -458,8 +467,9 @@ exports.shouldCorrectlyHandleNegativeOneLimitOnCursor = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_cursor_negative_one_limit', function(err, collection) {
         function insert(callback) {
           var total = 10;
@@ -477,7 +487,7 @@ exports.shouldCorrectlyHandleNegativeOneLimitOnCursor = {
             test.equal(1, items.length);
 
             // Let's close the db
-            db.close();
+            client.close();
             test.done();
           });
         }
@@ -501,8 +511,9 @@ exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_cursor_any_negative_limit', function(err, collection) {
         function insert(callback) {
           var total = 10;
@@ -520,7 +531,7 @@ exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = {
             test.equal(5, items.length);
 
             // Let's close the db
-            db.close();
+            client.close();
             test.done();
           });
         }
@@ -544,8 +555,9 @@ exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_limit_exceptions', function(err, collection) {
         collection.insert({'a':1}, configuration.writeConcernMax(), function(err, docs) {});
         collection.find(function(err, cursor) {
@@ -586,7 +598,7 @@ exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = {
                   test.equal("Cursor is closed", err.message);
                 }
 
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -615,8 +627,9 @@ exports.shouldCorrectlySkipRecordsOnCursor = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_skip', function(err, collection) {
         function insert(callback) {
           var total = 10;
@@ -654,7 +667,7 @@ exports.shouldCorrectlySkipRecordsOnCursor = {
                 test.equal(8, numberEqual);
 
                 // Let's close the db
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -680,8 +693,9 @@ exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_skip_exceptions', function(err, collection) {
         collection.insert({'a':1}, configuration.writeConcernMax(), function(err, docs) {});
         try {
@@ -706,7 +720,7 @@ exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = {
               test.equal("Cursor is closed", err.message);
             }
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -726,8 +740,9 @@ exports.shouldReturnErrorsOnIllegalBatchSizes = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_batchSize_exceptions', function(err, collection) {
         collection.insert({'a':1}, configuration.writeConcernMax(), function(err, docs) {});
         var cursor = collection.find();
@@ -758,7 +773,7 @@ exports.shouldReturnErrorsOnIllegalBatchSizes = {
                 test.equal("Cursor is closed", err.message);
               }
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -779,8 +794,9 @@ exports.shouldCorrectlyHandleChangesInBatchSizes = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_not_multiple_batch_size', function(err, collection) {
         var records = 6;
         var batchSize = 2;
@@ -831,7 +847,7 @@ exports.shouldCorrectlyHandleChangesInBatchSizes = {
                           test.ok(items == null);
                           test.ok(cursor.isClosed());
 
-                          db.close();
+                          client.close();
                           test.done();
                         });
                       });
@@ -858,8 +874,9 @@ exports.shouldCorrectlyHandleBatchSize = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_multiple_batch_size', function(err, collection) {
         //test with the last batch that is a multiple of batchSize
         var records = 4;
@@ -896,7 +913,7 @@ exports.shouldCorrectlyHandleBatchSize = {
                       test.ok(items == null);
                       test.ok(cursor.isClosed());
 
-                      db.close();
+                      client.close();
                       test.done();
                     });
                   });
@@ -921,8 +938,9 @@ exports.shouldHandleWhenLimitBiggerThanBatchSize = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_limit_greater_than_batch_size', function(err, collection) {
         var limit = 4;
         var records = 10;
@@ -955,7 +973,7 @@ exports.shouldHandleWhenLimitBiggerThanBatchSize = {
                     test.ok(items == null);
                     test.ok(cursor.isClosed());
 
-                    db.close();
+                    client.close();
                     test.done();
                   });
                 });
@@ -979,8 +997,9 @@ exports.shouldHandleLimitLessThanBatchSize = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_limit_less_than_batch_size', function(err, collection) {
         var limit = 2;
         var records = 10;
@@ -1005,7 +1024,7 @@ exports.shouldHandleLimitLessThanBatchSize = {
                 test.ok(items == null);
                 test.ok(cursor.isClosed());
 
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -1027,46 +1046,47 @@ exports.shouldHandleSkipLimitChaining = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_limit_skip_chaining', function(err, collection) {
-        function insert(callback) {
-          var total = 10;
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
+      var collection = db.collection('shouldHandleSkipLimitChaining');
 
-          for(var i = 0; i < 10; i++) {
-            collection.insert({'x':i}, configuration.writeConcernMax(), function(e) {
-              total = total - 1;
-              if(total == 0) callback();
-            });
-          }
-        }
+      function insert(callback) {
+        var total = 10;
 
-        function finished() {
-          collection.find().toArray(function(err, items) {
-            test.equal(10, items.length);
-
-            collection.find().limit(5).skip(3).toArray(function(err, items2) {
-              test.equal(5, items2.length);
-
-              // Check that we have the same elements
-              var numberEqual = 0;
-              var sliced = items.slice(3, 8);
-
-              for(var i = 0; i < sliced.length; i++) {
-                if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
-              }
-              test.equal(5, numberEqual);
-
-              // Let's close the db
-              db.close();
-              test.done();
-            });
+        for(var i = 0; i < 10; i++) {
+          collection.insert({'x':i}, configuration.writeConcernMax(), function(e) {
+            total = total - 1;
+            if(total == 0) callback();
           });
         }
+      }
 
-        insert(function() {
-          finished();
+      function finished() {
+        collection.find().toArray(function(err, items) {
+          test.equal(10, items.length);
+
+          collection.find().limit(5).skip(3).toArray(function(err, items2) {
+            test.equal(5, items2.length);
+
+            // Check that we have the same elements
+            var numberEqual = 0;
+            var sliced = items.slice(3, 8);
+
+            for(var i = 0; i < sliced.length; i++) {
+              if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
+            }
+            test.equal(5, numberEqual);
+
+            // Let's close the db
+            client.close();
+            test.done();
+          });
         });
+      }
+
+      insert(function() {
+        finished();
       });
     });
   }
@@ -1083,8 +1103,9 @@ exports.shouldCorrectlyHandleLimitSkipChainingInline = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_limit_skip_chaining_inline', function(err, collection) {
         function insert(callback) {
           var total = 10;
@@ -1114,7 +1135,7 @@ exports.shouldCorrectlyHandleLimitSkipChainingInline = {
               test.equal(5, numberEqual);
 
               // Let's close the db
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -1139,13 +1160,14 @@ exports.shouldCloseCursorNoQuerySent = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_close_no_query_sent', function(err, collection) {
         collection.find().close(function(err, cursor) {
           test.equal(true, cursor.isClosed());
           // Let's close the db
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1166,8 +1188,9 @@ exports.shouldCorrectlyRefillViaGetMoreCommand = {
   test: function(configuration, test) {
     var COUNT = 1000;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_refill_via_get_more', function(err, collection) {
         function insert(callback) {
           var docs = [];
@@ -1210,7 +1233,7 @@ exports.shouldCorrectlyRefillViaGetMoreCommand = {
                       test.equal(total, total2);
 
                       // Let's close the db
-                      db.close();
+                      client.close();
                       test.done();
                     });
                   }
@@ -1239,8 +1262,9 @@ exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_refill_via_get_more_alt_coll', function(err, collection) {
         var COUNT = 1000;
 
@@ -1284,7 +1308,7 @@ exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = {
                       test.equal(total, total2);
 
                       // Let's close the db
-                      db.close();
+                      client.close();
                       test.done();
                     });
                   }
@@ -1313,8 +1337,9 @@ exports.shouldCloseCursorAfterQueryHasBeenSent = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_close_after_query_sent', function(err, collection) {
         collection.insert({'a':1}, configuration.writeConcernMax(), function(err, r) {
           var cursor = collection.find({'a':1});
@@ -1322,7 +1347,7 @@ exports.shouldCloseCursorAfterQueryHasBeenSent = {
             cursor.close(function(err, cursor) {
               test.equal(true, cursor.isClosed());
               // Let's close the db
-              db.close();
+              client.close();
               test.done();
             })
           });
@@ -1343,8 +1368,9 @@ exports.shouldCorrectlyExecuteCursorCountWithFields = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_count_with_fields', function(err, collection) {
         collection.save({'x':1, 'a':2}, configuration.writeConcernMax(), function(err, doc) {
           collection.find({}, {'fields':['a']}).toArray(function(err, items) {
@@ -1356,7 +1382,7 @@ exports.shouldCorrectlyExecuteCursorCountWithFields = {
           collection.findOne({}, {'fields':['a']}, function(err, item) {
             test.equal(2, item.a);
             test.equal(null, item.x);
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -1376,15 +1402,16 @@ exports.shouldCorrectlyCountWithFieldsUsingExclude = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_count_with_fields_using_exclude', function(err, collection) {
         collection.save({'x':1, 'a':2}, configuration.writeConcernMax(), function(err, doc) {
           collection.find({}, {'fields':{'x':0}}).toArray(function(err, items) {
             test.equal(1, items.length);
             test.equal(2, items[0].a);
             test.equal(null, items[0].x);
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -1411,8 +1438,9 @@ exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = {
       docs[i] = {createdAt:new Date(d)};
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Create collection
       db.createCollection('shouldCorrectlyExecuteEnsureIndexWithNoCallback', function(err, collection) {
         // ensure index of createdAt index
@@ -1425,7 +1453,7 @@ exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = {
             collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
               test.equal(null, err);
               test.equal(1, items.length);
-              db.close();
+              client.close();
               test.done();
             })
           })
@@ -1453,8 +1481,9 @@ exports['Should correctly execute count on cursor'] = {
       docs[i] = {'a':i, createdAt:new Date(d)};
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Create collection
       db.createCollection('Should_correctly_execute_count_on_cursor_1', function(err, collection) {
         test.equal(null, err);
@@ -1474,7 +1503,7 @@ exports['Should correctly execute count on cursor'] = {
                 cursor.count(function(err, c) {
                   test.equal(1000, c);
                   test.equal(1000, total);
-                  db.close();
+                  client.close();
                   test.done();
                 })
               }
@@ -1505,8 +1534,9 @@ exports['should be able to stream documents'] = {
 
     var count = 0;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Create collection
       db.createCollection('Should_be_able_to_stream_documents', function(err, collection) {
         test.equal(null, err);
@@ -1567,7 +1597,7 @@ exports['should be able to stream documents'] = {
             test.equal(1, paused);
             test.equal(1, resumed);
             test.strictEqual(stream.isClosed(), true);
-            db.close();
+            client.close();
             test.done();
           }
         });
@@ -1591,8 +1621,9 @@ exports['immediately destroying a stream prevents the query from executing'] = {
       , docs = [{ b: 2 }, { b: 3 }]
       , doneCalled = 0
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('immediately_destroying_a_stream_prevents_the_query_from_executing', function(err, collection) {
         test.equal(null, err);
 
@@ -1619,7 +1650,7 @@ exports['immediately destroying a stream prevents the query from executing'] = {
                 test.equal(undefined, err);
                 test.strictEqual(0, i);
                 test.strictEqual(true, stream.isClosed());
-                db.close();
+                client.close();
                 test.done();
               }
             }
@@ -1641,8 +1672,9 @@ exports['destroying a stream stops it'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.createCollection('destroying_a_stream_stops_it', function(err, collection) {
@@ -1678,7 +1710,7 @@ exports['destroying a stream stops it'] = {
               test.strictEqual(5, i);
               test.strictEqual(1, finished);
               test.strictEqual(true, stream.isClosed());
-              db.close();
+              client.close();
               test.done();
             }, 150)
           }
@@ -1699,11 +1731,12 @@ exports['cursor stream errors'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    client.open(function(err, db_p) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
-      client.createCollection('cursor_stream_errors', function(err, collection) {
+      db.createCollection('cursor_stream_errors', function(err, collection) {
         test.equal(null, err);
 
         var docs = [];
@@ -1770,13 +1803,12 @@ exports['cursor stream errors connection force closed'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {
-      poolSize:1, auto_reconnect:false
-    });
-    client.open(function(err, db_p) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
-      client.createCollection('cursor_stream_errors', function(err, collection) {
+      db.createCollection('cursor_stream_errors', function(err, collection) {
         test.equal(null, err);
 
         var docs = [];
@@ -1795,7 +1827,7 @@ exports['cursor stream errors connection force closed'] = {
           stream.on('data', function (doc) {
             // console.log("==================== data")
             if (++i === 5) {
-              client.serverConfig.connections()[0]
+              db.serverConfig.connections()[0]
                 .write(new Buffer('312312321321askdjljsaNCKnablibh'))
             }
           });
@@ -1841,8 +1873,9 @@ exports['cursor stream pipe'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var fs = require('fs');
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('cursor_stream_pipe', function(err, collection) {
         test.equal(null, err);
 
@@ -1882,7 +1915,7 @@ exports['cursor stream pipe'] = {
             test.ok(/Bob/.test(contents));
             test.ok(/Joe/.test(contents));
             fs.unlink(filename);
-            db.close();
+            client.close();
             test.done();
           }
         });
@@ -1902,10 +1935,9 @@ exports.shouldCloseDeadTailableCursors = {
   // The actual test we wish to run
   test: function(configuration, test) {
     // http://www.mongodb.org/display/DOCS/Tailable+Cursors
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
-
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var options = { capped: true, size: 10000000 };
       db.createCollection('test_if_dead_tailable_cursors_close', options, function(err, collection) {
         // console.log("---------------------------------- 0")
@@ -1964,7 +1996,7 @@ exports.shouldCloseDeadTailableCursors = {
               // console.log("---------------------------------- 2")
               setTimeout(function () {
                 // console.log("---------------------------------- 3")
-                db.close();
+                client.close();
 
                 setTimeout(function() {
                   // console.log("---------------------------------- 4")
@@ -1991,9 +2023,9 @@ exports.shouldAwaitData = {
   // The actual test we wish to run
   test: function(configuration, test) {
     // http://www.mongodb.org/display/DOCS/Tailable+Cursors
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var options = { capped: true, size: 8};
       db.createCollection('should_await_data', options, function(err, collection) {
         collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
@@ -2008,7 +2040,7 @@ exports.shouldAwaitData = {
             }
 
             if(err != null) {
-              db.close();
+              client.close();
               test.done();
             }
           });
@@ -2029,9 +2061,9 @@ exports.shouldAwaitDataWithDocumentsAvailable = {
   // The actual test we wish to run
   test: function(configuration, test) {
     // http://www.mongodb.org/display/DOCS/Tailable+Cursors
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var options = { capped: true, size: 8};
       db.createCollection('should_await_data_no_docs', options, function(err, collection) {
         // Create cursor with awaitdata, and timeout after the period specified
@@ -2046,7 +2078,7 @@ exports.shouldAwaitDataWithDocumentsAvailable = {
           if(err != null) {
             test.ok(called);
             cursor.rewind = rewind;
-            db.close();
+            client.close();
             test.done();
           }
         });
@@ -2066,9 +2098,9 @@ exports.shouldAwaitDataUsingCursorFlag = {
   // The actual test we wish to run
   test: function(configuration, test) {
     // http://www.mongodb.org/display/DOCS/Tailable+Cursors
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var options = { capped: true, size: 8};
       db.createCollection('should_await_data_cursor_flag', options, function(err, collection) {
         collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
@@ -2079,7 +2111,7 @@ exports.shouldAwaitDataUsingCursorFlag = {
           cursor.addCursorFlag('awaitData', true)
           cursor.each(function(err, result) {
             if(err != null) {
-              db.close();
+              client.close();
               test.done();
             } else {
               cursor.kill();
@@ -2118,7 +2150,7 @@ exports.shouldAwaitDataUsingCursorFlag = {
 //           });
 //           console.log("------------ 1")
 //
-//           db.close();
+//           client.close();
 //           test.done();
 //         });
 //       });
@@ -2137,9 +2169,9 @@ exports['Should correctly retry tailable cursor connection'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     // http://www.mongodb.org/display/DOCS/Tailable+Cursors
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var options = { capped: true, size: 8};
       db.createCollection('should_await_data', options, function(err, collection) {
         collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
@@ -2148,7 +2180,7 @@ exports['Should correctly retry tailable cursor connection'] = {
           var cursor = collection.find({}, {tailable:true, awaitdata:true});
           cursor.each(function(err, result) {
             if(err != null) {
-              db.close();
+              client.close();
               test.done();
             } else {
               cursor.kill();
@@ -2192,8 +2224,9 @@ exports.shouldCorrectExecuteExplainHonoringLimit = {
     docs[18] = { "_keywords" : [ "catena", "diameter", "621455", "8mm", "rings", "brd", "legend", "red" ]};
     docs[19] = { "_keywords" : [ "catena", "diameter", "621464", "rings", "5mm", "brd", "legend", "red" ]};
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Insert all the docs
       var collection = db.collection('shouldCorrectExecuteExplainHonoringLimit');
       collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
@@ -2210,7 +2243,7 @@ exports.shouldCorrectExecuteExplainHonoringLimit = {
               test.equal(null, err);
               test.ok(result != null);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -2232,14 +2265,15 @@ exports.shouldNotExplainWhenFalse = {
   test: function(configuration, test) {
     var doc = { "name" : "camera", "_keywords" : [ "compact", "ii2gd", "led", "red", "aet" ]};
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldNotExplainWhenFalse');
       collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
         collection.find({"_keywords" : "red"}, {}, {explain:false}).limit(10).toArray(function(err, result) {
           test.equal("camera", result[0].name);
-    db.close();
+    client.close();
     test.done();
         });
       });
@@ -2257,10 +2291,9 @@ exports.shouldFailToSetReadPreferenceOnCursor = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       try {
         db.collection('shouldFailToSetReadPreferenceOnCursor').find().setReadPreference("notsecondary");
         test.ok(false);
@@ -2269,7 +2302,7 @@ exports.shouldFailToSetReadPreferenceOnCursor = {
 
       db.collection('shouldFailToSetReadPreferenceOnCursor').find().setReadPreference("secondary");
 
-      db.close();
+      client.close();
       test.done()
     });
   }
@@ -2286,8 +2319,9 @@ exports.shouldNotFailDueToStackOverflowEach = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('shouldNotFailDueToStackOverflowEach', function(err, collection) {
         var docs = [];
         var total = 0;
@@ -2316,7 +2350,7 @@ exports.shouldNotFailDueToStackOverflowEach = {
                   var e = new Date().getTime();
 
                   test.equal(30000, total);
-                  db.close();
+                  client.close();
                   test.done();
                 } else {
                   total++;
@@ -2341,8 +2375,9 @@ exports.shouldNotFailDueToStackOverflowToArray = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('shouldNotFailDueToStackOverflowToArray', function(err, collection) {
         var docs = [];
         var total = 0;
@@ -2372,7 +2407,7 @@ exports.shouldNotFailDueToStackOverflowToArray = {
                   var e = new Date().getTime();
 
                   test.equal(30000, items.length);
-                  db.close();
+                  client.close();
                   test.done();
                 });
               }
@@ -2396,8 +2431,9 @@ exports.shouldCorrectlySkipAndLimit = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldCorrectlySkipAndLimit')
       var docs = [];
       for(var i = 0; i < 100; i++) docs.push({a:i, OrderNumber:i});
@@ -2409,7 +2445,7 @@ exports.shouldCorrectlySkipAndLimit = {
 
           collection.find({}, {OrderNumber:1}).skip(10).limit(10).count(true, function(err, count) {
             test.equal(10, count);
-            db.close();
+            client.close();
             test.done();
           });
         })
@@ -2429,8 +2465,9 @@ exports.shouldFailToTailANormalCollection = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldFailToTailANormalCollection')
       var docs = [];
       for(var i = 0; i < 100; i++) docs.push({a:i, OrderNumber:i});
@@ -2440,7 +2477,7 @@ exports.shouldFailToTailANormalCollection = {
           test.ok(err instanceof Error);
           test.ok(typeof(err.code) === 'number');
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -2458,12 +2495,13 @@ exports.shouldCorrectlyUseFindAndCursorCount = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
+    // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
-    db.open(function(err, db) {
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
 
       // Create a lot of documents to insert
       var docs = []
@@ -2485,7 +2523,7 @@ exports.shouldCorrectlyUseFindAndCursorCount = {
               test.equal(null, err);
               test.equal(100, count);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -2506,12 +2544,13 @@ exports['should correctly apply hint to count command for cursor'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
+    // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
     // DOC_START
     // Establish connection to db
-    db.open(function(err, db) {
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var col = db.collection('count_hint');
 
       col.insert([{i:1}, {i:2}], {w:1}, function(err, docs) {
@@ -2542,7 +2581,7 @@ exports['should correctly apply hint to count command for cursor'] = {
                       test.equal(null, err);
                       test.equal(2, count);
 
-                      db.close();
+                      client.close();
                       test.done();
                     });
                   });
@@ -2567,9 +2606,9 @@ exports['Terminate each after first document by returning false'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
 
       // Create a lot of documents to insert
       var docs = []
@@ -2591,7 +2630,7 @@ exports['Terminate each after first document by returning false'] = {
               test.equal(done, false);
               done = true;
 
-              db.close();
+              client.close();
               test.done();
               return false;
             }
@@ -2612,9 +2651,9 @@ exports['Should correctly handle maxTimeMS as part of findOne options'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       var donkey = {
@@ -2631,7 +2670,7 @@ exports['Should correctly handle maxTimeMS as part of findOne options'] = {
           test.equal(null, err);
           test.equal('brown', doc.color);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -2649,9 +2688,9 @@ exports['Should correctly handle batchSize of 2'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.collection('should_correctly_handle_batchSize_2').insert([{ x: 1 }, { x: 2 }, { x: 3 }], function(error) {
@@ -2662,7 +2701,7 @@ exports['Should correctly handle batchSize of 2'] = {
 
           cursor.nextObject(function(err, obj) {
             test.equal(null, err);
-            db.close();
+            client.close();
 
             cursor.nextObject(function(err, obj) {
               test.equal(null, err);
@@ -2687,9 +2726,9 @@ exports['Should report database name and collection name'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.collection('myCollection').find({}, function(error, cursor) {
@@ -2697,7 +2736,7 @@ exports['Should report database name and collection name'] = {
         test.equal('myCollection', cursor.namespace.collection);
         test.equal('integration_tests', cursor.namespace.database);
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -2722,8 +2761,9 @@ exports['Should correctly execute count on cursor with maxTimeMS'] = {
       docs[i] = {'a':i, createdAt:new Date(d)};
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Create collection
       db.createCollection('Should_correctly_execute_count_on_cursor_2', function(err, collection) {
         test.equal(null, err);
@@ -2748,7 +2788,7 @@ exports['Should correctly execute count on cursor with maxTimeMS'] = {
             cursor.count(function(err, c) {
               test.equal(null, err);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -2776,8 +2816,9 @@ exports['Should correctly execute count on cursor with maxTimeMS set using legac
       docs[i] = {'a':i, createdAt:new Date(d)};
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Create collection
       db.createCollection('Should_correctly_execute_count_on_cursor_3', function(err, collection) {
         test.equal(null, err);
@@ -2792,7 +2833,7 @@ exports['Should correctly execute count on cursor with maxTimeMS set using legac
           cursor.toArray(function(err, docs) {
             test.equal(null, err);
 
-            db.close();
+            client.close();
             test.done();
           });
         })
@@ -2819,8 +2860,9 @@ exports['Should correctly apply map to toArray'] = {
       docs[i] = {'a':i, createdAt:new Date(d)};
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       var collection = db.collection('map_toArray');
@@ -2844,7 +2886,7 @@ exports['Should correctly apply map to toArray'] = {
             test.equal(1, x.a);
           })
 
-          db.close();
+          client.close();
           test.done();
         });
       })
@@ -2870,8 +2912,9 @@ exports['Should correctly apply map to next'] = {
       docs[i] = {'a':i, createdAt:new Date(d)};
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       var collection = db.collection('map_next');
@@ -2890,7 +2933,7 @@ exports['Should correctly apply map to next'] = {
           test.equal(null, err);
           test.equal(1, doc.a);
 
-          db.close();
+          client.close();
           test.done();
         });
       })
@@ -2916,8 +2959,9 @@ exports['Should correctly apply map to nextObject'] = {
       docs[i] = {'a':i, createdAt:new Date(d)};
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       var collection = db.collection('map_nextObject');
@@ -2936,7 +2980,7 @@ exports['Should correctly apply map to nextObject'] = {
           test.equal(null, err);
           test.equal(1, doc.a);
 
-          db.close();
+          client.close();
           test.done();
         });
       })
@@ -2962,8 +3006,9 @@ exports['Should correctly apply map to each'] = {
       docs[i] = {'a':i, createdAt:new Date(d)};
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       var collection = db.collection('map_each');
@@ -2984,7 +3029,7 @@ exports['Should correctly apply map to each'] = {
           if(doc) {
             test.equal(1, doc.a);
           } else {
-            db.close();
+            client.close();
             test.done();
           }
         });
@@ -3011,8 +3056,9 @@ exports['Should correctly apply map to forEach'] = {
       docs[i] = {'a':i, createdAt:new Date(d)};
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       var collection = db.collection('map_forEach');
@@ -3078,7 +3124,7 @@ exports['Should correctly apply multiple uses of map and apply forEach'] = {
           test.equal(1, doc.a);
         }, function(err, doc) {
           test.equal(null, err);
-          db.close();
+          client.close();
           test.done();
         });
       })
@@ -3097,8 +3143,9 @@ exports['Should correctly apply skip and limit to large set of documents'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       var collection = db.collection('cursor_limit_skip_correctly');
@@ -3118,7 +3165,7 @@ exports['Should correctly apply skip and limit to large set of documents'] = {
           test.equal(null, err);
           test.equal(2016, docs.length);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -3136,8 +3183,9 @@ exports['should tail cursor using maxAwaitTimeMS for 3.2 or higher'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var options = { capped: true, size: 8};
       db.createCollection('should_await_data_max_awaittime_ms', options, function(err, collection) {
         collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
@@ -3155,7 +3203,7 @@ exports['should tail cursor using maxAwaitTimeMS for 3.2 or higher'] = {
               }, 300)
             } else {
               test.ok((new Date().getTime() - s.getTime()) >= 500);
-              db.close();
+              client.close();
               test.done();
             }
           });
@@ -3176,8 +3224,9 @@ exports['Should not emit any events after close event emitted due to cursor kill
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       var collection = db.collection('cursor_limit_skip_correctly');
@@ -3201,7 +3250,7 @@ exports['Should not emit any events after close event emitted due to cursor kill
 
         cursor.on('close', function() {
           // console.log("------------- received close")
-          db.close();
+          client.close();
           test.done();
         })
 
@@ -3231,8 +3280,9 @@ exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = {
       docs[i] = {createdAt:new Date(d)};
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Create collection
       db.createCollection('shouldCorrectlyExecuteEnsureIndexWithNoCallback', function(err, collection) {
         // ensure index of createdAt index
@@ -3245,7 +3295,7 @@ exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = {
             collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
               test.equal(null, err);
               test.equal(1, items.length);
-              db.close();
+              client.close();
               test.done();
             })
           })
@@ -3273,8 +3323,9 @@ exports['Should correctly execute count on cursor with limit and skip'] = {
       docs[i] = {'a':i, createdAt:new Date(d)};
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Create collection
       db.createCollection('Should_correctly_execute_count_on_cursor_1_', function(err, collection) {
         test.equal(null, err);
@@ -3297,7 +3348,7 @@ exports['Should correctly execute count on cursor with limit and skip'] = {
               test.equal(null, err);
               test.equal(50, c);
 
-              db.close();
+              client.close();
               test.done();
             });
           })
@@ -3326,8 +3377,9 @@ exports['Should correctly handle negative batchSize and set the limit'] = {
       docs[i] = {'a':i, createdAt:new Date(d)};
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Create collection
       db.createCollection('Should_correctly_execute_count_on_cursor_1_', function(err, collection) {
         test.equal(null, err);
@@ -3343,7 +3395,7 @@ exports['Should correctly handle negative batchSize and set the limit'] = {
             test.equal(null, err);
             test.ok(cursor.cursorState.cursorId.equals(Long.ZERO));
 
-            db.close();
+            client.close();
             test.done();
           });
         })
@@ -3367,8 +3419,9 @@ exports['Correcly decorate the cursor count command with skip, limit, hint, read
         started.push(event);
     });
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.collection('cursor_count_test', {readConcern: {level: 'local'}})
@@ -3386,7 +3439,7 @@ exports['Correcly decorate the cursor count command with skip, limit, hint, read
 
           listener.uninstrument();
 
-          db.close();
+          client.close();
           test.done();
       });
     });
@@ -3408,8 +3461,9 @@ exports['Correcly decorate the collection cursor count command with skip, limit,
         started.push(event);
     });
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.collection('cursor_count_test1', {readConcern: {level: 'local'}}).count({project: '123'}, {
@@ -3428,7 +3482,7 @@ exports['Correcly decorate the collection cursor count command with skip, limit,
 
         listener.uninstrument();
 
-        db.close();
+        client.close();
         test.done();
       });
     });

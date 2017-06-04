@@ -8,12 +8,15 @@ exports['Should correctly start monitoring for single server connection'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1, host: "/tmp/mongodb-27017.sock"});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1, host: "/tmp/mongodb-27017.sock"});
+    console.log("$$$$$$$$$$$$$$$$$$$$$$$")
+    console.dir(client)
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.serverConfig.once('monitoring', function() {
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -28,12 +31,13 @@ exports['Should correctly disable monitoring for single server connection'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1, host: "/tmp/mongodb-27017.sock", monitoring: false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1, host: "/tmp/mongodb-27017.sock", monitoring: false});
+    client.connect(function(err, db) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       test.equal(false, db.serverConfig.s.server.s.monitoring);
 
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -47,8 +51,9 @@ exports['Should correctly connect to server using domain socket'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1, host: "/tmp/mongodb-27017.sock"});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1, host: "/tmp/mongodb-27017.sock"});
+    client.connect(function(err, db) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.collection("domainSocketCollection0").insert({a:1}, {w:1}, function(err, item) {
@@ -58,7 +63,7 @@ exports['Should correctly connect to server using domain socket'] = {
           test.equal(null, err);
           test.equal(1, items.length);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -74,13 +79,13 @@ exports['Should correctly connect to server using just events'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:true});
-    db.on('open', function() {
-      db.close();
+    var client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:true});
+    client.on('open', function() {
+      client.close();
       test.done();
     });
 
-    db.open();
+    client.connect();
   }
 }
 
@@ -92,16 +97,16 @@ exports['Should correctly identify parser type'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:true});
-    db.on('open', function(err, db) {
-      test.equal(null, err);
+    var client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:true});
+    client.on('open', function(client) {
+      var db = client.db(configuration.database);
       test.equal('js', db.serverConfig.parserType);
 
-      db.close();
+      client.close();
       test.done();
     });
 
-    db.open();
+    client.connect();
   }
 }
 
@@ -113,13 +118,13 @@ exports['Should correctly connect to server using big connection pool'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:2000, auto_reconnect:true});
-    db.on('open', function() {
-      db.close();
+    var client = configuration.newDbInstance({w:1}, {poolSize:2000, auto_reconnect:true});
+    client.on('open', function() {
+      client.close();
       test.done();
     });
 
-    db.open();
+    client.connect();
   }
 }
 
@@ -131,8 +136,9 @@ exports['Should connect to server using domain socket with undefined port'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1, host: "/tmp/mongodb-27017.sock", port:undefined});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1, host: "/tmp/mongodb-27017.sock", port:undefined});
+    client.connect(function(err, db) {
+      var db = client.db(configuration.database);      
       test.equal(null, err);
 
       db.collection("domainSocketCollection1").insert({x:1}, {w:1}, function(err, item) {
@@ -142,7 +148,7 @@ exports['Should connect to server using domain socket with undefined port'] = {
           test.equal(null, err);
           test.equal(1, items.length);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -159,12 +165,12 @@ exports['Should fail to connect using non-domain socket with undefined port'] = 
   // The actual test we wish to run
   test: function(configuration, test) {
     var Server = configuration.require.Server
-      , Db = configuration.require.Db;
+      , MongoClient = configuration.require.MongoClient;
 
     var error;
     try {
-      var db = new Db('test', new Server("localhost", undefined), {w:0});
-      db.open(function(){ });
+      var client = new MongoClient(new Server("localhost", undefined), {w:0});
+      client.connect(function(){ });
     } catch (err){
       error = err;
     }
@@ -178,8 +184,9 @@ exports['Should fail to connect using non-domain socket with undefined port'] = 
 /**
  * @ignore
  */
-function connectionTester(test, testName, callback) {
-  return function(err, db) {
+function connectionTester(test, configuration, testName, callback) {
+  return function(err, client) {
+    var db = client.db(configuration.database);
     test.equal(err, null);
 
     db.collection(testName, function(err, collection) {
@@ -192,7 +199,7 @@ function connectionTester(test, testName, callback) {
         db.dropDatabase(function(err, done) {
           test.equal(err, null);
           test.ok(done);
-          if(callback) return callback(db);
+          if(callback) return callback(client);
           test.done();
         });
       });
@@ -210,8 +217,8 @@ exports.testConnectNoOptions = {
   test: function(configuration, test) {
     var connect = configuration.require;
 
-    connect(configuration.url(), connectionTester(test, 'testConnectNoOptions', function(db) {
-      db.close();
+    connect(configuration.url(), connectionTester(test, configuration, 'testConnectNoOptions', function(client) {
+      client.close();
       test.done();
     }));
   }
@@ -229,11 +236,11 @@ exports.testConnectServerOptions = {
 
     connect(configuration.url(),
             { server: {auto_reconnect: true, poolSize: 4} },
-            connectionTester(test, 'testConnectServerOptions', function(db) {
-      test.equal(1, db.serverConfig.poolSize);
-      test.equal(4, db.serverConfig.s.server.s.pool.size);
-      test.equal(true, db.serverConfig.autoReconnect);
-      db.close();
+            connectionTester(test, configuration, 'testConnectServerOptions', function(client) {
+      test.equal(1, client.topology.poolSize);
+      test.equal(4, client.topology.s.server.s.pool.size);
+      test.equal(true, client.topology.autoReconnect);
+      client.close();
       test.done();
     }));
   }
@@ -252,11 +259,11 @@ exports.testConnectAllOptions = {
     connect(configuration.url(),
             { server: {auto_reconnect: true, poolSize: 4},
               db: {native_parser: (process.env['TEST_NATIVE'] != null)} },
-            connectionTester(test, 'testConnectAllOptions', function(db) {
-      test.ok(db.serverConfig.poolSize >= 1);
-      test.equal(4, db.serverConfig.s.server.s.pool.size);
-      test.equal(true, db.serverConfig.autoReconnect);
-      db.close();
+            connectionTester(test, configuration, 'testConnectAllOptions', function(client) {
+      test.ok(client.topology.poolSize >= 1);
+      test.equal(4, client.topology.s.server.s.pool.size);
+      test.equal(true, client.topology.autoReconnect);
+      client.close();
       test.done();
     }));
   }
@@ -273,19 +280,20 @@ exports.testConnectGoodAuth = {
     var connect = configuration.require;
     var user = 'testConnectGoodAuth', password = 'password';
     // First add a user.
-    connect(configuration.url(), function(err, db) {
+    connect(configuration.url(), function(err, client) {
       test.equal(err, null);
+      var db = client.db(configuration.database);
 
       db.addUser(user, password, function(err, result) {
         test.equal(err, null);
-        db.close();
+        client.close();
         restOfTest();
       });
     });
 
     function restOfTest() {
-      connect(configuration.url(user, password), connectionTester(test, 'testConnectGoodAuth', function(db) {
-        db.close();
+      connect(configuration.url(user, password), connectionTester(test, configuration, 'testConnectGoodAuth', function(client) {
+        client.close();
         test.done();
       }));
     }
@@ -362,50 +370,13 @@ exports.testConnectBadUrl = {
 /**
  * @ignore
  */
-exports.shouldCorrectlyReturnTheRightDbObjectOnOpenEmit = {
-  metadata: { requires: { topology: 'single' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db_conn = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    var db2 = db_conn.db("test2");
-
-    db2.on('open', function (err, db) {
-      test.equal(db2.databaseName, db.databaseName);
-    });
-
-    db_conn.on('open', function (err, db) {
-      test.equal(db_conn.databaseName, db.databaseName);
-    });
-
-    db_conn.open(function (err) {
-      if(err) throw err;
-      var col1 = db_conn.collection('test');
-      var col2 = db2.collection('test');
-
-      var testData = { value : "something" };
-      col1.insert(testData, function (err) {
-        if (err) throw err;
-        col2.insert(testData, function (err) {
-          if (err) throw err;
-          db2.close();
-          test.done();
-        });
-      });
-    });
-  }
-}
-
-/**
- * @ignore
- */
 exports.shouldCorrectlyReturnFalseOnIsConnectBeforeConnectionHappened = {
   metadata: { requires: { topology: 'single' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db_conn = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    test.equal(false, db_conn.serverConfig.isConnected());
+    var client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    test.equal(false, client.isConnected());
     test.done();
   }
 }
@@ -422,8 +393,9 @@ exports['Should correctly reconnect and finish query operation'] = {
       , MongoClient = configuration.require.MongoClient
       , Server = configuration.require.Server;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:true});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:true});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.collection('test_reconnect').insert({a:1}, function(err, doc) {
@@ -459,7 +431,7 @@ exports['Should correctly reconnect and finish query operation'] = {
               test.equal(2, dbReconnect);
               test.equal(2, dbClose);
 
-              db.close();
+              client.close();
               test.done();
             });
           });

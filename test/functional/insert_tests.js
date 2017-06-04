@@ -50,15 +50,16 @@ exports.shouldCorrectlyPerformSingleInsert = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldCorrectlyPerformSingleInsert');
       collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         collection.findOne(function(err, item) {
           test.equal(1, item.a);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -77,8 +78,9 @@ exports.shouldCorrectlyHandleMultipleDocumentInsert = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('test_multiple_insert');
       var docs = [{a:1}, {a:2}];
 
@@ -104,7 +106,7 @@ exports.shouldCorrectlyHandleMultipleDocumentInsert = {
           });
           test.equal(2, results.length);
           // Let's close the db
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -122,8 +124,9 @@ exports.shouldCorrectlyExecuteSaveInsertUpdate = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldCorrectlyExecuteSaveInsertUpdate');
 
       collection.save({ email : 'save' }, configuration.writeConcernMax(), function() {
@@ -136,7 +139,7 @@ exports.shouldCorrectlyExecuteSaveInsertUpdate = {
             function() {
               collection.find().toArray(function(e, a) {
                 test.equal(3, a.length)
-                db.close();
+                client.close();
                 test.done();
               });
             }
@@ -157,8 +160,9 @@ exports.shouldCorrectlyInsertAndRetrieveLargeIntegratedArrayDocument = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('test_should_deserialize_large_integrated_array');
 
       var doc = {'a':0,
@@ -170,7 +174,7 @@ exports.shouldCorrectlyInsertAndRetrieveLargeIntegratedArrayDocument = {
         collection.findOne({'a': 0}, function(err, result) {
           test.deepEqual(doc.a, result.a);
           test.deepEqual(doc.b, result.b);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -193,8 +197,9 @@ exports.shouldCorrectlyInsertAndRetrieveDocumentWithAllTypes = {
       , Code = configuration.require.Code
       , DBRef = configuration.require.DBRef;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('test_all_serialization_types');
 
       var date = new Date();
@@ -245,7 +250,7 @@ exports.shouldCorrectlyInsertAndRetrieveDocumentWithAllTypes = {
           test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
           test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
           test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);
-          db.close();
+          client.close();
           test.done();
         })
       });
@@ -263,8 +268,9 @@ exports.shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('test_all_serialization_types');
 
       //convience curried handler for functions of type 'a -> (err, result)
@@ -298,7 +304,7 @@ exports.shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext = {
                     test.equal("Test Account", doc.name);
                     test.equal("somestring", doc.settings.thisOneWorks);
                     test.equal("test", doc.settings.block[0]);
-                    db.close();
+                    client.close();
                     test.done();
                   });
                 })
@@ -325,8 +331,9 @@ exports.shouldCorrectlySerializeDocumentWithAllTypesInNewContext = {
       , Code = configuration.require.Code
       , DBRef = configuration.require.DBRef;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('test_all_serialization_types_new_context');
 
       var date = new Date();
@@ -388,7 +395,7 @@ exports.shouldCorrectlySerializeDocumentWithAllTypesInNewContext = {
           test.equal(motherOfAllDocuments.dbref.namespace, doc.dbref.namespace);
           test.equal(motherOfAllDocuments.dbref.oid.toHexString(), doc.dbref.oid.toHexString());
           test.equal(motherOfAllDocuments.dbref.db, doc.dbref.db);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -408,14 +415,15 @@ exports.shouldCorrectlyDoToJsonForLongValue = {
   test: function(configuration, test) {
     var Long = configuration.require.Long;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('test_to_json_for_long');
 
       collection.insert([{value: Long.fromNumber(32222432)}], configuration.writeConcernMax(), function(err, ids) {
         collection.findOne({}, function(err, item) {
           test.equal(32222432, item.value);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -433,8 +441,9 @@ exports.shouldCorrectlyInsertAndUpdateWithNoCallback = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('test_insert_and_update_no_callback');
 
       // Insert the update
@@ -447,7 +456,7 @@ exports.shouldCorrectlyInsertAndUpdateWithNoCallback = {
         // Locate document
         collection.findOne({}, function(err, item) {
           test.equal(2, item.i)
-          db.close();
+          client.close();
           test.done();
         });
       }, 100);
@@ -468,8 +477,9 @@ exports.shouldInsertAndQueryTimestamp = {
     var Timestamp = configuration.require.Timestamp
       , Long = configuration.require.Long;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('test_insert_and_query_timestamp');
 
       // Insert the update
@@ -479,7 +489,7 @@ exports.shouldInsertAndQueryTimestamp = {
           test.ok(item.i._bsontype == "Timestamp");
           test.equal(100, item.i);
           test.equal(200, item.j);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -497,8 +507,9 @@ exports.shouldCorrectlyInsertAndQueryUndefined = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('test_insert_and_query_undefined');
 
       // Insert the update
@@ -507,7 +518,7 @@ exports.shouldCorrectlyInsertAndQueryUndefined = {
         collection.findOne({}, function(err, item) {
           test.equal(null, item.i)
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -544,8 +555,9 @@ exports.shouldThrowErrorIfSerializingFunctionOrdered = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('test_should_throw_error_if_serializing_function');
       var func = function() { return 1};
       // Insert the update
@@ -555,7 +567,7 @@ exports.shouldThrowErrorIfSerializingFunctionOrdered = {
         collection.findOne({_id:result.ops[0]._id}, function(err, object) {
           test.equal(func.toString(), object.z.code);
           test.equal(1, object.i);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -573,8 +585,9 @@ exports.shouldThrowErrorIfSerializingFunctionUnOrdered = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('test_should_throw_error_if_serializing_function_1');
       var func = function() { return 1};
       // Insert the update
@@ -584,7 +597,7 @@ exports.shouldThrowErrorIfSerializingFunctionUnOrdered = {
         collection.findOne({_id:result.ops[0]._id}, function(err, object) {
           test.equal(func.toString(), object.z.code);
           test.equal(1, object.i);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -604,8 +617,9 @@ exports.shouldCorrectlyInsertDocumentWithUUID = {
   test: function(configuration, test) {
     var Binary = configuration.require.Binary;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('insert_doc_with_uuid');
 
       collection.insert({_id : "12345678123456781234567812345678", field: '1'}, configuration.writeConcernMax(), function(err, result) {
@@ -623,7 +637,7 @@ exports.shouldCorrectlyInsertDocumentWithUUID = {
             collection.find({_id : binaryUUID}).toArray(function(err, items) {
               test.equal(null, err);
               test.equal(items[0].field, '2')
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -643,8 +657,9 @@ exports.shouldCorrectlyCallCallbackWithDbDriverInStrictMode = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('test_insert_and_update_no_callback_strict');
 
       collection.insert({_id : "12345678123456781234567812345678", field: '1'}, configuration.writeConcernMax(), function(err, result) {
@@ -653,7 +668,7 @@ exports.shouldCorrectlyCallCallbackWithDbDriverInStrictMode = {
         collection.update({ '_id': "12345678123456781234567812345678" }, { '$set': { 'field': 0 }}, configuration.writeConcernMax(), function(err, r) {
           test.equal(null, err);
           test.equal(1, r.result.n);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -674,8 +689,9 @@ exports.shouldCorrectlyInsertDBRefWithDbNotDefined = {
     var DBRef = configuration.require.DBRef
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldCorrectlyInsertDBRefWithDbNotDefined');
 
       var doc = {_id: new ObjectID()};
@@ -699,7 +715,7 @@ exports.shouldCorrectlyInsertDBRefWithDbNotDefined = {
             test.equal(doc._id.toString(), items[2].ref.oid.toString());
             test.equal(configuration.db_name, items[2].ref.db);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -718,8 +734,9 @@ exports.shouldCorrectlyInsertUpdateRemoveWithNoOptions = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldCorrectlyInsertUpdateRemoveWithNoOptions');
 
       collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
@@ -733,7 +750,7 @@ exports.shouldCorrectlyInsertUpdateRemoveWithNoOptions = {
 
             collection.count(function(err, count) {
               test.equal(0, count);
-              db.close();
+              client.close();
               test.done();
             })
           });
@@ -755,8 +772,9 @@ exports.shouldCorrectlyExecuteMultipleFetches = {
   test: function(configuration, test) {
     // Search parameter
     var to = 'ralph'
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldCorrectlyExecuteMultipleFetches');
       // Execute query
       collection.insert({addresses:{localPart:'ralph'}}, configuration.writeConcernMax(), function(err, result) {
@@ -764,7 +782,7 @@ exports.shouldCorrectlyExecuteMultipleFetches = {
         collection.findOne({"addresses.localPart" : to}, function( err, doc ) {
           test.equal(null, err);
           test.equal(to, doc.addresses.localPart);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -784,14 +802,15 @@ exports.shouldCorrectlyFailWhenNoObjectToUpdate = {
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldCorrectlyFailWhenNoObjectToUpdate');
 
       collection.update({_id : new ObjectID()}, { email : 'update' }, configuration.writeConcernMax(),
         function(err, result) {
           test.equal(0, result.result.n);
-          db.close();
+          client.close();
           test.done();
         }
       );
@@ -821,8 +840,9 @@ exports['Should correctly insert object and retrieve it when containing array an
      ]
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('Should_correctly_insert_object_and_retrieve_it_when_containing_array_and_IsoDate');
 
       collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
@@ -831,7 +851,7 @@ exports['Should correctly insert object and retrieve it when containing array an
         collection.findOne(function(err, item) {
           test.ok(err == null);
           test.deepEqual(doc, item);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -863,8 +883,9 @@ exports['Should correctly insert object with timestamps'] = {
      "timestamp2" : new Timestamp(33333),
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('Should_correctly_insert_object_with_timestamps');
 
       collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
@@ -873,7 +894,7 @@ exports['Should correctly insert object with timestamps'] = {
         collection.findOne(function(err, item) {
           test.ok(err == null);
           test.deepEqual(doc, item);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -898,12 +919,13 @@ exports['Should fail on insert due to key starting with $'] = {
      "$key" : "foreign",
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('Should_fail_on_insert_due_to_key_starting_with');
       collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
         test.ok(err != null);
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -927,8 +949,9 @@ exports['Should Correctly allow for control of serialization of functions on com
       func : function() {}
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('Should_Correctly_allow_for_control_of_serialization_of_functions_on_command_level');
       collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
 
@@ -941,7 +964,7 @@ exports['Should Correctly allow for control of serialization of functions on com
             // Execute a safe insert with replication to two servers
             collection.findAndModify({str:"String"}, [['a', 1]], {'$set':{'f':function() {}}}, {new:true, safe: true, serializeFunctions:true}, function(err, result) {
               test.ok(result.value.f._bsontype == "Code")
-              db.close();
+              client.close();
               test.done();
             })
           })
@@ -968,15 +991,16 @@ exports['Should Correctly allow for control of serialization of functions on col
       func : function() {}
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('Should_Correctly_allow_for_control_of_serialization_of_functions_on_collection_level', {serializeFunctions:true});
       collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         collection.findOne({str : "String"}, function(err, item) {
           test.ok(item.func._bsontype == "Code");
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -999,15 +1023,16 @@ exports['Should Correctly allow for using a Date object as _id'] = {
       str : 'hello'
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('Should_Correctly_allow_for_using_a_Date_object_as__id');
       collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         collection.findOne({str : "hello"}, function(err, item) {
           test.ok(item._id instanceof Date);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1025,12 +1050,13 @@ exports['Should Correctly fail to update returning 0 results'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('Should_Correctly_fail_to_update_returning_0_results');
       collection.update({a:1}, {$set: {a:1}}, configuration.writeConcernMax(), function(err, r) {
         test.equal(0, r.result.n);
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -1060,8 +1086,9 @@ exports['Should Correctly update two fields including a sub field'] = {
       }
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('Should_Correctly_update_two_fields_including_a_sub_field');
       collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
@@ -1075,7 +1102,7 @@ exports['Should Correctly update two fields including a sub field'] = {
             test.equal(null, err);
             test.equal('p1_2', item.Prop1);
             test.equal('s2_2', item.More.Sub2);
-            db.close();
+            client.close();
             test.done();
           })
         });
@@ -1094,8 +1121,9 @@ exports['Should correctly fail due to duplicate key for _id'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('Should_Correctly_update_two_fields_including_a_sub_field_2');
       collection.insert({_id:1}, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
@@ -1103,7 +1131,7 @@ exports['Should correctly fail due to duplicate key for _id'] = {
         // Update two fields
         collection.insert({_id:1}, configuration.writeConcernMax(), function(err, result) {
           test.ok(err != null);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1121,8 +1149,9 @@ exports.shouldCorrectlyInsertDocWithCustomId = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldCorrectlyInsertDocWithCustomId');
       // Insert the update
       collection.insert({_id:0, test:'hello'}, configuration.writeConcernMax(), function(err, result) {
@@ -1131,7 +1160,7 @@ exports.shouldCorrectlyInsertDocWithCustomId = {
         collection.findOne({_id:0}, function(err, item) {
           test.equal(0, item._id);
           test.equal('hello', item.test);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1149,8 +1178,9 @@ exports.shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne');
 
       // Upsert a new doc
@@ -1163,7 +1193,7 @@ exports.shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne = {
         collection.update({a:1}, {a:1}, {upsert:true, w:1, fullResult:true}, function(err, result) {
           if(result.updatedExisting) test.equal(true, result.updatedExisting);
           test.equal(1, result.result.n);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1181,8 +1211,9 @@ exports.shouldCorrectlyPerformLargeTextInsert = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldCorrectlyPerformLargeTextInsert');
 
       // Create large string, insert and then retrive
@@ -1198,7 +1229,7 @@ exports.shouldCorrectlyPerformLargeTextInsert = {
         collection.findOne({a:1}, function(err, doc) {
           test.equal(null, err);
           test.equal(50000, doc.string.length);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1216,8 +1247,9 @@ exports.shouldCorrectlyPerformInsertOfObjectsUsingToBSON = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldCorrectlyPerformInsertOfObjectsUsingToBSON');
 
       // Create document with toBSON method
@@ -1230,7 +1262,7 @@ exports.shouldCorrectlyPerformInsertOfObjectsUsingToBSON = {
         collection.findOne({c:1}, function(err, doc) {
           test.equal(null, err);
           test.deepEqual(1, doc.c);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1252,9 +1284,9 @@ exports.shouldAttempToForceBsonSize = {
   test: function(configuration, test) {
     var Binary = configuration.require.Binary;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, disableDriverBSONSizeCheck:true});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('shouldAttempToForceBsonSize', function(err, collection) {
         // var doc = {a:1, b:new Binary(new Buffer(16777216)/5)}
         var doc = [
@@ -1270,7 +1302,7 @@ exports.shouldAttempToForceBsonSize = {
             test.equal(null, err);
             test.deepEqual(1, doc.a);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -1289,8 +1321,9 @@ exports.shouldCorrectlyUseCustomObjectToUpdateDocument = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldCorrectlyUseCustomObjectToUpdateDocument');
 
       collection.insert({a:{b:{c:1}}}, configuration.writeConcernMax(), function(err, result) {
@@ -1307,7 +1340,7 @@ exports.shouldCorrectlyUseCustomObjectToUpdateDocument = {
           test.equal(null, err);
           test.equal(1, r.result.n);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1325,11 +1358,12 @@ exports.shouldExecuteInsertWithNoCallbackAndWriteConcern = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldExecuteInsertWithNoCallbackAndWriteConcern');
       collection.insert({a:{b:{c:1}}});
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -1346,12 +1380,13 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcern = {
   // The actual test we wish to run
   test: function(configuration, test) {
     function cb (err) {
-      db.close();
+      client.close();
       test.done();
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('gh-completely2');
       collection.insert({ a: 1 }, { w: 0 }, cb);
     });
@@ -1370,12 +1405,13 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithUpdate = {
   test: function(configuration, test) {
     function cb (err) {
       test.equal(null, err);
-      db.close();
+      client.close();
       test.done();
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('gh-completely3');
       collection.update({ a: 1 }, {a:2}, { upsert:true, w: 0 }, cb);
     });
@@ -1394,12 +1430,13 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithRemove = {
   test: function(configuration, test) {
     function cb (err) {
       test.equal(null, err);
-      db.close();
+      client.close();
       test.done();
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('gh-completely1');
       collection.remove({ a: 1 }, { w: 0 }, cb);
     });
@@ -1424,8 +1461,9 @@ exports.handleBSONTypeInsertsCorrectly = {
       , MaxKey = configuration.require.MaxKey
       , Code = configuration.require.Code;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('bson_types_insert');
 
       var document = {
@@ -1468,7 +1506,7 @@ exports.handleBSONTypeInsertsCorrectly = {
                     collection.findOne({"code": new Code("function () {}", {a: 77})}, function(err, doc) {
                       test.equal(null, err);
                       test.ok(doc != null);
-                      db.close();
+                      client.close();
                       test.done();
                     });
                   });
@@ -1500,8 +1538,9 @@ exports.handleBSONTypeInsertsCorrectlyFor28OrHigher = {
       , MaxKey = configuration.require.MaxKey
       , Code = configuration.require.Code;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('bson_types_insert_1');
 
       var document = {
@@ -1544,7 +1583,7 @@ exports.handleBSONTypeInsertsCorrectlyFor28OrHigher = {
                     collection.findOne({"code": new Code("function () {}", {a: 55})}, function(err, doc) {
                       test.equal(null, err);
                       test.ok(doc != null);
-                      db.close();
+                      client.close();
                       test.done();
                     });
                   });
@@ -1570,8 +1609,9 @@ exports.mixedTimestampAndDateQuery = {
   test: function(configuration, test) {
     var Timestamp = configuration.require.Timestamp;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('timestamp_date');
 
       var d = new Date();
@@ -1589,7 +1629,7 @@ exports.mixedTimestampAndDateQuery = {
           collection.findOne({"x": d}, function(err, doc) {
             test.equal(null, err);
             test.ok(doc != null);
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -1608,8 +1648,9 @@ exports.positiveAndNegativeInfinity = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('negative_pos');
       var d = new Date();
 
@@ -1625,7 +1666,7 @@ exports.positiveAndNegativeInfinity = {
           test.equal(null, err);
           test.equal(Number.POSITIVE_INFINITY, doc.pos);
           test.equal(Number.NEGATIVE_INFINITY, doc.neg);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1642,14 +1683,15 @@ exports.shouldCorrectlyInsertSimpleRegExpDocument = {
   test: function(configuration, test) {
     var regexp = /foobar/i;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_regex', function(err, collection) {
         collection.insert({'b':regexp}, configuration.writeConcernMax(), function(err, ids) {
           collection.find({}, {'fields': ['b']}).toArray(function(err, items) {
             test.equal(("" + regexp), ("" + items[0].b));
             // Let's close the db
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -1667,8 +1709,9 @@ exports.shouldCorrectlyInsertSimpleUTF8Regexp = {
   test: function(configuration, test) {
     var regexp = /foobaré/;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldCorrectlyInsertSimpleUTF8Regexp');
 
       collection.insert({'b':regexp}, configuration.writeConcernMax(), function(err, ids) {
@@ -1678,7 +1721,7 @@ exports.shouldCorrectlyInsertSimpleUTF8Regexp = {
           test.equal(null, err)
           test.equal(("" + regexp), ("" + items[0].b));
           // Let's close the db
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1693,8 +1736,9 @@ exports.shouldCorrectlyThrowDueToIllegalCollectionName = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var k = new Buffer(15);
       for (var i = 0; i < 15; i++)
         k[i] = 0;
@@ -1709,7 +1753,7 @@ exports.shouldCorrectlyThrowDueToIllegalCollectionName = {
       } catch (err) {
       }
 
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -1726,8 +1770,9 @@ exports.shouldCorrectlyHonorPromoteLongFalseNativeBSON = {
 
     var o = configuration.writeConcernMax();
     o.promoteLongs = false;
-    var db = configuration.newDbInstance(o, {native_parser:true, promoteLongs: false})
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, promoteLongs: false});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('shouldCorrectlyHonorPromoteLong').insert({
             doc: Long.fromNumber(10)
           , array: [[Long.fromNumber(10)]]
@@ -1738,7 +1783,7 @@ exports.shouldCorrectlyHonorPromoteLongFalseNativeBSON = {
             test.equal(null, err);
             test.ok(doc.doc._bsontype == "Long");
             test.ok(doc.array[0][0]._bsontype == "Long");
-            db.close();
+            client.close();
             test.done();
           });
       });
@@ -1757,9 +1802,10 @@ exports.shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore = {
 
     var o = configuration.writeConcernMax();
     o.promoteLongs = false;
-    // var db = configuration.newDbInstance(o, {native_parser:true, promoteLongs:false})
-    var db = configuration.newDbInstance(o, {native_parser:true})
-    db.open(function(err, db) {
+
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, promoteLongs:false});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore').insertMany([
         {a: Long.fromNumber(10)}, {a: Long.fromNumber(10)}, {a: Long.fromNumber(10)}, {a: Long.fromNumber(10)},
         {a: Long.fromNumber(10)}, {a: Long.fromNumber(10)}, {a: Long.fromNumber(10)}, {a: Long.fromNumber(10)},
@@ -1775,7 +1821,7 @@ exports.shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore = {
             var doc = docs.pop();
 
             test.ok(doc.a._bsontype == "Long");
-            db.close();
+            client.close();
             test.done();
           });
       });
@@ -1792,8 +1838,9 @@ exports.shouldCorrectlyHonorPromoteLongTrueNativeBSON = {
   test: function(configuration, test) {
     var Long = configuration.require.Long;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:true})
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').insert({
             doc: Long.fromNumber(10)
           , array: [[Long.fromNumber(10)]]
@@ -1804,7 +1851,7 @@ exports.shouldCorrectlyHonorPromoteLongTrueNativeBSON = {
             test.equal(null, err);
             test.ok('number', typeof doc.doc);
             test.ok('number', typeof doc.array[0][0])
-            db.close();
+            client.close();
             test.done();
           });
       });
@@ -1821,8 +1868,9 @@ exports.shouldCorrectlyHonorPromoteLongFalseJSBSON = {
   test: function(configuration, test) {
     var Long = configuration.require.Long;
 
-    var db = configuration.newDbInstance({w:1, promoteLongs:false}, {native_parser:false})
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, promoteLongs: false});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').insert({
             doc: Long.fromNumber(10)
           , array: [[Long.fromNumber(10)]]
@@ -1834,7 +1882,7 @@ exports.shouldCorrectlyHonorPromoteLongFalseJSBSON = {
             test.equal(null, err);
             test.ok(doc.doc._bsontype == "Long");
             test.ok(doc.array[0][0]._bsontype == "Long");
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -1851,8 +1899,9 @@ exports.shouldCorrectlyHonorPromoteLongTrueJSBSON = {
   test: function(configuration, test) {
     var Long = configuration.require.Long;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').insert({
             doc: Long.fromNumber(10)
           , array: [[Long.fromNumber(10)]]
@@ -1863,7 +1912,7 @@ exports.shouldCorrectlyHonorPromoteLongTrueJSBSON = {
             test.equal(null, err);
             test.ok('number', typeof doc.doc);
             test.ok('number', typeof doc.array[0][0])
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -1880,13 +1929,14 @@ exports.shouldCorrectlyWorkWithCheckKeys = {
   test: function(configuration, test) {
     var Long = configuration.require.Long;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('shouldCorrectlyOverrideCheckKeysJSOnUpdate').update({
           "ps.op.t":1
         }, {'$set': {b: 1}}, {checkKeys:false}, function(err, doc) {
           test.equal(null, err);
-          db.close();
+          client.close();
           test.done();
         });
     });
@@ -1900,8 +1950,9 @@ exports.shouldCorrectlyApplyBitOperator = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var col = db.collection('shouldCorrectlyApplyBitOperator');
 
       col.insert({a:1, b:1}, function(err, result) {
@@ -1915,7 +1966,7 @@ exports.shouldCorrectlyApplyBitOperator = {
             test.equal(1, doc.a);
             test.equal(0, doc.b);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -1931,8 +1982,9 @@ exports.shouldCorrectlyPerformInsertAndUpdateWithFunctionSerialization = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var col = db.collection('shouldCorrectlyPerformInsertAndUpdateWithFunctionSerialization', {serializeFunctions:true});
 
       col.insert({a:1, f: function(x) {return x;}},function(err,doc){
@@ -1944,7 +1996,7 @@ exports.shouldCorrectlyPerformInsertAndUpdateWithFunctionSerialization = {
           col.findOne({a:1}, function(err, doc) {
             test.equal(null, err);
             test.equal("function (y){return y;}", doc.f.code);
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -1960,8 +2012,9 @@ exports['should correctly insert > 1000 docs using insert and insertMany'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var col = db.collection('shouldCorreclyAllowforMoreThanAThousandDocsInsert', {serializeFunctions:true});
       var docs = [];
 
@@ -1982,7 +2035,7 @@ exports['should correctly insert > 1000 docs using insert and insertMany'] = {
           test.equal(null,err);
           test.equal(2000, doc.result.n);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1997,8 +2050,9 @@ exports['should return error on unordered insertMany with multiple unique key co
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get collection
       var col = db.collection('insertManyMultipleWriteErrors');
       col.drop(function(err, r) {
@@ -2011,7 +2065,7 @@ exports['should return error on unordered insertMany with multiple unique key co
             test.ok(err != null);
             test.ok(err.writeErrors.length == 2);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -2027,8 +2081,9 @@ exports['should return error on unordered insert with multiple unique key constr
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get collection
       var col = db.collection('insertManyMultipleWriteErrors1');
       col.drop(function(err, r) {
@@ -2041,7 +2096,7 @@ exports['should return error on unordered insert with multiple unique key constr
             test.ok(err != null);
             test.ok(err.writeErrors.length == 2);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -2057,8 +2112,9 @@ exports['should return error on ordered insertMany with multiple unique key cons
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get collection
       var col = db.collection('insertManyMultipleWriteErrors2');
       col.drop(function(err, r) {
@@ -2070,7 +2126,7 @@ exports['should return error on ordered insertMany with multiple unique key cons
           col.insertMany([{a:1}, {a:2}, {a:1}, {a:3}, {a:1}], {ordered:true}, function(err, r) {
             test.ok(err != null);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -2086,8 +2142,9 @@ exports['should return error on ordered insert with multiple unique key constrai
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get collection
       var col = db.collection('insertManyMultipleWriteErrors3');
       col.drop(function(err, r) {
@@ -2099,7 +2156,7 @@ exports['should return error on ordered insert with multiple unique key constrai
           col.insert([{a:1}, {a:2}, {a:1}, {a:3}, {a:1}], {ordered:true}, function(err, r) {
             test.ok(err != null);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -2129,8 +2186,9 @@ exports['Correctly allow forceServerObjectId for insertOne'] = {
         succeeded.push(event);
     });
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.collection('apm_test').insertOne({a:1}, {forceServerObjectId:true}).then(function(r) {
@@ -2138,7 +2196,7 @@ exports['Correctly allow forceServerObjectId for insertOne'] = {
         test.equal(undefined, started[0].command.documents[0]._id);
         listener.uninstrument();
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -2166,8 +2224,9 @@ exports['Correctly allow forceServerObjectId for insertMany'] = {
         succeeded.push(event);
     });
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.collection('apm_test').insertMany([{a:1}], {forceServerObjectId:true}).then(function(r) {
@@ -2175,7 +2234,7 @@ exports['Correctly allow forceServerObjectId for insertMany'] = {
         test.equal(undefined, started[0].command.documents[0]._id);
 
         listener.uninstrument();
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -2203,8 +2262,9 @@ exports['Correctly allow forceServerObjectId for insertMany'] = {
         succeeded.push(event);
     });
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.collection('apm_test').insertMany([{a:1}], {forceServerObjectId:true}).then(function(r) {
@@ -2212,7 +2272,7 @@ exports['Correctly allow forceServerObjectId for insertMany'] = {
         test.equal(undefined, started[0].command.documents[0]._id);
 
         listener.uninstrument();
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -2222,14 +2282,15 @@ exports['Correctly allow forceServerObjectId for insertMany'] = {
 exports['should return correct number of ids for insertMany { ordered: true }'] = {
   metadata: { requires: { topology: [ 'single' ] } },
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       db.collection('inserted_ids_test').insertMany([{}, {}, {}], { ordered: true })
         .then(function(r) {
           test.equal(null, err);
           test.equal(3, r.insertedIds.length);
-          db.close();
+          client.close();
           test.done();
         });
     });
@@ -2239,14 +2300,15 @@ exports['should return correct number of ids for insertMany { ordered: true }'] 
 exports['should return correct number of ids for insertMany { ordered: false }'] = {
   metadata: { requires: { topology: [ 'single' ] } },
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({ w: 1 }, { poolSize:1, auto_reconnect:false });
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       db.collection('inserted_ids_test').insertMany([{}, {}, {}], { ordered: false })
         .then(function(r) {
           test.equal(null, err);
           test.equal(3, r.insertedIds.length);
-          db.close();
+          client.close();
           test.done();
         });
     });
@@ -2258,8 +2320,9 @@ exports['Insert document including sub documents'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       var shipment = {
@@ -2285,7 +2348,7 @@ exports['Insert document including sub documents'] = {
           test.equal(null, err);
           test.equal('a', v.products[0].suppliers[0].shipments[0].shipment1);
 
-          db.close();
+          client.close();
           test.done();
         });
       });

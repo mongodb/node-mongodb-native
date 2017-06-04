@@ -67,9 +67,10 @@ exports['should not call callback twice on collection() with callback'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:true});
+    client.connect(function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
       var count = 0;
 
       var coll = db.collection('coll_name', function(e,coll) {
@@ -334,8 +335,6 @@ exports.shouldCorrectlyThrowWhenTryingToReOpenConnection = {
 
         test.ok(false);
       } catch (err) {        
-        console.dir(err)
-        throw "";
         client.close();
         test.done();
       }
@@ -351,16 +350,16 @@ exports.shouldCorrectlyReconnectWhenError = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var Db = configuration.require.Db
+    var MongoClient = configuration.require.MongoClient
       , Server = configuration.require.Server;
 
-    var db = new Db('integration_tests_to_drop_2', new Server("127.0.0.1", 27088,
+    var client = new MongoClient(new Server("127.0.0.1", 27088,
       {auto_reconnect: false, poolSize: 4}), configuration.writeConcernMax());
     // Establish connection to db
-    db.open(function(err, _db) {
+    client.connect(function(err, _db) {
       test.ok(err != null);
 
-      db.open(function(err, _db) {
+      client.connect(function(err, _db) {
         test.ok(err != null);
         client.close();
         test.done();
@@ -373,8 +372,8 @@ exports['should not cut collection name when it is the same as the database'] = 
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize:1, auto_reconnect: false });
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
       test.equal(null, err);
 
       var db1 = client.db('node972');
@@ -403,9 +402,8 @@ exports.shouldCorrectlyUseCursorWithListCollectionsCommand = {
     var Db = configuration.require.Db
       , Server = configuration.require.Server;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
       test.equal(null, err);
 
       // Get a db we that does not have any collections
@@ -445,9 +443,8 @@ exports.shouldCorrectlyUseCursorWithListCollectionsCommandAndBatchSize = {
     var Db = configuration.require.Db
       , Server = configuration.require.Server;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
       test.equal(null, err);
 
       // Get a db we that does not have any collections
@@ -487,9 +484,8 @@ exports['should correctly list collection names with . in the middle'] = {
     var Db = configuration.require.Db
       , Server = configuration.require.Server;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
       test.equal(null, err);
 
       // Get a db we that does not have any collections
@@ -539,9 +535,8 @@ exports['should correctly list collection names with batchSize 1 for 2.8 or high
     var Db = configuration.require.Db
       , Server = configuration.require.Server;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
       test.equal(null, err);
 
       // Get a db we that does not have any collections
@@ -584,14 +579,14 @@ exports['should correctly execute close function in order'] = {
     var Db = configuration.require.Db
       , Server = configuration.require.Server;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       var items = [];
 
       items.push(1);
-      db.close(function(){
+      client.close(function(){
         test.equal(2, items.length);
         test.done();
       });

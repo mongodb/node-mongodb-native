@@ -224,7 +224,7 @@ var Configuration = function(options) {
         }
 
         // Normal socket connection
-        return new Db(db, topology(host, serverOptions), dbOptions);
+        return new MongoClient(topology(host, serverOptions), dbOptions);
       },
 
       url: function(username, password) {
@@ -262,32 +262,32 @@ var runner = new Runner({
 });
 
 var testFiles = [
-  // Logging tests
-    '/test/functional/logger_tests.js'
+  // // Logging tests
+  //   '/test/functional/logger_tests.js'
 
-  // APM tests
-  , '/test/functional/apm_tests.js'
+  // // APM tests
+  // , '/test/functional/apm_tests.js'
 
-  // Connection spec tests
-  , '/test/functional/connection_string_spec_tests.js'
+  // // Connection spec tests
+  // , '/test/functional/connection_string_spec_tests.js'
 
-  // Replicaset read concern (make sure no illegal state due to teardown tests)
-  , '/test/functional/readconcern_tests.js'
+  // // Replicaset read concern (make sure no illegal state due to teardown tests)
+  // , '/test/functional/readconcern_tests.js'
 
-  // Promise tests
-  , '/test/functional/promises_db_tests.js'
-  , '/test/functional/promises_collection_tests.js'
-  , '/test/functional/promises_cursor_tests.js'
-  , '/test/functional/operation_promises_example_tests.js'
-  , '/test/functional/byo_promises_tests.js'
+  // // Promise tests
+  // , '/test/functional/promises_db_tests.js'
+  // , '/test/functional/promises_collection_tests.js'
+  // , '/test/functional/promises_cursor_tests.js'
+  // , '/test/functional/operation_promises_example_tests.js'
+  // , '/test/functional/byo_promises_tests.js'
 
-  // Functionality tests
-  , '/test/functional/mongo_client_tests.js'
-  , '/test/functional/collection_tests.js'
-  , '/test/functional/db_tests.js'
-  , '/test/functional/cursor_tests.js'
-  , '/test/functional/insert_tests.js'
-  , '/test/functional/aggregation_tests.js'
+  // // Functionality tests
+  // , '/test/functional/mongo_client_tests.js'
+  // , '/test/functional/collection_tests.js'
+  // , '/test/functional/db_tests.js'
+  // , '/test/functional/cursor_tests.js'
+  // , '/test/functional/insert_tests.js'
+  // , '/test/functional/aggregation_tests.js'
   , '/test/functional/connection_tests.js'
   , '/test/functional/cursorstream_tests.js'
   , '/test/functional/custom_pk_tests.js'
