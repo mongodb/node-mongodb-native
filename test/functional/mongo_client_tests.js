@@ -462,7 +462,7 @@ exports["correctly connect setting keepAlive to 100"] = {
       client.close();
 
       MongoClient.connect(configuration.url(), {
-        keepAlive: 0
+        keepAlive: false
       }, function(err, client) {
         test.equal(null, err);
 
