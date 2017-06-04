@@ -9,8 +9,9 @@ exports.shouldCorrectlyGenerateObjectID = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var number_of_tests_done = 0;
 
       var collection = db.collection('test_object_id_generation.data');
@@ -54,7 +55,7 @@ exports.shouldCorrectlyGenerateObjectID = {
       var intervalId = setInterval(function() {
         if(number_of_tests_done == 3) {
           clearInterval(intervalId);
-          db.close();
+          client.close();
           test.done();
         }
       }, 100);
@@ -106,8 +107,9 @@ exports.shouldCorrectlyCreateOIDNotUsingObjectID = {
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('test_non_oid_id');
       var date = new Date();
       date.setUTCDate(12);
@@ -122,7 +124,7 @@ exports.shouldCorrectlyCreateOIDNotUsingObjectID = {
           test.equal(("" + date), ("" + items[0]._id));
 
           // Let's close the db
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -184,8 +186,9 @@ exports.shouldCorrectlyInsertWithObjectId = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('shouldCorrectlyInsertWithObjectId');
       collection.insert({}, {w:1}, function(err, ids) {
         setTimeout(function() {
@@ -211,7 +214,7 @@ exports.shouldCorrectlyInsertWithObjectId = {
               test.equal(compareDate.getMonth(), date2.getMonth());
               test.equal(compareDate.getHours(), date2.getHours());
               // Let's close the db
-              db.close();
+              client.close();
               test.done();
             });
           });

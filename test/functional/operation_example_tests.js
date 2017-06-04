@@ -21,16 +21,19 @@ exports.aggregationExample1 = {
   metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
           title : "this is my title", author : "bob", posted : new Date() ,
@@ -62,7 +65,7 @@ exports.aggregationExample1 = {
             test.equal('fun', result[1]._id.tags);
             test.deepEqual(['bob'], result[1].authors);
 
-            db.close();
+            client.close();
             test.done();
         });
       });
@@ -84,16 +87,19 @@ exports.aggregationExample2 = {
   metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
           title : "this is my title", author : "bob", posted : new Date() ,
@@ -125,7 +131,7 @@ exports.aggregationExample2 = {
           test.equal(null, err);
           test.equal(2, docs.length);
           test.done();
-          db.close();
+          client.close();
         });
       });
     });
@@ -146,16 +152,19 @@ exports['Aggregation Cursor toArray Test'] = {
   metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
           title : "this is my title", author : "bob", posted : new Date() ,
@@ -187,7 +196,7 @@ exports['Aggregation Cursor toArray Test'] = {
           test.equal(null, err);
           test.equal(2, docs.length);
           test.done();
-          db.close();
+          client.close();
         });
       });
     });
@@ -208,16 +217,19 @@ exports['Aggregation Cursor toArray Test'] = {
   metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
           title : "this is my title", author : "bob", posted : new Date() ,
@@ -248,7 +260,7 @@ exports['Aggregation Cursor toArray Test'] = {
         cursor.next(function(err, docs) {
           test.equal(null, err);
           test.done();
-          db.close();
+          client.close();
         });
       });
     });
@@ -269,16 +281,19 @@ exports['Aggregation Cursor each Test'] = {
   metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
           title : "this is my title", author : "bob", posted : new Date() ,
@@ -311,7 +326,7 @@ exports['Aggregation Cursor each Test'] = {
 
           if(docs == null) {
             test.done();
-            db.close();
+            client.close();
           }
         });
       });
@@ -333,16 +348,19 @@ exports['Aggregation Cursor forEach Test'] = {
   metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
           title : "this is my title", author : "bob", posted : new Date() ,
@@ -379,7 +397,7 @@ exports['Aggregation Cursor forEach Test'] = {
           test.equal(2, count);
 
           test.done();
-          db.close();
+          client.close();
         });
       });
     });
@@ -400,16 +418,19 @@ exports.aggregationExample3 = {
   metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
           title : "this is my title", author : "bob", posted : new Date() ,
@@ -445,7 +466,7 @@ exports.aggregationExample3 = {
         cursor.once('end', function() {
           test.equal(2, count);
           test.done();
-          db.close();
+          client.close();
         });
       });
     });
@@ -465,15 +486,18 @@ exports.shouldCorrectlyDoSimpleCountExamples = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Crete the collection for the distinct example
       var collection = db.collection('countExample1');
       // Insert documents to perform distinct against
@@ -490,7 +514,7 @@ exports.shouldCorrectlyDoSimpleCountExamples = {
             test.equal(null, err);
             test.equal(1, count);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -512,15 +536,18 @@ exports.shouldCreateComplexIndexOnTwoFields = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Create a collection we want to drop later
       var collection = db.collection('createIndexExample1');
       // Insert a bunch of documents for the index
@@ -542,7 +569,7 @@ exports.shouldCreateComplexIndexOnTwoFields = {
               test.equal(null, err);
               test.ok(explanation != null);
 
-              db.close();
+              client.close();
               test.done();
             });
           })
@@ -565,16 +592,18 @@ exports.shouldCreateASimpleIndexOnASingleField = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection we want to drop later
       var collection = db.collection('createIndexExample2');
       // Insert a bunch of documents for the index
@@ -590,7 +619,7 @@ exports.shouldCreateASimpleIndexOnASingleField = {
             test.equal(null, err);
             test.ok(explanation != null);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -612,16 +641,18 @@ exports.createIndexExample3 = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
-
-    db.open(function(err, db) {1
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection we want to drop later
       var collection = db.collection('createIndexExample3');
       // Insert a bunch of documents for the index
@@ -645,7 +676,7 @@ exports.createIndexExample3 = {
               test.equal(null, err);
               test.ok(explanation != null);
 
-              db.close();
+              client.close();
               test.done();
             });
           })
@@ -668,15 +699,18 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Crete the collection for the distinct example
       var collection = db.collection('distinctExample1');
 
@@ -692,7 +726,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = {
           collection.distinct('b.c', function(err, docs) {
             test.deepEqual(['a', 'b', 'c'], docs.sort());
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -714,16 +748,18 @@ exports.shouldCorrectlyHandleDistinctIndexes = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Crete the collection for the distinct example
       var collection = db.collection('distinctExample2');
 
@@ -735,7 +771,7 @@ exports.shouldCorrectlyHandleDistinctIndexes = {
         collection.distinct('a', {c:1}, function(err, docs) {
           test.deepEqual([5], docs.sort());
 
-          db.close();
+          client.close();
           test.done();
         });
       })
@@ -756,16 +792,18 @@ exports.shouldCorrectlyDropCollectionWithDropFunction = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection we want to drop later
       var collection = db.collection('test_other_drop');
 
@@ -789,7 +827,7 @@ exports.shouldCorrectlyDropCollectionWithDropFunction = {
           test.equal(false, found);
 
           // Let's close the db
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -811,15 +849,18 @@ exports.dropAllIndexesExample1 = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       db.createCollection('dropExample1', function(err, r) {
         test.equal(null, err);
 
@@ -828,7 +869,7 @@ exports.dropAllIndexesExample1 = {
           test.equal(null, err);
 
           // Let's close the db
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -849,15 +890,18 @@ exports.shouldCorrectlyCreateAndDropIndex = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var collection = db.collection('dropIndexExample1');
       // Insert a bunch of documents for the index
       collection.insertMany([{a:1, b:1}
@@ -877,7 +921,7 @@ exports.shouldCorrectlyCreateAndDropIndex = {
               test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
               test.equal(null, indexInformation.a_1_b_1);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -900,15 +944,18 @@ exports.shouldCreateComplexEnsureIndex = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var collection = db.collection('ensureIndexExample1');
       // Insert a bunch of documents for the index
       collection.insertMany([{a:1, b:1}
@@ -929,7 +976,7 @@ exports.shouldCreateComplexEnsureIndex = {
               test.equal(null, err);
               test.ok(explanation != null);
 
-              db.close();
+              client.close();
               test.done();
             });
           })
@@ -952,15 +999,18 @@ exports.ensureIndexExampleWithCompountIndex = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var collection = db.collection('ensureIndexExample2');
       // Insert a bunch of documents for the index
       collection.insertMany([{a:1, b:1}
@@ -982,7 +1032,7 @@ exports.ensureIndexExampleWithCompountIndex = {
               test.equal(null, err);
               test.ok(explanation != null);
 
-              db.close();
+              client.close();
               test.done();
             });
           })
@@ -1005,16 +1055,18 @@ exports.shouldPerformASimpleQuery = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection we want to drop later
       var collection = db.collection('simple_query');
 
@@ -1027,7 +1079,7 @@ exports.shouldPerformASimpleQuery = {
           test.equal(null, err);
           test.equal(3, docs.length);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1048,16 +1100,18 @@ exports.shouldPerformASimpleExplainQuery = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection we want to drop later
       var collection = db.collection('simple_explain_query');
       // Insert a bunch of documents for the testing
@@ -1069,7 +1123,7 @@ exports.shouldPerformASimpleExplainQuery = {
           test.equal(null, err);
           test.ok(explain != null);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1090,16 +1144,18 @@ exports.shouldPerformASimpleLimitSkipQuery = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection we want to drop later
       var collection = db.collection('simple_limit_skip_query');
       // Insert a bunch of documents for the testing
@@ -1114,7 +1170,7 @@ exports.shouldPerformASimpleLimitSkipQuery = {
             test.equal(null, docs[0].a);
             test.equal(2, docs[0].b);
 
-            db.close();
+            client.close();
             test.done();
         });
       });
@@ -1139,15 +1195,18 @@ exports.shouldPerformSimpleFindAndModifyOperations = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Create a collection we want to drop later
       var collection = db.collection('simple_find_and_modify_operations_');
 
@@ -1179,7 +1238,7 @@ exports.shouldPerformSimpleFindAndModifyOperations = {
                   test.equal(1, doc.value.d);
                   test.equal(1, doc.value.f);
 
-                  db.close();
+                  client.close();
                   test.done();
               })
             });
@@ -1203,16 +1262,18 @@ exports.shouldPerformSimpleFindAndRemove = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection we want to drop later
       var collection = db.collection('simple_find_and_modify_operations_2');
       // Insert some test documentations
@@ -1231,7 +1292,7 @@ exports.shouldPerformSimpleFindAndRemove = {
             test.equal(null, err);
             test.equal(null, item);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -1253,16 +1314,18 @@ exports.shouldPerformASimpleLimitSkipFindOneQuery = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection we want to drop later
       var collection = db.collection('simple_limit_skip_find_one_query');
       // Insert a bunch of documents for the testing
@@ -1275,7 +1338,7 @@ exports.shouldPerformASimpleLimitSkipFindOneQuery = {
           test.equal(null, doc.a);
           test.equal(2, doc.b);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1296,16 +1359,18 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommand = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Fetch the collection
       var collection = db.collection("simple_geo_near_command");
 
@@ -1319,7 +1384,7 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommand = {
           collection.geoNear(50, 50, {query:{a:1}, num:1}, function(err, docs) {
             test.equal(1, docs.results.length);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -1341,16 +1406,18 @@ exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommand = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Fetch the collection
       var collection = db.collection("simple_geo_haystack_command");
 
@@ -1363,7 +1430,7 @@ exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommand = {
           // Use geoNear command to find document
           collection.geoHaystackSearch(50, 50, {search:{a:1}, limit:1, maxDistance:100}, function(err, docs) {
             test.equal(1, docs.results.length);
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -1386,17 +1453,18 @@ exports.shouldCorrectlyExecuteGroupFunction = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var Code = configuration.require.Code;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   Code = require('mongodb').Code,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a test collection
       var collection = db.collection('test_group');
 
@@ -1480,7 +1548,7 @@ exports.shouldCorrectlyExecuteGroupFunction = {
                               collection.group([], {}, {}, "5 ++ 5", false, function(err, results) {
                                 test.ok(err.message != null);
 
-                                db.close();
+                                client.close();
                                 test.done();
                               });
                             });
@@ -1512,16 +1580,18 @@ exports.shouldPerformSimpleMapReduceFunctions = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a test collection
       var collection = db.collection('test_map_reduce_functions');
 
@@ -1544,7 +1614,7 @@ exports.shouldPerformSimpleMapReduceFunctions = {
             collection.findOne({'_id':2}, function(err, result) {
               test.equal(1, result.value);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -1569,16 +1639,18 @@ exports.shouldPerformMapReduceFunctionInline = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a test collection
       var collection = db.collection('test_map_reduce_functions_inline');
 
@@ -1597,7 +1669,7 @@ exports.shouldPerformMapReduceFunctionInline = {
 
           collection.mapReduce(map, reduce, {out : {replace: 'mapreduce_integration_test'}, verbose:true}, function(err, results, stats) {
             test.ok(stats != null);
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -1620,17 +1692,18 @@ exports.shouldPerformMapReduceWithContext = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var Code = configuration.require.Code;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   Code = require('mongodb').Code,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a test collection
       var collection = db.collection('test_map_reduce_functions_scope');
 
@@ -1680,7 +1753,7 @@ exports.shouldPerformMapReduceWithContext = {
               outCollection.find().toArray(function(err, results) {
                 test.equal(2, results[0].value)
 
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -1705,17 +1778,18 @@ exports.shouldPerformMapReduceInContextObjects = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var Code = configuration.require.Code;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   Code = require('mongodb').Code,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a test collection
       var collection = db.collection('test_map_reduce_functions_scope_objects');
 
@@ -1764,7 +1838,7 @@ exports.shouldPerformMapReduceInContextObjects = {
               // Find all entries in the map-reduce collection
               outCollection.find().toArray(function(err, results) {
                 test.equal(2, results[0].value)
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -1788,15 +1862,18 @@ exports.shouldCorrectlyRetriveACollectionsIndexes = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Crete the collection for the distinct example
       var collection = db.collection('simple_key_based_distinct');
       // Create a geo 2d index
@@ -1812,7 +1889,7 @@ exports.shouldCorrectlyRetriveACollectionsIndexes = {
             collection.indexes(function(err, indexes) {
               test.equal(3, indexes.length);
 
-              db.close();
+              client.close();
               test.done();
             });
           }, 1000);
@@ -1835,15 +1912,18 @@ exports.shouldCorrectlyExecuteIndexExists = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Create a test collection that we are getting the options back from
       var collection = db.collection('test_collection_index_exists', configuration.writeConcernMax());
       test.equal(null, err);
@@ -1861,7 +1941,7 @@ exports.shouldCorrectlyExecuteIndexExists = {
             collection.indexExists("c_1", function(err, result) {
               test.equal(false, result);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -1886,16 +1966,18 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0, native_parser:false}, {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection we want to drop later
       var collection = db.collection('more_index_information_test_2');
       // Insert a bunch of documents for the index
@@ -1917,7 +1999,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = {
               test.deepEqual({ _id: 1 }, indexInformation[0].key);
               test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -1940,16 +2022,18 @@ exports.shouldCorrectlyShowAllTheResultsFromIndexInformation = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection we want to drop later
       var collection = db.collection('more_index_information_test_3');
       // Insert a bunch of documents for the index
@@ -1972,7 +2056,7 @@ exports.shouldCorrectlyShowAllTheResultsFromIndexInformation = {
               test.deepEqual({ _id: 1 }, indexInformation[0].key);
               test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -1996,14 +2080,18 @@ exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var collection = db.collection("simple_document_insert_collection_no_safe");
       // Insert a single document
       collection.insertOne({hello:'world_no_safe'});
@@ -2015,7 +2103,7 @@ exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = {
         collection.findOne({hello:'world_no_safe'}, function(err, item) {
           test.equal(null, err);
           test.equal('world_no_safe', item.hello);
-          db.close();
+          client.close();
           test.done();
         })
       }, 100);
@@ -2038,14 +2126,18 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafe = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Fetch a collection to insert document into
       var collection = db.collection("batch_document_insert_collection_safe");
       // Insert a single document
@@ -2057,7 +2149,7 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafe = {
         collection.findOne({hello:'world_safe2'}, function(err, item) {
           test.equal(null, err);
           test.equal('world_safe2', item.hello);
-          db.close();
+          client.close();
           test.done();
         })
       });
@@ -2080,14 +2172,18 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Fetch a collection to insert document into
       var collection = db.collection("simple_document_insert_with_function_safe");
 
@@ -2102,7 +2198,7 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = {
         collection.findOne({hello:'world'}, function(err, item) {
           test.equal(null, err);
           test.ok("function() {}", item.code);
-          db.close();
+          client.close();
           test.done();
         })
       });
@@ -2125,16 +2221,18 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection
       var collection = db.collection('keepGoingExample');
 
@@ -2153,7 +2251,7 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
             // Count the number of documents left (should not include the duplicates)
             collection.count(function(err, count) {
               test.equal(3, count);
-              db.close();
+              client.close();
               test.done();
             })
           });
@@ -2176,16 +2274,18 @@ exports.shouldCorrectlyExecuteIsCapped = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a test collection that we are getting the options back from
       db.createCollection('test_collection_is_capped', {'capped':true, 'size':1024}, function(err, collection) {
         test.equal('test_collection_is_capped', collection.collectionName);
@@ -2194,7 +2294,7 @@ exports.shouldCorrectlyExecuteIsCapped = {
         collection.isCapped(function(err, capped) {
           test.equal(true, capped);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -2216,16 +2316,18 @@ exports.shouldCorrectlyRetriveCollectionOptions = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var Collection = configuration.require.Collection;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a test collection that we are getting the options back from
       db.createCollection('test_collection_options', {'capped':true, 'size':1024}, function(err, collection) {
         test.equal('test_collection_options', collection.collectionName);
@@ -2235,7 +2337,7 @@ exports.shouldCorrectlyRetriveCollectionOptions = {
           test.equal(true, options.capped);
           test.ok(options.size >= 1024);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -2258,15 +2360,18 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors u
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var docs = [];
 
       // Insert some documents
@@ -2300,7 +2405,7 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors u
               if(left == 0) {
                 test.equal(docs.length, results.length);
 
-                db.close();
+                client.close();
                 test.done();
               }
             });
@@ -2324,16 +2429,18 @@ exports.shouldCorrectlyIndexAndForceReindexOnCollection = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection we want to drop later
       var collection = db.collection('shouldCorrectlyForceReindexOnCollection');
       // Insert a bunch of documents for the index
@@ -2355,7 +2462,7 @@ exports.shouldCorrectlyIndexAndForceReindexOnCollection = {
               test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
               test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -2378,16 +2485,18 @@ exports.shouldRemoveAllDocumentsNoSafe = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Fetch a collection to insert document into
       var collection = db.collection("remove_all_documents_no_safe");
       // Insert a bunch of documents
@@ -2401,7 +2510,7 @@ exports.shouldRemoveAllDocumentsNoSafe = {
         collection.find().toArray(function(err, items) {
           test.equal(null, err);
           test.equal(0, items.length);
-          db.close();
+          client.close();
           test.done();
         });
       })
@@ -2422,15 +2531,18 @@ exports.shouldRemoveSubsetOfDocumentsSafeMode = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Fetch a collection to insert document into
@@ -2443,7 +2555,7 @@ exports.shouldRemoveSubsetOfDocumentsSafeMode = {
         collection.removeOne({a:1}, {w:1}, function(err, r) {
           test.equal(null, err);
           test.equal(1, r.result.n);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -2464,15 +2576,18 @@ exports.shouldCorrectlyRenameCollection = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Open a couple of collections
       db.createCollection('test_rename_collection', function(err, collection1) {
         db.createCollection('test_rename_collection2', function(err, collection2) {
@@ -2539,7 +2654,7 @@ exports.shouldCorrectlyRenameCollection = {
                 // Ensure that the collection is pointing to the new one
                 collection2.count(function(err, count) {
                   test.equal(2, count);
-                  db.close();
+                  client.close();
                   test.done();
                 });
               });
@@ -2565,16 +2680,18 @@ exports.shouldCorrectlySaveASimpleDocument = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Fetch the collection
       var collection = db.collection("save_a_simple_document");
       // Save a document with no safe option
@@ -2587,7 +2704,7 @@ exports.shouldCorrectlySaveASimpleDocument = {
         collection.findOne({hello:'world'}, function(err, item) {
           test.equal(null, err);
           test.equal('world', item.hello);
-          db.close();
+          client.close();
           test.done();
         });
       }, 2000);
@@ -2608,16 +2725,18 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Fetch the collection
       var collection = db.collection("save_a_simple_document_modify_it_and_resave_it");
 
@@ -2641,7 +2760,7 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = {
               test.equal('world', item.hello);
               test.equal('world2', item.hello2);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -2664,16 +2783,18 @@ exports.shouldCorrectlyUpdateASimpleDocument = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Get a collection
       var collection = db.collection('update_a_simple_document');
 
@@ -2691,7 +2812,7 @@ exports.shouldCorrectlyUpdateASimpleDocument = {
             test.equal(null, err);
             test.equal(1, item.a);
             test.equal(2, item.b);
-            db.close();
+            client.close();
             test.done();
           });
         }, 1000);
@@ -2713,16 +2834,18 @@ exports.shouldCorrectlyUpsertASimpleDocument = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Get a collection
       var collection = db.collection('update_a_simple_document_upsert');
       // Update the document using an upsert operation, ensuring creation if it does not exist
@@ -2735,7 +2858,7 @@ exports.shouldCorrectlyUpsertASimpleDocument = {
           test.equal(null, err);
           test.equal(1, item.a);
           test.equal(2, item.b);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -2756,16 +2879,18 @@ exports.shouldCorrectlyUpdateMultipleDocuments = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Get a collection
       var collection = db.collection('update_a_simple_document_multi');
 
@@ -2785,7 +2910,7 @@ exports.shouldCorrectlyUpdateMultipleDocuments = {
             test.equal(1, items[1].a);
             test.equal(0, items[1].b);
 
-            db.close();
+            client.close();
             test.done();
           });
         })
@@ -2807,16 +2932,18 @@ exports.shouldCorrectlyReturnACollectionsStats = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Crete the collection for the distinct example
       var collection = db.collection('collection_stats_test');
 
@@ -2827,7 +2954,7 @@ exports.shouldCorrectlyReturnACollectionsStats = {
         collection.stats(function(err, stats) {
           test.equal(2, stats.count);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -2848,16 +2975,18 @@ exports.shouldCorrectlyCreateAndDropAllIndex = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection we want to drop later
       var collection = db.collection('shouldCorrectlyCreateAndDropAllIndex');
       // Insert a bunch of documents for the index
@@ -2883,7 +3012,7 @@ exports.shouldCorrectlyCreateAndDropAllIndex = {
                 test.equal(null, indexInformation.a_1_b_1);
                 test.equal(null, indexInformation.c_1);
 
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -2912,21 +3041,24 @@ exports.accessAdminLevelOperations = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Use the admin database for the operation
       var adminDb = db.admin()
       test.ok(adminDb != null);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -2945,16 +3077,18 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Fetch a collection
       var collection = db.collection('shouldCorrectlyFailOnRetryDueToAppCloseOfDb');
 
@@ -2963,12 +3097,12 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = {
         test.equal(null, err);
 
         // Force close the connection
-        db.close(true, function(err, result) {
+        client.close(true, function(err, result) {
           // Attemp to insert should fail now with correct message 'db closed by application'
           collection.insertOne({a:2}, configuration.writeConcernMax(), function(err, result) {
             test.ok(err != null);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -2992,22 +3126,25 @@ exports.shouldCorrectlyExecuteEvalFunctions = {
   test: function(configuration, test) {
     var Code = configuration.require.Code
       , ReadPreference = configuration.require.ReadPreference;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var numberOfTests = 10;
 
       var tests_done = function() {
         numberOfTests = numberOfTests - 1;
 
         if(numberOfTests == 0) {
-          db.close();
+          client.close();
           test.done();
         }
       }
@@ -3060,7 +3197,7 @@ exports.shouldCorrectlyExecuteEvalFunctions = {
                               test.ok(err.message != null);
                               tests_done();
                               // Let's close the db
-                              // db.close();
+                              // client.close();
                               // test.done();
                             });
                           });
@@ -3092,16 +3229,18 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunction = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var Code = configuration.require.Code;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Clean out the collection
       db.collection("system.js").deleteMany({}, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
@@ -3114,7 +3253,7 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunction = {
             test.equal(null, err);
             test.equal(5, result);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -3136,21 +3275,25 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.on('close', function() {
         test.done();
       })
 
-      db.close();
+      client.close();
     });
     // END
   }
@@ -3168,19 +3311,22 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallback =
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Close the connection with a callback that is optional
-      db.close(function(err, result) {
+      client.close(function(err, result) {
         test.equal(null, err);
 
         test.done();
@@ -3202,19 +3348,22 @@ exports.shouldCorrectlyRetrievelistCollections = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Get an empty db
-      var db1 = db.db('listCollectionTestDb');
+      var db1 = client.db('listCollectionTestDb');
       // Create a collection
       var collection = db1.collection('shouldCorrectlyRetrievelistCollections');
       // Ensure the collection was created
@@ -3229,7 +3378,7 @@ exports.shouldCorrectlyRetrievelistCollections = {
           db1.listCollections().toArray(function(err, items) {
             test.ok(items.length >= 1);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -3247,13 +3396,22 @@ exports.shouldCorrectlyRetrievelistCollectionsWiredTiger = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
+    // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
+    // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Get an empty db
-      var db1 = db.db('listCollectionTestDb2');
+      var db1 = client.db('listCollectionTestDb2');
       // Create a collection
       var collection = db1.collection('shouldCorrectlyRetrievelistCollections');
       // Ensure the collection was created
@@ -3268,7 +3426,7 @@ exports.shouldCorrectlyRetrievelistCollectionsWiredTiger = {
           db1.listCollections().toArray(function(err, items) {
             test.equal(1, items.length);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -3289,15 +3447,18 @@ exports.shouldCorrectlyAccessACollection = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Grab a collection without a callback no safe mode
@@ -3318,7 +3479,7 @@ exports.shouldCorrectlyAccessACollection = {
             db.collection('test_correctly_access_collections', {strict:true}, function(err, col3) {
               test.equal(null, err);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -3341,15 +3502,18 @@ exports.shouldCorrectlyRetrieveAllCollections = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Create the collection
@@ -3359,106 +3523,8 @@ exports.shouldCorrectlyRetrieveAllCollections = {
         test.equal(null, err);
         test.ok(collections.length > 0);
 
-        db.close();
+        client.close();
         test.done();
-      });
-    });
-    // END
-  }
-}
-
-/**
- * An example of using the logout command for the database.
- *
- * @example-class Db
- * @example-method logout
- * @ignore
- */
-exports.shouldCorrectlyLogoutFromTheDatabase = {
-  metadata: { requires: { topology: 'single' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      test.equal(null, err);
-
-      // Add a user to the database
-      db.addUser('user3', 'name', function(err, result) {
-        test.equal(null, err);
-
-        // Authenticate
-        db.authenticate('user3', 'name', function(err, result) {
-          test.equal(true, result);
-
-          // console.log("--------- 0")
-          // Logout the db
-          db.logout(function(err, result) {
-            // console.log("---------- 1")
-            // console.dir(result)
-            test.equal(true, result);
-
-            // Remove the user
-            db.removeUser('user3', function(err, result) {
-              test.equal(true, result);
-
-              db.close();
-              test.done();
-            });
-          });
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * An example of using the authenticate command.
- *
- * @example-class Db
- * @example-method authenticate
- * @ignore
- */
-exports.shouldCorrectlyAuthenticateAgainstTheDatabase = {
-  metadata: { requires: { topology: 'single' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      test.equal(null, err);
-
-      // Add a user to the database
-      db.addUser('user2', 'name', function(err, result) {
-        test.equal(null, err);
-
-        // Authenticate
-        db.authenticate('user2', 'name', function(err, result) {
-          test.equal(true, result);
-
-          // Remove the user from the db
-          db.removeUser('user2', function(err, result) {
-            test.equal(null, err);
-
-            db.close();
-            test.done();
-          });
-        });
       });
     });
     // END
@@ -3477,15 +3543,18 @@ exports.shouldCorrectlyAddUserToDb = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Add a user to the database
@@ -3496,7 +3565,7 @@ exports.shouldCorrectlyAddUserToDb = {
         db.removeUser('user', function(err, result) {
           test.equal(null, err);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -3517,37 +3586,40 @@ exports.shouldCorrectlyAddAndRemoveUser = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var MongoClient = configuration.require.MongoClient;
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Add a user to the database
       db.addUser('user', 'name', function(err, result) {
         test.equal(null, err);
+        client.close();
 
-        // Authenticate
-        db.authenticate('user', 'name', function(err, result) {
-          test.equal(true, result);
+        MongoClient.connect('mongodb://user:name@localhost:27017/integration_tests', function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.database);
 
           // Logout the db
-          db.logout(function(err, result) {
+          client.logout(function(err, result) {
             test.equal(true, result);
 
             // Remove the user from the db
             db.removeUser('user', function(err, result) {
 
               // Authenticate
-              db.authenticate('user', 'name', function(err, result) {
-                test.equal(false, result);
-
-                db.close();
+              MongoClient.connect('mongodb://user:name@localhost:27017/integration_tests', function(err, client) {
+                test.ok(err);
                 test.done();
               });
             });
@@ -3571,15 +3643,18 @@ exports.shouldCorrectlyCreateACollection = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Create a capped collection with a maximum of 1000 documents
@@ -3590,7 +3665,7 @@ exports.shouldCorrectlyCreateACollection = {
         collection.insertOne({a:1}, configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -3611,15 +3686,18 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServer = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Execute ping against the server
@@ -3642,7 +3720,7 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServer = {
               db.listCollections({name:"a_simple_create_drop_collection"}).toArray(function(err, names) {
                 test.equal(0, names.length);
 
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -3666,22 +3744,25 @@ exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGone = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Execute ping against the server
       db.command({ping:1}, function(err, result) {
         test.equal(null, err);
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -3701,15 +3782,18 @@ exports.shouldCorrectlyRenameACollection = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Create a collection
@@ -3740,7 +3824,7 @@ exports.shouldCorrectlyRenameACollection = {
                   db.listCollections({name:"simple_rename_collection_2"}).toArray(function(err, names) {
                     test.equal(1, names.length);
 
-                    db.close();
+                    client.close();
                     test.done();
                   });
                 });
@@ -3766,16 +3850,18 @@ exports.shouldCreateOnDbComplexIndexOnTwoFields = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection we want to drop later
       var collection = db.collection('more_complex_index_test');
       // Insert a bunch of documents for the index
@@ -3797,7 +3883,7 @@ exports.shouldCreateOnDbComplexIndexOnTwoFields = {
               test.equal(null, err);
               test.ok(explanation != null);
 
-              db.close();
+              client.close();
               test.done();
             });
           })
@@ -3820,16 +3906,18 @@ exports.shouldCreateComplexEnsureIndexDb = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection we want to drop later
       var collection = db.collection('more_complex_ensure_index_db_test');
       // Insert a bunch of documents for the index
@@ -3851,7 +3939,7 @@ exports.shouldCreateComplexEnsureIndexDb = {
               test.equal(null, err);
               test.ok(explanation != null);
 
-              db.close();
+              client.close();
               test.done();
             });
           })
@@ -3874,16 +3962,18 @@ exports.shouldCorrectlyDropTheDatabase = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection
       var collection = db.collection('more_index_information_test_1');
       // Insert a bunch of documents for the index
@@ -3912,7 +4002,7 @@ exports.shouldCorrectlyDropTheDatabase = {
               // We should not find the databases
               if(process.env['JENKINS'] == null) test.equal(false, found);
 
-              db.close();
+              client.close();
               test.done();
             });
           }, 2000);
@@ -3935,22 +4025,25 @@ exports.shouldCorrectlyRetrieveDbStats = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.stats(function(err, stats) {
         test.equal(null, err);
         test.ok(stats != null);
 
-        db.close();
+        client.close();
         test.done();
       })
     });
@@ -3970,20 +4063,23 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstances = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Reference a different database sharing the same connections
       // for the data transfer
-      var secondDb = db.db("integration_tests_2");
+      var secondDb = client.db("integration_tests_2");
 
       // Fetch the collections
       var multipleColl1 = db.collection("multiple_db_instances");
@@ -4000,7 +4096,7 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstances = {
             multipleColl2.count(function(err, count) {
               test.equal(1, count);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -4036,17 +4132,20 @@ exports['Should correctly connect with default replicasetNoOption'] = {
       , {rs_name:configuration.replicasetName}
     );
 
-    var db = new Db('integration_test_', replSet, {w:0});
-    db.open(function(err, p_db) {
+    var client = new MongoClient(replSet, {w:0});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
-      p_db.close();
+      client.close();
       test.done();
     });
     // END
@@ -4060,58 +4159,6 @@ exports['Should correctly connect with default replicasetNoOption'] = {
  *************************************************************************/
 
 /**
- * Authenticate against MongoDB Admin user
- *
- * @example-class Admin
- * @example-method authenticate
- * @ignore
- */
-exports.shouldCorrectlyAuthenticate = {
-  metadata: { requires: { topology: 'single' } },
-
-  // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
-      // Grab a collection object
-      var collection = db.collection('test');
-
-      // Force the creation of the collection by inserting a document
-      // Collections are not created until the first document is inserted
-      collection.insertOne({'a':1}, {w:1}, function(err, doc) {
-
-        // Use the admin database for the operation
-        var adminDb = db.admin();
-
-        // Add the new user to the admin database
-        adminDb.addUser('admin2', 'admin2', function(err, result) {
-
-          // Authenticate using the newly added user
-          adminDb.authenticate('admin2', 'admin2', function(err, result) {
-            test.ok(result);
-
-            adminDb.removeUser('admin2', function(err, result) {
-              test.ok(result);
-
-              db.close();
-              test.done();
-            });
-          });
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
  * Retrieve the buildInfo for the current MongoDB instance
  *
  * @example-class Admin
@@ -4122,40 +4169,29 @@ exports.shouldCorrectlyRetrieveBuildInfo = {
   metadata: { requires: { topology: 'single' } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
 
       // Use the admin database for the operation
       var adminDb = db.admin();
 
-      // Add the new user to the admin database
-      adminDb.addUser('admin3', 'admin3', function(err, result) {
+      // Retrive the build information for the MongoDB instance
+      adminDb.buildInfo(function(err, info) {
+        test.ok(err == null);
 
-        // Authenticate using the newly added user
-        adminDb.authenticate('admin3', 'admin3', function(err, result) {
-          test.ok(result);
-
-          // Retrive the build information for the MongoDB instance
-          adminDb.buildInfo(function(err, info) {
-            test.ok(err == null);
-
-            adminDb.removeUser('admin3', function(err, result) {
-              test.ok(result);
-
-              db.close();
-              test.done();
-            });
-          });
-        });
+        client.close();
+        test.done();
       });
     });
     // END
@@ -4173,40 +4209,28 @@ exports.shouldCorrectlyRetrieveBuildInfoUsingCommand = {
   metadata: { requires: { topology: 'single' } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
 
       // Use the admin database for the operation
       var adminDb = db.admin();
+      // Retrive the build information using the admin command
+      adminDb.command({buildInfo:1}, function(err, info) {
+        test.ok(err == null);
 
-      // Add the new user to the admin database
-      adminDb.addUser('admin4', 'admin4', function(err, result) {
-
-        // Authenticate using the newly added user
-        adminDb.authenticate('admin4', 'admin4', function(err, result) {
-          test.ok(result);
-
-          // Retrive the build information using the admin command
-          adminDb.command({buildInfo:1}, function(err, info) {
-            test.ok(err == null);
-
-            adminDb.removeUser('admin4', function(err, result) {
-              test.ok(result);
-
-              db.close();
-              test.done();
-            });
-          });
-        });
+        client.close();
+        test.done();
       });
     });
     // END
@@ -4216,7 +4240,7 @@ exports.shouldCorrectlyRetrieveBuildInfoUsingCommand = {
 /**
  * Retrieve the current profiling level set for the MongoDB instance
  *
- * @example-class Admin
+ * @example-class Db
  * @example-method profilingLevel
  * @ignore
  */
@@ -4224,17 +4248,19 @@ exports.shouldCorrectlySetDefaultProfilingLevel = {
   metadata: { requires: { topology: 'single' } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
 
       // Grab a collection object
       var collection = db.collection('test');
@@ -4244,112 +4270,14 @@ exports.shouldCorrectlySetDefaultProfilingLevel = {
       collection.insertOne({'a':1}, {w: 1}, function(err, doc) {
 
         // Use the admin database for the operation
-        var adminDb = db.admin();
+        var adminDb = client.db('admin');
 
-        // Add the new user to the admin database
-        adminDb.addUser('admin5', 'admin5', function(err, result) {
+        // Retrive the profiling level
+        adminDb.profilingLevel(function(err, level) {
+          test.equal(null, err);
 
-          // Authenticate using the newly added user
-          adminDb.authenticate('admin5', 'admin5', function(err, replies) {
-
-            // Retrive the profiling level
-            adminDb.profilingLevel(function(err, level) {
-
-              adminDb.removeUser('admin5', function(err, result) {
-                test.ok(result);
-
-                db.close();
-                test.done();
-              });
-            });
-          });
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * An example of how to use the setProfilingInfo
- * Use this command to set the Profiling level on the MongoDB server
- *
- * @example-class Admin
- * @example-method setProfilingLevel
- * @ignore
- */
-exports.shouldCorrectlyChangeProfilingLevel = {
-  metadata: { requires: { topology: 'single' } },
-
-  // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Grab a collection object
-      var collection = db.collection('test');
-
-      // Force the creation of the collection by inserting a document
-      // Collections are not created until the first document is inserted
-      collection.insertOne({'a':1}, {w: 1}, function(err, doc) {
-
-        // Use the admin database for the operation
-        var adminDb = db.admin();
-
-        // Add the new user to the admin database
-        adminDb.addUser('admin6', 'admin6', function(err, result) {
-
-          // Authenticate using the newly added user
-          adminDb.authenticate('admin6', 'admin6', function(err, replies) {
-
-            // Set the profiling level to only profile slow queries
-            adminDb.setProfilingLevel('slow_only', function(err, level) {
-
-              // Retrive the profiling level and verify that it's set to slow_only
-              adminDb.profilingLevel(function(err, level) {
-                test.equal('slow_only', level);
-
-                // Turn profiling off
-                adminDb.setProfilingLevel('off', function(err, level) {
-
-                  // Retrive the profiling level and verify that it's set to off
-                  adminDb.profilingLevel(function(err, level) {
-                    test.equal('off', level);
-
-                    // Set the profiling level to log all queries
-                    adminDb.setProfilingLevel('all', function(err, level) {
-
-                      // Retrive the profiling level and verify that it's set to all
-                      adminDb.profilingLevel(function(err, level) {
-                        test.equal('all', level);
-
-                        // Attempt to set an illegal profiling level
-                        adminDb.setProfilingLevel('medium', function(err, level) {
-                          test.ok(err instanceof Error);
-                          test.equal("Error: illegal profiling level value medium", err.message);
-
-                          adminDb.removeUser('admin6', function(err, result) {
-                            test.ok(result);
-
-                            db.close();
-                            test.done();
-                          });
-                        });
-                      })
-                    });
-                  })
-                });
-              })
-            });
-          });
+          client.close();
+          test.done();
         });
       });
     });
@@ -4361,7 +4289,7 @@ exports.shouldCorrectlyChangeProfilingLevel = {
  * An example of how to use the profilingInfo
  * Use this command to pull back the profiling information currently set for Mongodb
  *
- * @example-class Admin
+ * @example-class Db
  * @example-method profilingInfo
  * @ignore
  */
@@ -4369,58 +4297,54 @@ exports.shouldCorrectlySetAndExtractProfilingInfo = {
   metadata: { requires: { topology: 'single' } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Grab a collection object
       var collection = db.collection('test');
 
+      // Grab a collection object
+      var collection = db.collection('test_with_promise');
+
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insertOne({'a':1}, {w: 1}, function(doc) {
+      collection.insertOne({'a':1}, {w: 1}, function(err, doc) {
+        test.equal(null, err);
 
         // Use the admin database for the operation
-        var adminDb = db.admin();
+        // Set the profiling level to all
+        db.setProfilingLevel('all', function(err, level) {
+          test.equal(null, err);
 
-        // Add the new user to the admin database
-        adminDb.addUser('admin7', 'admin7', function(err, result) {
+          // Execute a query command
+          collection.find().toArray(function(err, items) {
+            test.equal(null, err);
+            test.ok(items.length > 0);
 
-          // Authenticate using the newly added user
-          adminDb.authenticate('admin7', 'admin7', function(err, replies) {
+            // Turn off profiling
+            db.setProfilingLevel('off', function(err, level) {
+              test.equal(null, err);
 
-            // Set the profiling level to all
-            adminDb.setProfilingLevel('all', function(err, level) {
+              // Retrive the profiling information
+              db.profilingInfo(function(err, infos) {
+                test.equal(null, err);
+                test.ok(infos.constructor == Array);
+                test.ok(infos.length >= 1);
+                test.ok(infos[0].ts.constructor == Date);
+                test.ok(infos[0].millis.constructor == Number);
 
-              // Execute a query command
-              collection.find().toArray(function(err, items) {
-
-                // Turn off profiling
-                adminDb.setProfilingLevel('off', function(err, level) {
-
-                  // Retrive the profiling information
-                  adminDb.profilingInfo(function(err, infos) {
-                    test.ok(infos.constructor == Array);
-                    test.ok(infos.length >= 1);
-                    test.ok(infos[0].ts.constructor == Date);
-                    test.ok(infos[0].millis.constructor == Number);
-
-                    adminDb.removeUser('admin7', function(err, result) {
-                      test.ok(result);
-
-                      db.close();
-                      test.done();
-                    });
-                  });
-                });
+                client.close();
+                test.done();
               });
             });
           });
@@ -4443,18 +4367,19 @@ exports.shouldCorrectlyCallValidateCollection = {
   metadata: { requires: { topology: 'single' } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Grab a collection object
       var collection = db.collection('test');
 
@@ -4465,24 +4390,12 @@ exports.shouldCorrectlyCallValidateCollection = {
         // Use the admin database for the operation
         var adminDb = db.admin();
 
-        // Add the new user to the admin database
-        adminDb.addUser('admin8', 'admin8', function(err, result) {
+        // Validate the 'test' collection
+        adminDb.validateCollection('test', function(err, doc) {
+          test.equal(null, err);
 
-          // Authenticate using the newly added user
-          adminDb.authenticate('admin8', 'admin8', function(err, replies) {
-
-            // Validate the 'test' collection
-            adminDb.validateCollection('test', function(err, doc) {
-              test.equal(null, err);
-
-              adminDb.removeUser('admin8', function(err, result) {
-                test.ok(result);
-
-                db.close();
-                test.done();
-              });
-            });
-          });
+          client.close();
+          test.done();
         });
       });
     });
@@ -4500,91 +4413,28 @@ exports.shouldCorrectlyPingTheMongoDbInstance = {
   metadata: { requires: { topology: 'single' } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Use the admin database for the operation
       var adminDb = db.admin();
 
-      // Add the new user to the admin database
-      adminDb.addUser('admin9', 'admin9', function(err, result) {
+      // Ping the server
+      adminDb.ping(function(err, pingResult) {
+        test.equal(null, err);
 
-        // Authenticate using the newly added user
-        adminDb.authenticate('admin9', 'admin9', function(err, result) {
-          test.ok(result);
-
-          // Ping the server
-          adminDb.ping(function(err, pingResult) {
-            test.equal(null, err);
-
-            adminDb.removeUser('admin9', function(err, result) {
-              test.ok(result);
-
-              db.close();
-              test.done();
-            });
-          });
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * An example of how add a user, authenticate and logout
- *
- * @example-class Admin
- * @example-method logout
- * @ignore
- */
-exports.shouldCorrectlyUseLogoutFunction = {
-  metadata: { requires: { topology: 'single' } },
-
-  // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Use the admin database for the operation
-      var adminDb = db.admin();
-
-      // Add the new user to the admin database
-      adminDb.addUser('admin10', 'admin10', function(err, result) {
-
-        // Authenticate using the newly added user
-        adminDb.authenticate('admin10', 'admin10', function(err, result) {
-          test.ok(result);
-
-          // Logout the user
-          adminDb.logout(function(err, result) {
-            test.equal(true, result);
-
-            adminDb.removeUser('admin10', function(err, result) {
-              test.ok(result);
-
-              db.close();
-              test.done();
-            });
-          });
-        });
+        client.close();
+        test.done();
       });
     });
     // END
@@ -4602,34 +4452,31 @@ exports.shouldCorrectlyAddAUserToAdminDb = {
   metadata: { requires: { topology: 'single' } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Use the admin database for the operation
       var adminDb = db.admin();
 
       // Add the new user to the admin database
       adminDb.addUser('admin11', 'admin11', function(err, result) {
+        test.ok(result);
 
-        // Authenticate using the newly added user
-        adminDb.authenticate('admin11', 'admin11', function(err, result) {
+        adminDb.removeUser('admin11', function(err, result) {
           test.ok(result);
 
-          adminDb.removeUser('admin11', function(err, result) {
-            test.ok(result);
-
-            db.close();
-            test.done();
-          });
+          client.close();
+          test.done();
         });
       });
     });
@@ -4647,42 +4494,33 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = {
   metadata: { requires: { topology: 'single' } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Use the admin database for the operation
       var adminDb = db.admin();
 
       // Add the new user to the admin database
       adminDb.addUser('admin12', 'admin12', function(err, result) {
+        test.ok(result);
 
-        // Authenticate using the newly added user
-        adminDb.authenticate('admin12', 'admin12', function(err, result) {
-          test.ok(result);
+        // Remove the user
+        adminDb.removeUser('admin12', function(err, result) {
+          test.equal(null, err);
+          test.equal(true, result);
 
-          // Remove the user
-          adminDb.removeUser('admin12', function(err, result) {
-            test.equal(null, err);
-            test.equal(true, result);
-
-            // Authenticate using the removed user should fail
-            adminDb.authenticate('admin12', 'admin12', function(err, result) {
-              test.ok(err != null);
-              test.ok(!result);
-
-              db.close();
-              test.done();
-            });
-          })
+          client.close();
+          test.done();
         });
       });
     });
@@ -4701,18 +4539,19 @@ exports.shouldCorrectlyListAllAvailableDatabases = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Use the admin database for the operation
       var adminDb = db.admin();
 
@@ -4721,7 +4560,7 @@ exports.shouldCorrectlyListAllAvailableDatabases = {
         test.equal(null, err);
         test.ok(dbs.databases.length > 0);
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -4740,18 +4579,19 @@ exports.shouldCorrectlyRetrieveServerInfo = {
   metadata: { requires: { topology: 'single' } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Grab a collection object
       var collection = db.collection('test');
 
@@ -4762,25 +4602,13 @@ exports.shouldCorrectlyRetrieveServerInfo = {
         // Use the admin database for the operation
         var adminDb = db.admin();
 
-        // Add the new user to the admin database
-        adminDb.addUser('admin13', 'admin13', function(err, result) {
+        // Retrive the server Info
+        adminDb.serverStatus(function(err, info) {
+          test.equal(null, err);
+          test.ok(info != null);
 
-          // Authenticate using the newly added user
-          adminDb.authenticate('admin13', 'admin13', function(err, result) {
-
-            // Retrive the server Info
-            adminDb.serverStatus(function(err, info) {
-              test.equal(null, err);
-              test.ok(info != null);
-
-              adminDb.removeUser('admin13', function(err, result) {
-                test.ok(result);
-
-                db.close();
-                test.done();
-              });
-            });
-          });
+          client.close();
+          test.done();
         });
       });
     });
@@ -4796,21 +4624,22 @@ exports.shouldCorrectlyRetrieveServerInfo = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveReplSetGetStatus = {
-  metadata: { requires: { topology: 'single' } },
+  metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Grab a collection object
       var collection = db.collection('test');
 
@@ -4821,29 +4650,13 @@ exports.shouldCorrectlyRetrieveReplSetGetStatus = {
         // Use the admin database for the operation
         var adminDb = db.admin();
 
-        // Add the new user to the admin database
-        adminDb.addUser('admin14', 'admin14', function(err, result) {
+        // Retrive the server Info, returns error if we are not
+        // running a replicaset
+        adminDb.replSetGetStatus(function(err, info) {
           test.equal(null, err);
-          test.ok(result != null);
 
-          // Authenticate using the newly added user
-          adminDb.authenticate('admin14', 'admin14', function(err, result) {
-            test.equal(null, err);
-            test.equal(true, result);
-
-            // Retrive the server Info, returns error if we are not
-            // running a replicaset
-            adminDb.replSetGetStatus(function(err, info) {
-
-              adminDb.removeUser('admin14', function(err, result) {
-                test.equal(null, err);
-                test.ok(result);
-
-                db.close();
-                test.done();
-              });
-            })
-          });
+          client.close();
+          test.done();
         });
       });
     });
@@ -4872,17 +4685,18 @@ exports.shouldCorrectlyExecuteToArray = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection to hold our documents
       var collection = db.collection('test_array');
 
@@ -4894,7 +4708,7 @@ exports.shouldCorrectlyExecuteToArray = {
           test.equal(1, documents.length);
           test.deepEqual([1, 2, 3], documents[0].b);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -4917,17 +4731,18 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection
       var collection = db.collection('test_to_a_after_each');
 
@@ -4946,7 +4761,7 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = {
               test.equal(null, err);
 
               // Let's close the db
-              db.close();
+              client.close();
               test.done();
             });
           };
@@ -4971,17 +4786,18 @@ exports['Should correctly iterate over cursor using forEach'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection
       var collection = db.collection('test_to_a_after_for_each');
 
@@ -4998,7 +4814,7 @@ exports['Should correctly iterate over cursor using forEach'] = {
         }, function(err) {
           test.equal(null, err);
           test.equal(1, count);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -5021,16 +4837,18 @@ exports['Should correctly rewind and restart cursor'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       var docs = [];
 
       // Insert 100 documents with some data
@@ -5058,7 +4876,7 @@ exports['Should correctly rewind and restart cursor'] = {
           cursor.nextObject(function(err, item) {
             test.equal(0, item.a)
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -5082,17 +4900,18 @@ exports.shouldCorrectlyUseCursorCountFunction = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Creat collection
       var collection = db.collection('cursor_count_collection');
 
@@ -5105,7 +4924,7 @@ exports.shouldCorrectlyUseCursorCountFunction = {
           test.equal(null, err);
           test.equal(2, count);
 
-          db.close();
+          client.close();
           test.done();
         })
       });
@@ -5128,17 +4947,18 @@ exports.shouldCorrectlyPerformSimpleSorts = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection
       var collection = db.collection('simple_sort_collection');
 
@@ -5156,7 +4976,7 @@ exports.shouldCorrectlyPerformSimpleSorts = {
             test.equal(null, err);
             test.equal(3, item.a);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -5180,17 +5000,18 @@ exports.shouldCorrectlyPerformLimitOnCursor = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection
       var collection = db.collection('simple_limit_collection');
 
@@ -5203,7 +5024,7 @@ exports.shouldCorrectlyPerformLimitOnCursor = {
           test.equal(null, err);
           test.equal(1, items.length);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -5226,17 +5047,18 @@ exports.shouldCorrectlyPerformSkipOnCursor = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection
       var collection = db.collection('simple_skip_collection');
 
@@ -5249,7 +5071,7 @@ exports.shouldCorrectlyPerformSkipOnCursor = {
           test.equal(null, err);
           test.equal(2, item.a);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -5273,17 +5095,18 @@ exports.shouldCorrectlyPerformBatchSizeOnCursor = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection
       var collection = db.collection('simple_batch_size_collection');
 
@@ -5296,7 +5119,7 @@ exports.shouldCorrectlyPerformBatchSizeOnCursor = {
           test.equal(null, err);
           test.equal(1, item.a);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -5319,17 +5142,18 @@ exports.shouldCorrectlyPerformNextObjectOnCursor = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection
       var collection = db.collection('simple_next_object_collection');
 
@@ -5342,7 +5166,7 @@ exports.shouldCorrectlyPerformNextObjectOnCursor = {
           test.equal(null, err);
           test.equal(1, item.a);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -5365,17 +5189,18 @@ exports.shouldCorrectlyPerformNextOnCursorWithCallbacks = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection
       var collection = db.collection('simple_next_object_collection_with_next');
 
@@ -5414,7 +5239,7 @@ exports.shouldCorrectlyPerformNextOnCursorWithCallbacks = {
                       test.equal(null, err);
                       test.ok(!r);
 
-                      db.close();
+                      client.close();
                       test.done();
                     });
                   });
@@ -5443,17 +5268,18 @@ exports.shouldCorrectlyPerformSimpleExplainCursor = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a collection
       var collection = db.collection('simple_explain_collection');
 
@@ -5465,7 +5291,7 @@ exports.shouldCorrectlyPerformSimpleExplainCursor = {
         collection.find().explain(function(err, explaination) {
           test.equal(null, err);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -5488,17 +5314,18 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a lot of documents to insert
       var docs = []
       for(var i = 0; i < 100; i++) {
@@ -5515,7 +5342,7 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = {
 
         // Execute find on all the documents
         stream.on('end', function() {
-          db.close();
+          client.close();
           test.done();
         });
 
@@ -5542,17 +5369,18 @@ exports.shouldStreamDocumentsUsingTheIsCloseFunction = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a lot of documents to insert
       var docs = []
       for(var i = 0; i < 100; i++) {
@@ -5576,7 +5404,7 @@ exports.shouldStreamDocumentsUsingTheIsCloseFunction = {
             test.equal(null, err);
             test.equal(true, cursor.isClosed());
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -5600,17 +5428,18 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a lot of documents to insert
       var docs = []
       for(var i = 0; i < 100; i++) {
@@ -5633,7 +5462,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = {
           cursor.close(function(err, result) {
             test.equal(null, err);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -5655,17 +5484,18 @@ exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a lot of documents to insert
       var docs = []
       var fetchedDocs = [];
@@ -5697,7 +5527,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = {
         // When the stream is done
         stream.on("end", function() {
           test.equal(null, fetchedDocs[1]);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -5718,17 +5548,18 @@ exports.shouldStreamDocumentsUsingTheCursorStreamDestroyFunction = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Create a lot of documents to insert
       var docs = []
       for(var i = 0; i < 1; i++) {
@@ -5751,7 +5582,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamDestroyFunction = {
 
         // When the stream is done
         stream.on("close", function() {
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -5789,14 +5620,17 @@ exports['Should correctly connect to a replicaset'] = {
       , configuration.replicasetName
       , "primary");
 
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:30000,localhost:30001,localhost:30002/test?replicaSet=rs', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
       test.ok(db != null);
 
@@ -5804,7 +5638,7 @@ exports['Should correctly connect to a replicaset'] = {
         test.equal(null, err);
         test.equal(1, result.result.n);
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -5830,14 +5664,17 @@ exports['Should connect to mongos proxies using connectiong string'] = {
       , configuration.host, configuration.port
       , configuration.host, configuration.port + 1);
 
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:50000,localhost:50001/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
       test.ok(db != null);
 
@@ -5845,7 +5682,7 @@ exports['Should connect to mongos proxies using connectiong string'] = {
         test.equal(null, err);
         test.equal(1, result);
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -5871,21 +5708,24 @@ exports['Should correctly connect using MongoClient to a single server using con
       , Server = configuration.require.Server;
     // DOC_START
     // Connect using the connection string
-    MongoClient.connect("mongodb://localhost:27017/integration_tests", {native_parser:true}, function(err, db) {
+    MongoClient.connect("mongodb://localhost:27017/integration_tests", {native_parser:true}, function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.collection('mongoclient_test').updateOne({a:1}, {b:1}, {upsert:true}, function(err, result) {
         test.equal(null, err);
         test.equal(1, result.result.n);
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -6107,18 +5947,19 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectId = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Open a file for writing
       var gridStore = new GridStore(db, null, "w");
       gridStore.open(function(err, gridStore) {
@@ -6149,7 +5990,7 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectId = {
               test.equal(null, err);
               test.equal(false, result);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -6174,17 +6015,19 @@ exports.shouldCorrectlyExecuteGridStoreList = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Our file id
       var fileId = new ObjectID();
 
@@ -6267,7 +6110,7 @@ exports.shouldCorrectlyExecuteGridStoreList = {
                           test.ok(found);
                           test.ok(found2);
 
-                          db.close();
+                          client.close();
                           test.done();
                         });
                       });
@@ -6298,16 +6141,19 @@ exports.shouldCorrectlyReadlinesAndPutLines = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Open a file for writing
       var gridStore = new GridStore(db, "test_gs_puts_and_readlines", "w");
       gridStore.open(function(err, gridStore) {
@@ -6322,7 +6168,7 @@ exports.shouldCorrectlyReadlinesAndPutLines = {
             GridStore.read(db, 'test_gs_puts_and_readlines', function(err, data) {
               test.equal("line one\n", data.toString());
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -6347,17 +6193,19 @@ exports.shouldCorrectlyUnlink = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Open a new file for writing
       var gridStore = new GridStore(db, "test_gs_unlink", "w");
       db.dropDatabase(function(err, r) {
@@ -6398,7 +6246,7 @@ exports.shouldCorrectlyUnlink = {
                       collection.count(function(err, count) {
                         test.equal(0, count);
 
-                        db.close();
+                        client.close();
                         test.done();
                       })
                     });
@@ -6428,16 +6276,19 @@ exports.shouldCorrectlyWriteAndReadJpgImage = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Read in the content of a file
       var data = fs.readFileSync('./test/functional/data/iya_logo_final_bw.jpg');
       // Create a new file
@@ -6460,7 +6311,7 @@ exports.shouldCorrectlyWriteAndReadJpgImage = {
                   // Compare the file content against the orgiinal
                   test.equal(data.toString('base64'), data2.toString('base64'));
 
-                  db.close();
+                  client.close();
                   test.done();
                 });
               });
@@ -6487,16 +6338,19 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilename = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Create a new instance of the gridstore
       var gridStore = new GridStore(db, 'ourexamplefiletowrite.txt', 'w');
 
@@ -6516,7 +6370,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilename = {
               test.equal(null, err);
               test.equal(true, result);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -6541,16 +6395,19 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectID = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Our file ID
       var fileId = new ObjectID();
 
@@ -6573,7 +6430,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectID = {
               test.equal(null, err);
               test.equal(true, result);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -6598,16 +6455,19 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFile = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Our file ID
       var fileId = new ObjectID();
 
@@ -6630,7 +6490,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFile = {
             test.equal(data.toString('base64'), fileData.toString('base64'))
             test.equal(fileSize, fileData.length);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -6654,16 +6514,19 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandle = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Our file ID
       var fileId = new ObjectID();
 
@@ -6689,7 +6552,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandle = {
             test.equal(data.toString('base64'), fileData.toString('base64'));
             test.equal(fileSize, fileData.length);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -6713,16 +6576,19 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffers 
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Our file ID
       var fileId = new ObjectID();
 
@@ -6745,7 +6611,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffers 
               GridStore.read(db, fileId, function(err, fileData) {
                 test.equal('Hello worldBuffer Hello world', fileData.toString());
 
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -6771,16 +6637,19 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingClose = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Our file ID
       var fileId = new ObjectID();
 
@@ -6797,7 +6666,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingClose = {
           gridStore.close(function(err, result) {
             test.equal(err, null);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -6821,16 +6690,19 @@ exports.shouldCorrectlyAccessChunkCollection = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Our file ID
       var fileId = new ObjectID();
 
@@ -6844,7 +6716,7 @@ exports.shouldCorrectlyAccessChunkCollection = {
         gridStore.chunkCollection(function(err, collection) {
           test.equal(err, null);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -6867,16 +6739,19 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkIt = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Our file ID
       var fileId = new ObjectID();
 
@@ -6905,7 +6780,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkIt = {
                   test.equal(null, err);
                   test.equal(false, result);
 
-                  db.close();
+                  client.close();
                   test.done();
                 });
               });
@@ -6932,16 +6807,19 @@ exports.shouldCorrectlyAccessFilesCollection = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Our file ID
       var fileId = new ObjectID();
 
@@ -6955,7 +6833,7 @@ exports.shouldCorrectlyAccessFilesCollection = {
         gridStore.collection(function(err, collection) {
           test.equal(err, null);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -6978,16 +6856,19 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlines = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Our file ID
       var fileId = new ObjectID();
 
@@ -7013,7 +6894,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlines = {
                 GridStore.readlines(db, fileId, function(err, lines) {
                   test.deepEqual(["line one\n", "line two\n", "line three\n"], lines);
 
-                  db.close();
+                  client.close();
                   test.done();
                 });
               });
@@ -7040,16 +6921,19 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlines = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Our file ID
       var fileId = new ObjectID();
 
@@ -7079,7 +6963,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlines = {
                   gridStore.readlines(function(err, lines) {
                     test.deepEqual(["line one\n", "line two\n", "line three\n"], lines);
 
-                    db.close();
+                    client.close();
                     test.done();
                   });
                 });
@@ -7107,16 +6991,19 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreRead = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Create a new file
       var gridStore = new GridStore(db, null, "w");
       // Read in the content from a file, replace with your own
@@ -7133,7 +7020,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreRead = {
             GridStore.read(db, result._id, function(err, fileData) {
               test.equal(data.length, fileData.length);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -7158,16 +7045,19 @@ exports.shouldCorrectlyReadFileUsingStream = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Open a file for reading
       var gridStoreR = new GridStore(db, "test_gs_read_stream", "r");
       // Open a file for writing
@@ -7199,7 +7089,7 @@ exports.shouldCorrectlyReadFileUsingStream = {
               stream.on("end", function() {
                 // Verify the correctness of the read data
                 test.equal(data.length, readLen);
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -7225,24 +7115,27 @@ exports.shouldCorrectlyStreamWriteToGridStoreObject = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
+    
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    client.open(function(err, client) {
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Set up gridStore
-      var gridStore = new GridStore(client, "test_stream_write", "w");
+      var gridStore = new GridStore(db, "test_stream_write", "w");
       var stream = gridStore.stream();
       // Create a file reader stream to an object
       var fileStream = fs.createReadStream("./test/functional/data/test_gs_working_field_read.pdf");
       stream.on("end", function(err) {
         // Just read the content and compare to the raw binary
-        GridStore.read(client, "test_stream_write", function(err, gridData) {
+        GridStore.read(db, "test_stream_write", function(err, gridData) {
           var fileData = fs.readFileSync("./test/functional/data/test_gs_working_field_read.pdf");
           test.equal(fileData.toString('hex'), gridData.toString('hex'));
           client.close();
@@ -7270,16 +7163,18 @@ exports.shouldCorrectlyPipeAGridFsToAfile = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Open a file for writing
       var gridStoreWrite = new GridStore(db, "test_gs_read_stream_pipe", "w", {chunkSize:1024});
       gridStoreWrite.writeFile("./test/functional/data/test_gs_weird_bug.png", function(err, result) {
@@ -7304,7 +7199,7 @@ exports.shouldCorrectlyPipeAGridFsToAfile = {
               }
 
               // Close the database
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -7331,16 +7226,18 @@ exports.shouldCorrectlySeekWithBuffer = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Create a file and open it
       var gridStore = new GridStore(db, "test_gs_seek_with_buffer", "w");
       gridStore.open(function(err, gridStore) {
@@ -7418,7 +7315,7 @@ exports.shouldCorrectlySeekWithBuffer = {
                             gridStore.getc(function(err, chr) {
                               test.equal('o', chr);
 
-                              db.close();
+                              client.close();
                               test.done();
                             });
                           });
@@ -7451,16 +7348,19 @@ exports.shouldCorrectlyRewingAndTruncateOnWrite = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Our file ID
       var fileId = new ObjectID();
 
@@ -7492,7 +7392,7 @@ exports.shouldCorrectlyRewingAndTruncateOnWrite = {
                       GridStore.read(db, fileId, function(err, data) {
                         test.equal("abc", data);
 
-                        db.close();
+                        client.close();
                         test.done();
                       });
                     });
@@ -7521,17 +7421,19 @@ exports.shouldCorrectlyDetectEOF = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-
+      var db = client.db(configuration.database);
       // Open the file in write mode
       var gridStore = new GridStore(db, 'test_gs_empty_file_eof', "w");
       gridStore.open(function(err, gridStore) {
@@ -7544,7 +7446,7 @@ exports.shouldCorrectlyDetectEOF = {
             // Verify that we are at the end of the file
             test.equal(true, gridStore.eof());
 
-            db.close();
+            client.close();
             test.done();
           })
         });
@@ -7567,16 +7469,19 @@ exports.shouldCorrectlyExecuteGridstoreTell = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Create a new file
       var gridStore = new GridStore(db, "test_gs_tell", "w");
       // Open the file
@@ -7598,7 +7503,7 @@ exports.shouldCorrectlyExecuteGridstoreTell = {
                 gridStore.tell(function(err, position) {
                   test.equal(5, position);
 
-                  db.close();
+                  client.close();
                   test.done();
                 });
               });
@@ -7624,16 +7529,19 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Create a file and open it
       var gridStore = new GridStore(db, "test_gs_getc_file", "w");
       gridStore.open(function(err, gridStore) {
@@ -7650,7 +7558,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = {
               gridStore.getc(function(err, chr) {
                 test.equal('h', chr);
 
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -7676,17 +7584,19 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Create a file and open it
       var gridStore = new GridStore(db, new ObjectID(), "test_gs_getc_file", "w");
       gridStore.open(function(err, gridStore) {
@@ -7721,7 +7631,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = {
                         gridStore.getc(function(err, chr) {
                           test.equal('h', chr);
 
-                          db.close();
+                          client.close();
                           test.done();
                         })
                       });
@@ -7752,15 +7662,19 @@ exports.shouldStreamDocumentsUsingTheReadStreamPauseFunction = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // File id
       var fileId = new ObjectID();
       // Create a file
@@ -7789,7 +7703,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamPauseFunction = {
 
               // For each data item
               stream.on("end", function(item) {
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -7815,15 +7729,19 @@ exports.shouldStreamDocumentsUsingTheReadStreamResumeFunction = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // File id
       var fileId = new ObjectID();
       // Create a file
@@ -7864,7 +7782,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamResumeFunction = {
               stream.on("end", function(item) {
                 // Have we received the same file back?
                 test.equal(fileBuffer, fileBody);
-                db.close();
+                client.close();
                 test.done();
               });
 
@@ -7893,15 +7811,19 @@ exports.shouldStreamDocumentsUsingTheReadStreamDestroyFunction = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open(function(err, db) {
+    
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // File id
       var fileId = new ObjectID();
       // Create a file
@@ -7926,7 +7848,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamDestroyFunction = {
 
               // When the stream is done
               stream.on("end", function() {
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -7956,14 +7878,18 @@ exports['Should correctly execute ordered batch with no errors using write comma
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_0');
       // Initialize the Ordered Batch
@@ -7994,7 +7920,7 @@ exports['Should correctly execute ordered batch with no errors using write comma
         test.ok(upsert._id != null);
 
         // Finish up test
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -8015,14 +7941,18 @@ exports['Should correctly execute unordered batch with no errors'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_unordered_ops_legacy_0');
       // Initialize the unordered Batch
@@ -8054,7 +7984,7 @@ exports['Should correctly execute unordered batch with no errors'] = {
         test.ok(upsert._id != null);
 
         // Finish up test
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -8080,21 +8010,25 @@ exports['Should correctly execute insertOne operation'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('insert_one');
       col.insertOne({a:1}, function(err, r) {
         test.equal(null, err);
         test.equal(1, r.insertedCount);
         // Finish up test
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -8114,21 +8048,25 @@ exports['Should correctly execute insertMany operation'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('insert_many');
       col.insertMany([{a:1}, {a:2}], function(err, r) {
         test.equal(null, err);
         test.equal(2, r.insertedCount);
         // Finish up test
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -8148,14 +8086,18 @@ exports['Should correctly execute updateOne operation'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('update_one');
       col.updateOne({a:1}
@@ -8165,7 +8107,7 @@ exports['Should correctly execute updateOne operation'] = {
         test.equal(0, r.matchedCount);
         test.equal(1, r.upsertedCount);
         // Finish up test
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -8185,14 +8127,18 @@ exports['Should correctly execute updateMany operation'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('update_many');
       col.insertMany([{a:1}, {a:1}], function(err, r) {
@@ -8206,7 +8152,7 @@ exports['Should correctly execute updateMany operation'] = {
           test.equal(2, r.modifiedCount);
 
           // Finish up test
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -8227,14 +8173,18 @@ exports['Should correctly execute removeOne operation'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('remove_one');
       col.insertMany([{a:1}, {a:1}], function(err, r) {
@@ -8245,7 +8195,7 @@ exports['Should correctly execute removeOne operation'] = {
           test.equal(null, err);
           test.equal(1, r.deletedCount);
           // Finish up test
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -8266,14 +8216,18 @@ exports['Should correctly execute removeMany operation'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('remove_many');
       col.insertMany([{a:1}, {a:1}], function(err, r) {
@@ -8286,7 +8240,7 @@ exports['Should correctly execute removeMany operation'] = {
           test.equal(2, r.deletedCount);
 
           // Finish up test
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -8307,14 +8261,18 @@ exports['Should correctly execute bulkWrite operation'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('bulk_write');
       col.bulkWrite([
@@ -8340,7 +8298,7 @@ exports['Should correctly execute bulkWrite operation'] = {
         test.equal(2, Object.keys(r.upsertedIds).length);
 
         // Ordered bulk operation
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -8360,14 +8318,18 @@ exports['Should correctly execute findOneAndDelete operation'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('find_one_and_delete');
       col.insertMany([{a:1, b:1}], {w:1}, function(err, r) {
@@ -8381,7 +8343,7 @@ exports['Should correctly execute findOneAndDelete operation'] = {
             test.equal(1, r.lastErrorObject.n);
             test.equal(1, r.value.b);
 
-            db.close();
+            client.close();
             test.done();
         });
       });
@@ -8402,14 +8364,18 @@ exports['Should correctly execute findOneAndReplace operation'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('find_one_and_replace');
       col.insertMany([{a:1, b:1}], {w:1}, function(err, r) {
@@ -8430,7 +8396,7 @@ exports['Should correctly execute findOneAndReplace operation'] = {
             test.equal(1, r.value.b);
             test.equal(1, r.value.c);
 
-            db.close();
+            client.close();
             test.done();
         });
       });
@@ -8451,14 +8417,18 @@ exports['Should correctly execute findOneAndUpdate operation'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('find_one_and_update');
       col.insertMany([{a:1, b:1}], {w:1}, function(err, r) {
@@ -8479,7 +8449,7 @@ exports['Should correctly execute findOneAndUpdate operation'] = {
             test.equal(1, r.value.b);
             test.equal(1, r.value.d);
 
-            db.close();
+            client.close();
             test.done();
         });
       });
@@ -8500,15 +8470,18 @@ exports['Should correctly add capped collection options to cursor'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+    // LINE   var db = client.db('test);
     // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
+    // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Create a capped collection with a maximum of 1000 documents
@@ -8539,7 +8512,7 @@ exports['Should correctly add capped collection options to cursor'] = {
           });
 
           cursor.on('end', function() {
-            db.close();
+            client.close();
             test.done();
           });
         });

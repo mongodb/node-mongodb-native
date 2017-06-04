@@ -8,8 +8,9 @@ exports.shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_group2', function(err, collection) {
         collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true, function(err, results) {
           test.deepEqual([], results);
@@ -26,7 +27,7 @@ exports.shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction = {
                 }, true, function(err, results) {
                   test.equal(3, results[0].running_average)
                   test.equal(0.75, results[0].average)
-                  db.close();
+                  client.close();
                   test.done();
             });
           });
@@ -45,8 +46,9 @@ exports.shouldPerformMapReduceWithStringFunctions = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_map_reduce', function(err, collection) {
         collection.insert([{'user_id':1}, {'user_id':2}], configuration.writeConcernMax(), function(err, r) {
           // String functions
@@ -59,7 +61,7 @@ exports.shouldPerformMapReduceWithStringFunctions = {
 
               collection.findOne({'_id':2}, function(err, result) {
                 test.equal(1, result.value);
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -81,8 +83,9 @@ exports.shouldForceMapReduceError = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_map_reduce', function(err, collection) {
         collection.insert([{'user_id':1}, {'user_id':2}], configuration.writeConcernMax(), function(err, r) {
           // String functions
@@ -91,7 +94,7 @@ exports.shouldForceMapReduceError = {
 
           collection.mapReduce(map, reduce, {out: {inline : 1}}, function(err, collection) {
             test.ok(err != null);
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -108,8 +111,9 @@ exports.shouldPerformMapReduceWithParametersBeingFunctions = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_map_reduce_with_functions_as_arguments', function(err, collection) {
         collection.insert([{'user_id':1}, {'user_id':2}], configuration.writeConcernMax(), function(err, r) {
           // String functions
@@ -122,7 +126,7 @@ exports.shouldPerformMapReduceWithParametersBeingFunctions = {
 
               collection.findOne({'_id':2}, function(err, result) {
                 test.equal(1, result.value);
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -143,8 +147,9 @@ exports.shouldPerformMapReduceWithCodeObjects = {
   test: function(configuration, test) {
     var Code = configuration.require.Code;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_map_reduce_with_code_objects', function(err, collection) {
         collection.insert([{'user_id':1}, {'user_id':2}], configuration.writeConcernMax(), function(err, r) {
           // String functions
@@ -158,7 +163,7 @@ exports.shouldPerformMapReduceWithCodeObjects = {
 
             collection.findOne({'_id':2}, function(err, result) {
               test.equal(1, result.value);
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -178,8 +183,9 @@ exports.shouldPerformMapReduceWithOptions = {
   test: function(configuration, test) {
     var Code = configuration.require.Code;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_map_reduce_with_options', function(err, collection) {
         collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], configuration.writeConcernMax(), function(err, r) {
           // String functions
@@ -196,7 +202,7 @@ exports.shouldPerformMapReduceWithOptions = {
 
               collection.findOne({'_id':3}, function(err, result) {
                 test.equal(1, result.value);
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -217,8 +223,9 @@ exports.shouldHandleMapReduceErrors = {
   test: function(configuration, test) {
     var Code = configuration.require.Code;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_map_reduce_error', function(err, collection) {
         collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], configuration.writeConcernMax(), function(err, r) {
           // String functions
@@ -227,7 +234,7 @@ exports.shouldHandleMapReduceErrors = {
 
           collection.mapReduce(map, reduce, {out : {inline: 1}, 'query': {'user_id':{'$gt':1}}}, function(err, r) {
             test.ok(err != null);
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -244,10 +251,9 @@ exports.shouldSaveDataToDifferentDbFromMapreduce = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
 
       // Create a test collection
       db.createCollection('test_map_reduce_functions', function(err, collection) {
@@ -270,7 +276,7 @@ exports.shouldSaveDataToDifferentDbFromMapreduce = {
               collection.findOne({'_id':2}, function(err, result) {
                 test.equal(1, result.value);
 
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -289,8 +295,9 @@ exports.shouldCorrectlyReturnNestedKeys = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var start = new Date().setTime(new Date().getTime() - 10000);
       var end = new Date().setTime(new Date().getTime() + 10000);
 
@@ -328,7 +335,7 @@ exports.shouldCorrectlyReturnNestedKeys = {
           collection.group(keys, condition, initial, reduce, true, function(err, r) {
             test.equal(1, r[0].count)
             test.equal('smith', r[0]['data.lastname']);
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -349,8 +356,9 @@ exports.shouldPerformMapReduceWithScopeContainingFunction = {
     var util = {
       times_one_hundred: function(x) {return x * 100;}
     }
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_map_reduce', function(err, collection) {
         collection.insert([{'user_id':1}, {'user_id':2}], configuration.writeConcernMax(), function(err, r) {
           // String functions
@@ -370,7 +378,7 @@ exports.shouldPerformMapReduceWithScopeContainingFunction = {
               // During MapReduce
               test.equal(200, result.value);
 
-              db.close();
+              client.close();
               test.done();
             });
           });

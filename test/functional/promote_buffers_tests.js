@@ -12,8 +12,9 @@ exports['should correctly honor promoteBuffers when creating an instance using D
       Double = configuration.require.Double;
 
     var o = configuration.writeConcernMax();
-    var db = configuration.newDbInstance(o, {native_parser:true, promoteBuffers: true})
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, promoteBuffers:true});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('shouldCorrectlyHonorPromoteBuffer1').insert({
           doc: new Buffer(256)
         }, function(err, doc) {
@@ -23,7 +24,7 @@ exports['should correctly honor promoteBuffers when creating an instance using D
             test.equal(null, err);
             test.ok(doc.doc instanceof Buffer);
 
-            db.close();
+            client.close();
             test.done();
           });
       });
@@ -45,7 +46,9 @@ exports['should correctly honor promoteBuffers when creating an instance using M
 
     MongoClient.connect(configuration.url(), {
       promoteBuffers: true,
-    }, function(err, db) {
+    }, function(err, client) {
+      var db = client.db(configuration.database);
+      
       db.collection('shouldCorrectlyHonorPromoteBuffer2').insert({
           doc: new Buffer(256)
         }, function(err, doc) {
@@ -55,7 +58,7 @@ exports['should correctly honor promoteBuffers when creating an instance using M
             test.equal(null, err);
             test.ok(doc.doc instanceof Buffer);
 
-            db.close();
+            client.close();
             test.done();
           });
       });
@@ -77,7 +80,9 @@ exports['should correctly honor promoteBuffers at cursor level'] = {
 
     MongoClient.connect(configuration.url(), {
       promoteBuffers: true,
-    }, function(err, db) {
+    }, function(err, client) {
+      var db = client.db(configuration.database);
+      
       db.collection('shouldCorrectlyHonorPromoteBuffer3').insert({
           doc: new Buffer(256)
         }, function(err, doc) {
@@ -87,7 +92,7 @@ exports['should correctly honor promoteBuffers at cursor level'] = {
             test.equal(null, err);
             test.ok(doc.doc instanceof Buffer);
 
-            db.close();
+            client.close();
             test.done();
           });
       });
@@ -108,7 +113,8 @@ exports['should correctly honor promoteBuffers at cursor find level'] = {
       MongoClient = configuration.require.MongoClient;
 
     MongoClient.connect(configuration.url(), {
-    }, function(err, db) {
+    }, function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('shouldCorrectlyHonorPromoteBuffer4').insert({
           doc: new Buffer(256)
         }, function(err, doc) {
@@ -118,7 +124,7 @@ exports['should correctly honor promoteBuffers at cursor find level'] = {
             test.equal(null, err);
             test.ok(doc.doc instanceof Buffer);
 
-            db.close();
+            client.close();
             test.done();
           });
       });
@@ -139,7 +145,8 @@ exports['should correctly honor promoteBuffers at aggregate level'] = {
       MongoClient = configuration.require.MongoClient;
 
     MongoClient.connect(configuration.url(), {
-    }, function(err, db) {
+    }, function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('shouldCorrectlyHonorPromoteBuffer5').insert({
           doc: new Buffer(256)
         }, function(err, doc) {
@@ -149,7 +156,7 @@ exports['should correctly honor promoteBuffers at aggregate level'] = {
             test.equal(null, err);
             test.ok(doc.doc instanceof Buffer);
 
-            db.close();
+            client.close();
             test.done();
           });
       });

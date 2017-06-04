@@ -9,7 +9,6 @@ exports['should pass through writeConcern to all findAndModify commands at comma
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
     var started = [];
     var succeeded = [];
     var failed = [];
@@ -25,8 +24,9 @@ exports['should pass through writeConcern to all findAndModify commands at comma
         succeeded.push(event);
     });
 
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       var collection = db.collection('findAndModifyTEST');
@@ -54,7 +54,7 @@ exports['should pass through writeConcern to all findAndModify commands at comma
             test.deepEqual({fsync:1}, started[0].command.writeConcern);
 
             listener.uninstrument();
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -70,7 +70,6 @@ exports['should pass through writeConcern to all findAndModify at collection lev
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
     var started = [];
     var succeeded = [];
     var failed = [];
@@ -86,8 +85,9 @@ exports['should pass through writeConcern to all findAndModify at collection lev
         succeeded.push(event);
     });
 
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       var collection = db.collection('findAndModifyTEST', {fsync:1});
@@ -115,7 +115,7 @@ exports['should pass through writeConcern to all findAndModify at collection lev
             test.deepEqual({fsync:1}, started[0].command.writeConcern);
 
             listener.uninstrument();
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -153,9 +153,9 @@ exports['should pass through writeConcern to all findAndModify at db level'] = {
       : f('%s?%s', url, 'fsync=true');
 
     // Establish connection to db
-    MongoClient.connect(url, {server: {sslValidate: false}}, function(err, db) {
+    MongoClient.connect(url, {server: {sslValidate: false}}, function(err, client) {
       test.equal(null, err);
-
+      var db = client.db(configuration.database);
       var collection = db.collection('findAndModifyTEST');
       // Execute findOneAndUpdate
       collection.findOneAndUpdate({}, {$set: {a:1}}, function(err, r) {
@@ -181,7 +181,7 @@ exports['should pass through writeConcern to all findAndModify at db level'] = {
             test.deepEqual({fsync:1}, started[0].command.writeConcern);
 
             listener.uninstrument();
-            db.close();
+            client.close();
             test.done();
           });
         });

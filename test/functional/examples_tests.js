@@ -17,8 +17,9 @@ exports['first three examples'] = {
     var MongoClient = configuration.require.MongoClient;
 
     // Connect and validate the server certificate
-    MongoClient.connect(configuration.url(), function(err, db) {
+    MongoClient.connect(configuration.url(), function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       co(function*() {
 
@@ -76,7 +77,7 @@ exports['first three examples'] = {
 
         assert.equal(4, yield promise3);
 
-        db.close();
+        client.close();
         test.done();
       });
     });    
@@ -97,9 +98,10 @@ exports['query top level fields'] = {
     var MongoClient = configuration.require.MongoClient;
 
     // Connect and validate the server certificate
-    MongoClient.connect(configuration.url(), function(err, db) {
+    MongoClient.connect(configuration.url(), function(err, client) {
       test.equal(null, err);
-
+      var db = client.db(configuration.database);
+      
       co(function*() {
         yield db.collection('inventory').deleteMany({});
 
@@ -174,7 +176,7 @@ exports['query top level fields'] = {
         // End Example 13
         assert.equal(2, yield cursor.count());
 
-        db.close();
+        client.close();
         test.done();
       });
     });    
@@ -195,8 +197,9 @@ exports['query embedded documents'] = {
     var MongoClient = configuration.require.MongoClient;
 
     // Connect and validate the server certificate
-    MongoClient.connect(configuration.url(), function(err, db) {
+    MongoClient.connect(configuration.url(), function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       co(function*() {
         yield db.collection('inventory').deleteMany({});
@@ -267,7 +270,7 @@ exports['query embedded documents'] = {
         // End Example 19
         assert.equal(1, yield cursor.count());
 
-        db.close();
+        client.close();
         test.done();
       });
     });    
@@ -288,8 +291,9 @@ exports['query arrays'] = {
     var MongoClient = configuration.require.MongoClient;
 
     // Connect and validate the server certificate
-    MongoClient.connect(configuration.url(), function(err, db) {
+    MongoClient.connect(configuration.url(), function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       co(function*() {
         yield db.collection('inventory').deleteMany({});
@@ -380,7 +384,7 @@ exports['query arrays'] = {
         // End Example 28
         assert.equal(1, yield cursor.count());
 
-        db.close();
+        client.close();
         test.done();
       });
     });    
@@ -401,8 +405,9 @@ exports['query array of documents'] = {
     var MongoClient = configuration.require.MongoClient;
 
     // Connect and validate the server certificate
-    MongoClient.connect(configuration.url(), function(err, db) {
+    MongoClient.connect(configuration.url(), function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       co(function*() {
         yield db.collection('inventory').deleteMany({});
@@ -492,7 +497,7 @@ exports['query array of documents'] = {
         // End Example 37
         assert.equal(2, yield cursor.count());
 
-        db.close();
+        client.close();
         test.done();
       });
     });    
@@ -513,8 +518,9 @@ exports['query null'] = {
     var MongoClient = configuration.require.MongoClient;
 
     // Connect and validate the server certificate
-    MongoClient.connect(configuration.url(), function(err, db) {
+    MongoClient.connect(configuration.url(), function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       co(function*() {
         yield db.collection('inventory').deleteMany({});
@@ -552,7 +558,7 @@ exports['query null'] = {
         // End Example 41
         assert.equal(1, yield cursor.count());
 
-        db.close();
+        client.close();
         test.done();
       });
     });    
@@ -573,8 +579,9 @@ exports['projection'] = {
     var MongoClient = configuration.require.MongoClient;
 
     // Connect and validate the server certificate
-    MongoClient.connect(configuration.url(), function(err, db) {
+    MongoClient.connect(configuration.url(), function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       co(function*() {
         yield db.collection('inventory').deleteMany({});
@@ -728,7 +735,7 @@ exports['projection'] = {
           assert.equal(1, doc.instock.length);
         });
 
-        db.close();
+        client.close();
         test.done();
       });
     });    
@@ -749,8 +756,9 @@ exports['update and replace'] = {
     var MongoClient = configuration.require.MongoClient;
 
     // Connect and validate the server certificate
-    MongoClient.connect(configuration.url(), function(err, db) {
+    MongoClient.connect(configuration.url(), function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       co(function*() {
         yield db.collection('inventory').deleteMany({});
@@ -875,7 +883,7 @@ exports['update and replace'] = {
           assert.equal(2, doc.instock.length);
         });
 
-        db.close();
+        client.close();
         test.done();
       });
     });    
@@ -896,8 +904,9 @@ exports['delete'] = {
     var MongoClient = configuration.require.MongoClient;
 
     // Connect and validate the server certificate
-    MongoClient.connect(configuration.url(), function(err, db) {
+    MongoClient.connect(configuration.url(), function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       co(function*() {
         yield db.collection('inventory').deleteMany({});
@@ -972,7 +981,7 @@ exports['delete'] = {
         var cursor = db.collection('inventory').find({});
         assert.equal(0, yield cursor.count());
 
-        db.close();
+        client.close();
         test.done();
       });
     });    

@@ -108,7 +108,7 @@ exports['Should correctly emit all Server SDAM operations'] = {
       topologyClosed: [],
     }
 
-    var client = new MongoClient();
+    var client = new MongoClient(configuration.url());
     var events = ['serverDescriptionChanged', 'serverOpening'
       , 'serverClosed', 'topologyOpening', 'topologyDescriptionChanged'
       , 'topologyClosed'];
@@ -118,9 +118,9 @@ exports['Should correctly emit all Server SDAM operations'] = {
       });
     });
 
-    client.connect(configuration.url(), function(err, db) {
+    client.connect(function(err, client) {
       test.equal(null, err);
-      db.close(true);
+      client.close(true);
 
       for(var name in operations) {
         test.ok(operations[name].length > 0);

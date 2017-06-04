@@ -26,13 +26,15 @@ exports.aggregationExample2WithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -68,7 +70,7 @@ exports.aggregationExample2WithGenerators = {
       var docs = yield cursor.toArray();
       test.equal(2, docs.length);
       test.done();
-      db.close();
+      client.close();
     });
     // END
   }
@@ -92,13 +94,15 @@ exports['Aggregation Cursor next Test with Generators'] = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -131,7 +135,7 @@ exports['Aggregation Cursor next Test with Generators'] = {
       // Get all the aggregation results
       var doc = yield cursor.next();
       test.done();
-      db.close();
+      client.close();
     });
     // END
   }
@@ -153,13 +157,15 @@ exports.shouldCorrectlyDoSimpleCountExamplesWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -177,7 +183,7 @@ exports.shouldCorrectlyDoSimpleCountExamplesWithGenerators = {
       test.equal(1, count);
 
       // Close database
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -200,13 +206,15 @@ exports.shouldCreateComplexIndexOnTwoFieldsWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -228,7 +236,7 @@ exports.shouldCreateComplexIndexOnTwoFieldsWithGenerators = {
       var explanation = yield collection.find({a:2}).explain()
       test.ok(explanation != null);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -251,13 +259,15 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -276,7 +286,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithGenerators = {
       var docs = yield collection.distinct('b.c');
       test.deepEqual(['a', 'b', 'c'], docs.sort());
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -297,13 +307,15 @@ exports.shouldCorrectlyHandleDistinctIndexesWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -319,7 +331,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithGenerators = {
       var docs = yield collection.distinct('a', {c:1});
       test.deepEqual([5], docs.sort());
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -342,13 +354,15 @@ exports.shouldCorrectlyDropCollectionWithDropFunctionWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -377,7 +391,7 @@ exports.shouldCorrectlyDropCollectionWithDropFunctionWithGenerators = {
       test.equal(false, found);
 
       // Let's close the db
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -401,13 +415,15 @@ exports.dropAllIndexesExample1WithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -415,7 +431,7 @@ exports.dropAllIndexesExample1WithGenerators = {
       // Drop the collection
       yield db.collection('dropExample1_with_generators').dropAllIndexes();
       // Let's close the db
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -438,13 +454,15 @@ exports.shouldCorrectlyCreateAndDropIndexWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -466,7 +484,7 @@ exports.shouldCorrectlyCreateAndDropIndexWithGenerators = {
       test.equal(null, indexInformation.a_1_b_1);
 
       // Close db
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -489,13 +507,15 @@ exports.shouldCreateComplexEnsureIndexWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -516,7 +536,7 @@ exports.shouldCreateComplexEnsureIndexWithGenerators = {
       var explanation = yield collection.find({a:2}).explain();
       test.ok(explanation != null);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -539,13 +559,15 @@ exports.ensureIndexExampleWithCompountIndexWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -567,7 +589,7 @@ exports.ensureIndexExampleWithCompountIndexWithGenerators = {
       test.ok(explanation != null);
 
       // Close db
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -590,13 +612,15 @@ exports.shouldPerformASimpleQueryWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -612,7 +636,7 @@ exports.shouldPerformASimpleQueryWithGenerators = {
       test.equal(3, docs.length);
 
       // Close the db
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -635,13 +659,15 @@ exports.shouldPerformASimpleExplainQueryWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -655,7 +681,7 @@ exports.shouldPerformASimpleExplainQueryWithGenerators = {
       var explain = yield collection.find({}).explain();
       test.ok(explain != null);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -678,13 +704,15 @@ exports.shouldPerformASimpleLimitSkipQueryWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -702,7 +730,7 @@ exports.shouldPerformASimpleLimitSkipQueryWithGenerators = {
         test.equal(2, docs[0].b);
 
         // Close db
-        db.close();
+        client.close();
         test.done();
     });
     // END
@@ -729,13 +757,15 @@ exports.shouldPerformSimpleFindAndModifyOperationsWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -766,7 +796,7 @@ exports.shouldPerformSimpleFindAndModifyOperationsWithGenerators = {
       test.equal(1, doc.value.f);
 
       // Close the db
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -789,13 +819,15 @@ exports.shouldPerformSimpleFindAndRemoveWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -816,7 +848,7 @@ exports.shouldPerformSimpleFindAndRemoveWithGenerators = {
       test.equal(null, item);
 
       // Db close
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -839,13 +871,15 @@ exports.shouldPerformASimpleLimitSkipFindOneQueryWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -862,7 +896,7 @@ exports.shouldPerformASimpleLimitSkipFindOneQueryWithGenerators = {
       test.equal(2, doc.b);
 
       // Db close
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -885,13 +919,15 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommandWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -910,7 +946,7 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommandWithGenerators = {
       test.equal(1, docs.results.length);
 
       // Close db
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -933,13 +969,15 @@ exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -956,7 +994,7 @@ exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithGenerators = {
       // Use geoNear command to find document
       var docs = yield collection.geoHaystackSearch(50, 50, {search:{a:1}, limit:1, maxDistance:100});
       test.equal(1, docs.results.length);
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -980,14 +1018,15 @@ exports.shouldCorrectlyExecuteGroupFunctionWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   Code = require('mongodb').Code;
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -1078,7 +1117,7 @@ exports.shouldCorrectlyExecuteGroupFunctionWithGenerators = {
         } catch(err) {
           test.ok(err.message != null);
 
-          db.close();
+          client.close();
           test.done();
         }
       };
@@ -1103,13 +1142,15 @@ exports.shouldPerformSimpleMapReduceFunctionsWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -1135,7 +1176,7 @@ exports.shouldPerformSimpleMapReduceFunctionsWithGenerators = {
       test.equal(1, result.value);
 
       // Db close
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -1160,13 +1201,15 @@ exports.shouldPerformMapReduceFunctionInlineWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -1189,7 +1232,7 @@ exports.shouldPerformMapReduceFunctionInlineWithGenerators = {
 
       var result = yield collection.mapReduce(map, reduce, {out : {replace: 'mapreduce_integration_test'}, verbose:true});
       test.ok(result.stats != null);
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -1213,13 +1256,15 @@ exports.shouldPerformMapReduceWithContextWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -1270,7 +1315,7 @@ exports.shouldPerformMapReduceWithContextWithGenerators = {
       var results = yield outCollection.find().toArray();
       test.equal(2, results[0].value)
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -1294,13 +1339,15 @@ exports.shouldPerformMapReduceInContextObjectsWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -1351,7 +1398,7 @@ exports.shouldPerformMapReduceInContextObjectsWithGenerators = {
       // Find all entries in the map-reduce collection
       var results = yield outCollection.find().toArray();
       test.equal(2, results[0].value)
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -1374,13 +1421,15 @@ exports.shouldCorrectlyRetriveACollectionsIndexesWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -1399,7 +1448,7 @@ exports.shouldCorrectlyRetriveACollectionsIndexesWithGenerators = {
           var indexes = yield collection.indexes()
           test.equal(3, indexes.length);
 
-          db.close();
+          client.close();
           test.done();
         });
       }, 1000);
@@ -1424,13 +1473,15 @@ exports.shouldCorrectlyExecuteIndexExistsWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -1451,7 +1502,7 @@ exports.shouldCorrectlyExecuteIndexExistsWithGenerators = {
       var result = yield collection.indexExists("c_1");
       test.equal(false, result);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -1476,13 +1527,15 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformationWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -1508,7 +1561,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformationWithGenerators = {
       test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
 
       // Close db
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -1531,13 +1584,15 @@ exports.shouldCorrectlyShowAllTheResultsFromIndexInformationWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -1562,7 +1617,7 @@ exports.shouldCorrectlyShowAllTheResultsFromIndexInformationWithGenerators = {
       test.deepEqual({ _id: 1 }, indexInformation[0].key);
       test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -1586,13 +1641,15 @@ exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafeWithGen
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -1606,7 +1663,7 @@ exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafeWithGen
           // Fetch the document
           var item = yield collection.findOne({hello:'world_no_safe'});
           test.equal('world_no_safe', item.hello);
-          db.close();
+          client.close();
           test.done();
         })
       }, 100);
@@ -1633,13 +1690,15 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafeWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -1653,7 +1712,7 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafeWithGenerators = {
       // Fetch the document
       var item = yield collection.findOne({hello:'world_safe2'});
       test.equal('world_safe2', item.hello);
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -1678,13 +1737,15 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafeWithGenerator
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -1701,7 +1762,7 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafeWithGenerator
       // Fetch the document
       var item = yield collection.findOne({hello:'world'});
       test.ok("function() {}", item.code);
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -1726,13 +1787,15 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -1780,13 +1843,15 @@ exports.shouldCorrectlyExecuteIsCappedWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -1799,7 +1864,7 @@ exports.shouldCorrectlyExecuteIsCappedWithGenerators = {
       var capped = yield collection.isCapped();
       test.equal(true, capped);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -1822,13 +1887,15 @@ exports.shouldCorrectlyRetriveCollectionOptionsWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -1842,7 +1909,7 @@ exports.shouldCorrectlyRetriveCollectionOptionsWithGenerators = {
       test.equal(true, options.capped);
       test.ok(options.size >= 1024);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -1867,13 +1934,15 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors w
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -1903,7 +1972,7 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors w
       }
 
       test.equal(docs.length, results.length);
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -1926,13 +1995,15 @@ exports.shouldCorrectlyIndexAndForceReindexOnCollectionWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -1956,7 +2027,7 @@ exports.shouldCorrectlyIndexAndForceReindexOnCollectionWithGenerators = {
       test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
       test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -1979,13 +2050,15 @@ exports.shouldRemoveAllDocumentsNoSafeWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -2002,7 +2075,7 @@ exports.shouldRemoveAllDocumentsNoSafeWithGenerators = {
       // Fetch all results
       var items = yield collection.find().toArray();
       test.equal(0, items.length);
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -2025,13 +2098,15 @@ exports.shouldRemoveSubsetOfDocumentsSafeModeWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -2043,7 +2118,7 @@ exports.shouldRemoveSubsetOfDocumentsSafeModeWithGenerators = {
       // Remove all the document
       var r = yield collection.removeOne({a:1}, {w:1});
       test.equal(1, r.result.n);
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -2066,13 +2141,15 @@ exports.shouldCorrectlyRenameCollectionWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -2144,7 +2221,7 @@ exports.shouldCorrectlyRenameCollectionWithGenerators = {
         // Ensure that the collection is pointing to the new one
         var count = yield collection2.count();
         test.equal(2, count);
-        db.close();
+        client.close();
         test.done();
       }
     });
@@ -2168,13 +2245,15 @@ exports.shouldCorrectlySaveASimpleDocumentWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -2190,7 +2269,7 @@ exports.shouldCorrectlySaveASimpleDocumentWithGenerators = {
           // Find the saved document
           var item = yield collection.findOne({hello:'world'});
           test.equal('world', item.hello);
-          db.close();
+          client.close();
           test.done();
         });
       }, 2000);
@@ -2215,13 +2294,15 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveItWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -2247,7 +2328,7 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveItWithGenerators = {
       test.equal('world', item.hello);
       test.equal('world2', item.hello2);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -2270,13 +2351,15 @@ exports.shouldCorrectlyUpdateASimpleDocumentWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -2298,7 +2381,7 @@ exports.shouldCorrectlyUpdateASimpleDocumentWithGenerators = {
           test.equal(1, item.a);
           test.equal(2, item.b);
 
-          db.close();
+          client.close();
           test.done();
         });
       }, 1000);
@@ -2323,13 +2406,15 @@ exports.shouldCorrectlyUpsertASimpleDocumentWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -2344,7 +2429,7 @@ exports.shouldCorrectlyUpsertASimpleDocumentWithGenerators = {
       var item = yield collection.findOne({a:1});
       test.equal(1, item.a);
       test.equal(2, item.b);
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -2367,13 +2452,15 @@ exports.shouldCorrectlyUpdateMultipleDocumentsWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -2395,7 +2482,7 @@ exports.shouldCorrectlyUpdateMultipleDocumentsWithGenerators = {
       test.equal(1, items[1].a);
       test.equal(0, items[1].b);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -2418,13 +2505,15 @@ exports.shouldCorrectlyReturnACollectionsStatsWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -2439,7 +2528,7 @@ exports.shouldCorrectlyReturnACollectionsStatsWithGenerators = {
       var stats = yield collection.stats();
       test.equal(2, stats.count);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -2462,13 +2551,15 @@ exports.shouldCorrectlyCreateAndDropAllIndexWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -2496,7 +2587,7 @@ exports.shouldCorrectlyCreateAndDropAllIndexWithGenerators = {
       test.equal(null, indexInformation.a_1_b_1);
       test.equal(null, indexInformation.c_1);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -2525,13 +2616,15 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDbWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -2542,13 +2635,13 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDbWithGenerators = {
       yield collection.insertOne({a:1}, configuration.writeConcernMax());
 
       // Force close the connection
-      yield db.close(true)
+      yield client.close(true)
 
       try {
         // Attemp to insert should fail now with correct message 'db closed by application'
         yield collection.insertOne({a:2}, configuration.writeConcernMax());
       } catch(err) {
-        db.close();
+        client.close();
         test.done();
       }
     });
@@ -2574,13 +2667,15 @@ exports.shouldCorrectlyExecuteEvalFunctionsWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -2590,7 +2685,7 @@ exports.shouldCorrectlyExecuteEvalFunctionsWithGenerators = {
         numberOfTests = numberOfTests - 1;
 
         if(numberOfTests == 0) {
-          db.close();
+          client.close();
           test.done();
         }
       }
@@ -2669,13 +2764,15 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunctionWithGenerators
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -2689,7 +2786,7 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunctionWithGenerators
       var result = yield db.eval("echo(5)");
       test.equal(5, result);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -2712,18 +2809,20 @@ exports.shouldCorrectlyRetrievelistCollectionsWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
       // Get an empty db
-      var db1 = db.db('listCollectionTestDb2Generator');
+      var db1 = client.db('listCollectionTestDb2Generator');
       // Create a collection
       var collection = db1.collection('shouldCorrectlyRetrievelistCollections_with_generators');
       // Ensure the collection was created
@@ -2737,7 +2836,7 @@ exports.shouldCorrectlyRetrievelistCollectionsWithGenerators = {
       var items = yield db1.listCollections().toArray();
       test.ok(items.length >= 1);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -2760,13 +2859,15 @@ exports.shouldCorrectlyRetrieveAllCollectionsWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -2776,97 +2877,7 @@ exports.shouldCorrectlyRetrieveAllCollectionsWithGenerators = {
       var collections = yield db.collections();
       test.ok(collections.length > 0);
 
-      db.close();
-      test.done();
-    });
-    // END
-  }
-}
-
-/**
- * An example of using the logout command for the database with a Generator and the co module.
- *
- * @example-class Db
- * @example-method logout
- * @ignore
- */
-exports.shouldCorrectlyLogoutFromTheDatabaseWithGenerators = {
-  metadata: { requires: { generators:true, topology: 'single' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var co = require('co');
-
-    co(function*() {
-      // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   co = require('co');
-    // LINE   test = require('assert');
-    // LINE
-    // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      // Add a user to the database
-      var result = yield db.addUser('user3', 'name')
-
-      // Authenticate
-      var result = yield db.authenticate('user3', 'name');
-      test.equal(true, result);
-
-      // Logout the db
-      var result = yield db.logout()
-      test.equal(true, result);
-
-      // Remove the user
-      var result = yield db.removeUser('user3');
-      test.equal(true, result);
-
-      db.close();
-      test.done();
-    });
-    // END
-  }
-}
-
-/**
- * An example of using the authenticate command with a Generator and the co module.
- *
- * @example-class Db
- * @example-method authenticate
- * @ignore
- */
-exports.shouldCorrectlyAuthenticateAgainstTheDatabaseWithGenerators = {
-  metadata: { requires: { generators:true, topology: 'single' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var co = require('co');
-
-    co(function*() {
-      // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   co = require('co');
-    // LINE   test = require('assert');
-    // LINE
-    // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      // Add a user to the database
-      yield db.addUser('user2', 'name');
-
-      // Authenticate
-      var result = yield db.authenticate('user2', 'name');
-      test.equal(true, result);
-
-      // Remove the user from the db
-      yield db.removeUser('user2');
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -2889,13 +2900,15 @@ exports.shouldCorrectlyAddUserToDbWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -2904,7 +2917,7 @@ exports.shouldCorrectlyAddUserToDbWithGenerators = {
 
       // Remove the user from the db
       yield db.removeUser('user');
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -2923,42 +2936,41 @@ exports.shouldCorrectlyAddAndRemoveUserWithGenerators = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var co = require('co');
+    var co = require('co'),
+      MongoClient = configuration.require.MongoClient;
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
 
       // Add a user to the database
       yield db.addUser('user', 'name');
-
+      
       // Authenticate
-      var result = yield db.authenticate('user', 'name');
-      test.equal(true, result);
-
-      // Logout the db
-      var result = yield db.logout();
-      test.equal(true, result);
+      var client2 = yield MongoClient.connect('mongodb://user:name@localhost:27017/' + configuration.database);
+      client2.close();
 
       // Remove the user from the db
       yield db.removeUser('user');
 
       try {
         // Authenticate
-        var result = yield db.authenticate('user', 'name');
+        yield MongoClient.connect('mongodb://user:name@localhost:27017/admin');
         assert.ok(false);
       } catch(err) {}
 
-      db.close();
+      client.close();
       test.done();
     }).catch(function(err) {
       console.log(err.stack)
@@ -2983,13 +2995,15 @@ exports.shouldCorrectlyCreateACollectionWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -2998,7 +3012,7 @@ exports.shouldCorrectlyCreateACollectionWithGenerators = {
 
       // Insert a document in the capped collection
       yield collection.insertOne({a:1}, configuration.writeConcernMax());
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -3021,13 +3035,15 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServerWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -3047,7 +3063,7 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServerWithGenerators = {
       var names = yield db.listCollections({name:"a_simple_create_drop_collection_with_generators"}).toArray();
       test.equal(0, names.length);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -3070,19 +3086,21 @@ exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGoneWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
       // Execute ping against the server
       yield db.command({ping:1});
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -3105,13 +3123,15 @@ exports.shouldCorrectlyRenameACollectionWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -3140,7 +3160,7 @@ exports.shouldCorrectlyRenameACollectionWithGenerators = {
       var names = yield db.listCollections({name:"simple_rename_collection_2_with_generators"}).toArray();
       test.equal(1, names.length);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -3163,13 +3183,15 @@ exports.shouldCreateOnDbComplexIndexOnTwoFieldsWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -3192,7 +3214,7 @@ exports.shouldCreateOnDbComplexIndexOnTwoFieldsWithGenerators = {
       var explanation = yield collection.find({a:2}).explain();
       test.ok(explanation != null);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -3215,13 +3237,15 @@ exports.shouldCreateComplexEnsureIndexDbWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -3244,7 +3268,7 @@ exports.shouldCreateComplexEnsureIndexDbWithGenerators = {
       var explanation = yield collection.find({a:2}).explain();
       test.ok(explanation != null);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -3267,13 +3291,15 @@ exports.shouldCorrectlyDropTheDatabaseWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -3305,7 +3331,7 @@ exports.shouldCorrectlyDropTheDatabaseWithGenerators = {
           // We should not find the databases
           if(process.env['JENKINS'] == null) test.equal(false, found);
 
-          db.close();
+          client.close();
           test.done();
         });
       }, 2000);
@@ -3330,20 +3356,22 @@ exports.shouldCorrectlyRetrieveDbStatsWithGeneratorsWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
       var stats = yield db.stats()
       test.ok(stats != null);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -3366,19 +3394,21 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithGenerato
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
       // Reference a different database sharing the same connections
       // for the data transfer
-      var secondDb = db.db("integration_tests_2");
+      var secondDb = client.db("integration_tests_2");
 
       // Fetch the collections
       var multipleColl1 = db.collection("multiple_db_instances_with_generators");
@@ -3395,7 +3425,7 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithGenerato
       var count = yield multipleColl2.count();
       test.equal(1, count);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -3407,59 +3437,6 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithGenerato
  * ADMIN TESTS
  *
  *************************************************************************/
-
-/**
- * Authenticate against MongoDB Admin user using a Generator and the co module.
- *
- * @example-class Admin
- * @example-method authenticate
- * @ignore
- */
-exports.shouldCorrectlyAuthenticateWithGenerators = {
-  metadata: { requires: { generators:true, topology: 'single' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var co = require('co');
-
-    co(function*() {
-      // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   co = require('co');
-    // LINE   test = require('assert');
-    // LINE
-    // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      // Grab a collection object
-      var collection = db.collection('test_with_generators');
-
-      // Force the creation of the collection by inserting a document
-      // Collections are not created until the first document is inserted
-      yield collection.insertOne({'a':1}, {w:1});
-
-      // Use the admin database for the operation
-      var adminDb = db.admin();
-
-      // Add the new user to the admin database
-      yield adminDb.addUser('admin2', 'admin2');
-
-      // Authenticate using the newly added user
-      var result = yield adminDb.authenticate('admin2', 'admin2');
-      test.ok(result);
-
-      var result = yield adminDb.removeUser('admin2')
-      test.ok(result);
-
-      db.close();
-      test.done();
-    });
-    // END
-  }
-}
 
 /**
  * Retrieve the buildInfo for the current MongoDB instance using a Generator and the co module.
@@ -3477,13 +3454,15 @@ exports.shouldCorrectlyRetrieveBuildInfoWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -3491,20 +3470,10 @@ exports.shouldCorrectlyRetrieveBuildInfoWithGenerators = {
       // Use the admin database for the operation
       var adminDb = db.admin();
 
-      // Add the new user to the admin database
-      yield adminDb.addUser('admin3', 'admin3');
-
-      // Authenticate using the newly added user
-      var result = yield adminDb.authenticate('admin3', 'admin3');
-      test.ok(result);
-
       // Retrive the build information for the MongoDB instance
       yield adminDb.buildInfo();
 
-      var result = yield adminDb.removeUser('admin3');
-      test.ok(result);
-
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -3527,90 +3496,26 @@ exports.shouldCorrectlyRetrieveBuildInfoUsingCommandWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
 
       // Use the admin database for the operation
       var adminDb = db.admin();
-
-      // Add the new user to the admin database
-      yield adminDb.addUser('admin4', 'admin4');
-
-      // Authenticate using the newly added user
-      var result = yield adminDb.authenticate('admin4', 'admin4');
-      test.ok(result);
 
       // Retrive the build information using the admin command
       yield adminDb.command({buildInfo:1})
 
-      var result = yield adminDb.removeUser('admin4');
-      test.ok(result);
-
-      db.close();
-      test.done();
-    });
-    // END
-  }
-}
-
-/**
- * Retrieve the current profiling level set for the MongoDB instance using a Generator and the co module.
- *
- * @example-class Admin
- * @example-method profilingLevel
- * @ignore
- */
-exports.shouldCorrectlySetDefaultProfilingLevelWithGenerators = {
-  metadata: { requires: { generators:true, topology: 'single' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var co = require('co');
-
-    co(function*() {
-      // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   co = require('co');
-    // LINE   test = require('assert');
-    // LINE
-    // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Grab a collection object
-      var collection = db.collection('test_with_generators');
-
-      // Force the creation of the collection by inserting a document
-      // Collections are not created until the first document is inserted
-      yield collection.insertOne({'a':1}, {w: 1});
-
-      // Use the admin database for the operation
-      var adminDb = db.admin();
-
-      // Add the new user to the admin database
-      yield adminDb.addUser('admin5', 'admin5');
-
-      // Authenticate using the newly added user
-      yield adminDb.authenticate('admin5', 'admin5');
-
-      // Retrive the profiling level
-      yield adminDb.profilingLevel();
-
-      var result = yield adminDb.removeUser('admin5');
-      test.ok(result);
-
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -3621,7 +3526,7 @@ exports.shouldCorrectlySetDefaultProfilingLevelWithGenerators = {
  * An example of how to use the setProfilingInfo using a Generator and the co module.
  * Use this command to set the Profiling level on the MongoDB server
  *
- * @example-class Admin
+ * @example-class Db
  * @example-method setProfilingLevel
  * @ignore
  */
@@ -3634,13 +3539,15 @@ exports.shouldCorrectlyChangeProfilingLevelWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -3652,47 +3559,35 @@ exports.shouldCorrectlyChangeProfilingLevelWithGenerators = {
       // Collections are not created until the first document is inserted
       yield collection.insertOne({'a':1}, {w: 1});
 
-      // Use the admin database for the operation
-      var adminDb = db.admin();
-
-      // Add the new user to the admin database
-      yield adminDb.addUser('admin6', 'admin6');
-
-      // Authenticate using the newly added user
-      yield adminDb.authenticate('admin6', 'admin6');
-
       // Set the profiling level to only profile slow queries
-      yield adminDb.setProfilingLevel('slow_only')
+      yield db.setProfilingLevel('slow_only')
 
       // Retrive the profiling level and verify that it's set to slow_only
-      var level = yield adminDb.profilingLevel();
+      var level = yield db.profilingLevel();
       test.equal('slow_only', level);
 
       // Turn profiling off
-      yield adminDb.setProfilingLevel('off');
+      yield db.setProfilingLevel('off');
 
       // Retrive the profiling level and verify that it's set to off
-      var level = yield adminDb.profilingLevel();
+      var level = yield db.profilingLevel();
       test.equal('off', level);
 
       // Set the profiling level to log all queries
-      yield adminDb.setProfilingLevel('all');
+      yield db.setProfilingLevel('all');
 
       // Retrive the profiling level and verify that it's set to all
-      var level = yield adminDb.profilingLevel();
+      var level = yield db.profilingLevel();
       test.equal('all', level);
 
       try {
         // Attempt to set an illegal profiling level
-        yield adminDb.setProfilingLevel('medium');
+        yield db.setProfilingLevel('medium');
       } catch(err) {
         test.ok(err instanceof Error);
         test.equal("Error: illegal profiling level value medium", err.message);
 
-        var result = yield adminDb.removeUser('admin6');
-        test.ok(result);
-
-        db.close();
+        client.close();
         test.done();
       }
     });
@@ -3704,7 +3599,7 @@ exports.shouldCorrectlyChangeProfilingLevelWithGenerators = {
  * An example of how to use the profilingInfo using a Generator and the co module.
  * Use this command to pull back the profiling information currently set for Mongodb
  *
- * @example-class Admin
+ * @example-class Db
  * @example-method profilingInfo
  * @ignore
  */
@@ -3717,13 +3612,15 @@ exports.shouldCorrectlySetAndExtractProfilingInfoWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -3735,35 +3632,23 @@ exports.shouldCorrectlySetAndExtractProfilingInfoWithGenerators = {
       // Collections are not created until the first document is inserted
       yield collection.insertOne({'a':1}, {w: 1});
 
-      // Use the admin database for the operation
-      var adminDb = db.admin();
-
-      // Add the new user to the admin database
-      yield adminDb.addUser('admin7', 'admin7');
-
-      // Authenticate using the newly added user
-      yield adminDb.authenticate('admin7', 'admin7');
-
       // Set the profiling level to all
-      yield adminDb.setProfilingLevel('all');
+      yield db.setProfilingLevel('all');
 
       // Execute a query command
       yield collection.find().toArray();
 
       // Turn off profiling
-      yield adminDb.setProfilingLevel('off');
+      yield db.setProfilingLevel('off');
 
       // Retrive the profiling information
-      var infos = yield adminDb.profilingInfo();
+      var infos = yield db.profilingInfo();
       test.ok(infos.constructor == Array);
       test.ok(infos.length >= 1);
       test.ok(infos[0].ts.constructor == Date);
       test.ok(infos[0].millis.constructor == Number);
 
-      var result = yield adminDb.removeUser('admin7');
-      test.ok(result);
-
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -3787,13 +3672,15 @@ exports.shouldCorrectlyCallValidateCollectionWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -3808,20 +3695,11 @@ exports.shouldCorrectlyCallValidateCollectionWithGenerators = {
       // Use the admin database for the operation
       var adminDb = db.admin();
 
-      // Add the new user to the admin database
-      yield adminDb.addUser('admin8', 'admin8');
-
-      // Authenticate using the newly added user
-      yield adminDb.authenticate('admin8', 'admin8');
-
       // Validate the 'test' collection
       var doc = yield adminDb.validateCollection('test_with_generators');
       test.ok(doc != null);
 
-      var result = yield adminDb.removeUser('admin8')
-      test.ok(result);
-
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -3843,85 +3721,26 @@ exports.shouldCorrectlyPingTheMongoDbInstanceWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
 
       // Use the admin database for the operation
       var adminDb = db.admin();
-
-      // Add the new user to the admin database
-      yield adminDb.addUser('admin9', 'admin9');
-
-      // Authenticate using the newly added user
-      var result = yield adminDb.authenticate('admin9', 'admin9');
-      test.ok(result);
 
       // Ping the server
       yield adminDb.ping();
 
-      var result = yield adminDb.removeUser('admin9');
-      test.ok(result);
-
-      db.close();
-      test.done();
-    });
-    // END
-  }
-}
-
-/**
- * An example of how add a user, authenticate and logout using a Generator and the co module.
- *
- * @example-class Admin
- * @example-method logout
- * @ignore
- */
-exports.shouldCorrectlyUseLogoutFunctionWithGenerators = {
-  metadata: { requires: { generators:true, topology: 'single' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var co = require('co');
-
-    co(function*() {
-      // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   co = require('co');
-    // LINE   test = require('assert');
-    // LINE
-    // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Use the admin database for the operation
-      var adminDb = db.admin();
-
-      // Add the new user to the admin database
-      yield adminDb.addUser('admin10', 'admin10');
-
-      // Authenticate using the newly added user
-      var result = yield adminDb.authenticate('admin10', 'admin10')
-      test.ok(result);
-
-      // Logout the user
-      var result = yield adminDb.logout();
-      test.equal(true, result);
-
-      var result = adminDb.removeUser('admin10');
-      test.ok(result);
-
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -3944,13 +3763,15 @@ exports.shouldCorrectlyAddAUserToAdminDbWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -3961,14 +3782,10 @@ exports.shouldCorrectlyAddAUserToAdminDbWithGenerators = {
       // Add the new user to the admin database
       yield adminDb.addUser('admin11', 'admin11');
 
-      // Authenticate using the newly added user
-      var result = yield adminDb.authenticate('admin11', 'admin11');
-      test.ok(result);
-
       var result = yield adminDb.removeUser('admin11');
       test.ok(result);
 
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -3990,13 +3807,15 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDbWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -4007,21 +3826,12 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDbWithGenerators = {
       // Add the new user to the admin database
       yield adminDb.addUser('admin12', 'admin12');
 
-      // Authenticate using the newly added user
-      var result = yield adminDb.authenticate('admin12', 'admin12');
-      test.ok(result);
-
       // Remove the user
       var result = yield adminDb.removeUser('admin12');
       test.equal(true, result);
 
-      try {
-        // Authenticate using the removed user should fail
-        yield adminDb.authenticate('admin12', 'admin12');
-      } catch(err) {
-        db.close();
-        test.done();
-      }
+      client.close();
+      test.done();
     });
     // END
   }
@@ -4043,13 +3853,15 @@ exports.shouldCorrectlyListAllAvailableDatabasesWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -4061,7 +3873,7 @@ exports.shouldCorrectlyListAllAvailableDatabasesWithGenerators = {
       var dbs = yield adminDb.listDatabases();
       test.ok(dbs.databases.length > 0);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -4084,13 +3896,15 @@ exports.shouldCorrectlyRetrieveServerInfoWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -4105,20 +3919,11 @@ exports.shouldCorrectlyRetrieveServerInfoWithGenerators = {
       // Use the admin database for the operation
       var adminDb = db.admin();
 
-      // Add the new user to the admin database
-      yield adminDb.addUser('admin13', 'admin13');
-
-      // Authenticate using the newly added user
-      yield adminDb.authenticate('admin13', 'admin13');
-
       // Retrive the server Info
       var info = yield adminDb.serverStatus();
       test.ok(info != null);
 
-      var result = yield adminDb.removeUser('admin13');
-      test.ok(result);
-
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -4141,13 +3946,15 @@ exports.shouldCorrectlyRetrieveReplSetGetStatusWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -4166,7 +3973,7 @@ exports.shouldCorrectlyRetrieveReplSetGetStatusWithGenerators = {
       // running a replicaset
       yield adminDb.replSetGetStatus();
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -4198,13 +4005,15 @@ exports.shouldCorrectlyExecuteToArrayWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -4220,7 +4029,7 @@ exports.shouldCorrectlyExecuteToArrayWithGenerators = {
       test.equal(1, documents.length);
       test.deepEqual([1, 2, 3], documents[0].b);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -4245,13 +4054,15 @@ exports.shouldCorrectlyUseCursorCountFunctionWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -4266,7 +4077,7 @@ exports.shouldCorrectlyUseCursorCountFunctionWithGenerators = {
       var count = yield collection.find().count();
       test.equal(2, count);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -4291,13 +4102,15 @@ exports.shouldCorrectlyPerformNextObjectOnCursorWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -4312,7 +4125,7 @@ exports.shouldCorrectlyPerformNextObjectOnCursorWithGenerators = {
       var item = yield collection.find().nextObject();
       test.equal(1, item.a);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -4337,13 +4150,15 @@ exports.shouldCorrectlyPerformNextOnCursorWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -4368,7 +4183,7 @@ exports.shouldCorrectlyPerformNextOnCursorWithGenerators = {
 
       // Validate the correct number of elements
       test.equal(3, docs.length);
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -4393,13 +4208,15 @@ exports.shouldCorrectlyPerformSimpleExplainCursorWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -4412,7 +4229,7 @@ exports.shouldCorrectlyPerformSimpleExplainCursorWithGenerators = {
 
       // Do normal ascending sort
       yield collection.find().explain();
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -4437,13 +4254,15 @@ exports.shouldStreamDocumentsUsingTheCloseFunctionWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -4467,7 +4286,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunctionWithGenerators = {
 
       // Close the cursor, this is the same as reseting the query
       yield cursor.close();
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -4498,13 +4317,15 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectIdWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -4530,7 +4351,7 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectIdWithGenerators = {
       var result = yield GridStore.exist(db, file._id, 'another_root');
       test.equal(false, result);
 
-      db.close();
+      client.close();
       test.done();
     }).catch(function(e) {
       console.dir(e)
@@ -4557,13 +4378,15 @@ exports.shouldCorrectlyExecuteGridStoreListWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -4645,7 +4468,7 @@ exports.shouldCorrectlyExecuteGridStoreListWithGenerators = {
       test.ok(found);
       test.ok(found2);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -4670,13 +4493,15 @@ exports.shouldCorrectlyReadlinesAndPutLinesWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -4694,7 +4519,7 @@ exports.shouldCorrectlyReadlinesAndPutLinesWithGenerators = {
       var data = yield GridStore.read(db, 'test_gs_puts_and_readlines');
       test.equal("line one\n", data.toString());
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -4719,13 +4544,15 @@ exports.shouldCorrectlyUnlinkWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -4765,7 +4592,7 @@ exports.shouldCorrectlyUnlinkWithGenerators = {
       var count = yield collection.count();
       test.equal(0, count);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -4790,13 +4617,15 @@ exports.shouldCorrectlyWriteAndReadJpgImageWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -4822,7 +4651,7 @@ exports.shouldCorrectlyWriteAndReadJpgImageWithGenerators = {
       // Compare the file content against the orgiinal
       test.equal(data.toString('base64'), data2.toString('base64'));
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -4847,13 +4676,15 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilenameWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -4873,7 +4704,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilenameWithGenerators = {
       var result = yield GridStore.exist(db, 'ourexamplefiletowrite.txt');
       test.equal(true, result);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -4898,13 +4729,15 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectIDWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -4927,7 +4760,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectIDWithGenerators = {
       var result = yield GridStore.exist(db, fileId);
       test.equal(true, result);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -4952,13 +4785,15 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -4984,7 +4819,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithGenerators = {
       test.equal(data.toString('base64'), fileData.toString('base64'))
       test.equal(fileSize, fileData.length);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -5009,13 +4844,15 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandleWithGene
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -5044,7 +4881,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandleWithGene
       test.equal(data.toString('base64'), fileData.toString('base64'));
       test.equal(fileSize, fileData.length);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -5069,13 +4906,15 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffersW
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -5101,7 +4940,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffersW
       var fileData = yield GridStore.read(db, fileId);
       test.equal('Hello worldBuffer Hello world', fileData.toString());
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -5126,13 +4965,15 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -5151,7 +4992,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseWithGenerators = {
       // Close the
       yield gridStore.close();
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -5176,13 +5017,15 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkItWithGen
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -5211,7 +5054,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkItWithGen
       var result = yield GridStore.exist(db, fileId);
       test.equal(false, result);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -5236,13 +5079,15 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlinesWithGenerators
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -5271,7 +5116,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlinesWithGenerators
       var lines = yield GridStore.readlines(db, fileId);
       test.deepEqual(["line one\n", "line two\n", "line three\n"], lines);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -5296,13 +5141,15 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlinesWithGe
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -5335,7 +5182,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlinesWithGe
       var lines = yield gridStore.readlines();
       test.deepEqual(["line one\n", "line two\n", "line three\n"], lines);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -5360,13 +5207,15 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreReadWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -5385,7 +5234,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreReadWithGenerators = {
       var fileData = yield GridStore.read(db, result._id);
       test.equal(data.length, fileData.length);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -5410,13 +5259,15 @@ exports.shouldCorrectlySeekWithBufferWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -5485,7 +5336,7 @@ exports.shouldCorrectlySeekWithBufferWithGenerators = {
       var chr = yield gridStore.getc();
       test.equal('o', chr);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -5510,13 +5361,15 @@ exports.shouldCorrectlyRewingAndTruncateOnWriteWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -5551,7 +5404,7 @@ exports.shouldCorrectlyRewingAndTruncateOnWriteWithGenerators = {
       var data = yield GridStore.read(db, fileId);
       test.equal("abc", data);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -5576,13 +5429,15 @@ exports.shouldCorrectlyExecuteGridstoreTellWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -5607,7 +5462,7 @@ exports.shouldCorrectlyExecuteGridstoreTellWithGenerators = {
       var position = yield gridStore.tell();
       test.equal(5, position);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -5632,13 +5487,15 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -5657,7 +5514,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithGenerators = {
       var chr = yield gridStore.getc();
       test.equal('h', chr);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -5682,13 +5539,15 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithGenerators2 = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -5724,7 +5583,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithGenerators2 = {
       var chr = yield gridStore.getc();
       test.equal('h', chr);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -5753,13 +5612,15 @@ exports['Should correctly execute ordered batch with no errors using write comma
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -5793,7 +5654,7 @@ exports['Should correctly execute ordered batch with no errors using write comma
       test.ok(upsert._id != null);
 
       // Finish up test
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -5817,13 +5678,15 @@ exports['Should correctly execute unordered batch with no errors with Generators
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -5858,7 +5721,7 @@ exports['Should correctly execute unordered batch with no errors with Generators
       test.ok(upsert._id != null);
 
       // Finish up test
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -5887,13 +5750,15 @@ exports['Should correctly execute insertOne operation with Generators'] = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -5902,7 +5767,7 @@ exports['Should correctly execute insertOne operation with Generators'] = {
       var r = yield col.insertOne({a:1});
       test.equal(1, r.insertedCount);
       // Finish up test
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -5925,13 +5790,15 @@ exports['Should correctly execute insertMany operation with Generators'] = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -5940,7 +5807,7 @@ exports['Should correctly execute insertMany operation with Generators'] = {
       var r = yield col.insertMany([{a:1}, {a:2}]);
       test.equal(2, r.insertedCount);
       // Finish up test
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -5963,13 +5830,15 @@ exports['Should correctly execute updateOne operation with Generators'] = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -5981,7 +5850,7 @@ exports['Should correctly execute updateOne operation with Generators'] = {
       test.equal(0, r.matchedCount);
       test.equal(1, r.upsertedCount);
       // Finish up test
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -6004,13 +5873,15 @@ exports['Should correctly execute updateMany operation with Generators'] = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -6025,7 +5896,7 @@ exports['Should correctly execute updateMany operation with Generators'] = {
       test.equal(2, r.modifiedCount);
 
       // Finish up test
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -6048,13 +5919,15 @@ exports['Should correctly execute removeOne operation with Generators'] = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -6066,7 +5939,7 @@ exports['Should correctly execute removeOne operation with Generators'] = {
       var r = yield col.removeOne({a:1});
       test.equal(1, r.deletedCount);
       // Finish up test
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -6089,13 +5962,15 @@ exports['Should correctly execute removeMany operation with Generators'] = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -6109,7 +5984,7 @@ exports['Should correctly execute removeMany operation with Generators'] = {
       test.equal(2, r.deletedCount);
 
       // Finish up test
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -6132,13 +6007,15 @@ exports['Should correctly execute bulkWrite operation with Generators'] = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -6166,7 +6043,7 @@ exports['Should correctly execute bulkWrite operation with Generators'] = {
       test.equal(2, Object.keys(r.upsertedIds).length);
 
       // Ordered bulk operation
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -6189,13 +6066,15 @@ exports['Should correctly execute findOneAndDelete operation with Generators'] =
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -6210,7 +6089,7 @@ exports['Should correctly execute findOneAndDelete operation with Generators'] =
       test.equal(1, r.lastErrorObject.n);
       test.equal(1, r.value.b);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -6233,13 +6112,15 @@ exports['Should correctly execute findOneAndReplace operation with Generators'] 
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -6261,7 +6142,7 @@ exports['Should correctly execute findOneAndReplace operation with Generators'] 
       test.equal(1, r.value.b);
       test.equal(1, r.value.c);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -6284,13 +6165,15 @@ exports['Should correctly execute findOneAndUpdate operation with Generators'] =
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -6312,7 +6195,7 @@ exports['Should correctly execute findOneAndUpdate operation with Generators'] =
       test.equal(1, r.value.b);
       test.equal(1, r.value.d);
 
-      db.close();
+      client.close();
       test.done();
     });
     // END
@@ -6335,13 +6218,15 @@ exports['Should correctly add capped collection options to cursor with Generator
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
+      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
     // LINE
     // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // LINE   var db = client.db('test');
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
@@ -6370,7 +6255,7 @@ exports['Should correctly add capped collection options to cursor with Generator
       });
 
       cursor.on('end', function() {
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -6401,8 +6286,9 @@ exports['Correctly handle sample aggregation'] = {
     var co = require('co');
 
     co(function*() {
-      var db = configure.newDbInstance({w:1}, {poolSize:1});
-      db = yield db.open();
+      var client = configure.newDbInstance({w:1}, {poolSize:1});
+      client = yield client.connect();
+      var db = client.db(configure.database);
       var string = new Array(6000000).join('x');
       // Get the collection
       var collection = db.collection('bigdocs_aggregate_sample_issue');
@@ -6433,7 +6319,7 @@ exports['Correctly handle sample aggregation'] = {
         .batchSize(10)
 
         .on('error', function(err) {
-          db.close();
+          client.close();
         })
 
         .on('data', function(data) {
@@ -6445,7 +6331,7 @@ exports['Correctly handle sample aggregation'] = {
         .on('end', function() {
           test.equal(100, index);
 
-          db.close();
+          client.close();
           test.done();
         });
     });

@@ -9,7 +9,8 @@ exports['Execute all read crud specification tests'] = {
     co(function*() {
       // Create db connection
       var MongoClient = configuration.require.MongoClient;
-      var db = yield MongoClient.connect(configuration.url());
+      var client = yield MongoClient.connect(configuration.url());
+      var db = client.db(configuration.database);
 
       console.log("== Execute CRUD read specifications");
 
@@ -38,7 +39,8 @@ exports['Execute all write crud specification tests'] = {
     co(function*() {
       // Create db connection
       var MongoClient = configuration.require.MongoClient;
-      var db = yield MongoClient.connect(configuration.url());
+      var client = yield MongoClient.connect(configuration.url());
+      var db = client.db(configuration.database);
 
       console.log("== Execute CRUD read specifications");
 

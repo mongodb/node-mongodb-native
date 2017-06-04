@@ -14,8 +14,9 @@ exports.shouldCreateNewGridStoreObject = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gs1
         , gs2
         , id = new ObjectID()
@@ -30,7 +31,7 @@ exports.shouldCreateNewGridStoreObject = {
       test.ok(gs instanceof GridStore);
       test.equal(id, gs.fileId);
       test.equal(filename, gs.filename);
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -46,8 +47,9 @@ exports.shouldCreateNewGridStoreObjectWithIntId = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gs1
         , gs2
         , id = 123
@@ -63,7 +65,7 @@ exports.shouldCreateNewGridStoreObjectWithIntId = {
       test.equal(id, gs.fileId);
       test.equal(filename, gs.filename);
 
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -79,8 +81,9 @@ exports.shouldCreateNewGridStoreObjectWithStringId = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gs1
         , gs2
         , id = 'test'
@@ -96,7 +99,7 @@ exports.shouldCreateNewGridStoreObjectWithStringId = {
       test.equal(id, gs.fileId);
       test.equal(filename, gs.filename);
 
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -113,8 +116,9 @@ exports.shouldCorrectlySafeFileAndReadFileByObjectId = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, null, "w");
       gridStore.open(function(err, gridStore) {
         gridStore.write("hello world!", function(err, gridStore) {
@@ -122,7 +126,7 @@ exports.shouldCorrectlySafeFileAndReadFileByObjectId = {
             // Let's read the file using object Id
             GridStore.read(db, result._id, function(err, data) {
               test.equal('hello world!', data);
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -143,8 +147,9 @@ exports.shouldCorrectlyExecuteGridStoreExists = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "foobar", "w");
       gridStore.open(function(err, gridStore) {
         gridStore.write("hello world!", function(err, gridStore) {
@@ -159,7 +164,7 @@ exports.shouldCorrectlyExecuteGridStoreExists = {
 
             GridStore.exist(db, 'foobar', 'another_root', function(err, result) {
               test.equal(false, result);
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -180,8 +185,9 @@ exports.shouldCorrectlyPerformGridStoreReadLength = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_gs_read_length", "w");
       gridStore.open(function(err, gridStore) {
         gridStore.write("hello world!", function(err, gridStore) {
@@ -189,7 +195,7 @@ exports.shouldCorrectlyPerformGridStoreReadLength = {
             // Assert that we have overwriten the data
             GridStore.read(db, 'test_gs_read_length', 5, function(err, data) {
               test.equal('hello', data);
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -210,8 +216,9 @@ exports.shouldCorrectlyReadFromFileWithOffset = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_gs_read_with_offset", "w");
       gridStore.open(function(err, gridStore) {
         gridStore.write("hello, world!", function(err, gridStore) {
@@ -223,7 +230,7 @@ exports.shouldCorrectlyReadFromFileWithOffset = {
 
             GridStore.read(db, 'test_gs_read_with_offset', null, 7, function(err, data) {
               test.equal('world!', data);
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -243,12 +250,13 @@ exports.shouldCorrectlyHandleMultipleChunkGridStore = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var fs_client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    fs_client.open(function(err, fs_client) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
-      var gridStore = new GridStore(fs_client, "test_gs_multi_chunk", "w");
+      var gridStore = new GridStore(db, "test_gs_multi_chunk", "w");
       gridStore.open(function(err, gridStore) {
         test.equal(null, err);
 
@@ -271,15 +279,15 @@ exports.shouldCorrectlyHandleMultipleChunkGridStore = {
                 gridStore.close(function(err, result) {
                   test.equal(null, err);
 
-                  fs_client.collection('fs.chunks', function(err, collection) {
+                  db.collection('fs.chunks', function(err, collection) {
                     test.equal(null, err);
 
                     collection.count(function(err, count) {
                       test.equal(3, count);
 
-                      GridStore.read(fs_client, 'test_gs_multi_chunk', function(err, data) {
+                      GridStore.read(db, 'test_gs_multi_chunk', function(err, data) {
                         test.equal(512*3, data.length);
-                        fs_client.close();
+                        client.close();
 
                         test.done();
                       });
@@ -305,38 +313,40 @@ exports.shouldCorrectlyHandleUnlinkingWeirdName = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var fs_client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    fs_client.open(function(err, fs_client) {
-      var gridStore = new GridStore(fs_client, "9476700.937375426_1271170118964-clipped.png", "w", {'root':'articles'});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
+      
+      var gridStore = new GridStore(db, "9476700.937375426_1271170118964-clipped.png", "w", {'root':'articles'});
       gridStore.open(function(err, gridStore) {
-        fs_client.collection('articles.files').deleteMany({}, function() {
-          fs_client.collection('articles.chunks').deleteMany({}, function() {
+        db.collection('articles.files').deleteMany({}, function() {
+          db.collection('articles.chunks').deleteMany({}, function() {
             gridStore.write("hello, world!", function(err, gridStore) {
               gridStore.close(function(err, result) {
-                fs_client.collection('articles.files', function(err, collection) {
+                db.collection('articles.files', function(err, collection) {
                   collection.count(function(err, count) {
                     test.equal(1, count);
                   })
                 });
 
-                fs_client.collection('articles.chunks', function(err, collection) {
+                db.collection('articles.chunks', function(err, collection) {
                   collection.count(function(err, count) {
                     test.equal(1, count);
 
                     // Unlink the file
-                    GridStore.unlink(fs_client, '9476700.937375426_1271170118964-clipped.png', {'root':'articles'}, function(err, gridStore) {
-                      fs_client.collection('articles.files', function(err, collection) {
+                    GridStore.unlink(db, '9476700.937375426_1271170118964-clipped.png', {'root':'articles'}, function(err, gridStore) {
+                      db.collection('articles.files', function(err, collection) {
                         collection.count(function(err, count) {
                           test.equal(0, count);
                         })
                       });
 
-                      fs_client.collection('articles.chunks', function(err, collection) {
+                      db.collection('articles.chunks', function(err, collection) {
                         collection.count(function(err, count) {
                           test.equal(0, count);
 
-                          fs_client.close();
+                          client.close();
                           test.done();
                         })
                       });
@@ -362,36 +372,38 @@ exports.shouldCorrectlyUnlinkAnArrayOfFiles = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var fs_client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    fs_client.open(function(err, fs_client) {
-      var gridStore = new GridStore(fs_client, "test_gs_unlink_as_array", "w");
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
+      
+      var gridStore = new GridStore(db, "test_gs_unlink_as_array", "w");
       gridStore.open(function(err, gridStore) {
-        fs_client.collection('fs.files').deleteMany({}, function() {
-          fs_client.collection('fs.chunks').deleteMany({}, function() {
+        db.collection('fs.files').deleteMany({}, function() {
+          db.collection('fs.chunks').deleteMany({}, function() {
 
             gridStore.write("hello, world!", function(err, gridStore) {
               gridStore.close(function(err, result) {
-                fs_client.collection('fs.files', function(err, collection) {
+                db.collection('fs.files', function(err, collection) {
                   collection.count(function(err, count) {
                     test.equal(1, count);
                   })
                 });
 
-                fs_client.collection('fs.chunks', function(err, collection) {
+                db.collection('fs.chunks', function(err, collection) {
                   collection.count(function(err, count) {
                     test.equal(1, count);
 
                     // Unlink the file
-                    GridStore.unlink(fs_client, ['test_gs_unlink_as_array'], function(err, gridStore) {
-                      fs_client.collection('fs.files', function(err, collection) {
+                    GridStore.unlink(db, ['test_gs_unlink_as_array'], function(err, gridStore) {
+                      db.collection('fs.files', function(err, collection) {
                         collection.count(function(err, count) {
                           test.equal(0, count);
 
-                          fs_client.collection('fs.chunks', function(err, collection) {
+                          db.collection('fs.chunks', function(err, collection) {
                             collection.count(function(err, count) {
                               test.equal(0, count);
-                              fs_client.close();
+                              client.close();
 
                               test.done();
                             })
@@ -421,8 +433,9 @@ exports.shouldCorrectlyWriteFileToGridStore = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, 'test_gs_writing_file', 'w');
       var fileSize = fs.statSync('./test/functional/data/test_gs_weird_bug.png').size;
       var data = fs.readFileSync('./test/functional/data/test_gs_weird_bug.png');
@@ -437,7 +450,7 @@ exports.shouldCorrectlyWriteFileToGridStore = {
             var gridStore2 = new GridStore(db, 'test_gs_writing_file', 'r');
             gridStore2.open(function(err, gridStore2) {
               test.ok(gridStore2.md5 != null)
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -458,8 +471,9 @@ exports.shouldCorrectlyWriteFileToGridStoreUsingObjectId = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, null, 'w');
       var fileSize = fs.statSync('./test/functional/data/test_gs_weird_bug.png').size;
       var data = fs.readFileSync('./test/functional/data/test_gs_weird_bug.png');
@@ -476,7 +490,7 @@ exports.shouldCorrectlyWriteFileToGridStoreUsingObjectId = {
             var gridStore2 = new GridStore(db, doc.fileId, 'r');
             gridStore2.open(function(err, gridStore2) {
               test.ok(gridStore2.md5 != null)
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -497,8 +511,9 @@ exports.shouldCorrectlyPerformWorkingFiledRead = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_gs_working_field_read", "w");
       var data = fs.readFileSync("./test/functional/data/test_gs_working_field_read.pdf", 'binary');
 
@@ -508,7 +523,7 @@ exports.shouldCorrectlyPerformWorkingFiledRead = {
             // Assert that we have overwriten the data
             GridStore.read(db, 'test_gs_working_field_read', function(err, fileData) {
               test.equal(data.length, fileData.length);
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -529,8 +544,9 @@ exports.shouldCorrectlyPerformWorkingFiledReadWithChunkSizeLessThanFileSize = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Create a new file
       var gridStore = new GridStore(db, "test.txt", "w");
 
@@ -560,7 +576,7 @@ exports.shouldCorrectlyPerformWorkingFiledReadWithChunkSizeLessThanFileSize = {
             GridStore.read(db, result._id, function(err, fileData) {
               var data = fs.readFileSync('./test/functional/data/test_gs_working_field_read.pdf');
               test.equal(data.toString('base64'), fileData.toString('base64'));
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -580,8 +596,10 @@ exports.shouldCorrectlyPerformWorkingFiledWithBigFile = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var client = configuration.newDbInstance(configuration.writeConcernMax());
-    client.open(function(err, client) {
+
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Prepare fake big file
       var data = fs.readFileSync("./test/functional/data/test_gs_working_field_read.pdf", 'binary');
       // Write the data multiple times
@@ -594,7 +612,7 @@ exports.shouldCorrectlyPerformWorkingFiledWithBigFile = {
       fs.close(fd);
 
       // Create a new file
-      var gridStore = new GridStore(client, null, "w");
+      var gridStore = new GridStore(db, null, "w");
 
       // This shouldnt have to be set higher than the file...
       gridStore.chunkSize = 80960;
@@ -622,7 +640,7 @@ exports.shouldCorrectlyPerformWorkingFiledWithBigFile = {
             console.dir(result)
 
             // Read in the whole file and check that it's the same content
-            GridStore.read(client, result._id, function(err, fileData) {
+            GridStore.read(db, result._id, function(err, fileData) {
               console.dir(err)
 
               var data = fs.readFileSync('./test_gs_working_field_read.tmp');
@@ -648,8 +666,9 @@ exports.shouldCorrectlyPerformWorkingFiledWriteWithDifferentChunkSizes = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Prepare fake big file
       var data = fs.readFileSync("./test/functional/data/test_gs_working_field_read.pdf", 'binary');
       // Write the data multiple times
@@ -709,7 +728,7 @@ exports.shouldCorrectlyPerformWorkingFiledWriteWithDifferentChunkSizes = {
         executeTest(5000, test, function(err, result) {
           // Execute chunksize larger than file
           executeTest(fileSize+100, test, function(err, result) {
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -729,8 +748,9 @@ exports.shouldCorrectlyReadAndWriteFile = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_gs_weird_bug", "w");
       var data = fs.readFileSync("./test/functional/data/test_gs_weird_bug.png", 'binary');
 
@@ -740,7 +760,7 @@ exports.shouldCorrectlyReadAndWriteFile = {
             // Assert that we have overwriten the data
             GridStore.read(db, 'test_gs_weird_bug', function(err, fileData) {
               test.equal(data.length, fileData.length);
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -761,8 +781,9 @@ exports.shouldCorrectlyReadAndWriteBuffersMultipleChunks = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, null, 'w');
       // Force multiple chunks to be stored
       gridStore.chunkSize = 5000;
@@ -779,7 +800,7 @@ exports.shouldCorrectlyReadAndWriteBuffersMultipleChunks = {
             new GridStore(db, doc._id, 'r').open(function(err, gridStore) {
               gridStore.read(function(err, data2) {
                 test.equal(data.toString('base64'), data2.toString('base64'));
-                db.close();
+                client.close();
                 test.done();
               })
             });
@@ -801,8 +822,9 @@ exports.shouldCorrectlyReadAndWriteBuffersSingleChunks = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, null, 'w');
       // Force multiple chunks to be stored
       var fileSize = fs.statSync('./test/functional/data/test_gs_weird_bug.png').size;
@@ -818,7 +840,7 @@ exports.shouldCorrectlyReadAndWriteBuffersSingleChunks = {
             new GridStore(db, doc._id, 'r').open(function(err, gridStore) {
               gridStore.read(function(err, data2) {
                 test.equal(data.toString('base64'), data2.toString('base64'));
-                db.close();
+                client.close();
                 test.done();
               })
             });
@@ -840,8 +862,9 @@ exports.shouldCorrectlyReadAndWriteBuffersUsingNormalWriteWithMultipleChunks = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, null, 'w');
       // Force multiple chunks to be stored
       gridStore.chunkSize = 5000;
@@ -858,7 +881,7 @@ exports.shouldCorrectlyReadAndWriteBuffersUsingNormalWriteWithMultipleChunks = {
             new GridStore(db, doc._id, 'r').open(function(err, gridStore) {
               gridStore.read(function(err, data2) {
                 test.equal(data.toString('base64'), data2.toString('base64'));
-                db.close();
+                client.close();
                 test.done();
               })
             });
@@ -880,8 +903,9 @@ exports.shouldCorrectlyReadAndWriteBuffersSingleChunksAndVerifyExistance = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, null, 'w');
       // Force multiple chunks to be stored
       var fileSize = fs.statSync('./test/functional/data/test_gs_weird_bug.png').size;
@@ -898,7 +922,7 @@ exports.shouldCorrectlyReadAndWriteBuffersSingleChunksAndVerifyExistance = {
               test.equal(null, err);
               test.equal(true, result);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -919,8 +943,9 @@ exports.shouldCorrectlySaveDataByObjectID = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var id = new ObjectID();
       var gridStore = new GridStore(db, id, 'w');
 
@@ -932,7 +957,7 @@ exports.shouldCorrectlySaveDataByObjectID = {
               test.equal(null, err);
               test.equal(true, result);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -953,8 +978,9 @@ exports.shouldCheckExistsByUsingRegexp = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, 'shouldCheckExistsByUsingRegexp.txt', 'w');
 
       gridStore.open(function(err, gridStore) {
@@ -965,7 +991,7 @@ exports.shouldCheckExistsByUsingRegexp = {
               test.equal(null, err);
               test.equal(true, result);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -985,16 +1011,16 @@ exports.shouldCorrectlyOpenGridStoreWithDifferentRoot = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     var asset = {source:new ObjectID()};
 
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var store = new GridStore(db, new ObjectID( asset.source.toString() ), 'w', {root: 'store'});
       store.open(function(err, gridStore) {
         test.equal(null, err);
 
-        db.close();
+        client.close();
         test.done();
       })
     });
@@ -1012,8 +1038,9 @@ exports.shouldCorrectlySetFilenameForGridstoreOpen = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var id = new ObjectID();
       var gridStore = new GridStore(db, id, "test_gs_read_length", "w");
       gridStore.open(function(err, gridStore) {
@@ -1024,7 +1051,7 @@ exports.shouldCorrectlySetFilenameForGridstoreOpen = {
             gridStore.open(function(err, gridStore) {
               test.equal(null, err);
               test.equal("test_gs_read_length", gridStore.filename);
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -1045,8 +1072,9 @@ exports.shouldCorrectlySaveFileAndThenOpenChangeContentTypeAndSaveAgain = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var id = new ObjectID();
       var gridStore = new GridStore(db, id, "test_gs_read_length", "w", {content_type: "image/jpeg"});
       gridStore.open(function(err, gridStore) {
@@ -1064,7 +1092,7 @@ exports.shouldCorrectlySaveFileAndThenOpenChangeContentTypeAndSaveAgain = {
                   gridStore.read(function(err, data) {
                     test.equal(null, err);
                     test.equal("hello world!", data.toString('utf8'));
-                    db.close();
+                    client.close();
                     test.done();
                   });
                 });
@@ -1088,8 +1116,9 @@ exports.shouldCorrectlySaveFileWithoutFilenameAndThenOpenAddFilenameAndSaveAgain
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var id = new ObjectID();
       var gridStore = new GridStore(db, id, "w", {content_type: "image/jpeg"});
       gridStore.open(function(err, gridStore) {
@@ -1108,7 +1137,7 @@ exports.shouldCorrectlySaveFileWithoutFilenameAndThenOpenAddFilenameAndSaveAgain
                     gridStore.read(function(err, data) {
                       test.equal(null, err);
                       test.equal("<h1>hello world!</h1>", data.toString('utf8'));
-                      db.close();
+                      client.close();
                       test.done();
                     });
                   });
@@ -1133,8 +1162,9 @@ exports.shouldCorrectlySaveFileAndThenOpenChangeFilenameAndSaveAgain = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var id = new ObjectID();
       var gridStore = new GridStore(db, id, "test_gs_filename3", "w", {content_type: "image/jpeg"});
       gridStore.open(function(err, gridStore) {
@@ -1153,7 +1183,7 @@ exports.shouldCorrectlySaveFileAndThenOpenChangeFilenameAndSaveAgain = {
                     gridStore.read(function(err, data) {
                       test.equal(null, err);
                       test.equal("<h1>hello world!</h1>", data.toString('utf8'));
-                      db.close();
+                      client.close();
                       test.done();
                     });
                   });
@@ -1178,8 +1208,9 @@ exports.shouldCorrectlySaveFileAndThenAppendChangeFilenameAndSaveAgain = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var id = new ObjectID();
       var gridStore = new GridStore(db, id, "test_gs_filename1", "w", {content_type: "image/jpeg"});
       gridStore.open(function(err, gridStore) {
@@ -1197,7 +1228,7 @@ exports.shouldCorrectlySaveFileAndThenAppendChangeFilenameAndSaveAgain = {
                   gridStore.read(function(err, data) {
                     test.equal(null, err);
                     test.equal("hello world!", data.toString('utf8'));
-                    db.close();
+                    client.close();
                     test.done();
                   });
                 });
@@ -1221,8 +1252,9 @@ exports.shouldCorrectlyHandleSeekWithStream = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var id = new ObjectID();
       var gridStore = new GridStore(db, id, "test_gs_read_length", "w", {content_type: "image/jpeg"});
       gridStore.open(function(err, gridStore) {
@@ -1245,7 +1277,7 @@ exports.shouldCorrectlyHandleSeekWithStream = {
                 });
 
                 stream.on('end', function() {
-                  db.close();
+                  client.close();
                   test.done();
                 });
               });
@@ -1268,8 +1300,9 @@ exports.shouldCorrectlyHandleSeekIntoSecondChunkWithStream = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var id = new ObjectID();
       var gridStore = new GridStore(db, id, "test_gs_read_length", "w", {content_type: "image/jpeg", chunk_size:5});
       gridStore.open(function(err, gridStore) {
@@ -1291,7 +1324,7 @@ exports.shouldCorrectlyHandleSeekIntoSecondChunkWithStream = {
 
                 stream.on('end', function() {
                   test.equal("orld!", data);
-                  db.close();
+                  client.close();
                   test.done();
                 });
               });
@@ -1314,8 +1347,9 @@ exports['Should correctly handle multiple seeks'] = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_gs_seek_with_buffer", "w");
       gridStore.open(function(err, gridStore) {
         gridStore.write(new Buffer("012345678901234567890", "utf8"), function(err, gridStore) {
@@ -1335,7 +1369,7 @@ exports['Should correctly handle multiple seeks'] = {
 
                       gridStore2.read( 5, function(err, data) {
                         test.equal("67890", data.toString());
-                        db.close();
+                        client.close();
                         test.done();
                       });
                     });
@@ -1361,8 +1395,9 @@ exports['Should correctly handle multiple seeks over several chunks'] = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_gs_seek_with_buffer", "w", {chunk_size:4});
       gridStore.open(function(err, gridStore) {
         gridStore.write(new Buffer("012345678901234567890", "utf8"), function(err, gridStore) {
@@ -1382,7 +1417,7 @@ exports['Should correctly handle multiple seeks over several chunks'] = {
 
                       gridStore2.read( 5, function(err, data) {
                         test.equal("67890", data.toString());
-                        db.close();
+                        client.close();
                         test.done();
                       });
                     });
@@ -1408,8 +1443,9 @@ exports.shouldWriteFileWithMongofilesAndReadWithNodeJS = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var id = new ObjectID();
 
       // Execute function
@@ -1430,7 +1466,7 @@ exports.shouldWriteFileWithMongofilesAndReadWithNodeJS = {
             gridStore.read(function(err, data) {
               test.equal(null, err);
               test.deepEqual(originalData, data);
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -1451,8 +1487,9 @@ exports['Should fail when attempting to append to a file'] = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       var chunkSize = 256*1024;  // Standard 256KB chunks
       // Our file ID
@@ -1488,7 +1525,7 @@ exports['Should fail when attempting to append to a file'] = {
               gridStore.write(buffer, function(err, gridStore) {
                 test.ok(err != null);
 
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -1509,13 +1546,15 @@ exports.shouldCorrectlyStreamReadFromGridStoreObject = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    client.open(function(err, client) {
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Set up gridStore
-      var gridStore = new GridStore(client, "test_stream_write_2", "w");
+      var gridStore = new GridStore(db, "test_stream_write_2", "w");
       gridStore.writeFile("./test/functional/data/test_gs_working_field_read.pdf", function(err, result) {
         // Open a readable gridStore
-        gridStore = new GridStore(client, "test_stream_write_2", "r");
+        gridStore = new GridStore(db, "test_stream_write_2", "r");
 
         // Create a file write stream
         var fileStream = fs.createWriteStream("./test_stream_write_2.tmp");
@@ -1546,12 +1585,13 @@ exports.shouldCorrectlyStreamReadFromGridStoreObjectNoGridStoreOpenCalled = {
       , ObjectID = configuration.require.ObjectID;
 
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    client.open(function(err, client) {
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Set up gridStore
-      var gridStore = new GridStore(client, "test_stream_write_2", "w");
+      var gridStore = new GridStore(db, "test_stream_write_2", "w");
       gridStore.writeFile("./test/functional/data/test_gs_working_field_read.pdf", function(err, result) {
         // Open a readable gridStore
-        gridStore = new GridStore(client, "test_stream_write_2", "r");
+        gridStore = new GridStore(db, "test_stream_write_2", "r");
         var gotData = false;
 
         // Pipe out the data
@@ -1581,19 +1621,21 @@ exports.shouldCorrectlyStreamWriteFromGridStoreObject = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    client.open(function(err, client) {
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var filename = "test_stream_write_2";
       var filepath = "./test/functional/data/test_gs_working_field_read.pdf";
       // Set up streams
       var fileStream = fs.createReadStream(filepath);
-      var storeStream = new GridStore(client, filename, "w").stream();
+      var storeStream = new GridStore(db, filename, "w").stream();
 
       // Finish up once the file has been all read
       storeStream.on("end", function(err) {
 
         // Just read the content and compare to the raw binary
-        GridStore.read(client, filename, function(err, gridData) {
+        GridStore.read(db, filename, function(err, gridData) {
           test.equal(null, err);
           var fileData = fs.readFileSync(filepath);
           test.equal(fileData.toString('hex'), gridData.toString('hex'));
@@ -1620,8 +1662,9 @@ exports.shouldCorrectlyWriteLargeFileStringAndReadBack = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var fileId = new ObjectID();
       var gridStore = new GridStore(db, fileId, "w", {root:'fs'});
       gridStore.chunkSize = 5000;
@@ -1657,7 +1700,7 @@ exports.shouldCorrectlyWriteLargeFileStringAndReadBack = {
 
                   stream.on("end", function() {
                     test.equal(15000, endLen);
-                    db.close();
+                    client.close();
                     test.done();
                   });
                 });
@@ -1681,8 +1724,9 @@ exports.shouldCorrectlyWriteLargeFileBufferAndReadBack = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var fileId = new ObjectID();
       var gridStore = new GridStore(db, fileId, "w", {root:'fs'});
       gridStore.chunkSize = 5000;
@@ -1718,7 +1762,7 @@ exports.shouldCorrectlyWriteLargeFileBufferAndReadBack = {
 
                   stream.on("end", function() {
                     test.equal(15000, endLen);
-                    db.close();
+                    client.close();
                     test.done();
                   });
                 });
@@ -1741,8 +1785,9 @@ exports['Should return same data for streaming as for direct read'] = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStoreR = new GridStore(db, "test_gs_read_stream", "r");
       var gridStoreW = new GridStore(db, "test_gs_read_stream", "w", {chunkSize:56});
       // var data = fs.readFileSync("./test/gridstore/test_gs_weird_bug.png");
@@ -1787,7 +1832,7 @@ exports['Should return same data for streaming as for direct read'] = {
                       test.equal(streamData[i], data[i])
                     }
 
-                    db.close();
+                    client.close();
                     test.done();
                   })
                 })
@@ -1810,8 +1855,9 @@ exports.shouldCorrectlyFailDueToMissingChunks = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var FILE = "empty.test.file";
       db.collection('fs.files', function(err, collection) {
         collection.insert({filename: FILE,
@@ -1826,7 +1872,7 @@ exports.shouldCorrectlyFailDueToMissingChunks = {
               gs.read(function(err, data) {
                 test.ok(err != null);
                 gs.close(function (){});
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -1847,8 +1893,9 @@ exports.shouldCorrectlyWriteASmallPayload = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_gs_small_write4", "w");
       gridStore.open(function(err, gridStore) {
 
@@ -1868,7 +1915,7 @@ exports.shouldCorrectlyWriteASmallPayload = {
 
                   collection.find({'files_id':id}).toArray(function(err, items) {
                     test.equal(1, items.length);
-                    db.close();
+                    client.close();
                     test.done();
                   })
                 });
@@ -1891,8 +1938,9 @@ exports.shouldCorrectlyWriteSmallFileUsingABuffer = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_gs_small_write_with_buffer", "w");
       gridStore.open(function(err, gridStore) {
         var data = new Buffer("hello world", "utf8");
@@ -1907,7 +1955,7 @@ exports.shouldCorrectlyWriteSmallFileUsingABuffer = {
                 db.collection('fs.chunks', function(err, collection) {
                   collection.find({'files_id':item._id}).toArray(function(err, items) {
                     test.equal(1, items.length);
-                    db.close();
+                    client.close();
                     test.done();
                   })
                 });
@@ -1930,8 +1978,9 @@ exports.shouldSaveSmallFileToGridStore = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_gs_small_file", "w");
       gridStore.open(function(err, gridStore) {
         gridStore.write("hello world!", function(err, gridStore) {
@@ -1944,7 +1993,7 @@ exports.shouldSaveSmallFileToGridStore = {
                 // Read test of the file
                 GridStore.read(db, 'test_gs_small_file', function(err, data) {
                   test.equal('hello world!', data);
-                  db.close();
+                  client.close();
                   test.done();
                 });
               });
@@ -1966,8 +2015,9 @@ exports.shouldCorrectlyOverwriteFile = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_gs_overwrite", "w");
       gridStore.open(function(err, gridStore) {
         gridStore.write("hello world!", function(err, gridStore) {
@@ -1980,7 +2030,7 @@ exports.shouldCorrectlyOverwriteFile = {
                   // Assert that we have overwriten the data
                   GridStore.read(db, 'test_gs_overwrite', function(err, data) {
                     test.equal('overwrite', data);
-                    db.close();
+                    client.close();
                     test.done();
                   });
                 });
@@ -2003,8 +2053,9 @@ exports.shouldCorrectlySeekWithString = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_gs_seek", "w");
       gridStore.open(function(err, gridStore) {
         gridStore.write("hello, world!", function(err, gridStore) {
@@ -2056,7 +2107,7 @@ exports.shouldCorrectlySeekWithString = {
                                                         gridStore.seek(3, GridStore.IO_SEEK_CUR, function(err, gridStore) {
                                                           gridStore.getc(function(err, chr) {
                                                             test.equal('o', chr);
-                                                            db.close();
+                                                            client.close();
                                                             test.done();
                                                           });
                                                         });
@@ -2098,10 +2149,10 @@ exports.shouldCorrectlySeekAcrossChunks = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Create a new file
       var gridStore = new GridStore(db, "test_gs_seek_across_chunks", "w");
       // Open the file
@@ -2127,7 +2178,7 @@ exports.shouldCorrectlySeekAcrossChunks = {
                   test.equal(gridStore.chunkSize+1, position);
                   clearTimeout(timeout);
 
-                  db.close();
+                  client.close();
                   test.done();
                 });
               });
@@ -2149,28 +2200,29 @@ exports.shouldCorrectlySaveEmptyFile = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
-    var fs_db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    fs_db.open(function(err, fs_db) {
-      var gridStore = new GridStore(fs_db, "test_gs_save_empty_file", "w");
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);     
+      var gridStore = new GridStore(db, "test_gs_save_empty_file", "w");
       gridStore.open(function(err, gridStore) {
 
-        fs_db.collection('fs.files').deleteMany({}, function() {
-          fs_db.collection('fs.chunks').deleteMany({}, function() {
+        db.collection('fs.files').deleteMany({}, function() {
+          db.collection('fs.chunks').deleteMany({}, function() {
 
             gridStore.write("", function(err, gridStore) {
               gridStore.close(function(err, result) {
-                fs_db.collection('fs.files', function(err, collection) {
+                db.collection('fs.files', function(err, collection) {
                   collection.count(function(err, count) {
                     test.equal(1, count);
                   });
                 });
 
-                fs_db.collection('fs.chunks', function(err, collection) {
+                db.collection('fs.chunks', function(err, collection) {
                   collection.count(function(err, count) {
                     test.equal(0, count);
 
-                    fs_db.close();
+                    client.close();
                     test.done();
                   });
                 });
@@ -2194,8 +2246,9 @@ exports.shouldEnsureThatChunkSizeCannotBeChangedDuringRead = {
     var GridStore = configuration.require.GridStore
       , Chunk = configuration.require.Chunk;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_gs_cannot_change_chunk_size_on_read", "w");
       gridStore.open(function(err, gridStore) {
         gridStore.write("hello, world!", function(err, gridStore) {
@@ -2205,7 +2258,7 @@ exports.shouldEnsureThatChunkSizeCannotBeChangedDuringRead = {
             gridStore2.open(function(err, gridStore) {
               gridStore.chunkSize = 42;
               test.equal(Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -2226,14 +2279,15 @@ exports.shouldEnsureChunkSizeCannotChangeAfterDataHasBeenWritten = {
     var GridStore = configuration.require.GridStore
       , Chunk = configuration.require.Chunk;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_gs_cannot_change_chunk_size_after_data_written", "w");
       gridStore.open(function(err, gridStore) {
         gridStore.write("hello, world!", function(err, gridStore) {
           gridStore.chunkSize = 42;
           test.equal(Chunk.DEFAULT_CHUNK_SIZE, gridStore.chunkSize);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -2253,8 +2307,9 @@ exports.shouldCorrectlyStore8bitValues = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_gs_check_high_bits", "w");
       var data = new Buffer(255);
       for(var i=0; i<255; i++){
@@ -2270,7 +2325,7 @@ exports.shouldCorrectlyStore8bitValues = {
               test.equal(data.toString('hex'), fileData.toString('hex'));
               // test.equal(Array.prototype.join.call(data),
               //         Array.prototype.join.call(new Buffer(fileData, "binary")));
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -2290,8 +2345,9 @@ exports.shouldAllowChangingChunkSize = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_change_chunk_size", "w");
       gridStore.open(function(err, gridStore) {
         gridStore.chunkSize = 42
@@ -2301,7 +2357,7 @@ exports.shouldAllowChangingChunkSize = {
             var gridStore2 = new GridStore(db, "test_change_chunk_size", "r");
             gridStore2.open(function(err, gridStore) {
               test.equal(42, gridStore.chunkSize);
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -2321,8 +2377,9 @@ exports.shouldAllowChangingChunkSizeAtCreationOfGridStore = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_change_chunk_size", "w", {'chunk_size':42});
       gridStore.open(function(err, gridStore) {
         gridStore.write('foo', function(err, gridStore) {
@@ -2330,7 +2387,7 @@ exports.shouldAllowChangingChunkSizeAtCreationOfGridStore = {
             var gridStore2 = new GridStore(db, "test_change_chunk_size", "r");
             gridStore2.open(function(err, gridStore) {
               test.equal(42, gridStore.chunkSize);
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -2350,8 +2407,9 @@ exports.shouldCorrectlyCalculateMD5 = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "new-file", "w");
       gridStore.open(function(err, gridStore) {
         gridStore.write('hello world\n', function(err, gridStore) {
@@ -2372,7 +2430,7 @@ exports.shouldCorrectlyCalculateMD5 = {
                   var gridStore3 = new GridStore(db, "new-file", "r");
                   gridStore3.open(function(err, gridStore) {
                     test.equal("d41d8cd98f00b204e9800998ecf8427e", gridStore.md5);
-                    db.close();
+                    client.close();
                     test.done();
                   });
                 })
@@ -2395,8 +2453,9 @@ exports.shouldCorrectlyUpdateUploadDate = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var now = new Date();
       var originalFileUploadDate = null;
 
@@ -2420,7 +2479,7 @@ exports.shouldCorrectlyUpdateUploadDate = {
                       var gridStore4 = new GridStore(db, "test_gs_upload_date", "r");
                       gridStore4.open(function(err, gridStore) {
                         test.equal(originalFileUploadDate.getTime(), gridStore.uploadDate.getTime());
-                        db.close();
+                        client.close();
                         test.done();
                       });
                     });
@@ -2445,8 +2504,9 @@ exports.shouldCorrectlySaveContentType = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var ct = null;
 
       var gridStore = new GridStore(db, "test_gs_content_type", "w");
@@ -2466,7 +2526,7 @@ exports.shouldCorrectlySaveContentType = {
                   var gridStore4 = new GridStore(db, "test_gs_content_type", "r");
                   gridStore4.open(function(err, gridStore) {
                     test.equal("text/html", gridStore.contentType);
-                    db.close();
+                    client.close();
                     test.done();
                   });
                 })
@@ -2489,8 +2549,9 @@ exports.shouldCorrectlySaveContentTypeWhenPassedInAtGridStoreCreation = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_gs_content_type_option", "w", {'content_type':'image/jpg'});
       gridStore.open(function(err, gridStore) {
         gridStore.write('hello world\n', function(err, gridStore) {
@@ -2499,7 +2560,7 @@ exports.shouldCorrectlySaveContentTypeWhenPassedInAtGridStoreCreation = {
             var gridStore2 = new GridStore(db, "test_gs_content_type_option", "r");
             gridStore2.open(function(err, gridStore) {
               test.equal('image/jpg', gridStore.contentType);
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -2519,15 +2580,16 @@ exports.shouldCorrectlyReportIllegalMode = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_gs_unknown_mode", "x");
       try {
         gridStore.open(function(err, gridStore) {});
       } catch(err) {
         test.ok(err instanceof Error);
         test.equal("Illegal mode x", err.message);
-        db.close();
+        client.close();
         test.done();
       }
     });
@@ -2544,8 +2606,9 @@ exports.shouldCorrectlySaveAndRetrieveFileMetadata = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_gs_metadata", "w", {'content_type':'image/jpg'});
       gridStore.open(function(err, gridStore) {
         gridStore.write('hello world\n', function(err, gridStore) {
@@ -2563,7 +2626,7 @@ exports.shouldCorrectlySaveAndRetrieveFileMetadata = {
                   var gridStore4 = new GridStore(db, "test_gs_metadata", "r");
                   gridStore4.open(function(err, gridStore) {
                     test.equal(1, gridStore.metadata.a);
-                    db.close();
+                    client.close();
                     test.done();
                   });
                 });
@@ -2586,8 +2649,9 @@ exports.shouldNotThrowErrorOnClosingOfGridObject = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_gs_metadata", "w", {'content_type':'image/jpg'});
       gridStore.open(function(err, gridStore) {
         gridStore.write('hello world\n', function(err, gridStore) {
@@ -2598,7 +2662,7 @@ exports.shouldNotThrowErrorOnClosingOfGridObject = {
               gridStore.close(function(err, fo) {
                 test.ok(err == null);
                 test.ok(fo == null);
-                db.close();
+                client.close();
                 test.done();
               })
             });
@@ -2620,8 +2684,9 @@ exports.shouldNotThrowErrorOnClose = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var fieldId = new ObjectID();
       var gridStore = new GridStore(db, fieldId, "w", {root:'fs'});
       gridStore.chunkSize = 1024 * 256;
@@ -2638,7 +2703,7 @@ exports.shouldNotThrowErrorOnClose = {
 
         write(numberOfWrites, function() {
           gridStore.close(function(err, result) {
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -2657,8 +2722,9 @@ exports.shouldCorrectlySafeFileUsingIntAsIdKey = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, 500, "test_gs_small_write2", "w");
       gridStore.open(function(err, gridStore) {
 
@@ -2689,7 +2755,7 @@ exports.shouldCorrectlySafeFileUsingIntAsIdKey = {
                         GridStore.read(db, "test_gs_small_write2", function(err, data) {
                           test.equal(null, err);
                           test.equal('hello world!', data.toString('ascii'));
-                          db.close();
+                          client.close();
                           test.done();
                         })
                       })
@@ -2716,8 +2782,9 @@ exports.shouldCorrectlyReadWithPositionOffset = {
     var GridStore = configuration.require.GridStore
       , Long = configuration.require.Long;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Massive data Buffer
       var data = new Buffer(1024*512);
       // Set some data in the buffer at a point we want to read in the next chunk
@@ -2736,7 +2803,7 @@ exports.shouldCorrectlyReadWithPositionOffset = {
                 // Read
                 gridStore.read(5, function(err, data) {
                   test.equal('world', data.toString('ascii'))
-                  db.close();
+                  client.close();
                   test.done();
                 })
               });
@@ -2758,8 +2825,9 @@ exports.shouldCorrectlyWrite = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var mystr = '';
       var sizestr = 1024*25;
       for( var j = 0; j < sizestr; j++ ) {
@@ -2781,7 +2849,7 @@ exports.shouldCorrectlyWrite = {
                   gs2.read(function(err, datar) {
                     test.equal(mystr.length, datar.length);
                     test.equal(mystr, datar.toString('ascii'));
-                    db.close();
+                    client.close();
                     test.done();
                   });
                 });
@@ -2804,12 +2872,13 @@ exports.shouldCorrectlyReturnErrorMessageOnNoFileExisting = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "_i_shouldCorrectlyWriteASmallPayload", "r");
       gridStore.open(function(err, gridStore) {
         test.ok(err != null);
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -2826,13 +2895,14 @@ exports['should fail when seeking on a write enabled gridstore object'] = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var gridStore = new GridStore(db, "test_gs_metadata", "w", {'content_type':'image/jpg'});
       gridStore.open(function(err, gridStore) {
         gridStore.seek(0, function(err, g) {
           test.ok(err != null);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -2851,8 +2921,9 @@ exports['should correctly handle filename as ObjectId'] = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var id = new ObjectID();
       var gridStore = new GridStore(db, id, id, "w");
       gridStore.open(function(err, gridStore) {
@@ -2863,7 +2934,7 @@ exports['should correctly handle filename as ObjectId'] = {
             GridStore.exist(db, {filename: id}, function(err, r) {
               test.equal(true, r);
 
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -2890,8 +2961,9 @@ exports['should correctly pipe through multiple pipelines'] = {
     // Connection URL
     var url = 'mongodb://localhost:27017/myproject';
     // Use connect method to connect to the Server
-    MongoClient.connect(configuration.url(), {server: {sslValidate: false}}, function(err, db) {
+    MongoClient.connect(configuration.url(), {server: {sslValidate: false}}, function(err, client) {
       assert.equal(null, err);
+      var db = client.db(configuration.database);
 
       // Set up gridStore
       var stream = new GridStore(db, 'simple_100_document_toArray.png', 'w').stream();
@@ -2908,7 +2980,7 @@ exports['should correctly pipe through multiple pipelines'] = {
           test.equal(null, err);
           var fileData = fs.readFileSync(filename);
           test.equal(fileData.toString('hex'), gridData.toString('hex'));
-          db.close();
+          client.close();
           test.done();
         })
       });
@@ -2936,8 +3008,9 @@ exports['should correctly seek on file where size of file is a multiple of the c
     // Connection URL
     var url = 'mongodb://localhost:27017/myproject';
     // Use connect method to connect to the Server
-    MongoClient.connect(configuration.url(), {server: {sslValidate: false}}, function(err, db) {
+    MongoClient.connect(configuration.url(), {server: {sslValidate: false}}, function(err, client) {
       assert.equal(null, err);
+      var db = client.db(configuration.database);
 
       var gridStore = new GridStore(db, "test_gs_multi_chunk_exact_size", "w");
       gridStore.open(function(err, gridStore) {
@@ -2972,7 +3045,7 @@ exports['should correctly seek on file where size of file is a multiple of the c
                         test.equal(null, err);
                         test.equal(512 * 4, data.length);
 
-                        db.close();
+                        client.close();
                         test.done();
                       });
                     });
@@ -3006,8 +3079,9 @@ exports['should correctly seek on file where size of file is a multiple of the c
     var id = new ObjectID();
 
     // Use connect method to connect to the Server
-    MongoClient.connect(configuration.url(), {server: {sslValidate: false}}, function(err, db) {
+    MongoClient.connect(configuration.url(), {server: {sslValidate: false}}, function(err, client) {
       assert.equal(null, err);
+      var db = client.db(configuration.database);
 
       var gridStore = new GridStore(db, id, "w");
       gridStore.open(function(err, gridStore) {
@@ -3055,7 +3129,7 @@ exports['should correctly seek on file where size of file is a multiple of the c
                       stream.on('end', function() {
                         test.equal(data.toString('hex'), retrieved)
 
-                        db.close();
+                        client.close();
                         test.done();
                       });
                     });
@@ -3092,8 +3166,9 @@ exports['should correctly write fake png to gridstore'] = {
     var buffer = new Buffer(200033);
 
     // Use connect method to connect to the Server
-    MongoClient.connect(configuration.url(), {server: {sslValidate: false}}, function(err, db) {
+    MongoClient.connect(configuration.url(), {server: {sslValidate: false}}, function(err, client) {
       assert.equal(null, err);
+      var db = client.db(configuration.database);
 
       var gridStore = new GridStore(db, new ObjectID(), 'w', { "content_type": "image/png", "chunk_size": 1024*4 });
       gridStore.open(function(err, gridStore) {
@@ -3105,7 +3180,7 @@ exports['should correctly write fake png to gridstore'] = {
           gridStore.close(function(err, result) {
             test.equal(null, err);
 
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -3125,7 +3200,6 @@ exports['should not attempt to delete chunks when no file exists'] = {
       , GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
     var started = [];
     var succeeded = [];
     var failed = [];
@@ -3133,8 +3207,9 @@ exports['should not attempt to delete chunks when no file exists'] = {
     // Create a test buffer
     var buffer = new Buffer(2000);
 
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       var listener = require('../..').instrument(function(err, instrumentations) {});
@@ -3159,7 +3234,7 @@ exports['should not attempt to delete chunks when no file exists'] = {
             test.equal(null, err);
 
             listener.uninstrument();
-            db.close();
+            client.close();
             test.done();
           });
         });

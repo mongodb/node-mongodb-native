@@ -5,8 +5,9 @@ exports.shouldFailInsertDueToUniqueIndex = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('test_failing_insert_due_to_unique_index');
       // console.log("!!!!!!!!!!!!!!!!!!! ensureIndex 0")
       collection.ensureIndex([['a', 1 ]], {unique:true, w:1}, function(err, indexName) {
@@ -19,7 +20,7 @@ exports.shouldFailInsertDueToUniqueIndex = {
           collection.insert({a:2}, {w: 1}, function(err, r) {
             test.ok(err.code != null);
             test.ok(err != null);
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -34,8 +35,9 @@ exports.shouldFailInsertDueToUniqueIndexStrict = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.dropCollection('test_failing_insert_due_to_unique_index_strict', function(err, r) {
         db.createCollection('test_failing_insert_due_to_unique_index_strict', function(err, r) {
           db.collection('test_failing_insert_due_to_unique_index_strict', function(err, collection) {
@@ -45,7 +47,7 @@ exports.shouldFailInsertDueToUniqueIndexStrict = {
 
                 collection.insert({a:2}, {w:1}, function(err, r) {
                   test.ok(err != null);
-                  db.close();
+                  client.close();
                   test.done();
                 });
               });
@@ -62,15 +64,16 @@ exports['mixing included and excluded fields should return an error object with 
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var c = db.collection('test_error_object_should_include_message');
       c.insert({a:2, b: 5}, {w:1}, function(err, r) {
         test.equal(err, null);
 
         c.findOne({a:2}, {fields: {a:1, b:0}}, function(err) {
           test.ok(err != null);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -83,13 +86,14 @@ exports['should handle error throw in user callback'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var client = configuration.newDbInstance({w:1}, {poolSize:1});
     process.once("uncaughtException", function(err) {
-      db.close();
+      client.close();
       test.done();
     })
 
-    db.open(function(err, client) {
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var c = db.collection('test_error_object_should_include_message');
       c.findOne({}, function() {
         ggg
@@ -103,13 +107,14 @@ exports['should handle error throw in user callbackwhen calling count'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var client = configuration.newDbInstance({w:1}, {poolSize:1});
     process.once("uncaughtException", function(err) {
-      db.close();
+      client.close();
       test.done();
     })
 
-    db.open(function(err, client) {
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var c = db.collection('test_error_object_should_include_message');
       c.find({}).count(function() {
         ggg
@@ -123,13 +128,13 @@ exports['Should handle uncaught error correctly'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var client = configuration.newDbInstance({w:1}, {poolSize:1});
     process.once("uncaughtException", function(err) {
-      db.close();
+      client.close();
       test.done();
     })
 
-    db.open(function(err, db) {
+    client.connect(function(err, db) {
       testdfdma();
       test.ok(false);
     });
@@ -141,10 +146,12 @@ exports['Should handle throw error in db operation correctly'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
+
       process.once("uncaughtException", function(err) {
-        db.close();
+        client.close();
         test.done();
       })
 
@@ -185,9 +192,11 @@ exports['Should handle MongoClient throw error in db operation correctly'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
-    MongoClient.connect(configuration.url(), {server: {sslValidate:false}}, function(err, db) {
+    MongoClient.connect(configuration.url(), {server: {sslValidate:false}}, function(err, client) {
+      var db = client.db(configuration.database);
+
       process.once("uncaughtException", function(err) {
-        db.close();
+        client.close();
         test.done();
       })
 
@@ -205,19 +214,21 @@ exports['Should handle Error thrown during operation'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = null;
+    var client = null;
 
     process.once("uncaughtException", function(err) {
-      db.close();
+      console.log(err)
+      client.close();
       test.done();
     });
 
     var MongoClient = configuration.require.MongoClient;
     MongoClient.connect(configuration.url()
       , {server: {sslValidate:false}, replset: {sslValidate:false}, mongos: {sslValidate:false}}
-      , function(err, _db) {
+      , function(err, _client) {
       test.equal(null, err);
-      db = _db;
+      client = _client;
+      var db = client.db(configuration.database);
 
       db.collection('throwerrorduringoperation').insert([{a:1}, {a:1}], function(err, result) {
         test.equal(null, err);
@@ -241,8 +252,10 @@ exports.shouldCorrectlyHandleThrownError = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
+
       db.createCollection('shouldCorrectlyHandleThrownError', function(err, r) {
         try {
           db.collection('shouldCorrectlyHandleThrownError', function(err, collection) {
@@ -250,7 +263,7 @@ exports.shouldCorrectlyHandleThrownError = {
           });
         } catch (err) {
           test.ok(err != null);
-          db.close();
+          client.close();
           test.done();
         }
       });
@@ -268,17 +281,19 @@ exports.shouldCorrectlyHandleThrownErrorInRename = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, socketTimeoutMS:5000, connectTimeoutMS: 5000});
+    var client = configuration.newDbInstance({w:1}, {poolSize:1, socketTimeoutMS:5000, connectTimeoutMS: 5000});
     var domain = require('domain');
     var d = domain.create();
     d.on('error', function(err) {
-      db.close();
+      client.close();
       d.dispose();
       test.done();
     })
 
     d.run(function() {
-      db.open(function(err, db) {
+      client.connect(function(err, client) {
+        var db = client.db(configuration.database);
+
         // Execute code
         db.createCollection('shouldCorrectlyHandleThrownErrorInRename', function(err, r) {
           db.collection('shouldCorrectlyHandleThrownError', function(err, collection) {
@@ -300,15 +315,16 @@ exports.shouldCorrectlyHandleExceptionsInCursorNext = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var client = configuration.newDbInstance({w:1}, {poolSize:1});
 
     process.once('uncaughtException', function(err) {
       test.ok(err != null);
-      db.close();
+      client.close();
       test.done();
     });
 
-    db.open(function(err, db) {
+    client.connect(function(err, db) {
+      var db = client.db(configuration.database);
       var col = db.collection('shouldCorrectlyHandleExceptionsInCursorNext');
       col.insert({a:1}, function(err, result) {
         col.find().nextObject(function(err, result) {
@@ -327,16 +343,18 @@ exports.shouldCorrectlyHandleExceptionsInCursorEach = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var client = configuration.newDbInstance({w:1}, {poolSize:1});
 
     process.once('uncaughtException', function(err) {
       test.ok(err != null);
-      db.close();
+      client.close();
       test.done();
     });
 
-    db.open(function(err, db) {
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var col = db.collection('shouldCorrectlyHandleExceptionsInCursorNext');
+
       col.insert({a:1}, function(err, result) {
         col.find().each(function(err, result) {
           boom

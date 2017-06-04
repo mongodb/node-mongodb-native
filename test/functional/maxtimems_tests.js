@@ -7,8 +7,9 @@ exports['Should Correctly respect the maxtimeMs property on count'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var col = db.collection('max_time_ms');
 
       // Insert a couple of docs
@@ -23,7 +24,7 @@ exports['Should Correctly respect the maxtimeMs property on count'] = {
           .maxTimeMS(50)
           .count(function(err, count) {
             test.ok(err != null);
-            db.close();
+            client.close();
             test.done();
         });
       });
@@ -45,8 +46,9 @@ exports['Should Correctly respect the maxtimeMs property on toArray'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var col = db.collection('max_time_ms_2');
 
       // Insert a couple of docs
@@ -62,7 +64,7 @@ exports['Should Correctly respect the maxtimeMs property on toArray'] = {
           .toArray(function(err, items) {
             console.dir(err)
             test.ok(err != null);
-            db.close();
+            client.close();
             test.done();
         });
       });
@@ -82,8 +84,9 @@ exports['Should Correctly fail with maxTimeMS error'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var col = db.collection('max_time_ms_5');
 
       // Insert a couple of docs
@@ -101,7 +104,7 @@ exports['Should Correctly fail with maxTimeMS error'] = {
 
             db.admin().command({configureFailPoint: "maxTimeAlwaysTimeOut", mode: "off"}, function(err, result) {
               test.equal(true, result.ok);
-              db.close();
+              client.close();
               test.done();
             });
           });

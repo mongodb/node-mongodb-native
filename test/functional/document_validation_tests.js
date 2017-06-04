@@ -9,13 +9,13 @@ exports['should allow bypassing document validation in 3.2 or higher on inserts'
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
     var started = [];
     var succeeded = [];
     var failed = [];
 
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Get collection
@@ -44,7 +44,7 @@ exports['should allow bypassing document validation in 3.2 or higher on inserts'
                 col.insertMany([{b:1}], {bypassDocumentValidation:true}, function(err, r) {
                   test.equal(null, err);
 
-                  db.close();
+                  client.close();
                   test.done();
                 });
               });
@@ -63,13 +63,13 @@ exports['should allow bypassing document validation in 3.2 or higher on updates'
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
     var started = [];
     var succeeded = [];
     var failed = [];
 
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Get collection
@@ -102,7 +102,7 @@ exports['should allow bypassing document validation in 3.2 or higher on updates'
                   col.replaceOne({e:1}, {$set: {e:1}}, {upsert:true, bypassDocumentValidation:true}, function(err, r) {
                     test.equal(null, err);
 
-                    db.close();
+                    client.close();
                     test.done();
                   });
                 });
@@ -122,13 +122,13 @@ exports['should allow bypassing document validation in 3.2 or higher on bulkWrit
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
     var started = [];
     var succeeded = [];
     var failed = [];
 
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Get collection
@@ -152,7 +152,7 @@ exports['should allow bypassing document validation in 3.2 or higher on bulkWrit
               ], {bypassDocumentValidation:true}, function(err) {
                 test.equal(null, err);
 
-                db.close();
+                client.close();
                 test.done();
             });
           });
@@ -169,13 +169,13 @@ exports['should allow bypassing document validation in 3.2 or higher on findAndM
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
     var started = [];
     var succeeded = [];
     var failed = [];
 
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       // Get collection
@@ -200,7 +200,7 @@ exports['should allow bypassing document validation in 3.2 or higher on findAndM
               col.findOneAndReplace({c:1}, {c:1}, {upsert:true, bypassDocumentValidation:true}, function(err, r) {
                 test.equal(null, err);
 
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -217,9 +217,10 @@ exports['should correctly bypass validation for aggregation using out'] = {
   metadata: { requires: { mongodb:">=3.1.7", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
           title : "this is my title", author : "bob", posted : new Date() ,
@@ -256,7 +257,7 @@ exports['should correctly bypass validation for aggregation using out'] = {
               ], {bypassDocumentValidation:true}, function(err, result) {
                 test.equal(null, err);
 
-                db.close();
+                client.close();
                 test.done();
             });
           });
@@ -272,9 +273,10 @@ exports['should correctly bypass validation for mapReduce using out'] = {
   metadata: { requires: { mongodb:">=3.1.7", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
   
   // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
           title : "this is my title", author : "bob", posted : new Date() ,
@@ -294,7 +296,7 @@ exports['should correctly bypass validation for mapReduce using out'] = {
           test.equal(null, err);
 
           // Get write concern
-          var writeConcern = configure.writeConcernMax();
+          var writeConcern = configuration.writeConcernMax();
           writeConcern.bypassDocumentValidation = true;
 
           // Insert documents
@@ -306,7 +308,7 @@ exports['should correctly bypass validation for mapReduce using out'] = {
             col.mapReduce(map, reduce, {out: {replace : 'createValidationCollectionOut'}, bypassDocumentValidation: true}, function(err, collection) {
               test.equal(null, err);
 
-              db.close();
+              client.close();
               test.done();
             });
           });

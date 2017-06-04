@@ -10,7 +10,8 @@ exports['should maintain batch size between calls to receive new batches'] = {
 
     co(function*() {
       var instance = configure.newDbInstance({ w: 1 }, { poolSize: 1 });
-      var db = yield instance.open();
+      var client = yield instance.connect();
+      var db = client.db(configure.database);
 
       var docs = [ { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 } ];
       var collection = db.collection('batchSizeContinue');
@@ -32,7 +33,7 @@ exports['should maintain batch size between calls to receive new batches'] = {
       }
 
       test.equal(count, 6);
-      db.close();
+      client.close();
       test.done();
     }).catch(err => {
       console.log(err)

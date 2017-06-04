@@ -8,8 +8,9 @@ exports.shouldCorrectlyExtractIndexInformation = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_index_information', function(err, collection) {
         collection.insert({a:1}, configuration.writeConcernMax(), function(err, ids) {
           // Create an index on the collection
@@ -41,7 +42,7 @@ exports.shouldCorrectlyExtractIndexInformation = {
                 test.deepEqual([["a", 1]], collectionInfo[indexName]);
 
                 // Let's close the db
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -60,8 +61,9 @@ exports.shouldCorrectlyHandleMultipleColumnIndexes = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_multiple_index_cols', function(err, collection) {
         collection.insert({a:1}, function(err, ids) {
           // Create an index on the collection
@@ -79,7 +81,7 @@ exports.shouldCorrectlyHandleMultipleColumnIndexes = {
               test.deepEqual([['a', -1], ['b', 1], ['c', -1]], collectionInfo[indexName]);
 
               // Let's close the db
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -99,8 +101,9 @@ exports.shouldCorrectlyHandleUniqueIndex = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Create a non-unique index and test inserts
       db.createCollection('test_unique_index', function(err, collection) {
         db.createIndex(collection.collectionName, 'hello', configuration.writeConcernMax(), function(err, indexName) {
@@ -115,7 +118,7 @@ exports.shouldCorrectlyHandleUniqueIndex = {
                 collection.insert([{'hello':'world'}, {'hello':'mike'}, {'hello':'world'}], configuration.writeConcernMax(), function(err, ids) {
                   test.ok(err != null);
                   test.equal(11000, err.code);
-                  db.close();
+                  client.close();
                   test.done();
                 });
               });
@@ -135,8 +138,9 @@ exports.shouldCorrectlyCreateSubfieldIndex = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Create a non-unique index and test inserts
       db.createCollection('test_index_on_subfield', function(err, collection) {
         collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], configuration.writeConcernMax(), function(err, ids) {
@@ -151,7 +155,7 @@ exports.shouldCorrectlyCreateSubfieldIndex = {
               collection.insert([{'hello': {'a':4, 'b':5}}, {'hello': {'a':7, 'b':2}}, {'hello': {'a':4, 'b':10}}], configuration.writeConcernMax(), function(err, ids) {
                 // Assert that we have erros
                 test.ok(err != null);
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -170,8 +174,9 @@ exports.shouldCorrectlyDropIndexes = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_drop_indexes', function(err, collection) {
         collection.insert({a:1}, configuration.writeConcernMax(), function(err, ids) {
           // Create an index on the collection
@@ -183,7 +188,7 @@ exports.shouldCorrectlyDropIndexes = {
 
               collection.indexInformation(function(err, result) {
                 test.ok(result['a_1'] == null);
-                db.close();
+                client.close();
                 test.done();
               })
             })
@@ -202,8 +207,9 @@ exports.shouldThrowErrorOnAttemptingSafeCreateIndexWithNoCallback = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('shouldThrowErrorOnAttemptingSafeUpdateWithNoCallback', function(err, collection) {
         try {
           // insert a doc
@@ -211,7 +217,7 @@ exports.shouldThrowErrorOnAttemptingSafeCreateIndexWithNoCallback = {
           test.ok(false);
         } catch(err) {}
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -226,8 +232,9 @@ exports.shouldThrowErrorOnAttemptingSafeEnsureIndexWithNoCallback = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('shouldThrowErrorOnAttemptingSafeUpdateWithNoCallback', function(err, collection) {
         try {
           // insert a doc
@@ -235,7 +242,7 @@ exports.shouldThrowErrorOnAttemptingSafeEnsureIndexWithNoCallback = {
           test.ok(false);
         } catch(err) {}
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -250,8 +257,9 @@ exports.shouldCorrectlyHandleDistinctIndexes = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_distinct_queries', function(err, collection) {
         collection.insert([{'a':0, 'b':{'c':'a'}},
           {'a':1, 'b':{'c':'b'}},
@@ -262,7 +270,7 @@ exports.shouldCorrectlyHandleDistinctIndexes = {
 
               collection.distinct('b.c', function(err, docs) {
                 test.deepEqual(['a', 'b', 'c'], docs.sort());
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -280,8 +288,9 @@ exports.shouldCorrectlyExecuteEnsureIndex = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('test_ensure_index', function(err, collection) {
         // Create an index on the collection
         db.ensureIndex(collection.collectionName, 'a', configuration.writeConcernMax(), function(err, indexName) {
@@ -302,7 +311,7 @@ exports.shouldCorrectlyExecuteEnsureIndex = {
                 test.ok(collectionInfo['a_1'] != null);
                 test.deepEqual([["a", 1]], collectionInfo['a_1']);
                 // Let's close the db
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -321,8 +330,9 @@ exports.shouldCorrectlyCreateAndUseSparseIndex = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('create_and_use_sparse_index_test', function(err, r) {
         db.collection('create_and_use_sparse_index_test', function(err, collection) {
 
@@ -336,7 +346,7 @@ exports.shouldCorrectlyCreateAndUseSparseIndex = {
                 collection.indexInformation({full:true}, function(err, indexInfo) {
                   test.equal(null, err);
                   test.equal(2, indexInfo.length);
-                  db.close();
+                  client.close();
                   test.done();
                 })
               })
@@ -358,8 +368,9 @@ exports.shouldCorrectlyHandleGeospatialIndexes = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('geospatial_index_test', function(err, r) {
         db.collection('geospatial_index_test', function(err, collection) {
           collection.ensureIndex({loc:'2d'}, configuration.writeConcernMax(), function(err, indexName) {
@@ -370,7 +381,7 @@ exports.shouldCorrectlyHandleGeospatialIndexes = {
                 test.ok(err.errmsg.indexOf("point not in interval of") != -1);
                 test.ok(err.errmsg.indexOf("-180") != -1);
                 test.ok(err.errmsg.indexOf("180") != -1);
-                db.close();
+                client.close();
                 test.done();
               });
             });
@@ -391,8 +402,9 @@ exports.shouldCorrectlyHandleGeospatialIndexesAlteredRange = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('geospatial_index_altered_test', function(err, r) {
         db.collection('geospatial_index_altered_test', function(err, collection) {
           collection.ensureIndex({loc:'2d'},{min:0,max:1024, w:1}, function(err, indexName) {
@@ -404,7 +416,7 @@ exports.shouldCorrectlyHandleGeospatialIndexesAlteredRange = {
                   test.ok(err.errmsg.indexOf("point not in interval of") != -1);
                   test.ok(err.errmsg.indexOf("0") != -1);
                   test.ok(err.errmsg.indexOf("1024") != -1);
-                  db.close();
+                  client.close();
                   test.done();
                 });
               });
@@ -424,15 +436,16 @@ exports.shouldThrowDuplicateKeyErrorWhenCreatingIndex = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('shouldThrowDuplicateKeyErrorWhenCreatingIndex', function(err, collection) {
         collection.insert([{a:1}, {a:1}], configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           collection.ensureIndex({a:1}, {unique:true, w:1}, function(err, indexName) {
             test.ok(err != null);
-            db.close();
+            client.close();
             test.done();
           });
         })
@@ -449,16 +462,16 @@ exports.shouldThrowDuplicateKeyErrorWhenDriverInStrictMode = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
-    // Establish connection to db
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.createCollection('shouldThrowDuplicateKeyErrorWhenDriverInStrictMode', function(err, collection) {
         collection.insert([{a:1}, {a:1}], configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           collection.ensureIndex({a:1}, {unique:true, w:1}, function(err, indexName) {
             test.ok(err != null);
-            db.close();
+            client.close();
             test.done();
           });
         })
@@ -475,8 +488,9 @@ exports.shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Establish connection to db
       db.createCollection('shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex', function(err, collection) {
         test.equal(null, err);
@@ -486,7 +500,7 @@ exports.shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex = {
 
           collection.insert({loc:[600, 600]}, configuration.writeConcernMax(), function(err, result) {
             test.equal(null, err);
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -503,8 +517,9 @@ exports['Should correctly create an index with overriden name'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Establish connection to db
       db.createCollection('shouldCorrectlyCreateAnIndexWithOverridenName', function(err, collection) {
         test.equal(null, err);
@@ -515,7 +530,7 @@ exports['Should correctly create an index with overriden name'] = {
           // Fetch full index information
           collection.indexInformation({full:false}, function(err, indexInformation) {
             test.ok(indexInformation['myfunky_name'] != null);
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -529,15 +544,16 @@ exports['should handle index declarations using objects from other contexts'] = 
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var shared = require('./contexts');
 
       db.collection('indexcontext').ensureIndex(shared.object, { background: true }, function (err) {
         test.equal(null, err);
         db.collection('indexcontext').ensureIndex(shared.array, { background: true }, function (err) {
           test.equal(null, err);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -550,15 +566,16 @@ exports['should correctly return error message when applying unique index to dup
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection("should_throw_error_due_to_duplicates");
       collection.insert([{a:1}, {a:1}, {a:1}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         collection.ensureIndex({a:1}, {w:1, unique:true}, function(err, result) {
           test.ok(err != null);
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -571,8 +588,9 @@ exports['should correctly drop index with no callback'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection("should_correctly_drop_index");
       collection.insert([{a:1}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
@@ -580,7 +598,7 @@ exports['should correctly drop index with no callback'] = {
         collection.ensureIndex({a:1}, configuration.writeConcernMax(), function(err, result) {
           collection.dropIndex("a_1")
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -593,8 +611,9 @@ exports['should correctly apply hint to find'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection("should_correctly_apply_hint");
       collection.insert([{a:1}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
@@ -608,7 +627,7 @@ exports['should correctly apply hint to find'] = {
             collection.find({}, {hint:"a_1"}).toArray(function(err, docs) {
               test.equal(null, err);
               test.equal(1, docs[0].a);
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -623,8 +642,9 @@ exports['should correctly set language_override option'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection("should_correctly_set_language_override");
       collection.insert([{text:'Lorem ipsum dolor sit amet.', langua:'italian'}], function(err, result) {
         test.equal(null, err);
@@ -639,7 +659,7 @@ exports['should correctly set language_override option'] = {
                 test.equal(indexInformation[i].language_override, 'langua')
             }
 
-            db.close();
+            client.close();
             test.done();
 
           });
@@ -654,8 +674,9 @@ exports['should correctly use listIndexes to retrieve index list'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('testListIndexes').ensureIndex({a:1}, function(err, r) {
         test.equal(null, err);
 
@@ -664,7 +685,7 @@ exports['should correctly use listIndexes to retrieve index list'] = {
           test.equal(null, err);
           test.equal(2, indexes.length);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -677,8 +698,9 @@ exports['should correctly use listIndexes to retrieve index list using hasNext']
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('testListIndexes_2').ensureIndex({a:1}, function(err, r) {
         test.equal(null, err);
 
@@ -687,7 +709,7 @@ exports['should correctly use listIndexes to retrieve index list using hasNext']
           test.equal(null, err);
           test.equal(true, result);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -700,8 +722,9 @@ exports['should correctly ensureIndex for nested style index name c.d'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('ensureIndexWithNestedStyleIndex').ensureIndex({'c.d':1}, function(err, r) {
         test.equal(null, err);
 
@@ -710,7 +733,7 @@ exports['should correctly ensureIndex for nested style index name c.d'] = {
           test.equal(null, err);
           test.equal(2, indexes.length);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -723,8 +746,9 @@ exports['should correctly execute createIndexes'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('createIndexes').createIndexes([
         { key: {a:1} }, { key: {b:1}, name: "hello1"}
       ], function(err, r) {
@@ -742,7 +766,7 @@ exports['should correctly execute createIndexes'] = {
           test.ok(keys['a_1']);
           test.ok(keys['hello1']);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -758,13 +782,14 @@ exports.shouldCorrectlyCreateTextIndex = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('text_index').createIndex({ "$**": "text" }, { name: "TextIndex" }, function(err, r) {
         test.equal(null, err);
         test.equal('TextIndex', r);
         // Let's close the db
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -779,8 +804,9 @@ exports['should correctly pass partialIndexes through to createIndexCommand'] = 
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var started = [], succeeded = [];
 
       var listener = require('../..').instrument(function(err, instrumentations) {});
@@ -799,7 +825,7 @@ exports['should correctly pass partialIndexes through to createIndexCommand'] = 
         test.deepEqual({a:1}, started[0].command.indexes[0].partialFilterExpression);
 
         listener.uninstrument();
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -817,8 +843,9 @@ exports['should not retry partial index expression error'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(error, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(error, client) {
+      var db = client.db(configuration.database);
       test.equal(error, null);
       // Can't use $exists: false in partial filter expression, see
       // https://jira.mongodb.org/browse/SERVER-17853
@@ -829,7 +856,7 @@ exports['should not retry partial index expression error'] = {
         var msg = "key $exists must not start with '$'";
         test.ok(err.toString().indexOf(msg) === -1);
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -844,9 +871,10 @@ exports['should correctly error out due to driver close'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
-      db.close(function() {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
+      client.close(function() {
         db.createCollection('nonexisting', {w:1}, function(err, collection) {
           test.ok(err != null);
           db.collection('nonexisting', {strict: true}, function(err, collection) {
@@ -870,8 +898,9 @@ exports['should correctly create index on embedded key'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       var collection = db.collection('embedded_key_indes');
 
@@ -884,7 +913,7 @@ exports['should correctly create index on embedded key'] = {
 
         collection.ensureIndex({'a.a':1}, function(err, indexName) {
           test.equal(null, err);
-          db.close();
+          client.close();
           test.done();
         });
       })
@@ -900,8 +929,9 @@ exports['should correctly create index using . keys'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       var collection = db.collection('embedded_key_indes_1');
       collection.createIndex(
@@ -910,7 +940,7 @@ exports['should correctly create index using . keys'] = {
       function(err, r) {
         test.equal(null, err);
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -925,8 +955,9 @@ exports['error on duplicate key index'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
       var collection = db.collection('embedded_key_indes_2');
       collection.insertMany([{
@@ -941,7 +972,7 @@ exports['error on duplicate key index'] = {
         function(err, r) {
           test.equal(11000, err.code);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -970,7 +1001,7 @@ exports['error on duplicate key index'] = {
 //               console.dir(err)
 //               console.dir(indexes)
 
-//               db.close();
+//               client.close();
 //               test.done();
 //             });
 
@@ -980,7 +1011,7 @@ exports['error on duplicate key index'] = {
 
 //             //   collection.indexInformation(function(err, result) {
 //             //     test.ok(result['a_1'] == null);
-//             //     db.close();
+//             //     client.close();
 //             //     test.done();
 //             //   })
 //             // })
@@ -999,13 +1030,14 @@ exports['should correctly create Index with sub element'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // insert a doc
       db.collection('messed_up_index').createIndex({ temporary: 1, 'store.addressLines': 1, lifecycleStatus: 1 }, configuration.writeConcernMax(), function(err, r) {
         test.equal(null, err);
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -1020,8 +1052,9 @@ exports['should correctly fail detect error code 85 when peforming createIndex']
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       var collection = db.collection('messed_up_options');
 
       collection.ensureIndex({ 'a.one': 1, 'a.two': 1 }, { name: 'n1', partialFilterExpression: { 'a.two': { $exists: true } } }, function(err, r) {
@@ -1031,7 +1064,7 @@ exports['should correctly fail detect error code 85 when peforming createIndex']
           test.ok(err);
           test.equal(85, err.code);
 
-          db.close();
+          client.close();
           test.done();
         });
       });
@@ -1047,13 +1080,14 @@ exports['should correctly create Index with sub element running in background'] 
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // insert a doc
       db.collection('messed_up_index_2').createIndex({'accessControl.get': 1}, {background: true}, function(err, r) {
         test.equal(null, err);
 
-        db.close();
+        client.close();
         test.done();
       });
     });

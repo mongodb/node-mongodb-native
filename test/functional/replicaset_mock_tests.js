@@ -100,12 +100,13 @@ exports['Should correctly print warning when non mongos proxy passed in seed lis
         test.equal('expected mongos proxy, but found replicaset member mongod for server localhost:52001', state.message);
       });
 
-      MongoClient.connect('mongodb://localhost:52000,localhost:52001/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:52000,localhost:52001/test', function(err, client) {
         Logger.setCurrentLogger(logger);
+        var db = client.db(configuration.database);
         test.equal(null, err);
 
         running = false;
-        db.close();
+        client.close();
         mongos1.destroy();
         mongos2.destroy();
 
@@ -206,7 +207,7 @@ exports['Should correctly print warning and error when no mongos proxies in seed
         warnings.push(state);
       });
 
-      MongoClient.connect('mongodb://localhost:52002,localhost:52003/test', function(err, db) {
+      MongoClient.connect('mongodb://localhost:52002,localhost:52003/test', function(err, client) {
         Logger.setCurrentLogger(logger);
 
         // Assert all warnings
@@ -305,12 +306,12 @@ exports['Should correctly set socketTimeoutMS and connectTimeoutMS for mongos'] 
         }
       });
 
-      MongoClient.connect('mongodb://localhost:12004,localhost:12005/test?socketTimeoutMS=120000&connectTimeoutMS=15000', function(err, db) {
+      MongoClient.connect('mongodb://localhost:12004,localhost:12005/test?socketTimeoutMS=120000&connectTimeoutMS=15000', function(err, client) {
         test.equal(null, err);
-        test.equal(15000, db.serverConfig.s.mongos.s.options.connectionTimeout);
-        test.equal(120000, db.serverConfig.s.mongos.s.options.socketTimeout);
+        test.equal(15000, client.topology.s.mongos.s.options.connectionTimeout);
+        test.equal(120000, client.topology.s.mongos.s.options.socketTimeout);
 
-        db.close();
+        client.close();
         mongos1.destroy();
         mongos2.destroy();
         running = false;

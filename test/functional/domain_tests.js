@@ -10,11 +10,12 @@ exports.shouldStayInCorrectDomainForReadCommand = {
   test: function(configuration, test) {
     var Domain = require('domain');
     var domainInstance = Domain.create();
-    var client = configuration.newDbInstance({w: 0}, {poolSize: 1, auto_reconnect: true, domainsEnabled:true});
-
-    client.open(function(err, client) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, domainsEnabled:true});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.ok(!err);
-      var collection = client.collection('test');
+      var collection = db.collection('test');
+      
       domainInstance.run(function() {
         collection.count({}, function(err) {
           test.ok(!err);
@@ -45,7 +46,8 @@ exports.shouldStayInCorrectDomainForReadCommandUsingMongoClient = {
       domainsEnabled: true
     }, function(err, client) {
       test.ok(!err);
-      var collection = client.collection('test');
+      var db = client.db(configuration.database);
+      var collection = db.collection('test');
       domainInstance.run(function() {
         collection.count({}, function(err) {
           test.ok(!err);
@@ -72,9 +74,10 @@ exports.shouldStayInCorrectDomainForWriteCommand = {
     var domainInstance = Domain.create();
     var client = configuration.newDbInstance({w: 1}, {poolSize: 1, auto_reconnect: true, domainsEnabled:true});
 
-    client.open(function(err, client) {
+    client.connect(function(err, client) {
       test.ok(!err);
-      var collection = client.collection('test');
+      var db = client.db(configuration.database);
+      var collection = db.collection('test');
       domainInstance.run(function() {
         collection.insert({field: 123}, function(err) {
           test.ok(!err);
@@ -101,9 +104,10 @@ exports.shouldStayInCorrectDomainForQueuedReadCommand = {
     var domainInstance = Domain.create();
     var client = configuration.newDbInstance({w: 0, bufferMaxEntries: 0}, {poolSize: 1, auto_reconnect: true, domainsEnabled:true});
 
-    client.open(function(err, client) {
-      var connection = client.serverConfig.connections()[0];
-      var collection = client.collection('test');
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
+      var connection = db.serverConfig.connections()[0];
+      var collection = db.collection('test');
       connection.destroy();
 
       domainInstance.run(function() {
@@ -132,10 +136,11 @@ exports.shouldStayInCorrectDomainForQueuedWriteCommand = {
     var domainInstance = Domain.create();
     var client = configuration.newDbInstance({w: 1, bufferMaxEntries: 0}, {poolSize: 1, auto_reconnect: true, domainsEnabled:true});
 
-    client.open(function(err, client) {
+    client.connect(function(err, client) {
       test.ok(!err);
-      var connection = client.serverConfig.connections()[0];
-      var collection = client.collection('test');
+      var db = client.db(configuration.database);
+      var connection = db.serverConfig.connections()[0];
+      var collection = db.collection('test');
       connection.destroy();
 
       domainInstance.run(function() {
