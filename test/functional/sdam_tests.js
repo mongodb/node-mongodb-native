@@ -15,7 +15,7 @@ exports['Should correctly emit all Replicaset SDAM operations'] = {
       topologyClosed: [],
     }
 
-    var client = new MongoClient();
+    var client = new MongoClient(configuration.url());
     var events = ['serverDescriptionChanged', 'serverHeartbeatStarted'
       , 'serverHeartbeatSucceeded', 'serverOpening'
       , 'serverClosed', 'topologyOpening', 'topologyDescriptionChanged'
@@ -38,7 +38,7 @@ exports['Should correctly emit all Replicaset SDAM operations'] = {
       test.done();      
     });
 
-    client.connect(configuration.url(), function(err, db) {
+    client.connect(function(err, db) {
       test.equal(null, err);
     });
   }

@@ -4120,6 +4120,7 @@ exports['Should correctly connect with default replicasetNoOption'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
+      , MongoClient = configuration.require.MongoClient
       , Server = configuration.require.Server
       , Db = configuration.require.Db;
 
@@ -4134,6 +4135,7 @@ exports['Should correctly connect with default replicasetNoOption'] = {
 
     var client = new MongoClient(replSet, {w:0});
     client.connect(function(err, client) {
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
@@ -4143,7 +4145,6 @@ exports['Should correctly connect with default replicasetNoOption'] = {
     // REMOVE-LINE test.done();
     // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-      var db = client.db(configuration.database);
       test.equal(null, err);
       client.close();
       test.done();
@@ -4630,6 +4631,7 @@ exports.shouldCorrectlyRetrieveReplSetGetStatus = {
   test: function(configuration, test) {
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
@@ -4639,7 +4641,6 @@ exports.shouldCorrectlyRetrieveReplSetGetStatus = {
     // REMOVE-LINE test.done();
     // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-      var db = client.db(configuration.database);
       // Grab a collection object
       var collection = db.collection('test');
 
@@ -5621,6 +5622,7 @@ exports['Should correctly connect to a replicaset'] = {
       , "primary");
 
     MongoClient.connect(url, function(err, client) {
+      var db = client.db(configuration.database);
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
@@ -5630,7 +5632,6 @@ exports['Should correctly connect to a replicaset'] = {
     // REMOVE-LINE test.done();
     // REMOVE-LINE var db = client.db(configuration.database);
     // BEGIN
-      var db = client.db(configuration.database);
       test.equal(null, err);
       test.ok(db != null);
 

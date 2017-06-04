@@ -58,6 +58,7 @@ exports['Should correctly handle error when no server up in replicaset'] = {
     var ReplSet = configuration.require.ReplSet
       , Server = configuration.require.Server
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , CoreServer = configuration.require.CoreServer
       , CoreConnection = configuration.require.CoreConnection;
 
@@ -74,11 +75,9 @@ exports['Should correctly handle error when no server up in replicaset'] = {
       , {rs_name:configuration.replicasetName}
     );
 
-    var db = new Db('integration_test_', replSet, {w:0});
-    db.open(function(err, p_db) {
+    var client = new MongoClient(replSet, {w:0});
+    client.connect(function(err, client) {
       test.ok(err != null);
-
-      db.close();
 
       setTimeout(function() {
         // Connection account tests
@@ -89,13 +88,6 @@ exports['Should correctly handle error when no server up in replicaset'] = {
 
         test.done();
       }, 200);
-      // // Connection account tests
-      // test.equal(0, Object.keys(CoreConnection.connections()).length);
-      // test.equal(0, Object.keys(CoreServer.servers()).length);
-      // CoreServer.disableServerAccounting();
-      // CoreConnection.disableConnectionAccounting();
-      //
-      // test.done();
     });
   }
 }
@@ -108,6 +100,7 @@ exports['Should correctly connect with default replicaset'] = {
     var ReplSet = configuration.require.ReplSet
       , Server = configuration.require.Server
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , CoreServer = configuration.require.CoreServer
       , CoreConnection = configuration.require.CoreConnection;
 
@@ -127,15 +120,10 @@ exports['Should correctly connect with default replicaset'] = {
           , {rs_name:configuration.replicasetName}
         );
 
-        var db = new Db('integration_test_', replSet, {w:0});
-        db.open(function(err, p_db) {
+        var client = new MongoClient(replSet, {w:0});
+        client.connect(function(err, client) {
           test.equal(null, err);
-          p_db.close();
-          // process.exit(0)
-
-          // console.log("==============================================")
-          // console.dir(Object.keys(CoreConnection.connections()))
-          // console.dir(Object.keys(CoreServer.servers()))
+          client.close();
 
           setTimeout(function() {
             restartAndDone(configuration, test);
@@ -154,6 +142,7 @@ exports['Should correctly connect with default replicaset and no setName specifi
     var ReplSet = configuration.require.ReplSet
       , Server = configuration.require.Server
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , CoreServer = configuration.require.CoreServer
       , CoreConnection = configuration.require.CoreConnection;
 
@@ -173,10 +162,10 @@ exports['Should correctly connect with default replicaset and no setName specifi
           , {}
         );
 
-        var db = new Db('integration_test_', replSet, {w:0});
-        db.open(function(err, p_db) {
+        var client = new MongoClient(replSet, {w:0});
+        client.connect(function(err, client) {
           test.equal(null, err);
-          p_db.close();
+          client.close();
 
           // console.log("==============================================")
           // console.dir(Object.keys(CoreConnection.connections()))
@@ -203,6 +192,7 @@ exports['Should correctly connect with default replicaset and socket options set
     var ReplSet = configuration.require.ReplSet
       , Server = configuration.require.Server
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , CoreServer = configuration.require.CoreServer
       , CoreConnection = configuration.require.CoreConnection;
 
@@ -219,13 +209,13 @@ exports['Should correctly connect with default replicaset and socket options set
       {socketOptions: {keepAlive:100}, rs_name:configuration.replicasetName}
     );
 
-    var db = new Db('integration_test_', replSet, {w:0});
-    db.open(function(err, p_db) {
+    var client = new MongoClient(replSet, {w:0});
+    client.connect(function(err, client) {
       test.equal(null, err);
       // Get a connection
-      var connection = db.serverConfig.connections()[0];
+      var connection = client.topology.connections()[0];
       test.equal(100, connection.keepAliveInitialDelay);
-      p_db.close();
+      client.close();
 
       // // Connection account tests
       // test.equal(0, Object.keys(CoreConnection.connections()).length);
@@ -246,6 +236,7 @@ exports['Should emit close no callback'] = {
     var ReplSet = configuration.require.ReplSet
       , Server = configuration.require.Server
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , CoreServer = configuration.require.CoreServer
       , CoreConnection = configuration.require.CoreConnection;
 
@@ -262,13 +253,13 @@ exports['Should emit close no callback'] = {
       {rs_name:configuration.replicasetName}
     );
 
-    new Db('integration_test_', replSet, {w:0}).open(function(err, db) {
+    new MongoClient(replSet, {w:0}).connect(function(err, client) {
       test.equal(null, err);
       var dbCloseCount = 0, serverCloseCount = 0;
-      db.on('close', function() { ++dbCloseCount; });
+      client.on('close', function() { ++dbCloseCount; });
 
       // Force a close on a socket
-      db.close();
+      client.close();
 
       setTimeout(function() {
         // Connection account tests
@@ -292,6 +283,7 @@ exports['Should emit close with callback'] = {
     var ReplSet = configuration.require.ReplSet
       , Server = configuration.require.Server
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , CoreServer = configuration.require.CoreServer
       , CoreConnection = configuration.require.CoreConnection;
 
@@ -308,14 +300,14 @@ exports['Should emit close with callback'] = {
       {rs_name:configuration.replicasetName}
     );
 
-    new Db('integration_test_', replSet, {w:0}).open(function(err, db) {
+    new MongoClient(replSet, {w:0}).connect(function(err, client) {
       test.equal(null, err);
       var dbCloseCount = 0;
-      db.on('close', function() {
+      client.on('close', function() {
         ++dbCloseCount;
       });
 
-      db.close(function() {
+      client.close(function() {
         // Let all events fire.
         setTimeout(function() {
           // Connection account tests
@@ -340,6 +332,7 @@ exports['Should correctly pass error when wrong replicaSet'] = {
     var ReplSet = configuration.require.ReplSet
       , Server = configuration.require.Server
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , CoreServer = configuration.require.CoreServer
       , CoreConnection = configuration.require.CoreConnection;
 
@@ -352,8 +345,8 @@ exports['Should correctly pass error when wrong replicaSet'] = {
       {rs_name:configuration.replicasetName + "-wrong"}
     );
 
-    var db = new Db('integration_test_', replSet, {w:0});
-    db.open(function(err, p_db) {
+    var client = new MongoClient(replSet, {w:0});
+    client.connect(function(err, p_db) {
       test.notEqual(null, err);
       test.done();
     })
@@ -366,6 +359,7 @@ var ensureConnection = function(configuration, numberOfTries, callback) {
   var ReplSet = configuration.require.ReplSet
     , Server = configuration.require.Server
     , Db = configuration.require.Db
+    , MongoClient = configuration.require.MongoClient
     , CoreServer = configuration.require.CoreServer
     , CoreConnection = configuration.require.CoreConnection;
 
@@ -380,11 +374,8 @@ var ensureConnection = function(configuration, numberOfTries, callback) {
 
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
   // Open the db
-  var db = new Db('integration_test_', replSet, {w:0});
-  db.open(function(err, p_db) {
-    // Close the connection
-    db.close();
-
+  var client = new MongoClient(replSet, {w:0});
+  client.connect(function(err, client) {
     if(err != null) {
       // Wait for a sec and retry
       setTimeout(function() {
@@ -392,6 +383,7 @@ var ensureConnection = function(configuration, numberOfTries, callback) {
         ensureConnection(configuration, numberOfTries, callback);
       }, 3000);
     } else {
+      client.close();
       return callback(null);
     }
   })
@@ -405,6 +397,7 @@ exports['Should connect with primary stepped down'] = {
     var ReplSet = configuration.require.ReplSet
       , Server = configuration.require.Server
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , CoreServer = configuration.require.CoreServer
       , CoreConnection = configuration.require.CoreConnection;
 
@@ -425,13 +418,13 @@ exports['Should connect with primary stepped down'] = {
     configuration.manager.stepDownPrimary(false, {stepDownSecs: 1, force:true}).then(function() {
       // Wait for new primary to pop up
       ensureConnection(configuration, retries, function(err, p_db) {
-        new Db('integration_test_', replSet, {w:0}).open(function(err, p_db) {
+        new MongoClient(replSet, {w:0}).connect(function(err, client) {
           test.ok(err == null);
           // Get a connection
-          var connection = p_db.serverConfig.connections()[0];
+          var connection = client.topology.connections()[0];
           test.equal(true, connection.isConnected());
           // Close the database
-          p_db.close();
+          client.close();
 
           // // Connection account tests
           // test.equal(0, Object.keys(CoreConnection.connections()).length);
@@ -454,6 +447,7 @@ exports['Should connect with third node killed'] = {
     var ReplSet = configuration.require.ReplSet
       , Server = configuration.require.Server
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , CoreServer = configuration.require.CoreServer
       , CoreConnection = configuration.require.CoreConnection;
 
@@ -476,13 +470,13 @@ exports['Should connect with third node killed'] = {
         // Wait for new primary to pop up
         ensureConnection(configuration, retries, function(err, p_db) {
 
-          new Db('integration_test_', replSet, {w:0}).open(function(err, p_db) {
+          new MongoClient(replSet, {w:0}).connect(function(err, client) {
             test.ok(err == null);
             // Get a connection
-            var connection = p_db.serverConfig.connections()[0];
+            var connection = client.topology.connections()[0];
             test.equal(true, connection.isConnected());
             // Close the database
-            p_db.close();
+            client.close();
 
             // // Connection account tests
             // test.equal(0, Object.keys(CoreConnection.connections()).length);
@@ -506,6 +500,7 @@ exports['Should connect with primary node killed'] = {
     var ReplSet = configuration.require.ReplSet
       , Server = configuration.require.Server
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , CoreServer = configuration.require.CoreServer
       , CoreConnection = configuration.require.CoreConnection;
 
@@ -527,13 +522,13 @@ exports['Should connect with primary node killed'] = {
 
         // Wait for new primary to pop up
         ensureConnection(configuration, retries, function(err, p_db) {
-          new Db('integration_test_', replSet, {w:0}).open(function(err, p_db) {
+          new MongoClient(replSet, {w:0}).connect(function(err, client) {
             test.ok(err == null);
             // Get a connection
-            var connection = p_db.serverConfig.connections()[0];
+            var connection = client.topology.connections()[0];
             test.equal(true, connection.isConnected());
             // Close the database
-            p_db.close();
+            client.close();
 
             // // Connection account tests
             // test.equal(0, Object.keys(CoreConnection.connections()).length);
@@ -557,6 +552,7 @@ exports['Should correctly emit open signal and full set signal'] = {
     var ReplSet = configuration.require.ReplSet
       , Server = configuration.require.Server
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , CoreServer = configuration.require.CoreServer
       , CoreConnection = configuration.require.CoreConnection;
 
@@ -574,16 +570,16 @@ exports['Should correctly emit open signal and full set signal'] = {
       {rs_name:configuration.replicasetName}
     );
 
-    var db = new Db('integration_test_', replSet, {w:0});
-    db.once("open", function(_err, _db) {
+    var client = new MongoClient(replSet, {w:0});
+    client.once("open", function(_err, _db) {
       openCalled = true;
     });
 
-    db.once("fullsetup", function(_err, _db) {
+    client.once("fullsetup", function(client) {
       test.equal(true, openCalled);
 
       // Close and cleanup
-      _db.close();
+      client.close();
 
       setTimeout(function() {
         // Connection account tests
@@ -596,7 +592,7 @@ exports['Should correctly emit open signal and full set signal'] = {
       }, 200)
     });
 
-    db.open(function(err, p_db) {})
+    client.connect(function(err, p_db) {})
   }
 }
 
@@ -608,6 +604,7 @@ exports['ReplSet honors socketOptions options'] = {
     var ReplSet = configuration.require.ReplSet
       , Server = configuration.require.Server
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , CoreServer = configuration.require.CoreServer
       , CoreConnection = configuration.require.CoreConnection;
 
@@ -628,15 +625,15 @@ exports['ReplSet honors socketOptions options'] = {
       }, rs_name:configuration.replicasetName}
     );
 
-    var db = new Db('integration_test_', replSet, {w:0});
-    db.open(function(err, p_db) {
+    var client = new MongoClient(replSet, {w:0});
+    client.connect(function(err, client) {
       test.equal(null, err);
       // Get a connection
-      var connection = db.serverConfig.connections()[0];
+      var connection = client.topology.connections()[0];
       test.equal(1000, connection.connectionTimeout);
       test.equal(3000, connection.socketTimeout);
       test.equal(false, connection.noDelay);
-      p_db.close();
+      client.close();
 
       setTimeout(function() {
         // Connection account tests
@@ -651,103 +648,6 @@ exports['ReplSet honors socketOptions options'] = {
   }
 }
 
-exports['Should correctly emit all signals even if not yet connected'] = {
-  metadata: { requires: { topology: 'replicaset' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var ReplSet = configuration.require.ReplSet
-      , Server = configuration.require.Server
-      , Db = configuration.require.Db
-      , CoreServer = configuration.require.CoreServer
-      , CoreConnection = configuration.require.CoreConnection;
-
-    // Accounting tests
-    CoreServer.enableServerAccounting();
-    CoreConnection.enableConnectionAccounting();
-
-    // Replica configuration
-    var replSet = new ReplSet([
-        new Server(configuration.host, configuration.port),
-        new Server(configuration.host, configuration.port + 1),
-        new Server(configuration.host, configuration.port + 2)
-      ],
-      {rs_name:configuration.replicasetName}
-    );
-
-    var db_conn = new Db('integration_test_', replSet, {w:1});
-    var db2 = db_conn.db('integration_test_2');
-    var close_count = 0;
-    var open_count = 0;
-    var fullsetup_count = 0;
-
-    db2.on('close', function() {
-      close_count = close_count + 1;
-    });
-
-    db_conn.on('close', function() {
-      close_count = close_count + 1;
-    });
-
-    db2.on('open', function(err, db) {
-      test.equal('integration_test_2', db.databaseName);
-      open_count = open_count + 1;
-    });
-
-    db_conn.on('open', function(err, db) {
-      test.equal('integration_test_', db.databaseName);
-      open_count = open_count + 1;
-    });
-
-    db2.on('fullsetup', function(err, db) {
-      test.equal('integration_test_2', db.databaseName);
-      fullsetup_count = fullsetup_count + 1;
-    });
-
-    db_conn.on('fullsetup', function(err, db) {
-      test.equal('integration_test_', db.databaseName);
-      fullsetup_count = fullsetup_count + 1;
-    });
-
-    db_conn.open(function (err) {
-      if(err) throw err;
-
-      // Wait for fullset
-      var interval = setInterval(function() {
-        if(fullsetup_count == 2) {
-          clearInterval(interval);
-
-          var col1 = db_conn.collection('test');
-          var col2 = db2.collection('test');
-
-          var testData = { value : "something" };
-          col1.insert(testData, function (err) {
-            if (err) throw err;
-
-            var testData = { value : "something" };
-            col2.insert(testData, function (err) {
-              if (err) throw err;
-              db2.close(function() {
-                setTimeout(function() {
-                  // Connection account tests
-                  test.equal(0, Object.keys(CoreConnection.connections()).length);
-                  test.equal(0, Object.keys(CoreServer.servers()).length);
-                  CoreServer.disableServerAccounting();
-                  CoreConnection.disableConnectionAccounting();
-
-                  test.equal(2, close_count);
-                  test.equal(2, open_count);
-                  test.done();
-                }, 200);
-              });
-            });
-          });
-        }
-      }, 200);
-    });
-  }
-}
-
 exports['Should receive all events for primary and secondary leaving'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
@@ -756,6 +656,7 @@ exports['Should receive all events for primary and secondary leaving'] = {
     var ReplSet = configuration.require.ReplSet
       , Server = configuration.require.Server
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , CoreServer = configuration.require.CoreServer
       , CoreConnection = configuration.require.CoreConnection;
 
@@ -786,14 +687,14 @@ exports['Should receive all events for primary and secondary leaving'] = {
     });
 
     // Connect to the replicaset
-    var db = new Db('integration_test_', replSet, {w:0});
-    db.open(function(err, p_db) {
+    var client = new MongoClient(replSet, {w:0});
+    client.connect(function(err, client) {
       // Kill the secondary
       // Replset start port
       configuration.manager.secondaries().then(function(managers) {
         managers[0].stop().then(function() {
           test.equal(null, err);
-          p_db.close();
+          client.close();
 
           // // Connection account tests
           // test.equal(0, Object.keys(CoreConnection.connections()).length);
@@ -816,6 +717,7 @@ exports['Should Fail due to bufferMaxEntries = 0 not causing any buffering'] = {
     var ReplSet = configuration.require.ReplSet
       , Server = configuration.require.Server
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , CoreServer = configuration.require.CoreServer
       , CoreConnection = configuration.require.CoreConnection;
 
@@ -837,17 +739,18 @@ exports['Should Fail due to bufferMaxEntries = 0 not causing any buffering'] = {
     var numberLeaving = 0;
 
     // Connect to the replicaset
-    var db = new Db('integration_test_', replSet, {w:1, bufferMaxEntries: 0});
-    db.open(function(err, p_db) {
+    var client = new MongoClient(replSet, {w:1, bufferMaxEntries: 0});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
 
       // Setup
-      db.serverConfig.on('left', function(t) {
+      client.topology.on('left', function(t) {
         if(t == 'primary') {
           // Attempt an insert
           db.collection('_should_fail_due_to_bufferMaxEntries_0').insert({a:1}, function(err, ids) {
             test.ok(err != null);
             test.ok(err.message.indexOf("0") != -1)
-            db.close();
+            client.close();
 
             // // Connection account tests
             // test.equal(0, Object.keys(CoreConnection.connections()).length);
@@ -899,18 +802,18 @@ exports['Should correctly connect to a replicaset with additional options'] = {
           connectTimeoutMS: 500
         }
       }
-    }, function(err, db) {
+    }, function(err, client) {
       test.equal(null, err);
-      test.ok(db != null);
+      var db = client.db(configuration.database);
 
-      test.equal(500, db.serverConfig.connections()[0].connectionTimeout);
-      test.equal(360000, db.serverConfig.connections()[0].socketTimeout);
+      test.equal(500, client.topology.connections()[0].connectionTimeout);
+      test.equal(360000, client.topology.connections()[0].socketTimeout);
 
       db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
         test.equal(null, err);
         test.equal(1, result.result.n);
 
-        db.close();
+        client.close();
 
         setTimeout(function() {
           // Connection account tests
@@ -937,6 +840,7 @@ exports['Should correctly connect to a replicaset with readPreference set'] = {
     var mongo = configuration.require
       , MongoClient = mongo.MongoClient
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , CoreServer = configuration.require.CoreServer
       , CoreConnection = configuration.require.CoreConnection;
 
@@ -952,11 +856,13 @@ exports['Should correctly connect to a replicaset with readPreference set'] = {
     CoreServer.enableServerAccounting();
     CoreConnection.enableConnectionAccounting();
 
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
+      var db = client.db(configuration.database);
+
       db.collection("test_collection").insert({a:1}, function(err, result) {
         test.equal(null, err);
 
-        db.close();
+        client.close();
 
         setTimeout(function() {
           // Connection account tests
@@ -1013,6 +919,7 @@ exports['Should correctly connect to a replicaset with writeConcern specified an
       , GridStore = mongo.GridStore
       , ObjectID = mongo.ObjectID
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , CoreServer = configuration.require.CoreServer
       , CoreConnection = configuration.require.CoreConnection;
 
@@ -1028,11 +935,12 @@ exports['Should correctly connect to a replicaset with writeConcern specified an
     CoreServer.enableServerAccounting();
     CoreConnection.enableConnectionAccounting();
 
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
+      var db = client.db(configuration.database);
       var gs = new GridStore(db, new ObjectID());
       test.equal('majority', gs.writeConcern.w);
       test.equal(5000, gs.writeConcern.wtimeout);
-      db.close();
+      client.close();
 
       setTimeout(function() {
         // Connection account tests
@@ -1058,6 +966,7 @@ exports['Should Correctly remove server going into recovery mode'] = {
     var ReplSet = configuration.require.ReplSet
       , Server = configuration.require.Server
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , CoreServer = configuration.require.CoreServer
       , CoreConnection = configuration.require.CoreConnection;
 
@@ -1076,8 +985,9 @@ exports['Should Correctly remove server going into recovery mode'] = {
     );
 
     // Open the db connection
-    var db = new Db('integration_test_', replSet, {w:1});
-    db.on("fullsetup", function() {
+    var client = new MongoClient(replSet, {w:1});
+    client.on("fullsetup", function(client) {
+      var db = client.db(configuration.database);
       // console.log("========================================= 1")
       db.command({ismaster:true}, function(err, result) {
         // console.log("========================================= 2")
@@ -1091,18 +1001,18 @@ exports['Should Correctly remove server going into recovery mode'] = {
         // Get the arbiters
         var host = secondaries[0].split(":")[0];
         var port = parseInt(secondaries[0].split(":")[1], 10);
-        var db1 = new Db('integration_test_', new Server(host, port), {w:1});
+        var client1 = new MongoClient(new Server(host, port), {w:1});
         var done = false;
 
-        db.serverConfig.on('left', function(t, s) {
+        client.topology.on('left', function(t, s) {
           // console.log("========================================= 6 :: " + t + " :: " + s.name)
           if(t == 'primary' && !done) {
             done = true;
             // Return to working state
-            db1.admin().command({ replSetMaintenance: 0 }, function(err, result) {
+            client1.db('admin').command({ replSetMaintenance: 0 }, function(err, result) {
               // console.dir(err)
-              db.close();
-              db1.close();
+              client.close();
+              client1.close();
 
               setTimeout(function() {
                 // console.log("===================================== Connections")
@@ -1128,7 +1038,8 @@ exports['Should Correctly remove server going into recovery mode'] = {
         });
 
         // console.log("========================================= 3")
-        db1.open(function(err, db1) {
+        client1.connect(function(err, client1) {
+          var db1 = client1.db(configuration.database);
           test.equal(null, err);
           global.debug = true
           // console.log("========================================= 4")
@@ -1142,9 +1053,7 @@ exports['Should Correctly remove server going into recovery mode'] = {
       });
     });
 
-    db.open(function(err, p_db) {
-      db = p_db;
-    });
+    client.connect(function(err, p_db) {});
   }
 }
 
@@ -1171,10 +1080,10 @@ exports['Should return single server direct connection when replicaSet not provi
     CoreServer.enableServerAccounting();
     CoreConnection.enableConnectionAccounting();
 
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
       test.equal(null, err);
-      test.ok(db.serverConfig instanceof Server);
-      db.close();
+      test.ok(client.topology instanceof Server);
+      client.close();
 
       setTimeout(function() {
         // Connection account tests
@@ -1220,6 +1129,7 @@ exports['Should correctly connect to arbiter with single connection'] = {
       , ReplSet = mongo.ReplSet
       , Server = mongo.Server
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , CoreServer = configuration.require.CoreServer
       , CoreConnection = configuration.require.CoreConnection;
 
@@ -1232,19 +1142,20 @@ exports['Should correctly connect to arbiter with single connection'] = {
       // Get the arbiters
       var host = managers[0].host;
       var port = managers[0].port;
-      var db = new Db('integration_test_', new Server(host, port), {w:1});
-
-      db.open(function(err, p_db) {
+      
+      var client = new MongoClient(new Server(host, port), {w:1});
+      client.connect(function(err, client) {
+        var db = client.db(configuration.database);
         test.equal(null, err);
 
-        p_db.command({ismaster: true}, function(err, result) {
+        db.command({ismaster: true}, function(err, result) {
           test.equal(null, err);
 
           // Should fail
-          p_db.collection('t').insert({a:1}, function(err, r) {
+          db.collection('t').insert({a:1}, function(err, r) {
             test.ok(err != null);
 
-            p_db.close();
+            client.close();
 
             // // Connection account tests
             // test.equal(0, Object.keys(CoreConnection.connections()).length);
@@ -1269,6 +1180,7 @@ exports['Should correctly connect to secondary with single connection'] = {
       , ReplSet = mongo.ReplSet
       , Server = mongo.Server
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , CoreServer = configuration.require.CoreServer
       , CoreConnection = configuration.require.CoreConnection;
 
@@ -1281,15 +1193,16 @@ exports['Should correctly connect to secondary with single connection'] = {
       // Get the arbiters
       var host = managers[0].host;
       var port = managers[0].port;
-      var db = new Db('integration_test_', new Server(host, port), {w:1});
-
-      db.open(function(err, p_db) {
+      
+      var client = new MongoClient(new Server(host, port), {w:1});
+      client.connect(function(err, client) {
+        var db = client.db(configuration.database);
         test.equal(null, err);
 
-        p_db.command({ismaster: true}, function(err, result) {
+        db.command({ismaster: true}, function(err, result) {
           test.equal(null, err);
 
-          p_db.close();
+          client.close();
 
           // // Connection account tests
           // test.equal(0, Object.keys(CoreConnection.connections()).length);
@@ -1347,10 +1260,10 @@ exports['Replicaset connection where a server is standalone'] = {
               CoreConnection.enableConnectionAccounting();
 
               // Attempt to connect using MongoClient uri
-              MongoClient.connect(url, function(err, db) {
+              MongoClient.connect(url, function(err, client) {
                 test.equal(null, err);
-                test.ok(db.serverConfig instanceof ReplSet);
-                db.close();
+                test.ok(client.topology instanceof ReplSet);
+                client.close();
 
                 // // Connection account tests
                 // test.equal(0, Object.keys(CoreConnection.connections()).length);
@@ -1394,17 +1307,16 @@ exports['Should correctly modify the server reconnectTries for all replset insta
 
     MongoClient.connect(url, {
       reconnectTries: 10
-    }, function(err, db) {
+    }, function(err, client) {
       test.equal(null, err);
-      test.ok(db != null);
 
-      var servers = db.serverConfig.s.replset.s.replicaSetState.allServers();
+      var servers = client.topology.s.replset.s.replicaSetState.allServers();
       for (var i = 0; i < servers.length; i++) {
         test.equal(10, servers[i].s.pool.options.reconnectTries);
       }
 
       // Destroy the pool
-      db.close();
+      client.close();
 
       setTimeout(function() {
         // Connection account tests

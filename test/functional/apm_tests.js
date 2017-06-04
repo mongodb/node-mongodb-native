@@ -110,9 +110,10 @@ exports['Correctly receive the APM events for a listCollections command'] = {
     var succeeded = [];
     var failed = [];
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    client.connect(function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       db.collection('apm_test_list_collections').insertOne({a:1}, configuration.writeConcernMax()).then(function(r) {
         test.equal(1, r.insertedCount);
@@ -141,7 +142,7 @@ exports['Correctly receive the APM events for a listCollections command'] = {
             test.ok(started[0].connectionId.port != started[1].connectionId.port);
 
             listener.uninstrument();
-            db.close();
+            client.close();
             test.done();
           });
         });
@@ -160,8 +161,10 @@ exports['Correctly receive the APM events for a listIndexes command'] = {
     var succeeded = [];
     var failed = [];
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.on('fullsetup', function(topology, db) {
+    var client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    client.on('fullsetup', function(client) {
+      var db = client.db(configuration.database);
+      
       db.collection('apm_test_list_collections').insertOne({a:1}, configuration.writeConcernMax()).then(function(r) {
         test.equal(1, r.insertedCount);
 
@@ -191,14 +194,14 @@ exports['Correctly receive the APM events for a listIndexes command'] = {
             test.ok(started[0].connectionId.port != started[1].connectionId.port);
 
             listener.uninstrument();
-            db.close();
+            client.close();
             test.done();
           });
         });
       });
     });
 
-    db.open(function() {});
+    client.connect(function() {});
   }
 }
 

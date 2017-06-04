@@ -22,7 +22,7 @@ exports['Should connect to mongos proxies using connectiong string and options']
     }, function(err, db) {
       test.equal(null, err);
       test.ok(db != null);
-      test.equal(500, db.serverConfig.haInterval);
+      test.equal(500, client.topology.haInterval);
 
       db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
         test.equal(null, err);
@@ -160,13 +160,13 @@ exports['Should exercise all options on mongos topology'] = {
     }, function(err, db) {
       test.equal(null, err);
       test.ok(db != null);
-      test.equal(500, db.serverConfig.haInterval);
-      test.ok(db.serverConfig.capabilities() != null);
-      test.equal(true, db.serverConfig.isConnected());
-      test.ok(db.serverConfig.lastIsMaster() != null);
-      test.ok(db.serverConfig.connections() != null);
-      test.ok(db.serverConfig.isMasterDoc != null);
-      test.ok(db.serverConfig.bson != null);
+      test.equal(500, client.topology.haInterval);
+      test.ok(client.topology.capabilities() != null);
+      test.equal(true, client.topology.isConnected());
+      test.ok(client.topology.lastIsMaster() != null);
+      test.ok(client.topology.connections() != null);
+      test.ok(client.topology.isMasterDoc != null);
+      test.ok(client.topology.bson != null);
 
       db.close();
       test.done();
@@ -198,7 +198,7 @@ exports['Should correctly modify the server reconnectTries for all sharded proxy
       test.equal(null, err);
       test.ok(db != null);
 
-      var servers = db.serverConfig.s.mongos.connectedProxies;
+      var servers = client.topology.s.mongos.connectedProxies;
       for (var i = 0; i < servers.length; i++) {
         test.equal(10, servers[i].s.pool.options.reconnectTries);
       }

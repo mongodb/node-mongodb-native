@@ -1827,7 +1827,7 @@ exports['cursor stream errors connection force closed'] = {
           stream.on('data', function (doc) {
             // console.log("==================== data")
             if (++i === 5) {
-              db.serverConfig.connections()[0]
+              client.topology.connections()[0]
                 .write(new Buffer('312312321321askdjljsaNCKnablibh'))
             }
           });

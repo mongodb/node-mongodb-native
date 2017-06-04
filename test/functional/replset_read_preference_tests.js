@@ -37,9 +37,10 @@ exports['Should Correctly Pick lowest ping time'] = {
     );
 
     // Open the database
-    var db = new Db('integration_test_', replSet, {w:1});
+    var client = new MongoClient(replSet, {w:1});
     // Trigger test once whole set is up
-    db.on("fullsetup", function() {
+    client.on("fullsetup", function(client) {
+      var db = client.db(configuration.database);
 
       db.command({ismaster:true}, function(err, result) {
         test.equal(null, err);
@@ -47,12 +48,12 @@ exports['Should Correctly Pick lowest ping time'] = {
         var time = 10;
 
         // // Nearest strategy
-        // var nearest = db.serverConfig.replset.readPreferenceStrategies['nearest'];
+        // var nearest = client.topology.replset.readPreferenceStrategies['nearest'];
 
         // Sorted by time
         var byTime = [];
         // console.log("============== server servers")
-        var byTime = db.serverConfig.replset.getServers({ignoreArbiters:true});
+        var byTime = client.topology.replset.getServers({ignoreArbiters:true});
         byTime.forEach(function(s) {
           s.lastIsMasterMS = time;
           time = time + 10;
@@ -85,7 +86,7 @@ exports['Should Correctly Pick lowest ping time'] = {
         // var lastServer = null;
 
         // Pick the server
-        db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+        client.topology.replset.once('pickedServer', function(readPreference, server) {
           // console.log("======================== 1")
           // console.log(" byTime[0].name = " + byTime[0].name)
           // console.log(" server.name = " + server.name)
@@ -99,7 +100,7 @@ exports['Should Correctly Pick lowest ping time'] = {
           test.equal(null, err);
 
           // Pick the server
-          db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+          client.topology.replset.once('pickedServer', function(readPreference, server) {
             // console.log("======================== 3")
             test.ok(secondaries.indexOf(server.name) != -1);
           });
@@ -110,7 +111,7 @@ exports['Should Correctly Pick lowest ping time'] = {
             test.equal(null, err);
 
             // Pick the server
-            db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+            client.topology.replset.once('pickedServer', function(readPreference, server) {
               // console.log("======================== 5")
               // console.dir(secondaries)
               // console.dir(server.name)
@@ -125,7 +126,7 @@ exports['Should Correctly Pick lowest ping time'] = {
               test.equal(null, err);
 
               // Pick the server
-              db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+              client.topology.replset.once('pickedServer', function(readPreference, server) {
                 // console.log("======================== 6")
                 test.equal('localhost:31000', server.name);
               });
@@ -136,7 +137,7 @@ exports['Should Correctly Pick lowest ping time'] = {
                 test.equal(null, err);
 
                 // Close db
-                db.close();
+                client.close();
                 restartAndDone(configuration, test);
               });
             });
@@ -145,9 +146,7 @@ exports['Should Correctly Pick lowest ping time'] = {
       });
     });
 
-    db.open(function(err, p_db) {
-      db = p_db;
-    });
+    client.connect(function(err, p_db) {});
   }
 }
 
@@ -175,13 +174,14 @@ exports['Should Correctly vary read server when using readpreference NEAREST'] =
     );
 
     // Open the database
-    var db = new Db('integration_test_', replSet, {w:1, readPreference: ReadPreference.NEAREST});
-    db.on("fullsetup", function() {
+    var client = new MongoClient(replSet, {w:1, readPreference: ReadPreference.NEAREST});
+    client.on("fullsetup", function() {
+      var db = client.db(configuration.database);
       // Servers viewed
       var viewedServers = {};
 
       // Pick the server
-      db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+      client.topology.replset.once('pickedServer', function(readPreference, server) {
         viewedServers[server.name] = server.name;
       });
 
@@ -189,7 +189,7 @@ exports['Should Correctly vary read server when using readpreference NEAREST'] =
         test.equal(null, err);
 
         // Pick the server
-        db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+        client.topology.replset.once('pickedServer', function(readPreference, server) {
           viewedServers[server.name] = server.name;
         });
 
@@ -197,7 +197,7 @@ exports['Should Correctly vary read server when using readpreference NEAREST'] =
           test.equal(null, err);
 
           // Pick the server
-          db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+          client.topology.replset.once('pickedServer', function(readPreference, server) {
             viewedServers[server.name] = server.name;
           });
 
@@ -205,16 +205,14 @@ exports['Should Correctly vary read server when using readpreference NEAREST'] =
             test.equal(null, err);
             test.ok(Object.keys(viewedServers).length > 1);
 
-            db.close();
+            client.close();
             restartAndDone(configuration, test);
           });
         });
       });
     });
 
-    db.open(function(err, p_db) {
-      db = p_db;
-    });
+    client.connect(function(err, p_db) {});
   }
 }
 
@@ -242,13 +240,14 @@ exports['Should Correctly vary read server when using readpreference NEAREST pas
     );
 
     // Open the database
-    var db = new Db('integration_test_', replSet, {w:1, readPreference: ReadPreference.NEAREST});
-    db.on("fullsetup", function() {
+    var client = new MongoClient(replSet, {w:1, readPreference: ReadPreference.NEAREST});
+    client.on("fullsetup", function() {
+      var db = client.db(configuration.database);
       // Servers viewed
       var viewedServers = {};
 
       // Pick the server
-      db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+      client.topology.replset.once('pickedServer', function(readPreference, server) {
         viewedServers[server.name] = server.name;
       });
 
@@ -258,7 +257,7 @@ exports['Should Correctly vary read server when using readpreference NEAREST pas
         test.equal(null, err);
 
         // Pick the server
-        db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+        client.topology.replset.once('pickedServer', function(readPreference, server) {
           viewedServers[server.name] = server.name;
         });
 
@@ -268,7 +267,7 @@ exports['Should Correctly vary read server when using readpreference NEAREST pas
           test.equal(null, err);
 
           // Pick the server
-          db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+          client.topology.replset.once('pickedServer', function(readPreference, server) {
             viewedServers[server.name] = server.name;
           });
 
@@ -278,16 +277,14 @@ exports['Should Correctly vary read server when using readpreference NEAREST pas
             test.equal(null, err);
             test.ok(Object.keys(viewedServers).length > 1);
 
-            db.close();
+            client.close();
             restartAndDone(configuration, test);
           });
         });
       });
     });
 
-    db.open(function(err, p_db) {
-      db = p_db;
-    });
+    client.connect(function(err, p_db) {});
   }
 }
 
@@ -301,6 +298,7 @@ exports.shouldCorrectlyReadFromGridstoreWithSecondaryReadPreference = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID
+      , MongoClient = configuration.require.MongoClient
       , ReadPreference = configuration.require.ReadPreference
       , ReplSet = configuration.require.ReplSet
       , Server = configuration.require.Server
@@ -318,8 +316,10 @@ exports.shouldCorrectlyReadFromGridstoreWithSecondaryReadPreference = {
     // Create an id
     var id = new ObjectID();
     // Open the database
-    var db = new Db('integration_test_', replSet, {w:1});
-    db.on("fullsetup", function() {
+    var client = new MongoClient(replSet, {w:1});
+    client.on("fullsetup", function() {
+      var db = client.db(configuration.database);
+      
       db.command({ismaster:true}, function(err, result) {
         test.equal(null, err);
 
@@ -347,7 +347,7 @@ exports.shouldCorrectlyReadFromGridstoreWithSecondaryReadPreference = {
               test.equal(null, err);
 
               // Pick the server
-              db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+              client.topology.replset.once('pickedServer', function(readPreference, server) {
                 test.ok(secondaries[server.name] != null);
               });
 
@@ -358,7 +358,7 @@ exports.shouldCorrectlyReadFromGridstoreWithSecondaryReadPreference = {
                 gridStore.read(function(err, data2) {
                   test.equal(null, err);
                   test.equal(data.toString('base64'), data2.toString('base64'));
-                  db.close();
+                  client.close();
                   restartAndDone(configuration, test);
                 })
               });
@@ -368,9 +368,7 @@ exports.shouldCorrectlyReadFromGridstoreWithSecondaryReadPreference = {
       });
     });
 
-    db.open(function(err, p_db) {
-      db = p_db;
-    });
+    client.connect(function(err, p_db) {});
   }
 }
 
@@ -400,15 +398,17 @@ exports['Connection to replicaset with primary read preference'] = {
     );
 
     // Create db instance
-    var db = new Db('integration_test_', replSet, {w:0, readPreference:ReadPreference.PRIMARY});
+    var client = new MongoClient(replSet, {w:0, readPreference:ReadPreference.PRIMARY});
     // Logger.setLevel('info');
     // Trigger test once whole set is up
-    db.serverConfig.on("fullsetup", function() {
+    client.on("fullsetup", function(client) {
+      var db = client.db(configuration.database);
+      
       db.command({ismaster:true}, function(err, result) {
         test.equal(null, err);
 
         // Pick the server
-        db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+        client.topology.replset.once('pickedServer', function(readPreference, server) {
           test.equal(result.primary, server.name);
         });
 
@@ -416,16 +416,15 @@ exports['Connection to replicaset with primary read preference'] = {
         var collection = db.collection("read_preference_replicaset_test_0");
         // Attempt to read (should fail due to the server not being a primary);
         collection.find().toArray(function(err, items) {
-          db.close();
+          client.close();
           restartAndDone(configuration, test);
         });
       });
     });
 
     // Connect to the db
-    db.open(function(err, p_db) {
+    client.connect(function(err, p_db) {
       test.equal(null, err);
-      db = p_db;
     });
   }
 }
@@ -455,9 +454,10 @@ exports['Should Set read preference at collection level using collection method'
     );
 
     // Create db instance
-    var db = new Db('integration_test_', replSet, {w:0});
+    var client = new MongoClient(replSet, {w:0});
     // Connect to the db
-    db.on("fullsetup", function() {
+    client.on("fullsetup", function(client) {
+      var db = client.db(configuration.database);
       db.command({ismaster:true}, function(err, result) {
         test.equal(null, err);
 
@@ -469,7 +469,7 @@ exports['Should Set read preference at collection level using collection method'
         });
 
         // Pick the server
-        db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+        client.topology.replset.once('pickedServer', function(readPreference, server) {
           test.ok(secondaries[server.name] != null);
         });
 
@@ -479,16 +479,14 @@ exports['Should Set read preference at collection level using collection method'
         var cursor = collection.find()
         cursor.toArray(function(err, items) {
           test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference)
-          db.close();
+          client.close();
           restartAndDone(configuration, test);
         });
       });
     });
 
     // Connect to the db
-    db.open(function(err, p_db) {
-      db = p_db;
-    });
+    client.connect(function(err, p_db) {});
   }
 }
 
@@ -517,9 +515,10 @@ exports['Should Set read preference at collection level using createCollection m
     );
 
     // Create db instance
-    var db = new Db('integration_test_', replSet, {w:0});
+    var client = new MongoClient(replSet, {w:0});
     // Connect to the db
-    db.on("fullsetup", function() {
+    client.on("fullsetup", function() {
+      var db = client.db(configuration.database);
       db.command({ismaster:true}, function(err, result) {
         // Filter out the secondaries
         var secondaries = {};
@@ -533,7 +532,7 @@ exports['Should Set read preference at collection level using createCollection m
           test.equal(null, err);
 
           // Pick the server
-          db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+          client.topology.replset.once('pickedServer', function(readPreference, server) {
             test.ok(secondaries[server.name] != null);
           });
 
@@ -542,7 +541,7 @@ exports['Should Set read preference at collection level using createCollection m
           cursor.toArray(function(err, items) {
             // Does not get called or we don't care
             test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference)
-            db.close();
+            client.close();
             restartAndDone(configuration, test);
           });
         });
@@ -550,9 +549,7 @@ exports['Should Set read preference at collection level using createCollection m
     });
 
     // Connect to the db
-    db.open(function(err, p_db) {
-      db = p_db;
-    });
+    client.connect(function(err, p_db) {});
   }
 }
 
@@ -581,9 +578,10 @@ exports['Should Set read preference at cursor level'] = {
     );
 
     // Create db instance
-    var db = new Db('integration_test_', replSet, {w:0});
+    var client = new MongoClient(replSet, {w:0});
     // Connect to the db
-    db.on("fullsetup", function() {
+    client.on("fullsetup", function() {
+      var db = client.db(configuration.database);
       db.command({ismaster:true}, function(err, result) {
         // Filter out the secondaries
         var secondaries = {};
@@ -596,24 +594,22 @@ exports['Should Set read preference at cursor level'] = {
         var collection = db.collection("read_preferences_all_levels_1");
 
         // Pick the server
-        db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
-          db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+        client.topology.replset.once('pickedServer', function(readPreference, server) {
+          client.topology.replset.once('pickedServer', function(readPreference, server) {
             test.ok(secondaries[server.name] != null);
           });
         });
 
         // Attempt to read (should fail due to the server not being a primary);
         collection.find().setReadPreference(ReadPreference.SECONDARY).toArray(function(err, items) {
-          db.close();
+          client.close();
           restartAndDone(configuration, test);
         });
       });
     });
 
     // Connect to the db
-    db.open(function(err, p_db) {
-      db = p_db;
-    });
+    client.connect(function(err, p_db) {});
   }
 }
 
@@ -642,9 +638,10 @@ exports['Attempt to change read preference at cursor level after object read leg
     );
 
     // Create db instance
-    var db = new Db('integration_test_', replSet, {w:0});
+    var client = new MongoClient(replSet, {w:0});
     // Connect to the db
-    db.open(function(err, p_db) {
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);      
       // Grab the collection
       var collection = db.collection("read_preferences_all_levels_2");
       // Insert a bunch of documents
@@ -655,7 +652,7 @@ exports['Attempt to change read preference at cursor level after object read leg
         var cursor = collection.find().setReadPreference(ReadPreference.SECONDARY);
         cursor.each(function(err, result) {
           if(result == null) {
-            p_db.close();
+            client.close();
             restartAndDone(configuration, test);
           } else {
             try {
@@ -703,9 +700,10 @@ exports['Set read preference at db level'] = {
     var executedCorrectlyRead = false;
 
     // Create db instance
-    var db = new Db('integration_test_', replSet, {w:0, readPreference:new ReadPreference(ReadPreference.SECONDARY)});
+    var client = new MongoClient(replSet, {w:0, readPreference:new ReadPreference(ReadPreference.SECONDARY)});
     // Connect to the db
-    db.on("fullsetup", function() {
+    client.on("fullsetup", function() {
+      var db = client.db(configuration.database);
       db.command({ismaster:true}, function(err, result) {
         // console.log("--------------- 0")
         // Filter out the secondaries
@@ -717,7 +715,7 @@ exports['Set read preference at db level'] = {
         });
         // console.log("--------------- 1")
 
-        db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+        client.topology.replset.once('pickedServer', function(readPreference, server) {
           // console.log("--------------- 4")
           test.ok(secondaries[server.name] != null);
         });
@@ -732,16 +730,14 @@ exports['Set read preference at db level'] = {
           // console.log("--------------- 5")
           // Does not get called or we don't care
           test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference)
-          db.close();
+          client.close();
           restartAndDone(configuration, test);
         });
       });
     });
 
     // Connect to the db
-    db.open(function(err, p_db) {
-      db = p_db;
-    });
+    client.connect(function(err, p_db) {});
   }
 }
 
@@ -770,9 +766,10 @@ exports['Set read preference at collection level using collection method'] = {
     );
 
     // Create db instance
-    var db = new Db('integration_test_', replSet, {w:0});
+    var client = new MongoClient(replSet, {w:0});
     // Connect to the db
-    db.on("fullsetup", function() {
+    client.on("fullsetup", function(client) {
+      var db = client.db(configuration.database);
       db.command({ismaster:true}, function(err, result) {
         // Filter out the secondaries
         var secondaries = {};
@@ -781,7 +778,7 @@ exports['Set read preference at collection level using collection method'] = {
             secondaries[s] = s;
         });
 
-        db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+        client.topology.replset.once('pickedServer', function(readPreference, server) {
           test.ok(secondaries[server.name] != null);
         });
 
@@ -792,16 +789,14 @@ exports['Set read preference at collection level using collection method'] = {
         cursor.toArray(function(err, items) {
           // Does not get called or we don't care
           test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference)
-          db.close();
+          client.close();
           restartAndDone(configuration, test);
         });
       });
     });
 
     // Connect to the db
-    db.open(function(err, p_db) {
-      db = p_db;
-    });
+    client.connect(function(err, p_db) {});
   }
 }
 
@@ -830,23 +825,23 @@ exports['Ensure tag read goes only to the correct server'] = {
     );
 
     // Open the database
-    var db = new Db('local', replSet, {w:0, readPreference: new ReadPreference(ReadPreference.SECONDARY, {"loc":"ny"})});
+    var client = new MongoClient(replSet, {w:0, readPreference: new ReadPreference(ReadPreference.SECONDARY, {"loc":"ny"})});
     // Trigger test once whole set is up
-    db.on("fullsetup", function() {
-      db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+    client.on("fullsetup", function() {
+      var db = client.db(configuration.database);
+
+      client.topology.replset.once('pickedServer', function(readPreference, server) {
         test.equal('secondary', readPreference.preference);
         test.equal('ny', readPreference.tags['loc']);
       });
 
-      db.db('local').collection('system.replset').find().toArray(function(err, doc) {
-        db.close();
+      client.db('local').collection('system.replset').find().toArray(function(err, doc) {
+        client.close();
         restartAndDone(configuration, test);
       });
     });
 
-    db.open(function(err, p_db) {
-      db = p_db;
-    });
+    client.connect(function(err, p_db) {});
   }
 }
 
@@ -875,11 +870,12 @@ exports['Ensure tag read goes only to the correct servers using nearest'] = {
     );
 
     // Open the database
-    var db = new Db('local', replSet, {w:1, readPreference: new ReadPreference(ReadPreference.NEAREST, {"loc":"ny"})});
+    var client = new MongoClient(replSet, {w:1, readPreference: new ReadPreference(ReadPreference.NEAREST, {"loc":"ny"})});
     var success = false;
     // Trigger test once whole set is up
-    db.on("fullsetup", function() {
-      db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+    client.on("fullsetup", function(client) {
+      var db = client.db(configuration.database);
+      client.topology.replset.once('pickedServer', function(readPreference, server) {
         // console.log("==================== pickedServer")
         // console.log(server.lastIsMaster());
         test.equal('ny', server.lastIsMaster().tags.loc);
@@ -887,16 +883,14 @@ exports['Ensure tag read goes only to the correct servers using nearest'] = {
         success = true;
       });
 
-      db.db('local').collection('system.replset').find().toArray(function(err, doc) {
+      client.db('local').collection('system.replset').find().toArray(function(err, doc) {
         test.ok(success);
-        db.close();
+        client.close();
         restartAndDone(configuration, test);
       });
     });
 
-    db.open(function(err, p_db) {
-      db = p_db;
-    });
+    client.connect(function(err, p_db) {});
   }
 }
 
@@ -925,20 +919,19 @@ exports['Always uses primary readPreference for findAndModify'] = {
     );
 
     // Open the database
-    var db = new Db('test', replSet, {w:0, readPreference: new ReadPreference(ReadPreference.SECONDARY_PREFERRED)});
+    var client = new MongoClient(replSet, {w:0, readPreference: new ReadPreference(ReadPreference.SECONDARY_PREFERRED)});
     var success = false;
     // Trigger test once whole set is up
-    db.on("fullsetup", function() {
+    client.on("fullsetup", function(client) {
+      var db = client.db(configuration.database);
       db.collection('test').findAndModify({}, {}, { upsert: false }, function(err) {
         test.equal(null, err);
-        db.close();
+        client.close();
         restartAndDone(configuration, test);
       });
     });
 
-    db.open(function(err, p_db) {
-      db = p_db;
-    });
+    client.connect(function(err, p_db) {});
   }
 }
 
@@ -966,31 +959,31 @@ exports['should correctly apply read preference for direct secondary connection'
       {readPreference: ReadPreference.NEAREST, rs_name:configuration.replicasetName, debug:true}
     );
 
-    // Create an id
-    var db = null;
     // Open the database
-    var db = new Db('integration_test_', replSet, {w:'majority', wtimeout: 10000});
-    db.on("fullsetup", function() {
+    var client = new MongoClient(replSet, {w:'majority', wtimeout: 10000});
+    client.on("fullsetup", function(client) {
+      var db = client.db(configuration.database);
 
       db.collection('direct_secondary_read_test').insertMany([{a:1}, {a:1}, {a:1}, {a:1}], configuration.writeConcernMax(), function(err, r) {
         test.equal(null, err);
-        db.close();
+        client.close();
 
         setTimeout(function() {
           var url = format("mongodb://localhost:%s/integration_test_?readPreference=nearest"
             , configuration.port + 1);
           // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! CONNECT")
           // Connect using the MongoClient
-          MongoClient.connect(url, function(err, db){
+          MongoClient.connect(url, function(err, client){
             test.equal(null, err);
-            test.ok(db.serverConfig instanceof Server);
+            var db = client.db(configuration.database);
+            test.ok(client.topology instanceof Server);
 
             db.collection('direct_secondary_read_test').count(function(err, n) {
               test.equal(null, err);
               test.ok(n > 0);
 
               // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! CONNECT DONE")
-              db.close();
+              client.close();
               test.done();
             });
           });
@@ -998,9 +991,7 @@ exports['should correctly apply read preference for direct secondary connection'
       });
     });
 
-    db.open(function(err, p_db) {
-      db = p_db;
-    });
+    client.connect(function(err, p_db) {});
   }
 }
 
@@ -1034,7 +1025,7 @@ exports['should correctly apply read preference for direct secondary connection'
 //             console.log("-----------------------------------------------")
 //             console.dir(err)
 //             console.dir(docs)
-//             db.close();
+//             client.close();
 //             test.done();
 //           });
 //         });

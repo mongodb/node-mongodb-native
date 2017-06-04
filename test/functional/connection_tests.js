@@ -15,7 +15,7 @@ exports['Should correctly start monitoring for single server connection'] = {
       var db = client.db(configuration.database);
       test.equal(null, err);
 
-      db.serverConfig.once('monitoring', function() {
+      client.topology.once('monitoring', function() {
         client.close();
         test.done();
       });
@@ -35,7 +35,7 @@ exports['Should correctly disable monitoring for single server connection'] = {
     client.connect(function(err, db) {
       var db = client.db(configuration.database);
       test.equal(null, err);
-      test.equal(false, db.serverConfig.s.server.s.monitoring);
+      test.equal(false, client.topology.s.server.s.monitoring);
 
       client.close();
       test.done();
@@ -100,7 +100,7 @@ exports['Should correctly identify parser type'] = {
     var client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:true});
     client.on('open', function(client) {
       var db = client.db(configuration.database);
-      test.equal('js', db.serverConfig.parserType);
+      test.equal('js', client.topology.parserType);
 
       client.close();
       test.done();
@@ -381,7 +381,7 @@ exports['Should correctly reconnect and finish query operation'] = {
           ++dbClose;
         });
 
-        db.serverConfig.once('reconnect', function() {
+        client.topology.once('reconnect', function() {
 
           // Await reconnect and re-authentication
           db.collection('test_reconnect').findOne(function(err, doc) {
@@ -391,7 +391,7 @@ exports['Should correctly reconnect and finish query operation'] = {
             test.equal(1, dbClose);
 
             // Attempt disconnect again
-            db.serverConfig.connections()[0].destroy();
+            client.topology.connections()[0].destroy();
 
             // Await reconnect and re-authentication
             db.collection('test_reconnect').findOne(function(err, doc) {
@@ -407,7 +407,7 @@ exports['Should correctly reconnect and finish query operation'] = {
         })
 
         // Force close
-        db.serverConfig.connections()[0].destroy();
+        client.topology.connections()[0].destroy();
       });
     });
   }

@@ -18,9 +18,9 @@ exports['Should correctly apply collection level read Preference to count'] = {
       // Set read preference
       var collection = db.collection('read_pref_1', {readPreference:ReadPreference.SECONDARY_PREFERRED});
       // Save checkout function
-      var command = db.serverConfig.command;
+      var command = client.topology.command;
       // Set up our checker method
-      db.serverConfig.command = function() {
+      client.topology.command = function() {
         var args = Array.prototype.slice.call(arguments, 0);
         test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
         return  command.apply(db.serverConfig, args);
@@ -28,7 +28,7 @@ exports['Should correctly apply collection level read Preference to count'] = {
 
       // Execute count
       collection.count(function(err, count) {
-        db.serverConfig.command = command;
+        client.topology.command = command;
 
         client.close();
         test.done();
@@ -56,9 +56,9 @@ exports['Should correctly apply collection level read Preference to group'] = {
       var collection = db.collection('read_pref_1', {readPreference:ReadPreference.SECONDARY_PREFERRED});
 
       // Save checkout function
-      var command = db.serverConfig.command;
+      var command = client.topology.command;
       // Set up our checker method
-      db.serverConfig.command = function() {
+      client.topology.command = function() {
         var args = Array.prototype.slice.call(arguments, 0);
         test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
         return  command.apply(db.serverConfig, args);
@@ -66,7 +66,7 @@ exports['Should correctly apply collection level read Preference to group'] = {
 
       // Execute count
       collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
-        db.serverConfig.command = command;
+        client.topology.command = command;
 
         client.close();
         test.done();
@@ -135,9 +135,9 @@ exports['Should correctly apply collection level read Preference to geoNear'] = 
       var collection = db.collection('read_pref_1', {readPreference:ReadPreference.SECONDARY_PREFERRED});
 
       // Save checkout function
-      var command = db.serverConfig.command;
+      var command = client.topology.command;
       // Set up our checker method
-      db.serverConfig.command = function() {
+      client.topology.command = function() {
         var args = Array.prototype.slice.call(arguments, 0);
         test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
         return  command.apply(db.serverConfig, args);
@@ -145,7 +145,7 @@ exports['Should correctly apply collection level read Preference to geoNear'] = 
 
       // Execute count
       collection.geoNear(50, 50, {query:{a:1}, num:1}, function(err, docs) {
-        db.serverConfig.command = command;
+        client.topology.command = command;
 
         client.close();
         test.done();
@@ -172,9 +172,9 @@ exports['Should correctly apply collection level read Preference to geoHaystackS
       // Set read preference
       var collection = db.collection('read_pref_1', {readPreference:ReadPreference.SECONDARY_PREFERRED});
       // Save checkout function
-      var command = db.serverConfig.command;
+      var command = client.topology.command;
       // Set up our checker method
-      db.serverConfig.command = function() {
+      client.topology.command = function() {
         var args = Array.prototype.slice.call(arguments, 0);
         test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
         return  command.apply(db.serverConfig, args);
@@ -182,7 +182,7 @@ exports['Should correctly apply collection level read Preference to geoHaystackS
 
       // Execute count
       collection.geoHaystackSearch(50, 50, {search:{a:1}, limit:1, maxDistance:100}, function(err, docs) {
-        db.serverConfig.command = command;
+        client.topology.command = command;
 
         client.close();
         test.done();
@@ -209,9 +209,9 @@ exports['Should correctly apply collection level read Preference to mapReduce'] 
       // Set read preference
       var collection = db.collection('read_pref_1', {readPreference:ReadPreference.SECONDARY_PREFERRED});
       // Save checkout function
-      var command = db.serverConfig.command;
+      var command = client.topology.command;
       // Set up our checker method
-      db.serverConfig.command = function() {
+      client.topology.command = function() {
         var args = Array.prototype.slice.call(arguments, 0);
         test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
         return  command.apply(db.serverConfig, args);
@@ -224,7 +224,7 @@ exports['Should correctly apply collection level read Preference to mapReduce'] 
 
       // Perform the map reduce
       collection.mapReduce(map, reduce, {out: {inline:1}}, function(err, collection) {
-        db.serverConfig.command = command;
+        client.topology.command = command;
 
         client.close();
         test.done();
@@ -251,9 +251,9 @@ exports['Should correctly apply collection level read Preference to mapReduce ba
       // Set read preference
       var collection = db.collection('read_pref_1', {readPreference:ReadPreference.SECONDARY_PREFERRED});
       // Save checkout function
-      var command = db.serverConfig.command;
+      var command = client.topology.command;
       // Set up our checker method
-      db.serverConfig.command = function() {
+      client.topology.command = function() {
         var args = Array.prototype.slice.call(arguments, 0);
         test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
         return  command.apply(db.serverConfig, args);
@@ -266,7 +266,7 @@ exports['Should correctly apply collection level read Preference to mapReduce ba
 
       // Perform the map reduce
       collection.mapReduce(map, reduce, {out: 'inline'}, function(err, collection) {
-        db.serverConfig.command = command;
+        client.topology.command = command;
 
         client.close();
         test.done();
@@ -327,9 +327,9 @@ exports['Should correctly apply collection level read Preference to aggregate'] 
       // Set read preference
       var collection = db.collection('read_pref_1', {readPreference:ReadPreference.SECONDARY_PREFERRED});
       // Save checkout function
-      var command = db.serverConfig.command;
+      var command = client.topology.command;
       // Set up our checker method
-      db.serverConfig.command = function() {
+      client.topology.command = function() {
         var args = Array.prototype.slice.call(arguments, 0);
         test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
         return  command.apply(db.serverConfig, args);
@@ -352,7 +352,7 @@ exports['Should correctly apply collection level read Preference to aggregate'] 
             authors : { $addToSet : "$author" }
           }}
         ], function(err, result) {
-        db.serverConfig.command = command;
+        client.topology.command = command;
 
         client.close();
         test.done();
@@ -379,9 +379,9 @@ exports['Should correctly apply collection level read Preference to stats'] = {
       // Set read preference
       var collection = db.collection('read_pref_1', {readPreference:ReadPreference.SECONDARY_PREFERRED});
       // Save checkout function
-      var command = db.serverConfig.command;
+      var command = client.topology.command;
       // Set up our checker method
-      db.serverConfig.command = function() {
+      client.topology.command = function() {
         var args = Array.prototype.slice.call(arguments, 0);
         test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
         return  command.apply(db.serverConfig, args);
@@ -394,7 +394,7 @@ exports['Should correctly apply collection level read Preference to stats'] = {
 
       // Perform the map reduce
       collection.stats(function(err, collection) {
-        db.serverConfig.command = command;
+        client.topology.command = command;
 
         client.close();
         test.done();
@@ -419,7 +419,7 @@ exports['Should correctly honor the readPreferences at DB and individual command
       var db = client.db(configuration.database);
       var store = db._executeQueryCommand;
       // Save checkout function
-      var command = db.serverConfig.command;
+      var command = client.topology.command;
       // Set up our checker method
       client.topology.command = function() {
         var args = Array.prototype.slice.call(arguments, 0);

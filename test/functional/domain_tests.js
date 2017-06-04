@@ -106,7 +106,7 @@ exports.shouldStayInCorrectDomainForQueuedReadCommand = {
 
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
-      var connection = db.serverConfig.connections()[0];
+      var connection = client.topology.connections()[0];
       var collection = db.collection('test');
       connection.destroy();
 
@@ -139,7 +139,7 @@ exports.shouldStayInCorrectDomainForQueuedWriteCommand = {
     client.connect(function(err, client) {
       test.ok(!err);
       var db = client.db(configuration.database);
-      var connection = db.serverConfig.connections()[0];
+      var connection = client.topology.connections()[0];
       var collection = db.collection('test');
       connection.destroy();
 

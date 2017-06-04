@@ -21,11 +21,11 @@ exports['Should correctly recover when bufferMaxEntries: -1 and restart'] = {
           test.equal(0, r.result.n);
 
           client.close();
-          test.done();
         });
 
         setTimeout(function() {
           configuration.manager.restart(9, {waitMS: 5000}).then(function() {
+            test.done();
           });
         }, 5000)
       });
