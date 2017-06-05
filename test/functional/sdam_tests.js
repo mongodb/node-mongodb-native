@@ -121,7 +121,11 @@ exports['Should correctly emit all Server SDAM operations'] = {
       test.equal(null, err);
       client.close(true);
 
+      // console.log("########################################")
+      // console.dir(Object.keys(operations))
+
       for(var name in operations) {
+        // console.log("" + name + " :: " + operations[name].length)
         test.ok(operations[name].length > 0);
       }
 
