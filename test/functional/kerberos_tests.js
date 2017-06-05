@@ -25,13 +25,16 @@ exports['Should Correctly Authenticate using kerberos with MongoClient'] = {
     var urlEncodedPrincipal = encodeURIComponent(principal);
 
     // Let's write the actual connection code
-    MongoClient.connect(format("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&gssapiServiceName=mongodb&maxPoolSize=1", urlEncodedPrincipal, server), function(err, db) {
+    MongoClient.connect(format("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&gssapiServiceName=mongodb&maxPoolSize=1", urlEncodedPrincipal, server), function(err, client) {
       test.equal(null, err);
-      test.ok(db != null);
+      var db = client.db('kerberos');
 
       db.collection('test').find().toArray(function(err, docs) {
+        console.dir()
         test.equal(null, err);
         test.ok(true, docs[0].kerberos);
+
+        client.close();
         test.done();
       });
     });
@@ -56,13 +59,15 @@ exports['Validate that SERVICE_REALM and CANONICALIZE_HOST_NAME is passed in'] =
     var urlEncodedPrincipal = encodeURIComponent(principal);
 
     // Let's write the actual connection code
-    MongoClient.connect(format("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false,SERVICE_REALM:windows&maxPoolSize=1", urlEncodedPrincipal, server), function(err, db) {
+    MongoClient.connect(format("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false,SERVICE_REALM:windows&maxPoolSize=1", urlEncodedPrincipal, server), function(err, client) {
       test.equal(null, err);
-      test.ok(db != null);
+      var db = client.db('kerberos');
 
       db.collection('test').find().toArray(function(err, docs) {
         test.equal(null, err);
         test.ok(true, docs[0].kerberos);
+
+        client.close();
         test.done();
       });
     });
@@ -87,13 +92,15 @@ exports['Should Correctly Authenticate using kerberos with MongoClient and authe
     var urlEncodedPrincipal = encodeURIComponent(principal);
 
     // Let's write the actual connection code
-    MongoClient.connect(format("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false&maxPoolSize=1", urlEncodedPrincipal, server), function(err, db) {
+    MongoClient.connect(format("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false&maxPoolSize=1", urlEncodedPrincipal, server), function(err, client) {
       test.equal(null, err);
-      test.ok(db != null);
+      var db = client.db('kerberos');
 
       db.collection('test').find().toArray(function(err, docs) {
         test.equal(null, err);
         test.ok(true, docs[0].kerberos);
+        
+        client.close();
         test.done();
       });
     });
@@ -118,17 +125,17 @@ exports['Should Correctly Authenticate using kerberos with MongoClient and then 
     var urlEncodedPrincipal = encodeURIComponent(principal);
 
     // Let's write the actual connection code
-    MongoClient.connect(format("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&gssapiServiceName=mongodb&maxPoolSize=5", urlEncodedPrincipal, server), function(err, db) {
+    MongoClient.connect(format("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&gssapiServiceName=mongodb&maxPoolSize=5", urlEncodedPrincipal, server), function(err, client) {
       test.equal(null, err);
-      test.ok(db != null);
+      var db = client.db('kerberos');
 
-      db.db('kerberos').collection('test').findOne(function(err, doc) {
+      client.db('kerberos').collection('test').findOne(function(err, doc) {
         test.equal(null, err);
         test.equal(true, doc.kerberos);
 
         client.topology.once('reconnect', function() {
           // Await reconnect and re-authentication
-          db.db('kerberos').collection('test').findOne(function(err, doc) {
+          client.db('kerberos').collection('test').findOne(function(err, doc) {
             test.equal(null, err);
             test.equal(true, doc.kerberos);
 
@@ -136,10 +143,11 @@ exports['Should Correctly Authenticate using kerberos with MongoClient and then 
             client.topology.connections()[0].destroy();
 
             // Await reconnect and re-authentication
-            db.db('kerberos').collection('test').findOne(function(err, doc) {
+            client.db('kerberos').collection('test').findOne(function(err, doc) {
               test.equal(null, err);
               test.equal(true, doc.kerberos);
-
+              
+              client.close();
               test.done();
             });
           });
@@ -169,17 +177,18 @@ exports['Should Correctly Authenticate authenticate method manually'] = {
     var principal = "drivers@LDAPTEST.10GEN.CC";
     var urlEncodedPrincipal = encodeURIComponent(principal);
 
-    var db = new Db('test', new Server(server, 27017), {w:1});
-    db.open(function(err, db) {
+    var client = new MongoClient(new Server(server, 27017)
+      , {w:1, user: principal, authMechanism: 'GSSAPI'});
+    client.connect(function(err, client) {
       test.equal(null, err);
-      test.ok(db != null);
+      var db = client.db('kerberos');
 
-      // Authenticate
-      db.authenticate(principal, null, {authMechanism: 'GSSAPI'}, function(err, result) {
+      // Await reconnect and re-authentication
+      client.db('kerberos').collection('test').findOne(function(err, doc) {
         test.equal(null, err);
-        test.ok(result);
-
-        db.close();
+        test.equal(true, doc.kerberos);
+        
+        client.close();
         test.done();
       });
     });
@@ -232,13 +241,15 @@ exports['Should Correctly Authenticate on Win32 using kerberos with MongoClient'
     var urlEncodedPrincipal = encodeURIComponent(principal);
 
     // Let's write the actual connection code
-    MongoClient.connect(format("mongodb://%s:%s@%s/kerberos?authMechanism=GSSAPI&maxPoolSize=1", urlEncodedPrincipal, pass, server), function(err, db) {
+    MongoClient.connect(format("mongodb://%s:%s@%s/kerberos?authMechanism=GSSAPI&maxPoolSize=1", urlEncodedPrincipal, pass, server), function(err, client) {
       test.equal(null, err);
-      test.ok(db != null);
+      var db = client.db('kerberos');
 
       db.collection('test').find().toArray(function(err, docs) {
         test.equal(null, err);
         test.ok(true, docs[0].kerberos);
+
+        client.close();
         test.done();
       });
     });
@@ -265,17 +276,17 @@ exports['Should Correctly Authenticate using kerberos on Win32 with MongoClient 
     var urlEncodedPrincipal = encodeURIComponent(principal);
 
     // Let's write the actual connection code
-    MongoClient.connect(format("mongodb://%s:%s@%s/kerberos?authMechanism=GSSAPI&maxPoolSize=5", urlEncodedPrincipal, pass, server), function(err, db) {
+    MongoClient.connect(format("mongodb://%s:%s@%s/kerberos?authMechanism=GSSAPI&maxPoolSize=5", urlEncodedPrincipal, pass, server), function(err, client) {
       test.equal(null, err);
-      test.ok(db != null);
+      var db = client.db('kerberos');
 
-      db.db('kerberos').collection('test').findOne(function(err, doc) {
+      client.db('kerberos').collection('test').findOne(function(err, doc) {
         test.equal(null, err);
         test.equal(true, doc.kerberos);
 
         client.topology.once('reconnect', function() {
           // Await reconnect and re-authentication
-          db.db('kerberos').collection('test').findOne(function(err, doc) {
+          client.db('kerberos').collection('test').findOne(function(err, doc) {
             test.equal(null, err);
             test.equal(true, doc.kerberos);
 
@@ -283,10 +294,11 @@ exports['Should Correctly Authenticate using kerberos on Win32 with MongoClient 
             client.topology.connections()[0].destroy();
 
             // Await reconnect and re-authentication
-            db.db('kerberos').collection('test').findOne(function(err, doc) {
+            client.db('kerberos').collection('test').findOne(function(err, doc) {
               test.equal(null, err);
               test.equal(true, doc.kerberos);
 
+              client.close();
               test.done();
             });
           });
@@ -317,18 +329,18 @@ exports['Should Correctly Authenticate on Win32 authenticate method manually'] =
     var pass = process.env['LDAPTEST_PASSWORD'];
     if(pass == null) throw new Error("The env parameter LDAPTEST_PASSWORD must be set");
     var urlEncodedPrincipal = encodeURIComponent(principal);
-
-    var db = new Db('test', new Server(server, 27017), {w:1});
-    db.open(function(err, db) {
+      
+    var client = new MongoClient(new Server(server, 27017)
+      , {w:1, user: principal, password: pass, authMechanism: 'GSSAPI'});
+    client.connect(function(err, client) {
       test.equal(null, err);
-      test.ok(db != null);
+      var db = client.db('kerberos');
 
-      // Authenticate
-      db.authenticate(principal, pass, {authMechanism: 'GSSAPI'}, function(err, result) {
+      db.collection('test').find().toArray(function(err, docs) {
         test.equal(null, err);
-        test.ok(result);
+        test.ok(true, docs[0].kerberos);
 
-        db.close();
+        client.close();
         test.done();
       });
     });
