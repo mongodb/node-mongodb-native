@@ -11,6 +11,7 @@ exports['Should correctly perform a Mongos secondary read using the read prefere
     var Mongos = configuration.require.Mongos
       , Server = configuration.require.Server
       , Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
       , Logger = configuration.require.Logger
       , ReadPreference = configuration.require.ReadPreference;
     // Set up mongos connection
@@ -20,10 +21,10 @@ exports['Should correctly perform a Mongos secondary read using the read prefere
       ])
 
     // Connect using the mongos connections
-    var db = new Db('integration_test_', mongos, {w:0});
-    db.open(function(err, db) {
+    var client = new MongoClient(mongos, {w:0});
+    client.connect(function(err, client) {
       test.equal(null, err);
-      test.ok(db != null);
+      var db = client.db(configuration.database);
 
       // Perform a simple insert into a collection
       var collection = db.collection("shard_test1");
@@ -50,7 +51,7 @@ exports['Should correctly perform a Mongos secondary read using the read prefere
           // Set error level for the driver
           Logger.setLevel('error');
           // Close db connection
-          db.close();
+          client.close();
         })
       });
     });
@@ -66,6 +67,7 @@ exports['Should correctly fail a Mongos read using a unsupported read preference
   // The actual test we wish to run
   test: function(configuration, test) {
     var Mongos = configuration.require.Mongos
+      , MongoClient = configuration.require.MongoClient
       , Server = configuration.require.Server
       , Db = configuration.require.Db
       , Logger = configuration.require.Logger
@@ -77,10 +79,10 @@ exports['Should correctly fail a Mongos read using a unsupported read preference
       ])
 
     // Connect using the mongos connections
-    var db = new Db('integration_test_', mongos, {w:0});
-    db.open(function(err, db) {
+    var client = new MongoClient(mongos, {w:0});
+    client.connect(function(err, client) {
       test.equal(null, err);
-      test.ok(db != null);
+      var db = client.db(configuration.database);
 
       // Perform a simple insert into a collection
       var collection = db.collection("shard_test2");
@@ -106,7 +108,7 @@ exports['Should correctly fail a Mongos read using a unsupported read preference
           // Set error level for the driver
           Logger.setLevel('error');
           // Close db connection
-          db.close();
+          client.close();
         })
       });
     });
@@ -122,6 +124,7 @@ exports['Should fail a Mongos secondary read using the read preference and tags 
   // The actual test we wish to run
   test: function(configuration, test) {
     var Mongos = configuration.require.Mongos
+      , MongoClient = configuration.require.MongoClient
       , Server = configuration.require.Server
       , Logger = configuration.require.Logger
       , Db = configuration.require.Db
@@ -133,10 +136,10 @@ exports['Should fail a Mongos secondary read using the read preference and tags 
       ])
 
     // Connect using the mongos connections
-    var db = new Db('integration_test_', mongos, {w:0});
-    db.open(function(err, db) {
+    var client = new MongoClient(mongos, {w:0});
+    client.connect(function(err, client) {
       test.equal(null, err);
-      test.ok(db != null);
+      var db = client.db(configuration.database);
 
       // Perform a simple insert into a collection
       var collection = db.collection("shard_test3");
@@ -161,7 +164,7 @@ exports['Should fail a Mongos secondary read using the read preference and tags 
           // Set error level for the driver
           Logger.setLevel('error');
           // Close db connection
-          db.close();
+          client.close();
         })
       });
     });
@@ -177,6 +180,7 @@ exports['Should correctly read from a tagged secondary using Mongos'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var Mongos = configuration.require.Mongos
+      , MongoClient = configuration.require.MongoClient
       , Server = configuration.require.Server
       , Logger = configuration.require.Logger
       , Db = configuration.require.Db
@@ -188,10 +192,10 @@ exports['Should correctly read from a tagged secondary using Mongos'] = {
       ])
 
     // Connect using the mongos connections
-    var db = new Db('integration_test_', mongos, {w:0});
-    db.open(function(err, db) {
+    var client = new MongoClient(mongos, {w:0});
+    client.connect(function(err, client) {
       test.equal(null, err);
-      test.ok(db != null);
+      var db = client.db(configuration.database);
 
       // Perform a simple insert into a collection
       var collection = db.collection("shard_test4");
@@ -217,7 +221,7 @@ exports['Should correctly read from a tagged secondary using Mongos'] = {
           // Set error level for the driver
           Logger.setLevel('error');
           // Close db connection
-          db.close();
+          client.close();
         })
       });
     });
@@ -233,16 +237,17 @@ exports['Should correctly connect to MongoS using single server instance'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var Mongos = configuration.require.Mongos
+      , MongoClient = configuration.require.MongoClient
       , Server = configuration.require.Server
       , Db = configuration.require.Db
       , ReadPreference = configuration.require.ReadPreference;
 
     var mongos = new Server(configuration.host, configuration.port, { auto_reconnect: true });
     // Connect using the mongos connections
-    var db = new Db('integration_test_', mongos, {w:1});
-    db.open(function(err, db) {
+    var client = new MongoClient(mongos, {w:0});
+    client.connect(function(err, client) {
       test.equal(null, err);
-      test.ok(db != null);
+      var db = client.db(configuration.database);
 
       // Perform a simple insert into a collection
       var collection = db.collection("shard_test5");
@@ -254,7 +259,7 @@ exports['Should correctly connect to MongoS using single server instance'] = {
           test.equal(null, err);
           test.equal(1, item.test);
 
-          db.close();
+          client.close();
           test.done();
         })
       });
@@ -271,17 +276,21 @@ exports['Should correctly connect to the mongos using Server connection'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var Mongos = configuration.require.Mongos
+      , MongoClient = configuration.require.MongoClient
       , Server = configuration.require.Server
       , Db = configuration.require.Db
       , ReadPreference = configuration.require.ReadPreference;
-    var db = new Db("test", new Server(configuration.host, configuration.port), {w:0});
-    db.open(function(e, db) {
-      test.equal(null, e);
+    
+    // Connect using the mongos connections
+    var client = new MongoClient(new Server(configuration.host, configuration.port), {w:0});
+    client.connect(function(err, client) {
+      test.equal(null, err);
+      var db = client.db(configuration.database);
 
       db.createCollection("GabeTest", function(e,collection) {
         test.equal(null, e);
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -311,17 +320,17 @@ exports.shouldCorrectlyEmitOpenEvent = {
 
     var openCalled = false;
     // Connect using the mongos connections
-    var db = new Db('integration_test_', mongos, {w:0});
-    db.once("open", function(_err, _db) {
+    var client = new MongoClient(mongos, {w:0});
+    client.once("open", function(_err, _db) {
       openCalled = true;
     })
 
-    db.open(function(err, db) {
+    client.connect(function(err, client) {
       test.equal(null, err);
-      test.ok(db != null);
+      test.ok(client != null);
       test.equal(true, openCalled);
 
-      db.close();
+      client.close();
       test.done();
     });
   }
@@ -349,8 +358,9 @@ exports['Should correctly apply readPreference when performing inline mapReduce'
       ])
 
     // Connect using the mongos connections
-    new Db('integration_test_2', mongos).open(function(err, db) {
+    new MongoClient(mongos).connect(function(err, client) {
       test.equal(null, err);
+      var db = client.db(configuration.database);
 
       // Get the collection
       var col = db.collection('items');
@@ -358,7 +368,7 @@ exports['Should correctly apply readPreference when performing inline mapReduce'
       col.insertMany([{a:1}, {a:2}, {a:3}], function(err, r) {
         test.equal(null, err);
 
-        db.db('admin').command({enableSharding: 'integration_test_2'}, function(err, r) {
+        client.db('admin').command({enableSharding: 'integration_test_2'}, function(err, r) {
           // console.log("============================================= 0")
           // console.dir(err)
           // console.dir(r)
@@ -367,7 +377,7 @@ exports['Should correctly apply readPreference when performing inline mapReduce'
           col.createIndex( { _id: "hashed" }, function(err, r) {
             test.equal(null, err);
 
-            db.db('admin').command({
+            client.db('admin').command({
               shardCollection: 'integration_test_2.items',
               key: {'_id': 'hashed'},
             }, function(err, r) {
@@ -397,7 +407,7 @@ exports['Should correctly apply readPreference when performing inline mapReduce'
                 // console.dir(r)
                 // throw new Error('')
 
-                db.close();
+                client.close();
                 test.done();
               });
             });

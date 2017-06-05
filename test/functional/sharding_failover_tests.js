@@ -23,10 +23,10 @@ exports['Should correctly connect and then handle a mongos failure'] = {
       , configuration.host, configuration.port + 1);
     // console.log("----------------------------- 0")
     // console.log(url)
-    MongoClient.connect(url, {}, function(err, db) {
+    MongoClient.connect(url, {}, function(err, client) {
       // console.log("----------------------------- 1")
       test.equal(null, err);
-      test.ok(db != null);
+      var db = client.db(configuration.database);
 
       db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
         // console.log("----------------------------- 2")
@@ -45,7 +45,7 @@ exports['Should correctly connect and then handle a mongos failure'] = {
               // console.log("----------------------------- 5:1")
               mongos.start().then(function() {
                 // console.log("----------------------------- 5:2")
-                db.close();
+                client.close();
                 test.done();
               });
             } else {
@@ -106,11 +106,11 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = {
 
     // console.log("+++++++++++++++++++++++++++++++++++++ 0")
     // Connect using the mongos connections
-    var db = new Db('integration_test_', mongos, {w:0});
-    db.open(function(err, db) {
+    var client = new MongoClient(mongos, {w:0});
+    client.connect(function(err, client) {
       // console.log("+++++++++++++++++++++++++++++++++++++ 1")
       test.equal(null, err);
-      test.ok(db != null);
+      var db = client.db(configuration.database);
 
       // Perform a simple insert into a collection
       var collection = db.collection("shard_test2");
@@ -166,7 +166,7 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = {
 
                                 test.equal(5, numberOfJoins);
                                 test.equal(3, numberLeaving);
-                                db.close();
+                                client.close();
                                 test.done();
                               }, 10000);
                             });
@@ -204,9 +204,10 @@ exports['Should correctly connect and emit a reconnect event after mongos failov
       , configuration.host, configuration.port
       , configuration.host, configuration.port + 1);
 
-    MongoClient.connect(url, {}, function(err, db) {
+    MongoClient.connect(url, {}, function(err, client) {
       test.equal(null, err);
-      test.ok(db != null);
+      test.ok(client != null);
+      var db = client.db(configuration.database);
 
       var reconnectCalled = false;
       // Add listener to the serverConfig
@@ -235,7 +236,7 @@ exports['Should correctly connect and emit a reconnect event after mongos failov
               db.collection("replicaset_mongo_client_collection").insert({c:1}, function(err) {
                 test.equal(null, err);
                 test.ok(reconnectCalled);
-                db.close();
+                client.close();
                 test.done();
               });
             });
