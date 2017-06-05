@@ -61,7 +61,7 @@ exports['Should correctly emit all Mongos SDAM operations'] = {
       topologyClosed: [],
     }
 
-    var client = new MongoClient();
+    var client = new MongoClient(configuration.url(), { haInterval: 500 });
     var events = ['serverDescriptionChanged', 'serverHeartbeatStarted'
       , 'serverHeartbeatSucceeded', 'serverOpening'
       , 'serverClosed', 'topologyOpening', 'topologyDescriptionChanged'
@@ -86,8 +86,7 @@ exports['Should correctly emit all Mongos SDAM operations'] = {
       }, 1000);
     });
 
-    var url = configuration.url();
-    client.connect(url, { haInterval: 500 }, function(err, db) {
+    client.connect(function(err, db) {
       test.equal(null, err);
     });
   }

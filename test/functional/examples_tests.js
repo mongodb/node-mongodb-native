@@ -8,7 +8,7 @@ var co = require('co');
  */
 exports['first three examples'] = {
   metadata: { requires: { 
-    topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+    topology: ['single'],
     mongodb: ">= 2.8.0"
   } },
   
@@ -89,7 +89,7 @@ exports['first three examples'] = {
  */
 exports['query top level fields'] = {
   metadata: { requires: { 
-    topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+    topology: ['single'],
     mongodb: ">= 2.8.0"
   } },
   
@@ -188,7 +188,7 @@ exports['query top level fields'] = {
  */
 exports['query embedded documents'] = {
   metadata: { requires: { 
-    topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+    topology: ['single'],
     mongodb: ">= 2.8.0"
   } },
   
@@ -282,7 +282,7 @@ exports['query embedded documents'] = {
  */
 exports['query arrays'] = {
   metadata: { requires: { 
-    topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+    topology: ['single'],
     mongodb: ">= 2.8.0"
   } },
   
@@ -396,7 +396,7 @@ exports['query arrays'] = {
  */
 exports['query array of documents'] = {
   metadata: { requires: { 
-    topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+    topology: ['single'],
     mongodb: ">= 2.8.0"
   } },
   
@@ -509,7 +509,7 @@ exports['query array of documents'] = {
  */
 exports['query null'] = {
   metadata: { requires: { 
-    topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+    topology: ['single'],
     mongodb: ">= 2.8.0"
   } },
   
@@ -570,7 +570,7 @@ exports['query null'] = {
  */
 exports['projection'] = {
   metadata: { requires: { 
-    topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+    topology: ['single'],
     mongodb: ">= 2.8.0"
   } },
   
@@ -747,7 +747,7 @@ exports['projection'] = {
  */
 exports['update and replace'] = {
   metadata: { requires: { 
-    topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+    topology: ['single'],
     mongodb: ">= 2.8.0"
   } },
   
@@ -895,7 +895,7 @@ exports['update and replace'] = {
  */
 exports['delete'] = {
   metadata: { requires: { 
-    topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+    topology: ['single'],
     mongodb: ">= 2.8.0"
   } },
   
