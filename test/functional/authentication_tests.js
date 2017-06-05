@@ -90,7 +90,7 @@ exports['should correctly authenticate with kay.kay'] = {
  * @ignore
  */
 exports.shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode = {
-  metadata: { requires: { topology: ['single', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {

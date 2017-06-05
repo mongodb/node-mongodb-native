@@ -51,21 +51,21 @@ exports['Should correctly authenticate using x509'] = {
             , sslCert:cert
             , sslValidate:false
           }
-        }, function(err, db) {
+        }, function(err, client) {
           test.equal(null, err);
-          test.ok(db != null);
+          var db = client.db(configuration.database);
 
           // Execute build info
           db.command({buildInfo:1}, function(err, result) {
             test.equal(null, err);
             var version = parseInt(result.versionArray.slice(0, 3).join(""), 10);
             if(version < 253) {
-              db.close();
+              client.close();
               return test.done();
             }
 
             // Add the X509 auth user to the $external db
-            var ext = db.db('$external');
+            var ext = client.db('$external');
             ext.addUser(userName, {roles: [
               {'role': 'readWriteAnyDatabase', 'db': 'admin'},
               {'role': 'userAdminAnyDatabase', 'db': 'admin'}
@@ -73,7 +73,7 @@ exports['Should correctly authenticate using x509'] = {
               test.equal(null, err);
               test.equal(userName, result[0].user);
               test.equal('', result[0].pwd);
-              db.close();
+              client.close();
 
               // Connect using X509 authentication
               MongoClient.connect(f('mongodb://%s@server:27019/test?authMechanism=%s&ssl=true&maxPoolSize=1'
@@ -83,11 +83,10 @@ exports['Should correctly authenticate using x509'] = {
                   , sslCert:cert
                   , sslValidate:false
                 }
-              }, function(err, db) {
+              }, function(err, client) {
                 test.equal(null, err);
-                test.ok(db != null);
 
-                db.close();
+                client.close();
 
                 serverManager.stop().then(function() {
                   test.done();
@@ -150,21 +149,21 @@ exports['Should correctly handle bad x509 certificate'] = {
             , sslCert:cert
             , sslValidate:false
           }
-        }, function(err, db) {
+        }, function(err, client) {
           test.equal(null, err);
-          test.ok(db != null);
+          var db = client.db(configuration.database);
 
           // Execute build info
           db.command({buildInfo:1}, function(err, result) {
             test.equal(null, err);
             var version = parseInt(result.versionArray.slice(0, 3).join(""), 10);
             if(version < 253) {
-              db.close();
+              client.close();
               return test.done();
             }
 
             // Add the X509 auth user to the $external db
-            var ext = db.db('$external');
+            var ext = client.db('$external');
             ext.addUser(userName, {roles: [
               {'role': 'readWriteAnyDatabase', 'db': 'admin'},
               {'role': 'userAdminAnyDatabase', 'db': 'admin'}
@@ -172,7 +171,7 @@ exports['Should correctly handle bad x509 certificate'] = {
               test.equal(null, err);
               test.equal(userName, result[0].user);
               test.equal('', result[0].pwd);
-              db.close();
+              client.close();
 
               // Connect using X509 authentication
               MongoClient.connect(f('mongodb://%s@server:27019/test?authMechanism=%s&ssl=true&maxPoolSize=1'
@@ -182,8 +181,7 @@ exports['Should correctly handle bad x509 certificate'] = {
                   , sslCert:serverPem
                   , sslValidate:false
                 }
-              }, function(err, db) {
-                test.equal(null, db);
+              }, function(err, client) {
                 test.equal(0, err.ok);
                 test.equal("auth failed", err.errmsg);
 
@@ -247,21 +245,21 @@ exports['Should give reasonable error on x509 authentication failure'] = {
             , sslCert:cert
             , sslValidate:false
           }
-        }, function(err, db) {
+        }, function(err, client) {
           test.equal(null, err);
-          test.ok(db != null);
+          var db = client.db(configuration.database);
 
           // Execute build info
           db.command({buildInfo:1}, function(err, result) {
             test.equal(null, err);
             var version = parseInt(result.versionArray.slice(0, 3).join(""), 10);
             if(version < 253) {
-              db.close();
+              client.close();
               return test.done();
             }
 
             // Add the X509 auth user to the $external db
-            var ext = db.db('$external');
+            var ext = client.db('$external');
             ext.addUser(userName, {roles: [
               {'role': 'readWriteAnyDatabase', 'db': 'admin'},
               {'role': 'userAdminAnyDatabase', 'db': 'admin'}
@@ -269,7 +267,7 @@ exports['Should give reasonable error on x509 authentication failure'] = {
               test.equal(null, err);
               test.equal(userName, result[0].user);
               test.equal('', result[0].pwd);
-              db.close();
+              client.close();
 
               // Connect using X509 authentication
               MongoClient.connect(f('mongodb://%s@server:27019/test?authMechanism=%s&ssl=true&maxPoolSize=1'
@@ -279,8 +277,7 @@ exports['Should give reasonable error on x509 authentication failure'] = {
                   , sslCert:cert
                   , sslValidate:false
                 }
-              }, function(err, db) {
-                test.equal(null, db);
+              }, function(err, client) {
                 test.equal(0, err.ok);
                 test.equal("auth failed", err.errmsg);
 
@@ -342,21 +339,21 @@ exports['Should give helpful error when attempting to use x509 without SSL'] = {
             , sslCert:cert
             , sslValidate:false
           }
-        }, function(err, db) {
+        }, function(err, client) {
           test.equal(null, err);
-          test.ok(db != null);
+          var db = client.db(configuration.database);
 
           // Execute build info
           db.command({buildInfo:1}, function(err, result) {
             test.equal(null, err);
             var version = parseInt(result.versionArray.slice(0, 3).join(""), 10);
             if(version < 253) {
-              db.close();
+              client.close();
               return test.done();
             }
 
             // Add the X509 auth user to the $external db
-            var ext = db.db('$external');
+            var ext = client.db('$external');
             ext.addUser(userName, {roles: [
               {'role': 'readWriteAnyDatabase', 'db': 'admin'},
               {'role': 'userAdminAnyDatabase', 'db': 'admin'}
@@ -364,7 +361,7 @@ exports['Should give helpful error when attempting to use x509 without SSL'] = {
               test.equal(null, err);
               test.equal(userName, result[0].user);
               test.equal('', result[0].pwd);
-              db.close();
+              client.close();
 
               // Connect using X509 authentication
               MongoClient.connect(f('mongodb://%s@server:27019/test?authMechanism=%s&ssl=false&maxPoolSize=1'
@@ -374,8 +371,7 @@ exports['Should give helpful error when attempting to use x509 without SSL'] = {
                   , sslCert:serverPem
                   , sslValidate:false
                 }
-              }, function(err, db) {
-                test.equal(null, db);
+              }, function(err, client) {
                 test.ok(!!err);
                 test.equal(0, err.ok);
                 test.equal("SSL support is required for the MONGODB-X509 mechanism.", err.errmsg);
@@ -460,21 +456,21 @@ exports['Should correctly reauthenticate against x509'] = {
             , sslCert:cert
             , sslValidate:false
           }
-        }, function(err, db) {
+        }, function(err, client) {
           test.equal(null, err);
-          test.ok(db != null);
+          var db = client.db(configuration.database);
 
           // Execute build info
           db.command({buildInfo:1}, function(err, result) {
             test.equal(null, err);
             var version = parseInt(result.versionArray.slice(0, 3).join(""), 10);
             if(version < 253) {
-              db.close();
+              client.close();
               return test.done();
             }
 
             // Add the X509 auth user to the $external db
-            var ext = db.db('$external');
+            var ext = client.db('$external');
             ext.addUser(userName, {roles: [
               {'role': 'readWriteAnyDatabase', 'db': 'admin'},
               {'role': 'userAdminAnyDatabase', 'db': 'admin'}
@@ -482,7 +478,7 @@ exports['Should correctly reauthenticate against x509'] = {
               test.equal(null, err);
               test.equal(userName, result[0].user);
               test.equal('', result[0].pwd);
-              db.close();
+              client.close();
 
               // Connect using X509 authentication
               MongoClient.connect(f('mongodb://%s@server:27019/test?authMechanism=%s&ssl=true&maxPoolSize=1'
@@ -492,9 +488,9 @@ exports['Should correctly reauthenticate against x509'] = {
                   , sslCert:cert
                   , sslValidate:false
                 }
-              }, function(err, db) {
+              }, function(err, client) {
                 test.equal(null, err);
-                test.ok(db != null);
+                var db = client.db(configuration.database);
 
                 db.collection('x509collection').insert({a:1}, function(err) {
                   test.equal(null, err);
@@ -517,7 +513,7 @@ exports['Should correctly reauthenticate against x509'] = {
                           test.equal(null, err);
                           test.equal(1, doc.a);
 
-                          db.close();
+                          client.close();
 
                           serverManager.stop().then(function() {
                             test.done();

@@ -108,12 +108,9 @@ exports.shouldFailDuePresentingWrongCredentialsToServer = {
 
       // Connect to the replicaset
       var slaveDb = null;
-      var db = new Db('foo', replSet, configuration.writeConcernMax());
-      db.open(function(err, p_db) {
+      var client = new MongoClient(replSet, configuration.writeConcernMax());
+      client.connect(function(err, client) {
         test.ok(err != null);
-        test.equal(p_db, null);
-
-        db.close();
 
         replicasetManager.stop().then(function() {
           test.done();
@@ -158,8 +155,8 @@ exports['Should correctly receive ping and ha events using ssl'] = {
 
       // Connect to the replicaset
       var slaveDb = null;
-      var db = new Db('foo', replSet, {w:0});
-      db.open(function(err, db) {
+      var client = new MongoClient(replSet, configuration.writeConcernMax());
+      client.connect(function(err, client) {
         test.equal(null, err);
         var ha = false;
         var ping = false;
@@ -171,7 +168,7 @@ exports['Should correctly receive ping and ha events using ssl'] = {
         var interval = setInterval(function() {
           if(ha) {
             clearInterval(interval);
-            db.close();
+            client.close();
 
             replicasetManager.stop().then(function() {
               test.done();
@@ -226,12 +223,9 @@ exports.shouldFailToValidateServerSSLCertificate = {
       );
 
       // Connect to the replicaset
-      var slaveDb = null;
-      var db = new Db('foo', replSet, configuration.writeConcernMax());
-      db.open(function(err, p_db) {
+      var client = new MongoClient(replSet, configuration.writeConcernMax());
+      client.connect(function(err, client) {
         test.ok(err != null);
-
-        db.close();
 
         replicasetManager.stop().then(function() {
           test.done();
@@ -275,10 +269,10 @@ exports.shouldCorrectlyValidateAndPresentCertificateReplSet = {
       );
 
       // Connect to the replicaset
-      var slaveDb = null;
-      var db = new Db('foo', replSet, {w:0});
-      db.open(function(err, db) {
+      var client = new MongoClient(replSet, configuration.writeConcernMax());
+      client.connect(function(err, client) {
         test.equal(null, err);
+        var db = client.db(configuration.database);
 
         setInterval(function() {
           db.collection('test').count(function() {});
@@ -290,7 +284,7 @@ exports.shouldCorrectlyValidateAndPresentCertificateReplSet = {
             collection.insert([{a:1}, {b:2}, {c:'hello world'}], configuration.writeConcernMax(), function(err, result) {
               collection.find({}).toArray(function(err, items) {
                 test.equal(3, items.length);
-                db.close();
+                client.close();
 
                 replicasetManager.stop().then(function() {
                   test.done();
@@ -347,15 +341,14 @@ exports.shouldCorrectlyConnectToSSLBasedReplicaset = {
       );
 
       // Connect to the replicaset
-      var slaveDb = null;
-      var db = new Db('foo', replSet, {w:0});
-      db.open(function(err, p_db) {
+      var client = new MongoClient(replSet, configuration.writeConcernMax());
+      client.connect(function(err, client) {
         test.equal(null, err);
-        test.ok(!!p_db);
+        var db = client.db(configuration.database);
 
-        p_db.collection('test').find({}, function(error) {
+        db.collection('test').find({}, function(error) {
           test.equal(null, error);
-          p_db.close();
+          client.close();
 
           replicasetManager.stop().then(function() {
             test.done();
@@ -396,14 +389,10 @@ exports.shouldFailToValidateServerSSLCertificate = {
       );
 
       // Connect to the replicaset
-      var slaveDb = null;
-      var db = new Db('foo', replSet, {w:0});
-      db.open(function(err, p_db) {
+      var client = new MongoClient(replSet, configuration.writeConcernMax());
+      client.connect(function(err, client) {
         test.ok(err != null);
         test.ok(err instanceof Error);
-        test.ok(!p_db);
-
-        db.close();
 
         replicasetManager.stop().then(function() {
           test.done();
@@ -445,13 +434,9 @@ exports.shouldFailDueToNotPresentingCertificateToServer = {
       );
 
       // Connect to the replicaset
-      var slaveDb = null;
-      var db = new Db('foo', replSet, configuration.writeConcernMax());
-      db.open(function(err, p_db) {
+      var client = new MongoClient(replSet, configuration.writeConcernMax());
+      client.connect(function(err, client) {
         test.ok(err != null);
-        test.ok(!p_db);
-
-        db.close();
 
         replicasetManager.stop().then(function() {
           test.done();
@@ -516,11 +501,10 @@ exports.shouldCorrectlyPresentPasswordProtectedCertificate = {
       );
 
       // Connect to the replicaset
-      var slaveDb = null;
-      var db = new Db('foo', replSet, configuration.writeConcernMax());
-      db.open(function(err, p_db) {
+      var client = new MongoClient(replSet, configuration.writeConcernMax());
+      client.connect(function(err, client) {
         test.equal(null, err);
-        test.ok(p_db != null);
+        var db = client.db(configuration.database);
 
         // Create a collection
         db.createCollection('shouldCorrectlyValidateAndPresentCertificate2', function(err, collection) {
@@ -529,7 +513,7 @@ exports.shouldCorrectlyPresentPasswordProtectedCertificate = {
             collection.insert([{a:1}, {b:2}, {c:'hello world'}], configuration.writeConcernMax(), function(err, result) {
               collection.find({}).toArray(function(err, items) {
                 test.equal(3, items.length);
-                db.close();
+                client.close();
 
                 replicasetManager.stop().then(function() {
                   test.done();
@@ -586,11 +570,10 @@ exports.shouldCorrectlyValidateServerSSLCertificate = {
       );
 
       // Connect to the replicaset
-      var slaveDb = null;
-      var db = new Db('foo', replSet, configuration.writeConcernMax());
-      db.open(function(err, p_db) {
+      var client = new MongoClient(replSet, configuration.writeConcernMax());
+      client.connect(function(err, client) {
         test.equal(null, err);
-        test.ok(p_db != null);
+        var db = client.db(configuration.database);
 
         // Create a collection
         db.createCollection('shouldCorrectlyCommunicateUsingSSLSocket', function(err, collection) {
@@ -599,7 +582,7 @@ exports.shouldCorrectlyValidateServerSSLCertificate = {
             collection.insert([{a:1}, {b:2}, {c:'hello world'}], configuration.writeConcernMax(), function(err, result) {
               collection.find({}).toArray(function(err, items) {
                 test.equal(3, items.length);
-                db.close();
+                client.close();
 
                 replicasetManager.stop().then(function() {
                   test.done();
