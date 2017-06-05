@@ -1552,117 +1552,128 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = {
   }
 }
 
-// // /*************************************************************************************
-// //
-// //   sMong       sMong    ngosMo   sMong   ongosM    sMong         ongosM       ngos  n
-// //   ngosM       ngosM   osMongos  ngosM   osMong   ongosMongo    gosMongo    gosMongosM
-// //     ongo      sMo    Mong  Mong  Mongo   ngos   gosM  gosM    sMon  sMon  sMong  Mong
-// //     osMon    ongo    gos    osM  gosMon  sMo   sMon    ong    ngo    gos  ngosM
-// //     ongos    o Mo   sMon    ongo MongosM ngo   ngo           osMo    Mong  Mongo
-// //     osMong  Mo go   ngos    osMo gosMong sMo   sMo           ongo    gosM     Mongo
-// //     on osMo go Mo    Mon    ong  Mon osMongo   ngo   ngosMo   sMo    Mon       osMo
-// //     os ongosM  gos   gos    osM  gos ongosMo    Mo    Mongo   ngo    gos        ngos
-// //     ong sMong sMon   Mong  Mong  Mon  sMongo    gos   gosM    sMon  sMon  sMon  sMon
-// //   ngosMo gos ongosM   osMongos  ngosM  gosMo     ongosMon      gosMongo   ngosMongos
-// //    Mongo Mo  osMong    ngosMo   sMong   ongo      sMongosM      ongosM    sMongosMo
-// //
-// // **************************************************************************************/
+// /*************************************************************************************
+//
+//   sMong       sMong    ngosMo   sMong   ongosM    sMong         ongosM       ngos  n
+//   ngosM       ngosM   osMongos  ngosM   osMong   ongosMongo    gosMongo    gosMongosM
+//     ongo      sMo    Mong  Mong  Mongo   ngos   gosM  gosM    sMon  sMon  sMong  Mong
+//     osMon    ongo    gos    osM  gosMon  sMo   sMon    ong    ngo    gos  ngosM
+//     ongos    o Mo   sMon    ongo MongosM ngo   ngo           osMo    Mong  Mongo
+//     osMong  Mo go   ngos    osMo gosMong sMo   sMo           ongo    gosM     Mongo
+//     on osMo go Mo    Mon    ong  Mon osMongo   ngo   ngosMo   sMo    Mon       osMo
+//     os ongosM  gos   gos    osM  gos ongosMo    Mo    Mongo   ngo    gos        ngos
+//     ong sMong sMon   Mong  Mong  Mon  sMongo    gos   gosM    sMon  sMon  sMon  sMon
+//   ngosMo gos ongosM   osMongos  ngosM  gosMo     ongosMon      gosMongo   ngosMongos
+//    Mongo Mo  osMong    ngosMo   sMong   ongo      sMongosM      ongosM    sMongosMo
+//
+// **************************************************************************************/
 
-// var shardedManager;
+var shardedManager;
 
-// var setUpSharded = function(configuration, options, callback) {
-//   // var ShardingManager = require('mongodb-tools').ShardingManager
-//   var ShardingManager = require('../topology_test_definitions').Sharded
-//     , Db = configuration.require.Db
-//     , Server = configuration.require.Server
-//     , MongoClient = configuration.require.MongoClient
-//     , path = require('path');
+var setUpSharded = function(configuration, options, callback) {
+  // var ShardingManager = require('mongodb-tools').ShardingManager
+  var ShardingManager = require('../topology_test_definitions').Sharded
+    , Db = configuration.require.Db
+    , Server = configuration.require.Server
+    , MongoClient = configuration.require.MongoClient
+    , path = require('path');
 
-//   // Check if we have any options
-//   if(typeof options == 'function') callback = options, options = null;
+  // Check if we have any options
+  if(typeof options == 'function') callback = options, options = null;
 
-//   // Create Replicaset Manager
-//   var shardedManager = new ShardingManager({
-//     shard: {
-//       auth:null, keyFile: __dirname + '/data/keyfile.txt'
-//     },
-//     config: {
-//       auth:null, keyFile: __dirname + '/data/keyfile.txt'
-//     },
-//     proxy: {
-//       keyFile: __dirname + '/data/keyfile.txt'
-//     }
-//   });
+  // Create Replicaset Manager
+  var shardedManager = new ShardingManager({
+    shard: {
+      auth:null, keyFile: __dirname + '/data/keyfile.txt'
+    },
+    config: {
+      auth:null, keyFile: __dirname + '/data/keyfile.txt'
+    },
+    proxy: {
+      keyFile: __dirname + '/data/keyfile.txt'
+    }
+  });
 
-//   // Start SSL replicaset manager
-//   shardedManager.purge().then(function() {
-//     shardedManager.start().then(function() {
-//       callback(null, shardedManager);
-//     }).catch(function(e) {
-//       // // console.log(e.stack)
-//     });
-//   });
-// }
+  // Start SSL replicaset manager
+  shardedManager.purge().then(function() {
+    shardedManager.start().then(function() {
+      callback(null, shardedManager);
+    }).catch(function(e) {
+      // // console.log(e.stack)
+    });
+  });
+}
 
-// /**
-//  * @ignore
-//  */
-// exports['should correctly connect and authenticate against admin database using mongos'] = {
-//   metadata: { requires: { topology: ['auth'] } },
+/**
+ * @ignore
+ */
+exports['should correctly connect and authenticate against admin database using mongos'] = {
+  metadata: { requires: { topology: ['auth'] } },
 
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var MongoClient = configuration.require.MongoClient
-//       , Db = configuration.require.Db
-//       , Server = configuration.require.Server
-//       , Mongos = configuration.require.Mongos;
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , Db = configuration.require.Db
+      , Server = configuration.require.Server
+      , Mongos = configuration.require.Mongos;
 
-//     setUpSharded(configuration, function(err, manager) {
-//       var mongos = new Mongos([
-//           new Server( 'localhost', 51000),
-//         ], {poolSize: 1});
-//       var db = new Db('node-native-test', mongos, {w:1});
-//       db.open(function(err, p_db) {
-//         test.equal(null, err);
+    setUpSharded(configuration, function(err, manager) {
+      var mongos = new Mongos([
+          new Server( 'localhost', 51000),
+        ], {poolSize: 1});
+      
+      var client = new MongoClient(mongos, {w:1});
+      client.connect(function(err, client) {
+        test.equal(null, err);
+        var db = client.db(configuration.database);
 
-//         // Add a user
-//         db.admin().addUser("admin", "admin", {w:'majority'}, function(err, result) {
-//           test.equal(null, err);
+        // Add a user
+        db.admin().addUser("admin", "admin", {w:'majority'}, function(err, result) {
+          test.equal(null, err);
+          client.close();
 
-//           // Log in to admin
-//           db.admin().authenticate("admin", "admin", function(err, result) {
-//             test.equal(null, err);
+          new MongoClient(new Mongos([
+              new Server( 'localhost', 51000),
+            ], {poolSize: 1})
+            , {w:1, user:'admin', password: 'admin', authSource: 'admin'}).connect(function(err, client) {
+            test.equal(null, err);
+            var db_p = client.db(configuration.database);
 
-//             db.addUser("me", "secret", {w:'majority'}, function(err, result) {
-//               // Close the connection
-//               db.close();
+          // // Log in to admin
+          // db.admin().authenticate("admin", "admin", function(err, result) {
+          //   test.equal(null, err);
 
-//               setTimeout(function() {
-//                 // connection string
-//                 var config = f("mongodb://me:secret@localhost:%s/node-native-test"
-//                   , 51000);
-//                 // Connect
-//                 MongoClient.connect(config, function(error, client) {
-//                   test.equal(null, error);
+            db.addUser("me", "secret", {w:'majority'}, function(err, result) {
+              // Close the connection
+              client.close();
 
-//                   client.collections(function(error, names) {
-//                     test.equal(null, error);
+              setTimeout(function() {
+                // connection string
+                var config = f("mongodb://me:secret@localhost:%s/node-native-test"
+                  , 51000);
+                // Connect
+                MongoClient.connect(config, function(error, client) {
+                  test.equal(null, error);
+                  var db = client.db(configuration.database);
 
-//                     client.close();
+                  db.collections(function(error, names) {
+                    test.equal(null, error);
 
-//                     manager.stop().then(function() {
-//                       test.done();
-//                     });
-//                   });
-//                 });
-//               }, 5000);
-//             });
-//           });
-//         });
-//       });
-//     });
-//   }
-// }
+                    client.close();
+
+                    manager.stop().then(function() {
+                      test.done();
+                    });
+                  });
+                });
+              }, 5000);
+            });
+          });
+        });
+      });
+    });
+  }
+}
 
 // /**
 //  * @ignore
