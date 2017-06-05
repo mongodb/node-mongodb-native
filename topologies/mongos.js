@@ -356,7 +356,7 @@ function handleInitialConnectEvent(self, event) {
     // Trigger topologyMonitor
     if(self.connectingProxies.length == 0) {
       // Emit connected if we are connected
-      if(self.connectedProxies.length > 0) {
+      if(self.connectedProxies.length > 0 && self.state === CONNECTING) {
         // Set the state to connected
         stateTransition(self, CONNECTED);
         // Emit the connect event
