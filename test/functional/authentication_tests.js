@@ -1637,11 +1637,7 @@ exports['should correctly connect and authenticate against admin database using 
             ], {poolSize: 1})
             , {w:1, user:'admin', password: 'admin', authSource: 'admin'}).connect(function(err, client) {
             test.equal(null, err);
-            var db_p = client.db(configuration.database);
-
-          // // Log in to admin
-          // db.admin().authenticate("admin", "admin", function(err, result) {
-          //   test.equal(null, err);
+            var db = client.db(configuration.database);
 
             db.addUser("me", "secret", {w:'majority'}, function(err, result) {
               // Close the connection
@@ -1649,8 +1645,8 @@ exports['should correctly connect and authenticate against admin database using 
 
               setTimeout(function() {
                 // connection string
-                var config = f("mongodb://me:secret@localhost:%s/node-native-test"
-                  , 51000);
+                var config = f("mongodb://me:secret@localhost:%s/%s"
+                  , 51000, configuration.database);
                 // Connect
                 MongoClient.connect(config, function(error, client) {
                   test.equal(null, error);
@@ -1675,84 +1671,90 @@ exports['should correctly connect and authenticate against admin database using 
   }
 }
 
-// /**
-//  * @ignore
-//  */
-// exports['Should correctly handle proxy stepdown and stepup without loosing auth for sharding'] = {
-//   metadata: { requires: { topology: ['auth'] } },
+/**
+ * @ignore
+ */
+exports['Should correctly handle proxy stepdown and stepup without loosing auth for sharding'] = {
+  metadata: { requires: { topology: ['auth'] } },
 
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var MongoClient = configuration.require.MongoClient
-//       , Db = configuration.require.Db
-//       , Server = configuration.require.Server
-//       , Mongos = configuration.require.Mongos;
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , Db = configuration.require.Db
+      , Server = configuration.require.Server
+      , Mongos = configuration.require.Mongos;
 
-//     setUpSharded(configuration, function(err, manager) {
-//       var mongos = new Mongos([
-//           new Server( 'localhost', 51000),
-//         ], {poolSize: 1});
+    setUpSharded(configuration, function(err, manager) {
+      var mongos = new Mongos([
+          new Server( 'localhost', 51000),
+        ], {poolSize: 1});
 
-//       var db = new Db('node-native-test', mongos, {w:1});
-//       db.open(function(err, p_db) {
-//         test.equal(null, err);
+      var client = new MongoClient(mongos, {w:1});
+      client.connect(function(err, client) {
+        test.equal(null, err);
+        var db = client.db(configuration.database);
 
-//         // Add a user
-//         db.admin().addUser("admin", "admin", {w:'majority'}, function(err, result) {
-//           test.equal(null, err);
+        // Add a user
+        db.admin().addUser("admin", "admin", {w:'majority'}, function(err, result) {
+          test.equal(null, err);
+          client.close();
 
-//           // Log in to admin
-//           db.admin().authenticate("admin", "admin", function(err, result) {
-//             test.equal(null, err);
+          new MongoClient(new Mongos([
+              new Server( 'localhost', 51000),
+            ], {poolSize: 1})
+            , {w:1, user:'admin', password: 'admin', authSource: 'admin'}).connect(function(err, client) {
+            test.equal(null, err);
+            var db = client.db(configuration.database);
 
-//             db.addUser("me", "secret", {w:'majority'}, function(err, result) {
-//               // Close the connection
-//               db.close();
+            db.addUser("me", "secret", {w:'majority'}, function(err, result) {
+              // Close the connection
+              client.close();
 
-//               // connection string
-//               var config = f("mongodb://me:secret@localhost:%s/node-native-test"
-//                 , 51000);
-//               // Connect
-//               MongoClient.connect(config, function(error, client) {
-//                 test.equal(null, error);
+              // connection string
+              var config = f("mongodb://me:secret@localhost:%s/%s"
+                , 51000, configuration.database);
+              // Connect
+              MongoClient.connect(config, function(error, client) {
+                test.equal(null, error);
+                var db = client.db(configuration.database);
 
-//                 client.collections(function(error, names) {
-//                   test.equal(null, error);
+                db.collections(function(error, names) {
+                  test.equal(null, error);
 
-//                   // Get the proxies
-//                   var proxies = manager.proxies();
+                  // Get the proxies
+                  var proxies = manager.proxies();
 
-//                   proxies[0].stop().then(function() {
+                  proxies[0].stop().then(function() {
 
-//                     proxies[1].stop().then(function() {
+                    proxies[1].stop().then(function() {
 
-//                       client.collections(function(error, names) {
-//                         test.equal(null, error);
-//                       });
+                      db.collections(function(error, names) {
+                        test.equal(null, error);
+                      });
 
-//                       proxies[0].start().then(function() {
+                      proxies[0].start().then(function() {
 
-//                         proxies[1].start().then(function() {
+                        proxies[1].start().then(function() {
 
-//                           client.collections(function(error, names) {
-//                             test.equal(null, error);
+                          db.collections(function(error, names) {
+                            test.equal(null, error);
 
-//                             client.close();
+                            client.close();
 
-//                             manager.stop().then(function() {
-//                               test.done();
-//                             });
-//                           });
-//                         });
-//                       });
-//                     });
-//                   });
-//                 });
-//               });
-//             });
-//           });
-//         });
-//       });
-//     });
-//   }
-// }
+                            manager.stop().then(function() {
+                              test.done();
+                            });
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+}
