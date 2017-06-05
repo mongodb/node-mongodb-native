@@ -633,27 +633,6 @@ if(argv.t == 'functional') {
   }
 
   //
-  // SSL configuration
-  if(argv.e == 'scram') {
-    // Create ssl server
-    config = {
-        url: "mongodb://%slocalhost:27017/integration_tests"
-      , topology: function(host, port, serverOptions) {
-        host = host || 'localhost';
-        port = port || 27017;
-        serverOptions = clone(serverOptions);
-        serverOptions.poolSize = 1;
-        return new Server(host, port, serverOptions);
-      }, manager: new ServerManager('mongod', {
-        dbpath: path.join(path.resolve('db'), f("data-%d", 27017)),
-        auth:null
-      })
-    }
-
-    executeTestSuite(config);
-  }
-
-  //
   // Authentication Configuration
   if(argv.e == 'auth') {
     // Create ssl server

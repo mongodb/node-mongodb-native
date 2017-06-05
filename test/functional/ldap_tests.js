@@ -23,12 +23,15 @@ exports['Should correctly authenticate against ldap'] = {
     var url = format("mongodb://%s:%s@%s/test?authMechanism=PLAIN&maxPoolSize=1", user, pass, server);
 
     // Let's write the actual connection code
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
       test.equal(null, err);    
+      var db = client.db(configuration.database);
 
-      db.db('ldap').collection('test').findOne(function(err, doc) {
+      client.db('ldap').collection('test').findOne(function(err, doc) {
         test.equal(null, err);
         test.equal(true, doc.ldap);
+
+        client.close();
         test.done();
       });
     });
@@ -56,16 +59,17 @@ exports['Should correctly reauthenticate against ldap'] = {
     var url = format("mongodb://%s:%s@%s/test?authMechanism=PLAIN&maxPoolSize=1", user, pass, server);
 
     // Let's write the actual connection code
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, function(err, client) {
       test.equal(null, err);    
+      var db = client.db(configuration.database);
 
-      db.db('ldap').collection('test').findOne(function(err, doc) {
+      client.db('ldap').collection('test').findOne(function(err, doc) {
         test.equal(null, err);
         test.equal(true, doc.ldap);
 
         client.topology.once('reconnect', function() {
           // Await reconnect and re-authentication    
-          db.db('ldap').collection('test').findOne(function(err, doc) {
+          client.db('ldap').collection('test').findOne(function(err, doc) {
             test.equal(null, err);
             test.equal(true, doc.ldap);
 
@@ -73,10 +77,11 @@ exports['Should correctly reauthenticate against ldap'] = {
             client.topology.connections()[0].destroy();
 
             // Await reconnect and re-authentication    
-            db.db('ldap').collection('test').findOne(function(err, doc) {
+            client.db('ldap').collection('test').findOne(function(err, doc) {
               test.equal(null, err);
               test.equal(true, doc.ldap);
 
+              client.close();
               test.done();
             });
           });
