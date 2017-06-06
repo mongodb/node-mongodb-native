@@ -1,3 +1,9 @@
+# Candidates
+Additional auth related candidates for removal are the db level addUser/removeUser as there will
+no longer be any users at the db level for 3.6 or higher.
+- Db.prototype.addUser
+- Db.prototyoe.removeUser
+
 # API Changes
 We removed the following API methods.
 - Db.prototype.authenticate
