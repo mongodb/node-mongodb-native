@@ -1,10 +1,7 @@
 language: node_js
 node_js:
-  - "0.10"
-  - "0.12"
   - "4"
   - "6"
-  - "7"
 sudo: false
 env:
   - MONGODB_VERSION=2.2.x
