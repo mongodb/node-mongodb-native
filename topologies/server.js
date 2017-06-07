@@ -287,7 +287,7 @@ var eventHandler = function(self, event) {
         if(!self.s.inTopology) {
           // Emit topology description changed if something listening
           sdam.emitTopologyDescriptionChanged(self, {
-            topologyType: 'Single', servers: [{address: self.name, arbiters: [], hosts: [], passives: [], type: 'Standalone'}]
+            topologyType: 'Single', servers: [{address: self.name, arbiters: [], hosts: [], passives: [], type: sdam.getTopologyType(self)}]
           });
         }
 
