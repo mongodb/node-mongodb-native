@@ -3062,7 +3062,7 @@ exports['Should correctly apply multiple uses of map and apply forEach'] = {
     db.open(function(err, db) {
       test.equal(null, err);
 
-      var collection = db.collection('map_forEach');
+      var collection = db.collection('map_mapmapforEach');
 
       // insert all docs
       collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
