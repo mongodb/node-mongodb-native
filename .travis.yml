@@ -6,6 +6,7 @@ node_js:
   - "4"
   - "6"
   - "7"
+  - "8"
 sudo: true
 #after_success: npm run coverage
 env:
