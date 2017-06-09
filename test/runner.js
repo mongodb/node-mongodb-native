@@ -282,8 +282,12 @@ testFiles.forEach(function(t) {
 
 // Add a Node version plugin
 runner.plugin(new NodeVersionFilter(startupOptions));
-// Add a MongoDB version plugin
-runner.plugin(new MongoDBVersionFilter(startupOptions));
+
+if (!argv.s) {
+  // Add a MongoDB version plugin
+  runner.plugin(new MongoDBVersionFilter(startupOptions));
+}
+
 // Add a Topology filter plugin
 runner.plugin(new MongoDBTopologyFilter(startupOptions));
 // Add a Filter allowing us to specify that a function requires Promises
