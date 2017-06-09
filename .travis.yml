@@ -7,7 +7,7 @@ node_js:
   - "6"
   - "7"
   - "8"
-sudo: true
+sudo: false
 #after_success: npm run coverage
 env:
   - MONGODB_VERSION=2.4.x
