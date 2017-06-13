@@ -254,20 +254,20 @@ function connectNewServers(self, servers, callback) {
 
       // Destroyed
       if(self.state == DESTROYED || self.state == UNREFERENCED) {
-        return this.destroy();
+        return this.destroy({force:true});
       }
 
       if(event == 'connect' && !self.authenticating) {
         // Destroyed
         if(self.state == DESTROYED || self.state == UNREFERENCED) {
-          return _self.destroy();
+          return _self.destroy({force:true});
         }
 
         // Do we have authentication contexts that need to be applied
         applyAuthenticationContexts(self, _self, function() {
           // Destroy the instance
           if(self.state == DESTROYED || self.state == UNREFERENCED) {
-            return _self.destroy();
+            return _self.destroy({force:true});
           }
 
           // Update the state
@@ -296,11 +296,11 @@ function connectNewServers(self, servers, callback) {
             // Rexecute any stalled operation
             rexecuteOperations(self);
           } else {
-            _self.destroy();
+            _self.destroy({force:true});
           }
         });
       } else if(event == 'connect' && self.authenticating) {
-        this.destroy();
+        this.destroy({force:true});
       } else if(event == 'error') {
         error = err;
       }
@@ -373,7 +373,7 @@ var pingServer = function(self, server, cb) {
     socketTimeout: self.s.options.connectionTimeout || 2000,
   }, function(err, r) {
     if(self.state == DESTROYED || self.state == UNREFERENCED) {
-      server.destroy();
+      server.destroy({force:true});
       return cb(err, r);
     }
 
@@ -558,11 +558,11 @@ function topologyMonitor(self, options) {
       if(!self.s.replicaSetState.hasPrimary() && !self.s.options.secondaryOnlyConnectionAllowed) {
         if(err) return self.emit('error', err);
         self.emit('error', new MongoError('no primary found in replicaset'));
-        return self.destroy();
+        return self.destroy({force:true});
       } else if(!self.s.replicaSetState.hasSecondary() && self.s.options.secondaryOnlyConnectionAllowed) {
         if(err) return self.emit('error', err);
         self.emit('error', new MongoError('no secondary found in replicaset'));
-        return self.destroy();
+        return self.destroy({force:true});
       }
 
       for(var i = 0; i < servers.length; i++) {
@@ -679,7 +679,7 @@ function handleInitialConnectEvent(self, event) {
 
     // Destroy the instance
     if(self.state == DESTROYED || self.state == UNREFERENCED) {
-      return this.destroy();
+      return this.destroy({force:true});
     }
 
     // Check the type of server
@@ -688,7 +688,7 @@ function handleInitialConnectEvent(self, event) {
       applyAuthenticationContexts(self, _this, function() {
         // Destroy the instance
         if(self.state == DESTROYED || self.state == UNREFERENCED) {
-          return _this.destroy();
+          return _this.destroy({force:true});
         }
 
         // Update the state
@@ -731,11 +731,11 @@ function handleInitialConnectEvent(self, event) {
             topologyMonitor(self, {});
           }
         } else if(result instanceof MongoError) {
-          _this.destroy();
-          self.destroy();
+          _this.destroy({force:true});
+          self.destroy({force:true});
           return self.emit('error', result);
         } else {
-          _this.destroy();
+          _this.destroy({force:true});
         }
       });
     } else {
