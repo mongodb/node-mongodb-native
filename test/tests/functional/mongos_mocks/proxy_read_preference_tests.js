@@ -124,7 +124,7 @@ exports['Should correctly set query and readpreference field on wire protocol fo
     });
 
     server.on('error', function(){});
-    server.connect();
+    setTimeout(function() { server.connect(); }, 100);
   }
 }
 
@@ -255,7 +255,7 @@ exports['Should correctly set query and near readpreference field on wire protoc
     });
 
     server.on('error', function(){});
-    server.connect();
+    setTimeout(function() { server.connect(); }, 100);
   }
 }
 
@@ -372,7 +372,7 @@ exports['Should correctly set query and readpreference field on wire protocol fo
     });
 
     server.on('error', function(){});
-    server.connect();
+    setTimeout(function() { server.connect(); }, 100);
   }
 }
 
@@ -494,6 +494,6 @@ exports['Should correctly set query and readpreference field on wire protocol fo
     });
 
     server.on('error', function(){});
-    server.connect();
+    setTimeout(function() { server.connect(); }, 100);
   }
 }

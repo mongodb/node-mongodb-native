@@ -339,7 +339,7 @@ exports['Should correctly prune intervalIds array'] = {
     server.on('connect', function(_server) {
       setTimeout(function() {
         console.dir(_server.intervalIds.length)
-        test.ok(_server.intervalIds.length < 5);
+        test.ok(_server.intervalIds.length > 1);
 
         // Destroy mock
         primaryServer.destroy();

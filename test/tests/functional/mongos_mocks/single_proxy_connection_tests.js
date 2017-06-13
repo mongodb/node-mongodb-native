@@ -271,6 +271,6 @@ exports['Should not fail due to available connections equal to 0 during ha proce
     });
 
     _server.on('error', function(){});
-    _server.connect();
+    setTimeout(function() { _server.connect(); }, 100);
   }
 }
