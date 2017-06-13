@@ -303,12 +303,12 @@ exports['Should ignore one of the mongos instances due to being outside the late
             });
           });
 
-          server2.connect();
+          setTimeout(function() { server2.connect(); }, 100);
         });
       });
     });
 
     server.on('error', function(){});
-    server.connect();
+    setTimeout(function() { server.connect(); }, 100);
   }
 }

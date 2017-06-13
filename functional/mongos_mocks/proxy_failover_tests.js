@@ -127,7 +127,7 @@ exports['Should correctly failover due to proxy going away causing timeout'] = {
     });
 
     server.on('error', function(){});
-    server.connect();
+    setTimeout(function() { server.connect(); }, 100);
   }
 }
 
@@ -281,7 +281,7 @@ exports['Should correctly bring back proxy and use it'] = {
     });
 
     server.on('error', function(){});
-    server.connect();
+    setTimeout(function() { server.connect(); }, 100);
   }
 }
 
@@ -432,6 +432,6 @@ exports['Should correctly bring back both proxies and use it'] = {
     });
 
     server.on('error', function(){});
-    server.connect();
+    setTimeout(function() { server.connect(); }, 100);
   }
 }

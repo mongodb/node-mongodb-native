@@ -122,7 +122,7 @@ exports['Should correctly print warning when non mongos proxy passed in seed lis
       });
 
       server.on('error', function(){});
-      server.connect();
+      setTimeout(function() { server.connect(); }, 100);
     });
   }
 }
@@ -243,7 +243,7 @@ exports['Should correctly print warning and error when no mongos proxies in seed
         test.done();
       });
 
-      server.connect();
+      setTimeout(function() { server.connect(); }, 100);
     }).catch(function(err) {        
     });
   }
