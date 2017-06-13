@@ -127,7 +127,7 @@ exports['Should correctly timeout socket operation and then correctly re-execute
     });
 
     replset.on('error', function(){});
-    replset.connect();
+    setTimeout(function() { replset.connect(); }, 100);
   }
 }
 
@@ -183,7 +183,7 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
 
     // Boot the mock
     co(function*() {
-      server = yield mockupdb.createServer(37017, 'localhost', {
+      __server = yield mockupdb.createServer(37017, 'localhost', {
         onRead: function(server, connection, buffer, bytesRead) {
           // Force EPIPE error
           if(currentStep == 1)  {
@@ -202,7 +202,7 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
       // Primary state machine
       co(function*() {
         while(running) {
-          var request = yield server.receive();
+          var request = yield __server.receive();
           // Get the document
           var doc = request.document;
           if(doc.ismaster && currentStep == 0) {
@@ -284,13 +284,14 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
         test.ok(brokenPipe);
         _server.destroy();
         running = false;
+        __server.destroy();
         test.done();
       });
     });
 
     server.on('error', function(){});
     // console.log("!!! connect")
-    server.connect();
+    setTimeout(function() { server.connect(); }, 100);
   }
 }
 

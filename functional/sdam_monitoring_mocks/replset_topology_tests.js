@@ -238,6 +238,10 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
                 }
               }
 
+              running = false;
+              primaryServer.destroy();
+              firstSecondaryServer.destroy();
+              arbiterServer.destroy();
               test.done();
             }, 1000);
           }, 2000);
