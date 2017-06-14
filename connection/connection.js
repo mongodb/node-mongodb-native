@@ -7,9 +7,15 @@ var inherits = require('util').inherits
   , crypto = require('crypto')
   , f = require('util').format
   , debugOptions = require('./utils').debugOptions
+  , parseHeader = require('./utils').parseHeader
+  , compressorIDs = require('./utils').compressorIDs
   , Response = require('./commands').Response
   , MongoError = require('../error')
-  , Logger = require('./logger');
+  , Logger = require('./logger')
+  , zlib = require('zlib')
+  , Snappy = require('./utils').retrieveSnappy()
+  , OP_COMPRESSED = require('../wireprotocol/shared').opcodes.OP_COMPRESSED
+  , MESSAGE_HEADER_SIZE = require('../wireprotocol/shared').MESSAGE_HEADER_SIZE;
 
 var _id = 0;
 var debugFields = ['host', 'port', 'size', 'keepAlive', 'keepAliveInitialDelay', 'noDelay'
@@ -215,6 +221,49 @@ var closeHandler = function(self) {
   }
 }
 
+// Decompress a message using the given compressor
+var decompress = function(compressorID, compressedData, callback) {
+  if (compressorID < 0 || compressorID > compressorIDs.length) {
+    throw new Error('Server sent message compressed using an unsupported compressor. (Received compressor ID ' + compressorID + ')');
+  }
+  switch (compressorID) {
+    case compressorIDs.snappy:
+      Snappy.uncompress(compressedData, callback);
+      break;
+    case compressorIDs.zlib:
+      zlib.inflate(compressedData, callback);
+      break;
+    default:
+      callback(null, compressedData);
+  }
+}
+
+// Handle a message once it is recieved
+var emitMessageHandler = function (self, message) {
+  var msgHeader = parseHeader(message);
+  if (msgHeader.opCode == OP_COMPRESSED) {
+    msgHeader.fromCompressed = true;
+    var index = MESSAGE_HEADER_SIZE;
+    msgHeader.opCode = message.readInt32LE(index);
+    index += 4;
+    msgHeader.length = message.readInt32LE(index);
+    index += 4;
+    var compressorID = message[index];
+    index++;
+    decompress(compressorID, message.slice(index), function(err, decompressedMsgBody) {
+      if (err) {
+        throw err;
+      }
+      if (decompressedMsgBody.length !== msgHeader.length) {
+        throw new Error('Decompressing a compressed message from the server failed. The message is corrupt.')
+      }
+      self.messageHandler(new Response(self.bson, message, msgHeader, decompressedMsgBody, self.responseOptions), self);
+    })
+  } else {
+    self.messageHandler(new Response(self.bson, message, msgHeader, message.slice(MESSAGE_HEADER_SIZE), self.responseOptions), self);
+  }
+}
+
 var dataHandler = function(self) {
   return function(data) {
     // Parse until we are done with the data
@@ -246,8 +295,9 @@ var dataHandler = function(self) {
             self.sizeOfMessage = 0;
             self.bytesRead = 0;
             self.stubBuffer = null;
-            // Emit the buffer
-            self.messageHandler(new Response(self.bson, emitBuffer, self.responseOptions), self);
+
+            emitMessageHandler(self, emitBuffer);
+
           } catch(err) {
             var errorObject = {err:"socketHandler", trace:err, bin:self.buffer, parseState:{
               sizeOfMessage:self.sizeOfMessage,
@@ -328,7 +378,7 @@ var dataHandler = function(self) {
                 // Exit parsing loop
                 data = new Buffer(0);
                 // Emit the message
-                self.messageHandler(new Response(self.bson, emitBuffer, self.responseOptions), self);
+                emitMessageHandler(self, emitBuffer);
               } catch (err) {
                 self.emit("parseError", err, self);
               }
@@ -358,7 +408,7 @@ var dataHandler = function(self) {
               // Copy rest of message
               data = data.slice(sizeOfMessage);
               // Emit the message
-              self.messageHandler(new Response(self.bson, emitBuffer, self.responseOptions), self);
+              emitMessageHandler(self, emitBuffer);
             }
           } else {
             // Create a buffer that contains the space for the non-complete message
@@ -539,7 +589,7 @@ Connection.prototype.write = function(buffer) {
     // Iterate over all buffers and write them in order to the socket
     for(i = 0; i < buffer.length; i++) this.connection.write(buffer[i], 'binary');
     return true;
-  } 
+  }
 
   // Connection is destroyed return write failed
   return false;

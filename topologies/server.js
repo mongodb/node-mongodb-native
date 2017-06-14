@@ -16,7 +16,8 @@ var inherits = require('util').inherits,
   BasicCursor = require('../cursor'),
   sdam = require('./shared'),
   assign = require('../utils').assign,
-  createClientInfo = require('./shared').createClientInfo;
+  createClientInfo = require('./shared').createClientInfo,
+  createCompressionInfo = require('./shared').createCompressionInfo;
 
 // Used for filtering out fields for loggin
 var debugFields = ['reconnect', 'reconnectTries', 'reconnectInterval', 'emitError', 'cursorFactory', 'host'
@@ -112,7 +113,8 @@ var Server = function(options) {
       ? options.monitoringInterval
       : 5000,
     // Topology id
-    topologyId: -1
+    topologyId: -1,
+    compression: {compressors: createCompressionInfo(options)}
   }
 
   // Curent ismaster
@@ -247,7 +249,8 @@ var eventHandler = function(self, event) {
       // Query options
       var queryOptions = { numberToSkip: 0, numberToReturn: -1, checkKeys: false, slaveOk: true };
       // Create a query instance
-      var query = new Query(self.s.bson, 'admin.$cmd', {ismaster:true, client: self.clientInfo}, queryOptions);
+      var compressors = (self.s.compression && self.s.compression.compressors) ? self.s.compression.compressors : [];
+      var query = new Query(self.s.bson, 'admin.$cmd', {ismaster:true, client: self.clientInfo, compression: compressors}, queryOptions);
       // Get start time
       var start = new Date().getTime();
       // Execute the ismaster query

@@ -3,9 +3,7 @@
 var MongoError = require('../error');
 
 // Wire command operation ids
-var OP_UPDATE = 2001;
-var OP_INSERT = 2002;
-var OP_DELETE = 2006;
+var opcodes = require('./shared').opcodes;
 
 var Insert = function(requestId, ismaster, bson, ns, documents, options) {
   // Basic options needed to be passed in
@@ -103,10 +101,10 @@ Insert.prototype.toBin = function() {
   index = index + 4;
 
   // Operation
-  header[index + 3] = (OP_INSERT >> 24) & 0xff;
-  header[index + 2] = (OP_INSERT >> 16) & 0xff;
-  header[index + 1] = (OP_INSERT >> 8) & 0xff;
-  header[index] = (OP_INSERT) & 0xff;
+  header[index + 3] = (opcodes.OP_INSERT >> 24) & 0xff;
+  header[index + 2] = (opcodes.OP_INSERT >> 16) & 0xff;
+  header[index + 1] = (opcodes.OP_INSERT >> 8) & 0xff;
+  header[index] = (opcodes.OP_INSERT) & 0xff;
   index = index + 4;
 
   // Flags
@@ -215,10 +213,10 @@ Update.prototype.toBin = function() {
   index = index + 4;
 
   // Operation
-  header[index + 3] = (OP_UPDATE >> 24) & 0xff;
-  header[index + 2] = (OP_UPDATE >> 16) & 0xff;
-  header[index + 1] = (OP_UPDATE >> 8) & 0xff;
-  header[index] = (OP_UPDATE) & 0xff;
+  header[index + 3] = (opcodes.OP_UPDATE >> 24) & 0xff;
+  header[index + 2] = (opcodes.OP_UPDATE >> 16) & 0xff;
+  header[index + 1] = (opcodes.OP_UPDATE >> 8) & 0xff;
+  header[index] = (opcodes.OP_UPDATE) & 0xff;
   index = index + 4;
 
   // Write ZERO
@@ -322,10 +320,10 @@ Remove.prototype.toBin = function() {
   index = index + 4;
 
   // Operation
-  header[index + 3] = (OP_DELETE >> 24) & 0xff;
-  header[index + 2] = (OP_DELETE >> 16) & 0xff;
-  header[index + 1] = (OP_DELETE >> 8) & 0xff;
-  header[index] = (OP_DELETE) & 0xff;
+  header[index + 3] = (opcodes.OP_DELETE >> 24) & 0xff;
+  header[index + 2] = (opcodes.OP_DELETE >> 16) & 0xff;
+  header[index + 1] = (opcodes.OP_DELETE >> 8) & 0xff;
+  header[index] = (opcodes.OP_DELETE) & 0xff;
   index = index + 4;
 
   // Write ZERO

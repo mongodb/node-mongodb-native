@@ -78,9 +78,44 @@ var retrieveBSON = function() {
   return BSON;
 }
 
+// Throw an error if an attempt to use Snappy is made when Snappy is not installed
+var noSnappyWarning = function() {
+  throw new Error('Attempted to use Snappy compression, but Snappy is not installed. Install or disable Snappy compression and try again.')
+}
+
+// Facilitate loading Snappy optionally
+var retrieveSnappy = function() {
+  var snappy = require_optional('snappy');
+  if (!snappy) {
+    snappy = {
+      compress: noSnappyWarning,
+      uncompress: noSnappyWarning,
+      compressSync: noSnappyWarning,
+      uncompressSync: noSnappyWarning
+    }
+  }
+  return snappy;
+}
+
+// Parses the header of a wire protocol message
+var parseHeader = function(message) {
+  return {
+    length: message.readInt32LE(0),
+    requestId: message.readInt32LE(4),
+    responseTo: message.readInt32LE(8),
+    opCode: message.readInt32LE(12)
+  }
+}
+
+exports.compressorIDs = {
+  snappy: 1,
+  zlib: 2
+}
 exports.setProperty = setProperty;
 exports.getProperty = getProperty;
 exports.getSingleProperty = getSingleProperty;
 exports.copy = copy;
 exports.debugOptions = debugOptions;
 exports.retrieveBSON = retrieveBSON;
+exports.retrieveSnappy = retrieveSnappy;
+exports.parseHeader = parseHeader;

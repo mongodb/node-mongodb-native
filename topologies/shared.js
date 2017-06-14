@@ -56,6 +56,21 @@ function createClientInfo(options) {
   return clientInfo;
 }
 
+function createCompressionInfo(options) {
+  if (!options.compression || !options.compression.compressors) {
+    return [];
+  }
+
+  // Check that all supplied compressors are valid
+  options.compression.compressors.forEach(function(compressor) {
+    if (compressor !== 'snappy' && compressor !== 'zlib') {
+      throw new Error('compressors must be at least one of snappy or zlib')
+    }
+  })
+
+  return options.compression.compressors
+}
+
 function clone(object) {
   return JSON.parse(JSON.stringify(object));
 }
@@ -322,6 +337,7 @@ module.exports.emitServerDescriptionChanged = emitServerDescriptionChanged;
 module.exports.emitTopologyDescriptionChanged = emitTopologyDescriptionChanged;
 module.exports.cloneOptions = cloneOptions;
 module.exports.createClientInfo = createClientInfo;
+module.exports.createCompressionInfo = createCompressionInfo;
 module.exports.clone = clone;
 module.exports.diff = diff;
 module.exports.Interval = Interval;

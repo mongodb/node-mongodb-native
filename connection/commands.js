@@ -1,6 +1,6 @@
 "use strict";
 
-var retrieveBSON = require('../connection/utils').retrieveBSON;
+var retrieveBSON = require('./utils').retrieveBSON;
 var BSON = retrieveBSON();
 var Long = BSON.Long;
 
@@ -8,9 +8,7 @@ var Long = BSON.Long;
 var _requestId = 0;
 
 // Wire command operation ids
-var OP_QUERY = 2004;
-var OP_GETMORE = 2005;
-var OP_KILL_CURSORS = 2007;
+var opcodes = require('../wireprotocol/shared').opcodes;
 
 // Query flags
 var OPTS_TAILABLE_CURSOR = 2;
@@ -184,10 +182,10 @@ Query.prototype.toBin = function() {
   index = index + 4;
 
   // Write header information OP_QUERY
-  header[index + 3] = (OP_QUERY >> 24) & 0xff;
-  header[index + 2] = (OP_QUERY >> 16) & 0xff;
-  header[index + 1] = (OP_QUERY >> 8) & 0xff;
-  header[index] = (OP_QUERY) & 0xff;
+  header[index + 3] = (opcodes.OP_QUERY >> 24) & 0xff;
+  header[index + 2] = (opcodes.OP_QUERY >> 16) & 0xff;
+  header[index + 1] = (opcodes.OP_QUERY >> 8) & 0xff;
+  header[index] = (opcodes.OP_QUERY) & 0xff;
   index = index + 4;
 
   // Write header information flags
@@ -267,10 +265,10 @@ GetMore.prototype.toBin = function() {
   index = index + 4;
 
   // index = write32bit(index, _buffer, OP_GETMORE);
-  _buffer[index + 3] = (OP_GETMORE >> 24) & 0xff;
-  _buffer[index + 2] = (OP_GETMORE >> 16) & 0xff;
-  _buffer[index + 1] = (OP_GETMORE >> 8) & 0xff;
-  _buffer[index] = (OP_GETMORE) & 0xff;
+  _buffer[index + 3] = (opcodes.OP_GETMORE >> 24) & 0xff;
+  _buffer[index + 2] = (opcodes.OP_GETMORE >> 16) & 0xff;
+  _buffer[index + 1] = (opcodes.OP_GETMORE >> 8) & 0xff;
+  _buffer[index] = (opcodes.OP_GETMORE) & 0xff;
   index = index + 4;
 
   // index = write32bit(index, _buffer, 0);
@@ -351,10 +349,10 @@ KillCursor.prototype.toBin = function() {
   index = index + 4;
 
   // index = write32bit(index, _buffer, OP_KILL_CURSORS);
-  _buffer[index + 3] = (OP_KILL_CURSORS >> 24) & 0xff;
-  _buffer[index + 2] = (OP_KILL_CURSORS >> 16) & 0xff;
-  _buffer[index + 1] = (OP_KILL_CURSORS >> 8) & 0xff;
-  _buffer[index] = (OP_KILL_CURSORS) & 0xff;
+  _buffer[index + 3] = (opcodes.OP_KILL_CURSORS >> 24) & 0xff;
+  _buffer[index + 2] = (opcodes.OP_KILL_CURSORS >> 16) & 0xff;
+  _buffer[index + 1] = (opcodes.OP_KILL_CURSORS >> 8) & 0xff;
+  _buffer[index] = (opcodes.OP_KILL_CURSORS) & 0xff;
   index = index + 4;
 
   // index = write32bit(index, _buffer, 0);
@@ -394,53 +392,26 @@ KillCursor.prototype.toBin = function() {
   return _buffer;
 }
 
-var Response = function(bson, data, opts) {
+var Response = function(bson, message, msgHeader, msgBody, opts) {
   opts = opts || {promoteLongs: true, promoteValues: true, promoteBuffers: false};
   this.parsed = false;
-
-  //
-  // Parse Header
-  //
-  this.index = 0;
-  this.raw = data;
-  this.data = data;
+  this.raw = message;
+  this.data = msgBody;
   this.bson = bson;
   this.opts = opts;
 
-  // Read the message length
-  this.length = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
-  this.index = this.index + 4;
+  // Read the message header
+  this.length = msgHeader.length;
+  this.requestId = msgHeader.requestId;
+  this.responseTo = msgHeader.responseTo;
+  this.opCode = msgHeader.opCode;
+  this.fromCompressed = msgHeader.fromCompressed;
 
-  // Fetch the request id for this reply
-  this.requestId = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
-  this.index = this.index + 4;
-
-  // Fetch the id of the request that triggered the response
-  this.responseTo = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
-  this.index = this.index + 4;
-
-  // Skip op-code field
-  this.index = this.index + 4;
-
-  // Unpack flags
-  this.responseFlags = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
-  this.index = this.index + 4;
-
-  // Unpack the cursor
-  var lowBits = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
-  this.index = this.index + 4;
-  var highBits = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
-  this.index = this.index + 4;
-  // Create long object
-  this.cursorId = new Long(lowBits, highBits);
-
-  // Unpack the starting from
-  this.startingFrom = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
-  this.index = this.index + 4;
-
-  // Unpack the number of objects returned
-  this.numberReturned = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
-  this.index = this.index + 4;
+  // Read the message body
+  this.responseFlags = msgBody.readInt32LE(0);
+  this.cursorId = new Long(msgBody.readInt32LE(4), msgBody.readInt32LE(8));
+  this.startingFrom = msgBody.readInt32LE(12);
+  this.numberReturned = msgBody.readInt32LE(16);
 
   // Preallocate document array
   this.documents = new Array(this.numberReturned);
@@ -484,6 +455,10 @@ Response.prototype.parse = function(options) {
     promoteValues: promoteValues,
     promoteBuffers: promoteBuffers
   };
+
+  // Position within OP_REPLY at which documents start
+  // (See https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#wire-op-reply)
+  this.index = 20;
 
   //
   // Single document and documentsReturnedIn set
