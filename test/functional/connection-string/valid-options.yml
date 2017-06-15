@@ -15,16 +15,3 @@ tests:
             db: "admin"
         options:
             authmechanism: "MONGODB-CR"
-    -
-        description: "Option key and value (escaped null bytes)"
-        uri: "mongodb://example.com/?replicaSet=my%00rs"
-        valid: true
-        warning: false
-        hosts:
-            -
-                type: "hostname"
-                host: "example.com"
-                port: ~
-        auth: ~
-        options:
-            replicaset: "my\0rs"

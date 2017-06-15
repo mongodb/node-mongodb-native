@@ -1,0 +1,100 @@
+{
+    "tests": [
+        {
+            "auth": {
+                "db": "admin.sock",
+                "password": null,
+                "username": null
+            },
+            "description": "Multiple Unix domain sockets and auth DB resembling a socket (relative path)",
+            "hosts": [
+                {
+                    "host": "rel/mongodb-27017.sock",
+                    "port": null,
+                    "type": "unix"
+                },
+                {
+                    "host": "rel/mongodb-27018.sock",
+                    "port": null,
+                    "type": "unix"
+                }
+            ],
+            "options": null,
+            "uri": "mongodb://rel%2Fmongodb-27017.sock,rel%2Fmongodb-27018.sock/admin.sock",
+            "valid": true,
+            "warning": false
+        },
+        {
+            "auth": {
+                "db": "admin.shoe",
+                "password": null,
+                "username": null
+            },
+            "description": "Multiple Unix domain sockets with auth DB resembling a path (relative path)",
+            "hosts": [
+                {
+                    "host": "rel/mongodb-27017.sock",
+                    "port": null,
+                    "type": "unix"
+                },
+                {
+                    "host": "rel/mongodb-27018.sock",
+                    "port": null,
+                    "type": "unix"
+                }
+            ],
+            "options": null,
+            "uri": "mongodb://rel%2Fmongodb-27017.sock,rel%2Fmongodb-27018.sock/admin.shoe",
+            "valid": true,
+            "warning": false
+        },
+        {
+            "auth": {
+                "db": "admin.sock",
+                "password": null,
+                "username": null
+            },
+            "description": "Multiple Unix domain sockets and auth DB resembling a socket (absolute path)",
+            "hosts": [
+                {
+                    "host": "/tmp/mongodb-27017.sock",
+                    "port": null,
+                    "type": "unix"
+                },
+                {
+                    "host": "/tmp/mongodb-27018.sock",
+                    "port": null,
+                    "type": "unix"
+                }
+            ],
+            "options": null,
+            "uri": "mongodb://%2Ftmp%2Fmongodb-27017.sock,%2Ftmp%2Fmongodb-27018.sock/admin.sock",
+            "valid": true,
+            "warning": false
+        },
+        {
+            "auth": {
+                "db": "admin.shoe",
+                "password": null,
+                "username": null
+            },
+            "description": "Multiple Unix domain sockets with auth DB resembling a path (absolute path)",
+            "hosts": [
+                {
+                    "host": "/tmp/mongodb-27017.sock",
+                    "port": null,
+                    "type": "unix"
+                },
+                {
+                    "host": "/tmp/mongodb-27018.sock",
+                    "port": null,
+                    "type": "unix"
+                }
+            ],
+            "options": null,
+            "uri": "mongodb://%2Ftmp%2Fmongodb-27017.sock,%2Ftmp%2Fmongodb-27018.sock/admin.shoe",
+            "valid": true,
+            "warning": false
+        }
+    ]
+}

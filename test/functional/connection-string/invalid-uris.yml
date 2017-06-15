@@ -168,6 +168,14 @@ tests:
         auth: ~
         options: ~
     -
+        description: "Username with password containing an unescaped colon"
+        uri: "mongodb://alice:foo:bar@127.0.0.1"
+        valid: false
+        warning: ~
+        hosts: ~
+        auth: ~
+        options: ~
+    -
         description: "Username containing an unescaped at-sign"
         uri: "mongodb://alice@@127.0.0.1"
         valid: false
@@ -184,40 +192,32 @@ tests:
         auth: ~
         options: ~
     -
+        description: "Username containing an unescaped slash"
+        uri: "mongodb://alice/@127.0.0.1/db"
+        valid: false
+        warning: ~
+        hosts: ~
+        auth: ~
+        options: ~
+    -
+        description: "Username containing unescaped slash with password"
+        uri: "mongodb://alice/bob:foo@127.0.0.1/db"
+        valid: false
+        warning: ~
+        hosts: ~
+        auth: ~
+        options: ~
+    -
+        description: "Username with password containing an unescaped slash"
+        uri: "mongodb://alice:foo/bar@127.0.0.1/db"
+        valid: false
+        warning: ~
+        hosts: ~
+        auth: ~
+        options: ~
+    -
         description: "Host with unescaped slash"
         uri: "mongodb:///tmp/mongodb-27017.sock/"
-        valid: false
-        warning: ~
-        hosts: ~
-        auth: ~
-        options: ~
-    -
-        description: "Illegal backslash at the end"
-        uri: "mongodb://localhost:27107/admin/"
-        valid: false
-        warning: ~
-        hosts: ~
-        auth: ~
-        options: ~
-    -
-        description: "More than 1 database name in URL"
-        uri: "mongodb://localhost:27107/admin/admin2"
-        valid: false
-        warning: ~
-        hosts: ~
-        auth: ~
-        options: ~
-    -
-        description: "Illegal backslash at the end (Unix socket)"
-        uri: "mongodb://%2Ftmp%2Fmongodb-27017.sock/admin/"
-        valid: false
-        warning: ~
-        hosts: ~
-        auth: ~
-        options: ~
-    -
-        description: "More than 1 database name in URL (Unix socket)"
-        uri: "mongodb://%2Ftmp%2Fmongodb-27017.sock/admin/admin2"
         valid: false
         warning: ~
         hosts: ~
