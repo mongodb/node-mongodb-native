@@ -135,13 +135,13 @@ exports['Should correctly parse mongodb://fred:foo%20bar@localhost/baz'] = {
 /**
  * @ignore
  */
-exports['Should correctly parse mongodb:///tmp/mongodb-27017.sock'] = {
+exports['Should correctly parse mongodb://%2Ftmp%2Fmongodb-27017.sock'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb:///tmp/mongodb-27017.sock");
+    var object = parse("mongodb://%2Ftmp%2Fmongodb-27017.sock");
     test.equal(1, object.servers.length);
     test.equal('/tmp/mongodb-27017.sock', object.servers[0].domain_socket);
     test.equal('admin', object.dbName);
@@ -152,13 +152,13 @@ exports['Should correctly parse mongodb:///tmp/mongodb-27017.sock'] = {
 /**
  * @ignore
  */
-exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock'] = {
+exports['Should correctly parse mongodb://fred:foo@%2Ftmp%2Fmongodb-27017.sock'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://fred:foo@/tmp/mongodb-27017.sock");
+    var object = parse("mongodb://fred:foo@%2Ftmp%2Fmongodb-27017.sock");
     test.equal(1, object.servers.length);
     test.equal('/tmp/mongodb-27017.sock', object.servers[0].domain_socket);
     test.equal('admin', object.dbName);
@@ -171,13 +171,13 @@ exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock'] = {
 /**
  * @ignore
  */
-exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock/somedb'] = {
+exports['Should correctly parse mongodb://fred:foo@%2Ftmp%2Fmongodb-27017.sock/somedb'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://fred:foo@/tmp/mongodb-27017.sock/somedb");
+    var object = parse("mongodb://fred:foo@%2Ftmp%2Fmongodb-27017.sock/somedb");
     test.equal(1, object.servers.length);
     test.equal('/tmp/mongodb-27017.sock', object.servers[0].domain_socket);
     test.equal('somedb', object.dbName);
@@ -190,13 +190,13 @@ exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock/somed
 /**
  * @ignore
  */
-exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock/somedb?safe=true'] = {
+exports['Should correctly parse mongodb://fred:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://fred:foo@/tmp/mongodb-27017.sock/somedb?safe=true");
+    var object = parse("mongodb://fred:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true");
     test.equal(1, object.servers.length);
     test.equal('/tmp/mongodb-27017.sock', object.servers[0].domain_socket);
     test.equal('somedb', object.dbName);
@@ -731,13 +731,13 @@ exports['Should correctly parse mongodb://localhost,[::1]:27018,[2607:f0d0:1002:
 /**
  * @ignore
  */
-exports['Should correctly parse mongodb://k?y:foo@/tmp/mongodb-27017.sock/somedb?safe=true'] = {
+exports['Should correctly parse mongodb://k?y:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://k%3Fy:foo@/tmp/mongodb-27017.sock/somedb?safe=true");
+    var object = parse("mongodb://k%3Fy:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true");
     test.equal('k?y', object.auth.user);
     test.done();
   }
@@ -746,13 +746,13 @@ exports['Should correctly parse mongodb://k?y:foo@/tmp/mongodb-27017.sock/somedb
 /**
  * @ignore
  */
-exports['Should correctly parse uriencoded k?y mongodb://k%3Fy:foo@/tmp/mongodb-27017.sock/somedb?safe=true'] = {
+exports['Should correctly parse uriencoded k?y mongodb://k%3Fy:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://k%3Fy:foo@/tmp/mongodb-27017.sock/somedb?safe=true");
+    var object = parse("mongodb://k%3Fy:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true");
     test.equal('k?y', object.auth.user);
     test.done();
   }
@@ -761,13 +761,13 @@ exports['Should correctly parse uriencoded k?y mongodb://k%3Fy:foo@/tmp/mongodb-
 /**
  * @ignore
  */
-exports['Should correctly parse username kay:kay mongodb://kay%3Akay:foo@/tmp/mongodb-27017.sock/somedb?safe=true'] = {
+exports['Should correctly parse username kay:kay mongodb://kay%3Akay:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://kay%3Akay:foo@/tmp/mongodb-27017.sock/somedb?safe=true");
+    var object = parse("mongodb://kay%3Akay:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true");
     test.equal('kay:kay', object.auth.user);
     test.done();
   }

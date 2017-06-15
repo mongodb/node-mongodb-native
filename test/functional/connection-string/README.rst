@@ -40,13 +40,7 @@ Version
 -------
 
 Files in the "specifications" repository have no version scheme. They are not
-tied to a MongoDB server version, and it is our intention that each
-specification moves from "draft" to "final" with no further versions; it is
-superseded by a future spec, not revised.
-
-However, implementers must have stable sets of tests to target. As test files
-evolve they will be occasionally tagged like "uri-tests-tests-2015-07-16", until
-the spec is final.
+tied to a MongoDB server version.
 
 Format
 ------
@@ -72,7 +66,7 @@ array of test case objects, each of which have the following keys:
     (as discussed in `RFC 2396 <https://www.ietf.org/rfc/rfc2396.txt>`_).
   - ``password``: A string containing the parsed password.
   - ``db``: A string containing the parsed authentication database. For legacy
-    implementations that support namespaces (databases and collections) this may 
+    implementations that support namespaces (databases and collections) this may
     be the full namespace eg: ``<db>.<coll>``
 - ``options``: An object containing key/value pairs for each parsed query string
   option.
@@ -97,3 +91,7 @@ handler and watching for output).
 
 Not all drivers may be able to directly assert the hosts, auth credentials, and
 options. Doing so may require exposing the driver's URI parsing component.
+
+The file valid-db-with-dotted-name.yml is a special case for testing drivers
+that allow dotted namespaces, instead of only database names, in the Auth
+Database portion of the URI.
