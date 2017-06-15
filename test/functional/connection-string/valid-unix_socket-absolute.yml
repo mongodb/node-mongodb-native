@@ -138,8 +138,8 @@ tests:
             db: "admin"
         options: ~
     -
-        description: "Multiple Unix domain sockets and auth DB resembling a socket (absolute path)"
-        uri: "mongodb://%2Ftmp%2Fmongodb-27017.sock,%2Ftmp%2Fmongodb-27018.sock/admin.sock"
+        description: "Multiple Unix domain sockets and auth DB (absolute path)"
+        uri: "mongodb://%2Ftmp%2Fmongodb-27017.sock,%2Ftmp%2Fmongodb-27018.sock/admin"
         valid: true
         warning: false
         hosts:
@@ -154,11 +154,11 @@ tests:
         auth:
             username: ~
             password: ~
-            db: "admin.sock"
+            db: "admin"
         options: ~
     -
-        description: "Multiple Unix domain sockets with auth DB resembling a path (absolute path)"
-        uri: "mongodb://%2Ftmp%2Fmongodb-27017.sock,%2Ftmp%2Fmongodb-27018.sock/admin.shoe"
+        description: "Multiple Unix domain sockets with auth DB (absolute path)"
+        uri: "mongodb://%2Ftmp%2Fmongodb-27017.sock,%2Ftmp%2Fmongodb-27018.sock/admin"
         valid: true
         warning: false
         hosts:
@@ -173,7 +173,7 @@ tests:
         auth:
             username: ~
             password: ~
-            db: "admin.shoe"
+            db: "admin"
         options: ~
     -
         description: "Multiple Unix domain sockets with auth and query string (absolute path)"

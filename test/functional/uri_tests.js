@@ -79,7 +79,7 @@ exports['Should correctly connect via domain socket'] = {
     var MongoClient = configuration.require.MongoClient;
 
     if(process.platform != "win32") {
-      MongoClient.connect("mongodb:///tmp/mongodb-27017.sock?safe=false", function(err, client) {
+      MongoClient.connect("mongodb://%2Ftmp%2Fmongodb-27017.sock?safe=false", function(err, client) {
         test.equal(null, err);
         client.close();
         test.done();
