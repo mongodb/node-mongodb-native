@@ -217,7 +217,7 @@ var Configuration = function(options) {
         }
 
         // Fall back
-        var host = serverOptions && serverOptions.host || "/tmp/mongodb-27017.sock";
+        var host = serverOptions && serverOptions.host || "%2Ftmp%2Fmongodb-27017.sock";
 
         // Set up the options
         var keys = Object.keys(options);

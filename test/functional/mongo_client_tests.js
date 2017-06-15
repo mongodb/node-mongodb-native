@@ -415,7 +415,7 @@ exports["should correctly connect to mongodb using domain socket"] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
-    MongoClient.connect('mongodb:///tmp/mongodb-27017.sock/test', function(err, client) {
+    MongoClient.connect('mongodb://%2Ftmp%2Fmongodb-27017.sock/test', function(err, client) {
       test.equal(null, err);
       test.done();
     });
