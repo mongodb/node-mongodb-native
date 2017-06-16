@@ -43,7 +43,7 @@ db.open((err, db) => {
 is replaced with
 
 ```js
-new MongoClient(new Server('localhost', 27017), { 
+new MongoClient(new Server('localhost', 27017), {
     user: 'root'
   , password: 'root'
   , authSource: 'adming'}).connect((err, client) => {
@@ -67,3 +67,10 @@ MongoClient.connect('mongodb://localhost:27017/test', (err, client) => {
   var db = client.db('test');
 });
 ```
+
+## Connection String Changes
+Following [changes to the MongoDB connection string specification](https://github.com/mongodb/specifications/commit/4631ccd4f825fb1a3aba204510023f9b4d193a05), authentication and hostname details in connection strings must now be URL-encoded. These changes reduce ambiguity in connection strings.
+
+For example, whereas before `mongodb://u$ername:pa$$w{}rd@/tmp/mongodb-27017.sock/test` would have been a valid connection string (with username `u$ername`, password `pa$$w{}rd`, host `/tmp/mongodb-27017.sock` and auth database `test`), the connection string for those details would now have to be provided to MongoClient as `mongodb://u%24ername:pa%24%24w%7B%7Drd@%2Ftmp%2Fmongodb-27017.sock/test`.
+
+For more information about connection strings, read the [connection string specification](https://github.com/mongodb/specifications/blob/master/source/connection-string/connection-string-spec.rst).
