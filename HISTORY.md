@@ -1,3 +1,7 @@
+3.0.0 2017-??-??
+----------------
+* NODE-1043 URI-escaping authentication and hostname details in connection string
+
 2.2.31 2017-08-08
 -----------------
 * update mongodb-core to 2.2.15
