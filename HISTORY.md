@@ -1,3 +1,13 @@
+2.2.29 2017-06-19
+-----------------
+* Update mongodb-core to 2.1.13
+  * NODE-1039 ensure we force destroy server instances, forcing queue to be flushed.
+  *  Use actual server type in standalone SDAM events.
+* Allow multiple map calls (Issue #1521, https://github.com/Robbilie).
+* Clone insertMany options before mutating (Issue #1522, https://github.com/vkarpov15).
+* NODE-1034 Fix GridStore issue caused by Node 8.0.0 breaking backward compatible fs.read API.
+* NODE-1026, use  operator instead of skip function in order to avoid useless fetch stage.
+
 2.2.28 2017-06-02
 -----------------
 * Update mongodb-core to 2.1.12
