@@ -849,6 +849,14 @@ MongoClient.connect(url, {
 &lt;/tr&gt;
 
 &lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;strong&gt;appname&lt;/strong&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Server, Replicaset, Mongos&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;string&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;null&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;The name of the application that created this MongoClient instance. MongoDB 3.4 and newer will print this value in the server log upon establishing each connection. It is also recorded in the slow query log and profile collections.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;&lt;strong&gt;loggerLevel&lt;/strong&gt;&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Server, Replicaset, Mongos&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;string&lt;/td&gt;
