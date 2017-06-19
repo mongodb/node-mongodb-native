@@ -597,6 +597,30 @@ exports['Should correctly pass through appname'] = {
   }
 }
 
+exports['Should correctly pass through appname in options'] = {
+  metadata: {
+    requires: {
+      node: ">0.8.0",
+      topology: ['single', 'replicaset', 'sharded']
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var url = configuration.url();
+
+    // console.dir(url)
+    MongoClient.connect(url, {appname: 'hello world'}, function(err, db) {
+      test.equal(null, err);
+      test.equal('hello world', db.serverConfig.clientInfo.application.name);
+
+      db.close();
+      test.done();
+    });
+  }
+}
+
 exports['Should correctly pass through socketTimeoutMS and connectTimeoutMS'] = {
   metadata: {
     requires: {
