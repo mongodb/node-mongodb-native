@@ -1,3 +1,8 @@
+2.1.13 2017-06-19
+-----------------
+- NODE-1039 ensure we force destroy server instances, forcing queue to be flushed.
+-  Use actual server type in standalone SDAM events.
+
 2.1.12 2017-06-02
 -----------------
 * NODE-1019 Set keepAlive to 300 seconds or 1/2 of socketTimeout if socketTimeout < keepAlive.
