@@ -23,7 +23,6 @@
     "bluebird": "3.4.6",
     "bson": "latest",
     "cli-table": "^0.3.1",
-    "co": "^4.6.0",
     "colors": "^1.1.2",
     "coveralls": "^2.11.6",
     "eslint": "^3.8.1",
