@@ -232,9 +232,14 @@ exports['Should correctly print warning and error when no mongos proxies in seed
 
       server.on('error', function(){
         Logger.setCurrentLogger(logger);
-        test.equal('expected mongos proxy, but found replicaset member mongod for server localhost:52002', warnings[0].message);
-        test.equal('expected mongos proxy, but found replicaset member mongod for server localhost:52003', warnings[1].message);
-        test.equal('no mongos proxies found in seed list, did you mean to connect to a replicaset', warnings[2].message);
+
+        var errors = ['expected mongos proxy, but found replicaset member mongod for server localhost:52002'
+          , 'expected mongos proxy, but found replicaset member mongod for server localhost:52003'
+          , 'no mongos proxies found in seed list, did you mean to connect to a replicaset'];
+
+        test.ok(errors.indexOf(warnings[0].message) != -1);
+        test.ok(errors.indexOf(warnings[1].message) != -1);
+        test.ok(errors.indexOf(warnings[2].message) != -1);
 
         running = false;
         server.destroy();
