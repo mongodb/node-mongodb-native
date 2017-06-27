@@ -5303,7 +5303,7 @@ exports.shouldCorrectlyDifferentiateBetweenObjectIdInstances = {
     var objectId3 = new ObjectID();
     // objectId and objectId2 should be the same
     test.ok(objectId.equals(objectId2));
-    // objectId and objectId2 should be different
+    // objectId and objectId3 should be different
     test.ok(!objectId.equals(objectId3));
     test.done();
     // DOC_END
