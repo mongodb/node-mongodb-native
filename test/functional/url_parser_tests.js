@@ -657,3 +657,15 @@ exports['Should correctly parse username kay:kay mongodb://kay%3Akay:foo@/tmp/mo
     test.done();
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Should use options passed into url parsing'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  test: function(configure, test) {
+    var object = parse('mongodb://localhost/', { readPreference: 'secondary' });
+    test.equal('secondary', object.db_options.readPreference);
+    test.done();
+  }
+}
