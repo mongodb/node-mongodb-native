@@ -1,3 +1,6 @@
+"use strict";
+var assign = require('../../../../lib/utils').assign;
+
 exports['Should correctly timeout socket operation and then correctly re-execute'] = {
   metadata: {
     requires: {
@@ -20,12 +23,6 @@ exports['Should correctly timeout socket operation and then correctly re-execute
     // Primary stop responding
     var stopRespondingPrimary = false;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
@@ -39,7 +36,7 @@ exports['Should correctly timeout socket operation and then correctly re-execute
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultFields, {})];
+    var serverIsMaster = [assign({}, defaultFields)];
     var timeoutPromise = function(timeout) {
       return new Promise(function(resolve, reject) {
         setTimeout(function() {
@@ -81,7 +78,6 @@ exports['Should correctly timeout socket operation and then correctly re-execute
       // Start dropping the packets
       setTimeout(function() {
         stopRespondingPrimary = true;
-        currentIsMasterState = 1;
       }, 5000);
     });
 
@@ -153,12 +149,6 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
     // Should fail due to broken pipe
     var brokenPipe = false;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
@@ -172,7 +162,8 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultFields, {})];
+    var serverIsMaster = [assign({}, defaultFields)];
+
     var timeoutPromise = function(timeout) {
       return new Promise(function(resolve, reject) {
         setTimeout(function() {
@@ -182,6 +173,7 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
     }
 
     // Boot the mock
+    var __server;
     co(function*() {
       __server = yield mockupdb.createServer(37017, 'localhost', {
         onRead: function(server, connection, buffer, bytesRead) {
@@ -278,8 +270,6 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
     // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 1")
 
     server.once('reconnect', function(_server) {
-      // console.log("!!!! server reconnect")
-      // console.dir(_server)
       _server.insert('test.test', [{created:new Date()}], function(err, r) {
         test.ok(brokenPipe);
         _server.destroy();
@@ -290,7 +280,6 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
     });
 
     server.on('error', function(){});
-    // console.log("!!! connect")
     setTimeout(function() { server.connect(); }, 100);
   }
 }
@@ -317,12 +306,6 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
 //     // Primary stop responding
 //     var stopRespondingPrimary = false;
 //
-//     // Extend the object
-//     var extend = function(template, fields) {
-//       for(var name in template) fields[name] = template[name];
-//       return fields;
-//     }
-//
 //     // Default message fields
 //     var defaultFields = {
 //       "ismaster" : true,
@@ -336,7 +319,7 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
 //     }
 //
 //     // Primary server states
-//     var serverIsMaster = [extend(defaultFields, {})];
+//     var serverIsMaster = [assign({}, defaultFields)];
 //     var timeoutPromise = function(timeout) {
 //       return new Promise(function(resolve, reject) {
 //         setTimeout(function() {
@@ -373,7 +356,6 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
 //       // // Start dropping the packets
 //       // setTimeout(function() {
 //       //   stopRespondingPrimary = true;
-//       //   currentIsMasterState = 1;
 //       // }, 5000);
 //     });
 //

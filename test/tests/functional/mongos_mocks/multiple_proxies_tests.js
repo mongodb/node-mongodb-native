@@ -1,4 +1,5 @@
-"use strict"
+"use strict";
+var assign = require('../../../../lib/utils').assign;
 
 var timeoutPromise = function(timeout) {
   return new Promise(function(resolve, reject) {
@@ -32,12 +33,6 @@ exports['Should correctly load-balance the operations'] = {
     var stopRespondingPrimary = false;
     var port = null;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
@@ -52,7 +47,7 @@ exports['Should correctly load-balance the operations'] = {
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultFields, {})];
+    var serverIsMaster = [assign({}, defaultFields)];
     // Boot the mock
     co(function*() {
       mongos1 = yield mockupdb.createServer(11000, 'localhost');
@@ -93,7 +88,6 @@ exports['Should correctly load-balance the operations'] = {
       // Start dropping the packets
       setTimeout(function() {
         stopRespondingPrimary = true;
-        currentIsMasterState = 1;
       }, 5000);
 
       // Attempt to connect
@@ -172,12 +166,6 @@ exports['Should ignore one of the mongos instances due to being outside the late
     // Primary stop responding
     var stopRespondingPrimary = false;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
@@ -192,7 +180,7 @@ exports['Should ignore one of the mongos instances due to being outside the late
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultFields, {})];
+    var serverIsMaster = [assign({}, defaultFields)];
     // Boot the mock
     co(function*() {
       mongos1 = yield mockupdb.createServer(11002, 'localhost');

@@ -1,18 +1,5 @@
 "use strict";
-
-// Extend the object
-var extend = function(template, fields) {
-  var object = {};
-  for(var name in template) {
-    object[name] = template[name];
-  }
-
-  for(var name in fields) {
-   object[name] = fields[name];
-  }
-
-  return object;
-}
+var assign = require('../../../../lib/utils').assign;
 
 exports['Correctly execute count command against replicaset with a single member'] = {
   metadata: {
@@ -48,7 +35,7 @@ exports['Correctly execute count command against replicaset with a single member
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
@@ -138,7 +125,7 @@ exports['Correctly execute count command against replicaset with a single member
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 

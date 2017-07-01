@@ -1,3 +1,6 @@
+"use strict";
+var assign = require('../../../../lib/utils').assign;
+
 var timeoutPromise = function(timeout) {
   return new Promise(function(resolve, reject) {
     setTimeout(function() {
@@ -27,12 +30,6 @@ exports['SDAM Monitoring Should correctly connect to two proxies'] = {
     // Current index for the ismaster
     var currentStep = 0;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
@@ -47,7 +44,7 @@ exports['SDAM Monitoring Should correctly connect to two proxies'] = {
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultFields, {})];
+    var serverIsMaster = [assign({}, defaultFields)];
     // Boot the mock
     co(function*() {
       mongos1 = yield mockupdb.createServer(62000, 'localhost');
@@ -261,12 +258,6 @@ exports['SDAM Monitoring Should correctly failover due to proxy going away causi
     // Primary stop responding
     var stopRespondingPrimary = false;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
@@ -281,7 +272,7 @@ exports['SDAM Monitoring Should correctly failover due to proxy going away causi
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultFields, {})];
+    var serverIsMaster = [assign({}, defaultFields)];
     // Boot the mock
     co(function*() {
       mongos1 = yield mockupdb.createServer(62002, 'localhost');
@@ -321,7 +312,6 @@ exports['SDAM Monitoring Should correctly failover due to proxy going away causi
       // Start dropping the packets
       setTimeout(function() {
         stopRespondingPrimary = true;
-        currentIsMasterState = 1;
       }, 5000);
     });
 
@@ -492,12 +482,6 @@ exports['SDAM Monitoring Should correctly bring back proxy and use it'] = {
     // Primary stop responding
     var stopRespondingPrimary = false;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
@@ -512,7 +496,7 @@ exports['SDAM Monitoring Should correctly bring back proxy and use it'] = {
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultFields, {})];
+    var serverIsMaster = [assign({}, defaultFields)];
     // Boot the mock
     co(function*() {
       mongos1 = yield mockupdb.createServer(62004, 'localhost');
