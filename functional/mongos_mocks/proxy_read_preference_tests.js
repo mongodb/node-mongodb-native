@@ -1,3 +1,6 @@
+"use strict";
+var assign = require('../../../../lib/utils').assign;
+
 exports['Should correctly set query and readpreference field on wire protocol for 3.2'] = {
   metadata: {
     requires: {
@@ -23,12 +26,6 @@ exports['Should correctly set query and readpreference field on wire protocol fo
     // Primary stop responding
     var stopRespondingPrimary = false;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
@@ -43,7 +40,7 @@ exports['Should correctly set query and readpreference field on wire protocol fo
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultFields, {})];
+    var serverIsMaster = [ assign({}, defaultFields) ];
     // Received command on server
     var command = null;
     // Boot the mock
@@ -79,7 +76,6 @@ exports['Should correctly set query and readpreference field on wire protocol fo
       // Start dropping the packets
       setTimeout(function() {
         stopRespondingPrimary = true;
-        currentIsMasterState = 1;
       }, 5000);
     }).catch(function(err) {
     });
@@ -153,12 +149,6 @@ exports['Should correctly set query and near readpreference field on wire protoc
     // Primary stop responding
     var stopRespondingPrimary = false;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
@@ -173,7 +163,7 @@ exports['Should correctly set query and near readpreference field on wire protoc
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultFields, {})];
+    var serverIsMaster = [ assign({}, defaultFields) ];
     // Received command on server
     var command = null;
     // Boot the mock
@@ -209,7 +199,6 @@ exports['Should correctly set query and near readpreference field on wire protoc
       // Start dropping the packets
       setTimeout(function() {
         stopRespondingPrimary = true;
-        currentIsMasterState = 1;
       }, 5000);
     }).catch(function(err) {
     });
@@ -280,12 +269,6 @@ exports['Should correctly set query and readpreference field on wire protocol fo
     var mongos2 = null;
     var running = true;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
@@ -300,7 +283,7 @@ exports['Should correctly set query and readpreference field on wire protocol fo
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultFields, {})];
+    var serverIsMaster = [ assign({}, defaultFields) ];
     // Received command on server
     var command = null;
     // Boot the mock
@@ -401,12 +384,6 @@ exports['Should correctly set query and readpreference field on wire protocol fo
     // Primary stop responding
     var stopRespondingPrimary = false;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
@@ -419,7 +396,7 @@ exports['Should correctly set query and readpreference field on wire protocol fo
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultFields, {})];
+    var serverIsMaster = [ assign({}, defaultFields) ];
     // Received command on server
     var command = null;
     // Boot the mock
@@ -447,7 +424,6 @@ exports['Should correctly set query and readpreference field on wire protocol fo
       // Start dropping the packets
       setTimeout(function() {
         stopRespondingPrimary = true;
-        currentIsMasterState = 1;
       }, 5000);
     }).catch(function(err) {
     });

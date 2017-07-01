@@ -1,3 +1,6 @@
+"use strict";
+var assign = require('../../../../lib/utils').assign;
+
 var timeoutPromise = function(timeout) {
   return new Promise(function(resolve, reject) {
     setTimeout(function() {
@@ -32,12 +35,6 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
     // Primary stop responding
     var stopRespondingPrimary = false;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "setName": "rs", "setVersion": 1, "electionId": electionIds[currentIsMasterState],
@@ -47,23 +44,23 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000"
-    }), extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32000", "primary": "localhost:32001"
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000"
-    }), extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32001", "primary": "localhost:32001"
     })];
 
     // Primary server states
-    var secondSecondary = [extend(defaultFields, {
+    var secondSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32002", "primary": "localhost:32000"
-    }), extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32002", "primary": "localhost:32001"
     })];
 
@@ -244,12 +241,6 @@ exports['Should correctly prune intervalIds array'] = {
     // Primary stop responding
     var stopRespondingPrimary = false;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "setName": "rs", "setVersion": 1, "electionId": electionIds[currentIsMasterState],
@@ -259,23 +250,23 @@ exports['Should correctly prune intervalIds array'] = {
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000"
-    }), extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32000", "primary": "localhost:32001"
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000"
-    }), extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32001", "primary": "localhost:32001"
     })];
 
     // Primary server states
-    var secondSecondary = [extend(defaultFields, {
+    var secondSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32002", "primary": "localhost:32000"
-    }), extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32002", "primary": "localhost:32001"
     })];
 

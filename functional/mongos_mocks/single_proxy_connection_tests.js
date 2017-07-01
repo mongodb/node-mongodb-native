@@ -1,4 +1,6 @@
+"use strict";
 var f = require('util').format;
+var assign = require('../../../../lib/utils').assign;
 
 exports['Should correctly timeout mongos socket operation and then correctly re-execute'] = {
   metadata: {
@@ -23,12 +25,6 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
     // Primary stop responding
     var stopRespondingPrimary = false;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
@@ -43,7 +39,7 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultFields, {})];
+    var serverIsMaster = [ assign({}, defaultFields) ];
     var timeoutPromise = function(timeout) {
       return new Promise(function(resolve, reject) {
         setTimeout(function() {
@@ -88,7 +84,6 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
       // Start dropping the packets
       setTimeout(function() {
         stopRespondingPrimary = true;
-        currentIsMasterState = 1;
       }, 500);
     }).catch(function(err) {
     });
@@ -159,12 +154,6 @@ exports['Should not fail due to available connections equal to 0 during ha proce
     // Primary stop responding
     var stopRespondingPrimary = false;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
@@ -179,7 +168,7 @@ exports['Should not fail due to available connections equal to 0 during ha proce
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultFields, {})];
+    var serverIsMaster = [ assign({}, defaultFields) ];
     var timeoutPromise = function(timeout) {
       return new Promise(function(resolve, reject) {
         setTimeout(function() {

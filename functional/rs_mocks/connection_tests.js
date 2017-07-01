@@ -1,18 +1,5 @@
 "use strict";
-
-// Extend the object
-var extend = function(template, fields) {
-  var object = {};
-  for(var name in template) {
-    object[name] = template[name];
-  }
-
-  for(var name in fields) {
-   object[name] = fields[name];
-  }
-
-  return object;
-}
+var assign = require('../../../../lib/utils').assign;
 
 exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arbiter'] = {
   metadata: {
@@ -47,17 +34,17 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
     // Primary server states
-    var arbiter = [extend(defaultFields, {
+    var arbiter = [assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
     })];
 
@@ -200,17 +187,17 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
     // Primary server states
-    var arbiter = [extend(defaultFields, {
+    var arbiter = [assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
     })];
 
@@ -352,12 +339,12 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary but missi
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
@@ -483,7 +470,7 @@ exports['Fail to connect due to missing primary'] = {
     }
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
@@ -576,12 +563,12 @@ exports['Successful connection to replicaset of 0 primary, 1 secondary and 1 arb
     }
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
     // Primary server states
-    var arbiter = [extend(defaultFields, {
+    var arbiter = [assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
     })];
 
@@ -701,17 +688,17 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
     // Primary server states
-    var arbiter = [extend(defaultFields, {
+    var arbiter = [assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
     })];
 
@@ -855,17 +842,17 @@ exports['Should print socketTimeout warning due to socketTimeout < haInterval'] 
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
     // Primary server states
-    var arbiter = [extend(defaultFields, {
+    var arbiter = [assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
     })];
 
@@ -985,12 +972,12 @@ exports['Should connect with a replicaset with a single primary and secondary'] 
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
@@ -1108,17 +1095,17 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
     // Primary server states
-    var arbiter = [extend(defaultFields, {
+    var arbiter = [assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
     })];
 
@@ -1261,17 +1248,17 @@ exports['Successful connection to replicaset of 1 primary, 0 secondary and 1 arb
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
     // Primary server states
-    var arbiter = [extend(defaultFields, {
+    var arbiter = [assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
     })];
 
@@ -1399,17 +1386,17 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
     // Primary server states
-    var arbiter = [extend(defaultFields, {
+    var arbiter = [assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
     })];
 
@@ -1536,12 +1523,12 @@ exports['Correctly return lastIsMaster when connected to a secondary only for a 
     }
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
     // Primary server states
-    var arbiter = [extend(defaultFields, {
+    var arbiter = [assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
     })];
 

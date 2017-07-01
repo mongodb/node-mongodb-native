@@ -1,3 +1,6 @@
+"use strict";
+var assign = require('../../../../lib/utils').assign;
+
 exports['Should correctly connect to a replicaset and select the correct tagged secondary server'] = {
   metadata: {
     requires: {
@@ -24,12 +27,6 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
     var running = true;
     var electionIds = [new ObjectId(), new ObjectId()];
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "setName": "rs", "setVersion": 1, "electionId": electionIds[0],
@@ -39,17 +36,17 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
     // Primary server states
-    var secondSecondary = [extend(defaultFields, {
+    var secondSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32002", "primary": "localhost:32000", "tags" : { "loc" : "dc" }
     })];
 
@@ -202,12 +199,6 @@ exports['Should correctly connect to a replicaset and select the primary server'
     var running = true;
     var electionIds = [new ObjectId(), new ObjectId()];
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "setName": "rs", "setVersion": 1, "electionId": electionIds[0],
@@ -217,17 +208,17 @@ exports['Should correctly connect to a replicaset and select the primary server'
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
     // Primary server states
-    var secondSecondary = [extend(defaultFields, {
+    var secondSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32002", "primary": "localhost:32000", "tags" : { "loc" : "dc" }
     })];
 
@@ -363,12 +354,6 @@ exports['Should correctly round robin secondary reads'] = {
     var running = true;
     var electionIds = [new ObjectId(), new ObjectId()];
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "setName": "rs", "setVersion": 1, "electionId": electionIds[0],
@@ -378,17 +363,17 @@ exports['Should correctly round robin secondary reads'] = {
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
     // Primary server states
-    var secondSecondary = [extend(defaultFields, {
+    var secondSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32002", "primary": "localhost:32000", "tags" : { "loc" : "dc" }
     })];
 
@@ -547,12 +532,6 @@ exports['Should correctly fall back to a secondary server if the readPreference 
     var running = true;
     var electionIds = [new ObjectId(), new ObjectId()];
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "setName": "rs", "setVersion": 1, "electionId": electionIds[0],
@@ -562,12 +541,12 @@ exports['Should correctly fall back to a secondary server if the readPreference 
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000"
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000"
     })];
 
@@ -607,7 +586,7 @@ exports['Should correctly fall back to a secondary server if the readPreference 
       });
 
       // mock ops store from node-mongodb-native for handling repl set disconnects
-      mockDisconnectHandler = {
+      var mockDisconnectHandler = {
         add: function(opType, ns, ops, options, callback) {
           // Command issued to replSet will fail immediately if !server.isConnected()
           return callback(MongoError.create({message: "no connection available", driver:true}));
@@ -716,12 +695,6 @@ exports['Should correctly fallback to secondaries when primary not available'] =
     var running = true;
     var electionIds = [new ObjectId(), new ObjectId()];
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "setName": "rs", "setVersion": 1, "electionId": electionIds[0],
@@ -731,17 +704,17 @@ exports['Should correctly fallback to secondaries when primary not available'] =
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
     // Primary server states
-    var secondSecondary = [extend(defaultFields, {
+    var secondSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32002", "primary": "localhost:32000", "tags" : { "loc" : "dc" }
     })];
 
@@ -898,12 +871,6 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
     var running = true;
     var electionIds = [new ObjectId(), new ObjectId()];
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "setName": "rs", "setVersion": 1, "electionId": electionIds[0],
@@ -913,17 +880,17 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
     // Primary server states
-    var secondSecondary = [extend(defaultFields, {
+    var secondSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32002", "primary": "localhost:32000", "tags" : { "loc" : "dc" }
     })];
 
@@ -1083,12 +1050,6 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
     var running = true;
     var electionIds = [new ObjectId(), new ObjectId()];
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "setName": "rs", "setVersion": 1, "electionId": electionIds[0],
@@ -1098,17 +1059,17 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "dc" }
     })];
 
     // Primary server states
-    var secondSecondary = [extend(defaultFields, {
+    var secondSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32002", "primary": "localhost:32000", "tags" : { "loc" : "dc" }
     })];
 
@@ -1265,12 +1226,6 @@ exports['Should correctly connect connect to single server replicaset and peform
     var running = true;
     var electionIds = [new ObjectId(), new ObjectId()];
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "setName": "rs", "setVersion": 1, "electionId": electionIds[0],
@@ -1280,7 +1235,7 @@ exports['Should correctly connect connect to single server replicaset and peform
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
@@ -1378,12 +1333,6 @@ exports['Should only read from secondaries when read preference secondaryPreferr
     var running = true;
     var electionIds = [new ObjectId(), new ObjectId()];
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "setName": "rs", "setVersion": 1, "electionId": electionIds[0],
@@ -1393,17 +1342,17 @@ exports['Should only read from secondaries when read preference secondaryPreferr
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
     // Primary server states
-    var secondSecondary = [extend(defaultFields, {
+    var secondSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32002", "primary": "localhost:32000", "tags" : { "loc" : "dc" }
     })];
 
@@ -1503,7 +1452,7 @@ exports['Should only read from secondaries when read preference secondaryPreferr
                 firstSecondaryServer.destroy();
                 secondSecondaryServer.destroy();
                 server.destroy();
-                running = false; 
+                running = false;
 
                 setTimeout(function() {
                   test.done();

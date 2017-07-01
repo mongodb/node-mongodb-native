@@ -1,4 +1,5 @@
 "use strict";
+var assign = require('../../../../lib/utils').assign;
 
 // SCENARIO
 // ------------------------------------------------------------------
@@ -6,20 +7,6 @@
 // 2. Continuously streaming Query using find
 // 3. Step down primary and re-elect new primary before query finishes.
 // 4. No disconnected servers detected (new primary never detected).
-
-// Extend the object
-var extend = function(template, fields) {
-  var object = {};
-  for(var name in template) {
-    object[name] = template[name];
-  }
-
-  for(var name in fields) {
-   object[name] = fields[name];
-  }
-
-  return object;
-}
 
 // exports['Successfully finish query executing against secondary during primary stepDown'] = {
 //   metadata: {
@@ -65,25 +52,25 @@ var extend = function(template, fields) {
 //     }
 
 //     // Primary server states
-//     var primary = [extend(defaultFields, {
+//     var primary = [assign({}, defaultFields, {
 //       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
-//     }), extend(defaultFields, {
+//     }), assign({}, defaultFields, {
 //       "ismaster":false, "secondary":true, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
-//     }), extend(defaultFields, {
+//     }), assign({}, defaultFields, {
 //       "ismaster":false, "secondary":true, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
 //     })];
 
 //     // Primary server states
-//     var firstSecondary = [extend(defaultFields, {
+//     var firstSecondary = [assign({}, defaultFields, {
 //       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
-//     }), extend(defaultFields, {
+//     }), assign({}, defaultFields, {
 //       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
-//     }), extend(defaultFields, {
+//     }), assign({}, defaultFields, {
 //       "ismaster":true, "secondary":false, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
 //     })];
 
 //     // Primary server states
-//     var arbiter = [extend(defaultFields, {
+//     var arbiter = [assign({}, defaultFields, {
 //       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
 //     })];
 

@@ -1,18 +1,5 @@
 "use strict";
-
-// Extend the object
-var extend = function(template, fields) {
-  var object = {};
-  for(var name in template) {
-    object[name] = template[name];
-  }
-
-  for(var name in fields) {
-   object[name] = fields[name];
-  }
-
-  return object;
-}
+var assign = require('../../../../lib/utils').assign;
 
 exports['Successfully add a new secondary server to the set'] = {
   metadata: {
@@ -48,31 +35,31 @@ exports['Successfully add a new secondary server to the set'] = {
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
-    }), extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" },
       "hosts": ["localhost:32000", "localhost:32001", "localhost:32002", "localhost:32003"], "setVersion": 2
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
-    }), extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" },
       "hosts": ["localhost:32000", "localhost:32001", "localhost:32002", "localhost:32003"], "setVersion": 2
     })];
 
     // Primary server states
-    var secondSecondary = [extend(defaultFields, {
+    var secondSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32003", "primary": "localhost:32000", "tags" : { "loc" : "sf" },
       "hosts": ["localhost:32000", "localhost:32001", "localhost:32002", "localhost:32003"], "setVersion": 2
     })];
 
     // Primary server states
-    var arbiter = [extend(defaultFields, {
+    var arbiter = [assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
-    }),extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000",
       "hosts": ["localhost:32000", "localhost:32001", "localhost:32002", "localhost:32003"], "setVersion": 2
     })];
@@ -240,23 +227,23 @@ exports['Successfully remove a secondary server from the set'] = {
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
-    }), extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" },
       "hosts": ["localhost:32000", "localhost:32001", "localhost:32002"], "setVersion": 2
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
-    }), extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" },
       "hosts": ["localhost:32000", "localhost:32001", "localhost:32002"], "setVersion": 2
     })];
 
     // Primary server states
-    var secondSecondary = [extend(defaultFields, {
+    var secondSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32003", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     }), { "ismaster" : true,
       "maxBsonObjectSize" : 16777216, "maxMessageSizeBytes" : 48000000,
@@ -265,9 +252,9 @@ exports['Successfully remove a secondary server from the set'] = {
     }];
 
     // Primary server states
-    var arbiter = [extend(defaultFields, {
+    var arbiter = [assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
-    }),extend(defaultFields, {
+    }),assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000",
       "hosts": ["localhost:32000", "localhost:32001", "localhost:32002"], "setVersion": 2
     })];
@@ -462,43 +449,43 @@ exports['Successfully remove and re-add secondary server to the set'] = {
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
-    }), extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" },
       "hosts": ["localhost:32000", "localhost:32001", "localhost:32002"], "setVersion": 2
-    }), extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
-    }), extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" },
       "hosts": ["localhost:32000", "localhost:32001", "localhost:32002"], "setVersion": 2
-    }), extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
     // Primary server states
-    var secondSecondary = [extend(defaultFields, {
+    var secondSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32003", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     }), { "ismaster" : true,
       "maxBsonObjectSize" : 16777216, "maxMessageSizeBytes" : 48000000,
       "maxWriteBatchSize" : 1000, "localTime" : new Date(), "maxWireVersion" : 3,
       "minWireVersion" : 0, "ok" : 1
-    }, extend(defaultFields, {
+    }, assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32003", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
     // Primary server states
-    var arbiter = [extend(defaultFields, {
+    var arbiter = [assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
-    }),extend(defaultFields, {
+    }),assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000",
       "hosts": ["localhost:32000", "localhost:32001", "localhost:32002"], "setVersion": 2
-    }), extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
     })];
 
@@ -698,31 +685,31 @@ exports['Successfully add a new secondary server to the set and ensure ha Monito
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
-    }), extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" },
       "hosts": ["localhost:32000", "localhost:32001", "localhost:32002", "localhost:32003"], "setVersion": 2
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
-    }), extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" },
       "hosts": ["localhost:32000", "localhost:32001", "localhost:32002", "localhost:32003"], "setVersion": 2
     })];
 
     // Primary server states
-    var secondSecondary = [extend(defaultFields, {
+    var secondSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32003", "primary": "localhost:32000", "tags" : { "loc" : "sf" },
       "hosts": ["localhost:32000", "localhost:32001", "localhost:32002", "localhost:32003"], "setVersion": 2
     })];
 
     // Primary server states
-    var arbiter = [extend(defaultFields, {
+    var arbiter = [assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
-    }),extend(defaultFields, {
+    }),assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000",
       "hosts": ["localhost:32000", "localhost:32001", "localhost:32002", "localhost:32003"], "setVersion": 2
     })];

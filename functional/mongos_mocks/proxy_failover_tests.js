@@ -1,3 +1,6 @@
+"use strict";
+var assign = require('../../../../lib/utils').assign;
+
 var timeoutPromise = function(timeout) {
   return new Promise(function(resolve, reject) {
     setTimeout(function() {
@@ -29,12 +32,6 @@ exports['Should correctly failover due to proxy going away causing timeout'] = {
     // Primary stop responding
     var stopRespondingPrimary = false;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
@@ -49,7 +46,7 @@ exports['Should correctly failover due to proxy going away causing timeout'] = {
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultFields, {})];
+    var serverIsMaster = [ assign({}, defaultFields) ];
     // Boot the mock
     co(function*() {
       mongos1 = yield mockupdb.createServer(52007, 'localhost');
@@ -91,7 +88,6 @@ exports['Should correctly failover due to proxy going away causing timeout'] = {
       // Start dropping the packets
       setTimeout(function() {
         stopRespondingPrimary = true;
-        currentIsMasterState = 1;
       }, 5000);
     }).catch(function(err) {
     });
@@ -154,12 +150,6 @@ exports['Should correctly bring back proxy and use it'] = {
     // Primary stop responding
     var stopRespondingPrimary = false;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
@@ -174,7 +164,7 @@ exports['Should correctly bring back proxy and use it'] = {
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultFields, {})];
+    var serverIsMaster = [ assign({}, defaultFields) ];
     // Boot the mock
     co(function*() {
       mongos1 = yield mockupdb.createServer(52009, 'localhost');
@@ -218,7 +208,6 @@ exports['Should correctly bring back proxy and use it'] = {
       // Start dropping the packets
       setTimeout(function() {
         stopRespondingPrimary = true;
-        currentIsMasterState = 1;
       }, 5000);
     }).catch(function(err) {
     });
@@ -308,12 +297,6 @@ exports['Should correctly bring back both proxies and use it'] = {
     // Primary stop responding
     var stopRespondingPrimary = false;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
@@ -328,7 +311,7 @@ exports['Should correctly bring back both proxies and use it'] = {
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultFields, {})];
+    var serverIsMaster = [ assign({}, defaultFields) ];
     // Boot the mock
     co(function*() {
       mongos1 = yield mockupdb.createServer(52011, 'localhost');
@@ -375,7 +358,6 @@ exports['Should correctly bring back both proxies and use it'] = {
       // Start dropping the packets
       setTimeout(function() {
         stopRespondingPrimary = true;
-        currentIsMasterState = 1;
       }, 1000);
     }).catch(function(err) {
     });

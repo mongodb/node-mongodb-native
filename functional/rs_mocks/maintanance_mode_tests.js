@@ -1,18 +1,5 @@
 "use strict";
-
-// Extend the object
-var extend = function(template, fields) {
-  var object = {};
-  for(var name in template) {
-    object[name] = template[name];
-  }
-
-  for(var name in fields) {
-   object[name] = fields[name];
-  }
-
-  return object;
-}
+var assign = require('../../../../lib/utils').assign;
 
 exports['Successfully detect server in maintanance mode'] = {
   metadata: {
@@ -48,30 +35,30 @@ exports['Successfully detect server in maintanance mode'] = {
     }
 
     // Primary server states
-    var primary = [extend(defaultFields, {
+    var primary = [assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
-    }), extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
     })];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
+    var firstSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
-    }), extend(defaultFields, {
+    }), assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     })];
 
     // Primary server states
-    var secondSecondary = [extend(defaultFields, {
+    var secondSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32003", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     }), { "ismaster" : true,
       "ismaster":false, "secondary":false, "arbiterOnly": false, "me": "localhost:32003", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     }];
 
     // Primary server states
-    var arbiter = [extend(defaultFields, {
+    var arbiter = [assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
-    }),extend(defaultFields, {
+    }),assign({}, defaultFields, {
       "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
     })];
 

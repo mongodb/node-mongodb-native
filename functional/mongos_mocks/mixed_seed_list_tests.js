@@ -1,4 +1,5 @@
-"use strict"
+"use strict";
+var assign = require('../../../../lib/utils').assign;
 
 exports['Should correctly print warning when non mongos proxy passed in seed list'] = {
   metadata: {
@@ -25,12 +26,6 @@ exports['Should correctly print warning when non mongos proxy passed in seed lis
     var stopRespondingPrimary = false;
     var port = null;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
@@ -53,7 +48,7 @@ exports['Should correctly print warning when non mongos proxy passed in seed lis
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultFields, {}), extend(defaultRSFields, {})];
+    var serverIsMaster = [assign({}, defaultFields), assign({}, defaultRSFields)];
 
     // Boot the mock
     co(function*() {
@@ -152,12 +147,6 @@ exports['Should correctly print warning and error when no mongos proxies in seed
     var stopRespondingPrimary = false;
     var port = null;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultRSFields = {
       "setName": "rs", "setVersion": 1, "electionId": new ObjectId(),
@@ -167,7 +156,7 @@ exports['Should correctly print warning and error when no mongos proxies in seed
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultRSFields, {}), extend(defaultRSFields, {})];
+    var serverIsMaster = [assign({}, defaultRSFields), assign({}, defaultRSFields)];
 
     // Boot the mock
     co(function*() {
@@ -249,7 +238,7 @@ exports['Should correctly print warning and error when no mongos proxies in seed
       });
 
       setTimeout(function() { server.connect(); }, 100);
-    }).catch(function(err) {        
+    }).catch(function(err) {
     });
   }
 }

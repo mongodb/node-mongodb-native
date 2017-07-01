@@ -1,3 +1,6 @@
+"use strict";
+var assign = require('../../../../lib/utils').assign;
+
 exports['Should correctly emit sdam monitoring events for single server'] = {
   metadata: {
     requires: {
@@ -20,12 +23,6 @@ exports['Should correctly emit sdam monitoring events for single server'] = {
     // Primary stop responding
     var stopRespondingPrimary = false;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
@@ -39,7 +36,7 @@ exports['Should correctly emit sdam monitoring events for single server'] = {
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultFields, {})];
+    var serverIsMaster = [assign({}, defaultFields)];
     var timeoutPromise = function(timeout) {
       return new Promise(function(resolve, reject) {
         setTimeout(function() {
@@ -49,6 +46,7 @@ exports['Should correctly emit sdam monitoring events for single server'] = {
     }
 
     // Boot the mock
+    var __server;
     co(function*() {
       __server = yield mockupdb.createServer(37018, 'localhost');
 
@@ -193,12 +191,6 @@ exports['Should correctly emit sdam monitoring events for single server, with co
     // Primary stop responding
     var stopRespondingPrimary = false;
 
-    // Extend the object
-    var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
-      return fields;
-    }
-
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
@@ -213,7 +205,7 @@ exports['Should correctly emit sdam monitoring events for single server, with co
     }
 
     // Primary server states
-    var serverIsMaster = [extend(defaultFields, {})];
+    var serverIsMaster = [assign({}, defaultFields)];
     var timeoutPromise = function(timeout) {
       return new Promise(function(resolve, reject) {
         setTimeout(function() {
@@ -223,6 +215,7 @@ exports['Should correctly emit sdam monitoring events for single server, with co
     }
 
     // Boot the mock
+    var __server;
     co(function*() {
       __server = yield mockupdb.createServer(37008, 'localhost');
 
