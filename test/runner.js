@@ -317,6 +317,7 @@ var testFiles = [
   , '/test/functional/mongo_client_options_tests.js'
   , '/test/functional/decimal128_tests.js'
   , '/test/functional/find_and_modify_tests.js'
+  , '/test/functional/change_stream_tests.js'
   , '/test/functional/hang_tests.js',
   , '/test/functional/disconnect_handler_tests.js',
   , '/test/functional/promote_values_tests.js',
