@@ -4104,13 +4104,13 @@ exports.shouldCorrectlyUseCursorCountFunctionWithPromises = {
 }
 
 /**
- * A simple example showing the use of nextObject using a Promise.
+ * A simple example showing the use of next using a Promise.
  *
  * @example-class Cursor
- * @example-method nextObject
+ * @example-method next
  * @ignore
  */
-exports.shouldCorrectlyPerformNextObjectOnCursorWithPromises = {
+exports.shouldCorrectlyPerformNextOnCursorWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { promises:true, topology: ['single'] } },
@@ -4137,7 +4137,7 @@ exports.shouldCorrectlyPerformNextObjectOnCursorWithPromises = {
       collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(docs) {
 
         // Do normal ascending sort
-        collection.find().nextObject().then(function(item) {
+        collection.find().next().then(function(item) {
           test.equal(1, item.a);
 
           client.close();
@@ -4235,7 +4235,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunctionWithPromises = {
         var cursor = collection.find();
 
         // Fetch the first object
-        cursor.nextObject().then(function(object) {
+        cursor.next().then(function(object) {
 
           // Close the cursor, this is the same as reseting the query
           cursor.close().then(function(result) {

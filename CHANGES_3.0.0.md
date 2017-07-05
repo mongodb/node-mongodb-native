@@ -15,6 +15,7 @@ We removed the following API methods.
 - Admin.prototype.profilingLevel
 - Admin.prototype.setProfilingLevel
 - Admin.prototype.profilingInfo
+- Cursor.prototype.nextObject
 
 We've added the following API methods.
 - MongoClient.prototype.logout

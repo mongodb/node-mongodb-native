@@ -95,28 +95,6 @@ exports['should correctly execute find method using crud api'] = {
               clonedCursor.next(function(err, doc) {
                 test.equal(null, err);
                 test.equal(null, doc);
-                nextObjectMethod();
-              });
-            });
-          });
-        }
-
-        //
-        // Exercise nextObject legacy method
-        // -------------------------------------------------
-        var nextObjectMethod = function() {
-          var clonedCursor = cursor.clone();
-          clonedCursor.nextObject(function(err, doc) {
-            test.equal(null, err);
-            test.ok(doc != null);
-
-            clonedCursor.nextObject(function(err, doc) {
-              test.equal(null, err);
-              test.ok(doc != null);
-
-              clonedCursor.nextObject(function(err, doc) {
-                test.equal(null, err);
-                test.equal(null, doc);
                 streamMethod();
               });
             });
