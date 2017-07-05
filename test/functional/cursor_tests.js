@@ -342,7 +342,7 @@ exports.shouldCorrectlyExecuteSortOnCursor = {
           test.deepEqual([['a', -1]], cursor.sortValue);finished();
 
           var cursor = collection.find();
-          cursor.nextObject(function(err, doc) {
+          cursor.next(function(err, doc) {
             try {
               cursor.sort(['a']);
             } catch(err) {
@@ -350,11 +350,11 @@ exports.shouldCorrectlyExecuteSortOnCursor = {
             }
           });
 
-          collection.find().sort('a', 25).nextObject(function(err, doc) {
+          collection.find().sort('a', 25).next(function(err, doc) {
             test.equal("Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);finished();
           });
 
-          collection.find().sort(25).nextObject(function(err, doc) {
+          collection.find().sort(25).next(function(err, doc) {
             test.equal("Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]", err.message);finished();
           });
         }
@@ -584,7 +584,7 @@ exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = {
             }
 
             collection.find(function(err, cursor) {
-              cursor.nextObject(function(err, doc) {
+              cursor.next(function(err, doc) {
                 try {
                   cursor.limit(1);
                 } catch(err) {
@@ -705,7 +705,7 @@ exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = {
         }
 
         var cursor = collection.find()
-        cursor.nextObject(function(err, doc) {
+        cursor.next(function(err, doc) {
           try {
             cursor.skip(1);
           } catch(err) {
@@ -755,8 +755,8 @@ exports.shouldReturnErrorsOnIllegalBatchSizes = {
         }
 
         var cursor = collection.find();
-        cursor.nextObject(function(err, doc) {
-          cursor.nextObject(function(err, doc) {
+        cursor.next(function(err, doc) {
+          cursor.next(function(err, doc) {
             try {
               cursor.batchSize(1);
               test.ok(false);
@@ -808,13 +808,13 @@ exports.shouldCorrectlyHandleChangesInBatchSizes = {
         collection.insert(docs, configuration.writeConcernMax(), function() {
           collection.find({}, {batchSize : batchSize}, function(err, cursor) {
             //1st
-            cursor.nextObject(function(err, items) {
-              //cursor.items should contain 1 since nextObject already popped one
+            cursor.next(function(err, items) {
+              //cursor.items should contain 1 since next already popped one
               test.equal(1, cursor.bufferedCount());
               test.ok(items != null);
 
               //2nd
-              cursor.nextObject(function(err, items) {
+              cursor.next(function(err, items) {
                 test.equal(0, cursor.bufferedCount());
                 test.ok(items != null);
 
@@ -823,27 +823,27 @@ exports.shouldCorrectlyHandleChangesInBatchSizes = {
                 cursor.batchSize(batchSize);
 
                 //3rd
-                cursor.nextObject(function(err, items) {
+                cursor.next(function(err, items) {
                   test.equal(2, cursor.bufferedCount());
                   test.ok(items != null);
 
                   //4th
-                  cursor.nextObject(function(err, items) {
+                  cursor.next(function(err, items) {
                     test.equal(1, cursor.bufferedCount());
                     test.ok(items != null);
 
                     //5th
-                    cursor.nextObject(function(err, items) {
+                    cursor.next(function(err, items) {
                       test.equal(0, cursor.bufferedCount());
                       test.ok(items != null);
 
                       //6th
-                      cursor.nextObject(function(err, items) {
+                      cursor.next(function(err, items) {
                         test.equal(0, cursor.bufferedCount());
                         test.ok(items != null);
 
                         //No more
-                        cursor.nextObject(function(err, items) {
+                        cursor.next(function(err, items) {
                           test.ok(items == null);
                           test.ok(cursor.isClosed());
 
@@ -889,27 +889,27 @@ exports.shouldCorrectlyHandleBatchSize = {
         collection.insert(docs, configuration.writeConcernMax(), function() {
           collection.find({}, {batchSize : batchSize}, function(err, cursor) {
             //1st
-            cursor.nextObject(function(err, items) {
+            cursor.next(function(err, items) {
               test.equal(1, cursor.bufferedCount());
               test.ok(items != null);
 
               //2nd
-              cursor.nextObject(function(err, items) {
+              cursor.next(function(err, items) {
                 test.equal(0, cursor.bufferedCount());
                 test.ok(items != null);
 
                 //3rd
-                cursor.nextObject(function(err, items) {
+                cursor.next(function(err, items) {
                   test.equal(1, cursor.bufferedCount());
                   test.ok(items != null);
 
                   //4th
-                  cursor.nextObject(function(err, items) {
+                  cursor.next(function(err, items) {
                     test.equal(0, cursor.bufferedCount());
                     test.ok(items != null);
 
                     //No more
-                    cursor.nextObject(function(err, items) {
+                    cursor.next(function(err, items) {
                       test.ok(items == null);
                       test.ok(cursor.isClosed());
 
@@ -953,23 +953,23 @@ exports.shouldHandleWhenLimitBiggerThanBatchSize = {
         collection.insert(docs, configuration.writeConcernMax(), function() {
           var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
           //1st
-          cursor.nextObject(function(err, items) {
+          cursor.next(function(err, items) {
             test.equal(2, cursor.bufferedCount());
 
             //2nd
-            cursor.nextObject(function(err, items) {
+            cursor.next(function(err, items) {
               test.equal(1, cursor.bufferedCount());
 
               //3rd
-              cursor.nextObject(function(err, items) {
+              cursor.next(function(err, items) {
                 test.equal(0, cursor.bufferedCount());
 
                 //4th
-                cursor.nextObject(function(err, items) {
+                cursor.next(function(err, items) {
                   test.equal(null, err);
 
                   //No more
-                  cursor.nextObject(function(err, items) {
+                  cursor.next(function(err, items) {
                     test.ok(items == null);
                     test.ok(cursor.isClosed());
 
@@ -1012,15 +1012,15 @@ exports.shouldHandleLimitLessThanBatchSize = {
         collection.insert(docs, configuration.writeConcernMax(), function() {
           var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
           //1st
-          cursor.nextObject(function(err, items) {
+          cursor.next(function(err, items) {
             test.equal(1, cursor.bufferedCount());
 
             //2nd
-            cursor.nextObject(function(err, items) {
+            cursor.next(function(err, items) {
               test.equal(0, cursor.bufferedCount());
 
               //No more
-              cursor.nextObject(function(err, items) {
+              cursor.next(function(err, items) {
                 test.ok(items == null);
                 test.ok(cursor.isClosed());
 
@@ -1343,7 +1343,7 @@ exports.shouldCloseCursorAfterQueryHasBeenSent = {
       db.createCollection('test_close_after_query_sent', function(err, collection) {
         collection.insert({'a':1}, configuration.writeConcernMax(), function(err, r) {
           var cursor = collection.find({'a':1});
-          cursor.nextObject(function(err, item) {
+          cursor.next(function(err, item) {
             cursor.close(function(err, cursor) {
               test.equal(true, cursor.isClosed());
               // Let's close the db
@@ -2699,14 +2699,14 @@ exports['Should correctly handle batchSize of 2'] = {
         db.collection('should_correctly_handle_batchSize_2').find({}, {batchSize: 2}, function(error, cursor) {
           test.equal(null, err);
 
-          cursor.nextObject(function(err, obj) {
+          cursor.next(function(err, obj) {
             test.equal(null, err);
             client.close();
 
-            cursor.nextObject(function(err, obj) {
+            cursor.next(function(err, obj) {
               test.equal(null, err);
 
-              cursor.nextObject(function(err, obj) {
+              cursor.next(function(err, obj) {
                 test.ok(err != null);
                 test.done();
               });
@@ -2930,53 +2930,6 @@ exports['Should correctly apply map to next'] = {
           .batchSize(5)
           .limit(10);
         cursor.next(function(err, doc) {
-          test.equal(null, err);
-          test.equal(1, doc.a);
-
-          client.close();
-          test.done();
-        });
-      })
-    });
-  }
-}
-
-/**
- * @ignore
- * @api private
- */
-exports['Should correctly apply map to nextObject'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var docs = [];
-
-    for(var i = 0; i < 1000; i++) {
-      var d = new Date().getTime() + i*1000;
-      docs[i] = {'a':i, createdAt:new Date(d)};
-    }
-
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    client.connect(function(err, client) {
-      var db = client.db(configuration.database);
-      test.equal(null, err);
-
-      var collection = db.collection('map_nextObject');
-
-      // insert all docs
-      collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
-        test.equal(null, err);
-        var total = 0;
-
-        // Create a cursor for the content
-        var cursor = collection.find({})
-          .map(function(x) { return {a:1}; })
-          .batchSize(5)
-          .limit(10);
-        cursor.nextObject(function(err, doc) {
           test.equal(null, err);
           test.equal(1, doc.a);
 

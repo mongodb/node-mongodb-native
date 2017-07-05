@@ -4085,54 +4085,6 @@ exports.shouldCorrectlyUseCursorCountFunctionWithGenerators = {
 }
 
 /**
- * A simple example showing the use of nextObject using a Generator and the co module.
- *
- * @example-class Cursor
- * @example-method nextObject
- * @ignore
- */
-exports.shouldCorrectlyPerformNextObjectOnCursorWithGenerators = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, topology: ['single'] } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var co = require('co');
-
-    co(function*() {
-      // Connect
-      var client = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).connect();
-      var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   co = require('co');
-    // LINE   test = require('assert');
-    // LINE
-    // LINE co(function*() {
-    // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
-    // LINE   var db = client.db('test');
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Create a collection
-      var collection = db.collection('simple_next_object_collection_with_generators');
-
-      // Insert some documents we can sort on
-      yield collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax());
-
-      // Do normal ascending sort
-      var item = yield collection.find().nextObject();
-      test.equal(1, item.a);
-
-      client.close();
-      test.done();
-    });
-    // END
-  }
-}
-
-/**
  * A simple example showing the use of next and co module to iterate over cursor
  *
  * @example-class Cursor
@@ -4282,7 +4234,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunctionWithGenerators = {
       var cursor = collection.find();
 
       // Fetch the first object
-      yield cursor.nextObject();
+      yield cursor.next();
 
       // Close the cursor, this is the same as reseting the query
       yield cursor.close();

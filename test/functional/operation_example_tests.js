@@ -4868,13 +4868,13 @@ exports['Should correctly rewind and restart cursor'] = {
         // Grab a cursor using the find
         var cursor = collection.find({});
         // Fetch the first object off the cursor
-        cursor.nextObject(function(err, item) {
+        cursor.next(function(err, item) {
           test.equal(0, item.a)
           // Rewind the cursor, resetting it to point to the start of the query
           cursor.rewind();
 
           // Grab the first object again
-          cursor.nextObject(function(err, item) {
+          cursor.next(function(err, item) {
             test.equal(0, item.a)
 
             client.close();
@@ -4968,12 +4968,12 @@ exports.shouldCorrectlyPerformSimpleSorts = {
         test.equal(null, err);
 
         // Do normal ascending sort
-        collection.find().sort({'a': 1}).nextObject(function(err, item) {
+        collection.find().sort({'a': 1}).next(function(err, item) {
           test.equal(null, err);
           test.equal(1, item.a);
 
           // Do normal descending sort, with new syntax that enforces ordering of sort keys
-          collection.find().sort([['a', -1]]).nextObject(function(err, item) {
+          collection.find().sort([['a', -1]]).next(function(err, item) {
             test.equal(null, err);
             test.equal(3, item.a);
 
@@ -5068,7 +5068,7 @@ exports.shouldCorrectlyPerformSkipOnCursor = {
         test.equal(null, err);
 
         // Skip one document
-        collection.find().skip(1).nextObject(function(err, item) {
+        collection.find().skip(1).next(function(err, item) {
           test.equal(null, err);
           test.equal(2, item.a);
 
@@ -5116,54 +5116,7 @@ exports.shouldCorrectlyPerformBatchSizeOnCursor = {
         test.equal(null, err);
 
         // Do normal ascending sort
-        collection.find().batchSize(1).nextObject(function(err, item) {
-          test.equal(null, err);
-          test.equal(1, item.a);
-
-          client.close();
-          test.done();
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * A simple example showing the use of nextObject.
- *
- * @example-class Cursor
- * @example-method nextObject
- * @ignore
- */
-exports.shouldCorrectlyPerformNextObjectOnCursor = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    client.connect(function(err, client) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // REMOVE-LINE var db = client.db(configuration.database);
-    // BEGIN
-      var db = client.db(configuration.database);
-      // Create a collection
-      var collection = db.collection('simple_next_object_collection');
-
-      // Insert some documents we can sort on
-      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
-        test.equal(null, err);
-
-        // Do normal ascending sort
-        collection.find().nextObject(function(err, item) {
+        collection.find().batchSize(1).next(function(err, item) {
           test.equal(null, err);
           test.equal(1, item.a);
 
@@ -5397,7 +5350,7 @@ exports.shouldStreamDocumentsUsingTheIsCloseFunction = {
         var cursor = collection.find();
 
         // Fetch the first object
-        cursor.nextObject(function(err, object) {
+        cursor.next(function(err, object) {
           test.equal(null, err);
 
           // Close the cursor, this is the same as reseting the query
@@ -5456,7 +5409,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = {
         var cursor = collection.find();
 
         // Fetch the first object
-        cursor.nextObject(function(err, object) {
+        cursor.next(function(err, object) {
           test.equal(null, err);
 
           // Close the cursor, this is the same as reseting the query
