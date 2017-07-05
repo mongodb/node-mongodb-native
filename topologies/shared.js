@@ -64,11 +64,11 @@ function createCompressionInfo(options) {
   // Check that all supplied compressors are valid
   options.compression.compressors.forEach(function(compressor) {
     if (compressor !== 'snappy' && compressor !== 'zlib') {
-      throw new Error('compressors must be at least one of snappy or zlib')
+      throw new Error('compressors must be at least one of snappy or zlib');
     }
   })
 
-  return options.compression.compressors
+  return options.compression.compressors;
 }
 
 function clone(object) {

@@ -265,6 +265,20 @@ var eventHandler = function(self, event) {
           return;
         }
 
+        // Determine whether the server is instructing us to use a compressor
+        if (result.result && result.result.compression) {
+          for (var i = 0; i < self.s.compression.compressors.length; i++) {
+            if (result.result.compression.indexOf(self.s.compression.compressors[i]) > -1) {
+              self.s.pool.options.agreedCompressor = self.s.compression.compressors[i]
+              break;
+            }
+          }
+
+          if (self.s.compression.zlibCompressionLevel) {
+            self.s.pool.options.zlibCompressionLevel = self.s.compression.zlibCompressionLevel;
+          }
+        }
+
         // Ensure no error emitted after initial connect when reconnecting
         self.initalConnect = false;
         // Save the ismaster

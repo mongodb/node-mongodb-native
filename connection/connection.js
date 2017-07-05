@@ -7,8 +7,8 @@ var inherits = require('util').inherits
   , crypto = require('crypto')
   , f = require('util').format
   , debugOptions = require('./utils').debugOptions
-  , parseHeader = require('./utils').parseHeader
-  , compressorIDs = require('./utils').compressorIDs
+  , parseHeader = require('../wireprotocol/shared').parseHeader
+  , decompress = require('../wireprotocol/compression').decompress
   , Response = require('./commands').Response
   , MongoError = require('../error')
   , Logger = require('./logger')
@@ -82,7 +82,7 @@ var Connection = function(messageHandler, options) {
   this.host = options.host || 'localhost';
   this.family = typeof options.family == 'number' ? options.family : 4;
   this.keepAlive = typeof options.keepAlive == 'boolean' ? options.keepAlive : true;
-  this.keepAliveInitialDelay = typeof options.keepAliveInitialDelay == 'number' 
+  this.keepAliveInitialDelay = typeof options.keepAliveInitialDelay == 'number'
     ? options.keepAliveInitialDelay : 300000;
   this.noDelay = typeof options.noDelay == 'boolean' ? options.noDelay : true;
   this.connectionTimeout = typeof options.connectionTimeout == 'number'
@@ -218,23 +218,6 @@ var closeHandler = function(self) {
         , MongoError.create(f("connection %s to %s:%s closed", self.id, self.host, self.port))
         , self);
     }
-  }
-}
-
-// Decompress a message using the given compressor
-var decompress = function(compressorID, compressedData, callback) {
-  if (compressorID < 0 || compressorID > compressorIDs.length) {
-    throw new Error('Server sent message compressed using an unsupported compressor. (Received compressor ID ' + compressorID + ')');
-  }
-  switch (compressorID) {
-    case compressorIDs.snappy:
-      Snappy.uncompress(compressedData, callback);
-      break;
-    case compressorIDs.zlib:
-      zlib.inflate(compressedData, callback);
-      break;
-    default:
-      callback(null, compressedData);
   }
 }
 

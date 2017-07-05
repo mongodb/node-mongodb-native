@@ -8,7 +8,14 @@ var inherits = require('util').inherits,
   f = require('util').format,
   Query = require('./commands').Query,
   CommandResult = require('./command_result'),
-  assign = require('../utils').assign;
+  assign = require('../utils').assign,
+  Snappy = require('./utils').retrieveSnappy(),
+  zlib = require('zlib'),
+  MESSAGE_HEADER_SIZE = require('../wireprotocol/shared').MESSAGE_HEADER_SIZE,
+  opcodes = require('../wireprotocol/shared').opcodes,
+  compress = require('../wireprotocol/compression').compress,
+  compressorIDs = require('../wireprotocol/compression').compressorIDs,
+  uncompressibleCommands = require('../wireprotocol/compression').uncompressibleCommands;
 
 var MongoCR = require('../auth/mongocr')
   , X509 = require('../auth/x509')
@@ -918,6 +925,56 @@ Pool.prototype.destroy = function(force) {
   checkStatus();
 }
 
+// Prepare the buffer that Pool.prototype.write() uses to send to the server
+var serializeCommands = function(self, commands, result, callback) {
+  // Base case when there are no more commands to serialize
+  if (commands.length === 0) return callback(null, result);
+
+  // Pop off the zeroth command and serialize it
+  var thisCommand = commands.shift();
+  var originalCommandBuffer = thisCommand.toBin();
+
+  // Check whether we and the server have agreed to use a compressor
+  if (self.options.agreedCompressor && !hasUncompressibleCommands(thisCommand)) {
+    // Transform originalCommandBuffer into OP_COMPRESSED
+    var concatenatedOriginalCommandBuffer = Buffer.concat(originalCommandBuffer);
+    var messageToBeCompressed = concatenatedOriginalCommandBuffer.slice(MESSAGE_HEADER_SIZE);
+
+    // Extract information needed for OP_COMPRESSED from the uncompressed message
+    var originalCommandOpCode = concatenatedOriginalCommandBuffer.readInt32LE(12);
+
+    // Compress the message body
+    compress(self, messageToBeCompressed, function(err, compressedMessage) {
+      if (err) return callback(err, null);
+
+      // Create the msgHeader of OP_COMPRESSED
+      var msgHeader = new Buffer(MESSAGE_HEADER_SIZE);
+      msgHeader.writeInt32LE(MESSAGE_HEADER_SIZE + 9 + compressedMessage.length, 0); // messageLength
+      msgHeader.writeInt32LE(thisCommand.requestId, 4); // requestID
+      msgHeader.writeInt32LE(0, 8); // responseTo (zero)
+      msgHeader.writeInt32LE(opcodes.OP_COMPRESSED, 12); // opCode
+
+      // Create the compression details of OP_COMPRESSED
+      var compressionDetails = new Buffer(9);
+      compressionDetails.writeInt32LE(originalCommandOpCode, 0); // originalOpcode
+      compressionDetails.writeInt32LE(messageToBeCompressed.length, 4); // Size of the uncompressed compressedMessage, excluding the MsgHeader
+      compressionDetails.writeUInt8(compressorIDs[self.options.agreedCompressor], 8); // compressorID
+
+      // Push the concatenation of the OP_COMPRESSED message onto results
+      result.push(Buffer.concat([msgHeader, compressionDetails, compressedMessage]));
+
+      // Continue recursing through the commands array
+      serializeCommands(self, commands, result, callback);
+    })
+  } else {
+    // Push the serialization of the command onto results
+    result.push(originalCommandBuffer);
+
+    // Continue recursing through the commands array
+    serializeCommands(self, commands, result, callback);
+  }
+}
+
 /**
  * Write a message to MongoDB
  * @method
@@ -932,6 +989,11 @@ Pool.prototype.write = function(commands, options, cb) {
 
   // Always have options
   options = options || {};
+
+  // We need to have a callback function unless the message returns no response
+  if(!(typeof cb == 'function') && !options.noResponse) {
+    throw new MongoError('write method must provide a callback');
+  }
 
   // Pool was destroyed error out
   if(this.state == DESTROYED || this.state == DESTROYING) {
@@ -968,25 +1030,6 @@ Pool.prototype.write = function(commands, options, cb) {
     cb: cb, raw: false, promoteLongs: true, promoteValues: true, promoteBuffers: false, fullResult: false
   };
 
-  var buffer = null
-
-  if(Array.isArray(commands)) {
-    buffer = [];
-
-    for(var i = 0; i < commands.length; i++) {
-      buffer.push(commands[i].toBin());
-    }
-
-    // Get the requestId
-    operation.requestId = commands[commands.length - 1].requestId;
-  } else {
-    operation.requestId = commands.requestId;
-    buffer = commands.toBin();
-  }
-
-  // Set the buffers
-  operation.buffer = buffer;
-
   // Set the options for the parsing
   operation.promoteLongs = typeof options.promoteLongs == 'boolean' ? options.promoteLongs : true;
   operation.promoteValues = typeof options.promoteValues == 'boolean' ? options.promoteValues : true;
@@ -997,7 +1040,6 @@ Pool.prototype.write = function(commands, options, cb) {
   operation.command = typeof options.command == 'boolean' ? options.command : false;
   operation.fullResult = typeof options.fullResult == 'boolean' ? options.fullResult : false;
   operation.noResponse = typeof options.noResponse == 'boolean' ? options.noResponse : false;
-  // operation.requestId = options.requestId;
 
   // Optional per operation socketTimeout
   operation.socketTimeout = options.socketTimeout;
@@ -1007,25 +1049,45 @@ Pool.prototype.write = function(commands, options, cb) {
     operation.socketTimeout = options.socketTimeout;
   }
 
-  // We need to have a callback function unless the message returns no response
-  if(!(typeof cb == 'function') && !options.noResponse) {
-    throw new MongoError('write method must provide a callback');
+  // Ensure commands is an array
+  if (!Array.isArray(commands)) {
+    commands = [commands];
   }
 
-  // If we have a monitoring operation schedule as the very first operation
-  // Otherwise add to back of queue
-  if(options.monitoring) {
-    this.queue.unshift(operation);
-  } else {
-    this.queue.push(operation);
-  }
+  // Get the requestId
+  operation.requestId = commands[commands.length - 1].requestId;
 
-  // Attempt to execute the operation
-  if(!self.executing) {
-    process.nextTick(function() {
-      _execute(self)();
-    });
-  }
+  // Prepare the operation buffer
+  serializeCommands(self, commands, [], function(err, serializedCommands) {
+    if (err) throw err;
+
+    // Set the operation's buffer to the serialization of the commands
+    operation.buffer = serializedCommands;
+
+    // If we have a monitoring operation schedule as the very first operation
+    // Otherwise add to back of queue
+    if(options.monitoring) {
+      self.queue.unshift(operation);
+    } else {
+      self.queue.push(operation);
+    }
+
+    // Attempt to execute the operation
+    if(!self.executing) {
+      process.nextTick(function() {
+        _execute(self)();
+      });
+    }
+  })
+
+}
+
+// Return whether a command contains an uncompressible command term
+// Will return true if command contains no uncompressible command terms
+var hasUncompressibleCommands = function(command) {
+  return uncompressibleCommands.some(function(cmd) {
+    return command.query.hasOwnProperty(cmd);
+  });
 }
 
 // Remove connection method
