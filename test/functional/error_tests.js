@@ -327,7 +327,7 @@ exports.shouldCorrectlyHandleExceptionsInCursorNext = {
       var db = client.db(configuration.database);
       var col = db.collection('shouldCorrectlyHandleExceptionsInCursorNext');
       col.insert({a:1}, function(err, result) {
-        col.find().nextObject(function(err, result) {
+        col.find().next(function(err, result) {
           boom
         });
       });
