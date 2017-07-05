@@ -79,38 +79,31 @@ exports['Should correctly emit sdam monitoring events for single server'] = {
 
     // Add event listeners
     server.once('connect', function(_server) {
-      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!! connect")
       id = _server.id;
       _server.destroy({emitClose:true});
     });
 
     server.on('serverOpening', function(event) {
-      // console.log("------------- serverOpening")
       flags[0] = event;
     });
 
     server.on('serverClosed', function(event) {
-      // console.log("------------- serverClosed")
       flags[1] = event;
     });
 
     server.on('serverDescriptionChanged', function(event) {
-      // console.log("------------- serverDescriptionChanged")
       flags[2] = event;
     });
 
     server.on('topologyOpening', function(event) {
-      // console.log("------------- topologyOpening")
       flags[3] = event;
     });
 
     server.on('topologyClosed', function(event) {
-      // console.log("------------- topologyClosed")
       flags[4] = event;
     });
 
     server.on('topologyDescriptionChanged', function(event) {
-      // console.log("------------- topologyDescriptionChanged")
       flags[5] = event;
     });
 
@@ -170,7 +163,7 @@ exports['Should correctly emit sdam monitoring events for single server'] = {
       }, 100);
     });
 
-    setTimeout(function() { server.connect(); }, 100);
+    process.nextTick(function() { server.connect(); });
   }
 }
 
@@ -201,7 +194,7 @@ exports['Should correctly emit sdam monitoring events for single server, with co
       "maxWireVersion" : 3,
       "minWireVersion" : 0,
       "ok" : 1,
-      "hosts": [ "localhost:37008" ] // <-- this makes it an RSPrimary
+      "hosts": [ "a:27017", "b:27017" ] // <-- this makes it an RSPrimary
     }
 
     // Primary server states
@@ -217,12 +210,12 @@ exports['Should correctly emit sdam monitoring events for single server, with co
     // Boot the mock
     var __server;
     co(function*() {
-      __server = yield mockupdb.createServer(37008, 'localhost');
+      server = yield mockupdb.createServer(37008, 'localhost');
 
       // Primary state machine
       co(function*() {
         while(running) {
-          var request = yield __server.receive();
+          var request = yield server.receive();
 
           // Get the document
           var doc = request.document;
@@ -248,38 +241,31 @@ exports['Should correctly emit sdam monitoring events for single server, with co
 
     // Add event listeners
     server.once('connect', function(_server) {
-      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!! connect 1")
       id = _server.id;
       _server.destroy({emitClose:true});
     });
 
     server.on('serverOpening', function(event) {
-      // console.log("------------- serverOpening")
       flags[0] = event;
     });
 
     server.on('serverClosed', function(event) {
-      // console.log("------------- serverClosed")
       flags[1] = event;
     });
 
     server.on('serverDescriptionChanged', function(event) {
-      // console.log("------------- serverDescriptionChanged")
       flags[2] = event;
     });
 
     server.on('topologyOpening', function(event) {
-      // console.log("------------- topologyOpening")
       flags[3] = event;
     });
 
     server.on('topologyClosed', function(event) {
-      // console.log("------------- topologyClosed")
       flags[4] = event;
     });
 
     server.on('topologyDescriptionChanged', function(event) {
-      // console.log("------------- topologyDescriptionChanged")
       flags[5] = event;
     });
 
@@ -332,13 +318,10 @@ exports['Should correctly emit sdam monitoring events for single server, with co
             ]
           }
         }, flags[5]);
-        running = false;
-        __server.destroy();
-
         test.done();
       }, 100);
     });
 
-    setTimeout(function() { server.connect(); }, 100);
+    process.nextTick(function() { server.connect(); });
   }
 }

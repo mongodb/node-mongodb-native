@@ -1,7 +1,11 @@
 "use strict";
 
-var f = require('util').format
-  , Long = require('bson').Long;
+let f = require('util').format
+  , Long = require('bson').Long
+  , locateAuthMethod = require('./shared').locateAuthMethod
+  , executeCommand = require('./shared').executeCommand;
+
+const WIRE_PROTOCOL_COMPRESSION_SUPPORT_MIN_VERSION = 5
 
 exports['Should correctly connect server to single instance'] = {
   metadata: { requires: { topology: "single" } },
@@ -127,34 +131,32 @@ exports['Should correctly connect server to single instance and execute insert']
   }
 }
 
-exports['Should correctly connect server to single instance and execute insert (with compression if supported by the server)'] = {
-  metadata: { requires: { topology: ["single"] } },
+exports['Should correctly connect server to single instance and send an uncompressed message if an uncompressible command is specified'] = {
+  metadata: { requires: { topology: "single" } },
 
   test: function(configuration, test) {
     var Server = require('../../../lib/topologies/server')
-      , bson = require('bson');
+      , bson = require('bson')
+      , ReadPreference = configuration.require.ReadPreference;
 
     // Attempt to connect
     var server = new Server({
         host: configuration.host
       , port: configuration.port
       , bson: new bson()
-      , compression: { compressors: ['snappy'] }
+      , compression: { compressors: ['snappy', 'zlib'] }
     })
 
     // Add event listeners
     server.on('connect', function(server) {
-      server.insert('integration_tests.inserts', {a:1}, function(err, r) {
+      server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
+        if (err) {
+          console.log(err)
+        }
         test.equal(null, err);
-        test.equal(1, r.result.n);
 
-        server.insert('integration_tests.inserts', {a:1}, {ordered:false}, function(err, r) {
-          test.equal(null, err);
-          test.equal(1, r.result.n);
-
-          server.destroy();
-          test.done();
-        });
+        server.destroy();
+        test.done();
       });
     });
 
@@ -768,7 +770,7 @@ exports['Should correctly promoteValues when calling getMore on queries'] = {
         var cursor = server.cursor(ns, {
             find: ns
           , query: {}
-          , limit: 102          
+          , limit: 102
         }, {
           promoteValues: false
         });
@@ -784,6 +786,7 @@ exports['Should correctly promoteValues when calling getMore on queries'] = {
             test.equal(typeof doc.long, 'object');
             test.equal(doc.long._bsontype, 'Long');
             test.equal(typeof doc.double, 'object');
+            test.equal(doc.double._bsontype, 'Double');
 
             // Call next
             callNext(cursor);
@@ -796,5 +799,181 @@ exports['Should correctly promoteValues when calling getMore on queries'] = {
 
     // Start connection
     server.connect();
+  }
+}
+
+exports['Should error when invalid compressors are specified'] = {
+  metadata: { requires: { topology: "single" } },
+
+  test: function(configuration, test) {
+    var Server = require('../../../lib/topologies/server')
+      , bson = require('bson');
+
+    // Attempt to connect
+    try {
+      var server = new Server({
+            host: configuration.host
+          , port: configuration.port
+          , bson: new bson()
+          , compression: { compressors: ['notACompressor', 'alsoNotACompressor', 'snappy'] }
+        })
+    } catch(err) {
+      test.equal('compressors must be at least one of snappy or zlib', err.message);
+      test.done();
+    }
+  }
+}
+
+exports['Should correctly connect server specifying compression to single instance with authentication and insert documents'] = {
+  metadata: { requires: { topology: ["auth", "snappyCompression"] } },
+
+  test: function(configuration, test) {
+    var Server = require('../../../lib/topologies/server')
+      , Connection = require('../../../lib/connection/connection')
+      , bson = require('bson')
+      , Query = require('../../../lib/connection/commands').Query;
+
+
+    Connection.enableConnectionAccounting();
+
+    configuration.manager.restart(true).then(function() {
+      locateAuthMethod(configuration, function(err, method) {
+        test.equal(null, err);
+
+        // Attempt to connect
+        executeCommand(configuration, 'admin', {
+          createUser: 'root',
+          pwd: "root",
+          roles: [ { role: "root", db: "admin" } ],
+          digestPassword: true
+        }, function(err, r) {
+          var server = new Server({
+              host: configuration.host
+            , port: configuration.port
+            , bson: new bson()
+            , compression: { compressors: ['snappy', 'zlib'] }
+          });
+
+          // Add event listeners
+          server.on('connect', function(server) {
+            server.insert('integration_tests.inserts', {a:1}, function(err, r) {
+              test.equal(null, err);
+              test.equal(1, r.result.n);
+
+              server.insert('integration_tests.inserts', {a:1}, {ordered:false}, function(err, r) {
+                test.equal(null, err);
+                test.equal(1, r.result.n);
+
+                server.destroy();
+                Connection.disableConnectionAccounting();
+                test.done();
+              });
+            });
+          });
+
+          server.connect({auth: [method, 'admin', 'root', 'root']});
+        });
+      });
+    });
+  }
+}
+
+exports['Should fail to connect server specifying compression to single instance with incorrect authentication credentials'] = {
+  metadata: { requires: { topology: ["auth", "snappyCompression"] } },
+
+  test: function(configuration, test) {
+    var Server = require('../../../lib/topologies/server')
+      , Connection = require('../../../lib/connection/connection')
+      , bson = require('bson')
+      , Query = require('../../../lib/connection/commands').Query;
+
+
+    Connection.enableConnectionAccounting();
+
+    configuration.manager.restart(true).then(function() {
+      locateAuthMethod(configuration, function(err, method) {
+        test.equal(null, err);
+
+        // Attempt to connect
+        executeCommand(configuration, 'admin', {
+          createUser: 'root',
+          pwd: "root",
+          roles: [ { role: "root", db: "admin" } ],
+          digestPassword: true
+        }, function(err, r) {
+          var server = new Server({
+              host: configuration.host
+            , port: configuration.port
+            , bson: new bson()
+            , compression: { compressors: ['snappy', 'zlib'] }
+          });
+
+          // Add event listeners
+          server.on('error', function() {
+            test.equal(0, Object.keys(Connection.connections()).length);
+            Connection.disableConnectionAccounting();
+            test.done();
+          });
+
+          server.connect({auth: [method, 'admin', 'root2', 'root']});
+        });
+      });
+    });
+  }
+}
+
+exports['Should correctly connect server to single instance and execute insert with snappy compression if supported by the server'] = {
+  metadata: { requires: { topology: ["single", "snappyCompression"] } },
+
+  test: function(configuration, test) {
+    var Server = require('../../../lib/topologies/server')
+      , bson = require('bson');
+
+    // Attempt to connect to server
+    var server = new Server({
+        host: configuration.host
+      , port: configuration.port
+      , bson: new bson()
+      , compression: {
+          compressors: ['snappy', 'zlib']
+        }
+    })
+
+    // Add event listeners
+    server.on('connect', function(server) {
+      let envShouldSupportCompression = configuration.manager.options.networkMessageCompressors == 'snappy' && server.ismaster.maxWireVersion >= WIRE_PROTOCOL_COMPRESSION_SUPPORT_MIN_VERSION;
+
+      // Check compression has been negotiated
+      if (envShouldSupportCompression) {
+        test.equal('snappy', server.s.pool.options.agreedCompressor);
+      }
+
+      server.insert('integration_tests.inserts', {a:1}, function(err, r) {
+        test.equal(null, err);
+        test.equal(1, r.result.n);
+        if (envShouldSupportCompression) {
+          test.equal(true, r.message.fromCompressed);
+        } else {
+          test.equal(true, r.message.fromCompressed == false || r.message.fromCompressed == undefined);
+        }
+
+        server.insert('integration_tests.inserts', {a:2}, {ordered:false}, function(err, r) {
+          test.equal(null, err);
+          test.equal(1, r.result.n);
+          if (envShouldSupportCompression) {
+            test.equal(true, r.message.fromCompressed);
+          } else {
+            test.equal(true, r.message.fromCompressed == false || r.message.fromCompressed == undefined);
+          }
+
+          server.destroy();
+          test.done();
+        });
+      });
+    });
+
+    // Start connection
+    server.connect();
+
   }
 }
