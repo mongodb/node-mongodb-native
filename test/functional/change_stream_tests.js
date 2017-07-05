@@ -10,7 +10,7 @@ exports['Should create a Change Stream cursor on a database'] = {
     var MongoClient = configuration.require.MongoClient;
 
     var client = new MongoClient(configuration.url());
-    console.log('config url', configuration.url())
+    console.log('Connecting to', configuration.url())
 
     client.connect(function(err, client) {
       assert.equal(null, err);
