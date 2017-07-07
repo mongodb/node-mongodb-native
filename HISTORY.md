@@ -1,3 +1,11 @@
+2.2.30 2017-07-07
+-----------------
+* Update mongodb-core to 2.2.14
+* MongoClient
+  * add `appname` to list of valid option names
+  * added test for passing appname as option
+* NODE-1052 ensure user options are applied while parsing connection string uris
+
 2.2.29 2017-06-19
 -----------------
 * Update mongodb-core to 2.1.13
