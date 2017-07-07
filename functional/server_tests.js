@@ -675,7 +675,7 @@ exports['Should correctly connect execute 5 evals in parallel'] = {
 
           if(left == 0) {
             var total = new Date().getTime() - start;
-            test.ok(total > 5*100 && total < 1000);
+            test.ok(total >= 5*100 && total <= 1000);
 
             server.destroy();
             test.done();
