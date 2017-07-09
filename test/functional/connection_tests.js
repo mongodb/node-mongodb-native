@@ -286,6 +286,14 @@ exports.testConnectGoodAuth = {
     function restOfTest() {
       connect(configuration.url(user, password), connectionTester(test, 'testConnectGoodAuth', function(db) {
         db.close();
+        asOption();
+      }));
+    }
+
+    function asOption() {
+      var opts = { auth: { user: user, password: password } };
+      connect(configuration.url(), opts, connectionTester(test, 'testConnectGoodAuth', function(db) {
+        db.close();
         test.done();
       }));
     }
