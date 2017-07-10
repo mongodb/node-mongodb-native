@@ -12,9 +12,7 @@ exports['Should create a Change Stream on a database and emit change events'] = 
 
   // The actual test we wish to run
   test: function(configuration, test) {
-
     var MongoClient = configuration.require.MongoClient;
-
     var client = new MongoClient(configuration.url());
 
     client.connect(function(err, client) {
@@ -134,7 +132,6 @@ exports['Should create a Change Stream on a collection and emit change events'] 
   test: function(configuration, test) {
 
     var MongoClient = configuration.require.MongoClient;
-
     var client = new MongoClient(configuration.url());
 
     client.connect(function(err, client) {
