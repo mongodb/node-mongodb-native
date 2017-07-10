@@ -14,6 +14,7 @@
   ],
   "dependencies": {
     "es6-promise": "3.2.1",
+    "mongodb-core": "2.1.12",
     "mongodb-core": "christkv/mongodb-core#3.0.0",
     "readable-stream": "2.2.7"
   },
@@ -23,6 +24,7 @@
     "bluebird": "3.4.6",
     "bson": "latest",
     "cli-table": "^0.3.1",
+    "co": "4.6.0",
     "colors": "^1.1.2",
     "coveralls": "^2.11.6",
     "eslint": "^3.8.1",
