@@ -7,7 +7,7 @@ var pipeline = [
   { $addFields: { "comment": "The documentKey field has been projected out of this document." } }
 ];
 
-exports['Should create a Change Stream cursor on a database and emit change events'] = {
+exports['Should create a Change Stream on a database and emit change events'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
@@ -43,7 +43,7 @@ exports['Should create a Change Stream cursor on a database and emit change even
             assert.equal(null, err);
             setTimeout(function() {
               test.done();
-            }, 2000);
+            }, 1100);
           });
         });
 
@@ -61,7 +61,7 @@ exports['Should create a Change Stream cursor on a database and emit change even
   }
 };
 
-exports['Should create a Change Stream cursor on a database and get change events through imperative callback form'] = {
+exports['Should create a Change Stream on a database and get change events through imperative callback form'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
@@ -77,38 +77,225 @@ exports['Should create a Change Stream cursor on a database and get change event
       var thisChangeStream = theDatabase.changes(pipeline);
 
       // Trigger the first database event
-      theDatabase.collection('docs').insert({b:2},{j:true}, function (err, result) {
+      theDatabase.collection('docs').insert({b:2}, function (err, result) {
         assert.equal(null, err);
         assert.equal(result.insertedCount, 1);
 
-        // Fetch the change notification
-        thisChangeStream.hasNext(function(err, hasNext) {
-          assert.equal(null, err);
-          assert.equal(true, hasNext);
-          thisChangeStream.next(function(err, changeNotification) {
+        setTimeout(function() {
+          // Fetch the change notification
+          thisChangeStream.hasNext(function(err, hasNext) {
             assert.equal(null, err);
-            assert.equal(changeNotification.operationType, 'insert');
-            assert.equal(changeNotification.newDocument.b, 2);
-            assert.equal(changeNotification.ns.db, 'integration_tests');
-            assert.equal(changeNotification.ns.coll, 'docs');
-            assert.ok(!(changeNotification.documentKey));
-            assert.equal(changeNotification.comment, 'The documentKey field has been projected out of this document.');
-
-            // Trigger the second database event
-            theDatabase.collection('docs').update({b:2}, {$inc: {b:2}}, function (err) {
+            assert.equal(true, hasNext);
+            thisChangeStream.next(function(err, changeNotification) {
               assert.equal(null, err);
-              thisChangeStream.hasNext(function(err, hasNext) {
-                assert.equal(null, err);
-                assert.equal(true, hasNext);
-                thisChangeStream.next(function(err, changeNotification) {
-                  assert.equal(null, err);
-                  assert.equal(changeNotification.operationType, 'update');
-                  // Close the cursor
-                  thisChangeStream.close(function(err) {
-                    assert.equal(null, err);
+              assert.equal(changeNotification.operationType, 'insert');
+              assert.equal(changeNotification.newDocument.b, 2);
+              assert.equal(changeNotification.ns.db, 'integration_tests');
+              assert.equal(changeNotification.ns.coll, 'docs');
+              assert.ok(!(changeNotification.documentKey));
+              assert.equal(changeNotification.comment, 'The documentKey field has been projected out of this document.');
 
+              // Trigger the second database event
+              theDatabase.collection('docs').update({b:2}, {$inc: {b:2}}, function (err) {
+                assert.equal(null, err);
+                thisChangeStream.hasNext(function(err, hasNext) {
+                  assert.equal(null, err);
+                  assert.equal(true, hasNext);
+                  thisChangeStream.next(function(err, changeNotification) {
+                    assert.equal(null, err);
+                    assert.equal(changeNotification.operationType, 'update');
                     // Close the cursor
                     thisChangeStream.close(function(err) {
+                      assert.equal(null, err);
+
+                      // Close the cursor
+                      thisChangeStream.close(function(err) {
+                        assert.equal(null, err);
+                        setTimeout(function() {
+                          test.done();
+                        }, 1100);
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        }, 200);
+      });
+    });
+  }
+};
+
+exports['Should create a Change Stream on a collection and emit change events'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+
+    var MongoClient = configuration.require.MongoClient;
+
+    var client = new MongoClient(configuration.url());
+
+    client.connect(function(err, client) {
+      assert.equal(null, err);
+
+      var theCollection = client.db('integration_tests').collection('docs');
+
+      var thisChangeStream = theCollection.changes(pipeline);
+
+      // Attach first event listener
+      thisChangeStream.once('change', function(changeNotification) {
+        assert.equal(changeNotification.operationType, 'insert');
+        assert.equal(changeNotification.newDocument.d, 4);
+        assert.equal(changeNotification.ns.db, 'integration_tests');
+        assert.equal(changeNotification.ns.coll, 'docs');
+        assert.ok(!(changeNotification.documentKey));
+        assert.equal(changeNotification.comment, 'The documentKey field has been projected out of this document.');
+
+        // Attach second event listener
+        thisChangeStream.once('change', function(changeNotification) {
+          assert.equal(changeNotification.operationType, 'update');
+          assert.equal(changeNotification.updateDescription.updatedFields.d, 6);
+
+          // Close the cursor
+          thisChangeStream.close(function(err) {
+            assert.equal(null, err);
+            setTimeout(function() {
+              test.done();
+            }, 1100);
+          });
+        });
+
+        // Trigger the second database event
+        theCollection.update({d:4}, {$inc: {d:2}}, function (err) {
+          assert.equal(null, err);
+        });
+      });
+
+      // Trigger the first database event
+      theCollection.insert({d:4}, function (err) {
+        assert.equal(null, err);
+      });
+    });
+  }
+};
+
+exports['Should create a Change Stream on a collection and get change events through imperative callback form'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var client = new MongoClient(configuration.url());
+
+    client.connect(function(err, client) {
+      assert.equal(null, err);
+
+      var theCollection = client.db('integration_tests').collection('docs');
+
+      var thisChangeStream = theCollection.changes(pipeline);
+
+      // Trigger the first database event
+      theCollection.insert({e:5}, function (err, result) {
+        assert.equal(null, err);
+        assert.equal(result.insertedCount, 1);
+
+        setTimeout(function() {
+          // Fetch the change notification
+          thisChangeStream.hasNext(function(err, hasNext) {
+            assert.equal(null, err);
+            assert.equal(true, hasNext);
+            thisChangeStream.next(function(err, changeNotification) {
+              assert.equal(null, err);
+              assert.equal(changeNotification.operationType, 'insert');
+              assert.equal(changeNotification.newDocument.e, 5);
+              assert.equal(changeNotification.ns.db, 'integration_tests');
+              assert.equal(changeNotification.ns.coll, 'docs');
+              assert.ok(!(changeNotification.documentKey));
+              assert.equal(changeNotification.comment, 'The documentKey field has been projected out of this document.');
+
+              // Trigger the second database event
+              theCollection.update({e:5}, {$inc: {e:2}}, function (err) {
+                assert.equal(null, err);
+                thisChangeStream.hasNext(function(err, hasNext) {
+                  assert.equal(null, err);
+                  assert.equal(true, hasNext);
+                  thisChangeStream.next(function(err, changeNotification) {
+                    assert.equal(null, err);
+                    assert.equal(changeNotification.operationType, 'update');
+                    // Close the cursor
+                    thisChangeStream.close(function(err) {
+                      assert.equal(null, err);
+
+                      // Close the cursor
+                      thisChangeStream.close(function(err) {
+                        assert.equal(null, err);
+                        setTimeout(function() {
+                          test.done();
+                        }, 1100);
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        }, 200);
+      });
+    });
+  }
+};
+
+exports['Should support creating multiple Change Streams of the same database'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var client = new MongoClient(configuration.url());
+
+    client.connect(function(err, client) {
+      assert.equal(null, err);
+
+      var theDatabase = client.db('integration_tests');
+
+      var thisChangeStream1 = theDatabase.changes([{ $addFields: { "changeStreamNumber": 1 } }]);
+      var thisChangeStream2 = theDatabase.changes([{ $addFields: { "changeStreamNumber": 2 } }]);
+
+      theDatabase.collection('docs').insert({c:3}, {w:"majority", j:true}, function (err, result) {
+        assert.equal(null, err);
+        assert.equal(result.insertedCount, 1);
+
+        setTimeout(function() {
+          // Fetch the change notification from the first Change Stream
+          thisChangeStream1.hasNext(function(err, hasNext) {
+            assert.equal(null, err);
+            assert.equal(true, hasNext);
+            thisChangeStream1.next(function(err, changeNotification) {
+              assert.equal(null, err);
+              assert.equal(changeNotification.operationType, 'insert');
+              assert.equal(changeNotification.newDocument.c, 3);
+              assert.equal(changeNotification.ns.db, 'integration_tests');
+              assert.equal(changeNotification.ns.coll, 'docs');
+              assert.equal(changeNotification.changeStreamNumber, 1);
+
+              // Fetch the change notification from the second Change Stream
+              thisChangeStream2.hasNext(function(err, hasNext) {
+                assert.equal(null, err);
+                assert.equal(true, hasNext);
+                thisChangeStream2.next(function(err, changeNotification) {
+                  assert.equal(null, err);
+                  assert.equal(changeNotification.operationType, 'insert');
+                  assert.equal(changeNotification.newDocument.c, 3);
+                  assert.equal(changeNotification.ns.db, 'integration_tests');
+                  assert.equal(changeNotification.ns.coll, 'docs');
+                  assert.equal(changeNotification.changeStreamNumber, 2);
+
+                  // Close the cursors
+                  thisChangeStream1.close(function(err) {
+                    assert.equal(null, err);
+                    thisChangeStream2.close(function(err) {
                       assert.equal(null, err);
                       setTimeout(function() {
                         test.done();
@@ -119,7 +306,7 @@ exports['Should create a Change Stream cursor on a database and get change event
               });
             });
           });
-        });
+        }, 200);
       });
     });
   }
