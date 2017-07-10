@@ -312,6 +312,48 @@ exports['Should support creating multiple Change Streams of the same database'] 
   }
 };
 
+exports['Should properly close Change Stream cursor'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+
+    var MongoClient = configuration.require.MongoClient;
+    var client = new MongoClient(configuration.url());
+
+    client.connect(function(err, client) {
+      assert.equal(null, err);
+
+      var theDatabase = client.db('integration_tests');
+
+      var thisChangeStream = theDatabase.changes(pipeline);
+
+      // Attach first event listener
+      thisChangeStream.once('change', function(changeNotification) {
+        assert.equal(changeNotification.operationType, 'insert');
+
+        // Check the cursor is open
+        assert.equal(thisChangeStream.isClosed(), false);
+        assert.equal(thisChangeStream.cursor.isClosed(), false);
+
+        thisChangeStream.close(function(err) {
+          assert.equal(null, err);
+
+          // Check the cursor is closed
+          assert.equal(thisChangeStream.isClosed(), true);
+          assert.equal(thisChangeStream.cursor.isClosed(), true);
+          test.done();
+        });
+      });
+
+      // Trigger the first database event
+      theDatabase.collection('docs').insert({a:1}, function (err) {
+        assert.equal(null, err);
+      });
+    });
+  }
+};
+
 exports['Should error when attempting to create a Change Stream with a forbidden aggrgation pipeline stage'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
