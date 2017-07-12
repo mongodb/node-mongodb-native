@@ -488,7 +488,7 @@ exports['Should cache the change stream resume token using event listeners'] = {
   }
 };
 
-exports['Should error if resume token projected out of change stream document and disableResume is false'] = {
+exports['Should error if resume token projected out of change stream document and disableResume is false using promises'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
@@ -524,6 +524,42 @@ exports['Should error if resume token projected out of change stream document an
           });
         }, 200);
       });
+    });
+  }
+};
+
+exports['Should error if resume token projected out of change stream document and disableResume is false using event listeners'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var client = new MongoClient(configuration.url());
+    client.connect(function(err, client) {
+      assert.equal(null, err);
+
+      var theDatabase = client.db('integration_tests');
+
+      var thisChangeStream = theDatabase.changes([{$project: {_id: false}}]);
+
+      // Fetch the change notification
+      thisChangeStream.on('change', function() {
+        assert.ok(false);
+      });
+
+      thisChangeStream.on('error', function(err) {
+        assert.equal(err.message, 'A change stream document has been recieved that lacks a resume token (_id) and resumability has not been disabled for this change stream.');
+        thisChangeStream.close(function() {
+          setTimeout(test.done, 1100);
+        });
+      });
+
+      // Trigger the first database event
+      theDatabase.collection('docs').insert({b:2}, function (err, result) {
+        assert.equal(null, err);
+        assert.equal(result.insertedCount, 1);
+      });
+
     });
   }
 };
@@ -566,6 +602,95 @@ exports['Should not error if resume token projected out of change stream documen
             });
           });
         }, 200);
+      });
+    });
+  }
+};
+
+exports['Should invalidate change stream on collection rename using event listeners'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var client = new MongoClient(configuration.url());
+
+    client.connect(function(err, client) {
+      assert.equal(null, err);
+
+      var theDatabase = client.db('integration_tests');
+
+      var thisChangeStream = theDatabase.changes(pipeline);
+
+      // Attach first event listener
+      thisChangeStream.once('change', function(changeNotification) {
+        assert.equal(changeNotification.operationType, 'insert');
+        assert.equal(changeNotification.newDocument.a, 1);
+        assert.equal(changeNotification.ns.db, 'integration_tests');
+        assert.equal(changeNotification.ns.coll, 'docs');
+        assert.ok(!(changeNotification.documentKey));
+        assert.equal(changeNotification.comment, 'The documentKey field has been projected out of this document.');
+
+        // Attach second event listener
+        thisChangeStream.once('change', function(changeNotification) {
+          // Check the cursor invalidation has occured
+          assert.equal(changeNotification.operationType, 'invalidate');
+          assert.equal(thisChangeStream.isClosed(), true);
+
+          setTimeout(test.done, 1100);
+        });
+
+        // Trigger the second database event
+        theDatabase.collection('docs').rename('renamedDocs', {dropTarget: true}, function (err) {
+          assert.equal(null, err);
+        });
+      });
+
+      // Trigger the first database event
+      theDatabase.collection('docs').insert({a:1}, function (err) {
+        assert.equal(null, err);
+      });
+    });
+  }
+};
+exports['Should invalidate change stream on database drop using imperative callback from'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var client = new MongoClient(configuration.url());
+
+    client.connect(function(err, client) {
+      assert.equal(null, err);
+
+      var theDatabase = client.db('integration_tests');
+
+      var thisChangeStream = theDatabase.changes(pipeline);
+
+      // Trigger the first database event
+      theDatabase.collection('docs').insert({a:1}, function (err) {
+        assert.equal(null, err);
+
+        thisChangeStream.next(function(err, change) {
+          assert.equal(null, err);
+          assert.equal(change.operationType, 'insert');
+
+          theDatabase.dropDatabase(function(err) {
+            assert.equal(null, err);
+
+            thisChangeStream.next(function(err, change) {
+              assert.equal(null, err);
+
+              // Check the cursor invalidation has occured
+              assert.equal(change.operationType, 'invalidate');
+              assert.equal(thisChangeStream.isClosed(), true);
+
+              setTimeout(test.done, 1100);
+
+            });
+          });
+        });
       });
     });
   }
