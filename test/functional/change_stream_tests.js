@@ -24,7 +24,6 @@ exports['Should create a Change Stream on a database and emit change events'] = 
 
       // Attach first event listener
       thisChangeStream.once('change', function(changeNotification) {
-        console.log(changeNotification)
         assert.equal(changeNotification.operationType, 'insert');
         assert.equal(changeNotification.newDocument.a, 1);
         assert.equal(changeNotification.ns.db, 'integration_tests');
@@ -478,7 +477,7 @@ exports['Should cache the change stream resume token using event listeners'] = {
             test.done();
           }, 1100);
         });
-      })
+      });
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({b:2}, function (err, result) {
@@ -556,8 +555,8 @@ exports['Should not error if resume token projected out of change stream documen
             thisChangeStream.next(function(err, doc) {
               assert.equal(err, null);
               assert.equal(doc._id, null);
-              assert.equal(doc.operationType, 'insert')
-              
+              assert.equal(doc.operationType, 'insert');
+
               // Close the change stream
               thisChangeStream.close().then(function() {
                 setTimeout(function() {
