@@ -488,7 +488,7 @@ exports['Should cache the change stream resume token using event listeners'] = {
   }
 };
 
-exports['Should error if resume token projected out of change stream document and disableResume is false using promises'] = {
+exports['Should error if resume token projected out of change stream document and disableResume is false using imperative callback form'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
@@ -506,13 +506,13 @@ exports['Should error if resume token projected out of change stream document an
       theDatabase.collection('docs').insert({b:2}, function (err, result) {
         assert.equal(null, err);
         assert.equal(result.insertedCount, 1);
-
         setTimeout(function() {
           // Fetch the change notification
           thisChangeStream.hasNext(function(err, hasNext) {
             assert.equal(null, err);
             assert.equal(true, hasNext);
             thisChangeStream.next(function(err) {
+              assert.ok(err);
               assert.equal(err.message, 'A change stream document has been recieved that lacks a resume token (_id) and resumability has not been disabled for this change stream.');
               // Close the change stream
               thisChangeStream.close().then(function() {
@@ -653,7 +653,8 @@ exports['Should invalidate change stream on collection rename using event listen
     });
   }
 };
-exports['Should invalidate change stream on database drop using imperative callback from'] = {
+
+exports['Should invalidate change stream on database drop using imperative callback form'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
@@ -692,6 +693,67 @@ exports['Should invalidate change stream on database drop using imperative callb
           });
         });
       });
+    });
+  }
+};
+
+exports['Should resume connection when a MongoNetworkError is encountered'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var client = new MongoClient(configuration.url(), {
+      connectTimeoutMS: 10,
+      loggerLevel: "warn"
+    });
+
+    client.connect(function(err, client) {
+      assert.equal(null, err);
+
+      var theDatabase = client.db('integration_tests');
+
+      var thisChangeStream = theDatabase.changes(pipeline);
+      thisChangeStream.cursor.initialCursor = true;
+
+      // Insert three documents in order, the second of which will cause the simulator to trigger a MongoNetworkError
+      theDatabase.collection('docs').insertOne({a: 1}).then(function() {
+        return theDatabase.collection('docs').insertOne({shouldThrowMongoNetworkError: true});
+      }).then(function() {
+        return theDatabase.collection('docs').insertOne({b: 2});
+      }).then(function() {
+        return thisChangeStream.next();
+      }).then(function(change) {
+        // Check the cursor is the initial cursor
+        assert.equal(thisChangeStream.cursor.initialCursor, true);
+
+        // Check the document is the document we are expecting
+        assert.ok(change);
+        assert.equal(change.operationType, 'insert');
+        assert.equal(change.newDocument.a, 1);
+        assert.deepEqual(thisChangeStream.resumeToken(), change._id);
+
+        // Get the next change stream document. This will cause the simulator to trigger a MongoNetworkError, and therefore attempt to reconnect
+        return thisChangeStream.next();
+      }).then(function(change) {
+        // Check a new cursor has been established
+        assert.notEqual(thisChangeStream.cursor.initialCursor, true);
+
+        // The next document should be the one after the shouldThrowMongoNetworkError document
+        assert.ok(change);
+        assert.equal(change.operationType, 'insert');
+        assert.equal(change.newDocument.b, 2);
+        assert.deepEqual(thisChangeStream.resumeToken(), change._id);
+
+        // Close the change stream
+        thisChangeStream.close(function(err) {
+          assert.equal(err, null);
+          setTimeout(test.done, 1100);
+        });
+      }).catch(function(err) {
+        throw err;
+      });
+
     });
   }
 };
