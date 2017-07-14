@@ -121,6 +121,57 @@ exports['Should create a Change Stream on a database and get change events throu
   }
 };
 
+exports['Should create a Change Stream on a database and get change events through promises'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var client = new MongoClient(configuration.url());
+
+    client.connect(function(err, client) {
+      assert.equal(null, err);
+
+      var theDatabase = client.db('integration_tests');
+
+      var thisChangeStream = theDatabase.changes(pipeline);
+
+      // Trigger the first database event
+      theDatabase.collection('docs').insert({b:2}).then(function (result) {
+        assert.equal(result.insertedCount, 1);
+
+        // Fetch the change notification
+        return thisChangeStream.hasNext();
+      }).then(function(hasNext) {
+        assert.equal(true, hasNext);
+        return thisChangeStream.next();
+      }).then(function(changeNotification) {
+        assert.equal(changeNotification.operationType, 'insert');
+        assert.equal(changeNotification.newDocument.b, 2);
+        assert.equal(changeNotification.ns.db, 'integration_tests');
+        assert.equal(changeNotification.ns.coll, 'docs');
+        assert.ok(!(changeNotification.documentKey));
+        assert.equal(changeNotification.comment, 'The documentKey field has been projected out of this document.');
+
+        // Trigger the second database event
+        return theDatabase.collection('docs').update({b:2}, {$inc: {b:2}});
+      }).then(function () {
+        return thisChangeStream.hasNext();
+      }).then(function(hasNext) {
+        assert.equal(true, hasNext);
+        return thisChangeStream.next();
+      }).then(function(changeNotification) {
+        assert.equal(changeNotification.operationType, 'update');
+        return thisChangeStream.close();
+      }).then(function() {
+        setTimeout(test.done, 1100);
+      }).catch(function(err) {
+        assert.equal(err, null);
+      });
+    });
+  }
+};
+
 exports['Should create a Change Stream on a collection and emit change events'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
