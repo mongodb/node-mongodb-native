@@ -697,16 +697,13 @@ exports['Should invalidate change stream on database drop using imperative callb
   }
 };
 
-exports['Should resume connection when a MongoNetworkError is encountered'] = {
+exports['Should resume connection when a MongoNetworkError is encountered using promises'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
-    var client = new MongoClient(configuration.url(), {
-      connectTimeoutMS: 10,
-      loggerLevel: "warn"
-    });
+    var client = new MongoClient(configuration.url());
 
     client.connect(function(err, client) {
       assert.equal(null, err);
@@ -754,6 +751,66 @@ exports['Should resume connection when a MongoNetworkError is encountered'] = {
         throw err;
       });
 
+    });
+  }
+};
+exports['Should resume connection when a MongoNetworkError is encountered using imperative callback form'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var client = new MongoClient(configuration.url());
+
+    client.connect(function(err, client) {
+      assert.equal(null, err);
+
+      var theDatabase = client.db('integration_tests');
+
+      var thisChangeStream = theDatabase.changes(pipeline);
+      thisChangeStream.cursor.initialCursor = true;
+
+      // Insert three documents in order, the second of which will cause the simulator to trigger a MongoNetworkError
+      theDatabase.collection('docs').insertOne({a: 1}, function(err) {
+        assert.equal(null, err);
+        theDatabase.collection('docs').insertOne({shouldThrowMongoNetworkError: true}, function(err) {
+          assert.equal(null, err);
+          theDatabase.collection('docs').insertOne({b: 2}, function(err) {
+            assert.equal(null, err);
+            thisChangeStream.next(function(err, change) {
+              assert.equal(null, err);
+
+              // Check the cursor is the initial cursor
+              assert.equal(thisChangeStream.cursor.initialCursor, true);
+
+              // Check the document is the document we are expecting
+              assert.ok(change);
+              assert.equal(change.operationType, 'insert');
+              assert.equal(change.newDocument.a, 1);
+              assert.deepEqual(thisChangeStream.resumeToken(), change._id);
+
+              // Get the next change stream document. This will cause the simulator to trigger a MongoNetworkError, and therefore attempt to reconnect
+              thisChangeStream.next(function(err, change) {
+                assert.equal(null, err);
+                // Check a new cursor has been established
+                assert.notEqual(thisChangeStream.cursor.initialCursor, true);
+
+                // The next document should be the one after the shouldThrowMongoNetworkError document
+                assert.ok(change);
+                assert.equal(change.operationType, 'insert');
+                assert.equal(change.newDocument.b, 2);
+                assert.deepEqual(thisChangeStream.resumeToken(), change._id);
+
+                // Close the change stream
+                thisChangeStream.close(function(err) {
+                  assert.equal(err, null);
+                  setTimeout(test.done, 1100);
+                });
+              });
+            });
+          });
+        });
+      });
     });
   }
 };
