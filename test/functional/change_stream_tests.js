@@ -20,7 +20,7 @@ exports['Should create a Change Stream on a database and emit change events'] = 
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.changes(pipeline);
+      var thisChangeStream = theDatabase.watch(pipeline);
 
       // Attach first event listener
       thisChangeStream.once('change', function(changeNotification) {
@@ -72,7 +72,7 @@ exports['Should create a Change Stream on a database and get change events throu
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.changes(pipeline);
+      var thisChangeStream = theDatabase.watch(pipeline);
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({b:2}, function (err, result) {
@@ -134,7 +134,7 @@ exports['Should create a Change Stream on a database and get change events throu
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.changes(pipeline);
+      var thisChangeStream = theDatabase.watch(pipeline);
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({b:2}).then(function (result) {
@@ -190,7 +190,7 @@ exports['Should create a Change Stream on a collection and emit change events'] 
 
       var theCollection = client.db('integration_tests').collection('docs');
 
-      var thisChangeStream = theCollection.changes(pipeline);
+      var thisChangeStream = theCollection.watch(pipeline);
 
       // Attach first event listener
       thisChangeStream.once('change', function(changeNotification) {
@@ -242,7 +242,7 @@ exports['Should create a Change Stream on a collection and get change events thr
 
       var theCollection = client.db('integration_tests').collection('docs');
 
-      var thisChangeStream = theCollection.changes(pipeline);
+      var thisChangeStream = theCollection.watch(pipeline);
 
       // Trigger the first database event
       theCollection.insert({e:5}, function (err, result) {
@@ -304,8 +304,8 @@ exports['Should support creating multiple Change Streams of the same database'] 
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream1 = theDatabase.changes([{ $addFields: { "changeStreamNumber": 1 } }]);
-      var thisChangeStream2 = theDatabase.changes([{ $addFields: { "changeStreamNumber": 2 } }]);
+      var thisChangeStream1 = theDatabase.watch([{ $addFields: { "changeStreamNumber": 1 } }]);
+      var thisChangeStream2 = theDatabase.watch([{ $addFields: { "changeStreamNumber": 2 } }]);
 
       theDatabase.collection('docs').insert({c:3}, {w:"majority", j:true}, function (err, result) {
         assert.ifError(err);
@@ -322,7 +322,7 @@ exports['Should support creating multiple Change Streams of the same database'] 
               assert.equal(changeNotification.newDocument.c, 3);
               assert.equal(changeNotification.ns.db, 'integration_tests');
               assert.equal(changeNotification.ns.coll, 'docs');
-              assert.equal(changeNotification.changeStreamNumber, 1);
+              assert.equal(changeNotification.watchtreamNumber, 1);
 
               // Fetch the change notification from the second Change Stream
               thisChangeStream2.hasNext(function(err, hasNext) {
@@ -334,7 +334,7 @@ exports['Should support creating multiple Change Streams of the same database'] 
                   assert.equal(changeNotification.newDocument.c, 3);
                   assert.equal(changeNotification.ns.db, 'integration_tests');
                   assert.equal(changeNotification.ns.coll, 'docs');
-                  assert.equal(changeNotification.changeStreamNumber, 2);
+                  assert.equal(changeNotification.watchtreamNumber, 2);
 
                   // Close the change streams
                   thisChangeStream1.close(function(err) {
@@ -369,7 +369,7 @@ exports['Should properly close Change Stream cursor'] = {
       assert.ifError(err);
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.changes(pipeline);
+      var thisChangeStream = theDatabase.watch(pipeline);
 
       // Attach first event listener
       thisChangeStream.once('change', function(changeNotification) {
@@ -411,7 +411,7 @@ exports['Should error when attempting to create a Change Stream with a forbidden
       var theDatabase = client.db('integration_tests');
 
       try {
-        theDatabase.changes([{$skip: 2}]);
+        theDatabase.watch([{$skip: 2}]);
         assert.ok(false);
       } catch (e) {
         assert.equal(e.message, 'The pipeline contains the stage "$skip", which is not compatible with Change Streams at this time.');
@@ -434,7 +434,7 @@ exports['Should cache the change stream resume token using imperative callback f
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.changes(pipeline);
+      var thisChangeStream = theDatabase.watch(pipeline);
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({b:2}, function (err, result) {
@@ -479,7 +479,7 @@ exports['Should cache the change stream resume token using promises'] = {
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.changes(pipeline);
+      var thisChangeStream = theDatabase.watch(pipeline);
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({b:2}, function (err, result) {
@@ -522,7 +522,7 @@ exports['Should cache the change stream resume token using event listeners'] = {
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.changes(pipeline);
+      var thisChangeStream = theDatabase.watch(pipeline);
 
       thisChangeStream.once('change', function(changeNotification) {
         assert.deepEqual(thisChangeStream.resumeToken(), changeNotification._id);
@@ -555,7 +555,7 @@ exports['Should error if resume token projected out of change stream document an
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.changes([{$project: {_id: false}}]);
+      var thisChangeStream = theDatabase.watch([{$project: {_id: false}}]);
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({b:2}, function (err, result) {
@@ -595,7 +595,7 @@ exports['Should error if resume token projected out of change stream document an
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.changes([{$project: {_id: false}}]);
+      var thisChangeStream = theDatabase.watch([{$project: {_id: false}}]);
 
       // Fetch the change notification
       thisChangeStream.on('change', function() {
@@ -631,7 +631,7 @@ exports['Should not error if resume token projected out of change stream documen
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.changes([{$project: {_id: false}}], {disableResume: true});
+      var thisChangeStream = theDatabase.watch([{$project: {_id: false}}], {disableResume: true});
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({b:2}, function (err, result) {
@@ -675,7 +675,7 @@ exports['Should invalidate change stream on collection rename using event listen
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.changes(pipeline);
+      var thisChangeStream = theDatabase.watch(pipeline);
 
       // Attach first event listener
       thisChangeStream.once('change', function(changeNotification) {
@@ -722,7 +722,7 @@ exports['Should invalidate change stream on database drop using imperative callb
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.changes(pipeline);
+      var thisChangeStream = theDatabase.watch(pipeline);
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({a:1}, function (err) {
@@ -765,7 +765,7 @@ exports['Should invalidate change stream on collection drop using promises'] = {
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.collection('docs').changes(pipeline);
+      var thisChangeStream = theDatabase.collection('docs').watch(pipeline);
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({a:1}).then(function () {
@@ -806,7 +806,7 @@ exports['Should not invalidate change stream on entire database when collection 
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.changes(pipeline);
+      var thisChangeStream = theDatabase.watch(pipeline);
 
       // Trigger the first database event
       theDatabase.collection('aCollection').insert({a:1}).then(function () {
@@ -859,7 +859,7 @@ exports['Should resume connection when a MongoNetworkError is encountered using 
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.changes(pipeline);
+      var thisChangeStream = theDatabase.watch(pipeline);
       thisChangeStream.cursor.initialCursor = true;
 
       // Insert three documents in order, the second of which will cause the simulator to trigger a MongoNetworkError
@@ -917,7 +917,7 @@ exports['Should resume connection when a MongoNetworkError is encountered using 
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.changes(pipeline);
+      var thisChangeStream = theDatabase.watch(pipeline);
       thisChangeStream.cursor.initialCursor = true;
 
       // Insert three documents in order, the second of which will cause the simulator to trigger a MongoNetworkError
@@ -975,7 +975,7 @@ exports['Should resume from point in time using user-provided resumeAfter'] = {
 
       var theDatabase = client.db('integration_tests');
 
-      var thisFirstChangeStream = theDatabase.changes(pipeline);
+      var thisFirstChangeStream = theDatabase.watch(pipeline);
       var thisSecondChangeStream;
 
       var resumeToken;
@@ -1017,7 +1017,7 @@ exports['Should resume from point in time using user-provided resumeAfter'] = {
 
         return thisFirstChangeStream.close();
       }).then(function() {
-        thisSecondChangeStream = theDatabase.changes(pipeline, {resumeAfter: resumeToken});
+        thisSecondChangeStream = theDatabase.watch(pipeline, {resumeAfter: resumeToken});
 
         return new theDatabase.s.promiseLibrary(function (resolve) {
           setTimeout(function(){
@@ -1062,7 +1062,7 @@ exports['Should error when attempting to create a Change Stream against a stand-
       var theDatabase = client.db('integration_tests');
 
       try {
-        theDatabase.changes();
+        theDatabase.watch();
         assert.ok(false);
       } catch (e) {
         assert.equal(e.message, 'Change Stream are only supported on replica sets. The connected server does not appear to be a replica set.');
