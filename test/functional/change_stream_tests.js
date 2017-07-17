@@ -866,6 +866,91 @@ exports['Should resume connection when a MongoNetworkError is encountered using 
   }
 };
 
+exports['Should resume from point in time using user-provided resumeAfter'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var client = new MongoClient(configuration.url());
+
+    client.connect(function(err, client) {
+      assert.ifError(err);
+
+      var theDatabase = client.db('integration_tests');
+
+      var thisFirstChangeStream = theDatabase.changes(pipeline);
+      var thisSecondChangeStream;
+
+      var resumeToken;
+
+      // Trigger the first database event
+      theDatabase.collection('docs').insert({f:6}).then(function (result) {
+        assert.equal(result.insertedCount, 1);
+        return theDatabase.collection('docs').insert({g:7});
+      }).then(function (result) {
+        assert.equal(result.insertedCount, 1);
+        return theDatabase.collection('docs').insert({h:8});
+      }).then(function (result) {
+        assert.equal(result.insertedCount, 1);
+        // Fetch the change notification after a 200ms delay
+        return new theDatabase.s.promiseLibrary(function (resolve) {
+          setTimeout(function(){
+            resolve(thisFirstChangeStream.hasNext());
+          }, 200);
+        });
+      }).then(function(hasNext) {
+        assert.equal(true, hasNext);
+        return thisFirstChangeStream.next();
+      }).then(function(changeNotification) {
+        assert.equal(changeNotification.operationType, 'insert');
+        assert.equal(changeNotification.newDocument.f, 6);
+
+        // Save the resumeToken
+        resumeToken = changeNotification._id;
+
+        return thisFirstChangeStream.next();
+      }).then(function(changeNotification) {
+        assert.equal(changeNotification.operationType, 'insert');
+        assert.equal(changeNotification.newDocument.g, 7);
+
+        return thisFirstChangeStream.next();
+      }).then(function(changeNotification) {
+        assert.equal(changeNotification.operationType, 'insert');
+        assert.equal(changeNotification.newDocument.h, 8);
+
+        return thisFirstChangeStream.close();
+      }).then(function() {
+        thisSecondChangeStream = theDatabase.changes(pipeline, {resumeAfter: resumeToken});
+
+        return new theDatabase.s.promiseLibrary(function (resolve) {
+          setTimeout(function(){
+            resolve(thisSecondChangeStream.hasNext());
+          }, 200);
+        });
+
+      }).then(function(hasNext) {
+        assert.equal(true, hasNext);
+        return thisSecondChangeStream.next();
+      }).then(function(changeNotification) {
+        assert.equal(changeNotification.operationType, 'insert');
+        assert.equal(changeNotification.newDocument.g, 7);
+
+        return thisSecondChangeStream.next();
+      }).then(function(changeNotification) {
+        assert.equal(changeNotification.operationType, 'insert');
+        assert.equal(changeNotification.newDocument.h, 8);
+
+        return thisSecondChangeStream.close();
+      }).then(function() {
+        setTimeout(test.done, 1100);
+      }).catch(function(err) {
+        assert.ifError(err);
+      });
+    });
+  }
+};
+
 exports['Should error when attempting to create a Change Stream against a stand-alone server'] = {
   metadata: { requires: { topology: 'single' } },
 
