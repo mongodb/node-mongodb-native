@@ -448,7 +448,7 @@ exports['Should cache the change stream resume token using imperative callback f
             assert.equal(true, hasNext);
             thisChangeStream.next(function(err, changeNotification) {
               assert.ifError(err);
-              assert.deepEqual(thisChangeStream.resumeToken(), changeNotification._id);
+              assert.deepEqual(thisChangeStream.resumeToken, changeNotification._id);
 
               // Close the change stream
               thisChangeStream.close(function(err) {
@@ -491,7 +491,7 @@ exports['Should cache the change stream resume token using promises'] = {
           thisChangeStream.hasNext().then(function(hasNext) {
             assert.equal(true, hasNext);
             thisChangeStream.next().then(function(changeNotification) {
-              assert.deepEqual(thisChangeStream.resumeToken(), changeNotification._id);
+              assert.deepEqual(thisChangeStream.resumeToken, changeNotification._id);
 
               // Close the change stream
               thisChangeStream.close().then(function() {
@@ -525,7 +525,7 @@ exports['Should cache the change stream resume token using event listeners'] = {
       var thisChangeStream = theDatabase.watch(pipeline);
 
       thisChangeStream.once('change', function(changeNotification) {
-        assert.deepEqual(thisChangeStream.resumeToken(), changeNotification._id);
+        assert.deepEqual(thisChangeStream.resumeToken, changeNotification._id);
         // Close the change stream
         thisChangeStream.close().then(function() {
           setTimeout(function() {
@@ -877,7 +877,7 @@ exports['Should resume connection when a MongoNetworkError is encountered using 
         assert.ok(change);
         assert.equal(change.operationType, 'insert');
         assert.equal(change.newDocument.a, 1);
-        assert.deepEqual(thisChangeStream.resumeToken(), change._id);
+        assert.deepEqual(thisChangeStream.resumeToken, change._id);
 
         // Get the next change stream document. This will cause the simulator to trigger a MongoNetworkError, and therefore attempt to reconnect
         return thisChangeStream.next();
@@ -889,7 +889,7 @@ exports['Should resume connection when a MongoNetworkError is encountered using 
         assert.ok(change);
         assert.equal(change.operationType, 'insert');
         assert.equal(change.newDocument.b, 2);
-        assert.deepEqual(thisChangeStream.resumeToken(), change._id);
+        assert.deepEqual(thisChangeStream.resumeToken, change._id);
 
         // Close the change stream
         thisChangeStream.close(function(err) {
@@ -934,7 +934,7 @@ exports['Should resume connection when a MongoNetworkError is encountered using 
               assert.ok(change);
               assert.equal(change.operationType, 'insert');
               assert.equal(change.newDocument.a, 1);
-              assert.deepEqual(thisChangeStream.resumeToken(), change._id);
+              assert.deepEqual(thisChangeStream.resumeToken, change._id);
 
               // Get the next change stream document. This will cause the simulator to trigger a MongoNetworkError, and therefore attempt to reconnect
               thisChangeStream.next(function(err, change) {
@@ -946,7 +946,7 @@ exports['Should resume connection when a MongoNetworkError is encountered using 
                 assert.ok(change);
                 assert.equal(change.operationType, 'insert');
                 assert.equal(change.newDocument.b, 2);
-                assert.deepEqual(thisChangeStream.resumeToken(), change._id);
+                assert.deepEqual(thisChangeStream.resumeToken, change._id);
 
                 // Close the change stream
                 thisChangeStream.close(function(err) {
