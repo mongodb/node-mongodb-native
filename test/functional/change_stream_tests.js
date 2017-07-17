@@ -747,6 +747,96 @@ exports['Should invalidate change stream on database drop using imperative callb
   }
 };
 
+exports['Should invalidate change stream on collection drop using promises'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var client = new MongoClient(configuration.url());
+
+    client.connect(function(err, client) {
+      assert.ifError(err);
+
+      var theDatabase = client.db('integration_tests');
+
+      var thisChangeStream = theDatabase.collection('docs').changes(pipeline);
+
+      // Trigger the first database event
+      theDatabase.collection('docs').insert({a:1}).then(function () {
+        // Fetch the change notification after a 200ms delay
+        return new theDatabase.s.promiseLibrary(function (resolve) {
+          setTimeout(function(){
+            resolve(thisChangeStream.next());
+          }, 200);
+        });
+      }).then(function(change) {
+        assert.equal(change.operationType, 'insert');
+        return theDatabase.dropCollection('docs');
+      }).then(function() {
+        return thisChangeStream.next();
+      }).then(function(change) {
+        // Check the cursor invalidation has occured
+        assert.equal(change.operationType, 'invalidate');
+        assert.equal(thisChangeStream.isClosed(), true);
+
+        setTimeout(test.done, 1100);
+      }).catch(function(err) {
+        assert.ifError(err);
+      });
+    });
+  }
+};
+
+exports['Should not invalidate change stream on entire database when collection drop occurs'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var client = new MongoClient(configuration.url());
+
+    client.connect(function(err, client) {
+      assert.ifError(err);
+
+      var theDatabase = client.db('integration_tests');
+
+      var thisChangeStream = theDatabase.changes(pipeline);
+
+      // Trigger the first database event
+      theDatabase.collection('docs').insert({a:1}).then(function () {
+        // Fetch the change notification after a 200ms delay
+        return new theDatabase.s.promiseLibrary(function (resolve) {
+          setTimeout(function(){
+            resolve(thisChangeStream.next());
+          }, 200);
+        });
+      }).then(function(change) {
+        assert.equal(change.operationType, 'insert');
+        return theDatabase.dropCollection('docs');
+      }).then(function() {
+        return theDatabase.collection('otherDocs').insert({b:2});
+      }).then(function() {
+        return new theDatabase.s.promiseLibrary(function (resolve) {
+          setTimeout(function(){
+            resolve(thisChangeStream.next());
+          }, 200);
+        });
+      }).then(function(change) {
+        // Check the cursor invalidation has not occured
+        assert.equal(change.operationType, 'insert');
+        assert.equal(thisChangeStream.isClosed(), false);
+
+        return thisChangeStream.close();
+      }).then(function() {
+        setTimeout(test.done, 1100);
+      }).catch(function(err) {
+        assert.ifError(err);
+      });
+    });
+  }
+};
+
 exports['Should resume connection when a MongoNetworkError is encountered using promises'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
