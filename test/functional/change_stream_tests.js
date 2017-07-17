@@ -16,7 +16,7 @@ exports['Should create a Change Stream on a database and emit change events'] = 
     var client = new MongoClient(configuration.url());
 
     client.connect(function(err, client) {
-      assert.equal(null, err);
+      assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
 
@@ -38,7 +38,7 @@ exports['Should create a Change Stream on a database and emit change events'] = 
 
           // Close the change stream
           thisChangeStream.close(function(err) {
-            assert.equal(null, err);
+            assert.ifError(err);
             setTimeout(function() {
               test.done();
             }, 1100);
@@ -47,13 +47,13 @@ exports['Should create a Change Stream on a database and emit change events'] = 
 
         // Trigger the second database event
         theDatabase.collection('docs').update({a:1}, {$inc: {a:2}}, function (err) {
-          assert.equal(null, err);
+          assert.ifError(err);
         });
       });
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({a:1}, function (err) {
-        assert.equal(null, err);
+        assert.ifError(err);
       });
     });
   }
@@ -68,7 +68,7 @@ exports['Should create a Change Stream on a database and get change events throu
     var client = new MongoClient(configuration.url());
 
     client.connect(function(err, client) {
-      assert.equal(null, err);
+      assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
 
@@ -76,16 +76,16 @@ exports['Should create a Change Stream on a database and get change events throu
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({b:2}, function (err, result) {
-        assert.equal(null, err);
+        assert.ifError(err);
         assert.equal(result.insertedCount, 1);
 
         setTimeout(function() {
           // Fetch the change notification
           thisChangeStream.hasNext(function(err, hasNext) {
-            assert.equal(null, err);
+            assert.ifError(err);
             assert.equal(true, hasNext);
             thisChangeStream.next(function(err, changeNotification) {
-              assert.equal(null, err);
+              assert.ifError(err);
               assert.equal(changeNotification.operationType, 'insert');
               assert.equal(changeNotification.newDocument.b, 2);
               assert.equal(changeNotification.ns.db, 'integration_tests');
@@ -95,17 +95,17 @@ exports['Should create a Change Stream on a database and get change events throu
 
               // Trigger the second database event
               theDatabase.collection('docs').update({b:2}, {$inc: {b:2}}, function (err) {
-                assert.equal(null, err);
+                assert.ifError(err);
                 thisChangeStream.hasNext(function(err, hasNext) {
-                  assert.equal(null, err);
+                  assert.ifError(err);
                   assert.equal(true, hasNext);
                   thisChangeStream.next(function(err, changeNotification) {
-                    assert.equal(null, err);
+                    assert.ifError(err);
                     assert.equal(changeNotification.operationType, 'update');
 
                     // Close the change stream
                     thisChangeStream.close(function(err) {
-                      assert.equal(null, err);
+                      assert.ifError(err);
                       setTimeout(function() {
                         test.done();
                       }, 1100);
@@ -130,7 +130,7 @@ exports['Should create a Change Stream on a database and get change events throu
     var client = new MongoClient(configuration.url());
 
     client.connect(function(err, client) {
-      assert.equal(null, err);
+      assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
 
@@ -154,7 +154,6 @@ exports['Should create a Change Stream on a database and get change events throu
         assert.equal(changeNotification.comment, 'The documentKey field has been projected out of this document.');
 
         // Trigger the second database event
-        return theDatabase.collection('docs').update({b:2}, {$inc: {b:2}});
       }).then(function () {
         return thisChangeStream.hasNext();
       }).then(function(hasNext) {
@@ -166,7 +165,7 @@ exports['Should create a Change Stream on a database and get change events throu
       }).then(function() {
         setTimeout(test.done, 1100);
       }).catch(function(err) {
-        assert.equal(err, null);
+        assert.ifError(err);
       });
     });
   }
@@ -182,7 +181,7 @@ exports['Should create a Change Stream on a collection and emit change events'] 
     var client = new MongoClient(configuration.url());
 
     client.connect(function(err, client) {
-      assert.equal(null, err);
+      assert.ifError(err);
 
       var theCollection = client.db('integration_tests').collection('docs');
 
@@ -204,7 +203,7 @@ exports['Should create a Change Stream on a collection and emit change events'] 
 
           // Close the change stream
           thisChangeStream.close(function(err) {
-            assert.equal(null, err);
+            assert.ifError(err);
             setTimeout(function() {
               test.done();
             }, 1100);
@@ -213,13 +212,13 @@ exports['Should create a Change Stream on a collection and emit change events'] 
 
         // Trigger the second database event
         theCollection.update({d:4}, {$inc: {d:2}}, function (err) {
-          assert.equal(null, err);
+          assert.ifError(err);
         });
       });
 
       // Trigger the first database event
       theCollection.insert({d:4}, function (err) {
-        assert.equal(null, err);
+        assert.ifError(err);
       });
     });
   }
@@ -234,7 +233,7 @@ exports['Should create a Change Stream on a collection and get change events thr
     var client = new MongoClient(configuration.url());
 
     client.connect(function(err, client) {
-      assert.equal(null, err);
+      assert.ifError(err);
 
       var theCollection = client.db('integration_tests').collection('docs');
 
@@ -242,16 +241,16 @@ exports['Should create a Change Stream on a collection and get change events thr
 
       // Trigger the first database event
       theCollection.insert({e:5}, function (err, result) {
-        assert.equal(null, err);
+        assert.ifError(err);
         assert.equal(result.insertedCount, 1);
 
         setTimeout(function() {
           // Fetch the change notification
           thisChangeStream.hasNext(function(err, hasNext) {
-            assert.equal(null, err);
+            assert.ifError(err);
             assert.equal(true, hasNext);
             thisChangeStream.next(function(err, changeNotification) {
-              assert.equal(null, err);
+              assert.ifError(err);
               assert.equal(changeNotification.operationType, 'insert');
               assert.equal(changeNotification.newDocument.e, 5);
               assert.equal(changeNotification.ns.db, 'integration_tests');
@@ -261,16 +260,16 @@ exports['Should create a Change Stream on a collection and get change events thr
 
               // Trigger the second database event
               theCollection.update({e:5}, {$inc: {e:2}}, function (err) {
-                assert.equal(null, err);
+                assert.ifError(err);
                 thisChangeStream.hasNext(function(err, hasNext) {
-                  assert.equal(null, err);
+                  assert.ifError(err);
                   assert.equal(true, hasNext);
                   thisChangeStream.next(function(err, changeNotification) {
-                    assert.equal(null, err);
+                    assert.ifError(err);
                     assert.equal(changeNotification.operationType, 'update');
                     // Close the change stream
                     thisChangeStream.close(function(err) {
-                      assert.equal(null, err);
+                      assert.ifError(err);
 
                       setTimeout(function() {
                         test.done();
@@ -296,7 +295,7 @@ exports['Should support creating multiple Change Streams of the same database'] 
     var client = new MongoClient(configuration.url());
 
     client.connect(function(err, client) {
-      assert.equal(null, err);
+      assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
 
@@ -304,16 +303,16 @@ exports['Should support creating multiple Change Streams of the same database'] 
       var thisChangeStream2 = theDatabase.changes([{ $addFields: { "changeStreamNumber": 2 } }]);
 
       theDatabase.collection('docs').insert({c:3}, {w:"majority", j:true}, function (err, result) {
-        assert.equal(null, err);
+        assert.ifError(err);
         assert.equal(result.insertedCount, 1);
 
         setTimeout(function() {
           // Fetch the change notification from the first Change Stream
           thisChangeStream1.hasNext(function(err, hasNext) {
-            assert.equal(null, err);
+            assert.ifError(err);
             assert.equal(true, hasNext);
             thisChangeStream1.next(function(err, changeNotification) {
-              assert.equal(null, err);
+              assert.ifError(err);
               assert.equal(changeNotification.operationType, 'insert');
               assert.equal(changeNotification.newDocument.c, 3);
               assert.equal(changeNotification.ns.db, 'integration_tests');
@@ -322,10 +321,10 @@ exports['Should support creating multiple Change Streams of the same database'] 
 
               // Fetch the change notification from the second Change Stream
               thisChangeStream2.hasNext(function(err, hasNext) {
-                assert.equal(null, err);
+                assert.ifError(err);
                 assert.equal(true, hasNext);
                 thisChangeStream2.next(function(err, changeNotification) {
-                  assert.equal(null, err);
+                  assert.ifError(err);
                   assert.equal(changeNotification.operationType, 'insert');
                   assert.equal(changeNotification.newDocument.c, 3);
                   assert.equal(changeNotification.ns.db, 'integration_tests');
@@ -334,9 +333,9 @@ exports['Should support creating multiple Change Streams of the same database'] 
 
                   // Close the change streams
                   thisChangeStream1.close(function(err) {
-                    assert.equal(null, err);
+                    assert.ifError(err);
                     thisChangeStream2.close(function(err) {
-                      assert.equal(null, err);
+                      assert.ifError(err);
                       setTimeout(function() {
                         test.done();
                       }, 2000);
@@ -362,7 +361,7 @@ exports['Should properly close Change Stream cursor'] = {
     var client = new MongoClient(configuration.url());
 
     client.connect(function(err, client) {
-      assert.equal(null, err);
+      assert.ifError(err);
       var theDatabase = client.db('integration_tests');
 
       var thisChangeStream = theDatabase.changes(pipeline);
@@ -376,18 +375,18 @@ exports['Should properly close Change Stream cursor'] = {
         assert.equal(thisChangeStream.cursor.isClosed(), false);
 
         thisChangeStream.close(function(err) {
-          assert.equal(null, err);
+          assert.ifError(err);
 
           // Check the cursor is closed
           assert.equal(thisChangeStream.isClosed(), true);
-          assert.equal(thisChangeStream.cursor.isClosed(), true);
+          assert.ok(!thisChangeStream.cursor);
           test.done();
         });
       });
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({a:1}, function (err) {
-        assert.equal(null, err);
+        assert.ifError(err);
       });
     });
   }
@@ -402,7 +401,7 @@ exports['Should error when attempting to create a Change Stream with a forbidden
     var client = new MongoClient(configuration.url());
 
     client.connect(function(err, client) {
-      assert.equal(null, err);
+      assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
 
@@ -426,7 +425,7 @@ exports['Should cache the change stream resume token using imperative callback f
     var client = new MongoClient(configuration.url());
 
     client.connect(function(err, client) {
-      assert.equal(null, err);
+      assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
 
@@ -434,21 +433,21 @@ exports['Should cache the change stream resume token using imperative callback f
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({b:2}, function (err, result) {
-        assert.equal(null, err);
+        assert.ifError(err);
         assert.equal(result.insertedCount, 1);
 
         setTimeout(function() {
           // Fetch the change notification
           thisChangeStream.hasNext(function(err, hasNext) {
-            assert.equal(null, err);
+            assert.ifError(err);
             assert.equal(true, hasNext);
             thisChangeStream.next(function(err, changeNotification) {
-              assert.equal(null, err);
+              assert.ifError(err);
               assert.deepEqual(thisChangeStream.resumeToken(), changeNotification._id);
 
               // Close the change stream
               thisChangeStream.close(function(err) {
-                assert.equal(null, err);
+                assert.ifError(err);
                 setTimeout(function() {
                   test.done();
                 }, 1100);
@@ -471,7 +470,7 @@ exports['Should cache the change stream resume token using promises'] = {
     var client = new MongoClient(configuration.url());
 
     client.connect(function(err, client) {
-      assert.equal(null, err);
+      assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
 
@@ -479,7 +478,7 @@ exports['Should cache the change stream resume token using promises'] = {
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({b:2}, function (err, result) {
-        assert.equal(null, err);
+        assert.ifError(err);
         assert.equal(result.insertedCount, 1);
 
         setTimeout(function() {
@@ -497,7 +496,7 @@ exports['Should cache the change stream resume token using promises'] = {
               });
             });
           }).catch(function(err) {
-            assert.equal(null, err);
+            assert.ifError(err);
           });
         }, 200);
       });
@@ -514,7 +513,7 @@ exports['Should cache the change stream resume token using event listeners'] = {
     var client = new MongoClient(configuration.url());
 
     client.connect(function(err, client) {
-      assert.equal(null, err);
+      assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
 
@@ -532,7 +531,7 @@ exports['Should cache the change stream resume token using event listeners'] = {
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({b:2}, function (err, result) {
-        assert.equal(null, err);
+        assert.ifError(err);
         assert.equal(result.insertedCount, 1);
       });
     });
@@ -547,7 +546,7 @@ exports['Should error if resume token projected out of change stream document an
     var MongoClient = configuration.require.MongoClient;
     var client = new MongoClient(configuration.url());
     client.connect(function(err, client) {
-      assert.equal(null, err);
+      assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
 
@@ -555,12 +554,12 @@ exports['Should error if resume token projected out of change stream document an
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({b:2}, function (err, result) {
-        assert.equal(null, err);
+        assert.ifError(err);
         assert.equal(result.insertedCount, 1);
         setTimeout(function() {
           // Fetch the change notification
           thisChangeStream.hasNext(function(err, hasNext) {
-            assert.equal(null, err);
+            assert.ifError(err);
             assert.equal(true, hasNext);
             thisChangeStream.next(function(err) {
               assert.ok(err);
@@ -587,7 +586,7 @@ exports['Should error if resume token projected out of change stream document an
     var MongoClient = configuration.require.MongoClient;
     var client = new MongoClient(configuration.url());
     client.connect(function(err, client) {
-      assert.equal(null, err);
+      assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
 
@@ -607,7 +606,7 @@ exports['Should error if resume token projected out of change stream document an
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({b:2}, function (err, result) {
-        assert.equal(null, err);
+        assert.ifError(err);
         assert.equal(result.insertedCount, 1);
       });
 
@@ -623,7 +622,7 @@ exports['Should not error if resume token projected out of change stream documen
     var MongoClient = configuration.require.MongoClient;
     var client = new MongoClient(configuration.url());
     client.connect(function(err, client) {
-      assert.equal(null, err);
+      assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
 
@@ -631,16 +630,16 @@ exports['Should not error if resume token projected out of change stream documen
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({b:2}, function (err, result) {
-        assert.equal(null, err);
+        assert.ifError(err);
         assert.equal(result.insertedCount, 1);
 
         setTimeout(function() {
           // Fetch the change notification
           thisChangeStream.hasNext(function(err, hasNext) {
-            assert.equal(null, err);
+            assert.ifError(err);
             assert.equal(true, hasNext);
             thisChangeStream.next(function(err, doc) {
-              assert.equal(err, null);
+              assert.ifError(err);
               assert.equal(doc._id, null);
               assert.equal(doc.operationType, 'insert');
 
@@ -667,7 +666,7 @@ exports['Should invalidate change stream on collection rename using event listen
     var client = new MongoClient(configuration.url());
 
     client.connect(function(err, client) {
-      assert.equal(null, err);
+      assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
 
@@ -693,13 +692,13 @@ exports['Should invalidate change stream on collection rename using event listen
 
         // Trigger the second database event
         theDatabase.collection('docs').rename('renamedDocs', {dropTarget: true}, function (err) {
-          assert.equal(null, err);
+          assert.ifError(err);
         });
       });
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({a:1}, function (err) {
-        assert.equal(null, err);
+        assert.ifError(err);
       });
     });
   }
@@ -714,7 +713,7 @@ exports['Should invalidate change stream on database drop using imperative callb
     var client = new MongoClient(configuration.url());
 
     client.connect(function(err, client) {
-      assert.equal(null, err);
+      assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
 
@@ -722,17 +721,17 @@ exports['Should invalidate change stream on database drop using imperative callb
 
       // Trigger the first database event
       theDatabase.collection('docs').insert({a:1}, function (err) {
-        assert.equal(null, err);
+        assert.ifError(err);
 
         thisChangeStream.next(function(err, change) {
-          assert.equal(null, err);
+          assert.ifError(err);
           assert.equal(change.operationType, 'insert');
 
           theDatabase.dropDatabase(function(err) {
-            assert.equal(null, err);
+            assert.ifError(err);
 
             thisChangeStream.next(function(err, change) {
-              assert.equal(null, err);
+              assert.ifError(err);
 
               // Check the cursor invalidation has occured
               assert.equal(change.operationType, 'invalidate');
@@ -757,7 +756,7 @@ exports['Should resume connection when a MongoNetworkError is encountered using 
     var client = new MongoClient(configuration.url());
 
     client.connect(function(err, client) {
-      assert.equal(null, err);
+      assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
 
@@ -795,7 +794,7 @@ exports['Should resume connection when a MongoNetworkError is encountered using 
 
         // Close the change stream
         thisChangeStream.close(function(err) {
-          assert.equal(err, null);
+          assert.ifError(err);
           setTimeout(test.done, 1100);
         });
       }).catch(function(err) {
@@ -805,6 +804,7 @@ exports['Should resume connection when a MongoNetworkError is encountered using 
     });
   }
 };
+
 exports['Should resume connection when a MongoNetworkError is encountered using imperative callback form'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
@@ -814,7 +814,7 @@ exports['Should resume connection when a MongoNetworkError is encountered using 
     var client = new MongoClient(configuration.url());
 
     client.connect(function(err, client) {
-      assert.equal(null, err);
+      assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
 
@@ -823,13 +823,13 @@ exports['Should resume connection when a MongoNetworkError is encountered using 
 
       // Insert three documents in order, the second of which will cause the simulator to trigger a MongoNetworkError
       theDatabase.collection('docs').insertOne({a: 1}, function(err) {
-        assert.equal(null, err);
+        assert.ifError(err);
         theDatabase.collection('docs').insertOne({shouldThrowMongoNetworkError: true}, function(err) {
-          assert.equal(null, err);
+          assert.ifError(err);
           theDatabase.collection('docs').insertOne({b: 2}, function(err) {
-            assert.equal(null, err);
+            assert.ifError(err);
             thisChangeStream.next(function(err, change) {
-              assert.equal(null, err);
+              assert.ifError(err);
 
               // Check the cursor is the initial cursor
               assert.equal(thisChangeStream.cursor.initialCursor, true);
@@ -842,7 +842,7 @@ exports['Should resume connection when a MongoNetworkError is encountered using 
 
               // Get the next change stream document. This will cause the simulator to trigger a MongoNetworkError, and therefore attempt to reconnect
               thisChangeStream.next(function(err, change) {
-                assert.equal(null, err);
+                assert.ifError(err);
                 // Check a new cursor has been established
                 assert.notEqual(thisChangeStream.cursor.initialCursor, true);
 
@@ -854,7 +854,7 @@ exports['Should resume connection when a MongoNetworkError is encountered using 
 
                 // Close the change stream
                 thisChangeStream.close(function(err) {
-                  assert.equal(err, null);
+                  assert.ifError(err);
                   setTimeout(test.done, 1100);
                 });
               });
@@ -876,7 +876,7 @@ exports['Should error when attempting to create a Change Stream against a stand-
     var client = new MongoClient(configuration.url());
 
     client.connect(function(err, client) {
-      assert.equal(null, err);
+      assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
 
