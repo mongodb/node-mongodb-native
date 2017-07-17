@@ -809,7 +809,7 @@ exports['Should not invalidate change stream on entire database when collection 
       var thisChangeStream = theDatabase.changes(pipeline);
 
       // Trigger the first database event
-      theDatabase.collection('docs').insert({a:1}).then(function () {
+      theDatabase.collection('aCollection').insert({a:1}).then(function () {
         // Fetch the change notification after a 200ms delay
         return new theDatabase.s.promiseLibrary(function (resolve) {
           setTimeout(function(){
@@ -818,9 +818,13 @@ exports['Should not invalidate change stream on entire database when collection 
         });
       }).then(function(change) {
         assert.equal(change.operationType, 'insert');
-        return theDatabase.dropCollection('docs');
+        return theDatabase.dropCollection('aCollection');
       }).then(function() {
-        return theDatabase.collection('otherDocs').insert({b:2});
+        return new theDatabase.s.promiseLibrary(function (resolve) {
+          setTimeout(function(){
+            resolve(theDatabase.collection('otherDocs').insert({b:2}));
+          }, 200);
+        });
       }).then(function() {
         return new theDatabase.s.promiseLibrary(function (resolve) {
           setTimeout(function(){
