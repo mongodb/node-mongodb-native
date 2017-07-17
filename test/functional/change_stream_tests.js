@@ -140,8 +140,12 @@ exports['Should create a Change Stream on a database and get change events throu
       theDatabase.collection('docs').insert({b:2}).then(function (result) {
         assert.equal(result.insertedCount, 1);
 
-        // Fetch the change notification
-        return thisChangeStream.hasNext();
+        // Fetch the change notification after a 200ms delay
+        return new theDatabase.s.promiseLibrary(function (resolve) {
+          setTimeout(function(){
+            resolve(thisChangeStream.hasNext());
+          }, 200);
+        });
       }).then(function(hasNext) {
         assert.equal(true, hasNext);
         return thisChangeStream.next();
@@ -154,6 +158,7 @@ exports['Should create a Change Stream on a database and get change events throu
         assert.equal(changeNotification.comment, 'The documentKey field has been projected out of this document.');
 
         // Trigger the second database event
+        return theDatabase.collection('docs').update({b:2}, {$inc: {b:2}});
       }).then(function () {
         return thisChangeStream.hasNext();
       }).then(function(hasNext) {
@@ -920,9 +925,6 @@ exports['Should resume connection when a MongoNetworkError is encountered using 
             assert.ifError(err);
             thisChangeStream.next(function(err, change) {
               assert.ifError(err);
-
-              // Check the cursor is the initial cursor
-              assert.equal(thisChangeStream.cursor.initialCursor, true);
 
               // Check the document is the document we are expecting
               assert.ok(change);
