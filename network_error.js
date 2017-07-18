@@ -16,7 +16,7 @@ function MongoNetworkError(message) {
 /**
  * Creates a new MongoNetworkError object
  * @method
- * @param {object} options The error options
+ * @param {Error|string|object} options The options used to create the error.
  * @return {MongoNetworkError} A MongoNetworkError instance
  */
 MongoNetworkError.create = function(options) {

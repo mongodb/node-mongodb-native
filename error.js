@@ -16,7 +16,7 @@ function MongoError(message) {
 /**
  * Creates a new MongoError object
  * @method
- * @param {object} options The error options
+ * @param {Error|string|object} options The options used to create the error.
  * @return {MongoError} A MongoError instance
  */
 MongoError.create = function(options) {
