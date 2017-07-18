@@ -1047,6 +1047,130 @@ exports['Should resume from point in time using user-provided resumeAfter'] = {
   }
 };
 
+exports['Should support full document lookup'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var client = new MongoClient(configuration.url());
+
+    client.connect(function(err, client) {
+      assert.ifError(err);
+
+      var theDatabase = client.db('integration_tests');
+
+      var thisChangeStream = theDatabase.watch(pipeline, {fullDocument: 'lookup'});
+
+      // Trigger the first database event
+      theDatabase.collection('docs').insert({f:128}).then(function (result) {
+        assert.equal(result.insertedCount, 1);
+
+        // Fetch the change notification after a 200ms delay
+        return new theDatabase.s.promiseLibrary(function (resolve) {
+          setTimeout(function(){
+            resolve(thisChangeStream.hasNext());
+          }, 200);
+        });
+      }).then(function(hasNext) {
+        assert.equal(true, hasNext);
+        return thisChangeStream.next();
+      }).then(function(changeNotification) {
+        assert.equal(changeNotification.operationType, 'insert');
+        assert.equal(changeNotification.newDocument.f, 128);
+        assert.equal(changeNotification.ns.db, 'integration_tests');
+        assert.equal(changeNotification.ns.coll, 'docs');
+        assert.ok(!(changeNotification.documentKey));
+        assert.equal(changeNotification.comment, 'The documentKey field has been projected out of this document.');
+
+        // Trigger the second database event
+        return theDatabase.collection('docs').update({f: 128}, {$set: {c:2}});
+      }).then(function () {
+        return thisChangeStream.hasNext();
+      }).then(function(hasNext) {
+        assert.equal(true, hasNext);
+        return thisChangeStream.next();
+      }).then(function(changeNotification) {
+        assert.equal(changeNotification.operationType, 'update');
+
+        // Check the full lookedUpDocument is present
+        assert.ok(changeNotification.lookedUpDocument);
+        assert.equal(changeNotification.lookedUpDocument.f, 128);
+        assert.equal(changeNotification.lookedUpDocument.c, 2);
+
+        return thisChangeStream.close();
+      }).then(function() {
+        setTimeout(test.done, 1100);
+      }).catch(function(err) {
+        assert.ifError(err);
+      });
+    });
+  }
+};
+
+exports['Should support full document lookup with deleted documents'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var client = new MongoClient(configuration.url());
+
+    client.connect(function(err, client) {
+      assert.ifError(err);
+
+      var theDatabase = client.db('integration_tests');
+
+      var thisChangeStream = theDatabase.watch(pipeline, {fullDocument: 'lookup'});
+
+      // Trigger the first database event
+      theDatabase.collection('docs').insert({i:128}).then(function (result) {
+        assert.equal(result.insertedCount, 1);
+
+        return theDatabase.collection('docs').deleteOne({i:128});
+      }).then(function(result) {
+        assert.equal(result.result.n, 1);
+
+        // Fetch the change notification after a 200ms delay
+        return new theDatabase.s.promiseLibrary(function (resolve) {
+          setTimeout(function(){
+            resolve(thisChangeStream.hasNext());
+          }, 200);
+        });
+      }).then(function(hasNext) {
+        assert.equal(true, hasNext);
+        return thisChangeStream.next();
+      }).then(function(changeNotification) {
+        assert.equal(changeNotification.operationType, 'insert');
+        assert.equal(changeNotification.newDocument.i, 128);
+        assert.equal(changeNotification.ns.db, 'integration_tests');
+        assert.equal(changeNotification.ns.coll, 'docs');
+        assert.ok(!(changeNotification.documentKey));
+        assert.equal(changeNotification.comment, 'The documentKey field has been projected out of this document.');
+
+        // Trigger the second database event
+        return theDatabase.collection('docs').update({i: 128}, {$set: {c:2}});
+      }).then(function () {
+        return thisChangeStream.hasNext();
+      }).then(function(hasNext) {
+        assert.equal(true, hasNext);
+        return thisChangeStream.next();
+      }).then(function(changeNotification) {
+        assert.equal(changeNotification.operationType, 'delete');
+
+        // Check the full lookedUpDocument is present
+        assert.equal(changeNotification.lookedUpDocument, null);
+
+        return thisChangeStream.close();
+      }).then(function() {
+        setTimeout(test.done, 1100);
+      }).catch(function(err) {
+        assert.ifError(err);
+      });
+    });
+  }
+};
+
 exports['Should error when attempting to create a Change Stream against a stand-alone server'] = {
   metadata: { requires: { topology: 'single' } },
 
