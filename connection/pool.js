@@ -4,6 +4,7 @@ var inherits = require('util').inherits,
   EventEmitter = require('events').EventEmitter,
   Connection = require('./connection'),
   MongoError = require('../error'),
+  MongoNetworkError = require('../network_error'),
   Logger = require('./logger'),
   f = require('util').format,
   Query = require('./commands').Query,
@@ -322,7 +323,7 @@ function attemptReconnect(self) {
           self.destroy();
           // Emit close event
           self.emit('reconnectFailed'
-            , new MongoError(f('failed to reconnect after %s attempts with interval %s ms', self.options.reconnectTries, self.options.reconnectInterval)));
+            , new MongoNetworkError(f('failed to reconnect after %s attempts with interval %s ms', self.options.reconnectTries, self.options.reconnectInterval)));
         } else {
           self.reconnectId = setTimeout(attemptReconnect(self), self.options.reconnectInterval);
         }

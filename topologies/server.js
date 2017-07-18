@@ -10,6 +10,7 @@ var inherits = require('util').inherits,
   Pool = require('../connection/pool'),
   Query = require('../connection/commands').Query,
   MongoError = require('../error'),
+  MongoNetworkError = require('../network_error'),
   PreTwoSixWireProtocolSupport = require('../wireprotocol/2_4_support'),
   TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support'),
   ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support'),
@@ -350,7 +351,7 @@ var eventHandler = function(self, event) {
       // On first connect fail
       if(self.s.pool.state == 'disconnected' && self.initalConnect && ['close', 'timeout', 'error', 'parseError'].indexOf(event) != -1) {
         self.initalConnect = false;
-        return self.emit('error', new MongoError(f('failed to connect to server [%s] on first connect [%s]', self.name, err)));
+        return self.emit('error', new MongoNetworkError(f('failed to connect to server [%s] on first connect [%s]', self.name, err)));
       }
 
       // Reconnect event, emit the server

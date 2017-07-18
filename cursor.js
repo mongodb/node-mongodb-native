@@ -3,6 +3,7 @@
 var Logger = require('./connection/logger')
   , retrieveBSON = require('./connection/utils').retrieveBSON
   , MongoError = require('./error')
+  , MongoNetworkError = require('./network_error')
   , f = require('util').format;
 
 var BSON = retrieveBSON(),
@@ -443,7 +444,7 @@ var isConnectionDead = function(self, callback) {
     self.cursorState.killed = true;
     self.cursorState.documents = [];
     self.cursorState.cursorIndex = 0;
-    callback(MongoError.create(f('connection to host %s:%s was destroyed', self.pool.host, self.pool.port)))
+    callback(MongoNetworkError.create(f('connection to host %s:%s was destroyed', self.pool.host, self.pool.port)))
     return true;
   }
 
@@ -578,7 +579,7 @@ var nextFunction = function(self, callback) {
     if(isConnectionDead(self, callback)) return;
 
     // Check if topology is destroyed
-    if(self.topology.isDestroyed()) return callback(new MongoError('connection destroyed, not possible to instantiate cursor'));
+    if(self.topology.isDestroyed()) return callback(new MongoNetworkError('connection destroyed, not possible to instantiate cursor'));
 
     // query, cmd, options, cursorState, callback
     self._find(function(err) {
@@ -604,7 +605,7 @@ var nextFunction = function(self, callback) {
       self.cursorState.cursorIndex = 0;
 
       // Check if topology is destroyed
-      if(self.topology.isDestroyed()) return callback(new MongoError('connection destroyed, not possible to instantiate cursor'));
+      if(self.topology.isDestroyed()) return callback(new MongoNetworkError('connection destroyed, not possible to instantiate cursor'));
 
       // Check if connection is dead and return if not possible to
       // execute a getmore on this connection
