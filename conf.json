@@ -8,6 +8,7 @@
       "test/functional/authentication_tests.js",
       "test/functional/gridfs_stream_tests.js",
       "lib/admin.js",
+      "lib/change_stream.js",
       "lib/collection.js",
       "lib/cursor.js",
       "lib/aggregation_cursor.js",
