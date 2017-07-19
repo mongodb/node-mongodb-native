@@ -543,7 +543,7 @@ exports['Should cache the change stream resume token using event listeners'] = {
   }
 };
 
-exports['Should error if resume token projected out of change stream document and disableResume is false using imperative callback form'] = {
+exports['Should error if resume token projected out of change stream document using imperative callback form'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
@@ -583,7 +583,7 @@ exports['Should error if resume token projected out of change stream document an
   }
 };
 
-exports['Should error if resume token projected out of change stream document and disableResume is false using event listeners'] = {
+exports['Should error if resume token projected out of change stream document using event listeners'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
@@ -615,49 +615,6 @@ exports['Should error if resume token projected out of change stream document an
         assert.equal(result.insertedCount, 1);
       });
 
-    });
-  }
-};
-
-exports['Should not error if resume token projected out of change stream document and disableResume is true'] = {
-  metadata: { requires: { topology: 'replicaset' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var MongoClient = configuration.require.MongoClient;
-    var client = new MongoClient(configuration.url());
-    client.connect(function(err, client) {
-      assert.ifError(err);
-
-      var theDatabase = client.db('integration_tests');
-
-      var thisChangeStream = theDatabase.watch([{$project: {_id: false}}], {disableResume: true});
-
-      // Trigger the first database event
-      theDatabase.collection('docs').insert({b:2}, function (err, result) {
-        assert.ifError(err);
-        assert.equal(result.insertedCount, 1);
-
-        setTimeout(function() {
-          // Fetch the change notification
-          thisChangeStream.hasNext(function(err, hasNext) {
-            assert.ifError(err);
-            assert.equal(true, hasNext);
-            thisChangeStream.next(function(err, doc) {
-              assert.ifError(err);
-              assert.equal(doc._id, null);
-              assert.equal(doc.operationType, 'insert');
-
-              // Close the change stream
-              thisChangeStream.close().then(function() {
-                setTimeout(function() {
-                  test.done();
-                }, 1100);
-              });
-            });
-          });
-        }, 200);
-      });
     });
   }
 };
