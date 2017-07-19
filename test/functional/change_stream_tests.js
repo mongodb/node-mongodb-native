@@ -322,7 +322,7 @@ exports['Should support creating multiple Change Streams of the same database'] 
               assert.equal(changeNotification.newDocument.c, 3);
               assert.equal(changeNotification.ns.db, 'integration_tests');
               assert.equal(changeNotification.ns.coll, 'docs');
-              assert.equal(changeNotification.watchtreamNumber, 1);
+              assert.equal(changeNotification.changeStreamNumber, 1);
 
               // Fetch the change notification from the second Change Stream
               thisChangeStream2.hasNext(function(err, hasNext) {
@@ -334,7 +334,7 @@ exports['Should support creating multiple Change Streams of the same database'] 
                   assert.equal(changeNotification.newDocument.c, 3);
                   assert.equal(changeNotification.ns.db, 'integration_tests');
                   assert.equal(changeNotification.ns.coll, 'docs');
-                  assert.equal(changeNotification.watchtreamNumber, 2);
+                  assert.equal(changeNotification.changeStreamNumber, 2);
 
                   // Close the change streams
                   thisChangeStream1.close(function(err) {
@@ -846,7 +846,7 @@ exports['Should not invalidate change stream on entire database when collection 
   }
 };
 
-exports['Should resume connection when a MongoNetworkError is encountered using promises'] = {
+exports['Should re-establish connection when a MongoNetworkError is encountered using promises'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
@@ -860,7 +860,6 @@ exports['Should resume connection when a MongoNetworkError is encountered using 
       var theDatabase = client.db('integration_tests');
 
       var thisChangeStream = theDatabase.watch(pipeline);
-      thisChangeStream.cursor.initialCursor = true;
 
       // Insert three documents in order, the second of which will cause the simulator to trigger a MongoNetworkError
       theDatabase.collection('docs').insertOne({a: 1}).then(function() {
@@ -871,7 +870,7 @@ exports['Should resume connection when a MongoNetworkError is encountered using 
         return thisChangeStream.next();
       }).then(function(change) {
         // Check the cursor is the initial cursor
-        assert.equal(thisChangeStream.cursor.initialCursor, true);
+        thisChangeStream.cursor.cursorNumber = 1;
 
         // Check the document is the document we are expecting
         assert.ok(change);
@@ -883,7 +882,7 @@ exports['Should resume connection when a MongoNetworkError is encountered using 
         return thisChangeStream.next();
       }).then(function(change) {
         // Check a new cursor has been established
-        assert.notEqual(thisChangeStream.cursor.initialCursor, true);
+        assert.notEqual(thisChangeStream.cursor.cursorNumber, 1);
 
         // The next document should be the one after the shouldThrowMongoNetworkError document
         assert.ok(change);
