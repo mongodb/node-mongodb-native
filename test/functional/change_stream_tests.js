@@ -1,4 +1,5 @@
 var assert = require('assert');
+var MongoNetworkError = require('mongodb-core').MongoNetworkError;
 
 // Define the pipeline processing changes
 var pipeline = [
@@ -632,7 +633,7 @@ exports['Should invalidate change stream on collection rename using event listen
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.watch(pipeline);
+      var thisChangeStream = theDatabase.collection('docs').watch(pipeline);
 
       // Attach first event listener
       thisChangeStream.once('change', function(changeNotification) {
@@ -809,20 +810,25 @@ exports['Should re-establish connection when a MongoNetworkError is encountered 
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
-    var client = new MongoClient(configuration.url());
+    var socketTimeoutMS = 500;
+    var client = new MongoClient(configuration.url(), {socketTimeoutMS: socketTimeoutMS});
 
     client.connect(function(err, client) {
       assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
+      var theCollection = theDatabase.collection('MongoNetworkErrorTest');
+      var thisChangeStream = theCollection.watch(pipeline);
+      var mongodPID;
 
-      var thisChangeStream = theDatabase.watch(pipeline);
+      theDatabase.command({'serverStatus': 1}).then(function(serverStatus) {
+        assert.ok(serverStatus);
+        assert.equal(typeof serverStatus.pid, 'number');
+        mongodPID = serverStatus.pid;
 
-      // Insert three documents in order, the second of which will cause the simulator to trigger a MongoNetworkError
-      theDatabase.collection('docs').insertOne({a: 1}).then(function() {
-        return theDatabase.collection('docs').insertOne({shouldThrowMongoNetworkError: true});
+        return theCollection.insertOne({a: 1});
       }).then(function() {
-        return theDatabase.collection('docs').insertOne({b: 2});
+        return theCollection.insertOne({b: 2});
       }).then(function() {
         return thisChangeStream.next();
       }).then(function(change) {
@@ -835,7 +841,15 @@ exports['Should re-establish connection when a MongoNetworkError is encountered 
         assert.equal(change.newDocument.a, 1);
         assert.deepEqual(thisChangeStream.resumeToken, change._id);
 
-        // Get the next change stream document. This will cause the simulator to trigger a MongoNetworkError, and therefore attempt to reconnect
+        // Suspend the mongod instance for a while
+        process.kill(mongodPID, 'SIGSTOP');
+        setTimeout(function() {
+          process.kill(mongodPID, 'SIGCONT');
+        }, socketTimeoutMS + 1);
+
+        // Get the next change stream document.
+        // Because the server is suspended, this should timeout and result in a MongoNetworkError
+        // The Change Stream should automatically re-connect.
         return thisChangeStream.next();
       }).then(function(change) {
         // Check a new cursor has been established
@@ -854,6 +868,68 @@ exports['Should re-establish connection when a MongoNetworkError is encountered 
         });
       }).catch(function(err) {
         throw err;
+      });
+
+    });
+  }
+};
+
+exports['Should return MongoNetworkError after first retry attempt fails using promises'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var client = new MongoClient(configuration.url(), {
+      socketTimeoutMS: 500,
+      connectTimeoutMS: 100
+    });
+
+    client.connect(function(err, client) {
+      assert.ifError(err);
+
+      var theDatabase = client.db('integration_tests');
+      var theCollection = theDatabase.collection('MongoNetworkErrorTest');
+      var thisChangeStream = theCollection.watch(pipeline);
+      var mongodPID;
+
+      theDatabase.command({'serverStatus': 1}).then(function(serverStatus) {
+        assert.ok(serverStatus);
+        assert.equal(typeof serverStatus.pid, 'number');
+        mongodPID = serverStatus.pid;
+
+        return theCollection.insertOne({a: 1});
+      }).then(function() {
+        return theCollection.insertOne({b: 2});
+      }).then(function() {
+        return thisChangeStream.next();
+      }).then(function(change) {
+        // Check the cursor is the initial cursor
+        thisChangeStream.cursor.cursorNumber = 1;
+
+        // Check the document is the document we are expecting
+        assert.ok(change);
+        assert.equal(change.operationType, 'insert');
+        assert.equal(change.newDocument.a, 1);
+        assert.deepEqual(thisChangeStream.resumeToken, change._id);
+
+        // Suspend the mongod instance
+        process.kill(mongodPID, 'SIGSTOP');
+
+        // Get the next change stream document.
+        // Because the server is suspended, this should timeout and result in a MongoNetworkError
+        // The Change Stream should automatically attempt to reconnect once.
+        return thisChangeStream.next();
+      }).then(function () {
+        // We should never execute this line
+        assert.ok(false);
+      }).catch(function(err) {
+        assert.ok(err instanceof MongoNetworkError);
+
+        // Continue mongod execution
+        process.kill(mongodPID, 'SIGCONT');
+
+        test.done();
       });
 
     });
