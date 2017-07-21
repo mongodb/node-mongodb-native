@@ -4,6 +4,7 @@ var Query = require('../connection/commands').Query
   , retrieveBSON = require('../connection/utils').retrieveBSON
   , f = require('util').format
   , MongoError = require('../error')
+  , MongoNetworkError = require('../network_error')
   , getReadPreference = require('./shared').getReadPreference;
 
 var BSON = retrieveBSON(),
@@ -124,7 +125,7 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callback)
     // If we have a timed out query or a cursor that was killed
     if((r.responseFlags & (1 << 0)) != 0) {
       if(typeof callback != 'function') return;
-      return callback(new MongoError("cursor killed or timed out"), null);
+      return callback(new MongoNetworkError("cursor killed or timed out"), null);
     }
 
     if(!Array.isArray(r.documents) || r.documents.length == 0) {
@@ -182,7 +183,7 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
 
     // If we have a timed out query or a cursor that was killed
     if((r.responseFlags & (1 << 0)) != 0) {
-      return callback(new MongoError("cursor killed or timed out"), null);
+      return callback(new MongoNetworkError("cursor killed or timed out"), null);
     }
 
     // Raw, return all the extracted documents
