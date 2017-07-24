@@ -1,5 +1,6 @@
 var assert = require('assert');
 var MongoNetworkError = require('mongodb-core').MongoNetworkError;
+var ReadPreference = require('../../lib/read_preference');
 
 // Define the pipeline processing changes
 var pipeline = [
@@ -804,14 +805,18 @@ exports['Should not invalidate change stream on entire database when collection 
   }
 };
 
-exports['Should re-establish connection when a MongoNetworkError is encountered using promises'] = {
+exports['Should re-establish connection when a MongoNetworkError is encountered'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     var socketTimeoutMS = 500;
-    var client = new MongoClient(configuration.url(), {socketTimeoutMS: socketTimeoutMS});
+    var client = new MongoClient(configuration.url(), {
+      socketTimeoutMS: socketTimeoutMS,
+      readPreference: ReadPreference.SECONDARY,
+      validateOptions: true
+    });
 
     client.connect(function(err, client) {
       assert.ifError(err);
@@ -855,7 +860,6 @@ exports['Should re-establish connection when a MongoNetworkError is encountered 
         // Check a new cursor has been established
         assert.notEqual(thisChangeStream.cursor.cursorNumber, 1);
 
-        // The next document should be the one after the shouldThrowMongoNetworkError document
         assert.ok(change);
         assert.equal(change.operationType, 'insert');
         assert.equal(change.newDocument.b, 2);
@@ -904,9 +908,6 @@ exports['Should return MongoNetworkError after first retry attempt fails using p
       }).then(function() {
         return thisChangeStream.next();
       }).then(function(change) {
-        // Check the cursor is the initial cursor
-        thisChangeStream.cursor.cursorNumber = 1;
-
         // Check the document is the document we are expecting
         assert.ok(change);
         assert.equal(change.operationType, 'insert');
@@ -917,8 +918,7 @@ exports['Should return MongoNetworkError after first retry attempt fails using p
         process.kill(mongodPID, 'SIGSTOP');
 
         // Get the next change stream document.
-        // Because the server is suspended, this should timeout and result in a MongoNetworkError
-        // The Change Stream should automatically attempt to reconnect once.
+        // Because the server is suspended this will fail. After attempting to reconnect once, a MongoNetworkError will be returned.
         return thisChangeStream.next();
       }).then(function () {
         // We should never execute this line
@@ -929,35 +929,43 @@ exports['Should return MongoNetworkError after first retry attempt fails using p
         // Continue mongod execution
         process.kill(mongodPID, 'SIGCONT');
 
-        test.done();
+        thisChangeStream.close(function(err) {
+          assert.ifError(err);
+          setTimeout(test.done, 1100);
+        });
       });
-
     });
   }
 };
 
-exports['Should resume connection when a MongoNetworkError is encountered using imperative callback form'] = {
+exports['Should return MongoNetworkError after first retry attempt fails using callbacks'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
-    var client = new MongoClient(configuration.url());
+    var client = new MongoClient(configuration.url(), {
+      socketTimeoutMS: 500,
+      connectTimeoutMS: 100
+    });
 
     client.connect(function(err, client) {
       assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
+      var theCollection = theDatabase.collection('MongoNetworkErrorTest');
+      var thisChangeStream = theCollection.watch(pipeline);
+      var mongodPID;
 
-      var thisChangeStream = theDatabase.watch(pipeline);
-      thisChangeStream.cursor.initialCursor = true;
-
-      // Insert three documents in order, the second of which will cause the simulator to trigger a MongoNetworkError
-      theDatabase.collection('docs').insertOne({a: 1}, function(err) {
+      theDatabase.command({'serverStatus': 1}, function(err, serverStatus) {
         assert.ifError(err);
-        theDatabase.collection('docs').insertOne({shouldThrowMongoNetworkError: true}, function(err) {
+        assert.ok(serverStatus);
+        assert.equal(typeof serverStatus.pid, 'number');
+        mongodPID = serverStatus.pid;
+
+        theCollection.insertOne({a: 1}, function(err) {
           assert.ifError(err);
-          theDatabase.collection('docs').insertOne({b: 2}, function(err) {
+          theCollection.insertOne({b: 2}, function(err) {
             assert.ifError(err);
             thisChangeStream.next(function(err, change) {
               assert.ifError(err);
@@ -968,19 +976,19 @@ exports['Should resume connection when a MongoNetworkError is encountered using 
               assert.equal(change.newDocument.a, 1);
               assert.deepEqual(thisChangeStream.resumeToken, change._id);
 
-              // Get the next change stream document. This will cause the simulator to trigger a MongoNetworkError, and therefore attempt to reconnect
+              // Suspend the mongod instance
+              process.kill(mongodPID, 'SIGSTOP');
+
+              // Get the next change stream document.
+              // Because the server is suspended this will fail. After attempting to reconnect once, a MongoNetworkError will be returned.
               thisChangeStream.next(function(err, change) {
-                assert.ifError(err);
-                // Check a new cursor has been established
-                assert.notEqual(thisChangeStream.cursor.initialCursor, true);
+                assert.ok(err);
+                assert.equal(change, null);
+                assert.ok(err instanceof MongoNetworkError);
 
-                // The next document should be the one after the shouldThrowMongoNetworkError document
-                assert.ok(change);
-                assert.equal(change.operationType, 'insert');
-                assert.equal(change.newDocument.b, 2);
-                assert.deepEqual(thisChangeStream.resumeToken, change._id);
+                // Continue mongod execution
+                process.kill(mongodPID, 'SIGCONT');
 
-                // Close the change stream
                 thisChangeStream.close(function(err) {
                   assert.ifError(err);
                   setTimeout(test.done, 1100);
@@ -1199,6 +1207,40 @@ exports['Should support full document lookup with deleted documents'] = {
       }).catch(function(err) {
         assert.ifError(err);
       });
+    });
+  }
+};
+
+
+exports['Should create Change Streams with correct read preferences'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var client = new MongoClient(configuration.url());
+
+    client.connect(function(err, client) {
+      assert.ifError(err);
+
+      // Should get preference from database
+      var theDatabase = client.db('integration_tests', {readPreference: ReadPreference.PRIMARY_PREFERRED});
+      var thisChangeStream1 = theDatabase.watch(pipeline);
+      assert.deepEqual(thisChangeStream1.cursor.readPreference.preference, ReadPreference.PRIMARY_PREFERRED);
+
+      // Should get preference from collection
+      var theCollection = theDatabase.collection('docs', {readPreference: ReadPreference.SECONDARY_PREFERRED});
+      var thisChangeStream2 = theCollection.watch(pipeline);
+      assert.deepEqual(thisChangeStream2.cursor.readPreference.preference, ReadPreference.SECONDARY_PREFERRED);
+
+      // Should get preference from Change Stream options
+      var thisChangeStream3 = theCollection.watch(pipeline, {readPreference: ReadPreference.NEAREST});
+      assert.deepEqual(thisChangeStream3.cursor.readPreference.preference, ReadPreference.NEAREST);
+
+      Promise.all([thisChangeStream1.close(), thisChangeStream2.close(), thisChangeStream3.close()]).then(function(){
+        setTimeout(test.done, 1100);
+      });
+
     });
   }
 };
