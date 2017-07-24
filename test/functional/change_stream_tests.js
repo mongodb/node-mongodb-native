@@ -25,18 +25,18 @@ exports['Should create a Change Stream on a database and emit change events'] = 
       var thisChangeStream = theDatabase.watch(pipeline);
 
       // Attach first event listener
-      thisChangeStream.once('change', function(changeNotification) {
-        assert.equal(changeNotification.operationType, 'insert');
-        assert.equal(changeNotification.newDocument.a, 1);
-        assert.equal(changeNotification.ns.db, 'integration_tests');
-        assert.equal(changeNotification.ns.coll, 'docs');
-        assert.ok(!(changeNotification.documentKey));
-        assert.equal(changeNotification.comment, 'The documentKey field has been projected out of this document.');
+      thisChangeStream.once('change', function(change) {
+        assert.equal(change.operationType, 'insert');
+        assert.equal(change.newDocument.a, 1);
+        assert.equal(change.ns.db, 'integration_tests');
+        assert.equal(change.ns.coll, 'docs');
+        assert.ok(!(change.documentKey));
+        assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
 
         // Attach second event listener
-        thisChangeStream.once('change', function(changeNotification) {
-          assert.equal(changeNotification.operationType, 'update');
-          assert.equal(changeNotification.updateDescription.updatedFields.a, 3);
+        thisChangeStream.once('change', function(change) {
+          assert.equal(change.operationType, 'update');
+          assert.equal(change.updateDescription.updatedFields.a, 3);
 
           // Close the change stream
           thisChangeStream.close(function(err) {
@@ -86,14 +86,14 @@ exports['Should create a Change Stream on a database and get change events throu
           thisChangeStream.hasNext(function(err, hasNext) {
             assert.ifError(err);
             assert.equal(true, hasNext);
-            thisChangeStream.next(function(err, changeNotification) {
+            thisChangeStream.next(function(err, change) {
               assert.ifError(err);
-              assert.equal(changeNotification.operationType, 'insert');
-              assert.equal(changeNotification.newDocument.b, 2);
-              assert.equal(changeNotification.ns.db, 'integration_tests');
-              assert.equal(changeNotification.ns.coll, 'docs');
-              assert.ok(!(changeNotification.documentKey));
-              assert.equal(changeNotification.comment, 'The documentKey field has been projected out of this document.');
+              assert.equal(change.operationType, 'insert');
+              assert.equal(change.newDocument.b, 2);
+              assert.equal(change.ns.db, 'integration_tests');
+              assert.equal(change.ns.coll, 'docs');
+              assert.ok(!(change.documentKey));
+              assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
 
               // Trigger the second database event
               theDatabase.collection('docs').update({b:2}, {$inc: {b:2}}, function (err) {
@@ -101,9 +101,9 @@ exports['Should create a Change Stream on a database and get change events throu
                 thisChangeStream.hasNext(function(err, hasNext) {
                   assert.ifError(err);
                   assert.equal(true, hasNext);
-                  thisChangeStream.next(function(err, changeNotification) {
+                  thisChangeStream.next(function(err, change) {
                     assert.ifError(err);
-                    assert.equal(changeNotification.operationType, 'update');
+                    assert.equal(change.operationType, 'update');
 
                     // Close the change stream
                     thisChangeStream.close(function(err) {
@@ -151,13 +151,13 @@ exports['Should create a Change Stream on a database and get change events throu
       }).then(function(hasNext) {
         assert.equal(true, hasNext);
         return thisChangeStream.next();
-      }).then(function(changeNotification) {
-        assert.equal(changeNotification.operationType, 'insert');
-        assert.equal(changeNotification.newDocument.b, 2);
-        assert.equal(changeNotification.ns.db, 'integration_tests');
-        assert.equal(changeNotification.ns.coll, 'docs');
-        assert.ok(!(changeNotification.documentKey));
-        assert.equal(changeNotification.comment, 'The documentKey field has been projected out of this document.');
+      }).then(function(change) {
+        assert.equal(change.operationType, 'insert');
+        assert.equal(change.newDocument.b, 2);
+        assert.equal(change.ns.db, 'integration_tests');
+        assert.equal(change.ns.coll, 'docs');
+        assert.ok(!(change.documentKey));
+        assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
 
         // Trigger the second database event
         return theDatabase.collection('docs').update({b:2}, {$inc: {b:2}});
@@ -166,8 +166,8 @@ exports['Should create a Change Stream on a database and get change events throu
       }).then(function(hasNext) {
         assert.equal(true, hasNext);
         return thisChangeStream.next();
-      }).then(function(changeNotification) {
-        assert.equal(changeNotification.operationType, 'update');
+      }).then(function(change) {
+        assert.equal(change.operationType, 'update');
         return thisChangeStream.close();
       }).then(function() {
         setTimeout(test.done, 1100);
@@ -195,18 +195,18 @@ exports['Should create a Change Stream on a collection and emit change events'] 
       var thisChangeStream = theCollection.watch(pipeline);
 
       // Attach first event listener
-      thisChangeStream.once('change', function(changeNotification) {
-        assert.equal(changeNotification.operationType, 'insert');
-        assert.equal(changeNotification.newDocument.d, 4);
-        assert.equal(changeNotification.ns.db, 'integration_tests');
-        assert.equal(changeNotification.ns.coll, 'docs');
-        assert.ok(!(changeNotification.documentKey));
-        assert.equal(changeNotification.comment, 'The documentKey field has been projected out of this document.');
+      thisChangeStream.once('change', function(change) {
+        assert.equal(change.operationType, 'insert');
+        assert.equal(change.newDocument.d, 4);
+        assert.equal(change.ns.db, 'integration_tests');
+        assert.equal(change.ns.coll, 'docs');
+        assert.ok(!(change.documentKey));
+        assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
 
         // Attach second event listener
-        thisChangeStream.once('change', function(changeNotification) {
-          assert.equal(changeNotification.operationType, 'update');
-          assert.equal(changeNotification.updateDescription.updatedFields.d, 6);
+        thisChangeStream.once('change', function(change) {
+          assert.equal(change.operationType, 'update');
+          assert.equal(change.updateDescription.updatedFields.d, 6);
 
           // Close the change stream
           thisChangeStream.close(function(err) {
@@ -256,14 +256,14 @@ exports['Should create a Change Stream on a collection and get change events thr
           thisChangeStream.hasNext(function(err, hasNext) {
             assert.ifError(err);
             assert.equal(true, hasNext);
-            thisChangeStream.next(function(err, changeNotification) {
+            thisChangeStream.next(function(err, change) {
               assert.ifError(err);
-              assert.equal(changeNotification.operationType, 'insert');
-              assert.equal(changeNotification.newDocument.e, 5);
-              assert.equal(changeNotification.ns.db, 'integration_tests');
-              assert.equal(changeNotification.ns.coll, 'docs');
-              assert.ok(!(changeNotification.documentKey));
-              assert.equal(changeNotification.comment, 'The documentKey field has been projected out of this document.');
+              assert.equal(change.operationType, 'insert');
+              assert.equal(change.newDocument.e, 5);
+              assert.equal(change.ns.db, 'integration_tests');
+              assert.equal(change.ns.coll, 'docs');
+              assert.ok(!(change.documentKey));
+              assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
 
               // Trigger the second database event
               theCollection.update({e:5}, {$inc: {e:2}}, function (err) {
@@ -271,9 +271,9 @@ exports['Should create a Change Stream on a collection and get change events thr
                 thisChangeStream.hasNext(function(err, hasNext) {
                   assert.ifError(err);
                   assert.equal(true, hasNext);
-                  thisChangeStream.next(function(err, changeNotification) {
+                  thisChangeStream.next(function(err, change) {
                     assert.ifError(err);
-                    assert.equal(changeNotification.operationType, 'update');
+                    assert.equal(change.operationType, 'update');
                     // Close the change stream
                     thisChangeStream.close(function(err) {
                       assert.ifError(err);
@@ -318,25 +318,25 @@ exports['Should support creating multiple Change Streams of the same database'] 
           thisChangeStream1.hasNext(function(err, hasNext) {
             assert.ifError(err);
             assert.equal(true, hasNext);
-            thisChangeStream1.next(function(err, changeNotification) {
+            thisChangeStream1.next(function(err, change) {
               assert.ifError(err);
-              assert.equal(changeNotification.operationType, 'insert');
-              assert.equal(changeNotification.newDocument.c, 3);
-              assert.equal(changeNotification.ns.db, 'integration_tests');
-              assert.equal(changeNotification.ns.coll, 'docs');
-              assert.equal(changeNotification.changeStreamNumber, 1);
+              assert.equal(change.operationType, 'insert');
+              assert.equal(change.newDocument.c, 3);
+              assert.equal(change.ns.db, 'integration_tests');
+              assert.equal(change.ns.coll, 'docs');
+              assert.equal(change.changeStreamNumber, 1);
 
               // Fetch the change notification from the second Change Stream
               thisChangeStream2.hasNext(function(err, hasNext) {
                 assert.ifError(err);
                 assert.equal(true, hasNext);
-                thisChangeStream2.next(function(err, changeNotification) {
+                thisChangeStream2.next(function(err, change) {
                   assert.ifError(err);
-                  assert.equal(changeNotification.operationType, 'insert');
-                  assert.equal(changeNotification.newDocument.c, 3);
-                  assert.equal(changeNotification.ns.db, 'integration_tests');
-                  assert.equal(changeNotification.ns.coll, 'docs');
-                  assert.equal(changeNotification.changeStreamNumber, 2);
+                  assert.equal(change.operationType, 'insert');
+                  assert.equal(change.newDocument.c, 3);
+                  assert.equal(change.ns.db, 'integration_tests');
+                  assert.equal(change.ns.coll, 'docs');
+                  assert.equal(change.changeStreamNumber, 2);
 
                   // Close the change streams
                   thisChangeStream1.close(function(err) {
@@ -374,8 +374,8 @@ exports['Should properly close Change Stream cursor'] = {
       var thisChangeStream = theDatabase.watch(pipeline);
 
       // Attach first event listener
-      thisChangeStream.once('change', function(changeNotification) {
-        assert.equal(changeNotification.operationType, 'insert');
+      thisChangeStream.once('change', function(change) {
+        assert.equal(change.operationType, 'insert');
 
         // Check the cursor is open
         assert.equal(thisChangeStream.isClosed(), false);
@@ -448,9 +448,9 @@ exports['Should cache the change stream resume token using imperative callback f
           thisChangeStream.hasNext(function(err, hasNext) {
             assert.ifError(err);
             assert.equal(true, hasNext);
-            thisChangeStream.next(function(err, changeNotification) {
+            thisChangeStream.next(function(err, change) {
               assert.ifError(err);
-              assert.deepEqual(thisChangeStream.resumeToken, changeNotification._id);
+              assert.deepEqual(thisChangeStream.resumeToken, change._id);
 
               // Close the change stream
               thisChangeStream.close(function(err) {
@@ -492,8 +492,8 @@ exports['Should cache the change stream resume token using promises'] = {
           // Fetch the change notification
           thisChangeStream.hasNext().then(function(hasNext) {
             assert.equal(true, hasNext);
-            thisChangeStream.next().then(function(changeNotification) {
-              assert.deepEqual(thisChangeStream.resumeToken, changeNotification._id);
+            thisChangeStream.next().then(function(change) {
+              assert.deepEqual(thisChangeStream.resumeToken, change._id);
 
               // Close the change stream
               thisChangeStream.close().then(function() {
@@ -526,8 +526,8 @@ exports['Should cache the change stream resume token using event listeners'] = {
 
       var thisChangeStream = theDatabase.watch(pipeline);
 
-      thisChangeStream.once('change', function(changeNotification) {
-        assert.deepEqual(thisChangeStream.resumeToken, changeNotification._id);
+      thisChangeStream.once('change', function(change) {
+        assert.deepEqual(thisChangeStream.resumeToken, change._id);
         // Close the change stream
         thisChangeStream.close().then(function() {
           setTimeout(function() {
@@ -637,18 +637,18 @@ exports['Should invalidate change stream on collection rename using event listen
       var thisChangeStream = theDatabase.collection('docs').watch(pipeline);
 
       // Attach first event listener
-      thisChangeStream.once('change', function(changeNotification) {
-        assert.equal(changeNotification.operationType, 'insert');
-        assert.equal(changeNotification.newDocument.a, 1);
-        assert.equal(changeNotification.ns.db, 'integration_tests');
-        assert.equal(changeNotification.ns.coll, 'docs');
-        assert.ok(!(changeNotification.documentKey));
-        assert.equal(changeNotification.comment, 'The documentKey field has been projected out of this document.');
+      thisChangeStream.once('change', function(change) {
+        assert.equal(change.operationType, 'insert');
+        assert.equal(change.newDocument.a, 1);
+        assert.equal(change.ns.db, 'integration_tests');
+        assert.equal(change.ns.coll, 'docs');
+        assert.ok(!(change.documentKey));
+        assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
 
         // Attach second event listener
-        thisChangeStream.once('change', function(changeNotification) {
+        thisChangeStream.once('change', function(change) {
           // Check the cursor invalidation has occured
-          assert.equal(changeNotification.operationType, 'invalidate');
+          assert.equal(change.operationType, 'invalidate');
           assert.equal(thisChangeStream.isClosed(), true);
 
           setTimeout(test.done, 1100);
@@ -1038,22 +1038,22 @@ exports['Should resume from point in time using user-provided resumeAfter'] = {
       }).then(function(hasNext) {
         assert.equal(true, hasNext);
         return thisFirstChangeStream.next();
-      }).then(function(changeNotification) {
-        assert.equal(changeNotification.operationType, 'insert');
-        assert.equal(changeNotification.newDocument.f, 6);
+      }).then(function(change) {
+        assert.equal(change.operationType, 'insert');
+        assert.equal(change.newDocument.f, 6);
 
         // Save the resumeToken
-        resumeToken = changeNotification._id;
+        resumeToken = change._id;
 
         return thisFirstChangeStream.next();
-      }).then(function(changeNotification) {
-        assert.equal(changeNotification.operationType, 'insert');
-        assert.equal(changeNotification.newDocument.g, 7);
+      }).then(function(change) {
+        assert.equal(change.operationType, 'insert');
+        assert.equal(change.newDocument.g, 7);
 
         return thisFirstChangeStream.next();
-      }).then(function(changeNotification) {
-        assert.equal(changeNotification.operationType, 'insert');
-        assert.equal(changeNotification.newDocument.h, 8);
+      }).then(function(change) {
+        assert.equal(change.operationType, 'insert');
+        assert.equal(change.newDocument.h, 8);
 
         return thisFirstChangeStream.close();
       }).then(function() {
@@ -1068,14 +1068,14 @@ exports['Should resume from point in time using user-provided resumeAfter'] = {
       }).then(function(hasNext) {
         assert.equal(true, hasNext);
         return thisSecondChangeStream.next();
-      }).then(function(changeNotification) {
-        assert.equal(changeNotification.operationType, 'insert');
-        assert.equal(changeNotification.newDocument.g, 7);
+      }).then(function(change) {
+        assert.equal(change.operationType, 'insert');
+        assert.equal(change.newDocument.g, 7);
 
         return thisSecondChangeStream.next();
-      }).then(function(changeNotification) {
-        assert.equal(changeNotification.operationType, 'insert');
-        assert.equal(changeNotification.newDocument.h, 8);
+      }).then(function(change) {
+        assert.equal(change.operationType, 'insert');
+        assert.equal(change.newDocument.h, 8);
 
         return thisSecondChangeStream.close();
       }).then(function() {
@@ -1115,13 +1115,13 @@ exports['Should support full document lookup'] = {
       }).then(function(hasNext) {
         assert.equal(true, hasNext);
         return thisChangeStream.next();
-      }).then(function(changeNotification) {
-        assert.equal(changeNotification.operationType, 'insert');
-        assert.equal(changeNotification.newDocument.f, 128);
-        assert.equal(changeNotification.ns.db, 'integration_tests');
-        assert.equal(changeNotification.ns.coll, 'docs');
-        assert.ok(!(changeNotification.documentKey));
-        assert.equal(changeNotification.comment, 'The documentKey field has been projected out of this document.');
+      }).then(function(change) {
+        assert.equal(change.operationType, 'insert');
+        assert.equal(change.newDocument.f, 128);
+        assert.equal(change.ns.db, 'integration_tests');
+        assert.equal(change.ns.coll, 'docs');
+        assert.ok(!(change.documentKey));
+        assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
 
         // Trigger the second database event
         return theDatabase.collection('docs').update({f: 128}, {$set: {c:2}});
@@ -1130,13 +1130,13 @@ exports['Should support full document lookup'] = {
       }).then(function(hasNext) {
         assert.equal(true, hasNext);
         return thisChangeStream.next();
-      }).then(function(changeNotification) {
-        assert.equal(changeNotification.operationType, 'update');
+      }).then(function(change) {
+        assert.equal(change.operationType, 'update');
 
         // Check the full lookedUpDocument is present
-        assert.ok(changeNotification.lookedUpDocument);
-        assert.equal(changeNotification.lookedUpDocument.f, 128);
-        assert.equal(changeNotification.lookedUpDocument.c, 2);
+        assert.ok(change.lookedUpDocument);
+        assert.equal(change.lookedUpDocument.f, 128);
+        assert.equal(change.lookedUpDocument.c, 2);
 
         return thisChangeStream.close();
       }).then(function() {
@@ -1180,13 +1180,13 @@ exports['Should support full document lookup with deleted documents'] = {
       }).then(function(hasNext) {
         assert.equal(true, hasNext);
         return thisChangeStream.next();
-      }).then(function(changeNotification) {
-        assert.equal(changeNotification.operationType, 'insert');
-        assert.equal(changeNotification.newDocument.i, 128);
-        assert.equal(changeNotification.ns.db, 'integration_tests');
-        assert.equal(changeNotification.ns.coll, 'docs');
-        assert.ok(!(changeNotification.documentKey));
-        assert.equal(changeNotification.comment, 'The documentKey field has been projected out of this document.');
+      }).then(function(change) {
+        assert.equal(change.operationType, 'insert');
+        assert.equal(change.newDocument.i, 128);
+        assert.equal(change.ns.db, 'integration_tests');
+        assert.equal(change.ns.coll, 'docs');
+        assert.ok(!(change.documentKey));
+        assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
 
         // Trigger the second database event
         return theDatabase.collection('docs').update({i: 128}, {$set: {c:2}});
@@ -1195,11 +1195,11 @@ exports['Should support full document lookup with deleted documents'] = {
       }).then(function(hasNext) {
         assert.equal(true, hasNext);
         return thisChangeStream.next();
-      }).then(function(changeNotification) {
-        assert.equal(changeNotification.operationType, 'delete');
+      }).then(function(change) {
+        assert.equal(change.operationType, 'delete');
 
         // Check the full lookedUpDocument is present
-        assert.equal(changeNotification.lookedUpDocument, null);
+        assert.equal(change.lookedUpDocument, null);
 
         return thisChangeStream.close();
       }).then(function() {
