@@ -1288,85 +1288,57 @@ exports['Should support piping of Change Streams'] = {
     });
   }
 };
-// exports['Should support piping of Change Streams'] = {
-//   metadata: { requires: { topology: 'replicaset' } },
-//
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var fs = require('fs');
-//     var zlib = require('zlib');
-//     var MongoClient = configuration.require.MongoClient;
-//     var client = new MongoClient(configuration.url());
-//
-//     client.connect(function(err, client) {
-//       assert.ifError(err);
-//
-//       var theDatabase = client.db('integration_tests');
-//       var theCollection = theDatabase.collection('pipeTest');
-//       var thisChangeStream = theCollection.watch(pipeline);
-//
-//       var filename = '/tmp/_nodemongodbnative_stream_out.txt';
-//       var outStream = fs.createWriteStream(filename);
-//       var zlibTransformStream = zlib.createDeflate();
-//
-//       // Make a stream transforming to JSON and piping to the file
-//       var thisChangeStreamStream = thisChangeStream.cursor.stream({
-//         transform: function (doc) {
-//           console.log('transforming doc:', doc);
-//           return JSON.stringify(doc);
-//         }
-//       });
-//       var pipedStream = thisChangeStreamStream.pipe(zlibTransformStream);//.pipe(outStream);
-//       // thisChangeStreamStream.pipe(outStream);
-//
-//       //.pipe(zlibTransformStream);
-//       // var x = thisChangeStream.stream({transform: JSON.stringify})/*.pipe(zlibTransformStream)*/.pipe(outStream);
-//
-//       pipedStream.on('data', function(data) {
-//         console.log('new data:');
-//         console.log(data);
-//       });
-//       pipedStream.on('error', function(err) {
-//         assert.ifError(err);
-//       });
-//       pipedStream.on('close', function() {
-//         console.log('close');
-//       });
-//       pipedStream.on('end', function() {
-//         console.log('end');
-//       });
-//       pipedStream.on('readable', function() {
-//         console.log('readable');
-//       });
-//
-//       // Listen for changes to the file
-//       // var watcher = fs.watch(filename, function(eventType) {
-//       //   assert.equal(eventType, 'change');
-//       //
-//       //   var fileContents = fs.readFileSync(filename, 'utf8');
-//       //   var parsedFileContents = JSON.parse(fileContents);
-//       //   assert.equal(parsedFileContents.newDocument.a, 1);
-//       //
-//       //   watcher.close();
-//       //
-//       //   thisChangeStream.close(function(err) {
-//       //     assert.ifError(err);
-//       //     setTimeout(test.done, 1000);
-//       //   });
-//       // });
-//
-//       theCollection.insertMany([{a: 1}, {a: 1}, {a: 1}, {a: 1}, {a: 1}, {a: 1}, {a: 1}], function(err) {
-//         assert.ifError(err);
-//
-//         // var zlibTransformStream1 = zlib.createDeflate();
-//         // var stream = theCollection.find().stream({transform: function(doc) { return JSON.stringify(doc); }});
-//         // // stream.pipe(zlibTransformStream1).pipe(outStream);
-//         // stream.pipe(outStream);
-//
-//       });
-//     });
-//   }
-// };
+
+// This test currently fails because it seems that tailable/awaitdata cursors
+// are not compatible with chained pipes (such as ChangeStream -> zlib -> file).
+// Regular cursors do support chained pipes. Maybe ChangeStream's contained cursor
+// is failing to emit some event that zlib is waiting on?
+exports['Should support multiple piping of Change Streams'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var fs = require('fs');
+    var zlib = require('zlib');
+    var MongoClient = configuration.require.MongoClient;
+    var client = new MongoClient(configuration.url());
+
+    client.connect(function(err, client) {
+      assert.ifError(err);
+
+      var theDatabase = client.db('integration_tests');
+      var theCollection = theDatabase.collection('pipeTest');
+      var thisChangeStream = theCollection.watch(pipeline);
+
+      var filename = '/tmp/_nodemongodbnative_stream_zlib_out.txt';
+      var outStream = fs.createWriteStream(filename);
+      var zlibTransformStream = zlib.createDeflate();
+
+      // Make a stream transforming to JSON, compressing using zlib and piping to file
+      thisChangeStream.stream({transform: JSON.stringify}).pipe(zlibTransformStream).pipe(outStream);
+
+      // Listen for changes to the file
+      var watcher = fs.watch(filename, function(eventType) {
+        assert.equal(eventType, 'change');
+
+        var fileContents = fs.readFileSync(filename, 'utf8');
+        var parsedFileContents = JSON.parse(fileContents);
+        assert.equal(parsedFileContents.newDocument.a, 1);
+
+        watcher.close();
+
+        thisChangeStream.close(function(err) {
+          assert.ifError(err);
+          setTimeout(test.done, 1000);
+        });
+      });
+
+      theCollection.insert({a: 1}, function(err) {
+        assert.ifError(err);
+      });
+    });
+  }
+};
 
 exports['Should error when attempting to create a Change Stream against a stand-alone server'] = {
   metadata: { requires: { topology: 'single' } },
