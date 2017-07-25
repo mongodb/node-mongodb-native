@@ -1318,16 +1318,17 @@ ReplSet.prototype.logout = function(dbName, callback) {
 }
 
 /**
- * Perform one or more remove operations
+ * Get a new cursor
  * @method
  * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
- * @param {{object}|{Long}} cmd Can be either a command returning a cursor or a cursorId
+ * @param {object|Long} cmd Can be either a command returning a cursor or a cursorId
+ * @param {object} [options] Options for the cursor
  * @param {object} [options.batchSize=0] Batchsize for the operation
  * @param {array} [options.documents=[]] Initial documents list for cursor
  * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
  * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
- * @param {opResultCallback} callback A callback function
+ * @returns {Cursor}
  */
 ReplSet.prototype.cursor = function(ns, cmd, cursorOptions) {
   cursorOptions = cursorOptions || {};
