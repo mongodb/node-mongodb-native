@@ -25,7 +25,7 @@ exports['Should create a Change Stream on a database and emit change events'] = 
       var thisChangeStream = theDatabase.watch(pipeline);
 
       // Attach first event listener
-      thisChangeStream.once('change', function(change) {
+      thisChangeStream.once('data', function(change) {
         assert.equal(change.operationType, 'insert');
         assert.equal(change.newDocument.a, 1);
         assert.equal(change.ns.db, 'integration_tests');
@@ -34,7 +34,7 @@ exports['Should create a Change Stream on a database and emit change events'] = 
         assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
 
         // Attach second event listener
-        thisChangeStream.once('change', function(change) {
+        thisChangeStream.once('data', function(change) {
           assert.equal(change.operationType, 'update');
           assert.equal(change.updateDescription.updatedFields.a, 3);
 
@@ -178,7 +178,7 @@ exports['Should create a Change Stream on a database and get change events throu
   }
 };
 
-exports['Should create a Change Stream on a collection and emit change events'] = {
+exports['Should create a Change Stream on a collection and emit data events'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
@@ -195,7 +195,7 @@ exports['Should create a Change Stream on a collection and emit change events'] 
       var thisChangeStream = theCollection.watch(pipeline);
 
       // Attach first event listener
-      thisChangeStream.once('change', function(change) {
+      thisChangeStream.once('data', function(change) {
         assert.equal(change.operationType, 'insert');
         assert.equal(change.newDocument.d, 4);
         assert.equal(change.ns.db, 'integration_tests');
@@ -204,7 +204,7 @@ exports['Should create a Change Stream on a collection and emit change events'] 
         assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
 
         // Attach second event listener
-        thisChangeStream.once('change', function(change) {
+        thisChangeStream.once('data', function(change) {
           assert.equal(change.operationType, 'update');
           assert.equal(change.updateDescription.updatedFields.d, 6);
 
@@ -374,7 +374,7 @@ exports['Should properly close Change Stream cursor'] = {
       var thisChangeStream = theDatabase.watch(pipeline);
 
       // Attach first event listener
-      thisChangeStream.once('change', function(change) {
+      thisChangeStream.once('data', function(change) {
         assert.equal(change.operationType, 'insert');
 
         // Check the cursor is open
@@ -526,7 +526,7 @@ exports['Should cache the change stream resume token using event listeners'] = {
 
       var thisChangeStream = theDatabase.watch(pipeline);
 
-      thisChangeStream.once('change', function(change) {
+      thisChangeStream.once('data', function(change) {
         assert.deepEqual(thisChangeStream.resumeToken, change._id);
         // Close the change stream
         thisChangeStream.close().then(function() {
@@ -600,7 +600,7 @@ exports['Should error if resume token projected out of change stream document us
       var thisChangeStream = theDatabase.watch([{$project: {_id: false}}]);
 
       // Fetch the change notification
-      thisChangeStream.on('change', function() {
+      thisChangeStream.on('data', function() {
         assert.ok(false);
       });
 
@@ -637,7 +637,7 @@ exports['Should invalidate change stream on collection rename using event listen
       var thisChangeStream = theDatabase.collection('docs').watch(pipeline);
 
       // Attach first event listener
-      thisChangeStream.once('change', function(change) {
+      thisChangeStream.once('data', function(change) {
         assert.equal(change.operationType, 'insert');
         assert.equal(change.newDocument.a, 1);
         assert.equal(change.ns.db, 'integration_tests');
@@ -646,7 +646,7 @@ exports['Should invalidate change stream on collection rename using event listen
         assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
 
         // Attach second event listener
-        thisChangeStream.once('change', function(change) {
+        thisChangeStream.once('data', function(change) {
           // Check the cursor invalidation has occured
           assert.equal(change.operationType, 'invalidate');
           assert.equal(thisChangeStream.isClosed(), true);
@@ -1210,7 +1210,6 @@ exports['Should support full document lookup with deleted documents'] = {
     });
   }
 };
-
 
 exports['Should create Change Streams with correct read preferences'] = {
   metadata: { requires: { topology: 'replicaset' } },
