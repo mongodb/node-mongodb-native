@@ -3,8 +3,8 @@
 var Query = require('../connection/commands').Query
   , retrieveBSON = require('../connection/utils').retrieveBSON
   , f = require('util').format
-  , MongoError = require('../error')
-  , MongoNetworkError = require('../network_error')
+  , MongoError = require('../error').MongoError
+  , MongoNetworkError = require('../error').MongoNetworkError
   , getReadPreference = require('./shared').getReadPreference;
 
 var BSON = retrieveBSON(),
@@ -195,7 +195,7 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
 
     // We have an error detected
     if(r.documents[0].ok == 0) {
-      return callback(MongoError.create(r.documents[0]));
+      return callback(new MongoError(r.documents[0]));
     }
 
     // Ensure we have a Long valid cursor id

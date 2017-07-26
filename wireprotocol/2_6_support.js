@@ -6,7 +6,7 @@ var copy = require('../connection/utils').copy
   , GetMore = require('../connection/commands').GetMore
   , Query = require('../connection/commands').Query
   , f = require('util').format
-  , MongoError = require('../error')
+  , MongoError = require('../error').MongoError
   , getReadPreference = require('./shared').getReadPreference;
 
 var BSON = retrieveBSON(),

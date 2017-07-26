@@ -1,7 +1,7 @@
 "use strict";
 
 var f = require('util').format
-  , MongoError = require('../error');
+  , MongoError = require('../error').MongoError;
 
 // Filters for classes
 var classFilters = {};

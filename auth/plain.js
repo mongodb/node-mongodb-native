@@ -6,7 +6,7 @@ var f = require('util').format
   , Binary = BSON.Binary
   , retrieveBSON = require('../connection/utils').retrieveBSON
   , Query = require('../connection/commands').Query
-  , MongoError = require('../error');
+  , MongoError = require('../error').MongoError;
 
 var BSON = retrieveBSON();
 

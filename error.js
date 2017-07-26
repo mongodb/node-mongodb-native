@@ -1,16 +1,33 @@
 "use strict";
 
+var util = require('util');
+
 /**
  * Creates a new MongoError
  * @class
  * @augments Error
- * @param {string} message The error message
+ * @param {Error|string|object} message The error message
+ * @property {string} message The error message
+ * @property {string} stack The error call stack
  * @return {MongoError} A MongoError instance
  */
 function MongoError(message) {
   this.name = 'MongoError';
-  this.message = message;
-  Error.captureStackTrace(this, MongoError);
+
+  if (message instanceof Error) {
+    this.message = message.message;
+    this.stack = message.stack;
+  } else {
+    if (typeof message === 'string') {
+      this.message = message;
+    } else {
+      this.message = message.message || message.errmsg || message.$err || 'n/a';
+      for (var name in message) {
+        this[name] = message[name];
+      }
+    }
+    Error.captureStackTrace(this, MongoError);
+  }
 }
 
 /**
@@ -18,27 +35,31 @@ function MongoError(message) {
  * @method
  * @param {Error|string|object} options The options used to create the error.
  * @return {MongoError} A MongoError instance
+ * @deprecated Use new MongoError() instead.
  */
 MongoError.create = function(options) {
-  var err = null;
-
-  if(options instanceof Error) {
-    err = new MongoError(options.message);
-    err.stack = options.stack;
-  } else if(typeof options == 'string') {
-    err = new MongoError(options);
-  } else {
-    err = new MongoError(options.message || options.errmsg || options.$err || "n/a");
-    // Other options
-    for(var name in options) {
-      err[name] = options[name];
-    }
-  }
-
-  return err;
+  return new MongoError(options);
 }
 
 // Extend JavaScript error
 MongoError.prototype = new Error;
 
-module.exports = MongoError;
+/**
+ * Creates a new MongoNetworkError
+ * @class
+ * @param {Error|string|object} message The error message
+ * @property {string} message The error message
+ * @property {string} stack The error call stack
+ * @return {MongoNetworkError} A MongoNetworkError instance
+ * @extends {MongoError}
+ */
+var MongoNetworkError = function(message) {
+  MongoError.call(this, message);
+  this.name = 'MongoNetworkError';
+};
+util.inherits(MongoNetworkError, MongoError);
+
+module.exports = {
+  MongoError: MongoError,
+  MongoNetworkError: MongoNetworkError
+};

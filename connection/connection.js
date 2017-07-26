@@ -10,7 +10,7 @@ var inherits = require('util').inherits
   , parseHeader = require('../wireprotocol/shared').parseHeader
   , decompress = require('../wireprotocol/compression').decompress
   , Response = require('./commands').Response
-  , MongoNetworkError = require('../network_error')
+  , MongoNetworkError = require('../error').MongoNetworkError
   , Logger = require('./logger')
   , zlib = require('zlib')
   , Snappy = require('./utils').retrieveSnappy()
@@ -190,7 +190,7 @@ var errorHandler = function(self) {
     // Debug information
     if(self.logger.isDebug()) self.logger.debug(f('connection %s for [%s:%s] errored out with [%s]', self.id, self.host, self.port, JSON.stringify(err)));
     // Emit the error
-    if(self.listeners('error').length > 0) self.emit("error", MongoNetworkError.create(err), self);
+    if(self.listeners('error').length > 0) self.emit("error", new MongoNetworkError(err), self);
   }
 }
 
@@ -201,7 +201,7 @@ var timeoutHandler = function(self) {
     if(self.logger.isDebug()) self.logger.debug(f('connection %s for [%s:%s] timed out', self.id, self.host, self.port));
     // Emit timeout error
     self.emit("timeout"
-      , MongoNetworkError.create(f("connection %s to %s:%s timed out", self.id, self.host, self.port))
+      , new MongoNetworkError(f("connection %s to %s:%s timed out", self.id, self.host, self.port))
       , self);
   }
 }
@@ -215,7 +215,7 @@ var closeHandler = function(self) {
     // Emit close event
     if(!hadError) {
       self.emit("close"
-        , MongoNetworkError.create(f("connection %s to %s:%s closed", self.id, self.host, self.port))
+        , new MongoNetworkError(f("connection %s to %s:%s closed", self.id, self.host, self.port))
         , self);
     }
   }

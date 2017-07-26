@@ -4,7 +4,7 @@ var f = require('util').format
   , crypto = require('crypto')
   , retrieveBSON = require('../connection/utils').retrieveBSON
   , Query = require('../connection/commands').Query
-  , MongoError = require('../error');
+  , MongoError = require('../error').MongoError;
 
 var BSON = retrieveBSON(),
   Binary = BSON.Binary;

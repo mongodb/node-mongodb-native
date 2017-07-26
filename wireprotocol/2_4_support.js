@@ -10,7 +10,7 @@ var Insert = require('./commands').Insert
   , Query = require('../connection/commands').Query
   , f = require('util').format
   , CommandResult = require('../connection/command_result')
-  , MongoError = require('../error')
+  , MongoError = require('../error').MongoError
   , getReadPreference = require('./shared').getReadPreference;
 
 var BSON = retrieveBSON(),

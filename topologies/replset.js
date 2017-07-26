@@ -7,7 +7,7 @@ var inherits = require('util').inherits,
   BasicCursor = require('../cursor'),
   retrieveBSON = require('../connection/utils').retrieveBSON,
   Logger = require('../connection/logger'),
-  MongoError = require('../error'),
+  MongoError = require('../error').MongoError,
   Server = require('./server'),
   ReplSetState = require('./replset_state'),
   assign = require('../utils').assign,
@@ -1223,7 +1223,7 @@ ReplSet.prototype.auth = function(mechanism, db) {
           // Remove the entry from the stored authentication contexts
           self.s.authenticationContexts.splice(currentContextIndex, 0);
           // Return error
-          return callback(MongoError.create({
+          return callback(new MongoError({
             message: 'authentication fail', errors: errors
           }), false);
         }
@@ -1306,7 +1306,7 @@ ReplSet.prototype.logout = function(dbName, callback) {
         // Do not block new operations
         self.authenticating = false;
         // If we have one or more errors
-        if(errors.length) return callback(MongoError.create({
+        if(errors.length) return callback(new MongoError({
           message: f('logout failed against db %s', dbName), errors: errors
         }), false);
 

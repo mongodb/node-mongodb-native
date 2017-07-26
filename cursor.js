@@ -2,8 +2,8 @@
 
 var Logger = require('./connection/logger')
   , retrieveBSON = require('./connection/utils').retrieveBSON
-  , MongoError = require('./error')
-  , MongoNetworkError = require('./network_error')
+  , MongoError = require('./error').MongoError
+  , MongoNetworkError = require('./error').MongoNetworkError
   , f = require('util').format;
 
 var BSON = retrieveBSON(),
@@ -195,7 +195,7 @@ Cursor.prototype._find = function(callback) {
 
     // Query failure bit set
     if(result.queryFailure) {
-      return callback(MongoError.create(result.documents[0]), null);
+      return callback(new MongoError(result.documents[0]), null);
     }
 
     // Check if we have a command cursor
@@ -210,7 +210,7 @@ Cursor.prototype._find = function(callback) {
       // We have a an error document return the error
       if(result.documents[0]['$err']
         || result.documents[0]['errmsg']) {
-        return callback(MongoError.create(result.documents[0]), null);
+        return callback(new MongoError(result.documents[0]), null);
       }
 
       // We have a cursor document
@@ -444,7 +444,7 @@ var isConnectionDead = function(self, callback) {
     self.cursorState.killed = true;
     self.cursorState.documents = [];
     self.cursorState.cursorIndex = 0;
-    callback(MongoNetworkError.create(f('connection to host %s:%s was destroyed', self.pool.host, self.pool.port)))
+    callback(new MongoNetworkError(f('connection to host %s:%s was destroyed', self.pool.host, self.pool.port)))
     return true;
   }
 
@@ -473,7 +473,7 @@ var isCursorDeadButNotkilled = function(self, callback) {
  */
 var isCursorDeadAndKilled = function(self, callback) {
   if(self.cursorState.dead && self.cursorState.killed) {
-    handleCallback(callback, MongoError.create('cursor is dead'));
+    handleCallback(callback, new MongoError('cursor is dead'));
     return true;
   }
 
@@ -624,7 +624,7 @@ var nextFunction = function(self, callback) {
         if(self.cursorState.documents.length == 0
           && self.cmd.tailable && Long.ZERO.equals(self.cursorState.cursorId)) {
           // No more documents in the tailed cursor
-          return handleCallback(callback, MongoError.create({
+          return handleCallback(callback, new MongoError({
               message: 'No more documents in tailed cursor'
             , tailable: self.cmd.tailable
             , awaitData: self.cmd.awaitData
@@ -642,7 +642,7 @@ var nextFunction = function(self, callback) {
       });
   } else if(self.cursorState.documents.length == self.cursorState.cursorIndex
     && self.cmd.tailable && Long.ZERO.equals(self.cursorState.cursorId)) {
-      return handleCallback(callback, MongoError.create({
+      return handleCallback(callback, new MongoError({
           message: 'No more documents in tailed cursor'
         , tailable: self.cmd.tailable
         , awaitData: self.cmd.awaitData

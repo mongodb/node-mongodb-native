@@ -9,8 +9,8 @@ var inherits = require('util').inherits,
   retrieveBSON = require('../connection/utils').retrieveBSON,
   Pool = require('../connection/pool'),
   Query = require('../connection/commands').Query,
-  MongoError = require('../error'),
-  MongoNetworkError = require('../network_error'),
+  MongoError = require('../error').MongoError,
+  MongoNetworkError = require('../error').MongoNetworkError,
   PreTwoSixWireProtocolSupport = require('../wireprotocol/2_4_support'),
   TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support'),
   ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support'),
@@ -198,7 +198,7 @@ function disconnectHandler(self, type, ns, cmd, options, callback) {
 
   // If we have no connection error
   if(!self.s.pool.isConnected()) {
-    callback(MongoError.create(f("no connection available to server %s", self.name)));
+    callback(new MongoError(f("no connection available to server %s", self.name)));
     return true;
   }
 }
@@ -384,7 +384,7 @@ Server.prototype.connect = function(options) {
 
   // Do not allow connect to be called on anything that's not disconnected
   if(self.s.pool && !self.s.pool.isDisconnected() && !self.s.pool.isDestroyed()) {
-    throw MongoError.create(f('server instance in invalid state %s', self.s.pool.state));
+    throw new MongoError(f('server instance in invalid state %s', self.s.pool.state));
   }
 
   // Create a pool
@@ -476,8 +476,8 @@ Server.prototype.isDestroyed = function() {
 }
 
 function basicWriteValidations(self) {
-  if(!self.s.pool) return MongoError.create('server instance is not connected');
-  if(self.s.pool.isDestroyed()) return MongoError.create('server instance pool was destroyed');
+  if(!self.s.pool) return new MongoError('server instance is not connected');
+  if(self.s.pool.isDestroyed()) return new MongoError('server instance pool was destroyed');
 }
 
 function basicReadValidations(self, options) {

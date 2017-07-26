@@ -3,8 +3,8 @@
 var inherits = require('util').inherits,
   EventEmitter = require('events').EventEmitter,
   Connection = require('./connection'),
-  MongoError = require('../error'),
-  MongoNetworkError = require('../network_error'),
+  MongoError = require('../error').MongoError,
+  MongoNetworkError = require('../error').MongoNetworkError,
   Logger = require('./logger'),
   f = require('util').format,
   Query = require('./commands').Query,
@@ -496,13 +496,13 @@ function messageHandler(self) {
           // Parse the message according to the provided options
           message.parse(workItem);
         } catch(err) {
-          return handleOperationCallback(self, workItem.cb, MongoError.create(err));
+          return handleOperationCallback(self, workItem.cb, new MongoError(err));
         }
 
         // Establish if we have an error
         if(workItem.command && message.documents[0] && (message.documents[0].ok == 0 || message.documents[0]['$err']
         || message.documents[0]['errmsg'] || message.documents[0]['code'])) {
-          return handleOperationCallback(self, workItem.cb, MongoError.create(message.documents[0]));
+          return handleOperationCallback(self, workItem.cb, new MongoError(message.documents[0]));
         }
 
         // Add the connection details

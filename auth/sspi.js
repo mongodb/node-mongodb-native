@@ -3,7 +3,7 @@
 var f = require('util').format
   , require_optional = require('require_optional')
   , Query = require('../connection/commands').Query
-  , MongoError = require('../error');
+  , MongoError = require('../error').MongoError;
 
 var AuthSession = function(db, username, password, options) {
   this.db = db;

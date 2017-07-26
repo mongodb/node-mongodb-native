@@ -1,7 +1,7 @@
 "use strict"
 
 var ReadPreference = require('../topologies/read_preference'),
-  MongoError = require('../error');
+  MongoError = require('../error').MongoError;
 
 var MESSAGE_HEADER_SIZE = 16;
 

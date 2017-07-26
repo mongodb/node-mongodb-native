@@ -1,6 +1,6 @@
 "use strict";
 
-var MongoError = require('../error');
+var MongoError = require('../error').MongoError;
 
 // Wire command operation ids
 var opcodes = require('./shared').opcodes;
