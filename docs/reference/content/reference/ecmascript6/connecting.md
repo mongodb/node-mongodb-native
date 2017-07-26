@@ -40,12 +40,17 @@ Current Node.js allow usage of async/await syntax, simplifying the above corouti
 let MongoClient = require('mongodb').MongoClient
 let asset = require('asset')
 
-try {
-  let db = await MongoClient.connect('mongodb://localhost:27017/myproject')
-  db.close()
-} catch (error) {
-  // Technically, this will just throw a standard exception 
-  // if not caught, so this error handler is kind of moot.
-  console.log(error.stack)
+let connect = async function(){
+  try {
+    let db = await MongoClient.connect('mongodb://localhost:27017/myproject')
+    db.close()
+  } catch (error) {
+    // Technically, this will just throw a standard exception 
+    // if not caught, so this error handler is kind of moot.
+    console.log(error.stack)
+  }
 }
+
+connect()
 ```
+
