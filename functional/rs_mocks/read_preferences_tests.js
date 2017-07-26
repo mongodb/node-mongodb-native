@@ -589,7 +589,7 @@ exports['Should correctly fall back to a secondary server if the readPreference 
       var mockDisconnectHandler = {
         add: function(opType, ns, ops, options, callback) {
           // Command issued to replSet will fail immediately if !server.isConnected()
-          return callback(MongoError.create({message: "no connection available", driver:true}));
+          return callback(new MongoError({message: "no connection available", driver:true}));
         },
         execute: function() {
           // method needs to be called, so provide a dummy version

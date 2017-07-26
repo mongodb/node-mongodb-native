@@ -1,7 +1,7 @@
 function executeCommand(configuration, db, cmd, options, cb) {
   var Pool = require('../../../lib/connection/pool')
     , f = require('util').format
-    , MongoError = require('../../../lib/error')
+    , MongoError = require('../../../lib/error').MongoError
     , bson = require('bson')
     , Query = require('../../../lib/connection/commands').Query;
 
@@ -40,7 +40,7 @@ function executeCommand(configuration, db, cmd, options, cb) {
 
 function locateAuthMethod(configuration, cb) {
   var Pool = require('../../../lib/connection/pool')
-    , MongoError = require('../../../lib/error')
+    , MongoError = require('../../../lib/error').MongoError
     , bson = require('bson')
     , f = require('util').format
     , Query = require('../../../lib/connection/commands').Query;

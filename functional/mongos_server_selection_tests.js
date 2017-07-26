@@ -5,7 +5,7 @@ var f = require('util').format,
   url = require('url'),
   ObjectId = require('bson').ObjectId,
   Mongos = require('../../../lib/topologies/mongos'),
-  MongoError = require('../../../lib/error'),
+  MongoError = require('../../../lib/error').MongoError,
   ReadPreference = require('../../../lib/topologies/read_preference'),
   Server = require('../../../lib/topologies/server');
 
