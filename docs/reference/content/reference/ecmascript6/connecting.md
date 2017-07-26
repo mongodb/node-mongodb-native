@@ -30,3 +30,22 @@ co(function*() {
 ```
 
 The `MongoClient.connect` function returns a `Promise` that we then execute using the `yield` keyword of the `generator` function. If an error happens during the `MongoClient.connect` the error is caught by `co` and can be inspected by attaching a function to the `catch` method as shown above.
+
+
+# async/await
+
+Current Node.js allow usage of async/await syntax, simplifying the above coroutine/generator flow further:
+
+```js
+let MongoClient = require('mongodb').MongoClient
+let asset = require('asset')
+
+try {
+  let db = await MongoClient.connect('mongodb://localhost:27017/myproject')
+  db.close()
+} catch (error) {
+  // Technically, this will just throw a standard exception 
+  // if not caught, so this error handler is kind of moot.
+  console.log(error.stack)
+}
+```
