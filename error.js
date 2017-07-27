@@ -12,7 +12,8 @@ var util = require('util');
  * @return {MongoError} A MongoError instance
  */
 function MongoError(message) {
-  this.name = 'MongoError';
+  var tmp = Error.apply(this, arguments);
+  tmp.name = this.name = 'MongoError';
 
   if (message instanceof Error) {
     this.message = message.message;
@@ -26,9 +27,12 @@ function MongoError(message) {
         this[name] = message[name];
       }
     }
-    Error.captureStackTrace(this, MongoError);
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
   }
 }
+util.inherits(MongoError, Error);
 
 /**
  * Creates a new MongoError object
@@ -40,9 +44,6 @@ function MongoError(message) {
 MongoError.create = function(options) {
   return new MongoError(options);
 }
-
-// Extend JavaScript error
-MongoError.prototype = new Error;
 
 /**
  * Creates a new MongoNetworkError
