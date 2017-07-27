@@ -1,5 +1,5 @@
 var assert = require('assert');
-var MongoNetworkError = require('mongodb-core').MongoNetworkError;
+var MongoNetworkError = require('mongodb-core').MongoError.MongoNetworkError;
 var ReadPreference = require('../../lib/read_preference');
 
 // Define the pipeline processing changes
@@ -8,175 +8,6 @@ var pipeline = [
   { $project: { documentKey: false } },
   { $addFields: { "comment": "The documentKey field has been projected out of this document." } }
 ];
-
-exports['Should create a Change Stream on a database and emit change events'] = {
-  metadata: { requires: { topology: 'replicaset' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var MongoClient = configuration.require.MongoClient;
-    var client = new MongoClient(configuration.url());
-
-    client.connect(function(err, client) {
-      assert.ifError(err);
-
-      var theDatabase = client.db('integration_tests');
-
-      var thisChangeStream = theDatabase.watch(pipeline);
-
-      // Attach first event listener
-      thisChangeStream.once('data', function(change) {
-        assert.equal(change.operationType, 'insert');
-        assert.equal(change.newDocument.a, 1);
-        assert.equal(change.ns.db, 'integration_tests');
-        assert.equal(change.ns.coll, 'docs');
-        assert.ok(!(change.documentKey));
-        assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
-
-        // Attach second event listener
-        thisChangeStream.once('data', function(change) {
-          assert.equal(change.operationType, 'update');
-          assert.equal(change.updateDescription.updatedFields.a, 3);
-
-          // Close the change stream
-          thisChangeStream.close(function(err) {
-            assert.ifError(err);
-            setTimeout(function() {
-              test.done();
-            }, 1100);
-          });
-        });
-
-        // Trigger the second database event
-        theDatabase.collection('docs').update({a:1}, {$inc: {a:2}}, function (err) {
-          assert.ifError(err);
-        });
-      });
-
-      // Trigger the first database event
-      theDatabase.collection('docs').insert({a:1}, function (err) {
-        assert.ifError(err);
-      });
-    });
-  }
-};
-
-exports['Should create a Change Stream on a database and get change events through imperative callback form'] = {
-  metadata: { requires: { topology: 'replicaset' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var MongoClient = configuration.require.MongoClient;
-    var client = new MongoClient(configuration.url());
-
-    client.connect(function(err, client) {
-      assert.ifError(err);
-
-      var theDatabase = client.db('integration_tests');
-
-      var thisChangeStream = theDatabase.watch(pipeline);
-
-      // Trigger the first database event
-      theDatabase.collection('docs').insert({b:2}, function (err, result) {
-        assert.ifError(err);
-        assert.equal(result.insertedCount, 1);
-
-        setTimeout(function() {
-          // Fetch the change notification
-          thisChangeStream.hasNext(function(err, hasNext) {
-            assert.ifError(err);
-            assert.equal(true, hasNext);
-            thisChangeStream.next(function(err, change) {
-              assert.ifError(err);
-              assert.equal(change.operationType, 'insert');
-              assert.equal(change.newDocument.b, 2);
-              assert.equal(change.ns.db, 'integration_tests');
-              assert.equal(change.ns.coll, 'docs');
-              assert.ok(!(change.documentKey));
-              assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
-
-              // Trigger the second database event
-              theDatabase.collection('docs').update({b:2}, {$inc: {b:2}}, function (err) {
-                assert.ifError(err);
-                thisChangeStream.hasNext(function(err, hasNext) {
-                  assert.ifError(err);
-                  assert.equal(true, hasNext);
-                  thisChangeStream.next(function(err, change) {
-                    assert.ifError(err);
-                    assert.equal(change.operationType, 'update');
-
-                    // Close the change stream
-                    thisChangeStream.close(function(err) {
-                      assert.ifError(err);
-                      setTimeout(function() {
-                        test.done();
-                      }, 1100);
-                    });
-                  });
-                });
-              });
-            });
-          });
-        }, 200);
-      });
-    });
-  }
-};
-
-exports['Should create a Change Stream on a database and get change events through promises'] = {
-  metadata: { requires: { topology: 'replicaset' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var MongoClient = configuration.require.MongoClient;
-    var client = new MongoClient(configuration.url());
-
-    client.connect(function(err, client) {
-      assert.ifError(err);
-
-      var theDatabase = client.db('integration_tests');
-
-      var thisChangeStream = theDatabase.watch(pipeline);
-
-      // Trigger the first database event
-      theDatabase.collection('docs').insert({b:2}).then(function (result) {
-        assert.equal(result.insertedCount, 1);
-
-        // Fetch the change notification after a 200ms delay
-        return new theDatabase.s.promiseLibrary(function (resolve) {
-          setTimeout(function(){
-            resolve(thisChangeStream.hasNext());
-          }, 200);
-        });
-      }).then(function(hasNext) {
-        assert.equal(true, hasNext);
-        return thisChangeStream.next();
-      }).then(function(change) {
-        assert.equal(change.operationType, 'insert');
-        assert.equal(change.newDocument.b, 2);
-        assert.equal(change.ns.db, 'integration_tests');
-        assert.equal(change.ns.coll, 'docs');
-        assert.ok(!(change.documentKey));
-        assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
-
-        // Trigger the second database event
-        return theDatabase.collection('docs').update({b:2}, {$inc: {b:2}});
-      }).then(function () {
-        return thisChangeStream.hasNext();
-      }).then(function(hasNext) {
-        assert.equal(true, hasNext);
-        return thisChangeStream.next();
-      }).then(function(change) {
-        assert.equal(change.operationType, 'update');
-        return thisChangeStream.close();
-      }).then(function() {
-        setTimeout(test.done, 1100);
-      }).catch(function(err) {
-        assert.ifError(err);
-      });
-    });
-  }
-};
 
 exports['Should create a Change Stream on a collection and emit data events'] = {
   metadata: { requires: { topology: 'replicaset' } },
@@ -190,7 +21,7 @@ exports['Should create a Change Stream on a collection and emit data events'] = 
     client.connect(function(err, client) {
       assert.ifError(err);
 
-      var theCollection = client.db('integration_tests').collection('docs');
+      var theCollection = client.db('integration_tests').collection('docsDataEvent');
 
       var thisChangeStream = theCollection.watch(pipeline);
 
@@ -199,7 +30,7 @@ exports['Should create a Change Stream on a collection and emit data events'] = 
         assert.equal(change.operationType, 'insert');
         assert.equal(change.newDocument.d, 4);
         assert.equal(change.ns.db, 'integration_tests');
-        assert.equal(change.ns.coll, 'docs');
+        assert.equal(change.ns.coll, 'docsDataEvent');
         assert.ok(!(change.documentKey));
         assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
 
@@ -211,9 +42,7 @@ exports['Should create a Change Stream on a collection and emit data events'] = 
           // Close the change stream
           thisChangeStream.close(function(err) {
             assert.ifError(err);
-            setTimeout(function() {
-              test.done();
-            }, 1100);
+            test.done();
           });
         });
 
@@ -242,7 +71,7 @@ exports['Should create a Change Stream on a collection and get change events thr
     client.connect(function(err, client) {
       assert.ifError(err);
 
-      var theCollection = client.db('integration_tests').collection('docs');
+      var theCollection = client.db('integration_tests').collection('docsCallback');
 
       var thisChangeStream = theCollection.watch(pipeline);
 
@@ -251,49 +80,44 @@ exports['Should create a Change Stream on a collection and get change events thr
         assert.ifError(err);
         assert.equal(result.insertedCount, 1);
 
-        setTimeout(function() {
-          // Fetch the change notification
-          thisChangeStream.hasNext(function(err, hasNext) {
+        // Fetch the change notification
+        thisChangeStream.hasNext(function(err, hasNext) {
+          assert.ifError(err);
+          assert.equal(true, hasNext);
+          thisChangeStream.next(function(err, change) {
             assert.ifError(err);
-            assert.equal(true, hasNext);
-            thisChangeStream.next(function(err, change) {
+            assert.equal(change.operationType, 'insert');
+            assert.equal(change.newDocument.e, 5);
+            assert.equal(change.ns.db, 'integration_tests');
+            assert.equal(change.ns.coll, 'docsCallback');
+            assert.ok(!(change.documentKey));
+            assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
+
+            // Trigger the second database event
+            theCollection.update({e:5}, {$inc: {e:2}}, function (err) {
               assert.ifError(err);
-              assert.equal(change.operationType, 'insert');
-              assert.equal(change.newDocument.e, 5);
-              assert.equal(change.ns.db, 'integration_tests');
-              assert.equal(change.ns.coll, 'docs');
-              assert.ok(!(change.documentKey));
-              assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
-
-              // Trigger the second database event
-              theCollection.update({e:5}, {$inc: {e:2}}, function (err) {
+              thisChangeStream.hasNext(function(err, hasNext) {
                 assert.ifError(err);
-                thisChangeStream.hasNext(function(err, hasNext) {
+                assert.equal(true, hasNext);
+                thisChangeStream.next(function(err, change) {
                   assert.ifError(err);
-                  assert.equal(true, hasNext);
-                  thisChangeStream.next(function(err, change) {
+                  assert.equal(change.operationType, 'update');
+                  // Close the change stream
+                  thisChangeStream.close(function(err) {
                     assert.ifError(err);
-                    assert.equal(change.operationType, 'update');
-                    // Close the change stream
-                    thisChangeStream.close(function(err) {
-                      assert.ifError(err);
-
-                      setTimeout(function() {
-                        test.done();
-                      }, 1100);
-                    });
+                    test.done();
                   });
                 });
               });
             });
           });
-        }, 200);
+        });
       });
     });
   }
 };
 
-exports['Should support creating multiple Change Streams of the same database'] = {
+exports['Should support creating multiple simultaneous Change Streams'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
@@ -305,54 +129,53 @@ exports['Should support creating multiple Change Streams of the same database'] 
       assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
+      var theCollection1 = theDatabase.collection('simultaneous1');
+      var theCollection2 = theDatabase.collection('simultaneous2');
 
-      var thisChangeStream1 = theDatabase.watch([{ $addFields: { "changeStreamNumber": 1 } }]);
-      var thisChangeStream2 = theDatabase.watch([{ $addFields: { "changeStreamNumber": 2 } }]);
+      var thisChangeStream1, thisChangeStream2, thisChangeStream3;
 
-      theDatabase.collection('docs').insert({c:3}, {w:"majority", j:true}, function (err, result) {
+      theCollection1.insert({a: 1}).then(function() {
+        return theCollection2.insert({a: 1});
+      }).then(function () {
+        thisChangeStream1 = theCollection1.watch([{ $addFields: { "changeStreamNumber": 1 } }]);
+        thisChangeStream2 = theCollection2.watch([{ $addFields: { "changeStreamNumber": 2 } }]);
+        thisChangeStream3 = theCollection2.watch([{ $addFields: { "changeStreamNumber": 3 } }]);
+
+        return Promise.all([thisChangeStream1.hasNext(), thisChangeStream2.hasNext(), thisChangeStream3.hasNext()]);
+      }).then(function(hasNexts) {
+        // Check all the Change Streams have a next item
+        assert.ok(hasNexts[0]);
+        assert.ok(hasNexts[1]);
+        assert.ok(hasNexts[2]);
+
+        return Promise.all([thisChangeStream1.next(), thisChangeStream2.next(), thisChangeStream3.next()]);
+      }).then(function(changes) {
+        // Check the values of the change documents are correct
+        assert.equal(changes[0].operationType, 'insert');
+        assert.equal(changes[1].operationType, 'insert');
+        assert.equal(changes[2].operationType, 'insert');
+
+        assert.equal(changes[0].newDocument.a, 1);
+        assert.equal(changes[1].newDocument.a, 1);
+        assert.equal(changes[2].newDocument.a, 1);
+
+        assert.equal(changes[0].ns.db, 'integration_tests');
+        assert.equal(changes[1].ns.db, 'integration_tests');
+        assert.equal(changes[2].ns.db, 'integration_tests');
+
+        assert.equal(changes[0].ns.coll, 'simultaneous1');
+        assert.equal(changes[1].ns.coll, 'simultaneous2');
+        assert.equal(changes[2].ns.coll, 'simultaneous2');
+
+        assert.equal(changes[0].changeStreamNumber, 1);
+        assert.equal(changes[1].changeStreamNumber, 2);
+        assert.equal(changes[2].changeStreamNumber, 3);
+
+        return Promise.all([thisChangeStream1.close(), thisChangeStream2.close(), thisChangeStream3.close()]);
+      }).then(function() {
+        test.done();
+      }).catch(function(err) {
         assert.ifError(err);
-        assert.equal(result.insertedCount, 1);
-
-        setTimeout(function() {
-          // Fetch the change notification from the first Change Stream
-          thisChangeStream1.hasNext(function(err, hasNext) {
-            assert.ifError(err);
-            assert.equal(true, hasNext);
-            thisChangeStream1.next(function(err, change) {
-              assert.ifError(err);
-              assert.equal(change.operationType, 'insert');
-              assert.equal(change.newDocument.c, 3);
-              assert.equal(change.ns.db, 'integration_tests');
-              assert.equal(change.ns.coll, 'docs');
-              assert.equal(change.changeStreamNumber, 1);
-
-              // Fetch the change notification from the second Change Stream
-              thisChangeStream2.hasNext(function(err, hasNext) {
-                assert.ifError(err);
-                assert.equal(true, hasNext);
-                thisChangeStream2.next(function(err, change) {
-                  assert.ifError(err);
-                  assert.equal(change.operationType, 'insert');
-                  assert.equal(change.newDocument.c, 3);
-                  assert.equal(change.ns.db, 'integration_tests');
-                  assert.equal(change.ns.coll, 'docs');
-                  assert.equal(change.changeStreamNumber, 2);
-
-                  // Close the change streams
-                  thisChangeStream1.close(function(err) {
-                    assert.ifError(err);
-                    thisChangeStream2.close(function(err) {
-                      assert.ifError(err);
-                      setTimeout(function() {
-                        test.done();
-                      }, 2000);
-                    });
-                  });
-                });
-              });
-            });
-          });
-        }, 200);
       });
     });
   }
@@ -371,35 +194,24 @@ exports['Should properly close Change Stream cursor'] = {
       assert.ifError(err);
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.watch(pipeline);
+      var thisChangeStream = theDatabase.collection('changeStreamCloseTest').watch(pipeline);
 
-      // Attach first event listener
-      thisChangeStream.once('data', function(change) {
-        assert.equal(change.operationType, 'insert');
+      assert.equal(thisChangeStream.isClosed(), false);
+      assert.equal(thisChangeStream.cursor.isClosed(), false);
 
-        // Check the cursor is open
-        assert.equal(thisChangeStream.isClosed(), false);
-        assert.equal(thisChangeStream.cursor.isClosed(), false);
-
-        thisChangeStream.close(function(err) {
-          assert.ifError(err);
-
-          // Check the cursor is closed
-          assert.equal(thisChangeStream.isClosed(), true);
-          assert.ok(!thisChangeStream.cursor);
-          test.done();
-        });
-      });
-
-      // Trigger the first database event
-      theDatabase.collection('docs').insert({a:1}, function (err) {
+      thisChangeStream.close(function(err) {
         assert.ifError(err);
+
+        // Check the cursor is closed
+        assert.equal(thisChangeStream.isClosed(), true);
+        assert.ok(!thisChangeStream.cursor);
+        test.done();
       });
     });
   }
 };
 
-exports['Should error when attempting to create a Change Stream with a forbidden aggrgation pipeline stage'] = {
+exports['UPDATE WHEN SERVER-29137 DONE Should error when attempting to create a Change Stream with a forbidden aggrgation pipeline stage'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
@@ -412,13 +224,17 @@ exports['Should error when attempting to create a Change Stream with a forbidden
 
       var theDatabase = client.db('integration_tests');
 
-      try {
-        theDatabase.watch([{$skip: 2}]);
-        assert.ok(false);
-      } catch (e) {
-        assert.equal(e.message, 'The pipeline contains the stage "$skip", which is not compatible with Change Streams at this time.');
-        test.done();
-      }
+      var changeStream = theDatabase.collection('forbiddenStageTest').watch([{$alksdjfhlaskdfjh: 2}]);
+      changeStream.next(function(err) {
+        assert.ok(err);
+        assert.ok(err.message);
+        // assert.ok(err.message.indexOf('SOME ERROR MESSAGE HERE ONCE SERVER-29137 IS DONE') > -1);
+
+        changeStream.close(function(err) {
+          assert.ifError(err);
+          test.done();
+        });
+      });
     });
   }
 };
@@ -436,33 +252,28 @@ exports['Should cache the change stream resume token using imperative callback f
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.watch(pipeline);
+      var thisChangeStream = theDatabase.collection('cacheResumeTokenCallback').watch(pipeline);
 
       // Trigger the first database event
-      theDatabase.collection('docs').insert({b:2}, function (err, result) {
+      theDatabase.collection('cacheResumeTokenCallback').insert({b:2}, function (err, result) {
         assert.ifError(err);
         assert.equal(result.insertedCount, 1);
 
-        setTimeout(function() {
-          // Fetch the change notification
-          thisChangeStream.hasNext(function(err, hasNext) {
+        // Fetch the change notification
+        thisChangeStream.hasNext(function(err, hasNext) {
+          assert.ifError(err);
+          assert.equal(true, hasNext);
+          thisChangeStream.next(function(err, change) {
             assert.ifError(err);
-            assert.equal(true, hasNext);
-            thisChangeStream.next(function(err, change) {
+            assert.deepEqual(thisChangeStream.resumeToken, change._id);
+
+            // Close the change stream
+            thisChangeStream.close(function(err) {
               assert.ifError(err);
-              assert.deepEqual(thisChangeStream.resumeToken, change._id);
-
-              // Close the change stream
-              thisChangeStream.close(function(err) {
-                assert.ifError(err);
-                setTimeout(function() {
-                  test.done();
-                }, 1100);
-              });
-
+              test.done();
             });
           });
-        }, 200);
+        });
       });
     });
   }
@@ -481,31 +292,27 @@ exports['Should cache the change stream resume token using promises'] = {
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.watch(pipeline);
+      var thisChangeStream = theDatabase.collection('cacheResumeTokenPromise').watch(pipeline);
 
       // Trigger the first database event
-      theDatabase.collection('docs').insert({b:2}, function (err, result) {
+      theDatabase.collection('cacheResumeTokenPromise').insert({b:2}, function (err, result) {
         assert.ifError(err);
         assert.equal(result.insertedCount, 1);
 
-        setTimeout(function() {
-          // Fetch the change notification
-          thisChangeStream.hasNext().then(function(hasNext) {
-            assert.equal(true, hasNext);
-            thisChangeStream.next().then(function(change) {
-              assert.deepEqual(thisChangeStream.resumeToken, change._id);
+        // Fetch the change notification
+        thisChangeStream.hasNext().then(function(hasNext) {
+          assert.equal(true, hasNext);
+          thisChangeStream.next().then(function(change) {
+            assert.deepEqual(thisChangeStream.resumeToken, change._id);
 
-              // Close the change stream
-              thisChangeStream.close().then(function() {
-                setTimeout(function() {
-                  test.done();
-                }, 1100);
-              });
+            // Close the change stream
+            thisChangeStream.close().then(function() {
+              test.done();
             });
-          }).catch(function(err) {
-            assert.ifError(err);
           });
-        }, 200);
+        }).catch(function(err) {
+          assert.ifError(err);
+        });
       });
     });
   }
@@ -524,20 +331,18 @@ exports['Should cache the change stream resume token using event listeners'] = {
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.watch(pipeline);
+      var thisChangeStream = theDatabase.collection('cacheResumeTokenListener').watch(pipeline);
 
       thisChangeStream.once('data', function(change) {
         assert.deepEqual(thisChangeStream.resumeToken, change._id);
         // Close the change stream
         thisChangeStream.close().then(function() {
-          setTimeout(function() {
-            test.done();
-          }, 1100);
+          test.done();
         });
       });
 
       // Trigger the first database event
-      theDatabase.collection('docs').insert({b:2}, function (err, result) {
+      theDatabase.collection('cacheResumeTokenListener').insert({b:2}, function (err, result) {
         assert.ifError(err);
         assert.equal(result.insertedCount, 1);
       });
@@ -557,29 +362,25 @@ exports['Should error if resume token projected out of change stream document us
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.watch([{$project: {_id: false}}]);
+      var thisChangeStream = theDatabase.collection('resumetokenProjectedOutCallback').watch([{$project: {_id: false}}]);
 
       // Trigger the first database event
-      theDatabase.collection('docs').insert({b:2}, function (err, result) {
+      theDatabase.collection('resumetokenProjectedOutCallback').insert({b:2}, function (err, result) {
         assert.ifError(err);
         assert.equal(result.insertedCount, 1);
-        setTimeout(function() {
-          // Fetch the change notification
-          thisChangeStream.hasNext(function(err, hasNext) {
-            assert.ifError(err);
-            assert.equal(true, hasNext);
-            thisChangeStream.next(function(err) {
-              assert.ok(err);
-              assert.equal(err.message, 'A change stream document has been recieved that lacks a resume token (_id) and resumability has not been disabled for this change stream.');
-              // Close the change stream
-              thisChangeStream.close().then(function() {
-                setTimeout(function() {
-                  test.done();
-                }, 1100);
-              });
+        // Fetch the change notification
+        thisChangeStream.hasNext(function(err, hasNext) {
+          assert.ifError(err);
+          assert.equal(true, hasNext);
+          thisChangeStream.next(function(err) {
+            assert.ok(err);
+            assert.equal(err.message, 'A change stream document has been recieved that lacks a resume token (_id).');
+            // Close the change stream
+            thisChangeStream.close().then(function() {
+              test.done();
             });
           });
-        }, 200);
+        });
       });
     });
   }
@@ -597,7 +398,7 @@ exports['Should error if resume token projected out of change stream document us
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.watch([{$project: {_id: false}}]);
+      var thisChangeStream = theDatabase.collection('resumetokenProjectedOutListener').watch([{$project: {_id: false}}]);
 
       // Fetch the change notification
       thisChangeStream.on('data', function() {
@@ -605,14 +406,14 @@ exports['Should error if resume token projected out of change stream document us
       });
 
       thisChangeStream.on('error', function(err) {
-        assert.equal(err.message, 'A change stream document has been recieved that lacks a resume token (_id) and resumability has not been disabled for this change stream.');
+        assert.equal(err.message, 'A change stream document has been recieved that lacks a resume token (_id).');
         thisChangeStream.close(function() {
-          setTimeout(test.done, 1100);
+          test.done();
         });
       });
 
       // Trigger the first database event
-      theDatabase.collection('docs').insert({b:2}, function (err, result) {
+      theDatabase.collection('resumetokenProjectedOutListener').insert({b:2}, function (err, result) {
         assert.ifError(err);
         assert.equal(result.insertedCount, 1);
       });
@@ -621,7 +422,7 @@ exports['Should error if resume token projected out of change stream document us
   }
 };
 
-exports['Should invalidate change stream on collection rename using event listeners'] = {
+exports['UPDATE WHEN SERVER-29140 DONE Should invalidate change stream on collection rename using event listeners'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
@@ -634,14 +435,14 @@ exports['Should invalidate change stream on collection rename using event listen
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.collection('docs').watch(pipeline);
+      var thisChangeStream = theDatabase.collection('invalidateListeners').watch(pipeline);
 
       // Attach first event listener
       thisChangeStream.once('data', function(change) {
         assert.equal(change.operationType, 'insert');
         assert.equal(change.newDocument.a, 1);
         assert.equal(change.ns.db, 'integration_tests');
-        assert.equal(change.ns.coll, 'docs');
+        assert.equal(change.ns.coll, 'invalidateListeners');
         assert.ok(!(change.documentKey));
         assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
 
@@ -649,26 +450,26 @@ exports['Should invalidate change stream on collection rename using event listen
         thisChangeStream.once('data', function(change) {
           // Check the cursor invalidation has occured
           assert.equal(change.operationType, 'invalidate');
-          assert.equal(thisChangeStream.isClosed(), true);
+          // assert.equal(thisChangeStream.isClosed(), true); // UN-COMMENT WHEN SERVER-29140 DONE
 
-          setTimeout(test.done, 1100);
+          test.done();
         });
 
         // Trigger the second database event
-        theDatabase.collection('docs').rename('renamedDocs', {dropTarget: true}, function (err) {
+        theDatabase.collection('invalidateListeners').rename('renamedDocs', {dropTarget: true}, function (err) {
           assert.ifError(err);
         });
       });
 
       // Trigger the first database event
-      theDatabase.collection('docs').insert({a:1}, function (err) {
+      theDatabase.collection('invalidateListeners').insert({a:1}, function (err) {
         assert.ifError(err);
       });
     });
   }
 };
 
-exports['Should invalidate change stream on database drop using imperative callback form'] = {
+exports['UPDATE WHEN SERVER-29140 DONE Should invalidate change stream on database drop using imperative callback form'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
@@ -681,10 +482,10 @@ exports['Should invalidate change stream on database drop using imperative callb
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.watch(pipeline);
+      var thisChangeStream = theDatabase.collection('invalidateCallback').watch(pipeline);
 
       // Trigger the first database event
-      theDatabase.collection('docs').insert({a:1}, function (err) {
+      theDatabase.collection('invalidateCallback').insert({a:1}, function (err) {
         assert.ifError(err);
 
         thisChangeStream.next(function(err, change) {
@@ -699,9 +500,9 @@ exports['Should invalidate change stream on database drop using imperative callb
 
               // Check the cursor invalidation has occured
               assert.equal(change.operationType, 'invalidate');
-              assert.equal(thisChangeStream.isClosed(), true);
+              // assert.equal(thisChangeStream.isClosed(), true); // UN-COMMENT WHEN SERVER-29140 DONE
 
-              setTimeout(test.done, 1100);
+              test.done();
 
             });
           });
@@ -711,7 +512,7 @@ exports['Should invalidate change stream on database drop using imperative callb
   }
 };
 
-exports['Should invalidate change stream on collection drop using promises'] = {
+exports['UPDATE WHEN SERVER-29140 DONE Should invalidate change stream on collection drop using promises'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
@@ -722,12 +523,12 @@ exports['Should invalidate change stream on collection drop using promises'] = {
     client.connect(function(err, client) {
       assert.ifError(err);
 
-      var theDatabase = client.db('integration_tests');
+      var theDatabase = client.db('integration_tests_2');
 
-      var thisChangeStream = theDatabase.collection('docs').watch(pipeline);
+      var thisChangeStream = theDatabase.collection('invalidateCollectionDropPromises').watch(pipeline);
 
       // Trigger the first database event
-      theDatabase.collection('docs').insert({a:1}).then(function () {
+      theDatabase.collection('invalidateCollectionDropPromises').insert({a:1}).then(function () {
         // Fetch the change notification after a 200ms delay
         return new theDatabase.s.promiseLibrary(function (resolve) {
           setTimeout(function(){
@@ -736,68 +537,15 @@ exports['Should invalidate change stream on collection drop using promises'] = {
         });
       }).then(function(change) {
         assert.equal(change.operationType, 'insert');
-        return theDatabase.dropCollection('docs');
+        return theDatabase.dropCollection('invalidateCollectionDropPromises');
       }).then(function() {
         return thisChangeStream.next();
       }).then(function(change) {
         // Check the cursor invalidation has occured
         assert.equal(change.operationType, 'invalidate');
-        assert.equal(thisChangeStream.isClosed(), true);
+        // assert.equal(thisChangeStream.isClosed(), true); // UN-COMMENT WHEN SERVER-29140 DONE
 
-        setTimeout(test.done, 1100);
-      }).catch(function(err) {
-        assert.ifError(err);
-      });
-    });
-  }
-};
-
-exports['Should not invalidate change stream on entire database when collection drop occurs'] = {
-  metadata: { requires: { topology: 'replicaset' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var MongoClient = configuration.require.MongoClient;
-    var client = new MongoClient(configuration.url());
-
-    client.connect(function(err, client) {
-      assert.ifError(err);
-
-      var theDatabase = client.db('integration_tests');
-
-      var thisChangeStream = theDatabase.watch(pipeline);
-
-      // Trigger the first database event
-      theDatabase.collection('aCollection').insert({a:1}).then(function () {
-        // Fetch the change notification after a 200ms delay
-        return new theDatabase.s.promiseLibrary(function (resolve) {
-          setTimeout(function(){
-            resolve(thisChangeStream.next());
-          }, 200);
-        });
-      }).then(function(change) {
-        assert.equal(change.operationType, 'insert');
-        return theDatabase.dropCollection('aCollection');
-      }).then(function() {
-        return new theDatabase.s.promiseLibrary(function (resolve) {
-          setTimeout(function(){
-            resolve(theDatabase.collection('otherDocs').insert({b:2}));
-          }, 200);
-        });
-      }).then(function() {
-        return new theDatabase.s.promiseLibrary(function (resolve) {
-          setTimeout(function(){
-            resolve(thisChangeStream.next());
-          }, 200);
-        });
-      }).then(function(change) {
-        // Check the cursor invalidation has not occured
-        assert.equal(change.operationType, 'insert');
-        assert.equal(thisChangeStream.isClosed(), false);
-
-        return thisChangeStream.close();
-      }).then(function() {
-        setTimeout(test.done, 1100);
+        test.done();
       }).catch(function(err) {
         assert.ifError(err);
       });
@@ -868,10 +616,10 @@ exports['Should re-establish connection when a MongoNetworkError is encountered'
         // Close the change stream
         thisChangeStream.close(function(err) {
           assert.ifError(err);
-          setTimeout(test.done, 1100);
+          test.done();
         });
       }).catch(function(err) {
-        throw err;
+        assert.ifError(err);
       });
 
     });
@@ -893,7 +641,7 @@ exports['Should return MongoNetworkError after first retry attempt fails using p
       assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
-      var theCollection = theDatabase.collection('MongoNetworkErrorTest');
+      var theCollection = theDatabase.collection('MongoNetworkErrorTestPromises');
       var thisChangeStream = theCollection.watch(pipeline);
       var mongodPID;
 
@@ -925,13 +673,15 @@ exports['Should return MongoNetworkError after first retry attempt fails using p
         assert.ok(false);
       }).catch(function(err) {
         assert.ok(err instanceof MongoNetworkError);
+        assert.ok(err.message);
+        assert.ok(err.indexOf('timed out') > -1);
 
         // Continue mongod execution
         process.kill(mongodPID, 'SIGCONT');
 
         thisChangeStream.close(function(err) {
           assert.ifError(err);
-          setTimeout(test.done, 1100);
+          test.done();
         });
       });
     });
@@ -953,7 +703,7 @@ exports['Should return MongoNetworkError after first retry attempt fails using c
       assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
-      var theCollection = theDatabase.collection('MongoNetworkErrorTest');
+      var theCollection = theDatabase.collection('MongoNetworkErrorTestCallback');
       var thisChangeStream = theCollection.watch(pipeline);
       var mongodPID;
 
@@ -991,7 +741,7 @@ exports['Should return MongoNetworkError after first retry attempt fails using c
 
                 thisChangeStream.close(function(err) {
                   assert.ifError(err);
-                  setTimeout(test.done, 1100);
+                  test.done();
                 });
               });
             });
@@ -1087,7 +837,7 @@ exports['Should resume from point in time using user-provided resumeAfter'] = {
   }
 };
 
-exports['Should support full document lookup'] = {
+  exports['Should support full document lookup'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
@@ -1100,10 +850,10 @@ exports['Should support full document lookup'] = {
 
       var theDatabase = client.db('integration_tests');
 
-      var thisChangeStream = theDatabase.watch(pipeline, {fullDocument: 'lookup'});
+      var thisChangeStream = theDatabase.collection('fullDocumentLookup').watch(pipeline, {fullDocument: 'lookup'});
 
       // Trigger the first database event
-      theDatabase.collection('docs').insert({f:128}).then(function (result) {
+      theDatabase.collection('fullDocumentLookup').insert({f:128}).then(function (result) {
         assert.equal(result.insertedCount, 1);
 
         // Fetch the change notification after a 200ms delay
@@ -1119,12 +869,12 @@ exports['Should support full document lookup'] = {
         assert.equal(change.operationType, 'insert');
         assert.equal(change.newDocument.f, 128);
         assert.equal(change.ns.db, 'integration_tests');
-        assert.equal(change.ns.coll, 'docs');
+        assert.equal(change.ns.coll, 'fullDocumentLookup');
         assert.ok(!(change.documentKey));
         assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
 
         // Trigger the second database event
-        return theDatabase.collection('docs').update({f: 128}, {$set: {c:2}});
+        return theDatabase.collection('fullDocumentLookup').update({f: 128}, {$set: {c:2}});
       }).then(function () {
         return thisChangeStream.hasNext();
       }).then(function(hasNext) {
