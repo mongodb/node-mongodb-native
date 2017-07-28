@@ -1040,6 +1040,68 @@ exports['Should support piping of Change Streams'] = {
   }
 };
 
+exports['Should support piping of Change Streams that crash'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var fs = require('fs');
+    var MongoClient = configuration.require.MongoClient;
+    var socketTimeoutMS = 500;
+    var client = new MongoClient(configuration.url(), {
+      socketTimeoutMS: socketTimeoutMS,
+      validateOptions: true
+    });
+    var mongodPID;
+
+    client.connect(function(err, client) {
+      assert.ifError(err);
+
+      var theDatabase = client.db('integration_tests');
+      var theCollection = theDatabase.collection('pipeTest');
+      var thisChangeStream = theCollection.watch(pipeline);
+
+      var filename = '/tmp/_nodemongodbnative_stream_out.txt';
+      var outStream = fs.createWriteStream(filename);
+
+      // Make a stream transforming to JSON and piping to the file
+      thisChangeStream.stream({transform: JSON.stringify}).pipe(outStream);
+
+      // Listen for changes to the file
+      var watcher = fs.watch(filename, function(eventType) {
+        assert.equal(eventType, 'change');
+
+        var fileContents = fs.readFileSync(filename, 'utf8');
+        var parsedFileContents = JSON.parse(fileContents);
+        assert.equal(parsedFileContents.newDocument.a, 1);
+
+        watcher.close();
+
+        // // Suspend the mongod instance for a while
+        // process.kill(mongodPID, 'SIGSTOP');
+        // setTimeout(function() {
+        //   process.kill(mongodPID, 'SIGCONT');
+        // }, socketTimeoutMS + 1);
+
+        thisChangeStream.close(function(err) {
+          assert.ifError(err);
+          setTimeout(test.done, 1000);
+        });
+      });
+
+      theDatabase.command({'serverStatus': 1}).then(function(serverStatus) {
+        assert.ok(serverStatus);
+        assert.equal(typeof serverStatus.pid, 'number');
+        mongodPID = serverStatus.pid;
+
+        return theCollection.insert({a: 1});
+      }).catch(function(err) {
+        assert.ifError(err);
+      });
+    });
+  }
+};
+
 // This test currently fails because it seems that tailable/awaitdata cursors
 // are not compatible with chained pipes (such as ChangeStream -> zlib -> file).
 // Regular cursors do support chained pipes. Maybe ChangeStream's contained cursor
@@ -1085,6 +1147,58 @@ exports['Should support piping of Change Streams through zlib'] = {
       });
 
       theCollection.insert({a: 1}, function(err) {
+        assert.ifError(err);
+      });
+    });
+  }
+};
+
+exports['Should support piping of Change Streams through crypto'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var crypto = require('crypto');
+    var MongoClient = configuration.require.MongoClient;
+    var client = new MongoClient(configuration.url());
+
+    client.connect(function(err, client) {
+      assert.ifError(err);
+
+      var cipher = crypto.createCipher('aes192', 'a password');
+      var decipher = crypto.createDecipher('aes192', 'a password');
+
+      var theDatabase = client.db('integration_tests');
+      var theCollection = theDatabase.collection('multiPipeTest');
+      var thisChangeStream = theCollection.watch(pipeline);
+
+      // Make a stream transforming to JSON and piping to the file
+      var pipedStream = thisChangeStream.stream({transform: JSON.stringify}).pipe(cipher).pipe(decipher);
+
+      var dataEmitted = '';
+      pipedStream.on('data', function(data) {
+        dataEmitted += data.toString();
+
+        // Work around poor compatibility with crypto cipher
+        thisChangeStream.cursor.emit('end');
+      });
+
+      pipedStream.on('end', function() {
+        var parsedData = JSON.parse(dataEmitted.toString());
+        assert.equal(parsedData.operationType, 'insert');
+        assert.equal(parsedData.newDocument.a, 1407);
+
+        thisChangeStream.close(function(err) {
+          assert.ifError(err);
+          test.done();
+        });
+      });
+
+      pipedStream.on('error', function(err) {
+        assert.ifError(err);
+      });
+
+      theCollection.insert({a: 1407}, function(err) {
         assert.ifError(err);
       });
     });
