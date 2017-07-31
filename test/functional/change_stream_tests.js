@@ -1,5 +1,5 @@
 var assert = require('assert');
-var MongoNetworkError = require('mongodb-core').MongoError.MongoNetworkError;
+var MongoNetworkError = require('mongodb-core').MongoNetworkError;
 var ReadPreference = require('../../lib/read_preference');
 
 // Define the pipeline processing changes
@@ -8,7 +8,7 @@ var pipeline = [
   { $project: { documentKey: false } },
   { $addFields: { "comment": "The documentKey field has been projected out of this document." } }
 ];
-
+/*
 exports['Should create a Change Stream on a collection and emit data events'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
@@ -552,7 +552,6 @@ exports['UPDATE WHEN SERVER-29140 DONE Should invalidate change stream on collec
     });
   }
 };
-
 exports['UPDATE WHEN SERVER-29131 DONE Should re-establish connection when a MongoNetworkError is encountered'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
@@ -626,12 +625,19 @@ exports['UPDATE WHEN SERVER-29131 DONE Should re-establish connection when a Mon
     });
   }
 };
+*/
 
 exports['Should return MongoNetworkError after first retry attempt fails using promises'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
+    var co = require('co');
+    var mockupdb = require('../../../mock');
+
+
+
+
     var MongoClient = configuration.require.MongoClient;
     var client = new MongoClient(configuration.url(), {
       socketTimeoutMS: 500,
@@ -670,7 +676,7 @@ exports['Should return MongoNetworkError after first retry attempt fails using p
         // Because the server is suspended this will fail. After attempting to reconnect once, a MongoNetworkError will be returned.
         return thisChangeStream.next();
       }).then(function () {
-        // We should never execute this line
+        // We should never execute this line because calling thisChangeStream.next() should throw an error
         assert.ok(false);
       }).catch(function(err) {
         assert.ok(err instanceof MongoNetworkError);
@@ -713,6 +719,7 @@ exports['Should return MongoNetworkError after first retry attempt fails using c
         assert.ok(serverStatus);
         assert.equal(typeof serverStatus.pid, 'number');
         mongodPID = serverStatus.pid;
+        console.log(serverStatus);
 
         theCollection.insertOne({a: 1}, function(err) {
           assert.ifError(err);
@@ -732,9 +739,10 @@ exports['Should return MongoNetworkError after first retry attempt fails using c
 
               // Get the next change stream document.
               // Because the server is suspended this will fail. After attempting to reconnect once, a MongoNetworkError will be returned.
+              setTimeout(function(){
               thisChangeStream.next(function(err, change) {
-                assert.ok(err);
                 assert.equal(change, null);
+                assert.ok(err);
                 assert.ok(err instanceof MongoNetworkError);
 
                 // Continue mongod execution
@@ -745,6 +753,7 @@ exports['Should return MongoNetworkError after first retry attempt fails using c
                   test.done();
                 });
               });
+              }, 200);
             });
           });
         });
@@ -765,19 +774,20 @@ exports['Should resume from point in time using user-provided resumeAfter'] = {
       assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
+      var theCollection = theDatabase.collection('resumeAfterTest');
 
-      var thisFirstChangeStream = theDatabase.watch(pipeline);
+      var thisFirstChangeStream = theCollection.watch(pipeline);
       var thisSecondChangeStream;
 
       var resumeToken;
 
       // Trigger the first database event
-      theDatabase.collection('docs').insert({f:6}).then(function (result) {
+      theCollection.insert({f:6}).then(function (result) {
         assert.equal(result.insertedCount, 1);
-        return theDatabase.collection('docs').insert({g:7});
+        return theCollection.insert({g:7});
       }).then(function (result) {
         assert.equal(result.insertedCount, 1);
-        return theDatabase.collection('docs').insert({h:8});
+        return theCollection.insert({h:8});
       }).then(function (result) {
         assert.equal(result.insertedCount, 1);
         // Fetch the change notification after a 200ms delay
@@ -808,7 +818,7 @@ exports['Should resume from point in time using user-provided resumeAfter'] = {
 
         return thisFirstChangeStream.close();
       }).then(function() {
-        thisSecondChangeStream = theDatabase.watch(pipeline, {resumeAfter: resumeToken});
+        thisSecondChangeStream = theCollection.watch(pipeline, {resumeAfter: resumeToken});
 
         return new theDatabase.s.promiseLibrary(function (resolve) {
           setTimeout(function(){
@@ -911,14 +921,15 @@ exports['Should support full document lookup with deleted documents'] = {
       assert.ifError(err);
 
       var theDatabase = client.db('integration_tests');
+      var theCollection = theDatabase.collection('fullLookupTest');
 
-      var thisChangeStream = theDatabase.watch(pipeline, {fullDocument: 'lookup'});
+      var thisChangeStream = theCollection.watch(pipeline, {fullDocument: 'lookup'});
 
       // Trigger the first database event
-      theDatabase.collection('docs').insert({i:128}).then(function (result) {
+      theCollection.insert({i:128}).then(function (result) {
         assert.equal(result.insertedCount, 1);
 
-        return theDatabase.collection('docs').deleteOne({i:128});
+        return theCollection.deleteOne({i:128});
       }).then(function(result) {
         assert.equal(result.result.n, 1);
 
@@ -935,12 +946,12 @@ exports['Should support full document lookup with deleted documents'] = {
         assert.equal(change.operationType, 'insert');
         assert.equal(change.newDocument.i, 128);
         assert.equal(change.ns.db, 'integration_tests');
-        assert.equal(change.ns.coll, 'docs');
+        assert.equal(change.ns.coll, theCollection.collectionName);
         assert.ok(!(change.documentKey));
         assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
 
         // Trigger the second database event
-        return theDatabase.collection('docs').update({i: 128}, {$set: {c:2}});
+        return theCollection.update({i: 128}, {$set: {c:2}});
       }).then(function () {
         return thisChangeStream.hasNext();
       }).then(function(hasNext) {
@@ -975,19 +986,17 @@ exports['Should create Change Streams with correct read preferences'] = {
 
       // Should get preference from database
       var theDatabase = client.db('integration_tests', {readPreference: ReadPreference.PRIMARY_PREFERRED});
-      var thisChangeStream1 = theDatabase.watch(pipeline);
-      assert.deepEqual(thisChangeStream1.cursor.readPreference.preference, ReadPreference.PRIMARY_PREFERRED);
 
       // Should get preference from collection
       var theCollection = theDatabase.collection('docs', {readPreference: ReadPreference.SECONDARY_PREFERRED});
-      var thisChangeStream2 = theCollection.watch(pipeline);
-      assert.deepEqual(thisChangeStream2.cursor.readPreference.preference, ReadPreference.SECONDARY_PREFERRED);
+      var thisChangeStream1 = theCollection.watch(pipeline);
+      assert.deepEqual(thisChangeStream1.cursor.readPreference.preference, ReadPreference.SECONDARY_PREFERRED);
 
       // Should get preference from Change Stream options
-      var thisChangeStream3 = theCollection.watch(pipeline, {readPreference: ReadPreference.NEAREST});
-      assert.deepEqual(thisChangeStream3.cursor.readPreference.preference, ReadPreference.NEAREST);
+      var thisChangeStream2 = theCollection.watch(pipeline, {readPreference: ReadPreference.NEAREST});
+      assert.deepEqual(thisChangeStream2.cursor.readPreference.preference, ReadPreference.NEAREST);
 
-      Promise.all([thisChangeStream1.close(), thisChangeStream2.close(), thisChangeStream3.close()]).then(function(){
+      Promise.all([thisChangeStream1.close(), thisChangeStream2.close()]).then(function(){
         setTimeout(test.done, 1100);
       });
 
@@ -1220,7 +1229,8 @@ exports['Should error when attempting to create a Change Stream against a stand-
       var theDatabase = client.db('integration_tests');
 
       try {
-        theDatabase.watch();
+        var changeStreamTest = theDatabase.collection('standAloneTest').watch();
+        changeStreamTest.next();
         assert.ok(false);
       } catch (e) {
         assert.equal(e.message, 'Change Stream are only supported on replica sets. The connected server does not appear to be a replica set.');
