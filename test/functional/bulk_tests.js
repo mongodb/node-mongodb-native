@@ -369,7 +369,7 @@ exports['Should correctly perform ordered upsert with custom _id'] = {
   }
 }
 
-exports['Should throw an error when no operations in ordered batch'] = {
+exports['Should return an error when no operations in ordered batch'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
@@ -378,18 +378,15 @@ exports['Should throw an error when no operations in ordered batch'] = {
     db.open(function(err, db) {
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_8');
-      var threw = false;
 
-      try {
-        // Initialize the Ordered Batch
-        col.initializeOrderedBulkOp().execute(function(err, result) {});
-      } catch(err) {
-        threw = true;
-      }
+      // Initialize the Ordered Batch
+      col.initializeOrderedBulkOp().execute(function(err, result) {
+        test.equal(err instanceof Error, true);
+        test.equal(err.message, 'Invalid Operation, no operations specified');
 
-      test.equal(true, threw);
-      db.close();
-      test.done();
+        db.close();
+        test.done();
+      });
     });
   }
 }
@@ -874,7 +871,7 @@ exports['Should prohibit batch finds with no selector'] = {
   }
 }
 
-exports['Should throw an error when no operations in unordered batch'] = {
+exports['Should return an error when no operations in unordered batch'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
@@ -883,18 +880,15 @@ exports['Should throw an error when no operations in unordered batch'] = {
     db.open(function(err, db) {
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_8');
-      var threw = false;
 
-      try {
-        // Initialize the Ordered Batch
-        col.initializeUnorderedBulkOp().execute(configuration.writeConcernMax(),function(err, result) {});
-      } catch(err) {
-        threw = true;
-      }
+      // Initialize the Ordered Batch
+      col.initializeUnorderedBulkOp().execute(configuration.writeConcernMax(),function(err, result) {
+        test.equal(err instanceof Error, true);
+        test.equal(err.message, 'Invalid Operation, no operations specified');
 
-      test.equal(true, threw);
-      db.close();
-      test.done();
+        db.close();
+        test.done();
+      });
     });
   }
 }
@@ -1226,5 +1220,58 @@ exports['Should correctly handle bulk operation split for unordered bulk operati
         });
       });
     });
+  }
+}
+
+exports['Should return an error instead of throwing when no operations are provided for ordered bulk operation execute'] = {
+  metadata: { requires: { mongodb: ">=2.6.0" , topology: 'single', node: ">0.10.0" } },
+  test: function(configure, test) {
+    var db = configure.newDbInstance({ w: 1 }, { poolSize: 1 });
+
+    db.open(function(err, db) {
+      db.collection('doesnt_matter').insertMany([], function(err, r) {
+        test.equal(err instanceof Error, true);
+        test.equal(err.message, 'Invalid Operation, no operations specified');
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+exports['Should return an error instead of throwing when no operations are provided for unordered bulk operation execute'] = {
+  metadata: { requires: { mongodb: ">=2.6.0" , topology: 'single', node: ">0.10.0" } },
+  test: function(configure, test) {
+    var db = configure.newDbInstance({ w: 1 }, { poolSize: 1 });
+
+    db.open(function(err, db) {
+      db.collection('doesnt_matter').insertMany([], { ordered: false }, function(err, r) {
+        test.equal(err instanceof Error, true);
+        test.equal(err.message, 'Invalid Operation, no operations specified');
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+exports['Should return an error instead of throwing when an empty bulk operation is submitted (with promise)'] = {
+  metadata: { requires: { promises: true, node: ">0.12.0" } },
+  test: function(configure, test) {
+    var db = configure.newDbInstance({ w: 1 }, { poolSize: 1 });
+
+    return db.open()
+      .then(function() { return db.collection('doesnt_matter').insertMany([]); })
+      .then(function() {
+        test.equal(false, true); // this should not happen!
+      })
+      .catch(function(err) {
+        test.equal(err instanceof Error, true);
+        test.equal(err.message, 'Invalid Operation, no operations specified');
+      })
+      .then(function() {
+        db.close();
+        test.done();
+      });
   }
 }
