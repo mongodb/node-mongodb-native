@@ -1,17 +1,21 @@
+sudo: required
+dist: trusty
 language: node_js
+
 node_js:
   - "0.10"
   - "0.12"
   - "4"
   - "6"
-  - "7"
   - "8"
-sudo: false
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
 env:
-  - MONGODB_VERSION=2.2.x
-  - MONGODB_VERSION=2.4.x
   - MONGODB_VERSION=2.6.x
   - MONGODB_VERSION=3.0.x
   - MONGODB_VERSION=3.2.x
   - MONGODB_VERSION=3.4.x
-  - MONGODB_VERSION=3.6.x

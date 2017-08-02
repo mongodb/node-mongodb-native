@@ -50,7 +50,7 @@
     "url": "https://github.com/mongodb/node-mongodb-native/issues"
   },
   "scripts": {
-    "test": "node test/runner.js -t functional -l",
+    "test": "node test/runner.js -t functional",
     "coverage": "node_modules/.bin/nyc node test/runner.js -t functional && node_modules/.bin/nyc report --reporter=text-lcov | node_modules/.bin/coveralls",
     "lint": "eslint lib"
   },
