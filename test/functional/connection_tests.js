@@ -295,6 +295,37 @@ exports.testConnectGoodAuth = {
 /**
  * @ignore
  */
+exports.testConnectGoodAuthAsOption = {
+  metadata: { requires: { topology: 'single' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var connect = configuration.require;
+    var user = 'testConnectGoodAuthAsOption', password = 'password';
+    // First add a user.
+    connect(configuration.url(), function(err, db) {
+      test.equal(err, null);
+
+      db.addUser(user, password, function(err, result) {
+        test.equal(err, null);
+        db.close();
+        restOfTest();
+      });
+    });
+
+    function restOfTest() {
+      var opts = { auth: { user: user, password: password } };
+      connect(configuration.url('baduser', 'badpassword'), opts, connectionTester(test, 'testConnectGoodAuthAsOption', function(db) {
+        db.close();
+        test.done();
+      }));
+    }
+  }
+}
+
+/**
+ * @ignore
+ */
 exports.testConnectBadAuth = {
   metadata: { requires: { topology: 'single' } },
 
