@@ -23,7 +23,7 @@ var extend = function(template, fields) {
 }
 
 exports['Should create a Change Stream on a collection and emit data events'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: ">=3.5.10" } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -74,7 +74,7 @@ exports['Should create a Change Stream on a collection and emit data events'] = 
 };
 
 exports['Should create a Change Stream on a collection and get change events through imperative callback form'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -131,7 +131,7 @@ exports['Should create a Change Stream on a collection and get change events thr
 };
 
 exports['Should support creating multiple simultaneous Change Streams'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -195,7 +195,7 @@ exports['Should support creating multiple simultaneous Change Streams'] = {
 };
 
 exports['Should properly close Change Stream cursor'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -225,7 +225,7 @@ exports['Should properly close Change Stream cursor'] = {
 };
 
 exports['UPDATE WHEN SERVER-29137 DONE Should error when attempting to create a Change Stream with a forbidden aggrgation pipeline stage'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -253,7 +253,7 @@ exports['UPDATE WHEN SERVER-29137 DONE Should error when attempting to create a 
 };
 
 exports['Should cache the change stream resume token using imperative callback form'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -293,7 +293,7 @@ exports['Should cache the change stream resume token using imperative callback f
 };
 
 exports['Should cache the change stream resume token using promises'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -332,7 +332,7 @@ exports['Should cache the change stream resume token using promises'] = {
 };
 
 exports['Should cache the change stream resume token using event listeners'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -364,7 +364,7 @@ exports['Should cache the change stream resume token using event listeners'] = {
 };
 
 exports['Should error if resume token projected out of change stream document using imperative callback form'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -400,7 +400,7 @@ exports['Should error if resume token projected out of change stream document us
 };
 
 exports['Should error if resume token projected out of change stream document using event listeners'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -436,7 +436,7 @@ exports['Should error if resume token projected out of change stream document us
 };
 
 exports['UPDATE WHEN SERVER-29140 DONE Should invalidate change stream on collection rename using event listeners'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -483,7 +483,7 @@ exports['UPDATE WHEN SERVER-29140 DONE Should invalidate change stream on collec
 };
 
 exports['UPDATE WHEN SERVER-29140 DONE Should invalidate change stream on database drop using imperative callback form'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -526,7 +526,7 @@ exports['UPDATE WHEN SERVER-29140 DONE Should invalidate change stream on databa
 };
 
 exports['UPDATE WHEN SERVER-29140 DONE Should invalidate change stream on collection drop using promises'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -570,7 +570,8 @@ exports['Should return MongoNetworkError after first retry attempt fails using p
   metadata: {
     requires: {
       generators: true,
-      topology: "single"
+      topology: 'single',
+      mongodb: '>=3.5.10'
     }
   },
   test: function(configuration, test) {
@@ -653,7 +654,8 @@ exports['Should return MongoNetworkError after first retry attempt fails using c
   metadata: {
     requires: {
       generators: true,
-      topology: "single"
+      topology: 'single',
+      mongodb: '>=3.5.10'
     }
   },
   test: function(configuration, test) {
@@ -735,7 +737,8 @@ exports['Should resume Change Stream when a resumable error is encountered'] = {
   metadata: {
     requires: {
       generators: true,
-      topology: "single"
+      topology: 'single',
+      mongodb: '>=3.5.10'
     }
   },
   test: function(configuration, test) {
@@ -851,7 +854,7 @@ exports['Should resume Change Stream when a resumable error is encountered'] = {
 }
 
 exports['UPDATE WHEN SERVER-29131 AND SERVER-30438 DONE Should resume from point in time using user-provided resumeAfter'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -940,7 +943,7 @@ exports['UPDATE WHEN SERVER-29131 AND SERVER-30438 DONE Should resume from point
 };
 
 exports['UPDATE WHEN SERVER-30438 DONE Should start change stream at the current most recent entry in the oplog'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -992,7 +995,7 @@ exports['UPDATE WHEN SERVER-30438 DONE Should start change stream at the current
 };
 
 exports['Should support full document lookup'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1053,7 +1056,7 @@ exports['Should support full document lookup'] = {
 };
 
 exports['Should support full document lookup with deleted documents'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1117,7 +1120,7 @@ exports['Should support full document lookup with deleted documents'] = {
 };
 
 exports['Should create Change Streams with correct read preferences'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1150,7 +1153,7 @@ exports['Should create Change Streams with correct read preferences'] = {
 };
 
 exports['Should support piping of Change Streams'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1198,7 +1201,8 @@ exports['Should resume piping of Change Streams when a resumable error is encoun
   metadata: {
     requires: {
       generators: true,
-      topology: "single"
+      topology: 'single',
+      mongodb: '>=3.5.10'
     }
   },
   test: function(configuration, test) {
@@ -1338,7 +1342,7 @@ exports['Should resume piping of Change Streams when a resumable error is encoun
 }
 
 exports['Should support piping of Change Streams through multiple pipes'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1393,7 +1397,7 @@ exports['Should support piping of Change Streams through multiple pipes'] = {
 };
 
 exports['Should error when attempting to create a Change Stream against a stand-alone server'] = {
-  metadata: { requires: { topology: 'single' } },
+  metadata: { requires: { topology: 'single', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
