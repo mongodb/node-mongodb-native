@@ -34,7 +34,7 @@
     "jsdoc": "3.4.0",
     "ldjson-stream": "^1.2.1",
     "mongodb-extended-json": "1.7.1",
-    "mongodb-topology-manager": "github:sebthedev/mongodb-topology-manager#waiting-for-connections-fix",
+    "mongodb-topology-manager": "1.0.x",
     "mongodb-version-manager": "christkv/mongodb-version-manager#master",
     "nyc": "^8.1.0",
     "optimist": "0.6.1",
