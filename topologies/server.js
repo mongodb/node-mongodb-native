@@ -11,7 +11,6 @@ var inherits = require('util').inherits,
   Query = require('../connection/commands').Query,
   MongoError = require('../error').MongoError,
   MongoNetworkError = require('../error').MongoNetworkError,
-  PreTwoSixWireProtocolSupport = require('../wireprotocol/2_4_support'),
   TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support'),
   ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support'),
   BasicCursor = require('../cursor'),
@@ -128,7 +127,7 @@ var Server = function(options) {
   this.initalConnect = true;
   // Wire protocol handler, default to oldest known protocol handler
   // this gets changed when the first ismaster is called.
-  this.wireProtocolHandler = new PreTwoSixWireProtocolSupport();
+  this.wireProtocolHandler = new TwoSixWireProtocolSupport();
   // Default type
   this._type = 'server';
   // Set the client info
@@ -175,17 +174,12 @@ Object.defineProperty(Server.prototype, 'name', {
 
 function configureWireProtocolHandler(self, ismaster) {
   // 3.2 wire protocol handler
-  if(ismaster.maxWireVersion >= 4) {
+  if (ismaster.maxWireVersion >= 4) {
     return new ThreeTwoWireProtocolSupport(new TwoSixWireProtocolSupport());
   }
 
-  // 2.6 wire protocol handler
-  if(ismaster.maxWireVersion >= 2) {
-    return new TwoSixWireProtocolSupport();
-  }
-
-  // 2.4 or earlier wire protocol handler
-  return new PreTwoSixWireProtocolSupport();
+  // default to 2.6 wire protocol handler
+  return new TwoSixWireProtocolSupport();
 }
 
 function disconnectHandler(self, type, ns, cmd, options, callback) {
