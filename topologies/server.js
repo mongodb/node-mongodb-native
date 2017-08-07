@@ -172,6 +172,12 @@ Object.defineProperty(Server.prototype, 'name', {
   get: function() { return this.s.options.host + ":" + this.s.options.port; }
 });
 
+function isSupportedServer(response) {
+  return response &&
+         typeof response.maxWireVersion === 'number' &&
+         response.maxWireVersion >= 2;
+}
+
 function configureWireProtocolHandler(self, ismaster) {
   // 3.2 wire protocol handler
   if (ismaster.maxWireVersion >= 4) {
@@ -254,10 +260,14 @@ var eventHandler = function(self, event) {
       }, function(err, result) {
         // Set initial lastIsMasterMS
         self.lastIsMasterMS = new Date().getTime() - start;
-        if(err) {
+        if (err) {
           self.destroy();
-          if(self.listeners('error').length > 0) self.emit('error', err);
-          return;
+          return self.emit('error', err);
+        }
+
+        if (!isSupportedServer(result.result)) {
+          self.destroy();
+          return self.emit('error', new MongoError('unsupported server version'), self);
         }
 
         // Determine whether the server is instructing us to use a compressor
