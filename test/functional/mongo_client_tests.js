@@ -587,7 +587,7 @@ exports['Should correctly pass through appname in options'] = {
     // console.dir(url)
     MongoClient.connect(url, {appname: 'hello world'}, function(err, db) {
       test.equal(null, err);
-      test.equal('hello world', db.serverConfig.clientInfo.application.name);
+      test.equal('hello world', db.topology.clientInfo.application.name);
 
       db.close();
       test.done();

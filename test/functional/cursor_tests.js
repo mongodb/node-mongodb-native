@@ -3031,7 +3031,7 @@ exports['Should correctly apply map to forEach'] = {
           test.equal(4, doc.a);
         }, function(err, doc) {
           test.equal(null, err);
-          db.close();
+          client.close();
           test.done();
         });
       })
@@ -3057,8 +3057,9 @@ exports['Should correctly apply multiple uses of map and apply forEach'] = {
       docs[i] = {'a':i, createdAt:new Date(d)};
     }
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       var collection = db.collection('map_mapmapforEach');
@@ -3384,7 +3385,7 @@ exports['Correcly decorate the cursor count command with skip, limit, hint, read
         .hint({project:1}).count(true, function(err, r) {
           test.equal(null, err);
           test.equal(1, started.length);
-          if(started[0].command.readConcern) 
+          if(started[0].command.readConcern)
             test.deepEqual({level: 'local'}, started[0].command.readConcern);
           test.deepEqual({ project: 1 }, started[0].command.hint);
           test.equal(5, started[0].command.skip);
@@ -3427,7 +3428,7 @@ exports['Correcly decorate the collection cursor count command with skip, limit,
       }, function(err, r) {
         test.equal(null, err);
         test.equal(1, started.length);
-        if(started[0].command.readConcern) 
+        if(started[0].command.readConcern)
           test.deepEqual({level: 'local'}, started[0].command.readConcern);
         test.deepEqual({ project: 1 }, started[0].command.hint);
         test.equal(5, started[0].command.skip);

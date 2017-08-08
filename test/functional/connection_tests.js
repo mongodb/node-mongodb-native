@@ -9,8 +9,6 @@ exports['Should correctly start monitoring for single server connection'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var client = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1, host: "/tmp/mongodb-27017.sock"});
-    console.log("$$$$$$$$$$$$$$$$$$$$$$$")
-    console.dir(client)
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       test.equal(null, err);
@@ -138,7 +136,7 @@ exports['Should connect to server using domain socket with undefined port'] = {
   test: function(configuration, test) {
     var client = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1, host: "/tmp/mongodb-27017.sock", port:undefined});
     client.connect(function(err, db) {
-      var db = client.db(configuration.database);      
+      var db = client.db(configuration.database);
       test.equal(null, err);
 
       db.collection("domainSocketCollection1").insert({x:1}, {w:1}, function(err, item) {
@@ -311,20 +309,21 @@ exports.testConnectGoodAuthAsOption = {
     var connect = configuration.require;
     var user = 'testConnectGoodAuthAsOption', password = 'password';
     // First add a user.
-    connect(configuration.url(), function(err, db) {
+    connect(configuration.url(), function(err, client) {
       test.equal(err, null);
+      var db = client.db(configuration.database);
 
       db.addUser(user, password, function(err, result) {
         test.equal(err, null);
-        db.close();
+        client.close();
         restOfTest();
       });
     });
 
     function restOfTest() {
       var opts = { auth: { user: user, password: password } };
-      connect(configuration.url('baduser', 'badpassword'), opts, connectionTester(test, 'testConnectGoodAuthAsOption', function(db) {
-        db.close();
+      connect(configuration.url('baduser', 'badpassword'), opts, connectionTester(test, configuration, 'testConnectGoodAuthAsOption', function(client) {
+        client.close();
         test.done();
       }));
     }

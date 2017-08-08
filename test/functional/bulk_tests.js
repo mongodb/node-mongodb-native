@@ -382,8 +382,9 @@ exports['Should return an error when no operations in ordered batch'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_8');
 
@@ -392,7 +393,7 @@ exports['Should return an error when no operations in ordered batch'] = {
         test.equal(err instanceof Error, true);
         test.equal(err.message, 'Invalid Operation, no operations specified');
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -894,8 +895,9 @@ exports['Should return an error when no operations in unordered batch'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    var client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_8');
 
@@ -904,7 +906,7 @@ exports['Should return an error when no operations in unordered batch'] = {
         test.equal(err instanceof Error, true);
         test.equal(err.message, 'Invalid Operation, no operations specified');
 
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -1249,14 +1251,14 @@ exports['Should correctly handle bulk operation split for unordered bulk operati
 
 exports['Should return an error instead of throwing when no operations are provided for ordered bulk operation execute'] = {
   metadata: { requires: { mongodb: ">=2.6.0" , topology: 'single', node: ">0.10.0" } },
-  test: function(configure, test) {
-    var db = configure.newDbInstance({ w: 1 }, { poolSize: 1 });
-
-    db.open(function(err, db) {
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance({ w: 1 }, { poolSize: 1 });
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('doesnt_matter').insertMany([], function(err, r) {
         test.equal(err instanceof Error, true);
         test.equal(err.message, 'Invalid Operation, no operations specified');
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -1265,14 +1267,15 @@ exports['Should return an error instead of throwing when no operations are provi
 
 exports['Should return an error instead of throwing when no operations are provided for unordered bulk operation execute'] = {
   metadata: { requires: { mongodb: ">=2.6.0" , topology: 'single', node: ">0.10.0" } },
-  test: function(configure, test) {
-    var db = configure.newDbInstance({ w: 1 }, { poolSize: 1 });
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance({ w: 1 }, { poolSize: 1 });
 
-    db.open(function(err, db) {
+    client.connect(function(err, client) {
+      var db = client.db(configuration.database);
       db.collection('doesnt_matter').insertMany([], { ordered: false }, function(err, r) {
         test.equal(err instanceof Error, true);
         test.equal(err.message, 'Invalid Operation, no operations specified');
-        db.close();
+        client.close();
         test.done();
       });
     });
@@ -1281,11 +1284,14 @@ exports['Should return an error instead of throwing when no operations are provi
 
 exports['Should return an error instead of throwing when an empty bulk operation is submitted (with promise)'] = {
   metadata: { requires: { promises: true, node: ">0.12.0" } },
-  test: function(configure, test) {
-    var db = configure.newDbInstance({ w: 1 }, { poolSize: 1 });
+  test: function(configuration, test) {
+    var client = configuration.newDbInstance({ w: 1 }, { poolSize: 1 });
 
-    return db.open()
-      .then(function() { return db.collection('doesnt_matter').insertMany([]); })
+    return client.connect()
+      .then(function() {
+        var db = client.db(configuration.database);
+        return db.collection('doesnt_matter').insertMany([]);
+      })
       .then(function() {
         test.equal(false, true); // this should not happen!
       })
@@ -1294,7 +1300,7 @@ exports['Should return an error instead of throwing when an empty bulk operation
         test.equal(err.message, 'Invalid Operation, no operations specified');
       })
       .then(function() {
-        db.close();
+        client.close();
         test.done();
       });
   }
