@@ -1,3 +1,7 @@
+2.1.15 2017-08-08
+-----------------
+* Emit SDAM events on close and reconnect
+
 2.1.14 2017-07-07
 -----------------
 * NODE-1073 updates scram.js hi() algorithm to utilize crypto.pbkdf2Sync()
