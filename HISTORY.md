@@ -1,3 +1,10 @@
+2.2.31 2017-08-08
+-----------------
+* update mongodb-core to 2.2.15
+* allow auth option in MongoClient.connect
+* remove duplicate option `promoteLongs` from MongoClient's `connect`
+* bulk operations should not throw an error on empty batch
+
 2.2.30 2017-07-07
 -----------------
 * Update mongodb-core to 2.2.14
