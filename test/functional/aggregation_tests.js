@@ -22,6 +22,8 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = {
     // REMOVE-LINE test.
     // BEGIN
     client.connect(function(err, db) {
+      test.equal(null, err);
+
       var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
@@ -35,6 +37,7 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = {
       var collection = db.collection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray');
       // Insert the docs
       collection.insert(docs, {w: 1}, function(err, result) {
+        test.equal(null, err);
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         collection.aggregate([
@@ -47,16 +50,20 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = {
               _id : {tags : "$tags"},
               authors : { $addToSet : "$author" }
             }}
-          ], function(err, result) {
+          ], function(err, cursor) {
             test.equal(null, err);
-            test.equal('good', result[0]._id.tags);
-            test.deepEqual(['bob'], result[0].authors);
-            test.equal('fun', result[1]._id.tags);
-            test.deepEqual(['bob'], result[1].authors);
 
-            client.close();
-            test.done();
-        });
+            cursor.toArray(function(err, result) {
+              test.equal(null, err);
+              test.equal('good', result[0]._id.tags);
+              test.deepEqual(['bob'], result[0].authors);
+              test.equal('fun', result[1]._id.tags);
+              test.deepEqual(['bob'], result[1].authors);
+
+              client.close();
+              test.done();
+            });
+          });
       });
     });
     // END
@@ -84,7 +91,9 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.
     // BEGIN
-    client.connect(function(err, db) {
+    client.connect(function(err, client) {
+      test.equal(null, err);
+
       var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
@@ -98,6 +107,8 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray
       var collection = db.collection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments');
       // Insert the docs
       collection.insert(docs, {w: 1}, function(err, result) {
+        test.equal(null, err);
+
         // Execute aggregate, notice the pipeline is expressed as function call parameters
         // instead of an Array.
         collection.aggregate(
@@ -110,17 +121,21 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray
               _id : {tags : "$tags"},
               authors : { $addToSet : "$author" }
             }}
-          , function(err, result) {
+          , function(err, cursor) {
             test.equal(null, err);
-            test.equal('good', result[0]._id.tags);
-            test.deepEqual(['bob'], result[0].authors);
-            test.equal('fun', result[1]._id.tags);
-            test.deepEqual(['bob'], result[1].authors);
 
-            client.close();
-            test.done();
+            cursor.toArray(function(err, result) {
+              test.equal(null, err);
+              test.equal('good', result[0]._id.tags);
+              test.deepEqual(['bob'], result[0].authors);
+              test.equal('fun', result[1]._id.tags);
+              test.deepEqual(['bob'], result[1].authors);
+
+              client.close();
+              test.done();
+            });
+          });
         });
-      });
     });
     // END
   }
@@ -147,7 +162,9 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingl
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.
     // BEGIN
-    client.connect(function(err, db) {
+    client.connect(function(err, client) {
+      test.equal(null, err);
+
       var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
@@ -161,6 +178,8 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingl
       var collection = db.collection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments');
       // Insert the docs
       collection.insert(docs, {w: 1}, function(err, result) {
+        test.equal(null, err);
+
         // Execute aggregate, notice the pipeline is expressed as function call parameters
         // instead of an Array.
         collection.aggregate(
@@ -173,15 +192,19 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingl
               _id : {tags : "$tags"},
               authors : { $addToSet : "$author" }
             }}
-          , function(err, result) {
+          , function(err, cursor) {
             test.equal(null, err);
-            test.equal('good', result[0]._id.tags);
-            test.deepEqual(['bob'], result[0].authors);
-            test.equal('fun', result[1]._id.tags);
-            test.deepEqual(['bob'], result[1].authors);
 
-            client.close();
-            test.done();
+            cursor.toArray(function(err, result) {
+              test.equal(null, err);
+              test.equal('good', result[0]._id.tags);
+              test.deepEqual(['bob'], result[0].authors);
+              test.equal('fun', result[1]._id.tags);
+              test.deepEqual(['bob'], result[1].authors);
+
+              client.close();
+              test.done();
+            });
         });
       });
     });
@@ -216,7 +239,9 @@ exports['Should correctly return and iterate over all the cursor results'] = {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.
     // BEGIN
-    client.connect(function(err, db) {
+    client.connect(function(err, client) {
+      test.equal(null, err);
+
       var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
@@ -286,7 +311,9 @@ exports['Should correctly return a cursor and call explain'] = {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.
     // BEGIN
-    client.connect(function(err, db) {
+    client.connect(function(err, client) {
+      test.equal(null, err);
+
       var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
@@ -300,6 +327,7 @@ exports['Should correctly return a cursor and call explain'] = {
       var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
       // Insert the docs
       collection.insert(docs, {w: 1}, function(err, result) {
+        test.equal(null, err);
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([
@@ -357,7 +385,9 @@ exports['Should correctly return a cursor with batchSize 1 and call next'] = {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.
     // BEGIN
-    client.connect(function(err, db) {
+    client.connect(function(err, client) {
+      test.equal(null, err);
+
       var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
@@ -371,6 +401,7 @@ exports['Should correctly return a cursor with batchSize 1 and call next'] = {
       var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
       // Insert the docs
       collection.insert(docs, {w: 1}, function(err, result) {
+        test.equal(null, err);
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([
@@ -423,7 +454,9 @@ exports['Should correctly write the results out to a new collection'] = {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.
     // BEGIN
-    client.connect(function(err, db) {
+    client.connect(function(err, client) {
+      test.equal(null, err);
+
       var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
@@ -437,6 +470,7 @@ exports['Should correctly write the results out to a new collection'] = {
       var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
       // Insert the docs
       collection.insert(docs, {w: 1}, function(err, result) {
+        test.equal(null, err);
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         collection.aggregate([
@@ -451,12 +485,16 @@ exports['Should correctly write the results out to a new collection'] = {
             }}
           ], {
             out: "testingOutCollectionForAggregation"
-          }, function(err, results) {
+          }, function(err, cursor) {
             test.equal(null, err);
-            test.equal(0, results.length);
 
-            client.close();
-            test.done();
+            cursor.toArray(function(err, results) {
+              test.equal(null, err);
+              test.equal(0, results.length);
+
+              client.close();
+              test.done();
+            });
           });
       });
     });
@@ -485,7 +523,9 @@ exports['Should correctly use allowDiskUse when performing an aggregation'] = {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.
     // BEGIN
-    client.connect(function(err, db) {
+    client.connect(function(err, client) {
+      test.equal(null, err);
+
       var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
@@ -499,6 +539,7 @@ exports['Should correctly use allowDiskUse when performing an aggregation'] = {
       var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
       // Insert the docs
       collection.insert(docs, {w: 1}, function(err, result) {
+        test.equal(null, err);
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         collection.aggregate([
@@ -513,15 +554,19 @@ exports['Should correctly use allowDiskUse when performing an aggregation'] = {
             }}
           ], {
             allowDiskUse: true
-          }, function(err, results) {
+          }, function(err, cursor) {
             test.equal(null, err);
-            test.equal('good', results[0]._id.tags);
-            test.deepEqual(['bob'], results[0].authors);
-            test.equal('fun', results[1]._id.tags);
-            test.deepEqual(['bob'], results[1].authors);
 
-            client.close();
-            test.done();
+            cursor.toArray(function(err, results) {
+              test.equal(null, err);
+              test.equal('good', results[0]._id.tags);
+              test.deepEqual(['bob'], results[0].authors);
+              test.equal('fun', results[1]._id.tags);
+              test.deepEqual(['bob'], results[1].authors);
+
+              client.close();
+              test.done();
+            });
           });
       });
     });
@@ -542,10 +587,14 @@ exports['Should perform a simple group aggregation'] = {
   test: function(configuration, test) {
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
+      test.equal(null, err);
+
       var db = client.db(configuration.database);
       // Create a collection
       var col = db.collection('shouldPerformSimpleGroupAggregation');
-      col.remove({}, function() {
+      col.remove({}, function(err) {
+        test.equal(null, err);
+
         // Insert a single document
         col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
           test.equal(null, err);
@@ -582,6 +631,8 @@ exports['Should correctly perform an aggregation using a collection name with do
   test: function(configuration, test) {
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
+      test.equal(null, err);
+
       var db = client.db(configuration.database);
       db.collection('te.st', function(err, col){
         test.equal(null, err);
@@ -637,6 +688,8 @@ exports['Should fail aggregation due to illegal cursor option and streams'] = {
   test: function(configuration, test) {
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
+      test.equal(null, err);
+
       var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
@@ -650,10 +703,11 @@ exports['Should fail aggregation due to illegal cursor option and streams'] = {
       var collection = db.collection('shouldCorrectlyDoAggWithCursorGetStream');
       // Insert the docs
       collection.insert(docs, {w: 1}, function(err, result) {
+        test.equal(null, err);
 
         try {
           // Execute aggregate, notice the pipeline is expressed as an Array
-          var cursor = collection.aggregate([
+          collection.aggregate([
               { $project : {
                 author : 1,
                 tags : 1
@@ -700,6 +754,8 @@ exports['Ensure MaxTimeMS is correctly passed down into command execution when u
     // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
     // DOC_START
     client.connect(function(err, client) {
+      test.equal(null, err);
+
       var db = client.db(configuration.database);
       // Some docs for insertion
       var docs = [{
@@ -713,6 +769,7 @@ exports['Ensure MaxTimeMS is correctly passed down into command execution when u
       var collection = db.collection('shouldCorrectlyDoAggWithCursorMaxTimeMSSet');
       // Insert the docs
       collection.insert(docs, {w: 1}, function(err, result) {
+        test.equal(null, err);
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([
@@ -756,7 +813,7 @@ exports['Ensure MaxTimeMS is correctly passed down into command execution when u
           }
 
           // Execute aggregate, notice the pipeline is expressed as an Array
-          var cursor = collection.aggregate([
+          collection.aggregate([
               { $project : {
                 author : 1,
                 tags : 1
@@ -769,6 +826,8 @@ exports['Ensure MaxTimeMS is correctly passed down into command execution when u
             ], {
               maxTimeMS: 1000
             }, function(err, r) {
+              test.equal(null, err);
+
               // Return the command
               db.command = cmd;
               client.close();
@@ -804,6 +863,8 @@ exports['Should correctly handle ISODate date matches in aggregation framework']
     // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
     // DOC_START
     client.connect(function(err, client) {
+      test.equal(null, err);
+
       var db = client.db(configuration.database);
       var date1 = new Date();
       date1.setHours(date1.getHours() - 1);
@@ -819,6 +880,7 @@ exports['Should correctly handle ISODate date matches in aggregation framework']
       var collection = db.collection('shouldCorrectlyQueryUsingISODate');
       // Insert the docs
       collection.insertMany(docs, {w: 1}, function(err, result) {
+        test.equal(null, err);
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([{
@@ -862,6 +924,8 @@ exports['Should correctly exercise hasNext function on aggregation cursor'] = {
     // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
     // DOC_START
     client.connect(function(err, client) {
+      test.equal(null, err);
+
       var db = client.db(configuration.database);
       // Create a collection
       var collection = db.collection('shouldCorrectlyQueryUsingISODate3');
@@ -869,6 +933,7 @@ exports['Should correctly exercise hasNext function on aggregation cursor'] = {
       collection.insertMany([
         {a:1}, {b:1}
       ], {w: 1}, function(err, result) {
+        test.equal(null, err);
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([{

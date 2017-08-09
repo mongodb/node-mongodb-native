@@ -51,7 +51,7 @@ exports['should allow bypassing document validation in 3.2 or higher on inserts'
             });
           });
         });
-      });      
+      });
     });
   }
 }
@@ -110,7 +110,7 @@ exports['should allow bypassing document validation in 3.2 or higher on updates'
             });
           });
         });
-      });      
+      });
     });
   }
 }
@@ -157,7 +157,7 @@ exports['should allow bypassing document validation in 3.2 or higher on bulkWrit
             });
           });
         });
-      });      
+      });
     });
   }
 }
@@ -206,7 +206,7 @@ exports['should allow bypassing document validation in 3.2 or higher on findAndM
             });
           });
         });
-      });      
+      });
     });
   }
 }
@@ -214,8 +214,8 @@ exports['should allow bypassing document validation in 3.2 or higher on findAndM
 exports['should correctly bypass validation for aggregation using out'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb:">=3.1.7", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
+  metadata: { requires: { mongodb:">=3.1.7", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -254,11 +254,15 @@ exports['should correctly bypass validation for aggregation using out'] = {
                   _id : {tags : "$tags"},
                   authors : { $addToSet : "$author" }
                 }}, {$out: 'createValidationCollectionOut'}
-              ], {bypassDocumentValidation:true}, function(err, result) {
+              ], {bypassDocumentValidation:true}, function(err, cursor) {
                 test.equal(null, err);
 
-                client.close();
-                test.done();
+                cursor.toArray(function(err, results) {
+                  test.equal(null, err);
+
+                  client.close();
+                  test.done();
+                });
             });
           });
         });
@@ -270,8 +274,8 @@ exports['should correctly bypass validation for aggregation using out'] = {
 exports['should correctly bypass validation for mapReduce using out'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb:">=3.1.7", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
+  metadata: { requires: { mongodb:">=3.1.7", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});

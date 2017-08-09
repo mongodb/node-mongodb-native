@@ -351,11 +351,16 @@ exports['Should correctly apply collection level read Preference to aggregate'] 
             _id : {tags : "$tags"},
             authors : { $addToSet : "$author" }
           }}
-        ], function(err, result) {
-        client.topology.command = command;
+        ], function(err, cursor) {
+          test.equal(null, err);
 
-        client.close();
-        test.done();
+          cursor.toArray(function(err, result) {
+            test.equal(null, err);
+            client.topology.command = command;
+
+            client.close();
+            test.done();
+          });
       });
     });
   }

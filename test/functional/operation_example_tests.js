@@ -58,15 +58,19 @@ exports.aggregationExample1 = {
               _id : {tags : "$tags"},
               authors : { $addToSet : "$author" }
             }}
-          ], function(err, result) {
+          ], function(err, cursor) {
             test.equal(null, err);
-            test.equal('good', result[0]._id.tags);
-            test.deepEqual(['bob'], result[0].authors);
-            test.equal('fun', result[1]._id.tags);
-            test.deepEqual(['bob'], result[1].authors);
 
-            client.close();
-            test.done();
+            cursor.toArray(function(err, result) {
+              test.equal(null, err);
+              test.equal('good', result[0]._id.tags);
+              test.deepEqual(['bob'], result[0].authors);
+              test.equal('fun', result[1]._id.tags);
+              test.deepEqual(['bob'], result[1].authors);
+
+              client.close();
+              test.done();
+            });
         });
       });
     });
@@ -5901,7 +5905,7 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectId = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -6095,7 +6099,7 @@ exports.shouldCorrectlyReadlinesAndPutLines = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -6147,7 +6151,7 @@ exports.shouldCorrectlyUnlink = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -6230,7 +6234,7 @@ exports.shouldCorrectlyWriteAndReadJpgImage = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -6292,7 +6296,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilename = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -6409,7 +6413,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFile = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -6468,7 +6472,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandle = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -6530,7 +6534,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffers 
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -6591,7 +6595,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingClose = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -6644,7 +6648,7 @@ exports.shouldCorrectlyAccessChunkCollection = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -6693,7 +6697,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkIt = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -6761,7 +6765,7 @@ exports.shouldCorrectlyAccessFilesCollection = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -6875,7 +6879,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlines = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -6945,7 +6949,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreRead = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -6999,7 +7003,7 @@ exports.shouldCorrectlyReadFileUsingStream = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7069,7 +7073,7 @@ exports.shouldCorrectlyStreamWriteToGridStoreObject = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7302,7 +7306,7 @@ exports.shouldCorrectlyRewingAndTruncateOnWrite = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7375,7 +7379,7 @@ exports.shouldCorrectlyDetectEOF = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7423,7 +7427,7 @@ exports.shouldCorrectlyExecuteGridstoreTell = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7483,7 +7487,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7538,7 +7542,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7616,7 +7620,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamPauseFunction = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7683,7 +7687,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamResumeFunction = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,
@@ -7765,7 +7769,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamDestroyFunction = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
-    
+
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     client.connect(function(err, client) {
     // LINE var MongoClient = require('mongodb').MongoClient,

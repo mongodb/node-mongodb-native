@@ -69,6 +69,9 @@ MongoClient.connect('mongodb://localhost:27017/test', (err, client) => {
 });
 ```
 
+`Collection.prototype.aggregate` now returns a cursor if a callback is provided. It used to return the resulting documents which is the same as calling `cursor.toArray()` on the cursor we now pass back.
+
+
 ## Connection String Changes
 Following [changes to the MongoDB connection string specification](https://github.com/mongodb/specifications/commit/4631ccd4f825fb1a3aba204510023f9b4d193a05), authentication and hostname details in connection strings must now be URL-encoded. These changes reduce ambiguity in connection strings.
 
