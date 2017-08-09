@@ -15,11 +15,18 @@ exports.cursorShouldBeAbleToResetOnToArrayRunningQueryAgain = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_to_a', function(err, collection) {
+        test.equal(null, err);
 
         collection.insert({'a':1}, configuration.writeConcernMax(), function(err, ids) {
+          test.equal(null, err);
+
           var cursor = collection.find({});
           cursor.toArray(function(err, items) {
+            test.equal(null, err);
+
             // Should fail if called again (cursor should be closed)
             cursor.toArray(function(err, items) {
               test.equal(null, err);
@@ -55,9 +62,14 @@ exports['cursor should close after first next operation'] = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('close_on_next', function(err, collection) {
+        test.equal(null, err);
 
         collection.insert([{'a':1}, {'a':1}, {'a':1}], configuration.writeConcernMax(), function(err, ids) {
+          test.equal(null, err);
+
           var cursor = collection.find({});
           cursor.batchSize(2);
           cursor.next(function(err, d) {
@@ -86,9 +98,13 @@ exports['cursor should trigger getMore'] = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('trigger_get_more', function(err, collection) {
+        test.equal(null, err);
 
         collection.insert([{'a':1}, {'a':1}, {'a':1}], configuration.writeConcernMax(), function(err, ids) {
+          test.equal(null, err);
           var cursor = collection.find({});
           cursor.batchSize(2);
           cursor.toArray(function(err, docs) {
@@ -116,8 +132,14 @@ exports.shouldCorrectlyExecuteCursorExplain = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_explain', function(err, collection) {
+        test.equal(null, err);
+
         collection.insert({'a':1}, configuration.writeConcernMax(), function(err, r) {
+          test.equal(null, err);
+
           collection.find({'a':1}).explain(function(err, explaination) {
             test.equal(null, err);
             test.ok(explaination != null);
@@ -145,8 +167,13 @@ exports.shouldCorrectlyExecuteCursorCount = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_count', function(err, collection) {
+        test.equal(null, err);
+
         collection.find().count(function(err, count) {
+          test.equal(null, err);
           // test.equal(0, count);
 
           function insert(callback) {
@@ -154,6 +181,7 @@ exports.shouldCorrectlyExecuteCursorCount = {
 
             for(var i = 0; i < 10; i++) {
               collection.insert({'x':i}, configuration.writeConcernMax(), function(e, r) {
+                test.equal(null, e);
                 total = total - 1;
                 if(total == 0) callback();
               });
@@ -162,25 +190,32 @@ exports.shouldCorrectlyExecuteCursorCount = {
 
           function finished() {
             collection.find().count(function(err, count) {
+              test.equal(null, err);
               test.equal(10, count);
               test.ok(count.constructor == Number);
 
               collection.find({}, {'limit':5}).count(function(err, count) {
+                test.equal(null, err);
                 test.equal(5, count);
 
                 collection.find({}, {'skip':5}).count(function(err, count) {
+                  test.equal(null, err);
                   test.equal(5, count);
 
                   db.collection('acollectionthatdoesn').count(function(err, count) {
+                    test.equal(null, err);
                     test.equal(0, count);
 
                     var cursor = collection.find();
                     cursor.count(function(err, count) {
+                      test.equal(null, err);
                       test.equal(10, count);
 
                       cursor.each(function(err, item) {
+                        test.equal(null, err);
                         if(item == null) {
                           cursor.count(function(err, count2) {
+                            test.equal(null, err);
                             test.equal(10, count2);
                             test.equal(count, count2);
                             // Let's close the db
@@ -218,8 +253,13 @@ exports.shouldCorrectlyExecuteCursorCountWithDottedCollectionName = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_count.ext', function(err, collection) {
+        test.equal(null, err);
+
         collection.find().count(function(err, count) {
+          test.equal(null, err);
           // test.equal(0, count);
 
           function insert(callback) {
@@ -227,6 +267,7 @@ exports.shouldCorrectlyExecuteCursorCountWithDottedCollectionName = {
 
             for(var i = 0; i < 10; i++) {
               collection.insert({'x':i}, configuration.writeConcernMax(), function(e, r) {
+                test.equal(null, e);
                 total = total - 1;
                 if(total == 0) callback();
               });
@@ -235,25 +276,32 @@ exports.shouldCorrectlyExecuteCursorCountWithDottedCollectionName = {
 
           function finished() {
             collection.find().count(function(err, count) {
+              test.equal(null, err);
               test.equal(10, count);
               test.ok(count.constructor == Number);
 
               collection.find({}, {'limit':5}).count(function(err, count) {
+                test.equal(null, err);
                 test.equal(5, count);
 
                 collection.find({}, {'skip':5}).count(function(err, count) {
+                  test.equal(null, err);
                   test.equal(5, count);
 
                   db.collection('acollectionthatdoesn').count(function(err, count) {
+                    test.equal(null, err);
                     test.equal(0, count);
 
                     var cursor = collection.find();
                     cursor.count(function(err, count) {
+                      test.equal(null, err);
                       test.equal(10, count);
 
                       cursor.each(function(err, item) {
+                        test.equal(null, err);
                         if(item == null) {
                           cursor.count(function(err, count2) {
+                            test.equal(null, err);
                             test.equal(10, count2);
                             test.equal(count, count2);
                             // Let's close the db
@@ -291,12 +339,16 @@ exports.shouldCorrectlyExecuteSortOnCursor = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_sort', function(err, collection) {
+        test.equal(null, err);
         function insert(callback) {
           var total = 10;
 
           for(var i = 0; i < 10; i++) {
             collection.insert({'x':i}, configuration.writeConcernMax(), function(e) {
+              test.equal(null, e);
               total = total - 1;
               if(total == 0) callback();
             });
@@ -334,8 +386,9 @@ exports.shouldCorrectlyExecuteSortOnCursor = {
           cursor = collection.find().sort('a', 1).sort('a', -1);
           test.deepEqual([['a', -1]], cursor.sortValue);finished();
 
-          var cursor = collection.find();
+          cursor = collection.find();
           cursor.nextObject(function(err, doc) {
+            test.equal(null, err);
             try {
               cursor.sort(['a']);
             } catch(err) {
@@ -373,12 +426,16 @@ exports.shouldThrowErrorOnEachWhenMissingCallback = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_each', function(err, collection) {
+        test.equal(null, err);
         function insert(callback) {
           var total = 10;
 
           for(var i = 0; i < 10; i++) {
             collection.insert({'x':i}, configuration.writeConcernMax(), function(e) {
+              test.equal(null, e);
               total = total - 1;
               if(total == 0) callback();
             });
@@ -387,6 +444,7 @@ exports.shouldThrowErrorOnEachWhenMissingCallback = {
 
         function finished() {
           collection.find(function(err, cursor) {
+            test.equal(null, err);
             test.throws(function () {
               cursor.each();
             });
@@ -423,6 +481,7 @@ exports.shouldCorrectlyHandleLimitOnCursor = {
 
           for(var i = 0; i < 10; i++) {
             collection.insert({'x':i}, configuration.writeConcernMax(), function(e) {
+              test.equal(null, e);
               total = total - 1;
               if(total == 0) callback();
             });
@@ -431,6 +490,7 @@ exports.shouldCorrectlyHandleLimitOnCursor = {
 
         function finished() {
           collection.find().limit(5).toArray(function(err, items) {
+            test.equal(null, err);
             test.equal(5, items.length);
 
             // Let's close the db
@@ -460,12 +520,16 @@ exports.shouldCorrectlyHandleNegativeOneLimitOnCursor = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_cursor_negative_one_limit', function(err, collection) {
+        test.equal(null, err);
         function insert(callback) {
           var total = 10;
 
           for(var i = 0; i < 10; i++) {
             collection.insert({'x':i}, configuration.writeConcernMax(), function(e) {
+              test.equal(null, e);
               total = total - 1;
               if(total == 0) callback();
             });
@@ -474,6 +538,7 @@ exports.shouldCorrectlyHandleNegativeOneLimitOnCursor = {
 
         function finished() {
           collection.find().limit(-1).toArray(function(err, items) {
+            test.equal(null, err);
             test.equal(1, items.length);
 
             // Let's close the db
@@ -503,12 +568,16 @@ exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_cursor_any_negative_limit', function(err, collection) {
+        test.equal(null, err);
         function insert(callback) {
           var total = 10;
 
           for(var i = 0; i < 10; i++) {
             collection.insert({'x':i}, configuration.writeConcernMax(), function(e) {
+              test.equal(null, e);
               total = total - 1;
               if(total == 0) callback();
             });
@@ -517,6 +586,7 @@ exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = {
 
         function finished() {
           collection.find().limit(-5).toArray(function(err, items) {
+            test.equal(null, err);
             test.equal(5, items.length);
 
             // Let's close the db
@@ -546,9 +616,18 @@ exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_limit_exceptions', function(err, collection) {
-        collection.insert({'a':1}, configuration.writeConcernMax(), function(err, docs) {});
+        test.equal(null, err);
+
+        collection.insert({'a':1}, configuration.writeConcernMax(), function(err, docs) {
+          test.equal(null, err);
+        });
+
         collection.find(function(err, cursor) {
+          test.equal(null, err);
+
           try {
             cursor.limit('not-an-integer');
           } catch(err) {
@@ -564,7 +643,11 @@ exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = {
         });
 
         collection.find(function(err, cursor) {
+          test.equal(null, err);
+
           cursor.close(function(err, cursor) {
+            test.equal(null, err);
+
             try {
               cursor.limit(1);
             } catch(err) {
@@ -572,7 +655,9 @@ exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = {
             }
 
             collection.find(function(err, cursor) {
+              test.equal(null, err);
               cursor.nextObject(function(err, doc) {
+                test.equal(null, err);
                 try {
                   cursor.limit(1);
                 } catch(err) {
@@ -617,12 +702,18 @@ exports.shouldCorrectlySkipRecordsOnCursor = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_skip', function(err, collection) {
+        test.equal(null, err);
+
         function insert(callback) {
           var total = 10;
 
           for(var i = 0; i < 10; i++) {
             collection.insert({'x':i}, configuration.writeConcernMax(), function(e) {
+              test.equal(null, e);
+
               total = total - 1;
               if(total == 0) callback();
             });
@@ -631,16 +722,21 @@ exports.shouldCorrectlySkipRecordsOnCursor = {
 
         function finished() {
           collection.find(function(err, cursor) {
+            test.equal(null, err);
             cursor.count(function(err, count) {
+              test.equal(null, err);
               test.equal(10, count);
             });
           });
 
           collection.find(function(err, cursor) {
+            test.equal(null, err);
             cursor.toArray(function(err, items) {
+              test.equal(null, err);
               test.equal(10, items.length);
 
               collection.find().skip(2).toArray(function(err, items2) {
+                test.equal(null, err);
                 test.equal(8, items2.length);
 
                 // Check that we have the same elements
@@ -682,8 +778,14 @@ exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_skip_exceptions', function(err, collection) {
-        collection.insert({'a':1}, configuration.writeConcernMax(), function(err, docs) {});
+        test.equal(null, err);
+        collection.insert({'a':1}, configuration.writeConcernMax(), function(err, docs) {
+          test.equal(null, err);
+        });
+
         try {
           collection.find().skip('not-an-integer');
         } catch(err) {
@@ -692,6 +794,7 @@ exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = {
 
         var cursor = collection.find()
         cursor.nextObject(function(err, doc) {
+          test.equal(null, err);
           try {
             cursor.skip(1);
           } catch(err) {
@@ -700,6 +803,7 @@ exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = {
 
           var cursor2 = collection.find()
           cursor2.close(function(err, cursor) {
+            test.equal(null, err);
             try {
               cursor2.skip(1);
             } catch(err) {
@@ -728,8 +832,13 @@ exports.shouldReturnErrorsOnIllegalBatchSizes = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_batchSize_exceptions', function(err, collection) {
-        collection.insert({'a':1}, configuration.writeConcernMax(), function(err, docs) {});
+        test.equal(null, err);
+        collection.insert({'a':1}, configuration.writeConcernMax(), function(err, docs) {
+          test.equal(null, err);
+        });
         var cursor = collection.find();
 
         try {
@@ -739,9 +848,13 @@ exports.shouldReturnErrorsOnIllegalBatchSizes = {
           test.equal("batchSize requires an integer", err.message);
         }
 
-        var cursor = collection.find();
+        cursor = collection.find();
         cursor.nextObject(function(err, doc) {
+          test.equal(null, err);
+
           cursor.nextObject(function(err, doc) {
+            test.equal(null, err);
+
             try {
               cursor.batchSize(1);
               test.ok(false);
@@ -751,6 +864,7 @@ exports.shouldReturnErrorsOnIllegalBatchSizes = {
 
             var cursor2 = collection.find()
             cursor2.close(function(err, cursor) {
+              test.equal(null, err);
               try {
                 cursor2.batchSize(1);
                 test.ok(false);
@@ -781,7 +895,11 @@ exports.shouldCorrectlyHandleChangesInBatchSizes = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_not_multiple_batch_size', function(err, collection) {
+        test.equal(null, err);
+
         var records = 6;
         var batchSize = 2;
         var docs = [];
@@ -790,15 +908,21 @@ exports.shouldCorrectlyHandleChangesInBatchSizes = {
         }
 
         collection.insert(docs, configuration.writeConcernMax(), function() {
+          test.equal(null, err);
+
           collection.find({}, {batchSize : batchSize}, function(err, cursor) {
+            test.equal(null, err);
+
             //1st
             cursor.nextObject(function(err, items) {
+              test.equal(null, err);
               //cursor.items should contain 1 since nextObject already popped one
               test.equal(1, cursor.bufferedCount());
               test.ok(items != null);
 
               //2nd
               cursor.nextObject(function(err, items) {
+                test.equal(null, err);
                 test.equal(0, cursor.bufferedCount());
                 test.ok(items != null);
 
@@ -808,26 +932,31 @@ exports.shouldCorrectlyHandleChangesInBatchSizes = {
 
                 //3rd
                 cursor.nextObject(function(err, items) {
+                  test.equal(null, err);
                   test.equal(2, cursor.bufferedCount());
                   test.ok(items != null);
 
                   //4th
                   cursor.nextObject(function(err, items) {
+                    test.equal(null, err);
                     test.equal(1, cursor.bufferedCount());
                     test.ok(items != null);
 
                     //5th
                     cursor.nextObject(function(err, items) {
+                      test.equal(null, err);
                       test.equal(0, cursor.bufferedCount());
                       test.ok(items != null);
 
                       //6th
                       cursor.nextObject(function(err, items) {
+                        test.equal(null, err);
                         test.equal(0, cursor.bufferedCount());
                         test.ok(items != null);
 
                         //No more
                         cursor.nextObject(function(err, items) {
+                          test.equal(null, err);
                           test.ok(items == null);
                           test.ok(cursor.isClosed());
 
@@ -860,7 +989,11 @@ exports.shouldCorrectlyHandleBatchSize = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_multiple_batch_size', function(err, collection) {
+        test.equal(null, err);
+
         //test with the last batch that is a multiple of batchSize
         var records = 4;
         var batchSize = 2;
@@ -869,30 +1002,39 @@ exports.shouldCorrectlyHandleBatchSize = {
           docs.push({'a':i});
         }
 
-        collection.insert(docs, configuration.writeConcernMax(), function() {
+        collection.insert(docs, configuration.writeConcernMax(), function(err) {
+          test.equal(null, err);
+
           collection.find({}, {batchSize : batchSize}, function(err, cursor) {
+            test.equal(null, err);
+
             //1st
             cursor.nextObject(function(err, items) {
+              test.equal(null, err);
               test.equal(1, cursor.bufferedCount());
               test.ok(items != null);
 
               //2nd
               cursor.nextObject(function(err, items) {
+                test.equal(null, err);
                 test.equal(0, cursor.bufferedCount());
                 test.ok(items != null);
 
                 //3rd
                 cursor.nextObject(function(err, items) {
+                  test.equal(null, err);
                   test.equal(1, cursor.bufferedCount());
                   test.ok(items != null);
 
                   //4th
                   cursor.nextObject(function(err, items) {
+                    test.equal(null, err);
                     test.equal(0, cursor.bufferedCount());
                     test.ok(items != null);
 
                     //No more
                     cursor.nextObject(function(err, items) {
+                      test.equal(null, err);
                       test.ok(items == null);
                       test.ok(cursor.isClosed());
 
@@ -923,7 +1065,11 @@ exports.shouldHandleWhenLimitBiggerThanBatchSize = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_limit_greater_than_batch_size', function(err, collection) {
+        test.equal(null, err);
+
         var limit = 4;
         var records = 10;
         var batchSize = 3;
@@ -932,18 +1078,23 @@ exports.shouldHandleWhenLimitBiggerThanBatchSize = {
           docs.push({'a':i});
         }
 
-        collection.insert(docs, configuration.writeConcernMax(), function() {
+        collection.insert(docs, configuration.writeConcernMax(), function(err) {
+          test.equal(null, err);
+
           var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
           //1st
           cursor.nextObject(function(err, items) {
+            test.equal(null, err);
             test.equal(2, cursor.bufferedCount());
 
             //2nd
             cursor.nextObject(function(err, items) {
+              test.equal(null, err);
               test.equal(1, cursor.bufferedCount());
 
               //3rd
               cursor.nextObject(function(err, items) {
+                test.equal(null, err);
                 test.equal(0, cursor.bufferedCount());
 
                 //4th
@@ -952,6 +1103,7 @@ exports.shouldHandleWhenLimitBiggerThanBatchSize = {
 
                   //No more
                   cursor.nextObject(function(err, items) {
+                    test.equal(null, err);
                     test.ok(items == null);
                     test.ok(cursor.isClosed());
 
@@ -981,7 +1133,11 @@ exports.shouldHandleLimitLessThanBatchSize = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_limit_less_than_batch_size', function(err, collection) {
+        test.equal(null, err);
+
         var limit = 2;
         var records = 10;
         var batchSize = 4;
@@ -990,18 +1146,23 @@ exports.shouldHandleLimitLessThanBatchSize = {
           docs.push({'a':i});
         }
 
-        collection.insert(docs, configuration.writeConcernMax(), function() {
+        collection.insert(docs, configuration.writeConcernMax(), function(err) {
+          test.equal(null, err);
+
           var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
           //1st
           cursor.nextObject(function(err, items) {
+            test.equal(null, err);
             test.equal(1, cursor.bufferedCount());
 
             //2nd
             cursor.nextObject(function(err, items) {
+              test.equal(null, err);
               test.equal(0, cursor.bufferedCount());
 
               //No more
               cursor.nextObject(function(err, items) {
+                test.equal(null, err);
                 test.ok(items == null);
                 test.ok(cursor.isClosed());
 
@@ -1029,12 +1190,18 @@ exports.shouldHandleSkipLimitChaining = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_limit_skip_chaining', function(err, collection) {
+        test.equal(null, err);
+
         function insert(callback) {
           var total = 10;
 
           for(var i = 0; i < 10; i++) {
             collection.insert({'x':i}, configuration.writeConcernMax(), function(e) {
+              test.equal(null, e);
+
               total = total - 1;
               if(total == 0) callback();
             });
@@ -1043,9 +1210,11 @@ exports.shouldHandleSkipLimitChaining = {
 
         function finished() {
           collection.find().toArray(function(err, items) {
+            test.equal(null, err);
             test.equal(10, items.length);
 
             collection.find().limit(5).skip(3).toArray(function(err, items2) {
+              test.equal(null, err);
               test.equal(5, items2.length);
 
               // Check that we have the same elements
@@ -1085,12 +1254,17 @@ exports.shouldCorrectlyHandleLimitSkipChainingInline = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_limit_skip_chaining_inline', function(err, collection) {
+        test.equal(null, err);
+
         function insert(callback) {
           var total = 10;
 
           for(var i = 0; i < 10; i++) {
             collection.insert({'x':i}, configuration.writeConcernMax(), function(e) {
+              test.equal(null, e);
               total = total - 1;
               if(total == 0) callback();
             });
@@ -1099,9 +1273,11 @@ exports.shouldCorrectlyHandleLimitSkipChainingInline = {
 
         function finished() {
           collection.find().toArray(function(err, items) {
+            test.equal(null, err);
             test.equal(10, items.length);
 
             collection.find().limit(5).skip(3).toArray(function(err, items2) {
+              test.equal(null, err);
               test.equal(5, items2.length);
 
               // Check that we have the same elements
@@ -1141,8 +1317,13 @@ exports.shouldCloseCursorNoQuerySent = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_close_no_query_sent', function(err, collection) {
+        test.equal(null, err);
+
         collection.find().close(function(err, cursor) {
+          test.equal(null, err);
           test.equal(true, cursor.isClosed());
           // Let's close the db
           db.close();
@@ -1168,7 +1349,11 @@ exports.shouldCorrectlyRefillViaGetMoreCommand = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_refill_via_get_more', function(err, collection) {
+        test.equal(null, err);
+
         function insert(callback) {
           var docs = [];
 
@@ -1181,31 +1366,37 @@ exports.shouldCorrectlyRefillViaGetMoreCommand = {
 
         function finished() {
           collection.count(function(err, count) {
+            test.equal(null, err);
             test.equal(COUNT, count);
           });
 
           var total = 0;
           var i = 0;
           var cursor = collection.find({}, {}).each(function(err, item) {
+            test.equal(null, err);
             if(item != null) {
               total = total + item.a;
             } else {
               test.equal(499500, total);
 
               collection.count(function(err, count) {
+                test.equal(null, err);
                 test.equal(COUNT, count);
               });
 
               collection.count(function(err, count) {
+                test.equal(null, err);
                 test.equal(COUNT, count);
 
                 var total2 = 0;
                 collection.find().each(function(err, item) {
+                  test.equal(null, err);
                   if(item != null) {
                     total2 = total2 + item.a;
                   } else {
                     test.equal(499500, total2);
                     collection.count(function(err, count) {
+                      test.equal(null, err);
                       test.equal(COUNT, count);
                       test.equal(total, total2);
 
@@ -1241,7 +1432,10 @@ exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_refill_via_get_more_alt_coll', function(err, collection) {
+        test.equal(null, err);
         var COUNT = 1000;
 
         function insert(callback) {
@@ -1256,30 +1450,36 @@ exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = {
 
         function finished() {
           collection.count(function(err, count) {
+            test.equal(null, err);
             test.equal(1000, count);
           });
 
           var total = 0;
           collection.find().each(function(err, item) {
+            test.equal(null, err);
             if(item != null) {
               total = total + item.a;
             } else {
               test.equal(499500, total);
 
               collection.count(function(err, count) {
+                test.equal(null, err);
                 test.equal(1000, count);
               });
 
               collection.count(function(err, count) {
+                test.equal(null, err);
                 test.equal(1000, count);
 
                 var total2 = 0;
                 collection.find().each(function(err, item) {
+                  test.equal(null, err);
                   if(item != null) {
                     total2 = total2 + item.a;
                   } else {
                     test.equal(499500, total2);
                     collection.count(function(err, count) {
+                      test.equal(null, err);
                       test.equal(1000, count);
                       test.equal(total, total2);
 
@@ -1315,11 +1515,20 @@ exports.shouldCloseCursorAfterQueryHasBeenSent = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_close_after_query_sent', function(err, collection) {
+        test.equal(null, err);
+
         collection.insert({'a':1}, configuration.writeConcernMax(), function(err, r) {
+          test.equal(null, err);
+
           var cursor = collection.find({'a':1});
           cursor.nextObject(function(err, item) {
+            test.equal(null, err);
+
             cursor.close(function(err, cursor) {
+              test.equal(null, err);
               test.equal(true, cursor.isClosed());
               // Let's close the db
               db.close();
@@ -1345,15 +1554,23 @@ exports.shouldCorrectlyExecuteCursorCountWithFields = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_count_with_fields', function(err, collection) {
+        test.equal(null, err);
+
         collection.save({'x':1, 'a':2}, configuration.writeConcernMax(), function(err, doc) {
+          test.equal(null, err);
+
           collection.find({}, {'fields':['a']}).toArray(function(err, items) {
+            test.equal(null, err);
             test.equal(1, items.length);
             test.equal(2, items[0].a);
             test.equal(null, items[0].x);
           });
 
           collection.findOne({}, {'fields':['a']}, function(err, item) {
+            test.equal(null, err);
             test.equal(2, item.a);
             test.equal(null, item.x);
             db.close();
@@ -1378,9 +1595,16 @@ exports.shouldCorrectlyCountWithFieldsUsingExclude = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('test_count_with_fields_using_exclude', function(err, collection) {
+        test.equal(null, err);
+
         collection.save({'x':1, 'a':2}, configuration.writeConcernMax(), function(err, doc) {
+          test.equal(null, err);
+
           collection.find({}, {'fields':{'x':0}}).toArray(function(err, items) {
+            test.equal(null, err);
             test.equal(1, items.length);
             test.equal(2, items[0].a);
             test.equal(null, items[0].x);
@@ -1413,15 +1637,17 @@ exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
-      // Create collection
+      test.equal(null, err);
+
       db.createCollection('shouldCorrectlyExecuteEnsureIndexWithNoCallback', function(err, collection) {
-        // ensure index of createdAt index
+        test.equal(null, err);
+
         collection.ensureIndex({createdAt:1}, function(err, result) {
-          // insert all docs
+          test.equal(null, err);
+
           collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
             test.equal(null, err);
 
-            // Find with sort
             collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
               test.equal(null, err);
               test.equal(1, items.length);
@@ -1455,23 +1681,28 @@ exports['Should correctly execute count on cursor'] = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
-      // Create collection
+      test.equal(null, err);
+
       db.createCollection('Should_correctly_execute_count_on_cursor_1', function(err, collection) {
         test.equal(null, err);
 
         // insert all docs
         collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
+
           var total = 0;
           // Create a cursor for the content
           var cursor = collection.find({});
           cursor.count(function(err, c) {
+            test.equal(null, err);
             // Ensure each returns all documents
             cursor.each(function(err, item) {
+              test.equal(null, err);
               if(item != null) {
                 total++;
               } else {
                 cursor.count(function(err, c) {
+                  test.equal(null, err);
                   test.equal(1000, c);
                   test.equal(1000, total);
                   db.close();
@@ -1507,7 +1738,8 @@ exports['should be able to stream documents'] = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
-      // Create collection
+      test.equal(null, err);
+
       db.createCollection('Should_be_able_to_stream_documents', function(err, collection) {
         test.equal(null, err);
 
@@ -1593,6 +1825,8 @@ exports['immediately destroying a stream prevents the query from executing'] = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('immediately_destroying_a_stream_prevents_the_query_from_executing', function(err, collection) {
         test.equal(null, err);
 
@@ -1766,7 +2000,12 @@ exports['cursor stream errors'] = {
 exports['cursor stream errors connection force closed'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: {
+      mongodb: "<=3.5.0", // NOTE: remove this when SERVER-30576 is resolved
+      topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+    }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1808,8 +2047,6 @@ exports['cursor stream errors connection force closed'] = {
 
           function done (e) {
             return function(err) {
-              // console.log("==================== done :: " + e)
-              // console.dir(err)
               ++finished;
 
               if(finished == 2) {
@@ -1840,14 +2077,15 @@ exports['cursor stream pipe'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var fs = require('fs');
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('cursor_stream_pipe', function(err, collection) {
         test.equal(null, err);
 
         var docs = [];
-        ;('Aaden Aaron Adrian Aditya Bob Joe').split(' ').forEach(function (name) {
+        'Aaden Aaron Adrian Aditya Bob Joe'.split(' ').forEach(function (name) {
           docs.push({ name: name });
         });
 
@@ -1905,6 +2143,7 @@ exports.shouldCloseDeadTailableCursors = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     db.open(function(err, db) {
+      test.equal(null, err);
 
       var options = { capped: true, size: 10000000 };
       db.createCollection('test_if_dead_tailable_cursors_close', options, function(err, collection) {
@@ -1917,18 +2156,11 @@ exports.shouldCloseDeadTailableCursors = {
         // Just hammer the server
         for(var i = 0; i < 100; i++) {
           collection.insert({id: i}, {w:'majority', wtimeout: 5000}, function(err, r) {
-            // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!! INSERTED")
-            // console.dir(err)
-            // if(r) console.dir(r)
-            // console.log("-- insert " + (err == null));
-            // if(err) console.log(err.stack)
+            test.equal(null, err);
             count = count - 1;
 
             if(count == 0) {
-              // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!! INSERTED")
               var stream = collection.find({}, { tailable: true, awaitData: true }).stream();
-              // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!! INSERTED")
-              // global.debug = true
               var index = 0;
 
               stream.on('data', function (doc) {
@@ -1994,9 +2226,14 @@ exports.shouldAwaitData = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     db.open(function(err, db) {
+      test.equal(null, err);
+
       var options = { capped: true, size: 8};
       db.createCollection('should_await_data', options, function(err, collection) {
+        test.equal(null, err);
+
         collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
+          test.equal(null, err);
           var s = new Date();
 
           // Create cursor with awaitdata, and timeout after the period specified
@@ -2032,8 +2269,12 @@ exports.shouldAwaitDataWithDocumentsAvailable = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     db.open(function(err, db) {
+      test.equal(null, err);
+
       var options = { capped: true, size: 8};
       db.createCollection('should_await_data_no_docs', options, function(err, collection) {
+        test.equal(null, err);
+
         // Create cursor with awaitdata, and timeout after the period specified
         var cursor = collection.find({}, {tailable:true, awaitdata:true});
         var rewind = cursor.rewind;
@@ -2069,10 +2310,14 @@ exports.shouldAwaitDataUsingCursorFlag = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     db.open(function(err, db) {
+      test.equal(null, err);
+
       var options = { capped: true, size: 8};
       db.createCollection('should_await_data_cursor_flag', options, function(err, collection) {
+        test.equal(null, err);
+
         collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
-          var s = new Date();
+          test.equal(null, err);
           // Create cursor with awaitdata, and timeout after the period specified
           var cursor = collection.find({}, {});
           cursor.addCursorFlag('tailable', true)
@@ -2140,9 +2385,15 @@ exports['Should correctly retry tailable cursor connection'] = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     db.open(function(err, db) {
+      test.equal(null, err);
+
       var options = { capped: true, size: 8};
       db.createCollection('should_await_data', options, function(err, collection) {
+        test.equal(null, err);
+
         collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
+          test.equal(null, err);
+
           var s = new Date();
           // Create cursor with awaitdata, and timeout after the period specified
           var cursor = collection.find({}, {tailable:true, awaitdata:true});
@@ -2194,6 +2445,8 @@ exports.shouldCorrectExecuteExplainHonoringLimit = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       // Insert all the docs
       var collection = db.collection('shouldCorrectExecuteExplainHonoringLimit');
       collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
@@ -2234,13 +2487,18 @@ exports.shouldNotExplainWhenFalse = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       var collection = db.collection('shouldNotExplainWhenFalse');
       collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
+
         collection.find({"_keywords" : "red"}, {}, {explain:false}).limit(10).toArray(function(err, result) {
+          test.equal(null, err);
+
           test.equal("camera", result[0].name);
-    db.close();
-    test.done();
+          db.close();
+          test.done();
         });
       });
     });
@@ -2288,7 +2546,11 @@ exports.shouldNotFailDueToStackOverflowEach = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('shouldNotFailDueToStackOverflowEach', function(err, collection) {
+        test.equal(null, err);
+
         var docs = [];
         var total = 0;
         for(var i = 0; i < 30000; i++) docs.push({a:i});
@@ -2305,6 +2567,8 @@ exports.shouldNotFailDueToStackOverflowEach = {
         // Execute inserts
         for(var i = 0; i < left; i++) {
           collection.insert(allDocs.shift(), configuration.writeConcernMax(), function(err, d) {
+            test.equal(null, err);
+
             left = left - 1;
             totalI = totalI + d.length;
 
@@ -2312,6 +2576,7 @@ exports.shouldNotFailDueToStackOverflowEach = {
               var s = new Date().getTime();
 
               collection.find({}).each(function(err, item) {
+                test.equal(null, err);
                 if(item == null) {
                   var e = new Date().getTime();
 
@@ -2343,7 +2608,11 @@ exports.shouldNotFailDueToStackOverflowToArray = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.createCollection('shouldNotFailDueToStackOverflowToArray', function(err, collection) {
+        test.equal(null, err);
+
         var docs = [];
         var total = 0;
         for(var i = 0; i < 30000; i++) docs.push({a:i});
@@ -2362,6 +2631,8 @@ exports.shouldNotFailDueToStackOverflowToArray = {
         for(var i = 0; i < left; i++) {
           setTimeout(function() {
             collection.insert(allDocs.shift(), configuration.writeConcernMax(), function(err, d) {
+              test.equal(null, err);
+
               left = left - 1;
               totalI = totalI + d.length;
 
@@ -2369,8 +2640,9 @@ exports.shouldNotFailDueToStackOverflowToArray = {
                 var s = new Date().getTime();
 
                 collection.find({}).toArray(function(err, items) {
-                  var e = new Date().getTime();
+                  test.equal(null, err);
 
+                  var e = new Date().getTime();
                   test.equal(30000, items.length);
                   db.close();
                   test.done();
@@ -2398,16 +2670,21 @@ exports.shouldCorrectlySkipAndLimit = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       var collection = db.collection('shouldCorrectlySkipAndLimit')
       var docs = [];
       for(var i = 0; i < 100; i++) docs.push({a:i, OrderNumber:i});
 
       collection.insert(docs, configuration.writeConcernMax(), function(err, ids) {
+        test.equal(null, err);
 
         collection.find({}, {OrderNumber:1}).skip(10).limit(10).toArray(function(err, items) {
+          test.equal(null, err);
           test.equal(10, items[0].OrderNumber);
 
           collection.find({}, {OrderNumber:1}).skip(10).limit(10).count(true, function(err, count) {
+            test.equal(null, err);
             test.equal(10, count);
             db.close();
             test.done();
@@ -2431,11 +2708,15 @@ exports.shouldFailToTailANormalCollection = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       var collection = db.collection('shouldFailToTailANormalCollection')
       var docs = [];
       for(var i = 0; i < 100; i++) docs.push({a:i, OrderNumber:i});
 
       collection.insert(docs, configuration.writeConcernMax(), function(err, ids) {
+        test.equal(null, err);
+
         collection.find({}, {tailable:true}).each(function(err, doc) {
           test.ok(err instanceof Error);
           test.ok(typeof(err.code) === 'number');
@@ -2464,6 +2745,7 @@ exports.shouldCorrectlyUseFindAndCursorCount = {
     // DOC_START
     // Establish connection to db
     db.open(function(err, db) {
+      test.equal(null, err);
 
       // Create a lot of documents to insert
       var docs = []
@@ -2477,6 +2759,7 @@ exports.shouldCorrectlyUseFindAndCursorCount = {
 
         // Insert documents into collection
         collection.insert(docs, configuration.writeConcernMax(), function(err, ids) {
+          test.equal(null, err);
 
           collection.find({}, function(err, cursor) {
             test.equal(null, err);
@@ -2512,6 +2795,7 @@ exports['should correctly apply hint to count command for cursor'] = {
     // DOC_START
     // Establish connection to db
     db.open(function(err, db) {
+      test.equal(null, err);
       var col = db.collection('count_hint');
 
       col.insert([{i:1}, {i:2}], {w:1}, function(err, docs) {
@@ -2570,6 +2854,7 @@ exports['Terminate each after first document by returning false'] = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
     // Establish connection to db
     db.open(function(err, db) {
+      test.equal(null, err);
 
       // Create a lot of documents to insert
       var docs = []
@@ -2587,6 +2872,8 @@ exports['Terminate each after first document by returning false'] = {
           var done = false;
 
           collection.find({}).each(function(err, doc) {
+            test.equal(null, err);
+
             if(doc) {
               test.equal(done, false);
               done = true;
@@ -2724,6 +3011,8 @@ exports['Should correctly execute count on cursor with maxTimeMS'] = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       // Create collection
       db.createCollection('Should_correctly_execute_count_on_cursor_2', function(err, collection) {
         test.equal(null, err);
@@ -2778,6 +3067,8 @@ exports['Should correctly execute count on cursor with maxTimeMS set using legac
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       // Create collection
       db.createCollection('Should_correctly_execute_count_on_cursor_3', function(err, collection) {
         test.equal(null, err);
@@ -3138,9 +3429,15 @@ exports['should tail cursor using maxAwaitTimeMS for 3.2 or higher'] = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       var options = { capped: true, size: 8};
       db.createCollection('should_await_data_max_awaittime_ms', options, function(err, collection) {
+        test.equal(null, err);
+
         collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
+          test.equal(null, err);
+
           var s = new Date();
           // Create cursor with awaitdata, and timeout after the period specified
           var cursor = collection.find({})
@@ -3149,6 +3446,8 @@ exports['should tail cursor using maxAwaitTimeMS for 3.2 or higher'] = {
             .maxAwaitTimeMS(500);
 
           cursor.each(function(err, result) {
+            test.equal(null, err);
+
             if(result) {
               setTimeout(function() {
                 cursor.kill();
@@ -3233,10 +3532,16 @@ exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       // Create collection
       db.createCollection('shouldCorrectlyExecuteEnsureIndexWithNoCallback', function(err, collection) {
+        test.equal(null, err);
+
         // ensure index of createdAt index
         collection.ensureIndex({createdAt:1}, function(err, result) {
+          test.equal(null, err);
+
           // insert all docs
           collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
             test.equal(null, err);
@@ -3244,6 +3549,7 @@ exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = {
             // Find with sort
             collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
               test.equal(null, err);
+
               test.equal(1, items.length);
               db.close();
               test.done();
@@ -3275,6 +3581,8 @@ exports['Should correctly execute count on cursor with limit and skip'] = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       // Create collection
       db.createCollection('Should_correctly_execute_count_on_cursor_1_', function(err, collection) {
         test.equal(null, err);
@@ -3282,18 +3590,15 @@ exports['Should correctly execute count on cursor with limit and skip'] = {
         // insert all docs
         collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
-          var total = 0;
 
           // Create a cursor for the content
           var cursor = collection.find({});
           cursor.limit(100).skip(0).count(function(err, c) {
-            console.log("======================================= " + c)
             test.equal(null, err);
             test.equal(50, c);
 
             var cursor = collection.find({});
             cursor.limit(100).skip(0).toArray(function(err, docs) {
-              console.log("======================================= " + docs.length)
               test.equal(null, err);
               test.equal(50, c);
 
@@ -3328,6 +3633,8 @@ exports['Should correctly handle negative batchSize and set the limit'] = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       // Create collection
       db.createCollection('Should_correctly_execute_count_on_cursor_1_', function(err, collection) {
         test.equal(null, err);
@@ -3335,7 +3642,6 @@ exports['Should correctly handle negative batchSize and set the limit'] = {
         // insert all docs
         collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
-          var total = 0;
 
           // Create a cursor for the content
           var cursor = collection.find({});
@@ -3378,7 +3684,7 @@ exports['Correcly decorate the cursor count command with skip, limit, hint, read
         .hint({project:1}).count(true, function(err, r) {
           test.equal(null, err);
           test.equal(1, started.length);
-          if(started[0].command.readConcern) 
+          if(started[0].command.readConcern)
             test.deepEqual({level: 'local'}, started[0].command.readConcern);
           test.deepEqual({ project: 1 }, started[0].command.hint);
           test.equal(5, started[0].command.skip);
@@ -3420,7 +3726,7 @@ exports['Correcly decorate the collection cursor count command with skip, limit,
       }, function(err, r) {
         test.equal(null, err);
         test.equal(1, started.length);
-        if(started[0].command.readConcern) 
+        if(started[0].command.readConcern)
           test.deepEqual({level: 'local'}, started[0].command.readConcern);
         test.deepEqual({ project: 1 }, started[0].command.hint);
         test.equal(5, started[0].command.skip);
