@@ -3740,3 +3740,28 @@ exports['Correcly decorate the collection cursor count command with skip, limit,
     });
   }
 }
+
+exports['Should propagate hasNext errors when using a callback'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      var findCommand = {
+        find: 'integration_tests.has_next_error_callback',
+        limit: 0,
+        skip: 0,
+        query: {},
+        slaveOk: false
+      };
+
+      var cursor = db.s.topology.cursor(db.s.namespace, findCommand, { readPreference: 42 });
+      cursor.hasNext(function(err, hasNext) {
+        test.ok(err !== null);
+        test.equal(err.message, 'readPreference must be a ReadPreference instance');
+        test.done();
+      });
+    });
+  }
+}
