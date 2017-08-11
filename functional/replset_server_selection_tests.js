@@ -3,17 +3,17 @@
 var expect = require('chai').expect,
     f = require('util').format,
     fs = require('fs'),
-    ReplSetState = require('../../lib/topologies/replset_state'),
-    MongoError = require('../../lib/error').MongoError,
-    ReadPreference = require('../../lib/topologies/read_preference'),
-    Server = require('../../lib/topologies/server');
+    ReplSetState = require('../../../lib/topologies/replset_state'),
+    MongoError = require('../../../lib/error').MongoError,
+    ReadPreference = require('../../../lib/topologies/read_preference'),
+    Server = require('../../../lib/topologies/server');
 
 describe('A replicaset with no primary', function() {
   it('should correctly execute server selection tests', {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
-      var path = f('%s/../tests/server-selection/tests/server_selection/ReplicaSetNoPrimary/read', __dirname);
+      var path = f('%s/../server-selection/tests/server_selection/ReplicaSetNoPrimary/read', __dirname);
       var entries = fs.readdirSync(path).filter(function(x) {
         return x.indexOf('.json') !== -1;
       });
@@ -33,7 +33,7 @@ describe('A replicaset with a primary', function() {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
-      var path = f('%s/../tests/server-selection/tests/server_selection/ReplicaSetWithPrimary/read', __dirname);
+      var path = f('%s/../server-selection/tests/server_selection/ReplicaSetWithPrimary/read', __dirname);
       var entries = fs.readdirSync(path).filter(function(x) {
         return x.indexOf('.json') !== -1;
       });

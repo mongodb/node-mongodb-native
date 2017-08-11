@@ -2,8 +2,8 @@
 
 var expect = require('chai').expect,
     f = require('util').format,
-    Connection = require('../../lib/connection/connection'),
-    ReplSet = require('../../lib/topologies/replset');
+    Connection = require('../../../lib/connection/connection'),
+    ReplSet = require('../../../lib/topologies/replset');
 
 var restartAndDone = function(configuration, done) {
   configuration.manager.restart(9, {waitMS: 2000}).then(function() {

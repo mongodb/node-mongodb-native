@@ -4,14 +4,14 @@ var expect = require('chai').expect,
     f = require('util').format,
     fs = require('fs'),
     ObjectId = require('bson').ObjectId,
-    ReplSetState = require('../../lib/topologies/replset_state');
+    ReplSetState = require('../../../lib/topologies/replset_state');
 
 describe('A replica set state', function() {
   it('should correctly execute state machine tests', {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
-      var path = f('%s/../tests/topology_test_descriptions/rs', __dirname);
+      var path = f('%s/../topology_test_descriptions/rs', __dirname);
       var entries = fs.readdirSync(path).filter(function(x) {
         return x.indexOf('.json') !== -1;
       });

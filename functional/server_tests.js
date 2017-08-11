@@ -1,14 +1,14 @@
 'use strict';
 
-let expect = require('chai').expect,
+var expect = require('chai').expect,
     f = require('util').format,
-    locateAuthMethod = require('../tests/functional/shared').locateAuthMethod,
-    executeCommand = require('../tests/functional/shared').executeCommand,
-    Server = require('../../lib/topologies/server'),
+    locateAuthMethod = require('./shared').locateAuthMethod,
+    executeCommand = require('./shared').executeCommand,
+    Server = require('../../../lib/topologies/server'),
     Bson = require('bson'),
-    Connection = require('../../lib/connection/connection');
+    Connection = require('../../../lib/connection/connection');
 
-const WIRE_PROTOCOL_COMPRESSION_SUPPORT_MIN_VERSION = 5;
+var WIRE_PROTOCOL_COMPRESSION_SUPPORT_MIN_VERSION = 5;
 
 describe('Server tests', function() {
   it('should correctly connect server to single instance', {
@@ -897,7 +897,7 @@ describe('Server tests', function() {
 
       // Add event listeners
       server.on('connect', function(_server) {
-        let envShouldSupportCompression = self.configuration.manager.options.networkMessageCompressors === 'snappy' && server.ismaster.maxWireVersion >= WIRE_PROTOCOL_COMPRESSION_SUPPORT_MIN_VERSION;
+        var envShouldSupportCompression = self.configuration.manager.options.networkMessageCompressors === 'snappy' && server.ismaster.maxWireVersion >= WIRE_PROTOCOL_COMPRESSION_SUPPORT_MIN_VERSION;
 
         // Check compression has been negotiated
         if (envShouldSupportCompression) {
