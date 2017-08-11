@@ -1,142 +1,123 @@
-"use strict";
+'use strict';
 
-var f = require('util').format,
-  fs = require('fs'),
-  url = require('url'),
-  ObjectId = require('bson').ObjectId,
-  ReplSetState = require('../../../lib/topologies/replset_state'),
-  MongoError = require('../../../lib/error').MongoError,
-  ReadPreference = require('../../../lib/topologies/read_preference'),
-  Server = require('../../../lib/topologies/server');
+var expect = require('chai').expect,
+    f = require('util').format,
+    fs = require('fs'),
+    ReplSetState = require('../../lib/topologies/replset_state'),
+    MongoError = require('../../lib/error').MongoError,
+    ReadPreference = require('../../lib/topologies/read_preference'),
+    Server = require('../../lib/topologies/server');
 
-exports['Should correctly execute server selection tests ReplicaSetNoPrimary'] = {
-  metadata: { requires: { topology: "single" } },
+describe('A replicaset with no primary', function() {
+  it('should correctly execute server selection tests', {
+    metadata: { requires: { topology: 'single' } },
 
-  test: function(configuration, test) {
-    var path = f('%s/../server-selection/tests/server_selection/ReplicaSetNoPrimary/read', __dirname);
-    console.dir(path)
-    var entries = fs.readdirSync(path).filter(function(x) {
-      return x.indexOf('.json') != -1;
-    });
-    // .filter(function(x) {
-    //   return x.indexOf('PrimaryPreferred.json') != -1;
-    // });
-    // console.dir(entries)
-    // console.dir(entries)
-    // process.exit(0)
+    test: function(done) {
+      var path = f('%s/../tests/server-selection/tests/server_selection/ReplicaSetNoPrimary/read', __dirname);
+      var entries = fs.readdirSync(path).filter(function(x) {
+        return x.indexOf('.json') !== -1;
+      });
 
-    // Execute each of the entries
-    entries.forEach(function(x) {
-      executeEntry(test, x, f('%s/%s', path, x));
-    });
+      // Execute each of the entries
+      entries.forEach(function(x) {
+        executeEntry(x, f('%s/%s', path, x));
+      });
 
-    test.done();
-  }
-}
+      done();
+    }
+  });
+});
 
-exports['Should correctly execute server selection tests ReplicaSetWithPrimary'] = {
-  metadata: { requires: { topology: "single" } },
+describe('A replicaset with a primary', function() {
+  it('should correctly execute server selection tests', {
+    metadata: { requires: { topology: 'single' } },
 
-  test: function(configuration, test) {
-    var path = f('%s/../server-selection/tests/server_selection/ReplicaSetWithPrimary/read', __dirname);
-    console.dir(path)
-    var entries = fs.readdirSync(path).filter(function(x) {
-      return x.indexOf('.json') != -1;
-    })
-    // .filter(function(x) {
-    //   return x.indexOf('PrimaryPreferred.json') != -1;
-    // });
-    // console.dir(entries)
-    // console.dir(entries)
-    // process.exit(0)
+    test: function(done) {
+      var path = f('%s/../tests/server-selection/tests/server_selection/ReplicaSetWithPrimary/read', __dirname);
+      var entries = fs.readdirSync(path).filter(function(x) {
+        return x.indexOf('.json') !== -1;
+      });
 
-    // Execute each of the entries
-    entries.forEach(function(x) {
-      executeEntry(test, x, f('%s/%s', path, x));
-    });
+      // Execute each of the entries
+      entries.forEach(function(x) {
+        executeEntry(x, f('%s/%s', path, x));
+      });
 
-    test.done();
-  }
-}
+      done();
+    }
+  });
+});
 
 function convert(mode) {
-  if(mode.toLowerCase() == 'primarypreferred') return 'primaryPreferred';
-  if(mode.toLowerCase() == 'secondarypreferred') return 'secondaryPreferred';
+  if (mode.toLowerCase() === 'primarypreferred') return 'primaryPreferred';
+  if (mode.toLowerCase() === 'secondarypreferred') return 'secondaryPreferred';
   return mode.toLowerCase();
 }
 
-function executeEntry(test, file, path) {
-  console.log("= file :: " + file)
+function executeEntry(file, path) {
   // Read and parse the json file
-  var file = require(path);
+  file = require(path);
+
   // Let's pick out the parts of the selection specification
-  var topology_description = file.topology_description;
-  var in_latency_window = file.in_latency_window;
-  var operation = file.operation;
-  var read_preference = file.read_preference;
-  var suitable_servers = file.suitable_servers;
+  var topologyDescription = file.topology_description;
+  var inLatencyWindow = file.in_latency_window;
+  var readPreference = file.read_preference;
 
   try {
     // Create a Replset and populate it with dummy topology servers
     var replset = new ReplSetState();
-    replset.topologyType = topology_description.type;
+    replset.topologyType = topologyDescription.type;
     // For each server add them to the state
-    topology_description.servers.forEach(function(s) {
+    topologyDescription.servers.forEach(function(s) {
       var server = new Server({
         host: s.address.split(':')[0],
         port: parseInt(s.address.split(':')[1], 10)
       });
 
       // Add additional information
-      if(s.avg_rtt_ms) server.lastIsMasterMS = s.avg_rtt_ms;
-      if(s.tags) server.ismaster = {tags:s.tags};
+      if (s.avg_rtt_ms) server.lastIsMasterMS = s.avg_rtt_ms;
+      if (s.tags) server.ismaster = {tags: s.tags};
       // Ensure the server looks connected
-      server.isConnected = function() {return true};
+      server.isConnected = function() {return true;};
 
-      if(s.type == 'RSSecondary') {
+      if (s.type === 'RSSecondary') {
         replset.secondaries.push(server);
-      } else if(s.type == 'RSPrimary') {
+      } else if (s.type === 'RSPrimary') {
         replset.primary = server;
-      } else if(s.type == 'RSArbiter') {
+      } else if (s.type === 'RSArbiter') {
         replset.arbiters.push(server);
       }
     });
 
     // Create read preference
-    var rp = new ReadPreference(convert(read_preference.mode), read_preference.tag_sets);
+    var rp = new ReadPreference(convert(readPreference.mode), readPreference.tag_sets);
+
     // Perform a pickServer
     var server = replset.pickServer(rp);
-    var found_window = null;
+    var foundWindow = null;
 
     // server should be in the latency window
-    for(var i = 0; i < in_latency_window.length; i++) {
-      var w = in_latency_window[i];
+    for (var i = 0; i < inLatencyWindow.length; i++) {
+      var w = inLatencyWindow[i];
 
-      if(server.name == w.address) {
-        found_window = w;
+      if (server.name === w.address) {
+        foundWindow = w;
         break;
       }
     }
 
-    // console.log("--- 0")
-    // console.dir(found_window)
-    // console.dir(server)
-
-    if(['ReplicaSetNoPrimary', 'Primary', 'ReplicaSetWithPrimary'].indexOf(topology_description.type) != -1
-      && in_latency_window.length == 0) {
-        // console.log("########################################")
-        if(server instanceof MongoError) {
-          test.equal('no primary server available', server.message);
-          // console.log(server.message)
-        } else {
-          test.equal(null, server);
-        }
-        //
+    if (['ReplicaSetNoPrimary', 'Primary', 'ReplicaSetWithPrimary'].indexOf(topologyDescription.type) !== -1
+        && inLatencyWindow.length === 0) {
+      if (server instanceof MongoError) {
+        expect(server.message).to.equal('no primary server available');
+      } else {
+        expect(server).to.be.null;
+      }
     } else {
-      test.ok(found_window != null);
+      expect(foundWindow).to.not.be.null;
     }
-  } catch(err) {
-    console.log(err.stack)
-    process.exit(0)
+  } catch (err) {
+    console.log(err.stack);
+    process.exit(0);
   }
 }
