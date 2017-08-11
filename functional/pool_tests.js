@@ -8,7 +8,7 @@ var expect = require('chai').expect,
     Query = require('../../../lib/connection/commands').Query,
     Bson = require('bson');
 
-describe.only('Pool tests', function() {
+describe('Pool tests', function() {
   it('should correctly connect pool to single server', {
     metadata: { requires: { topology: 'single' } },
 
