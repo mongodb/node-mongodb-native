@@ -292,8 +292,6 @@ describe('Server tests', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      this.timeout(0);
-
       var self = this;
       var testDone = false;
 
