@@ -336,7 +336,8 @@ describe('ReplSet Failover (mocks)', function() {
       var server = new ReplSet([
         { host: 'localhost', port: 32000 },
         { host: 'localhost', port: 32001 },
-        { host: 'localhost', port: 32002 }], {
+        { host: 'localhost', port: 32002 }
+      ], {
         setName: 'rs',
         connectionTimeout: 3000,
         socketTimeout: 0,
