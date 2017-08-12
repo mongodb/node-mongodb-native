@@ -14,8 +14,8 @@ describe('ReplSet Connection Tests (mock)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet,
-          ObjectId = this.configuration.require.BSON.ObjectId,
+      var ReplSet = this.configuration.mongo.ReplSet,
+          ObjectId = this.configuration.mongo.BSON.ObjectId,
           mockupdb = require('../../../mock');
 
       // Contain mock server
@@ -159,8 +159,8 @@ describe('ReplSet Connection Tests (mock)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet,
-          ObjectId = this.configuration.require.BSON.ObjectId,
+      var ReplSet = this.configuration.mongo.ReplSet,
+          ObjectId = this.configuration.mongo.BSON.ObjectId,
           mockupdb = require('../../../mock');
 
       // Contain mock server
@@ -302,8 +302,8 @@ describe('ReplSet Connection Tests (mock)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet,
-          ObjectId = this.configuration.require.BSON.ObjectId,
+      var ReplSet = this.configuration.mongo.ReplSet,
+          ObjectId = this.configuration.mongo.BSON.ObjectId,
           mockupdb = require('../../../mock');
 
       // Contain mock server
@@ -430,8 +430,8 @@ describe('ReplSet Connection Tests (mock)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet,
-          ObjectId = this.configuration.require.BSON.ObjectId,
+      var ReplSet = this.configuration.mongo.ReplSet,
+          ObjectId = this.configuration.mongo.BSON.ObjectId,
           mockupdb = require('../../../mock');
 
       // Contain mock server
@@ -514,8 +514,8 @@ describe('ReplSet Connection Tests (mock)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet,
-          ObjectId = this.configuration.require.BSON.ObjectId,
+      var ReplSet = this.configuration.mongo.ReplSet,
+          ObjectId = this.configuration.mongo.BSON.ObjectId,
           mockupdb = require('../../../mock');
 
       // Contain mock server
@@ -635,8 +635,8 @@ describe('ReplSet Connection Tests (mock)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet,
-          ObjectId = this.configuration.require.BSON.ObjectId,
+      var ReplSet = this.configuration.mongo.ReplSet,
+          ObjectId = this.configuration.mongo.BSON.ObjectId,
           mockupdb = require('../../../mock');
 
       // Contain mock server
@@ -781,8 +781,8 @@ describe('ReplSet Connection Tests (mock)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet,
-          ObjectId = this.configuration.require.BSON.ObjectId,
+      var ReplSet = this.configuration.mongo.ReplSet,
+          ObjectId = this.configuration.mongo.BSON.ObjectId,
           mockupdb = require('../../../mock');
 
       // Contain mock server
@@ -907,8 +907,8 @@ describe('ReplSet Connection Tests (mock)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet,
-          ObjectId = this.configuration.require.BSON.ObjectId,
+      var ReplSet = this.configuration.mongo.ReplSet,
+          ObjectId = this.configuration.mongo.BSON.ObjectId,
           mockupdb = require('../../../mock');
 
       // Contain mock server
@@ -1025,8 +1025,8 @@ describe('ReplSet Connection Tests (mock)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet,
-          ObjectId = this.configuration.require.BSON.ObjectId,
+      var ReplSet = this.configuration.mongo.ReplSet,
+          ObjectId = this.configuration.mongo.BSON.ObjectId,
           mockupdb = require('../../../mock');
 
       // Contain mock server
@@ -1170,8 +1170,8 @@ describe('ReplSet Connection Tests (mock)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet,
-          ObjectId = this.configuration.require.BSON.ObjectId,
+      var ReplSet = this.configuration.mongo.ReplSet,
+          ObjectId = this.configuration.mongo.BSON.ObjectId,
           mockupdb = require('../../../mock');
 
       // Contain mock server
@@ -1286,8 +1286,8 @@ describe('ReplSet Connection Tests (mock)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet,
-          ObjectId = this.configuration.require.BSON.ObjectId,
+      var ReplSet = this.configuration.mongo.ReplSet,
+          ObjectId = this.configuration.mongo.BSON.ObjectId,
           mockupdb = require('../../../mock');
 
       // Contain mock server
@@ -1420,8 +1420,8 @@ describe('ReplSet Connection Tests (mock)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet,
-          ObjectId = this.configuration.require.BSON.ObjectId,
+      var ReplSet = this.configuration.mongo.ReplSet,
+          ObjectId = this.configuration.mongo.BSON.ObjectId,
           mockupdb = require('../../../mock');
 
       // Contain mock server
