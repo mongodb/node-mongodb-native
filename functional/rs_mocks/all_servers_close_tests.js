@@ -14,8 +14,8 @@ describe('ReplSet All Servers Close (mock)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet,
-          ObjectId = this.configuration.require.BSON.ObjectId,
+      var ReplSet = this.configuration.mongo.ReplSet,
+          ObjectId = this.configuration.mongo.BSON.ObjectId,
           mockupdb = require('../../../mock');
 
       // Contain mock server
@@ -174,8 +174,8 @@ describe('ReplSet All Servers Close (mock)', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet,
-          ObjectId = this.configuration.require.BSON.ObjectId,
+      var ReplSet = this.configuration.mongo.ReplSet,
+          ObjectId = this.configuration.mongo.BSON.ObjectId,
           mockupdb = require('../../../mock');
 
       // Contain mock server
@@ -275,7 +275,8 @@ describe('ReplSet All Servers Close (mock)', function() {
       var server = new ReplSet([
         { host: 'localhost', port: 34000 },
         { host: 'localhost', port: 34001 },
-        { host: 'localhost', port: 34002 }], {
+        { host: 'localhost', port: 34002 }
+      ], {
         setName: 'rs',
         connectionTimeout: 5000,
         socketTimeout: 5000,
