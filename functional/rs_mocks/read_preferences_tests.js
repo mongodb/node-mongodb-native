@@ -1379,7 +1379,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
               // Finished up
               if (count === 0) {
                 // Should not contain the primary
-                expect(portsSeen['32000']).to.not.exist;
+                expect(portsSeen).to.not.have.key('32000');
 
                 // Shut down mocks
                 primaryServer.destroy();
