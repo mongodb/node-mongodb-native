@@ -1,7 +1,8 @@
 'use strict';
 var expect = require('chai').expect,
     assign = require('../../../../lib/utils').assign,
-    co = require('co');
+    co = require('co'),
+    mockupdb = require('../../../mock');
 
 var timeoutPromise = function(timeout) {
   return new Promise(function(resolve, reject) {
@@ -19,8 +20,7 @@ describe('Single Timeout (mocks)', function() {
     },
 
     test: function(done) {
-      var Server = this.configuration.mongo.Server,
-          mockupdb = require('../../../mock');
+      var Server = this.configuration.mongo.Server;
 
       // Contain mock server
       var server = null;
@@ -132,8 +132,7 @@ describe('Single Timeout (mocks)', function() {
     },
 
     test: function(done) {
-      var Server = this.configuration.mongo.Server,
-          mockupdb = require('../../../mock');
+      var Server = this.configuration.mongo.Server;
 
       // Contain mock server
       var server = null;
@@ -276,8 +275,7 @@ describe('Single Timeout (mocks)', function() {
     },
 
     test: function(done) {
-      var Server = this.configuration.mongo.Server,
-          mockupdb = require('../../../mock');
+      var Server = this.configuration.mongo.Server;
 
       // Contain mock server
       var server = null;

@@ -2,7 +2,8 @@
 var expect = require('chai').expect,
     assign = require('../../../../lib/utils').assign,
     co = require('co'),
-    Connection = require('../../../../lib/connection/connection');
+    Connection = require('../../../../lib/connection/connection'),
+    mockupdb = require('../../../mock');
 
 describe('ReplSet Read Preferences (mocks)', function() {
   it('Should correctly connect to a replicaset and select the correct tagged secondary server', {
@@ -17,8 +18,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var ReplSet = this.configuration.mongo.ReplSet,
           ObjectId = this.configuration.mongo.BSON.ObjectId,
           ReadPreference = this.configuration.mongo.ReadPreference,
-          Long = this.configuration.mongo.BSON.Long,
-          mockupdb = require('../../../mock');
+          Long = this.configuration.mongo.BSON.Long;
 
       // Contain mock server
       var primaryServer = null;
@@ -171,8 +171,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var ReplSet = this.configuration.mongo.ReplSet,
           ObjectId = this.configuration.mongo.BSON.ObjectId,
           ReadPreference = this.configuration.mongo.ReadPreference,
-          Long = this.configuration.mongo.BSON.Long,
-          mockupdb = require('../../../mock');
+          Long = this.configuration.mongo.BSON.Long;
 
       // Contain mock server
       var primaryServer = null;
@@ -325,8 +324,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var ReplSet = this.configuration.mongo.ReplSet,
           ObjectId = this.configuration.mongo.BSON.ObjectId,
           ReadPreference = this.configuration.mongo.ReadPreference,
-          Long = this.configuration.mongo.BSON.Long,
-          mockupdb = require('../../../mock');
+          Long = this.configuration.mongo.BSON.Long;
 
       // Contain mock server
       var primaryServer = null;
@@ -504,8 +502,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
           ObjectId = this.configuration.mongo.BSON.ObjectId,
           ReadPreference = this.configuration.mongo.ReadPreference,
           Long = this.configuration.mongo.BSON.Long,
-          MongoError = this.configuration.mongo.MongoError,
-          mockupdb = require('../../../mock');
+          MongoError = this.configuration.mongo.MongoError;
 
       // Contain mock server
       var primaryServer = null;
@@ -664,8 +661,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var ReplSet = this.configuration.mongo.ReplSet,
           ObjectId = this.configuration.mongo.BSON.ObjectId,
           ReadPreference = this.configuration.mongo.ReadPreference,
-          Long = this.configuration.mongo.BSON.Long,
-          mockupdb = require('../../../mock');
+          Long = this.configuration.mongo.BSON.Long;
 
       // Contain mock server
       var primaryServer = null;
@@ -840,8 +836,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var ReplSet = this.configuration.mongo.ReplSet,
           ObjectId = this.configuration.mongo.BSON.ObjectId,
           ReadPreference = this.configuration.mongo.ReadPreference,
-          Long = this.configuration.mongo.BSON.Long,
-          mockupdb = require('../../../mock');
+          Long = this.configuration.mongo.BSON.Long;
 
       // Contain mock server
       var primaryServer = null;
@@ -999,8 +994,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var ReplSet = this.configuration.mongo.ReplSet,
           ObjectId = this.configuration.mongo.BSON.ObjectId,
           ReadPreference = this.configuration.mongo.ReadPreference,
-          Long = this.configuration.mongo.BSON.Long,
-          mockupdb = require('../../../mock');
+          Long = this.configuration.mongo.BSON.Long;
 
       // Contain mock server
       var primaryServer = null;
@@ -1159,8 +1153,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var ReplSet = this.configuration.mongo.ReplSet,
           ObjectId = this.configuration.mongo.BSON.ObjectId,
           ReadPreference = this.configuration.mongo.ReadPreference,
-          Long = this.configuration.mongo.BSON.Long,
-          mockupdb = require('../../../mock');
+          Long = this.configuration.mongo.BSON.Long;
 
       // Contain mock server
       var primaryServer = null;
@@ -1263,8 +1256,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var ReplSet = this.configuration.mongo.ReplSet,
           ObjectId = this.configuration.mongo.BSON.ObjectId,
           ReadPreference = this.configuration.mongo.ReadPreference,
-          Long = this.configuration.mongo.BSON.Long,
-          mockupdb = require('../../../mock');
+          Long = this.configuration.mongo.BSON.Long;
 
       // Contain mock server
       var primaryServer = null;

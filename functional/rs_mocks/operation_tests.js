@@ -1,7 +1,8 @@
 'use strict';
 var assign = require('../../../../lib/utils').assign,
     co = require('co'),
-    Connection = require('../../../../lib/connection/connection');
+    Connection = require('../../../../lib/connection/connection'),
+    mockupdb = require('../../../mock');
 
 describe('ReplSet Operations (mocks)', function() {
   it('Correctly execute count command against replicaset with a single member', {
@@ -14,8 +15,7 @@ describe('ReplSet Operations (mocks)', function() {
 
     test: function(done) {
       var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId,
-          mockupdb = require('../../../mock');
+          ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var primaryServer = null;
@@ -98,8 +98,7 @@ describe('ReplSet Operations (mocks)', function() {
     test: function(done) {
       var ReplSet = this.configuration.mongo.ReplSet,
           ObjectId = this.configuration.mongo.BSON.ObjectId,
-          ReadPreference = this.configuration.mongo.ReadPreference,
-          mockupdb = require('../../../mock');
+          ReadPreference = this.configuration.mongo.ReadPreference;
 
       // Contain mock server
       var primaryServer = null;

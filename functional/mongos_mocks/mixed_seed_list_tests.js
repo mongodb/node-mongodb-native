@@ -1,7 +1,8 @@
 'use strict';
 var expect = require('chai').expect,
     assign = require('../../../../lib/utils').assign,
-    co = require('co');
+    co = require('co'),
+    mockupdb = require('../../../mock');
 
 describe('Mongos Mixed Seed List (mocks)', function() {
   it('Should correctly print warning when non mongos proxy passed in seed list', {
@@ -15,8 +16,7 @@ describe('Mongos Mixed Seed List (mocks)', function() {
     test: function(done) {
       var Mongos = this.configuration.mongo.Mongos,
           ObjectId = this.configuration.mongo.BSON.ObjectId,
-          Logger = this.configuration.mongo.Logger,
-          mockupdb = require('../../../mock');
+          Logger = this.configuration.mongo.Logger;
 
       // Contain mock server
       var mongos1 = null;
@@ -132,8 +132,7 @@ describe('Mongos Mixed Seed List (mocks)', function() {
     test: function(done) {
       var Mongos = this.configuration.mongo.Mongos,
           Logger = this.configuration.mongo.Logger,
-          ObjectId = this.configuration.mongo.BSON.ObjectId,
-          mockupdb = require('../../../mock');
+          ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var mongos1 = null;

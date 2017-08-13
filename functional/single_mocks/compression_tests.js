@@ -1,7 +1,8 @@
 'use strict';
 var Server = require('../../../../lib/topologies/server'),
     expect = require('chai').expect,
-    co = require('co');
+    co = require('co'),
+    mockupdb = require('../../../mock');
 
 // NOTE: eventually use `this.configuration.mongo.Server` instead of direct import when
 // https://github.com/malexandert/mongodb-test-runner/issues/3 is fixed
@@ -16,8 +17,6 @@ describe('Single Compression (mocks)', function() {
     },
 
     test: function(done) {
-      var mockupdb = require('../../../mock');
-
       // Contain mock server
       var server = null;
       var running = true;
@@ -78,8 +77,6 @@ describe('Single Compression (mocks)', function() {
     },
 
     test: function(done) {
-      var mockupdb = require('../../../mock');
-
       // Contain mock server
       var server = null;
       var running = true;
@@ -183,8 +180,6 @@ describe('Single Compression (mocks)', function() {
     },
 
     test: function(done) {
-      var mockupdb = require('../../../mock');
-
       // Contain mock server
       var server = null;
       var running = true;
@@ -289,8 +284,6 @@ describe('Single Compression (mocks)', function() {
     },
 
     test: function(done) {
-      var mockupdb = require('../../../mock');
-
       // Contain mock server
       var server = null;
       var running = true;
@@ -395,8 +388,6 @@ describe('Single Compression (mocks)', function() {
     },
 
     test: function(done) {
-      var mockupdb = require('../../../mock');
-
       // Contain mock server
       var server = null;
       var running = true;

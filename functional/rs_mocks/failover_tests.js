@@ -2,7 +2,8 @@
 var expect = require('chai').expect,
     assign = require('../../../../lib/utils').assign,
     co = require('co'),
-    Connection = require('../../../../lib/connection/connection');
+    Connection = require('../../../../lib/connection/connection'),
+    mockupdb = require('../../../mock');
 
 describe('ReplSet Failover (mocks)', function() {
   it('Successfully failover to new primary', {
@@ -16,8 +17,7 @@ describe('ReplSet Failover (mocks)', function() {
     test: function(done) {
       var ReplSet = this.configuration.mongo.ReplSet,
           Server = this.configuration.mongo.Server,
-          ObjectId = this.configuration.mongo.BSON.ObjectId,
-          mockupdb = require('../../../mock');
+          ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var primaryServer = null;
@@ -217,8 +217,7 @@ describe('ReplSet Failover (mocks)', function() {
     test: function(done) {
       var ReplSet = this.configuration.mongo.ReplSet,
           Server = this.configuration.mongo.Server,
-          ObjectId = this.configuration.mongo.BSON.ObjectId,
-          mockupdb = require('../../../mock');
+          ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var primaryServer = null;

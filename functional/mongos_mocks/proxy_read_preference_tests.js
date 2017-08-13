@@ -1,7 +1,8 @@
 'use strict';
 var expect = require('chai').expect,
     assign = require('../../../../lib/utils').assign,
-    co = require('co');
+    co = require('co'),
+    mockupdb = require('../../../mock');
 
 describe('Mongos Proxy Read Preference (mocks)', function() {
   it('Should correctly set query and readpreference field on wire protocol for 3.2', {
@@ -15,8 +16,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
     test: function(done) {
       var Mongos = this.configuration.mongo.Mongos,
           Long = this.configuration.mongo.BSON.Long,
-          ReadPreference = this.configuration.mongo.ReadPreference,
-          mockupdb = require('../../../mock');
+          ReadPreference = this.configuration.mongo.ReadPreference;
 
       // Contain mock server
       var mongos1 = null;
@@ -120,8 +120,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
     test: function(done) {
       var Mongos = this.configuration.mongo.Mongos,
           Long = this.configuration.mongo.BSON.Long,
-          ReadPreference = this.configuration.mongo.ReadPreference,
-          mockupdb = require('../../../mock');
+          ReadPreference = this.configuration.mongo.ReadPreference;
 
       // Contain mock server
       var mongos1 = null;
@@ -225,8 +224,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
 
     test: function(done) {
       var Mongos = this.configuration.mongo.Mongos,
-          ReadPreference = this.configuration.mongo.ReadPreference,
-          mockupdb = require('../../../mock');
+          ReadPreference = this.configuration.mongo.ReadPreference;
 
       // Contain mock server
       var mongos1 = null;

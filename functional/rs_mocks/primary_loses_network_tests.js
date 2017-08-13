@@ -1,7 +1,8 @@
 'use strict';
 var assign = require('../../../../lib/utils').assign,
     co = require('co'),
-    Connection = require('../../../../lib/connection/connection');
+    Connection = require('../../../../lib/connection/connection'),
+    mockupdb = require('../../../mock');
 
 describe('ReplSet Primary Loses Network (mocks)', function() {
   it('Recover from Primary loosing network connectivity', {
@@ -14,8 +15,7 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
 
     test: function(done) {
       var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId,
-          mockupdb = require('../../../mock');
+          ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var primaryServer = null;

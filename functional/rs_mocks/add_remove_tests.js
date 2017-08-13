@@ -3,7 +3,8 @@
 var expect = require('chai').expect,
     assign = require('../../../../lib/utils').assign,
     co = require('co'),
-    Connection = require('../../../../lib/connection/connection');
+    Connection = require('../../../../lib/connection/connection'),
+    mockupdb = require('../../../mock');
 
 describe('ReplSet Add Remove (mocks)', function() {
   it('Successfully add a new secondary server to the set', {
@@ -16,8 +17,7 @@ describe('ReplSet Add Remove (mocks)', function() {
 
     test: function(done) {
       var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId,
-          mockupdb = require('../../../mock');
+          ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var primaryServer = null;
@@ -199,8 +199,7 @@ describe('ReplSet Add Remove (mocks)', function() {
 
     test: function(done) {
       var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId,
-          mockupdb = require('../../../mock');
+          ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var primaryServer = null;
@@ -402,8 +401,7 @@ describe('ReplSet Add Remove (mocks)', function() {
 
     test: function(done) {
       var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId,
-          mockupdb = require('../../../mock');
+          ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var primaryServer = null;
@@ -628,8 +626,7 @@ describe('ReplSet Add Remove (mocks)', function() {
 
     test: function(done) {
       var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId,
-          mockupdb = require('../../../mock');
+          ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var primaryServer = null;

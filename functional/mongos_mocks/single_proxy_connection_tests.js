@@ -2,7 +2,8 @@
 var expect = require('chai').expect,
     f = require('util').format,
     co = require('co'),
-    assign = require('../../../../lib/utils').assign;
+    assign = require('../../../../lib/utils').assign,
+    mockupdb = require('../../../mock');
 
 var timeoutPromise = function(timeout) {
   return new Promise(function(resolve, reject) {
@@ -20,8 +21,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
     },
 
     test: function(done) {
-      var Mongos = this.configuration.mongo.Mongos,
-          mockupdb = require('../../../mock');
+      var Mongos = this.configuration.mongo.Mongos;
 
       // Contain mock server
       var server = null;
@@ -133,8 +133,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
     test: function(done) {
       var Mongos = this.configuration.mongo.Mongos,
           Long = this.configuration.mongo.BSON.Long,
-          ObjectId = this.configuration.mongo.BSON.ObjectId,
-          mockupdb = require('../../../mock');
+          ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var server = null;

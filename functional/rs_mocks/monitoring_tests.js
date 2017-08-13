@@ -2,7 +2,8 @@
 var expect = require('chai').expect,
     assign = require('../../../../lib/utils').assign,
     co = require('co'),
-    Connection = require('../../../../lib/connection/connection');
+    Connection = require('../../../../lib/connection/connection'),
+    mockupdb = require('../../../mock');
 
 var timeoutPromise = function(timeout) {
   return new Promise(function(resolve, reject) {
@@ -23,8 +24,7 @@ describe('ReplSet Monitoring (mocks)', function() {
 
     test: function(done) {
       var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId,
-          mockupdb = require('../../../mock');
+          ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var primaryServer = null;
@@ -217,8 +217,7 @@ describe('ReplSet Monitoring (mocks)', function() {
 
     test: function(done) {
       var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId,
-          mockupdb = require('../../../mock');
+          ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var primaryServer = null;

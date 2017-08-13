@@ -2,9 +2,10 @@
 var expect = require('chai').expect,
     co = require('co'),
     assign = require('../../../../lib/utils').assign,
-    Connection = require('../../../../lib/connection/connection');
+    Connection = require('../../../../lib/connection/connection'),
+    mockupdb = require('../../../mock');
 
-describe('ReplSet All Servers Close (mock)', function() {
+describe('ReplSet All Servers Close (mocks)', function() {
   it('Successful reconnect when driver loses touch with entire replicaset', {
     metadata: {
       requires: {
@@ -15,8 +16,7 @@ describe('ReplSet All Servers Close (mock)', function() {
 
     test: function(done) {
       var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId,
-          mockupdb = require('../../../mock');
+          ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var primaryServer = null;
@@ -175,8 +175,7 @@ describe('ReplSet All Servers Close (mock)', function() {
 
     test: function(done) {
       var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId,
-          mockupdb = require('../../../mock');
+          ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var primaryServer = null;

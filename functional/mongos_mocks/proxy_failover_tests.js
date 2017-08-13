@@ -1,7 +1,8 @@
 'use strict';
 var expect = require('chai').expect,
     assign = require('../../../../lib/utils').assign,
-    co = require('co');
+    co = require('co'),
+    mockupdb = require('../../../mock');
 
 var timeoutPromise = function(timeout) {
   return new Promise(function(resolve, reject) {
@@ -19,8 +20,7 @@ describe('Mongos Proxy Failover (mocks)', function() {
     },
 
     test: function(done) {
-      var Mongos = this.configuration.mongo.Mongos,
-          mockupdb = require('../../../mock');
+      var Mongos = this.configuration.mongo.Mongos;
 
       // Contain mock server
       var mongos1 = null;
@@ -126,8 +126,7 @@ describe('Mongos Proxy Failover (mocks)', function() {
     },
 
     test: function(done) {
-      var Mongos = this.configuration.mongo.Mongos,
-          mockupdb = require('../../../mock');
+      var Mongos = this.configuration.mongo.Mongos;
 
       // Contain mock server
       var mongos1 = null;
@@ -258,8 +257,7 @@ describe('Mongos Proxy Failover (mocks)', function() {
     },
 
     test: function(done) {
-      var Mongos = this.configuration.mongo.Mongos,
-          mockupdb = require('../../../mock');
+      var Mongos = this.configuration.mongo.Mongos;
 
       // Contain mock server
       var mongos1 = null;
