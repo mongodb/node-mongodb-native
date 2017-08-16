@@ -4,7 +4,7 @@ var expect = require('chai').expect,
     f = require('util').format,
     Server = require('../../../lib/topologies/server'),
     Bson = require('bson');
-describe.only('Cursor tests', function() {
+describe('Cursor tests', function() {
   it('Should iterate cursor', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
