@@ -36,14 +36,14 @@ describe('Single SDAM Monitoring (mocks)', function() {
       var serverIsMaster = [assign({}, defaultFields)];
 
       // Boot the mock
-      var __server;
+      var mockServer;
       co(function*() {
-        __server = yield mockupdb.createServer(37018, 'localhost');
+        mockServer = yield mockupdb.createServer(37018, 'localhost');
 
         // Primary state machine
         co(function*() {
           while (running) {
-            var request = yield __server.receive();
+            var request = yield mockServer.receive();
 
             // Get the document
             var doc = request.document;
@@ -148,12 +148,12 @@ describe('Single SDAM Monitoring (mocks)', function() {
             }
           }).to.eql(flags[5]);
           running = false;
-          __server.destroy();
+          mockServer.destroy();
           done();
         }, 100);
       });
 
-      process.nextTick(function() { server.connect(); });
+      setTimeout(function() { server.connect(); }, 100);
     }
   });
 
@@ -184,8 +184,9 @@ describe('Single SDAM Monitoring (mocks)', function() {
       var serverIsMaster = [assign({}, defaultFields)];
 
       // Boot the mock
+      var mockServer;
       co(function*() {
-        var mockServer = yield mockupdb.createServer(37008, 'localhost');
+        mockServer = yield mockupdb.createServer(37008, 'localhost');
 
         // Primary state machine
         co(function*() {
@@ -293,6 +294,8 @@ describe('Single SDAM Monitoring (mocks)', function() {
               ]
             }
           }).to.eql(flags[5]);
+
+          mockServer.destroy();
           done();
         }, 100);
       });
