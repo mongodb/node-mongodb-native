@@ -846,11 +846,11 @@ describe('Server tests', function() {
       Connection.enableConnectionAccounting();
 
       this.configuration.manager.restart(true).then(function() {
-        locateAuthMethod(this.configuration, function(err, method) {
+        locateAuthMethod(self.configuration, function(err, method) {
           expect(err).to.be.null;
 
           // Attempt to connect
-          executeCommand(this.configuration, 'admin', {
+          executeCommand(self.configuration, 'admin', {
             createUser: 'root',
             pwd: 'root',
             roles: [ { role: 'root', db: 'admin' } ],
