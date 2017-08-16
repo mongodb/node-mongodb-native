@@ -4,7 +4,7 @@ var expect = require('chai').expect,
     co = require('co'),
     mockupdb = require('../../../mock');
 
-describe('Single SDAM Monitoring (mocks)', function() {
+describe.skip('Single SDAM Monitoring (mocks)', function() {
   it('Should correctly emit sdam monitoring events for single server', {
     metadata: {
       requires: {
