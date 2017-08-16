@@ -857,8 +857,8 @@ describe('Server tests', function() {
             digestPassword: true
           }, function(cmdErr, r) {
             var server = new Server({
-              host: this.configuration.host,
-              port: this.configuration.port,
+              host: self.configuration.host,
+              port: self.configuration.port,
               bson: new Bson(),
               compression: { compressors: ['snappy', 'zlib'] }
             });
