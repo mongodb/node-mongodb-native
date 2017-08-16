@@ -185,12 +185,12 @@ describe('Single SDAM Monitoring (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        server = yield mockupdb.createServer(37008, 'localhost');
+        var mockServer = yield mockupdb.createServer(37008, 'localhost');
 
         // Primary state machine
         co(function*() {
           while (running) {
-            var request = yield server.receive();
+            var request = yield mockServer.receive();
 
             // Get the document
             var doc = request.document;
@@ -297,7 +297,7 @@ describe('Single SDAM Monitoring (mocks)', function() {
         }, 100);
       });
 
-      process.nextTick(function() { server.connect(); });
+      setTimeout(function() { server.connect(); }, 100);
     }
   });
 });
