@@ -4,7 +4,7 @@ var expect = require('chai').expect,
     co = require('co'),
     mockupdb = require('../../../mock');
 
-describe('ReplSet SDAM Monitoring (mocks)', function() {
+describe.skip('ReplSet SDAM Monitoring (mocks)', function() {
   it('Successful emit SDAM monitoring events for replicaset', {
     metadata: {
       requires: {
