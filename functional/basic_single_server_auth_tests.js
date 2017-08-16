@@ -7,7 +7,7 @@ var expect = require('chai').expect,
     Connection = require('../../../lib/connection/connection'),
     Bson = require('bson');
 
-describe.only('Basic single server auth tests', function() {
+describe('Basic single server auth tests', function() {
   it('should fail to authenticate server using scram-sha-1 using connect auth', {
     metadata: { requires: { topology: 'auth' } },
 
