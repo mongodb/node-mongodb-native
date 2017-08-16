@@ -3,7 +3,7 @@
 var expect = require('chai').expect,
     f = require('util').format;
 
-describe.only('Error tests', function() {
+describe('Error tests', function() {
   it('should return helpful error when geoHaystack fails',  {
     metadata: {
       requires: { topology: ['single', 'replicaset'] }
