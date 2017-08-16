@@ -1,391 +1,379 @@
-"use strict";
+'use strict';
 
-var f = require('util').format,
-  locateAuthMethod = require('./shared').locateAuthMethod,
-  executeCommand = require('./shared').executeCommand;
+var expect = require('chai').expect,
+    locateAuthMethod = require('./shared').locateAuthMethod,
+    executeCommand = require('./shared').executeCommand,
+    Server = require('../../../lib/topologies/server'),
+    Connection = require('../../../lib/connection/connection'),
+    Bson = require('bson');
 
-exports['Should fail to authenticate server using scram-sha-1 using connect auth'] = {
-  metadata: { requires: { topology: "auth" } },
+describe.only('Basic single server auth tests', function() {
+  it('should fail to authenticate server using scram-sha-1 using connect auth', {
+    metadata: { requires: { topology: 'auth' } },
 
-  test: function(configuration, test) {
-    var Server = require('../../../lib/topologies/server')
-      , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson')
-      , Query = require('../../../lib/connection/commands').Query;
+    test: function(done) {
+      var self = this;
 
-    // Enable connections accounting
-    Connection.enableConnectionAccounting();
+      // Enable connections accounting
+      Connection.enableConnectionAccounting();
 
-    // Restart instance
-    configuration.manager.restart(true).then(function() {
-      locateAuthMethod(configuration, function(err, method) {
-        test.equal(null, err);
+      // Restart instance
+      self.configuration.manager.restart(true).then(function() {
+        locateAuthMethod(self.configuration, function(err, method) {
+          expect(err).to.be.null;
 
-        executeCommand(configuration, 'admin', {
-          createUser: 'root',
-          pwd: "root",
-          roles: [ { role: "root", db: "admin" } ],
-          digestPassword: true
-        }, function(err, r) {
-          test.equal(null, err);
+          executeCommand(self.configuration, 'admin', {
+            createUser: 'root',
+            pwd: 'root',
+            roles: [ { role: 'root', db: 'admin' } ],
+            digestPassword: true
+          }, function(cmdErr, r) {
+            expect(cmdErr).to.be.null;
 
-          var server = new Server({
-            host: configuration.host, port: configuration.port, bson: new bson()
-          });
-
-          server.on('error', function() {
-            // console.log("=================== " + Object.keys(Connection.connections()).length)
-            test.equal(0, Object.keys(Connection.connections()).length);
-            Connection.disableConnectionAccounting();
-            test.done();
-          });
-
-          server.connect({auth: [method, 'admin', 'root2', 'root']});
-        });
-      });
-    });
-  }
-}
-
-exports['Should correctly authenticate server using scram-sha-1 using connect auth'] = {
-  metadata: { requires: { topology: "auth" } },
-
-  test: function(configuration, test) {
-    var Server = require('../../../lib/topologies/server')
-      , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson')
-      , Query = require('../../../lib/connection/commands').Query;
-
-    // Enable connections accounting
-    Connection.enableConnectionAccounting();
-
-    // Restart instance
-    configuration.manager.restart(true).then(function() {
-      locateAuthMethod(configuration, function(err, method) {
-        test.equal(null, err);
-
-        executeCommand(configuration, 'admin', {
-          createUser: 'root',
-          pwd: "root",
-          roles: [ { role: "root", db: "admin" } ],
-          digestPassword: true
-        }, function(err, r) {
-          test.equal(null, err);
-
-          var server = new Server({
-            host: configuration.host, port: configuration.port, bson: new bson()
-          });
-
-          server.on('connect', function(_server) {
-            executeCommand(configuration, 'admin', {
-              dropUser: 'root'
-            }, { auth: [method, 'admin', 'root', 'root']}, function(err, r) {
-              test.equal(null, err);
-
-              _server.destroy({force:true});
-              // console.log("=================== " + Object.keys(Connection.connections()).length)
-              test.equal(0, Object.keys(Connection.connections()).length);
-              Connection.disableConnectionAccounting();
-              test.done();
-            });
-          });
-
-          server.connect({auth: [method, 'admin', 'root', 'root']});
-        });
-      });
-    });
-  }
-}
-
-exports['Should correctly authenticate server using scram-sha-1 using connect auth and maintain auth on new connections'] = {
-  metadata: { requires: { topology: "auth" } },
-
-  test: function(configuration, test) {
-    var Server = require('../../../lib/topologies/server')
-      , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson')
-      , Query = require('../../../lib/connection/commands').Query;
-
-    // Enable connections accounting
-    Connection.enableConnectionAccounting();
-
-    // Restart instance
-    configuration.manager.restart(true).then(function() {
-      locateAuthMethod(configuration, function(err, method) {
-        test.equal(null, err);
-
-        executeCommand(configuration, 'admin', {
-          createUser: 'root', pwd: "root", roles: [ { role: "root", db: "admin" } ], digestPassword: true
-        }, function(err, r) {
-          test.equal(null, err);
-
-          executeCommand(configuration, 'test', {
-            createUser: 'admin', pwd: "admin", roles: [ "readWrite", "dbAdmin" ], digestPassword: true
-          }, { auth: [method, 'admin', 'root', 'root'] }, function(err, r) {
-            test.equal(null, err);
-
-            // Attempt to connect
             var server = new Server({
-              host: configuration.host, port: configuration.port, bson: new bson()
-            })
+              host: self.configuration.host, port: self.configuration.port, bson: new Bson()
+            });
 
-            var index = 0;
+            server.on('error', function() {
+              // console.log('=================== ' + Object.keys(Connection.connections()).length)
+              expect(Object.keys(Connection.connections()).length).to.equal(0);
+              Connection.disableConnectionAccounting();
+              done();
+            });
 
-            var messageHandler = function(err, result) {
-              index = index + 1;
+            server.connect({auth: [method, 'admin', 'root2', 'root']});
+          });
+        });
+      });
+    }
+  });
 
-              // Tests
-              test.equal(null, err);
-              test.equal(1, result.result.n);
-              // Did we receive an answer for all the messages
-              if(index == 100) {
-                test.equal(5, server.s.pool.socketCount());
+  it('should correctly authenticate server using scram-sha-1 using connect auth', {
+    metadata: { requires: { topology: 'auth' } },
 
-                server.destroy({force:true});
-                // console.log("=================== " + Object.keys(Connection.connections()).length)
-                test.equal(0, Object.keys(Connection.connections()).length);
+    test: function(done) {
+      var self = this;
+
+      // Enable connections accounting
+      Connection.enableConnectionAccounting();
+
+      // Restart instance
+      self.configuration.manager.restart(true).then(function() {
+        locateAuthMethod(self.configuration, function(err, method) {
+          expect(err).to.be.null;
+
+          executeCommand(self.configuration, 'admin', {
+            createUser: 'root',
+            pwd: 'root',
+            roles: [ { role: 'root', db: 'admin' } ],
+            digestPassword: true
+          }, function(cmdErr, r) {
+            expect(cmdErr).to.be.null;
+
+            var server = new Server({
+              host: self.configuration.host, port: self.configuration.port, bson: new Bson()
+            });
+
+            server.on('connect', function(_server) {
+              executeCommand(self.configuration, 'admin', {
+                dropUser: 'root'
+              }, { auth: [method, 'admin', 'root', 'root']}, function(dropUserErr, dropUserRes) {
+                expect(dropUserErr).to.be.null;
+
+                _server.destroy({force: true});
+                // console.log('=================== ' + Object.keys(Connection.connections()).length)
+                expect(Object.keys(Connection.connections()).length).to.equal(0);
                 Connection.disableConnectionAccounting();
-                test.done();
-              }
-            }
-
-            // Add event listeners
-            server.on('connect', function(_pool) {
-              for(var i = 0; i < 10; i++)
-              process.nextTick(function() {
-                server.insert('test.test', [{a:1}], messageHandler);
-                server.insert('test.test', [{a:1}], messageHandler);
-                server.insert('test.test', [{a:1}], messageHandler);
-                server.insert('test.test', [{a:1}], messageHandler);
-                server.insert('test.test', [{a:1}], messageHandler);
-                server.insert('test.test', [{a:1}], messageHandler);
-                server.insert('test.test', [{a:1}], messageHandler);
-                server.insert('test.test', [{a:1}], messageHandler);
-                server.insert('test.test', [{a:1}], messageHandler);
-                server.insert('test.test', [{a:1}], messageHandler);
+                done();
               });
             });
 
-            // Start connection
-            server.connect({auth: [method, 'test', 'admin', 'admin']});
+            server.connect({auth: [method, 'admin', 'root', 'root']});
           });
         });
       });
-    });
-  }
-}
+    }
+  });
 
-exports['Should correctly authenticate server using scram-sha-1 using auth method'] = {
-  metadata: { requires: { topology: "auth" } },
+  it('should correctly authenticate server using scram-sha-1 using connect auth and maintain auth on new connections', {
+    metadata: { requires: { topology: 'auth' } },
 
-  test: function(configuration, test) {
-    var Server = require('../../../lib/topologies/server')
-      , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson')
-      , Query = require('../../../lib/connection/commands').Query;
+    test: function(done) {
+      var self = this;
 
-    // Enable connections accounting
-    Connection.enableConnectionAccounting();
+      // Enable connections accounting
+      Connection.enableConnectionAccounting();
 
-    // Restart instance
-    configuration.manager.restart(true).then(function() {
-      locateAuthMethod(configuration, function(err, method) {
-        test.equal(null, err);
+      // Restart instance
+      self.configuration.manager.restart(true).then(function() {
+        locateAuthMethod(self.configuration, function(err, method) {
+          expect(err).to.be.null;
 
-        executeCommand(configuration, 'admin', {
-          createUser: 'root', pwd: "root", roles: [ { role: "root", db: "admin" } ], digestPassword: true
-        }, function(err, r) {
-          test.equal(null, err);
+          executeCommand(self.configuration, 'admin', {
+            createUser: 'root', pwd: 'root', roles: [ { role: 'root', db: 'admin' } ], digestPassword: true
+          }, function(cmdErr, r) {
+            expect(cmdErr).to.be.null;
 
-          executeCommand(configuration, 'test', {
-            createUser: 'admin', pwd: "admin", roles: [ "readWrite", "dbAdmin" ], digestPassword: true
-          }, { auth: [method, 'admin', 'root', 'root'] }, function(err, r) {
-            test.equal(null, err);
+            executeCommand(self.configuration, 'test', {
+              createUser: 'admin', pwd: 'admin', roles: [ 'readWrite', 'dbAdmin' ], digestPassword: true
+            }, { auth: [method, 'admin', 'root', 'root'] }, function(createUserErr, createUserRes) {
+              expect(createUserErr).to.be.null;
 
-            // Attempt to connect
-            var server = new Server({
-              host: configuration.host, port: configuration.port, bson: new bson()
-            })
+              // Attempt to connect
+              var server = new Server({
+                host: self.configuration.host, port: self.configuration.port, bson: new Bson()
+              });
 
-            var index = 0;
-            var error = false;
+              var index = 0;
 
-            var messageHandler = function(err, result) {
-              index = index + 1;
+              var messageHandler = function(messageHandlerErr, result) {
+                index = index + 1;
 
-              // Tests
-              test.equal(null, err);
-              test.equal(1, result.result.n);
-              // Did we receive an answer for all the messages
-              if(index == 100) {
-                test.equal(5, server.s.pool.socketCount());
-                test.equal(false, error);
+                // Tests
+                expect(messageHandlerErr).to.be.null;
+                expect(result.result.n).to.equal(1);
+                // Did we receive an answer for all the messages
+                if (index === 100) {
+                  expect(server.s.pool.socketCount()).to.equal(5);
 
-                server.destroy({force:true});
-                // console.log("=================== " + Object.keys(Connection.connections()).length)
-                test.equal(0, Object.keys(Connection.connections()).length);
-                Connection.disableConnectionAccounting();
-                test.done();
-              }
-            }
+                  server.destroy({force: true});
+                  // console.log('=================== ' + Object.keys(Connection.connections()).length)
+                  expect(Object.keys(Connection.connections()).length).to.equal(0);
+                  Connection.disableConnectionAccounting();
+                  done();
+                }
+              };
 
-            // Add event listeners
-            server.on('connect', function(_server) {
-              _server.auth(method, 'test', 'admin', 'admin', function(err, r) {
-                for(var i = 0; i < 100; i++) {
-                  // console.log("!!!!!!!!!!! 1")
+              // Add event listeners
+              server.on('connect', function(_pool) {
+                for (var i = 0; i < 10; i++) {
                   process.nextTick(function() {
-                    server.insert('test.test', [{a:1}], messageHandler);
+                    server.insert('test.test', [{a: 1}], messageHandler);
+                    server.insert('test.test', [{a: 1}], messageHandler);
+                    server.insert('test.test', [{a: 1}], messageHandler);
+                    server.insert('test.test', [{a: 1}], messageHandler);
+                    server.insert('test.test', [{a: 1}], messageHandler);
+                    server.insert('test.test', [{a: 1}], messageHandler);
+                    server.insert('test.test', [{a: 1}], messageHandler);
+                    server.insert('test.test', [{a: 1}], messageHandler);
+                    server.insert('test.test', [{a: 1}], messageHandler);
+                    server.insert('test.test', [{a: 1}], messageHandler);
                   });
                 }
               });
 
-              for(var i = 0; i < 100; i++) {
-                process.nextTick(function() {
-                  // console.log("!!!!!!!!!!! 0")
-                  _server.command('admin.$cmd', {ismaster:true}, function(e, r) {
-                    // console.dir(e)
-                    if(e) error = e;
-                  });
-                });
-              }
+              // Start connection
+              server.connect({auth: [method, 'test', 'admin', 'admin']});
             });
-
-            // Start connection
-            server.connect();
           });
         });
       });
-    });
-  }
-}
+    }
+  });
 
-exports['Should correctly authenticate server using scram-sha-1 using connect auth then logout'] = {
-  metadata: { requires: { topology: "auth" } },
+  it('should correctly authenticate server using scram-sha-1 using auth method', {
+    metadata: { requires: { topology: 'auth' } },
 
-  test: function(configuration, test) {
-    var Server = require('../../../lib/topologies/server')
-      , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson')
-      , Query = require('../../../lib/connection/commands').Query;
+    test: function(done) {
+      var self = this;
 
-    // Enable connections accounting
-    Connection.enableConnectionAccounting();
+      // Enable connections accounting
+      Connection.enableConnectionAccounting();
 
-    // Restart instance
-    configuration.manager.restart(true).then(function() {
-      locateAuthMethod(configuration, function(err, method) {
-        test.equal(null, err);
+      // Restart instance
+      self.configuration.manager.restart(true).then(function() {
+        locateAuthMethod(self.configuration, function(err, method) {
+          expect(err).to.be.null;
 
-        executeCommand(configuration, 'admin', {
-          createUser: 'root', pwd: "root", roles: [ { role: "root", db: "admin" } ], digestPassword: true
-        }, function(err, r) {
-          test.equal(null, err);
+          executeCommand(self.configuration, 'admin', {
+            createUser: 'root', pwd: 'root', roles: [ { role: 'root', db: 'admin' } ], digestPassword: true
+          }, function(cmdErr, r) {
+            expect(cmdErr).to.be.null;
 
-          executeCommand(configuration, 'test', {
-            createUser: 'admin', pwd: "admin", roles: [ "readWrite", "dbAdmin" ], digestPassword: true
-          }, { auth: [method, 'admin', 'root', 'root'] }, function(err, r) {
-            test.equal(null, err);
-            // Attempt to connect
-            var server = new Server({
-              host: configuration.host, port: configuration.port, bson: new bson()
-            })
+            executeCommand(self.configuration, 'test', {
+              createUser: 'admin', pwd: 'admin', roles: [ 'readWrite', 'dbAdmin' ], digestPassword: true
+            }, { auth: [method, 'admin', 'root', 'root'] }, function(createUserErr, createUserRes) {
+              expect(createUserErr).to.be.null;
 
-            // Add event listeners
-            server.on('connect', function(_server) {
-              _server.insert('test.test', [{a:1}], function(err, r) {
-                // console.dir(err)
-                test.equal(null, err);
+              // Attempt to connect
+              var server = new Server({
+                host: self.configuration.host, port: self.configuration.port, bson: new Bson()
+              });
 
-                // Logout pool
-                _server.logout('test', function(err) {
-                  test.equal(null, err);
+              var index = 0;
+              var error = false;
 
-                  _server.insert('test.test', [{a:1}], function(err, r) {
-                    test.ok(err != null);
+              var messageHandler = function(messageHandlerErr, result) {
+                index = index + 1;
 
-                    _server.destroy({force:true});
-                    // console.log("=================== " + Object.keys(Connection.connections()).length)
-                    test.equal(0, Object.keys(Connection.connections()).length);
-                    // console.log("============================ 5")
-                    Connection.disableConnectionAccounting();
-                    test.done();
+                // Tests
+                expect(messageHandlerErr).to.be.null;
+                expect(result.result.n).to.equal(1);
+                // Did we receive an answer for all the messages
+                if (index === 100) {
+                  expect(server.s.pool.socketCount()).to.equal(5);
+                  expect(error).to.be.false;
+
+                  server.destroy({force: true});
+                  // console.log('=================== ' + Object.keys(Connection.connections()).length)
+                  expect(Object.keys(Connection.connections()).length).to.equal(0);
+                  Connection.disableConnectionAccounting();
+                  done();
+                }
+              };
+
+              // Add event listeners
+              server.on('connect', function(_server) {
+                _server.auth(method, 'test', 'admin', 'admin', function(authErr, authRes) {
+                  for (var i = 0; i < 100; i++) {
+                    process.nextTick(function() {
+                      server.insert('test.test', [{a: 1}], messageHandler);
+                    });
+                  }
+                });
+
+                var executeIsMaster = function() {
+                  _server.command('admin.$cmd', {ismaster: true}, function(adminErr, adminRes) {
+                    // console.dir(adminErr)
+                    if (adminErr) error = adminErr;
+                  });
+                };
+
+                for (var i = 0; i < 100; i++) {
+                  process.nextTick(executeIsMaster);
+                }
+              });
+
+              // Start connection
+              server.connect();
+            });
+          });
+        });
+      });
+    }
+  });
+
+  it('should correctly authenticate server using scram-sha-1 using connect auth then logout', {
+    metadata: { requires: { topology: 'auth' } },
+
+    test: function(done) {
+      var self = this;
+
+      // Enable connections accounting
+      Connection.enableConnectionAccounting();
+
+      // Restart instance
+      self.configuration.manager.restart(true).then(function() {
+        locateAuthMethod(self.configuration, function(err, method) {
+          expect(err).to.be.null;
+
+          executeCommand(self.configuration, 'admin', {
+            createUser: 'root', pwd: 'root', roles: [ { role: 'root', db: 'admin' } ], digestPassword: true
+          }, function(cmdErr, r) {
+            expect(cmdErr).to.be.null;
+
+            executeCommand(self.configuration, 'test', {
+              createUser: 'admin', pwd: 'admin', roles: [ 'readWrite', 'dbAdmin' ], digestPassword: true
+            }, { auth: [method, 'admin', 'root', 'root'] }, function(createUserErr, createUserRes) {
+              expect(createUserErr).to.be.null;
+              // Attempt to connect
+              var server = new Server({
+                host: self.configuration.host, port: self.configuration.port, bson: new Bson()
+              });
+
+              // Add event listeners
+              server.on('connect', function(_server) {
+                _server.insert('test.test', [{a: 1}], function(insertErr, insertRes) {
+                  // console.dir(insertErr)
+                  expect(insertErr).to.be.null;
+
+                  // Logout pool
+                  _server.logout('test', function(logoutErr) {
+                    expect(logoutErr).to.be.null;
+
+                    _server.insert('test.test', [{a: 1}], function(secondInsertErr, secondInsertRes) {
+                      expect(secondInsertErr).to.not.be.null;
+
+                      _server.destroy({force: true});
+                      // console.log('=================== ' + Object.keys(Connection.connections()).length)
+                      expect(Object.keys(Connection.connections()).length).to.equal(0);
+                      // console.log('============================ 5')
+                      Connection.disableConnectionAccounting();
+                      done();
+                    });
                   });
                 });
               });
-            });
 
-            // Start connection
-            server.connect({auth: [method, 'test', 'admin', 'admin']});
+              // Start connection
+              server.connect({auth: [method, 'test', 'admin', 'admin']});
+            });
           });
         });
       });
-    });
-  }
-}
+    }
+  });
 
-exports['Should correctly have server auth wait for logout to finish'] = {
-  metadata: { requires: { topology: "auth" } },
+  it('should correctly have server auth wait for logout to finish', {
+    metadata: { requires: { topology: 'auth' } },
 
-  test: function(configuration, test) {
-    var Server = require('../../../lib/topologies/server')
-      , Connection = require('../../../lib/connection/connection')
-      , bson = require('bson')
-      , Query = require('../../../lib/connection/commands').Query;
+    test: function(done) {
+      var self = this;
 
-    // Enable connections accounting
-    Connection.enableConnectionAccounting();
+      // Enable connections accounting
+      Connection.enableConnectionAccounting();
 
-    // Restart instance
-    configuration.manager.restart(true).then(function() {
-      locateAuthMethod(configuration, function(err, method) {
-        test.equal(null, err);
+      // Restart instance
+      self.configuration.manager.restart(true).then(function() {
+        locateAuthMethod(self.configuration, function(err, method) {
+          expect(err).to.be.null;
 
-        executeCommand(configuration, 'admin', {
-          createUser: 'root', pwd: "root", roles: [ { role: "root", db: "admin" } ], digestPassword: true
-        }, function(err, r) {
-          test.equal(null, err);
+          executeCommand(self.configuration, 'admin', {
+            createUser: 'root', pwd: 'root', roles: [ { role: 'root', db: 'admin' } ], digestPassword: true
+          }, function(ercmdErrr, r) {
+            expect(err).to.be.null;
 
-          executeCommand(configuration, 'test', {
-            createUser: 'admin', pwd: "admin", roles: [ "readWrite", "dbAdmin" ], digestPassword: true
-          }, { auth: [method, 'admin', 'root', 'root'] }, function(err, r) {
-            test.equal(null, err);
-            // Attempt to connect
-            var server = new Server({
-              host: configuration.host, port: configuration.port, bson: new bson()
-            })
+            executeCommand(self.configuration, 'test', {
+              createUser: 'admin', pwd: 'admin', roles: [ 'readWrite', 'dbAdmin' ], digestPassword: true
+            }, { auth: [method, 'admin', 'root', 'root'] }, function(createUserErr, createUserRes) {
+              expect(createUserErr).to.be.null;
+              // Attempt to connect
+              var server = new Server({
+                host: self.configuration.host, port: self.configuration.port, bson: new Bson()
+              });
 
-            // Add event listeners
-            server.on('connect', function(_server) {
-              _server.insert('test.test', [{a:1}], function(err, r) {
-                test.equal(null, err);
+              // Add event listeners
+              server.on('connect', function(_server) {
+                _server.insert('test.test', [{a: 1}], function(insertErr, insertRes) {
+                  expect(insertErr).to.be.null;
 
-                // Logout pool
-                _server.logout('test', function(err) {
-                  test.equal(null, err);
-                });
+                  // Logout pool
+                  _server.logout('test', function(logoutErr) {
+                    expect(logoutErr).to.be.null;
+                  });
 
-                _server.auth(method, 'test', 'admin', 'admin', function(err, r) {
-                  test.equal(null, err);
+                  _server.auth(method, 'test', 'admin', 'admin', function(authErr, authRes) {
+                    expect(authErr).to.be.null;
 
-                  _server.insert('test.test', [{a:1}], function(err, r) {
-                    test.equal(null, err);
+                    _server.insert('test.test', [{a: 1}], function(secondInsertErr, secondInsertRes) {
+                      expect(secondInsertErr).to.be.null;
 
-                    _server.destroy({force:true});
-                    // console.log("=================== " + Object.keys(Connection.connections()).length)
-                    test.equal(0, Object.keys(Connection.connections()).length);
-                    Connection.disableConnectionAccounting();
-                    test.done();
+                      _server.destroy({force: true});
+                      // console.log('=================== ' + Object.keys(Connection.connections()).length)
+                      expect(Object.keys(Connection.connections()).length).to.equal(0);
+                      Connection.disableConnectionAccounting();
+                      done();
+                    });
                   });
                 });
               });
-            });
 
-            // Start connection
-            server.connect({auth:[method, 'test', 'admin', 'admin']});
+              // Start connection
+              server.connect({auth: [method, 'test', 'admin', 'admin']});
+            });
           });
         });
       });
-    });
-  }
-}
+    }
+  });
+});

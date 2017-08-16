@@ -8,7 +8,7 @@ var expect = require('chai').expect,
     ReadPreference = require('../../../lib/topologies/read_preference'),
     Server = require('../../../lib/topologies/server');
 
-describe.only('Replica set with no primary', function() {
+describe('Replica set with no primary', function() {
   it('should correctly execute max staleness tests', {
     metadata: { requires: { topology: 'single' } },
 
@@ -29,7 +29,7 @@ describe.only('Replica set with no primary', function() {
   });
 });
 
-describe.only('Replica set with primary', function() {
+describe('Replica set with primary', function() {
   it('should correctly execute max staleness tests', {
     metadata: { requires: { topology: 'single' } },
 
