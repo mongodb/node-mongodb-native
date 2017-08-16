@@ -1,327 +1,304 @@
-"use strict";
-var assign = require('../../../../lib/utils').assign;
+'use strict';
+var expect = require('chai').expect,
+    assign = require('../../../../lib/utils').assign,
+    co = require('co'),
+    mockupdb = require('../../../mock');
 
-exports['Should correctly emit sdam monitoring events for single server'] = {
-  metadata: {
-    requires: {
-      generators: true,
-      topology: "single"
-    }
-  },
+describe('Single SDAM Monitoring (mocks)', function() {
+  it('Should correctly emit sdam monitoring events for single server', {
+    metadata: {
+      requires: {
+        generators: true,
+        topology: 'single'
+      }
+    },
 
-  test: function(configuration, test) {
-    var Server = configuration.require.Server,
-      ObjectId = configuration.require.BSON.ObjectId,
-      co = require('co'),
-      mockupdb = require('../../../mock');
+    test: function(done) {
+      var Server = this.configuration.mongo.Server;
 
-    // Contain mock server
-    var server = null;
-    var running = true;
-    // Current index for the ismaster
-    var currentStep = 0;
-    // Primary stop responding
-    var stopRespondingPrimary = false;
+      // Contain mock server
+      var server = null;
+      var running = true;
 
-    // Default message fields
-    var defaultFields = {
-      "ismaster" : true,
-      "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000,
-      "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(),
-      "maxWireVersion" : 3,
-      "minWireVersion" : 0,
-      "ok" : 1
-    }
+      // Default message fields
+      var defaultFields = {
+        'ismaster': true,
+        'maxBsonObjectSize': 16777216,
+        'maxMessageSizeBytes': 48000000,
+        'maxWriteBatchSize': 1000,
+        'localTime': new Date(),
+        'maxWireVersion': 3,
+        'minWireVersion': 0,
+        'ok': 1
+      };
 
-    // Primary server states
-    var serverIsMaster = [assign({}, defaultFields)];
-    var timeoutPromise = function(timeout) {
-      return new Promise(function(resolve, reject) {
-        setTimeout(function() {
-          resolve();
-        }, timeout);
-      });
-    }
+      // Primary server states
+      var serverIsMaster = [assign({}, defaultFields)];
 
-    // Boot the mock
-    var __server;
-    co(function*() {
-      __server = yield mockupdb.createServer(37018, 'localhost');
-
-      // Primary state machine
+      // Boot the mock
+      var __server;
       co(function*() {
-        while(running) {
-          var request = yield __server.receive();
+        __server = yield mockupdb.createServer(37018, 'localhost');
 
-          // Get the document
-          var doc = request.document;
-          if(doc.ismaster) {
-            request.reply(serverIsMaster[0]);
+        // Primary state machine
+        co(function*() {
+          while (running) {
+            var request = yield __server.receive();
+
+            // Get the document
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(serverIsMaster[0]);
+            }
           }
-        }
+        }).catch(function() {});
       });
-    });
 
-    // Attempt to connect
-    var server = new Server({
-      host: 'localhost',
-      port: '37018',
-      connectionTimeout: 3000,
-      socketTimeout: 1000,
-      size: 1
-    });
+      // Attempt to connect
+      server = new Server({
+        host: 'localhost',
+        port: '37018',
+        connectionTimeout: 3000,
+        socketTimeout: 1000,
+        size: 1
+      });
 
-    // Results
-    var flags = [];
-    var id = null;
+      // Results
+      var flags = [];
+      var id = null;
 
-    // Add event listeners
-    server.once('connect', function(_server) {
-      id = _server.id;
-      _server.destroy({emitClose:true});
-    });
+      // Add event listeners
+      server.once('connect', function(_server) {
+        id = _server.id;
+        _server.destroy({emitClose: true});
+      });
 
-    server.on('serverOpening', function(event) {
-      flags[0] = event;
-    });
+      server.on('serverOpening', function(event) {
+        flags[0] = event;
+      });
 
-    server.on('serverClosed', function(event) {
-      flags[1] = event;
-    });
+      server.on('serverClosed', function(event) {
+        flags[1] = event;
+      });
 
-    server.on('serverDescriptionChanged', function(event) {
-      flags[2] = event;
-    });
+      server.on('serverDescriptionChanged', function(event) {
+        flags[2] = event;
+      });
 
-    server.on('topologyOpening', function(event) {
-      flags[3] = event;
-    });
+      server.on('topologyOpening', function(event) {
+        flags[3] = event;
+      });
 
-    server.on('topologyClosed', function(event) {
-      flags[4] = event;
-    });
+      server.on('topologyClosed', function(event) {
+        flags[4] = event;
+      });
 
-    server.on('topologyDescriptionChanged', function(event) {
-      flags[5] = event;
-    });
+      server.on('topologyDescriptionChanged', function(event) {
+        flags[5] = event;
+      });
 
-    server.on('error', function(){});
-    server.on('close', function(){
-      setTimeout(function() {
-        test.deepEqual({ topologyId: id, address: 'localhost:37018' }, flags[0]);
-        test.deepEqual({ topologyId: id, address: 'localhost:37018' }, flags[1]);
-        test.deepEqual({ "topologyId": id, "address": "localhost:37018",
-          "previousDescription": {
-            "address": "localhost:37018",
-            "arbiters": [],
-            "hosts": [],
-            "passives": [],
-            "type": "Unknown"
-          },
-          "newDescription": {
-            "address": "localhost:37018",
-            "arbiters": [],
-            "hosts": [],
-            "passives": [],
-            "type": "Standalone"
-          }
-        }, flags[2]);
-
-        test.deepEqual({ topologyId: id }, flags[3]);
-        test.deepEqual({ topologyId: id }, flags[4]);
-        test.deepEqual({ "topologyId": id, "address": "localhost:37018",
-          "previousDescription": {
-            "topologyType": "Unknown",
-            "servers": [
-              {
-                "address": "localhost:37018",
-                "arbiters": [],
-                "hosts": [],
-                "passives": [],
-                "type": "Unknown"
-              }
-            ]
-          },
-          "newDescription": {
-            "topologyType": "Single",
-            "servers": [
-              {
-                "address": "localhost:37018",
-                "arbiters": [],
-                "hosts": [],
-                "passives": [],
-                "type": "Standalone"
-              }
-            ]
-          }
-        }, flags[5]);
-        running = false;
-        __server.destroy();
-        test.done();
-      }, 100);
-    });
-
-    process.nextTick(function() { server.connect(); });
-  }
-}
-
-exports['Should correctly emit sdam monitoring events for single server, with correct server type'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
-
-  test: function(configuration, test) {
-    var Server = configuration.require.Server,
-      ObjectId = configuration.require.BSON.ObjectId,
-      co = require('co'),
-      mockupdb = require('../../../mock');
-
-    // Contain mock server
-    var server = null;
-    var running = true;
-    // Current index for the ismaster
-    var currentStep = 0;
-    // Primary stop responding
-    var stopRespondingPrimary = false;
-
-    // Default message fields
-    var defaultFields = {
-      "ismaster" : true,
-      "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000,
-      "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(),
-      "maxWireVersion" : 3,
-      "minWireVersion" : 0,
-      "ok" : 1,
-      "hosts": [ "a:27017", "b:27017" ] // <-- this makes it an RSPrimary
-    }
-
-    // Primary server states
-    var serverIsMaster = [assign({}, defaultFields)];
-    var timeoutPromise = function(timeout) {
-      return new Promise(function(resolve, reject) {
+      server.on('error', done);
+      server.on('close', function() {
         setTimeout(function() {
-          resolve();
-        }, timeout);
+          expect({ topologyId: id, address: 'localhost:37018' }).to.eql(flags[0]);
+          expect({ topologyId: id, address: 'localhost:37018' }).to.eql(flags[1]);
+          expect({ 'topologyId': id, 'address': 'localhost:37018',
+            'previousDescription': {
+              'address': 'localhost:37018',
+              'arbiters': [],
+              'hosts': [],
+              'passives': [],
+              'type': 'Unknown'
+            },
+            'newDescription': {
+              'address': 'localhost:37018',
+              'arbiters': [],
+              'hosts': [],
+              'passives': [],
+              'type': 'Standalone'
+            }
+          }).to.eql(flags[2]);
+
+          expect({ topologyId: id }).to.eql(flags[3]);
+          expect({ topologyId: id }).to.eql(flags[4]);
+          expect({ 'topologyId': id, 'address': 'localhost:37018',
+            'previousDescription': {
+              'topologyType': 'Unknown',
+              'servers': [
+                {
+                  'address': 'localhost:37018',
+                  'arbiters': [],
+                  'hosts': [],
+                  'passives': [],
+                  'type': 'Unknown'
+                }
+              ]
+            },
+            'newDescription': {
+              'topologyType': 'Single',
+              'servers': [
+                {
+                  'address': 'localhost:37018',
+                  'arbiters': [],
+                  'hosts': [],
+                  'passives': [],
+                  'type': 'Standalone'
+                }
+              ]
+            }
+          }).to.eql(flags[5]);
+          running = false;
+          __server.destroy();
+          done();
+        }, 100);
       });
+
+      process.nextTick(function() { server.connect(); });
     }
+  });
 
-    // Boot the mock
-    var __server;
-    co(function*() {
-      server = yield mockupdb.createServer(37008, 'localhost');
+  it('Should correctly emit sdam monitoring events for single server, with correct server type', {
+    metadata: { requires: { generators: true, topology: 'single' } },
 
-      // Primary state machine
+    test: function(done) {
+      var Server = this.configuration.mongo.Server;
+
+      // Contain mock server
+      var server = null;
+      var running = true;
+
+      // Default message fields
+      var defaultFields = {
+        'ismaster': true,
+        'maxBsonObjectSize': 16777216,
+        'maxMessageSizeBytes': 48000000,
+        'maxWriteBatchSize': 1000,
+        'localTime': new Date(),
+        'maxWireVersion': 3,
+        'minWireVersion': 0,
+        'ok': 1,
+        'hosts': [ 'a:27017', 'b:27017' ] // <-- this makes it an RSPrimary
+      };
+
+      // Primary server states
+      var serverIsMaster = [assign({}, defaultFields)];
+
+      // Boot the mock
       co(function*() {
-        while(running) {
-          var request = yield server.receive();
+        server = yield mockupdb.createServer(37008, 'localhost');
 
-          // Get the document
-          var doc = request.document;
-          if(doc.ismaster) {
-            request.reply(serverIsMaster[0]);
+        // Primary state machine
+        co(function*() {
+          while (running) {
+            var request = yield server.receive();
+
+            // Get the document
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(serverIsMaster[0]);
+            }
           }
-        }
+        }).catch(function() {});
       });
-    });
 
-    // Attempt to connect
-    var server = new Server({
-      host: 'localhost',
-      port: '37008',
-      connectionTimeout: 3000,
-      socketTimeout: 1000,
-      size: 1
-    });
+      // Attempt to connect
+      server = new Server({
+        host: 'localhost',
+        port: '37008',
+        connectionTimeout: 3000,
+        socketTimeout: 1000,
+        size: 1
+      });
 
-    // Results
-    var flags = [];
-    var id = null;
+      // Results
+      var flags = [];
+      var id = null;
 
-    // Add event listeners
-    server.once('connect', function(_server) {
-      id = _server.id;
-      _server.destroy({emitClose:true});
-    });
+      // Add event listeners
+      server.once('connect', function(_server) {
+        id = _server.id;
+        _server.destroy({emitClose: true});
+      });
 
-    server.on('serverOpening', function(event) {
-      flags[0] = event;
-    });
+      server.on('serverOpening', function(event) {
+        flags[0] = event;
+      });
 
-    server.on('serverClosed', function(event) {
-      flags[1] = event;
-    });
+      server.on('serverClosed', function(event) {
+        flags[1] = event;
+      });
 
-    server.on('serverDescriptionChanged', function(event) {
-      flags[2] = event;
-    });
+      server.on('serverDescriptionChanged', function(event) {
+        flags[2] = event;
+      });
 
-    server.on('topologyOpening', function(event) {
-      flags[3] = event;
-    });
+      server.on('topologyOpening', function(event) {
+        flags[3] = event;
+      });
 
-    server.on('topologyClosed', function(event) {
-      flags[4] = event;
-    });
+      server.on('topologyClosed', function(event) {
+        flags[4] = event;
+      });
 
-    server.on('topologyDescriptionChanged', function(event) {
-      flags[5] = event;
-    });
+      server.on('topologyDescriptionChanged', function(event) {
+        flags[5] = event;
+      });
 
-    server.on('error', function(){});
-    server.on('close', function(){
-      setTimeout(function() {
-        test.deepEqual({ topologyId: id, address: 'localhost:37008' }, flags[0]);
-        test.deepEqual({ topologyId: id, address: 'localhost:37008' }, flags[1]);
-        test.deepEqual({ "topologyId": id, "address": "localhost:37008",
-          "previousDescription": {
-            "address": "localhost:37008",
-            "arbiters": [],
-            "hosts": [],
-            "passives": [],
-            "type": "Unknown"
-          },
-          "newDescription": {
-            "address": "localhost:37008",
-            "arbiters": [],
-            "hosts": [],
-            "passives": [],
-            "type": "RSPrimary"
-          }
-        }, flags[2]);
-        test.deepEqual({ topologyId: id }, flags[3]);
-        test.deepEqual({ topologyId: id }, flags[4]);
-        test.deepEqual({ "topologyId": id, "address": "localhost:37008",
-          "previousDescription": {
-            "topologyType": "Unknown",
-            "servers": [
-              {
-                "address": "localhost:37008",
-                "arbiters": [],
-                "hosts": [],
-                "passives": [],
-                "type": "Unknown"
-              }
-            ]
-          },
-          "newDescription": {
-            "topologyType": "Single",
-            "servers": [
-              {
-                "address": "localhost:37008",
-                "arbiters": [],
-                "hosts": [],
-                "passives": [],
-                "type": "RSPrimary"
-              }
-            ]
-          }
-        }, flags[5]);
-        test.done();
-      }, 100);
-    });
+      server.on('error', done);
+      server.on('close', function() {
+        setTimeout(function() {
+          expect({ topologyId: id, address: 'localhost:37008' }, flags[0]);
+          expect({ topologyId: id, address: 'localhost:37008' }, flags[1]);
+          expect({ 'topologyId': id, 'address': 'localhost:37008',
+            'previousDescription': {
+              'address': 'localhost:37008',
+              'arbiters': [],
+              'hosts': [],
+              'passives': [],
+              'type': 'Unknown'
+            },
+            'newDescription': {
+              'address': 'localhost:37008',
+              'arbiters': [],
+              'hosts': [],
+              'passives': [],
+              'type': 'RSPrimary'
+            }
+          }).to.eql(flags[2]);
+          expect({ topologyId: id }).to.eql(flags[3]);
+          expect({ topologyId: id }).to.eql(flags[4]);
+          expect({ 'topologyId': id, 'address': 'localhost:37008',
+            'previousDescription': {
+              'topologyType': 'Unknown',
+              'servers': [
+                {
+                  'address': 'localhost:37008',
+                  'arbiters': [],
+                  'hosts': [],
+                  'passives': [],
+                  'type': 'Unknown'
+                }
+              ]
+            },
+            'newDescription': {
+              'topologyType': 'Single',
+              'servers': [
+                {
+                  'address': 'localhost:37008',
+                  'arbiters': [],
+                  'hosts': [],
+                  'passives': [],
+                  'type': 'RSPrimary'
+                }
+              ]
+            }
+          }).to.eql(flags[5]);
+          done();
+        }, 100);
+      });
 
-    process.nextTick(function() { server.connect(); });
-  }
-}
+      process.nextTick(function() { server.connect(); });
+    }
+  });
+});
+
