@@ -7,7 +7,7 @@ var expect = require('chai').expect,
     ReadPreference = require('../../../lib/topologies/read_preference'),
     Server = require('../../../lib/topologies/server');
 
-describe.only('Mongos server selection tests', function() {
+describe('Mongos server selection tests', function() {
   it('should correctly execute server selection tests using Mongos Topology', {
     metadata: { requires: { topology: 'single' } },
 
@@ -17,12 +17,6 @@ describe.only('Mongos server selection tests', function() {
       var entries = fs.readdirSync(path).filter(function(x) {
         return x.indexOf('.json') !== -1;
       });
-      // .filter(function(x) {
-      //   return x.indexOf('PrimaryPreferred.json') !== -1;
-      // });
-      // console.dir(entries)
-      // console.dir(entries)
-      // process.exit(0)
 
       // Execute each of the entries
       entries.forEach(function(x) {
