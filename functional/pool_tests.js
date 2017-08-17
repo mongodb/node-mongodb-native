@@ -9,7 +9,7 @@ var expect = require('chai').expect,
     Bson = require('bson');
 
 describe('Pool tests', function() {
-  it('should correctly connect pool to single server', {
+  it.skip('should correctly connect pool to single server', {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
@@ -229,7 +229,7 @@ describe('Pool tests', function() {
     }
   });
 
-  it('should correctly recover from a server outage', {
+  it.skip('should correctly recover from a server outage', {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
