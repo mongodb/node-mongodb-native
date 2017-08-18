@@ -8,6 +8,12 @@ var pipeline = [
   { $addFields: { "comment": "The documentKey field has been projected out of this document." } }
 ];
 
+var delay = function(timeout) {
+  return new Promise(function(resolve) {
+    setTimeout(function() { resolve(); }, timeout);
+  });
+};
+
 // Extend the object (for mock server)
 var extend = function(template, fields) {
   var object = {};
@@ -22,7 +28,7 @@ var extend = function(template, fields) {
   return object;
 }
 
-
+/*
 exports['Should create a Change Stream on a collection and emit `change` events'] = {
   metadata: { requires: { topology: 'replicaset', mongodb: ">=3.5.10" } },
 
@@ -432,7 +438,7 @@ exports['Should error if resume token projected out of change stream document us
   }
 };
 
-exports['UPDATE WHEN SERVER-29140 DONE Should invalidate change stream on collection rename using event listeners'] = {
+exports['Should invalidate change stream on collection rename using event listeners'] = {
   metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
@@ -443,12 +449,11 @@ exports['UPDATE WHEN SERVER-29140 DONE Should invalidate change stream on collec
     client.connect(function(err, client) {
       assert.ifError(err);
 
-      var theDatabase = client.db('integration_tests');
-
-      var thisChangeStream = theDatabase.collection('invalidateListeners').watch(pipeline);
+      var database = client.db('integration_tests');
+      var changeStream = database.collection('invalidateListeners').watch(pipeline);
 
       // Attach first event listener
-      thisChangeStream.once('change', function(change) {
+      changeStream.once('change', function(change) {
         assert.equal(change.operationType, 'insert');
         assert.equal(change.fullDocument.a, 1);
         assert.equal(change.ns.db, 'integration_tests');
@@ -457,29 +462,29 @@ exports['UPDATE WHEN SERVER-29140 DONE Should invalidate change stream on collec
         assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
 
         // Attach second event listener
-        thisChangeStream.once('change', function(change) {
+        changeStream.once('change', function(change) {
           // Check the cursor invalidation has occured
           assert.equal(change.operationType, 'invalidate');
-          // assert.equal(thisChangeStream.isClosed(), true); // UN-COMMENT WHEN SERVER-29140 DONE
 
-          test.done();
+          // now expect the server to close the stream
+          changeStream.once('close', test.done);
         });
 
         // Trigger the second database event
-        theDatabase.collection('invalidateListeners').rename('renamedDocs', {dropTarget: true}, function (err) {
+        database.collection('invalidateListeners').rename('renamedDocs', {dropTarget: true}, function (err) {
           assert.ifError(err);
         });
       });
 
       // Trigger the first database event
-      theDatabase.collection('invalidateListeners').insert({a:1}, function (err) {
+      database.collection('invalidateListeners').insert({a:1}, function (err) {
         assert.ifError(err);
       });
     });
   }
 };
 
-exports['UPDATE WHEN SERVER-29140 DONE Should invalidate change stream on database drop using imperative callback form'] = {
+exports['Should invalidate change stream on database drop using imperative callback form'] = {
   metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
@@ -490,30 +495,31 @@ exports['UPDATE WHEN SERVER-29140 DONE Should invalidate change stream on databa
     client.connect(function(err, client) {
       assert.ifError(err);
 
-      var theDatabase = client.db('integration_tests');
-
-      var thisChangeStream = theDatabase.collection('invalidateCallback').watch(pipeline);
+      var database = client.db('integration_tests');
+      var changeStream = database.collection('invalidateCallback').watch(pipeline);
 
       // Trigger the first database event
-      theDatabase.collection('invalidateCallback').insert({a:1}, function (err) {
+      database.collection('invalidateCallback').insert({a:1}, function (err) {
         assert.ifError(err);
 
-        thisChangeStream.next(function(err, change) {
+        changeStream.next(function(err, change) {
           assert.ifError(err);
           assert.equal(change.operationType, 'insert');
 
-          theDatabase.dropDatabase(function(err) {
+          database.dropDatabase(function(err) {
             assert.ifError(err);
 
-            thisChangeStream.next(function(err, change) {
+            changeStream.next(function(err, change) {
               assert.ifError(err);
 
               // Check the cursor invalidation has occured
               assert.equal(change.operationType, 'invalidate');
-              // assert.equal(thisChangeStream.isClosed(), true); // UN-COMMENT WHEN SERVER-29140 DONE
 
-              test.done();
-
+              changeStream.hasNext(function(err, hasNext) {
+                assert.equal(hasNext, false);
+                assert.equal(changeStream.isClosed(), true);
+                test.done();
+              });
             });
           });
         });
@@ -522,7 +528,7 @@ exports['UPDATE WHEN SERVER-29140 DONE Should invalidate change stream on databa
   }
 };
 
-exports['UPDATE WHEN SERVER-29140 DONE Should invalidate change stream on collection drop using promises'] = {
+exports['Should invalidate change stream on collection drop using promises'] = {
   metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
@@ -532,33 +538,36 @@ exports['UPDATE WHEN SERVER-29140 DONE Should invalidate change stream on collec
 
     client.connect(function(err, client) {
       assert.ifError(err);
-
-      var theDatabase = client.db('integration_tests_2');
-
-      var thisChangeStream = theDatabase.collection('invalidateCollectionDropPromises').watch(pipeline);
+      var database = client.db('integration_tests_2');
+      var changeStream = database.collection('invalidateCollectionDropPromises').watch(pipeline);
 
       // Trigger the first database event
-      theDatabase.collection('invalidateCollectionDropPromises').insert({a:1}).then(function () {
-        // Fetch the change notification after a 200ms delay
-        return new theDatabase.s.promiseLibrary(function (resolve) {
-          setTimeout(function(){
-            resolve(thisChangeStream.next());
-          }, 200);
+      return database.collection('invalidateCollectionDropPromises').insert({a:1})
+        .then(function () {
+          return delay(200);
+        }).then(function() {
+          return changeStream.next();
+        })
+        .then(function(change) {
+          assert.equal(change.operationType, 'insert');
+          return database.dropCollection('invalidateCollectionDropPromises');
+        })
+        .then(function() {
+          return changeStream.next();
+        })
+        .then(function(change) {
+          // Check the cursor invalidation has occured
+          assert.equal(change.operationType, 'invalidate');
+          return changeStream.hasNext();
+        })
+        .then(function(hasNext) {
+          assert.equal(hasNext, false);
+          assert.equal(changeStream.isClosed(), true);
+          test.done();
+        })
+        .catch(function(err) {
+          assert.ifError(err);
         });
-      }).then(function(change) {
-        assert.equal(change.operationType, 'insert');
-        return theDatabase.dropCollection('invalidateCollectionDropPromises');
-      }).then(function() {
-        return thisChangeStream.next();
-      }).then(function(change) {
-        // Check the cursor invalidation has occured
-        assert.equal(change.operationType, 'invalidate');
-        // assert.equal(thisChangeStream.isClosed(), true); // UN-COMMENT WHEN SERVER-29140 DONE
-
-        test.done();
-      }).catch(function(err) {
-        assert.ifError(err);
-      });
     });
   }
 };
@@ -853,7 +862,7 @@ exports['Should resume Change Stream when a resumable error is encountered'] = {
   }
 }
 
-exports['UPDATE WHEN SERVER-29131 AND SERVER-30438 DONE Should resume from point in time using user-provided resumeAfter'] = {
+exports['Should resume from point in time using user-provided resumeAfter'] = {
   metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
   // The actual test we wish to run
@@ -864,136 +873,74 @@ exports['UPDATE WHEN SERVER-29131 AND SERVER-30438 DONE Should resume from point
     client.connect(function(err, client) {
       assert.ifError(err);
 
-      var theDatabase = client.db('integration_tests');
-      var theCollection = theDatabase.collection('resumeAfterTest2');
+      var database = client.db('integration_tests');
+      var collection = database.collection('resumeAfterTest2');
 
-      var thisFirstChangeStream, thisSecondChangeStream;
+      var firstChangeStream, secondChangeStream;
 
       var resumeToken;
       var docs = [{a: 0}, {a: 1}, {a: 2}];
 
       // Trigger the first database event
-      theCollection.insert(docs[0]).then(function (result) {
+      collection.insert(docs[0])
+      .then(function (result) {
         assert.equal(result.insertedCount, 1);
-        thisFirstChangeStream = theCollection.watch(pipeline);
-        return theCollection.insert(docs[1]);
+        firstChangeStream = collection.watch(pipeline);
+        return collection.insert(docs[1]);
       }).then(function (result) {
         assert.equal(result.insertedCount, 1);
-        return theCollection.insert(docs[2]);
+        return collection.insert(docs[2]);
       }).then(function (result) {
         assert.equal(result.insertedCount, 1);
-
-        // Fetch the change notification after a 200ms delay
-        return new theDatabase.s.promiseLibrary(function (resolve) {
-          setTimeout(function(){
-            resolve(thisFirstChangeStream.hasNext());
-          }, 200);
-        });
+        return delay(200);
+      }).then(function() {
+        return firstChangeStream.hasNext();
       }).then(function(hasNext) {
         assert.equal(true, hasNext);
-        return thisFirstChangeStream.next();
+        return firstChangeStream.next();
       }).then(function(change) {
         assert.equal(change.operationType, 'insert');
         assert.equal(change.fullDocument.a, docs[0].a);
 
         // Save the resumeToken
         resumeToken = change._id;
-
-        return thisFirstChangeStream.next();
+        return firstChangeStream.next();
       }).then(function(change) {
         assert.equal(change.operationType, 'insert');
         assert.equal(change.fullDocument.a, docs[1].a);
 
-        return thisFirstChangeStream.next();
+        return firstChangeStream.next();
       }).then(function(change) {
         assert.equal(change.operationType, 'insert');
         assert.equal(change.fullDocument.a, docs[2].a);
 
-        return thisFirstChangeStream.close();
+        return firstChangeStream.close();
       }).then(function() {
-        thisSecondChangeStream = theCollection.watch(pipeline, {resumeAfter: resumeToken});
-
-        return new theDatabase.s.promiseLibrary(function (resolve) {
-          setTimeout(function(){
-            resolve(thisSecondChangeStream.hasNext());
-          }, 200);
-        });
-
+        secondChangeStream = collection.watch(pipeline, {resumeAfter: resumeToken});
+        return delay(200);
+      }).then(function() {
+        return secondChangeStream.hasNext();
       }).then(function(hasNext) {
         assert.equal(true, hasNext);
-        return thisSecondChangeStream.next();
+        return secondChangeStream.next();
       }).then(function(change) {
         assert.equal(change.operationType, 'insert');
         assert.equal(change.fullDocument.a, docs[1].a);
-
-        return thisSecondChangeStream.next();
+        return secondChangeStream.next();
       }).then(function(change) {
         assert.equal(change.operationType, 'insert');
         assert.equal(change.fullDocument.a, docs[2].a);
-
-        return thisSecondChangeStream.close();
+        return secondChangeStream.close();
       }).then(function() {
-        setTimeout(test.done, 1100);
+        test.done();
       }).catch(function(err) {
         assert.ifError(err);
       });
     });
   }
 };
+*/
 
-exports['UPDATE WHEN SERVER-30438 DONE Should start change stream at the current most recent entry in the oplog'] = {
-  metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var MongoClient = configuration.require.MongoClient;
-    var client = new MongoClient(configuration.url());
-
-    client.connect(function(err, client) {
-      assert.ifError(err);
-
-      var theDatabase = client.db('integration_tests');
-      var theCollection = theDatabase.collection('resumeAfterTest');
-
-      var thisChangeStream;
-
-      var resumeToken;
-      var docs = [{a: 0}, {a: 1}, {a: 2}];
-
-      // Trigger the first database event
-      theCollection.insert(docs[0]).then(function (result) {
-        assert.equal(result.insertedCount, 1);
-        return theCollection.insert(docs[1]);
-      }).then(function (result) {
-        assert.equal(result.insertedCount, 1);
-        return theCollection.insert(docs[2]);
-      }).then(function (result) {
-        assert.equal(result.insertedCount, 1);
-        thisChangeStream = theCollection.watch(pipeline);
-
-        return new theDatabase.s.promiseLibrary(function (resolve) {
-          setTimeout(function(){
-            resolve(thisChangeStream.hasNext());
-          }, 200);
-        });
-      }).then(function(hasNext) {
-        assert.equal(true, hasNext);
-        return thisChangeStream.next();
-      }).then(function(change) {
-        // assert.equal(change.operationType, 'insert'); // UN-COMMENT WHEN SERVER-30438 DONE
-        // assert.equal(change.fullDocument.a, docs[2].a); // UN-COMMENT WHEN SERVER-30438 DONE
-
-        return thisChangeStream.close();
-      }).then(function() {
-        setTimeout(test.done, 1100);
-      }).catch(function(err) {
-        assert.ifError(err);
-      });
-    });
-  }
-};
-
-/*
 exports['Should support full document lookup'] = {
   metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
@@ -1005,37 +952,39 @@ exports['Should support full document lookup'] = {
     client.connect(function(err, client) {
       assert.ifError(err);
 
-      var theDatabase = client.db('integration_tests09');
-      var theCollection = theDatabase.collection('fullDocumentLookup');
-      var thisChangeStream = theCollection.watch(pipeline, {fullDocument: 'lookup'});
+      var database = client.db('integration_tests09');
+      var collection = database.collection('fullDocumentLookup');
+      var changeStream = collection.watch(pipeline, { fullDocument: 'lookup' });
+      changeStream.hasNext();
 
-      // Trigger the first database event
-      theCollection.insert({f:128}).then(function (result) {
+
+      delay(500).then(function() {
+        console.log('inserting');
+        return collection.insert({ f: 128 });
+      }).then(function (result) {
         assert.equal(result.insertedCount, 1);
-
-        // Fetch the change notification after a 200ms delay
-        return new theDatabase.s.promiseLibrary(function (resolve) {
-          setTimeout(function(){
-            resolve(thisChangeStream.hasNext());
-          }, 200);
-        });
+        console.log('inserted');
+        return delay(200);
+      }).then(function() {
+        console.log('checking hasNext');
+        return changeStream.hasNext();
       }).then(function(hasNext) {
         assert.equal(true, hasNext);
-        return thisChangeStream.next();
+        console.log('hasNext: ', hasNext);
+        return changeStream.next();
       }).then(function(change) {
-        console.log('GOT HERE0');
-
+        console.log('got next doc');
         assert.equal(change.operationType, 'insert');
         assert.equal(change.fullDocument.f, 128);
-        assert.equal(change.ns.db, theDatabase.databaseName);
-        assert.equal(change.ns.coll, theCollection.collectionName);
+        assert.equal(change.ns.db, database.databaseName);
+        assert.equal(change.ns.coll, collection.collectionName);
         assert.ok(!(change.documentKey));
         assert.equal(change.comment, 'The documentKey field has been projected out of this document.');
 
         // Trigger the second database event
-        return theCollection.update({f: 128}, {$set: {c:2}});
+        return collection.update({f: 128}, {$set: {c:2}});
       }).then(function () {
-        return thisChangeStream.next();
+        return changeStream.next();
       }).then(function(change) {
         assert.equal(change.operationType, 'update');
 
@@ -1044,17 +993,17 @@ exports['Should support full document lookup'] = {
         assert.equal(change.fullDocument.f, 128);
         assert.equal(change.fullDocument.c, 2);
 
-        return thisChangeStream.close();
+        return changeStream.close();
       }).then(function() {
-        setTimeout(test.done, 1100);
+        test.done();
       }).catch(function(err) {
         assert.ifError(err);
       });
     });
   }
 };
-*/
 
+/*
 exports['Should support full document lookup with deleted documents'] = {
   metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
@@ -1079,12 +1028,9 @@ exports['Should support full document lookup with deleted documents'] = {
       }).then(function(result) {
         assert.equal(result.result.n, 1);
 
-        // Fetch the change notification after a 200ms delay
-        return new theDatabase.s.promiseLibrary(function (resolve) {
-          setTimeout(function(){
-            resolve(thisChangeStream.hasNext());
-          }, 200);
-        });
+        return delay(200);
+      }).then(function() {
+        return thisChangeStream.hasNext();
       }).then(function(hasNext) {
         assert.equal(true, hasNext);
         return thisChangeStream.next();
@@ -1111,7 +1057,7 @@ exports['Should support full document lookup with deleted documents'] = {
 
         return thisChangeStream.close();
       }).then(function() {
-        setTimeout(test.done, 1100);
+        test.done();
       }).catch(function(err) {
         assert.ifError(err);
       });
@@ -1196,6 +1142,8 @@ exports['Should support piping of Change Streams'] = {
     });
   }
 };
+*/
+
 
 /*
 exports['Should resume piping of Change Streams when a resumable error is encountered'] = {
@@ -1334,7 +1282,7 @@ exports['Should resume piping of Change Streams when a resumable error is encoun
           //
           // thisChangeStream.close(function(err) {
           //   assert.ifError(err);
-          //   setTimeout(test.done, 1000);
+          //   test.done();
           // });
         });
       });
@@ -1343,6 +1291,7 @@ exports['Should resume piping of Change Streams when a resumable error is encoun
 }
 */
 
+/*
 exports['Should support piping of Change Streams through multiple pipes'] = {
   metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
@@ -1421,3 +1370,4 @@ exports['Should error when attempting to create a Change Stream against a stand-
     // });
   }
 };
+*/
