@@ -241,7 +241,7 @@ describe('ReplSet Add Remove (mocks)', function() {
     }
   });
 
-  it('Successfully remove a secondary server from the set', {
+  it.only('Successfully remove a secondary server from the set', {
     metadata: {
       requires: {
         generators: true,
@@ -258,7 +258,6 @@ describe('ReplSet Add Remove (mocks)', function() {
       var firstSecondaryServer = null;
       var secondSecondaryServer = null;
       var arbiterServer = null;
-      var running = true;
       var currentIsMasterIndex = 0;
 
       // Default message fields
@@ -365,60 +364,32 @@ describe('ReplSet Add Remove (mocks)', function() {
         secondSecondaryServer = yield mockupdb.createServer(32003, 'localhost');
         arbiterServer = yield mockupdb.createServer(32002, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(primary[currentIsMasterIndex]);
-            }
+        primaryServer.setMessageHandler(function(request) {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(primary[currentIsMasterIndex]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(firstSecondary[currentIsMasterIndex]);
-            }
+        firstSecondaryServer.setMessageHandler(function(request) {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(firstSecondary[currentIsMasterIndex]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield secondSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(secondSecondary[currentIsMasterIndex]);
-            }
+        secondSecondaryServer.setMessageHandler(function(request) {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(secondSecondary[currentIsMasterIndex]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Arbiter state machine
-        co(function*() {
-          while (running) {
-            var request = yield arbiterServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(arbiter[currentIsMasterIndex]);
-            }
+        arbiterServer.setMessageHandler(function(request) {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(arbiter[currentIsMasterIndex]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
       });
 
@@ -471,18 +442,16 @@ describe('ReplSet Add Remove (mocks)', function() {
           expect(server.s.replicaSetState.primary).to.not.be.null;
           expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-          primaryServer.destroy();
-          firstSecondaryServer.destroy();
-          secondSecondaryServer.destroy();
-          arbiterServer.destroy();
-          server.destroy();
-          running = false;
-
-          setTimeout(function() {
-            expect(Object.keys(Connection.connections())).to.have.length(0);
+          Promise.all([
+            server.destroy(),
+            primaryServer.destroy(),
+            firstSecondaryServer.destroy(),
+            secondSecondaryServer.destroy(),
+            arbiterServer.destroy()
+          ]).then(function() {
             Connection.disableConnectionAccounting();
             done();
-          }, 2000);
+          });
         }
       });
 
