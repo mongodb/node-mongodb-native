@@ -1024,7 +1024,7 @@ exports['Ensure killcursor commands are sent on 3.0 or earlier when APM is enabl
   }
 }
 
-exports['Correcly decorate the apm result for aggregation with cursorId'] = {
+exports['Correctly decorate the apm result for aggregation with cursorId'] = {
   metadata: { requires: { topology: ['single', 'replicaset'], mongodb: ">=3.0.0" } },
 
   // The actual test we wish to run
@@ -1079,7 +1079,7 @@ exports['Correcly decorate the apm result for aggregation with cursorId'] = {
   }
 }
 
-exports['Correcly decorate the apm result for listCollections with cursorId'] = {
+exports['Correctly decorate the apm result for listCollections with cursorId'] = {
   metadata: { requires: { topology: ['single', 'replicaset'], mongodb: ">=3.0.0" } },
 
   // The actual test we wish to run
