@@ -173,7 +173,7 @@ describe('APM', function() {
           .collection('apm_test_list_collections')
           .insertOne({ a: 1 }, self.configuration.writeConcernMax())
           .then(function(r) {
-            test.equal(1, r.insertedCount);
+            expect(r.insertedCount).to.equal(1);
 
             var listener = require('../..').instrument(function(err) {
               expect(err).to.be.null;
@@ -1122,7 +1122,7 @@ describe('APM', function() {
                 expect(err).to.be.null;
 
                 cursorCountAfter = result.cursors.clientCursors_size;
-                test.equal(cursorCountBefore, cursorCountAfter);
+                expect(cursorCountBefore).to.equal(cursorCountAfter);
 
                 listener.uninstrument();
                 client.close();
