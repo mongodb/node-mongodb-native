@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var fs = require('fs'),
   path = require('path'),
@@ -12,8 +12,8 @@ exports.shouldCorrectlyCommunicateUsingSSLSocket = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ServerManager = require('mongodb-topology-manager').Server
-      , MongoClient = configuration.require.MongoClient;
+    var ServerManager = require('mongodb-topology-manager').Server,
+      MongoClient = configuration.require.MongoClient;
 
     // All inserted docs
     var docs = [];
@@ -21,37 +21,45 @@ exports.shouldCorrectlyCommunicateUsingSSLSocket = {
     var insertDocs = [];
 
     // Start server
-    var serverManager = new ServerManager('mongod', {
-        journal: null
-      , port: 27019
-      , sslOnNormalPorts: null
-      , sslPEMKeyFile: __dirname + "/ssl/server.pem"
-      , dbpath: path.join(path.resolve('db'), f("data-%d", 27019))
-    }, {
-      ssl:true
-    });
+    var serverManager = new ServerManager(
+      'mongod',
+      {
+        journal: null,
+        port: 27019,
+        sslOnNormalPorts: null,
+        sslPEMKeyFile: __dirname + '/ssl/server.pem',
+        dbpath: path.join(path.resolve('db'), f('data-%d', 27019))
+      },
+      {
+        ssl: true
+      }
+    );
 
     serverManager.purge().then(function() {
       // Start the server
       serverManager.start().then(function() {
         setTimeout(function() {
           // Connect
-          MongoClient.connect("mongodb://localhost:27019/test?ssl=true", {
-            sslValidate: false
-          }, function(err, client) {
-            test.equal(null, err);
+          MongoClient.connect(
+            'mongodb://localhost:27019/test?ssl=true',
+            {
+              sslValidate: false
+            },
+            function(err, client) {
+              test.equal(null, err);
 
-            client.close();
+              client.close();
 
-            serverManager.stop().then(function() {
-              test.done();
-            });
-          });
+              serverManager.stop().then(function() {
+                test.done();
+              });
+            }
+          );
         }, 10000);
       });
     });
   }
-}
+};
 
 /**
  * @ignore
@@ -61,8 +69,8 @@ exports['should fail due to CRL list passed in'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ServerManager = require('mongodb-topology-manager').Server
-      , MongoClient = configuration.require.MongoClient;
+    var ServerManager = require('mongodb-topology-manager').Server,
+      MongoClient = configuration.require.MongoClient;
 
     // All inserted docs
     var docs = [];
@@ -70,42 +78,50 @@ exports['should fail due to CRL list passed in'] = {
     var insertDocs = [];
 
     // Start server
-    var serverManager = new ServerManager('mongod', {
-        journal: null
-      , port: 27019
-      , sslOnNormalPorts: null
-      , sslPEMKeyFile: __dirname + "/ssl/server.pem"
-      , dbpath: path.join(path.resolve('db'), f("data-%d", 27019))
-    }, {
-      ssl:true
-    });
+    var serverManager = new ServerManager(
+      'mongod',
+      {
+        journal: null,
+        port: 27019,
+        sslOnNormalPorts: null,
+        sslPEMKeyFile: __dirname + '/ssl/server.pem',
+        dbpath: path.join(path.resolve('db'), f('data-%d', 27019))
+      },
+      {
+        ssl: true
+      }
+    );
 
     // Read the ca
-    var crl = [fs.readFileSync(__dirname + "/ssl/crl_expired.pem")];
-    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+    var crl = [fs.readFileSync(__dirname + '/ssl/crl_expired.pem')];
+    var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
 
     serverManager.purge().then(function() {
       // Start the server
       serverManager.start().then(function() {
         setTimeout(function() {
           // Connect
-          MongoClient.connect("mongodb://server:27019/test?ssl=true", {
-            sslValidate: true,
-            sslCA: ca,
-            sslCRL: crl,
-          }, function(err, client) {
-            test.ok(err);
-            test.ok(err.message.indexOf('CRL has expired') != -1);
+          MongoClient.connect(
+            'mongodb://server:27019/test?ssl=true',
+            {
+              sslValidate: true,
+              sslCA: ca,
+              sslCRL: crl
+            },
+            function(err, client) {
+              test.ok(err);
+              test.ok(err.message.indexOf('CRL has expired') != -1);
 
-            serverManager.stop().then(function() {
-              test.done();
-            });
-          });
+              serverManager.stop().then(function() {
+                test.done();
+              });
+            }
+          );
         }, 10000);
       });
     });
   }
-}
+};
 
 /**
  * @ignore
@@ -115,8 +131,8 @@ exports.shouldCorrectlyValidateServerCertificate = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ServerManager = require('mongodb-topology-manager').Server
-      , MongoClient = configuration.require.MongoClient;
+    var ServerManager = require('mongodb-topology-manager').Server,
+      MongoClient = configuration.require.MongoClient;
 
     // All inserted docs
     var docs = [];
@@ -124,17 +140,17 @@ exports.shouldCorrectlyValidateServerCertificate = {
     var insertDocs = [];
 
     // Read the ca
-    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+    var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
 
     // Start server
     var serverManager = new ServerManager('mongod', {
-        journal:null
-      , sslOnNormalPorts: null
-      , sslPEMKeyFile: __dirname + "/ssl/server.pem"
+      journal: null,
+      sslOnNormalPorts: null,
+      sslPEMKeyFile: __dirname + '/ssl/server.pem',
       // EnsureUp options
-      , dbpath: path.join(path.resolve('db'), f("data-%d", 27019))
-      , bind_ip: 'server'
-      , port: 27019
+      dbpath: path.join(path.resolve('db'), f('data-%d', 27019)),
+      bind_ip: 'server',
+      port: 27019
     });
 
     serverManager.purge().then(function() {
@@ -142,23 +158,27 @@ exports.shouldCorrectlyValidateServerCertificate = {
       serverManager.start().then(function() {
         setTimeout(function() {
           // Connect and validate the server certificate
-          MongoClient.connect("mongodb://server:27019/test?ssl=true&maxPoolSize=1", {
-              sslValidate:true
-            , sslCA:ca
-          }, function(err, client) {
-            test.equal(null, err);
+          MongoClient.connect(
+            'mongodb://server:27019/test?ssl=true&maxPoolSize=1',
+            {
+              sslValidate: true,
+              sslCA: ca
+            },
+            function(err, client) {
+              test.equal(null, err);
 
-            client.close();
+              client.close();
 
-            serverManager.stop().then(function() {
-              test.done();
-            });
-          });
+              serverManager.stop().then(function() {
+                test.done();
+              });
+            }
+          );
         }, 10000);
       });
     });
   }
-}
+};
 
 /**
  * @ignore
@@ -168,8 +188,8 @@ exports['Should correctly pass down servername to connection for TLS SNI support
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ServerManager = require('mongodb-topology-manager').Server
-      , MongoClient = configuration.require.MongoClient;
+    var ServerManager = require('mongodb-topology-manager').Server,
+      MongoClient = configuration.require.MongoClient;
 
     // All inserted docs
     var docs = [];
@@ -177,17 +197,17 @@ exports['Should correctly pass down servername to connection for TLS SNI support
     var insertDocs = [];
 
     // Read the ca
-    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+    var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
 
     // Start server
     var serverManager = new ServerManager('mongod', {
-        journal:null
-      , sslOnNormalPorts: null
-      , sslPEMKeyFile: __dirname + "/ssl/server.pem"
+      journal: null,
+      sslOnNormalPorts: null,
+      sslPEMKeyFile: __dirname + '/ssl/server.pem',
       // EnsureUp options
-      , dbpath: path.join(path.resolve('db'), f("data-%d", 27019))
-      , bind_ip: 'server'
-      , port: 27019
+      dbpath: path.join(path.resolve('db'), f('data-%d', 27019)),
+      bind_ip: 'server',
+      port: 27019
     });
 
     serverManager.purge().then(function() {
@@ -195,35 +215,41 @@ exports['Should correctly pass down servername to connection for TLS SNI support
       serverManager.start().then(function() {
         setTimeout(function() {
           // Connect and validate the server certificate
-          MongoClient.connect("mongodb://server:27019/test?ssl=true&maxPoolSize=1", {
-              sslValidate:true
-            , servername: 'server'
-            , sslCA:ca
-          }, function(err, client) {
-            test.equal(null, err);
+          MongoClient.connect(
+            'mongodb://server:27019/test?ssl=true&maxPoolSize=1',
+            {
+              sslValidate: true,
+              servername: 'server',
+              sslCA: ca
+            },
+            function(err, client) {
+              test.equal(null, err);
 
-            client.close();
+              client.close();
 
-            serverManager.stop().then(function() {
-              test.done();
-            });
-          });
+              serverManager.stop().then(function() {
+                test.done();
+              });
+            }
+          );
         }, 10000);
       });
     });
   }
-}
+};
 
 /**
  * @ignore
  */
-exports['should correctly validate ssl certificate and ignore server certificate host name validation'] = {
+exports[
+  'should correctly validate ssl certificate and ignore server certificate host name validation'
+] = {
   metadata: { requires: { topology: 'ssl' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ServerManager = require('mongodb-topology-manager').Server
-      , MongoClient = configuration.require.MongoClient;
+    var ServerManager = require('mongodb-topology-manager').Server,
+      MongoClient = configuration.require.MongoClient;
 
     // All inserted docs
     var docs = [];
@@ -234,17 +260,17 @@ exports['should correctly validate ssl certificate and ignore server certificate
     var checkServerIdentityCalled = false;
 
     // Read the ca
-    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+    var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
 
     // Start server
     var serverManager = new ServerManager('mongod', {
-        journal:null
-      , sslOnNormalPorts: null
-      , sslPEMKeyFile: __dirname + "/ssl/server.pem"
+      journal: null,
+      sslOnNormalPorts: null,
+      sslPEMKeyFile: __dirname + '/ssl/server.pem',
       // EnsureUp options
-      , dbpath: path.join(path.resolve('db'), f("data-%d", 27019))
-      , bind_ip: 'server'
-      , port: 27019
+      dbpath: path.join(path.resolve('db'), f('data-%d', 27019)),
+      bind_ip: 'server',
+      port: 27019
     });
 
     serverManager.purge().then(function() {
@@ -252,28 +278,32 @@ exports['should correctly validate ssl certificate and ignore server certificate
       serverManager.start().then(function() {
         setTimeout(function() {
           // Connect and validate the server certificate
-          MongoClient.connect("mongodb://server:27019/test?ssl=true&maxPoolSize=1", {
-              sslValidate:true
-            , checkServerIdentity: function() {
-              checkServerIdentityCalled = true;
-              return undefined;
+          MongoClient.connect(
+            'mongodb://server:27019/test?ssl=true&maxPoolSize=1',
+            {
+              sslValidate: true,
+              checkServerIdentity: function() {
+                checkServerIdentityCalled = true;
+                return undefined;
+              },
+              sslCA: ca
+            },
+            function(err, client) {
+              test.equal(null, err);
+              test.ok(checkServerIdentityCalled);
+
+              client.close();
+
+              serverManager.stop().then(function() {
+                test.done();
+              });
             }
-            , sslCA:ca
-          }, function(err, client) {
-            test.equal(null, err);
-            test.ok(checkServerIdentityCalled);
-
-            client.close();
-
-            serverManager.stop().then(function() {
-              test.done();
-            });
-          });
+          );
         }, 10000);
       });
     });
   }
-}
+};
 
 /**
  * @ignore
@@ -283,8 +313,8 @@ exports['should fail to validate certificate due to illegal host name'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ServerManager = require('mongodb-topology-manager').Server
-      , MongoClient = configuration.require.MongoClient;
+    var ServerManager = require('mongodb-topology-manager').Server,
+      MongoClient = configuration.require.MongoClient;
 
     // All inserted docs
     var docs = [];
@@ -292,17 +322,17 @@ exports['should fail to validate certificate due to illegal host name'] = {
     var insertDocs = [];
 
     // Read the ca
-    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+    var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
 
     // Start server
     var serverManager = new ServerManager('mongod', {
-        journal:null
-      , sslOnNormalPorts: null
-      , sslPEMKeyFile: __dirname + "/ssl/server.pem"
+      journal: null,
+      sslOnNormalPorts: null,
+      sslPEMKeyFile: __dirname + '/ssl/server.pem',
       // EnsureUp options
-      , dbpath: path.join(path.resolve('db'), f("data-%d", 27019))
-      , bind_ip: 'server'
-      , port: 27019
+      dbpath: path.join(path.resolve('db'), f('data-%d', 27019)),
+      bind_ip: 'server',
+      port: 27019
     });
 
     serverManager.purge().then(function() {
@@ -310,21 +340,25 @@ exports['should fail to validate certificate due to illegal host name'] = {
       serverManager.start().then(function() {
         setTimeout(function() {
           // Connect and validate the server certificate
-          MongoClient.connect("mongodb://localhost:27017/test?ssl=true&maxPoolSize=1", {
-              sslValidate:true
-            , sslCA:ca
-          }, function(err, client) {
-            test.ok(err != null);
+          MongoClient.connect(
+            'mongodb://localhost:27017/test?ssl=true&maxPoolSize=1',
+            {
+              sslValidate: true,
+              sslCA: ca
+            },
+            function(err, client) {
+              test.ok(err != null);
 
-            serverManager.stop().then(function() {
-              test.done();
-            });
-          });
+              serverManager.stop().then(function() {
+                test.done();
+              });
+            }
+          );
         }, 10000);
       });
     });
   }
-}
+};
 
 /**
  * @ignore
@@ -334,8 +368,8 @@ exports.shouldCorrectlyValidatePresentedServerCertificateAndPresentValidCertific
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ServerManager = require('mongodb-topology-manager').Server
-      , MongoClient = configuration.require.MongoClient;
+    var ServerManager = require('mongodb-topology-manager').Server,
+      MongoClient = configuration.require.MongoClient;
 
     // All inserted docs
     var docs = [];
@@ -343,21 +377,21 @@ exports.shouldCorrectlyValidatePresentedServerCertificateAndPresentValidCertific
     var insertDocs = [];
 
     // Read the ca
-    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
-    var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
-    var key = fs.readFileSync(__dirname + "/ssl/client.pem");
+    var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
+    var cert = fs.readFileSync(__dirname + '/ssl/client.pem');
+    var key = fs.readFileSync(__dirname + '/ssl/client.pem');
 
     // Start server
     var serverManager = new ServerManager('mongod', {
-        journal:null
-      , sslOnNormalPorts: null
-      , sslCAFile: __dirname + "/ssl/ca.pem"
-      , sslCRLFile: __dirname + "/ssl/crl.pem"
-      , sslPEMKeyFile: __dirname + "/ssl/server.pem"
+      journal: null,
+      sslOnNormalPorts: null,
+      sslCAFile: __dirname + '/ssl/ca.pem',
+      sslCRLFile: __dirname + '/ssl/crl.pem',
+      sslPEMKeyFile: __dirname + '/ssl/server.pem',
       // EnsureUp options
-      , dbpath: path.join(path.resolve('db'), f("data-%d", 27019))
-      , bind_ip: 'server'
-      , port: 27019
+      dbpath: path.join(path.resolve('db'), f('data-%d', 27019)),
+      bind_ip: 'server',
+      port: 27019
     });
 
     serverManager.purge().then(function() {
@@ -365,26 +399,30 @@ exports.shouldCorrectlyValidatePresentedServerCertificateAndPresentValidCertific
       serverManager.start().then(function() {
         setTimeout(function() {
           // Connect and validate the server certificate
-          MongoClient.connect("mongodb://server:27019/test?ssl=true&maxPoolSize=1", {
-              sslValidate:true
-            , sslCA:ca
-            , sslKey:key
-            , sslCert:cert
-            , sslPass:'10gen'
-          }, function(err, client) {
-            test.equal(null, err);
+          MongoClient.connect(
+            'mongodb://server:27019/test?ssl=true&maxPoolSize=1',
+            {
+              sslValidate: true,
+              sslCA: ca,
+              sslKey: key,
+              sslCert: cert,
+              sslPass: '10gen'
+            },
+            function(err, client) {
+              test.equal(null, err);
 
-            client.close();
+              client.close();
 
-            serverManager.stop().then(function() {
-              test.done();
-            });
-          });
+              serverManager.stop().then(function() {
+                test.done();
+              });
+            }
+          );
         }, 10000);
       });
     });
   }
-}
+};
 
 /**
  * @ignore
@@ -394,8 +432,8 @@ exports.shouldValidatePresentedServerCertificateButPresentInvalidCertificate = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ServerManager = require('mongodb-topology-manager').Server
-      , MongoClient = configuration.require.MongoClient;
+    var ServerManager = require('mongodb-topology-manager').Server,
+      MongoClient = configuration.require.MongoClient;
 
     // All inserted docs
     var docs = [];
@@ -403,21 +441,21 @@ exports.shouldValidatePresentedServerCertificateButPresentInvalidCertificate = {
     var insertDocs = [];
 
     // Read the ca
-    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
-    var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
-    var key = fs.readFileSync(__dirname + "/ssl/client.pem");
+    var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
+    var cert = fs.readFileSync(__dirname + '/ssl/client.pem');
+    var key = fs.readFileSync(__dirname + '/ssl/client.pem');
 
     // Start server
     var serverManager = new ServerManager('mongod', {
-        journal:null
-      , sslMode: 'requireSSL'
-      , sslCAFile: __dirname + "/ssl/ca.pem"
-      , sslCRLFile: __dirname + "/ssl/crl.pem"
-      , sslPEMKeyFile: __dirname + "/ssl/server.pem"
+      journal: null,
+      sslMode: 'requireSSL',
+      sslCAFile: __dirname + '/ssl/ca.pem',
+      sslCRLFile: __dirname + '/ssl/crl.pem',
+      sslPEMKeyFile: __dirname + '/ssl/server.pem',
       // EnsureUp options
-      , dbpath: path.join(path.resolve('db'), f("data-%d", 27019))
-      , bind_ip: 'server'
-      , port: 27019
+      dbpath: path.join(path.resolve('db'), f('data-%d', 27019)),
+      bind_ip: 'server',
+      port: 27019
     });
 
     serverManager.purge().then(function() {
@@ -425,29 +463,33 @@ exports.shouldValidatePresentedServerCertificateButPresentInvalidCertificate = {
       serverManager.start().then(function() {
         setTimeout(function() {
           // Read the ca
-          var cert = fs.readFileSync(__dirname + "/ssl/mycert.pem");
-          var key = fs.readFileSync(__dirname + "/ssl/mycert.pem");
+          var cert = fs.readFileSync(__dirname + '/ssl/mycert.pem');
+          var key = fs.readFileSync(__dirname + '/ssl/mycert.pem');
 
           // Connect and validate the server certificate
-          MongoClient.connect("mongodb://server:27019/test?ssl=true&maxPoolSize=1", {
-              ssl:true
-            , sslValidate:true
-            , sslCA:ca
-            , sslKey:key
-            , sslCert:cert
-            , sslPass:'10gen'
-          }, function(err, client) {
-            test.ok(err != null);
+          MongoClient.connect(
+            'mongodb://server:27019/test?ssl=true&maxPoolSize=1',
+            {
+              ssl: true,
+              sslValidate: true,
+              sslCA: ca,
+              sslKey: key,
+              sslCert: cert,
+              sslPass: '10gen'
+            },
+            function(err, client) {
+              test.ok(err != null);
 
-            serverManager.stop().then(function() {
-              test.done();
-            });
-          });
+              serverManager.stop().then(function() {
+                test.done();
+              });
+            }
+          );
         }, 10000);
       });
     });
   }
-}
+};
 
 /**
  * @ignore
@@ -457,8 +499,8 @@ exports.shouldCorrectlyValidatePresentedServerCertificateAndInvalidKey = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ServerManager = require('mongodb-topology-manager').Server
-      , MongoClient = configuration.require.MongoClient;
+    var ServerManager = require('mongodb-topology-manager').Server,
+      MongoClient = configuration.require.MongoClient;
 
     // All inserted docs
     var docs = [];
@@ -466,21 +508,21 @@ exports.shouldCorrectlyValidatePresentedServerCertificateAndInvalidKey = {
     var insertDocs = [];
 
     // Read the ca
-    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
-    var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
-    var key = fs.readFileSync(__dirname + "/ssl/mycert.pem");
+    var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
+    var cert = fs.readFileSync(__dirname + '/ssl/client.pem');
+    var key = fs.readFileSync(__dirname + '/ssl/mycert.pem');
 
     // Start server
     var serverManager = new ServerManager('mongod', {
-        journal:null
-      , sslOnNormalPorts: null
-      , sslCAFile: __dirname + "/ssl/ca.pem"
-      , sslCRLFile: __dirname + "/ssl/crl.pem"
-      , sslPEMKeyFile: __dirname + "/ssl/server.pem"
+      journal: null,
+      sslOnNormalPorts: null,
+      sslCAFile: __dirname + '/ssl/ca.pem',
+      sslCRLFile: __dirname + '/ssl/crl.pem',
+      sslPEMKeyFile: __dirname + '/ssl/server.pem',
       // EnsureUp options
-      , dbpath: path.join(path.resolve('db'), f("data-%d", 27019))
-      , bind_ip: 'server'
-      , port: 27019
+      dbpath: path.join(path.resolve('db'), f('data-%d', 27019)),
+      bind_ip: 'server',
+      port: 27019
     });
 
     serverManager.purge().then(function() {
@@ -490,37 +532,43 @@ exports.shouldCorrectlyValidatePresentedServerCertificateAndInvalidKey = {
           // console.log("============================== 0")
           // console.dir(key)
           // Connect and validate the server certificate
-          MongoClient.connect("mongodb://server:27019/test?ssl=true&maxPoolSize=1", {
-              sslValidate:true
-            , sslCA:ca
-            , sslKey:key
-            , sslCert:cert
-            , sslPass:'10gen'
-          }, function(err, client) {
-            // console.log("============================== 1")
-            // console.dir(err)
-            test.ok(err != null);
+          MongoClient.connect(
+            'mongodb://server:27019/test?ssl=true&maxPoolSize=1',
+            {
+              sslValidate: true,
+              sslCA: ca,
+              sslKey: key,
+              sslCert: cert,
+              sslPass: '10gen'
+            },
+            function(err, client) {
+              // console.log("============================== 1")
+              // console.dir(err)
+              test.ok(err != null);
 
-            serverManager.stop().then(function() {
-              test.done();
-            });
-          });
+              serverManager.stop().then(function() {
+                test.done();
+              });
+            }
+          );
         }, 10000);
       });
     });
   }
-}
+};
 
 /**
  * @ignore
  */
-exports['Should correctly shut down if attempting to connect to ssl server with wrong parameters'] = {
+exports[
+  'Should correctly shut down if attempting to connect to ssl server with wrong parameters'
+] = {
   metadata: { requires: { topology: 'ssl' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ServerManager = require('mongodb-topology-manager').Server
-      , MongoClient = configuration.require.MongoClient;
+    var ServerManager = require('mongodb-topology-manager').Server,
+      MongoClient = configuration.require.MongoClient;
 
     // All inserted docs
     var docs = [];
@@ -529,13 +577,13 @@ exports['Should correctly shut down if attempting to connect to ssl server with 
 
     // Start server
     var serverManager = new ServerManager('mongod', {
-        journal: null
-      , sslOnNormalPorts: null
-      , sslPEMKeyFile: __dirname + "/ssl/server.pem"
+      journal: null,
+      sslOnNormalPorts: null,
+      sslPEMKeyFile: __dirname + '/ssl/server.pem',
       // EnsureUp options
-      , dbpath: path.join(path.resolve('db'), f("data-%d", 27019))
-      , bind_ip: 'server'
-      , port: 27019
+      dbpath: path.join(path.resolve('db'), f('data-%d', 27019)),
+      bind_ip: 'server',
+      port: 27019
     });
 
     // Start server
@@ -543,7 +591,7 @@ exports['Should correctly shut down if attempting to connect to ssl server with 
       // Start the server
       serverManager.start().then(function() {
         setTimeout(function() {
-          MongoClient.connect("mongodb://localhost:27019/test?ssl=false", function(err, db) {
+          MongoClient.connect('mongodb://localhost:27019/test?ssl=false', function(err, db) {
             test.ok(err != null);
 
             serverManager.stop().then(function() {
@@ -554,7 +602,7 @@ exports['Should correctly shut down if attempting to connect to ssl server with 
       });
     });
   }
-}
+};
 
 /**
  * @ignore
@@ -564,8 +612,8 @@ exports['should correctly connect using SSL to ReplSetManager'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-topology-manager').ReplSet
-      , MongoClient = configuration.require.MongoClient;
+    var ReplSetManager = require('mongodb-topology-manager').ReplSet,
+      MongoClient = configuration.require.MongoClient;
 
     // All inserted docs
     var docs = [];
@@ -573,56 +621,78 @@ exports['should correctly connect using SSL to ReplSetManager'] = {
     var insertDocs = [];
 
     // Read the ca
-    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
-    var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
-    var key = fs.readFileSync(__dirname + "/ssl/client.pem");
+    var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
+    var cert = fs.readFileSync(__dirname + '/ssl/client.pem');
+    var key = fs.readFileSync(__dirname + '/ssl/client.pem');
 
-    var replicasetManager = new ReplSetManager('mongod', [{
-      options: {
-        bind_ip: 'server', port: 31000,
-        dbpath: f('%s/../db/31000', __dirname),
-        sslOnNormalPorts: null, sslPEMKeyFile: __dirname + "/ssl/server.pem"
+    var replicasetManager = new ReplSetManager(
+      'mongod',
+      [
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31000,
+            dbpath: f('%s/../db/31000', __dirname),
+            sslOnNormalPorts: null,
+            sslPEMKeyFile: __dirname + '/ssl/server.pem'
+          }
+        },
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31001,
+            dbpath: f('%s/../db/31001', __dirname),
+            sslOnNormalPorts: null,
+            sslPEMKeyFile: __dirname + '/ssl/server.pem'
+          }
+        },
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31002,
+            dbpath: f('%s/../db/31002', __dirname),
+            sslOnNormalPorts: null,
+            sslPEMKeyFile: __dirname + '/ssl/server.pem'
+          }
+        }
+      ],
+      {
+        replSet: 'rs',
+        ssl: true,
+        rejectUnauthorized: false,
+        ca: ca,
+        host: 'server'
       }
-    }, {
-      options: {
-        bind_ip: 'server', port: 31001,
-        dbpath: f('%s/../db/31001', __dirname),
-        sslOnNormalPorts: null, sslPEMKeyFile: __dirname + "/ssl/server.pem"
-      }
-    }, {
-      options: {
-        bind_ip: 'server', port: 31002,
-        dbpath: f('%s/../db/31002', __dirname),
-        sslOnNormalPorts: null, sslPEMKeyFile: __dirname + "/ssl/server.pem"
-      }
-    }], {
-      replSet: 'rs', ssl:true, rejectUnauthorized: false, ca: ca, host: 'server'
-    });
+    );
 
     replicasetManager.purge().then(function() {
       // Start the server
       replicasetManager.start().then(function() {
         setTimeout(function() {
           // Connect and validate the server certificate
-          MongoClient.connect("mongodb://server:31000,server:31001,server:31002/test?ssl=true&replicaSet=rs&maxPoolSize=1", {
-              ssl:true
-            , sslValidate:false
-            , sslCA:ca
-          }, function(err, client) {
-            if(err) console.dir(err)
-            test.equal(null, err);
+          MongoClient.connect(
+            'mongodb://server:31000,server:31001,server:31002/test?ssl=true&replicaSet=rs&maxPoolSize=1',
+            {
+              ssl: true,
+              sslValidate: false,
+              sslCA: ca
+            },
+            function(err, client) {
+              if (err) console.dir(err);
+              test.equal(null, err);
 
-            client.close();
+              client.close();
 
-            replicasetManager.stop().then(function() {
-              test.done();
-            });
-          });
+              replicasetManager.stop().then(function() {
+                test.done();
+              });
+            }
+          );
         });
       }, 10000);
     });
   }
-}
+};
 
 /**
  * @ignore
@@ -632,70 +702,99 @@ exports.shouldCorrectlySendCertificateToReplSetAndValidateServerCertificate = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-topology-manager').ReplSet
-      , MongoClient = configuration.require.MongoClient;
+    var ReplSetManager = require('mongodb-topology-manager').ReplSet,
+      MongoClient = configuration.require.MongoClient;
     // All inserted docs
     var docs = [];
     var errs = [];
     var insertDocs = [];
 
     // Read the ca
-    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
-    var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
-    var key = fs.readFileSync(__dirname + "/ssl/client.pem");
+    var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
+    var cert = fs.readFileSync(__dirname + '/ssl/client.pem');
+    var key = fs.readFileSync(__dirname + '/ssl/client.pem');
 
-    var replicasetManager = new ReplSetManager('mongod', [{
-      options: {
-        bind_ip: 'server', port: 31000,
-        dbpath: f('%s/../db/31000', __dirname),
-        sslPEMKeyFile: __dirname + "/ssl/server.pem", sslCAFile: __dirname + "/ssl/ca.pem",
-        sslCRLFile: __dirname + "/ssl/crl.pem", sslMode: 'requireSSL'
+    var replicasetManager = new ReplSetManager(
+      'mongod',
+      [
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31000,
+            dbpath: f('%s/../db/31000', __dirname),
+            sslPEMKeyFile: __dirname + '/ssl/server.pem',
+            sslCAFile: __dirname + '/ssl/ca.pem',
+            sslCRLFile: __dirname + '/ssl/crl.pem',
+            sslMode: 'requireSSL'
+          }
+        },
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31001,
+            dbpath: f('%s/../db/31001', __dirname),
+            sslPEMKeyFile: __dirname + '/ssl/server.pem',
+            sslCAFile: __dirname + '/ssl/ca.pem',
+            sslCRLFile: __dirname + '/ssl/crl.pem',
+            sslMode: 'requireSSL'
+          }
+        },
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31002,
+            dbpath: f('%s/../db/31002', __dirname),
+            sslPEMKeyFile: __dirname + '/ssl/server.pem',
+            sslCAFile: __dirname + '/ssl/ca.pem',
+            sslCRLFile: __dirname + '/ssl/crl.pem',
+            sslMode: 'requireSSL'
+          }
+        }
+      ],
+      {
+        replSet: 'rs',
+        ssl: true,
+        rejectUnauthorized: false,
+        key: cert,
+        cert: cert,
+        host: 'server'
       }
-    }, {
-      options: {
-        bind_ip: 'server', port: 31001,
-        dbpath: f('%s/../db/31001', __dirname),
-        sslPEMKeyFile: __dirname + "/ssl/server.pem", sslCAFile: __dirname + "/ssl/ca.pem",
-        sslCRLFile: __dirname + "/ssl/crl.pem", sslMode: 'requireSSL'
-      }
-    }, {
-      options: {
-        bind_ip: 'server', port: 31002,
-        dbpath: f('%s/../db/31002', __dirname),
-        sslPEMKeyFile: __dirname + "/ssl/server.pem", sslCAFile: __dirname + "/ssl/ca.pem",
-        sslCRLFile: __dirname + "/ssl/crl.pem", sslMode: 'requireSSL'
-      }
-    }], {
-      replSet: 'rs', ssl:true, rejectUnauthorized: false, key: cert, cert: cert, host: 'server'
-    });
+    );
 
     replicasetManager.purge().then(function() {
       // Start the server
-      replicasetManager.start().then(function() {
-        setTimeout(function() {
-          // Connect and validate the server certificate
-          MongoClient.connect("mongodb://server:31000,server:31001/test?ssl=true&replicaSet=rs&maxPoolSize=1", {
-              sslValidate:false
-            , sslCA:ca
-            , sslKey:key
-            , sslCert:cert
-          }, function(err, client) {
-            if(err) console.dir(err);
-            test.equal(null, err);
+      replicasetManager
+        .start()
+        .then(function() {
+          setTimeout(function() {
+            // Connect and validate the server certificate
+            MongoClient.connect(
+              'mongodb://server:31000,server:31001/test?ssl=true&replicaSet=rs&maxPoolSize=1',
+              {
+                sslValidate: false,
+                sslCA: ca,
+                sslKey: key,
+                sslCert: cert
+              },
+              function(err, client) {
+                if (err) console.dir(err);
+                test.equal(null, err);
 
-            client.close();
+                client.close();
 
-            replicasetManager.stop().then(function() {
-              test.done();
-            });
-          });
-        }, 10000);
-      }).catch(function(e) {
-        console.dir(e)
-      });
+                replicasetManager.stop().then(function() {
+                  test.done();
+                });
+              }
+            );
+          }, 10000);
+        })
+        .catch(function(e) {
+          console.dir(e);
+        });
     });
   }
-}
+};
 
 /**
  * @ignore
@@ -705,71 +804,100 @@ exports['should correctly send SNI TLS servername to replicaset members'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-topology-manager').ReplSet
-      , MongoClient = configuration.require.MongoClient;
+    var ReplSetManager = require('mongodb-topology-manager').ReplSet,
+      MongoClient = configuration.require.MongoClient;
     // All inserted docs
     var docs = [];
     var errs = [];
     var insertDocs = [];
 
     // Read the ca
-    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
-    var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
-    var key = fs.readFileSync(__dirname + "/ssl/client.pem");
+    var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
+    var cert = fs.readFileSync(__dirname + '/ssl/client.pem');
+    var key = fs.readFileSync(__dirname + '/ssl/client.pem');
 
-    var replicasetManager = new ReplSetManager('mongod', [{
-      options: {
-        bind_ip: 'server', port: 31000,
-        dbpath: f('%s/../db/31000', __dirname),
-        sslPEMKeyFile: __dirname + "/ssl/server.pem", sslCAFile: __dirname + "/ssl/ca.pem",
-        sslCRLFile: __dirname + "/ssl/crl.pem", sslMode: 'requireSSL'
+    var replicasetManager = new ReplSetManager(
+      'mongod',
+      [
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31000,
+            dbpath: f('%s/../db/31000', __dirname),
+            sslPEMKeyFile: __dirname + '/ssl/server.pem',
+            sslCAFile: __dirname + '/ssl/ca.pem',
+            sslCRLFile: __dirname + '/ssl/crl.pem',
+            sslMode: 'requireSSL'
+          }
+        },
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31001,
+            dbpath: f('%s/../db/31001', __dirname),
+            sslPEMKeyFile: __dirname + '/ssl/server.pem',
+            sslCAFile: __dirname + '/ssl/ca.pem',
+            sslCRLFile: __dirname + '/ssl/crl.pem',
+            sslMode: 'requireSSL'
+          }
+        },
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31002,
+            dbpath: f('%s/../db/31002', __dirname),
+            sslPEMKeyFile: __dirname + '/ssl/server.pem',
+            sslCAFile: __dirname + '/ssl/ca.pem',
+            sslCRLFile: __dirname + '/ssl/crl.pem',
+            sslMode: 'requireSSL'
+          }
+        }
+      ],
+      {
+        replSet: 'rs',
+        ssl: true,
+        rejectUnauthorized: false,
+        key: cert,
+        cert: cert,
+        host: 'server'
       }
-    }, {
-      options: {
-        bind_ip: 'server', port: 31001,
-        dbpath: f('%s/../db/31001', __dirname),
-        sslPEMKeyFile: __dirname + "/ssl/server.pem", sslCAFile: __dirname + "/ssl/ca.pem",
-        sslCRLFile: __dirname + "/ssl/crl.pem", sslMode: 'requireSSL'
-      }
-    }, {
-      options: {
-        bind_ip: 'server', port: 31002,
-        dbpath: f('%s/../db/31002', __dirname),
-        sslPEMKeyFile: __dirname + "/ssl/server.pem", sslCAFile: __dirname + "/ssl/ca.pem",
-        sslCRLFile: __dirname + "/ssl/crl.pem", sslMode: 'requireSSL'
-      }
-    }], {
-      replSet: 'rs', ssl:true, rejectUnauthorized: false, key: cert, cert: cert, host: 'server'
-    });
+    );
 
     replicasetManager.purge().then(function() {
       // Start the server
-      replicasetManager.start().then(function() {
-        setTimeout(function() {
-          // Connect and validate the server certificate
-          MongoClient.connect("mongodb://server:31000/test?ssl=true&replicaSet=rs&maxPoolSize=1", {
-              sslValidate:false
-            , servername: 'server'
-            , sslCA:ca
-            , sslKey:key
-            , sslCert:cert
-          }, function(err, client) {
-            if(err) console.dir(err);
-            test.equal(null, err);
+      replicasetManager
+        .start()
+        .then(function() {
+          setTimeout(function() {
+            // Connect and validate the server certificate
+            MongoClient.connect(
+              'mongodb://server:31000/test?ssl=true&replicaSet=rs&maxPoolSize=1',
+              {
+                sslValidate: false,
+                servername: 'server',
+                sslCA: ca,
+                sslKey: key,
+                sslCert: cert
+              },
+              function(err, client) {
+                if (err) console.dir(err);
+                test.equal(null, err);
 
-            client.close();
+                client.close();
 
-            replicasetManager.stop().then(function() {
-              test.done();
-            });
-          });
-        }, 10000);
-      }).catch(function(e) {
-        console.dir(e)
-      });
+                replicasetManager.stop().then(function() {
+                  test.done();
+                });
+              }
+            );
+          }, 10000);
+        })
+        .catch(function(e) {
+          console.dir(e);
+        });
     });
   }
-}
+};
 
 /**
  * @ignore
@@ -779,87 +907,116 @@ exports['should correctly send SNI TLS servername to replicaset members with res
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-topology-manager').ReplSet
-      , MongoClient = configuration.require.MongoClient;
+    var ReplSetManager = require('mongodb-topology-manager').ReplSet,
+      MongoClient = configuration.require.MongoClient;
     // All inserted docs
     var docs = [];
     var errs = [];
     var insertDocs = [];
 
     // Read the ca
-    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
-    var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
-    var key = fs.readFileSync(__dirname + "/ssl/client.pem");
+    var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
+    var cert = fs.readFileSync(__dirname + '/ssl/client.pem');
+    var key = fs.readFileSync(__dirname + '/ssl/client.pem');
 
-    var replicasetManager = new ReplSetManager('mongod', [{
-      options: {
-        bind_ip: 'server', port: 31000,
-        dbpath: f('%s/../db/31000', __dirname),
-        sslPEMKeyFile: __dirname + "/ssl/server.pem", sslCAFile: __dirname + "/ssl/ca.pem",
-        sslCRLFile: __dirname + "/ssl/crl.pem", sslMode: 'requireSSL'
+    var replicasetManager = new ReplSetManager(
+      'mongod',
+      [
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31000,
+            dbpath: f('%s/../db/31000', __dirname),
+            sslPEMKeyFile: __dirname + '/ssl/server.pem',
+            sslCAFile: __dirname + '/ssl/ca.pem',
+            sslCRLFile: __dirname + '/ssl/crl.pem',
+            sslMode: 'requireSSL'
+          }
+        },
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31001,
+            dbpath: f('%s/../db/31001', __dirname),
+            sslPEMKeyFile: __dirname + '/ssl/server.pem',
+            sslCAFile: __dirname + '/ssl/ca.pem',
+            sslCRLFile: __dirname + '/ssl/crl.pem',
+            sslMode: 'requireSSL'
+          }
+        },
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31002,
+            dbpath: f('%s/../db/31002', __dirname),
+            sslPEMKeyFile: __dirname + '/ssl/server.pem',
+            sslCAFile: __dirname + '/ssl/ca.pem',
+            sslCRLFile: __dirname + '/ssl/crl.pem',
+            sslMode: 'requireSSL'
+          }
+        }
+      ],
+      {
+        replSet: 'rs',
+        ssl: true,
+        rejectUnauthorized: false,
+        key: cert,
+        cert: cert,
+        host: 'server'
       }
-    }, {
-      options: {
-        bind_ip: 'server', port: 31001,
-        dbpath: f('%s/../db/31001', __dirname),
-        sslPEMKeyFile: __dirname + "/ssl/server.pem", sslCAFile: __dirname + "/ssl/ca.pem",
-        sslCRLFile: __dirname + "/ssl/crl.pem", sslMode: 'requireSSL'
-      }
-    }, {
-      options: {
-        bind_ip: 'server', port: 31002,
-        dbpath: f('%s/../db/31002', __dirname),
-        sslPEMKeyFile: __dirname + "/ssl/server.pem", sslCAFile: __dirname + "/ssl/ca.pem",
-        sslCRLFile: __dirname + "/ssl/crl.pem", sslMode: 'requireSSL'
-      }
-    }], {
-      replSet: 'rs', ssl:true, rejectUnauthorized: false, key: cert, cert: cert, host: 'server'
-    });
+    );
 
     replicasetManager.purge().then(function() {
       // Start the server
-      replicasetManager.start().then(function() {
-        setTimeout(function() {
-          // Connect and validate the server certificate
-          MongoClient.connect("mongodb://server:31000/test?ssl=true&replicaSet=rs&maxPoolSize=1", {
-              sslValidate:false
-            , servername: 'server'
-            , sslCA:ca
-            , sslKey:key
-            , sslCert:cert
-            , haInterval: 2000
-          }, function(err, client) {
-            if(err) console.dir(client);
-            test.equal(null, err);
+      replicasetManager
+        .start()
+        .then(function() {
+          setTimeout(function() {
+            // Connect and validate the server certificate
+            MongoClient.connect(
+              'mongodb://server:31000/test?ssl=true&replicaSet=rs&maxPoolSize=1',
+              {
+                sslValidate: false,
+                servername: 'server',
+                sslCA: ca,
+                sslKey: key,
+                sslCert: cert,
+                haInterval: 2000
+              },
+              function(err, client) {
+                if (err) console.dir(client);
+                test.equal(null, err);
 
-            replicasetManager.primary().then(function(primary) {
-              primary.stop().then(function() {
-                // Restart the old master and wait for the sync to happen
-                primary.start().then(function(result) {
-                  // Wait to allow haInterval to happen
-                  setTimeout(function() {
-                    client.close();
-                    var connections = client.topology.connections();
+                replicasetManager.primary().then(function(primary) {
+                  primary.stop().then(function() {
+                    // Restart the old master and wait for the sync to happen
+                    primary.start().then(function(result) {
+                      // Wait to allow haInterval to happen
+                      setTimeout(function() {
+                        client.close();
+                        var connections = client.topology.connections();
 
-                    for(var i = 0; i < connections.length; i++) {
-                      test.equal('server', connections[i].options.servername);
-                    }
+                        for (var i = 0; i < connections.length; i++) {
+                          test.equal('server', connections[i].options.servername);
+                        }
 
-                    replicasetManager.stop().then(function() {
-                      test.done();
+                        replicasetManager.stop().then(function() {
+                          test.done();
+                        });
+                      }, 3000);
                     });
-                  }, 3000);
+                  });
                 });
-              });
-            });
-          });
-        }, 10000);
-      }).catch(function(e) {
-        console.dir(e)
-      });
+              }
+            );
+          }, 10000);
+        })
+        .catch(function(e) {
+          console.dir(e);
+        });
     });
   }
-}
+};
 
 /**
  * @ignore
@@ -869,72 +1026,101 @@ exports.shouldSendWrongCertificateToReplSetAndValidateServerCertificate = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-topology-manager').ReplSet
-      , MongoClient = configuration.require.MongoClient;
+    var ReplSetManager = require('mongodb-topology-manager').ReplSet,
+      MongoClient = configuration.require.MongoClient;
     // All inserted docs
     var docs = [];
     var errs = [];
     var insertDocs = [];
 
     // Read the ca
-    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
-    var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
-    var key = fs.readFileSync(__dirname + "/ssl/client.pem");
+    var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
+    var cert = fs.readFileSync(__dirname + '/ssl/client.pem');
+    var key = fs.readFileSync(__dirname + '/ssl/client.pem');
 
-    var replicasetManager = new ReplSetManager('mongod', [{
-      options: {
-        bind_ip: 'server', port: 31000,
-        dbpath: f('%s/../db/31000', __dirname),
-        sslPEMKeyFile: __dirname + "/ssl/server.pem", sslCAFile: __dirname + "/ssl/ca.pem",
-        sslCRLFile: __dirname + "/ssl/crl.pem", sslMode: 'requireSSL'
+    var replicasetManager = new ReplSetManager(
+      'mongod',
+      [
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31000,
+            dbpath: f('%s/../db/31000', __dirname),
+            sslPEMKeyFile: __dirname + '/ssl/server.pem',
+            sslCAFile: __dirname + '/ssl/ca.pem',
+            sslCRLFile: __dirname + '/ssl/crl.pem',
+            sslMode: 'requireSSL'
+          }
+        },
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31001,
+            dbpath: f('%s/../db/31001', __dirname),
+            sslPEMKeyFile: __dirname + '/ssl/server.pem',
+            sslCAFile: __dirname + '/ssl/ca.pem',
+            sslCRLFile: __dirname + '/ssl/crl.pem',
+            sslMode: 'requireSSL'
+          }
+        },
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31002,
+            dbpath: f('%s/../db/31002', __dirname),
+            sslPEMKeyFile: __dirname + '/ssl/server.pem',
+            sslCAFile: __dirname + '/ssl/ca.pem',
+            sslCRLFile: __dirname + '/ssl/crl.pem',
+            sslMode: 'requireSSL'
+          }
+        }
+      ],
+      {
+        replSet: 'rs',
+        ssl: true,
+        rejectUnauthorized: false,
+        key: cert,
+        cert: cert,
+        host: 'server'
       }
-    }, {
-      options: {
-        bind_ip: 'server', port: 31001,
-        dbpath: f('%s/../db/31001', __dirname),
-        sslPEMKeyFile: __dirname + "/ssl/server.pem", sslCAFile: __dirname + "/ssl/ca.pem",
-        sslCRLFile: __dirname + "/ssl/crl.pem", sslMode: 'requireSSL'
-      }
-    }, {
-      options: {
-        bind_ip: 'server', port: 31002,
-        dbpath: f('%s/../db/31002', __dirname),
-        sslPEMKeyFile: __dirname + "/ssl/server.pem", sslCAFile: __dirname + "/ssl/ca.pem",
-        sslCRLFile: __dirname + "/ssl/crl.pem", sslMode: 'requireSSL'
-      }
-    }], {
-      replSet: 'rs', ssl:true, rejectUnauthorized: false, key: cert, cert: cert, host: 'server'
-    });
+    );
 
     replicasetManager.purge().then(function() {
       // Start the server
-      replicasetManager.start().then(function() {
-        setTimeout(function() {
-          // Present wrong certificate
-          var cert = fs.readFileSync(__dirname + "/ssl/mycert.pem");
-          var key = fs.readFileSync(__dirname + "/ssl/mycert.pem");
+      replicasetManager
+        .start()
+        .then(function() {
+          setTimeout(function() {
+            // Present wrong certificate
+            var cert = fs.readFileSync(__dirname + '/ssl/mycert.pem');
+            var key = fs.readFileSync(__dirname + '/ssl/mycert.pem');
 
-          // Connect and validate the server certificate
-          MongoClient.connect("mongodb://server:31000,server:31001/test?ssl=true&replicaSet=rs&maxPoolSize=1", {
-              sslValidate:true
-            , sslCA:ca
-            , sslKey:key
-            , sslCert:cert
-            , sslPass: '10gen'
-          }, function(err, client) {
-            test.ok(err != null)
+            // Connect and validate the server certificate
+            MongoClient.connect(
+              'mongodb://server:31000,server:31001/test?ssl=true&replicaSet=rs&maxPoolSize=1',
+              {
+                sslValidate: true,
+                sslCA: ca,
+                sslKey: key,
+                sslCert: cert,
+                sslPass: '10gen'
+              },
+              function(err, client) {
+                test.ok(err != null);
 
-            replicasetManager.stop().then(function() {
-              test.done();
-            });
-          });
-        }, 10000);
-      }).catch(function(e) {
-        console.dir(e)
-      });
+                replicasetManager.stop().then(function() {
+                  test.done();
+                });
+              }
+            );
+          }, 10000);
+        })
+        .catch(function(e) {
+          console.dir(e);
+        });
     });
   }
-}
+};
 
 /**
  * @ignore
@@ -944,67 +1130,93 @@ exports['should correctly to replicaset using ssl connect with password'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-topology-manager').ReplSet
-      , MongoClient = configuration.require.MongoClient;
+    var ReplSetManager = require('mongodb-topology-manager').ReplSet,
+      MongoClient = configuration.require.MongoClient;
     // All inserted docs
     var docs = [];
     var errs = [];
     var insertDocs = [];
 
     // Read the ca
-    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
-    var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
-    var key = fs.readFileSync(__dirname + "/ssl/client.pem");
+    var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
+    var cert = fs.readFileSync(__dirname + '/ssl/client.pem');
+    var key = fs.readFileSync(__dirname + '/ssl/client.pem');
 
-    var replicasetManager = new ReplSetManager('mongod', [{
-      options: {
-        bind_ip: 'server', port: 31000,
-        dbpath: f('%s/../db/31000', __dirname),
-        sslPEMKeyFile: __dirname + "/ssl/server.pem", sslCAFile: __dirname + "/ssl/ca.pem",
-        sslCRLFile: __dirname + "/ssl/crl.pem", sslMode: 'requireSSL'
+    var replicasetManager = new ReplSetManager(
+      'mongod',
+      [
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31000,
+            dbpath: f('%s/../db/31000', __dirname),
+            sslPEMKeyFile: __dirname + '/ssl/server.pem',
+            sslCAFile: __dirname + '/ssl/ca.pem',
+            sslCRLFile: __dirname + '/ssl/crl.pem',
+            sslMode: 'requireSSL'
+          }
+        },
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31001,
+            dbpath: f('%s/../db/31001', __dirname),
+            sslPEMKeyFile: __dirname + '/ssl/server.pem',
+            sslCAFile: __dirname + '/ssl/ca.pem',
+            sslCRLFile: __dirname + '/ssl/crl.pem',
+            sslMode: 'requireSSL'
+          }
+        },
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31002,
+            dbpath: f('%s/../db/31002', __dirname),
+            sslPEMKeyFile: __dirname + '/ssl/server.pem',
+            sslCAFile: __dirname + '/ssl/ca.pem',
+            sslCRLFile: __dirname + '/ssl/crl.pem',
+            sslMode: 'requireSSL'
+          }
+        }
+      ],
+      {
+        replSet: 'rs',
+        ssl: true,
+        rejectUnauthorized: false,
+        key: cert,
+        cert: cert,
+        host: 'server'
       }
-    }, {
-      options: {
-        bind_ip: 'server', port: 31001,
-        dbpath: f('%s/../db/31001', __dirname),
-        sslPEMKeyFile: __dirname + "/ssl/server.pem", sslCAFile: __dirname + "/ssl/ca.pem",
-        sslCRLFile: __dirname + "/ssl/crl.pem", sslMode: 'requireSSL'
-      }
-    }, {
-      options: {
-        bind_ip: 'server', port: 31002,
-        dbpath: f('%s/../db/31002', __dirname),
-        sslPEMKeyFile: __dirname + "/ssl/server.pem", sslCAFile: __dirname + "/ssl/ca.pem",
-        sslCRLFile: __dirname + "/ssl/crl.pem", sslMode: 'requireSSL'
-      }
-    }], {
-      replSet: 'rs', ssl:true, rejectUnauthorized: false, key: cert, cert: cert, host: 'server'
-    });
+    );
 
     replicasetManager.purge().then(function() {
       // Start the server
       replicasetManager.start().then(function() {
         setTimeout(function() {
           // Connect and validate the server certificate
-          MongoClient.connect("mongodb://server:31000,server:31001/test?ssl=true&replicaSet=rs&maxPoolSize=1", {
-              sslValidate:true
-            , sslCA:ca
-            , sslKey:key
-            , sslCert:cert
-            , sslPass: '10gen'
-          }, function(err, client) {
-            test.equal(null, err)
-            client.close();
+          MongoClient.connect(
+            'mongodb://server:31000,server:31001/test?ssl=true&replicaSet=rs&maxPoolSize=1',
+            {
+              sslValidate: true,
+              sslCA: ca,
+              sslKey: key,
+              sslCert: cert,
+              sslPass: '10gen'
+            },
+            function(err, client) {
+              test.equal(null, err);
+              client.close();
 
-            replicasetManager.stop().then(function() {
-              test.done();
-            });
-          });
+              replicasetManager.stop().then(function() {
+                test.done();
+              });
+            }
+          );
         }, 10000);
       });
     });
   }
-}
+};
 
 /**
  * @ignore
@@ -1014,8 +1226,8 @@ exports['should correctly connect using ssl with sslValidation turned off'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-topology-manager').ReplSet
-      , MongoClient = configuration.require.MongoClient;
+    var ReplSetManager = require('mongodb-topology-manager').ReplSet,
+      MongoClient = configuration.require.MongoClient;
 
     // All inserted docs
     var docs = [];
@@ -1023,54 +1235,77 @@ exports['should correctly connect using ssl with sslValidation turned off'] = {
     var insertDocs = [];
 
     // Read the ca
-    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
-    var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
-    var key = fs.readFileSync(__dirname + "/ssl/client.pem");
+    var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
+    var cert = fs.readFileSync(__dirname + '/ssl/client.pem');
+    var key = fs.readFileSync(__dirname + '/ssl/client.pem');
 
-    var replicasetManager = new ReplSetManager('mongod', [{
-      options: {
-        bind_ip: 'server', port: 31000,
-        dbpath: f('%s/../db/31000', __dirname),
-        sslOnNormalPorts: null, sslPEMKeyFile: __dirname + "/ssl/server.pem"
+    var replicasetManager = new ReplSetManager(
+      'mongod',
+      [
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31000,
+            dbpath: f('%s/../db/31000', __dirname),
+            sslOnNormalPorts: null,
+            sslPEMKeyFile: __dirname + '/ssl/server.pem'
+          }
+        },
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31001,
+            dbpath: f('%s/../db/31001', __dirname),
+            sslOnNormalPorts: null,
+            sslPEMKeyFile: __dirname + '/ssl/server.pem'
+          }
+        },
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31002,
+            dbpath: f('%s/../db/31002', __dirname),
+            sslOnNormalPorts: null,
+            sslPEMKeyFile: __dirname + '/ssl/server.pem'
+          }
+        }
+      ],
+      {
+        replSet: 'rs',
+        ssl: true,
+        rejectUnauthorized: false,
+        key: cert,
+        cert: cert,
+        host: 'server'
       }
-    }, {
-      options: {
-        bind_ip: 'server', port: 31001,
-        dbpath: f('%s/../db/31001', __dirname),
-        sslOnNormalPorts: null, sslPEMKeyFile: __dirname + "/ssl/server.pem"
-      }
-    }, {
-      options: {
-        bind_ip: 'server', port: 31002,
-        dbpath: f('%s/../db/31002', __dirname),
-        sslOnNormalPorts: null, sslPEMKeyFile: __dirname + "/ssl/server.pem"
-      }
-    }], {
-      replSet: 'rs', ssl:true, rejectUnauthorized: false, key: cert, cert: cert, host: 'server'
-    });
+    );
 
     replicasetManager.purge().then(function() {
       // Start the server
       replicasetManager.start().then(function() {
         setTimeout(function() {
           // Connect and validate the server certificate
-          MongoClient.connect("mongodb://server:31000,server:31001/test?ssl=true&replicaSet=rs&maxPoolSize=1", {
-              ssl:true
-            , sslValidate:false
-          }, function(err, client) {
-            test.equal(null, err);
+          MongoClient.connect(
+            'mongodb://server:31000,server:31001/test?ssl=true&replicaSet=rs&maxPoolSize=1',
+            {
+              ssl: true,
+              sslValidate: false
+            },
+            function(err, client) {
+              test.equal(null, err);
 
-            client.close();
+              client.close();
 
-            replicasetManager.stop().then(function() {
-              test.done();
-            });
-          });
+              replicasetManager.stop().then(function() {
+                test.done();
+              });
+            }
+          );
         }, 10000);
       });
     });
   }
-}
+};
 
 /**
  * @ignore
@@ -1080,8 +1315,8 @@ exports['should correctly connect using SSL to replicaset with requireSSL'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-topology-manager').ReplSet
-      , MongoClient = configuration.require.MongoClient;
+    var ReplSetManager = require('mongodb-topology-manager').ReplSet,
+      MongoClient = configuration.require.MongoClient;
 
     // All inserted docs
     var docs = [];
@@ -1089,110 +1324,136 @@ exports['should correctly connect using SSL to replicaset with requireSSL'] = {
     var insertDocs = [];
 
     // Read the ca
-    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
-    var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
-    var key = fs.readFileSync(__dirname + "/ssl/client.pem");
-    var replicasetManager = new ReplSetManager('mongod', [{
-      options: {
-        bind_ip: 'server', port: 31000,
-        dbpath: f('%s/../db/31000', __dirname),
-        sslPEMKeyFile: __dirname + "/ssl/server.pem",
-        sslMode: 'requireSSL'
+    var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
+    var cert = fs.readFileSync(__dirname + '/ssl/client.pem');
+    var key = fs.readFileSync(__dirname + '/ssl/client.pem');
+    var replicasetManager = new ReplSetManager(
+      'mongod',
+      [
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31000,
+            dbpath: f('%s/../db/31000', __dirname),
+            sslPEMKeyFile: __dirname + '/ssl/server.pem',
+            sslMode: 'requireSSL'
+          }
+        },
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31001,
+            dbpath: f('%s/../db/31001', __dirname),
+            sslPEMKeyFile: __dirname + '/ssl/server.pem',
+            sslMode: 'requireSSL'
+          }
+        },
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31002,
+            dbpath: f('%s/../db/31002', __dirname),
+            sslPEMKeyFile: __dirname + '/ssl/server.pem',
+            sslMode: 'requireSSL'
+          }
+        }
+      ],
+      {
+        replSet: 'rs',
+        ssl: true,
+        rejectUnauthorized: false,
+        ca: ca,
+        host: 'server'
       }
-    }, {
-      options: {
-        bind_ip: 'server', port: 31001,
-        dbpath: f('%s/../db/31001', __dirname),
-        sslPEMKeyFile: __dirname + "/ssl/server.pem",
-        sslMode: 'requireSSL'
-      }
-    }, {
-      options: {
-        bind_ip: 'server', port: 31002,
-        dbpath: f('%s/../db/31002', __dirname),
-        sslPEMKeyFile: __dirname + "/ssl/server.pem",
-        sslMode: 'requireSSL'
-      }
-    }], {
-      replSet: 'rs', ssl:true, rejectUnauthorized: false, ca: ca, host: 'server'
-    });
+    );
 
     // console.log("---------------------------- 0")
 
     replicasetManager.purge().then(function() {
       // console.log("---------------------------- 1")
       // Start the server
-      replicasetManager.start().then(function() {
-        // console.log("---------------------------- 2")
-        setTimeout(function() {
-          // console.log("---------------------------- 3")
-          // Connect and validate the server certificate
-          MongoClient.connect("mongodb://server:31000,server:31001,server:31002/test?replicaSet=rs", {
-              ssl:true
-            , sslKey: key
-            , sslCert: cert
-            , sslCA:ca
-          }, function(err, client) {
-            // console.log("---------------------------- 4")
-            // if(err) console.dir(err)
-            test.equal(null, err);
-            var sets = [{}];
-            var db = client.db(configuration.database);
+      replicasetManager
+        .start()
+        .then(function() {
+          // console.log("---------------------------- 2")
+          setTimeout(function() {
+            // console.log("---------------------------- 3")
+            // Connect and validate the server certificate
+            MongoClient.connect(
+              'mongodb://server:31000,server:31001,server:31002/test?replicaSet=rs',
+              {
+                ssl: true,
+                sslKey: key,
+                sslCert: cert,
+                sslCA: ca
+              },
+              function(err, client) {
+                // console.log("---------------------------- 4")
+                // if(err) console.dir(err)
+                test.equal(null, err);
+                var sets = [{}];
+                var db = client.db(configuration.database);
 
-            var interval = setInterval(function() {
-              // console.log("---------------------------- 5:1")
+                var interval = setInterval(function() {
+                  // console.log("---------------------------- 5:1")
 
-              db.command({ismaster:true}, {readPreference:'nearest', full:true}, function(e, r) {
-                // console.log("---------------------------- 5:2")
-                // Add seen servers to list
-                if(r) {
-                  sets[sets.length - 1][r.connection.port] = true;
-                }
-              });
-            }, 500)
+                  db.command(
+                    { ismaster: true },
+                    { readPreference: 'nearest', full: true },
+                    function(e, r) {
+                      // console.log("---------------------------- 5:2")
+                      // Add seen servers to list
+                      if (r) {
+                        sets[sets.length - 1][r.connection.port] = true;
+                      }
+                    }
+                  );
+                }, 500);
 
-            setTimeout(function() {
-              // console.log("---------------------------- 6")
-              // Force a reconnect of a server
-              var secondary = client.topology.s.replset.s.replicaSetState.secondaries[0]
-              // console.log("---------------------------- 6:1")
-              secondary.destroy({emitClose:true});
-              // console.log("---------------------------- 6:2")
-              sets.push({});
-              // console.log("---------------------------- 6:3")
-
-              client.topology.once('joined', function(t, o, s) {
-                // console.log("---------------------------- 7")
                 setTimeout(function() {
-                  // console.log("---------------------------- 8")
-                  clearInterval(interval);
+                  // console.log("---------------------------- 6")
+                  // Force a reconnect of a server
+                  var secondary = client.topology.s.replset.s.replicaSetState.secondaries[0];
+                  // console.log("---------------------------- 6:1")
+                  secondary.destroy({ emitClose: true });
+                  // console.log("---------------------------- 6:2")
+                  sets.push({});
+                  // console.log("---------------------------- 6:3")
 
-                  test.ok(sets[0][31000]);
-                  test.ok(sets[0][31001]);
-                  test.ok(sets[0][31002]);
+                  client.topology.once('joined', function(t, o, s) {
+                    // console.log("---------------------------- 7")
+                    setTimeout(function() {
+                      // console.log("---------------------------- 8")
+                      clearInterval(interval);
 
-                  test.ok(sets[1][31000]);
-                  test.ok(sets[1][31001]);
-                  test.ok(sets[1][31002]);
+                      test.ok(sets[0][31000]);
+                      test.ok(sets[0][31001]);
+                      test.ok(sets[0][31002]);
 
-                  client.close();
+                      test.ok(sets[1][31000]);
+                      test.ok(sets[1][31001]);
+                      test.ok(sets[1][31002]);
 
-                  replicasetManager.stop().then(function() {
-                    // console.log("---------------------------- 9")
-                    test.done();
+                      client.close();
+
+                      replicasetManager.stop().then(function() {
+                        // console.log("---------------------------- 9")
+                        test.done();
+                      });
+                    }, 5000);
                   });
-                }, 5000);
-              });
-            }, 2000)
+                }, 2000);
+              }
+            );
           });
+        }, 10000)
+        .catch(function(err) {
+          console.dir(err);
+          process.exit(0);
         });
-      }, 10000).catch(function(err) {
-        console.dir(err)
-        process.exit(0)
-      });
     });
   }
-}
+};
 
 /**
  * @ignore
@@ -1202,8 +1463,8 @@ exports['should correctly connect to Replicaset using SSL when secondary down'] 
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-topology-manager').ReplSet
-      , MongoClient = configuration.require.MongoClient;
+    var ReplSetManager = require('mongodb-topology-manager').ReplSet,
+      MongoClient = configuration.require.MongoClient;
 
     // All inserted docs
     var docs = [];
@@ -1211,63 +1472,84 @@ exports['should correctly connect to Replicaset using SSL when secondary down'] 
     var insertDocs = [];
 
     // Read the ca
-    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
-    var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
-    var key = fs.readFileSync(__dirname + "/ssl/client.pem");
+    var ca = [fs.readFileSync(__dirname + '/ssl/ca.pem')];
+    var cert = fs.readFileSync(__dirname + '/ssl/client.pem');
+    var key = fs.readFileSync(__dirname + '/ssl/client.pem');
 
-    var replicasetManager = new ReplSetManager('mongod', [{
-      options: {
-        bind_ip: 'server', port: 31000,
-        dbpath: f('%s/../db/31000', __dirname),
-        sslOnNormalPorts: null, sslPEMKeyFile: __dirname + "/ssl/server.pem"
+    var replicasetManager = new ReplSetManager(
+      'mongod',
+      [
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31000,
+            dbpath: f('%s/../db/31000', __dirname),
+            sslOnNormalPorts: null,
+            sslPEMKeyFile: __dirname + '/ssl/server.pem'
+          }
+        },
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31001,
+            dbpath: f('%s/../db/31001', __dirname),
+            sslOnNormalPorts: null,
+            sslPEMKeyFile: __dirname + '/ssl/server.pem'
+          }
+        },
+        {
+          options: {
+            bind_ip: 'server',
+            port: 31002,
+            dbpath: f('%s/../db/31002', __dirname),
+            sslOnNormalPorts: null,
+            sslPEMKeyFile: __dirname + '/ssl/server.pem'
+          }
+        }
+      ],
+      {
+        replSet: 'rs',
+        ssl: true,
+        rejectUnauthorized: false,
+        ca: ca,
+        host: 'server'
       }
-    }, {
-      options: {
-        bind_ip: 'server', port: 31001,
-        dbpath: f('%s/../db/31001', __dirname),
-        sslOnNormalPorts: null, sslPEMKeyFile: __dirname + "/ssl/server.pem"
-      }
-    }, {
-      options: {
-        bind_ip: 'server', port: 31002,
-        dbpath: f('%s/../db/31002', __dirname),
-        sslOnNormalPorts: null, sslPEMKeyFile: __dirname + "/ssl/server.pem"
-      }
-    }], {
-      replSet: 'rs', ssl:true, rejectUnauthorized: false, ca: ca, host: 'server'
-    });
+    );
 
     replicasetManager.purge().then(function() {
       // Start the server
       replicasetManager.start().then(function() {
-
         replicasetManager.secondaries().then(function(managers) {
           var secondaryServerManager = managers[0];
 
           secondaryServerManager.stop().then(function() {
             setTimeout(function() {
               // Connect and validate the server certificate
-              MongoClient.connect("mongodb://server:31000,server:31001,server:31002/test?ssl=true&replicaSet=rs&maxPoolSize=1", {
-                  ssl:true
-                , sslValidate:false
-                , sslCA:ca
-              }, function(err, client) {
-                if(err) console.dir(err)
-                test.equal(null, err);
+              MongoClient.connect(
+                'mongodb://server:31000,server:31001,server:31002/test?ssl=true&replicaSet=rs&maxPoolSize=1',
+                {
+                  ssl: true,
+                  sslValidate: false,
+                  sslCA: ca
+                },
+                function(err, client) {
+                  if (err) console.dir(err);
+                  test.equal(null, err);
 
-                client.close();
+                  client.close();
 
-                replicasetManager.stop().then(function() {
-                  test.done();
-                });
-              });
+                  replicasetManager.stop().then(function() {
+                    test.done();
+                  });
+                }
+              );
             }, 1000);
           });
         });
       });
     });
   }
-}
+};
 
 // /**
 //  * @ignore

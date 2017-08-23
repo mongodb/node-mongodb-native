@@ -1,7 +1,9 @@
 exports['should correctly honor promoteValues when creating an instance using Db'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -10,37 +12,42 @@ exports['should correctly honor promoteValues when creating an instance using Db
       Double = configuration.require.Double;
 
     var o = configuration.writeConcernMax();
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, promoteValues:false});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      promoteValues: false
+    });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
-      
+
       db.collection('shouldCorrectlyHonorPromoteValues').insert({
-            doc: Long.fromNumber(10)
-          , int: 10
-          , double: 2.2222
-          , array: [[Long.fromNumber(10)]]
-        }, function(err, doc) {
+        doc: Long.fromNumber(10),
+        int: 10,
+        double: 2.2222,
+        array: [[Long.fromNumber(10)]]
+      }, function(err, doc) {
+        test.equal(null, err);
+
+        db.collection('shouldCorrectlyHonorPromoteValues').findOne(function(err, doc) {
           test.equal(null, err);
 
-          db.collection('shouldCorrectlyHonorPromoteValues').findOne(function(err, doc) {
-            test.equal(null, err);
+          test.deepEqual(Long.fromNumber(10), doc.doc);
+          test.deepEqual(new Int32(10), doc.int);
+          test.deepEqual(new Double(2.2222), doc.double);
 
-            test.deepEqual(Long.fromNumber(10), doc.doc);
-            test.deepEqual(new Int32(10), doc.int);
-            test.deepEqual(new Double(2.2222), doc.double);
-
-            client.close();
-            test.done();
-          });
+          client.close();
+          test.done();
+        });
       });
     });
   }
-}
+};
 
 exports['should correctly honor promoteValues when creating an instance using MongoClient'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -49,15 +56,18 @@ exports['should correctly honor promoteValues when creating an instance using Mo
       Double = configuration.require.Double,
       MongoClient = configuration.require.MongoClient;
 
-    MongoClient.connect(configuration.url(), {
-      promoteValues: false,
-    }, function(err, client) {
-      var db = client.db(configuration.database);
-      db.collection('shouldCorrectlyHonorPromoteValues').insert({
-            doc: Long.fromNumber(10)
-          , int: 10
-          , double: 2.2222
-          , array: [[Long.fromNumber(10)]]
+    MongoClient.connect(
+      configuration.url(),
+      {
+        promoteValues: false
+      },
+      function(err, client) {
+        var db = client.db(configuration.database);
+        db.collection('shouldCorrectlyHonorPromoteValues').insert({
+          doc: Long.fromNumber(10),
+          int: 10,
+          double: 2.2222,
+          array: [[Long.fromNumber(10)]]
         }, function(err, doc) {
           test.equal(null, err);
 
@@ -71,15 +81,18 @@ exports['should correctly honor promoteValues when creating an instance using Mo
             client.close();
             test.done();
           });
-      });
-    });
+        });
+      }
+    );
   }
-}
+};
 
 exports['should correctly honor promoteValues at cursor level'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -88,15 +101,18 @@ exports['should correctly honor promoteValues at cursor level'] = {
       Double = configuration.require.Double,
       MongoClient = configuration.require.MongoClient;
 
-    MongoClient.connect(configuration.url(), {
-      promoteValues: false,
-    }, function(err, client) {
-      var db = client.db(configuration.database);
-      db.collection('shouldCorrectlyHonorPromoteValues').insert({
-            doc: Long.fromNumber(10)
-          , int: 10
-          , double: 2.2222
-          , array: [[Long.fromNumber(10)]]
+    MongoClient.connect(
+      configuration.url(),
+      {
+        promoteValues: false
+      },
+      function(err, client) {
+        var db = client.db(configuration.database);
+        db.collection('shouldCorrectlyHonorPromoteValues').insert({
+          doc: Long.fromNumber(10),
+          int: 10,
+          double: 2.2222,
+          array: [[Long.fromNumber(10)]]
         }, function(err, doc) {
           test.equal(null, err);
 
@@ -110,15 +126,18 @@ exports['should correctly honor promoteValues at cursor level'] = {
             client.close();
             test.done();
           });
-      });
-    });
+        });
+      }
+    );
   }
-}
+};
 
 exports['should correctly honor promoteValues at cursor find level'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -127,18 +146,20 @@ exports['should correctly honor promoteValues at cursor find level'] = {
       Double = configuration.require.Double,
       MongoClient = configuration.require.MongoClient;
 
-    MongoClient.connect(configuration.url(), {
-    }, function(err, client) {
+    MongoClient.connect(configuration.url(), {}, function(err, client) {
       var db = client.db(configuration.database);
       db.collection('shouldCorrectlyHonorPromoteValues').insert({
-            doc: Long.fromNumber(10)
-          , int: 10
-          , double: 2.2222
-          , array: [[Long.fromNumber(10)]]
-        }, function(err, doc) {
-          test.equal(null, err);
+        doc: Long.fromNumber(10),
+        int: 10,
+        double: 2.2222,
+        array: [[Long.fromNumber(10)]]
+      }, function(err, doc) {
+        test.equal(null, err);
 
-          db.collection('shouldCorrectlyHonorPromoteValues').find({}, {}, {promoteValues: false}).next(function(err, doc) {
+        db
+          .collection('shouldCorrectlyHonorPromoteValues')
+          .find({}, {}, { promoteValues: false })
+          .next(function(err, doc) {
             test.equal(null, err);
 
             test.deepEqual(Long.fromNumber(10), doc.doc);
@@ -151,12 +172,14 @@ exports['should correctly honor promoteValues at cursor find level'] = {
       });
     });
   }
-}
+};
 
 exports['should correctly honor promoteValues at aggregate level'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -165,18 +188,20 @@ exports['should correctly honor promoteValues at aggregate level'] = {
       Double = configuration.require.Double,
       MongoClient = configuration.require.MongoClient;
 
-    MongoClient.connect(configuration.url(), {
-    }, function(err, client) {
+    MongoClient.connect(configuration.url(), {}, function(err, client) {
       var db = client.db(configuration.database);
       db.collection('shouldCorrectlyHonorPromoteValues2').insert({
-            doc: Long.fromNumber(10)
-          , int: 10
-          , double: 2.2222
-          , array: [[Long.fromNumber(10)]]
-        }, function(err, doc) {
-          test.equal(null, err);
+        doc: Long.fromNumber(10),
+        int: 10,
+        double: 2.2222,
+        array: [[Long.fromNumber(10)]]
+      }, function(err, doc) {
+        test.equal(null, err);
 
-          db.collection('shouldCorrectlyHonorPromoteValues2').aggregate([{$match: {}}], {promoteValues: false}).next(function(err, doc) {
+        db
+          .collection('shouldCorrectlyHonorPromoteValues2')
+          .aggregate([{ $match: {} }], { promoteValues: false })
+          .next(function(err, doc) {
             test.equal(null, err);
 
             test.deepEqual(Long.fromNumber(10), doc.doc);
@@ -189,12 +214,12 @@ exports['should correctly honor promoteValues at aggregate level'] = {
       });
     });
   }
-}
+};
 
 exports['Should correctly promoteValues when calling getMore on queries'] = {
   metadata: {
     requires: {
-      node: ">0.8.0",
+      node: '>0.8.0',
       topology: ['single', 'ssl', 'wiredtiger']
     }
   },
@@ -203,7 +228,7 @@ exports['Should correctly promoteValues when calling getMore on queries'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     var Long = configuration.require.Long;
-    
+
     MongoClient.connect(configuration.url(), function(err, client) {
       var docs = new Array(150).fill(0).map(function(_, i) {
         return {
@@ -214,15 +239,17 @@ exports['Should correctly promoteValues when calling getMore on queries'] = {
           int: 1234
         };
       });
-      
+
       var db = client.db(configuration.database);
-      
+
       db.collection('haystack').insert(docs, function(errInsert) {
         if (errInsert) throw errInsert;
         // change limit from 102 to 101 and this test passes.
         // seems to indicate that the promoteValues flag is used for the
         // initial find, but not for subsequent getMores
-        db.collection('haystack').find({}, {limit: 102, promoteValues: false})
+        db
+          .collection('haystack')
+          .find({}, { limit: 102, promoteValues: false })
           .on('data', function(doc) {
             test.equal(typeof doc.int, 'object');
             test.equal(doc.int._bsontype, 'Int32');
@@ -240,4 +267,4 @@ exports['Should correctly promoteValues when calling getMore on queries'] = {
       });
     });
   }
-}
+};

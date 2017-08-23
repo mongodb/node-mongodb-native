@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var f = require('util').format,
   fs = require('fs');
@@ -20,18 +20,18 @@ var f = require('util').format,
 var replSetManager;
 
 var setUp = function(configuration, options, callback) {
-  var ReplSetManager = require('mongodb-topology-manager').ReplSet
-    , Db = configuration.require.Db
-    , Server = configuration.require.Server
-    , MongoClient = configuration.require.MongoClient;
+  var ReplSetManager = require('mongodb-topology-manager').ReplSet,
+    Db = configuration.require.Db,
+    Server = configuration.require.Server,
+    MongoClient = configuration.require.MongoClient;
 
-    // console.log("$$$$$$$$$$$$ setup 0")
+  // console.log("$$$$$$$$$$$$ setup 0")
   // Check if we have any options
-  if(typeof options == 'function') callback = options, options = null;
+  if (typeof options == 'function') (callback = options), (options = null);
 
   // console.log("$$$$$$$$$$$$ setup 1")
   // Override options
-  if(options) {
+  if (options) {
     var rsOptions = options;
   } else {
     var rsOptions = {
@@ -43,35 +43,42 @@ var setUp = function(configuration, options, callback) {
       client: {
         replSet: 'rs'
       }
-    }
+    };
   }
 
   // console.log("$$$$$$$$$$$$ setup 2")
 
   // Set up the nodes
-  var nodes = [{
-    options: {
-      bind_ip: 'localhost', port: 31000,
-      dbpath: f('%s/../db/31000', __dirname),
+  var nodes = [
+    {
+      options: {
+        bind_ip: 'localhost',
+        port: 31000,
+        dbpath: f('%s/../db/31000', __dirname)
+      }
+    },
+    {
+      options: {
+        bind_ip: 'localhost',
+        port: 31001,
+        dbpath: f('%s/../db/31001', __dirname)
+      }
+    },
+    {
+      options: {
+        bind_ip: 'localhost',
+        port: 31002,
+        dbpath: f('%s/../db/31002', __dirname)
+      }
     }
-  }, {
-    options: {
-      bind_ip: 'localhost', port: 31001,
-      dbpath: f('%s/../db/31001', __dirname),
-    }
-  }, {
-    options: {
-      bind_ip: 'localhost', port: 31002,
-      dbpath: f('%s/../db/31002', __dirname),
-    }
-  }];
+  ];
 
   // console.log("$$$$$$$$$$$$ setup 3")
 
   // console.log("--------------------- setup 0")
   // Merge in any node start up options
-  for(var i = 0; i < nodes.length; i++) {
-    for(var name in rsOptions.server) {
+  for (var i = 0; i < nodes.length; i++) {
+    for (var name in rsOptions.server) {
       nodes[i].options[name] = rsOptions.server[name];
     }
   }
@@ -87,54 +94,57 @@ var setUp = function(configuration, options, callback) {
     // console.log("$$$$$$$$$$$$ setup 6")
     // console.log("--------------------- setup 2")
     // Start the server
-    replicasetManager.start().then(function() {
-      // console.log("$$$$$$$$$$$$ setup 7")
-      // console.log("--------------------- setup 3")
-      setTimeout(function() {
-        // console.log("$$$$$$$$$$$$ setup 8")
-        // console.log("--------------------- setup 4")
-        callback(null, replicasetManager);
-      }, 10000);
-    }).catch(function(e) {
-      console.log(e.stack)
-      process.exit(0);
-      // // console.dir(e);
-    });
+    replicasetManager
+      .start()
+      .then(function() {
+        // console.log("$$$$$$$$$$$$ setup 7")
+        // console.log("--------------------- setup 3")
+        setTimeout(function() {
+          // console.log("$$$$$$$$$$$$ setup 8")
+          // console.log("--------------------- setup 4")
+          callback(null, replicasetManager);
+        }, 10000);
+      })
+      .catch(function(e) {
+        console.log(e.stack);
+        process.exit(0);
+        // // console.dir(e);
+      });
   });
-}
+};
 
 /**
  * @ignore
  */
-exports['NODE-746 should correctly connect using MongoClient.connect to single primary/secondary with both hosts in uri'] = {
+exports[
+  'NODE-746 should correctly connect using MongoClient.connect to single primary/secondary with both hosts in uri'
+] = {
   metadata: { requires: { topology: ['auth'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var Db = configuration.require.Db
-      , Logger = configuration.require.Logger
-      , MongoClient = configuration.require.MongoClient
-      , Server = configuration.require.Server
-      , ReplSet = configuration.require.ReplSet;
+    var Db = configuration.require.Db,
+      Logger = configuration.require.Logger,
+      MongoClient = configuration.require.MongoClient,
+      Server = configuration.require.Server,
+      ReplSet = configuration.require.ReplSet;
 
-      // console.log("--------------------- -2")
+    // console.log("--------------------- -2")
     setUp(configuration, function(err, replicasetManager) {
       // console.log("--------------------- -1")
-      var replSet = new ReplSet( [
-          new Server( 'localhost', 31000),
-          new Server( 'localhost', 31001)
-        ],
-        {rs_name: 'rs', poolSize:1}
-      );
+      var replSet = new ReplSet([new Server('localhost', 31000), new Server('localhost', 31001)], {
+        rs_name: 'rs',
+        poolSize: 1
+      });
 
       // console.log("--------------------- 0")
 
       // Connect
-      new Db('replicaset_test_auth', replSet, {w:1}).open(function(err, db) {
+      new Db('replicaset_test_auth', replSet, { w: 1 }).open(function(err, db) {
         // console.log("--------------------- 1")
         // console.dir(err)
         // Add a user
-        db.admin().addUser("root", "root", {w:3, wtimeout: 25000}, function(err, result) {
+        db.admin().addUser('root', 'root', { w: 3, wtimeout: 25000 }, function(err, result) {
           // console.log("--------------------- 2")
           // console.dir(err)
 
@@ -142,38 +152,52 @@ exports['NODE-746 should correctly connect using MongoClient.connect to single p
           db.close();
           // console.log("--------------------- 3")
 
-            // console.log("--------------------- 4")
+          // console.log("--------------------- 4")
 
-            // shut down one of the secondaries
-            replicasetManager.secondaries().then(function(managers) {
+          // shut down one of the secondaries
+          replicasetManager.secondaries().then(function(managers) {
             // Remove the secondary server
-            replicasetManager.removeMember(managers[1], {
-              returnImmediately: false, force: true, skipWait:false
-            }, {
-              provider: 'scram-sha-1', db: 'admin', user: 'root', password: 'root'
-            }).then(function() {
-              // console.log("--------------------- 5")
+            replicasetManager
+              .removeMember(
+                managers[1],
+                {
+                  returnImmediately: false,
+                  force: true,
+                  skipWait: false
+                },
+                {
+                  provider: 'scram-sha-1',
+                  db: 'admin',
+                  user: 'root',
+                  password: 'root'
+                }
+              )
+              .then(function() {
+                // console.log("--------------------- 5")
 
-            // // Shutdown the second secondary
-            // managers[1].stop().then(function(err, result) {
-            // Logger.setLevel('debug');
-              // Attempt to connect
-              MongoClient.connect('mongodb://root:root@localhost:31000,localhost:31001/admin?replicaSet=rs', function(err, db) {
-                // console.log(err)
-                test.equal(null, err);
-                // console.log("--------------------- 6")
-                // console.dir(err)
-                db.close();
+                // // Shutdown the second secondary
+                // managers[1].stop().then(function(err, result) {
+                // Logger.setLevel('debug');
+                // Attempt to connect
+                MongoClient.connect(
+                  'mongodb://root:root@localhost:31000,localhost:31001/admin?replicaSet=rs',
+                  function(err, db) {
+                    // console.log(err)
+                    test.equal(null, err);
+                    // console.log("--------------------- 6")
+                    // console.dir(err)
+                    db.close();
 
-                replicasetManager.stop().then(function() {
-                  // console.log("--------------------- 7")
-                  test.done();
-                });
+                    replicasetManager.stop().then(function() {
+                      // console.log("--------------------- 7")
+                      test.done();
+                    });
+                  }
+                );
               });
-            });
           });
         });
       });
-    })
+    });
   }
-}
+};

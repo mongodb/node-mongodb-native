@@ -12,14 +12,20 @@ exports['Should correctly emit all Replicaset SDAM operations'] = {
       serverClosed: [],
       topologyOpening: [],
       topologyDescriptionChanged: [],
-      topologyClosed: [],
-    }
+      topologyClosed: []
+    };
 
     var client = new MongoClient(configuration.url());
-    var events = ['serverDescriptionChanged', 'serverHeartbeatStarted'
-      , 'serverHeartbeatSucceeded', 'serverOpening'
-      , 'serverClosed', 'topologyOpening', 'topologyDescriptionChanged'
-      , 'topologyClosed'];
+    var events = [
+      'serverDescriptionChanged',
+      'serverHeartbeatStarted',
+      'serverHeartbeatSucceeded',
+      'serverOpening',
+      'serverClosed',
+      'topologyOpening',
+      'topologyDescriptionChanged',
+      'topologyClosed'
+    ];
     events.forEach(function(e) {
       client.on(e, function(result) {
         operations[e].push(result);
@@ -31,18 +37,18 @@ exports['Should correctly emit all Replicaset SDAM operations'] = {
 
       // console.log(JSON.stringify(operations.topologyDescriptionChanged, null, 2));
 
-      for(var name in operations) {
+      for (var name in operations) {
         test.ok(operations[name].length > 0);
       }
 
-      test.done();      
+      test.done();
     });
 
     client.connect(function(err, db) {
       test.equal(null, err);
     });
   }
-}
+};
 
 exports['Should correctly emit all Mongos SDAM operations'] = {
   metadata: { requires: { topology: 'sharded' } },
@@ -58,14 +64,20 @@ exports['Should correctly emit all Mongos SDAM operations'] = {
       serverClosed: [],
       topologyOpening: [],
       topologyDescriptionChanged: [],
-      topologyClosed: [],
-    }
+      topologyClosed: []
+    };
 
     var client = new MongoClient(configuration.url(), { haInterval: 500 });
-    var events = ['serverDescriptionChanged', 'serverHeartbeatStarted'
-      , 'serverHeartbeatSucceeded', 'serverOpening'
-      , 'serverClosed', 'topologyOpening', 'topologyDescriptionChanged'
-      , 'topologyClosed'];
+    var events = [
+      'serverDescriptionChanged',
+      'serverHeartbeatStarted',
+      'serverHeartbeatSucceeded',
+      'serverOpening',
+      'serverClosed',
+      'topologyOpening',
+      'topologyDescriptionChanged',
+      'topologyClosed'
+    ];
     events.forEach(function(e) {
       client.on(e, function(result) {
         operations[e].push(result);
@@ -78,11 +90,11 @@ exports['Should correctly emit all Mongos SDAM operations'] = {
 
         // console.log(JSON.stringify(operations, null, 2));
 
-        for(var name in operations) {
+        for (var name in operations) {
           test.ok(operations[name].length > 0);
         }
 
-        test.done();      
+        test.done();
       }, 1000);
     });
 
@@ -90,7 +102,7 @@ exports['Should correctly emit all Mongos SDAM operations'] = {
       test.equal(null, err);
     });
   }
-}
+};
 
 exports['Should correctly emit all Server SDAM operations'] = {
   metadata: { requires: { topology: 'single' } },
@@ -104,13 +116,18 @@ exports['Should correctly emit all Server SDAM operations'] = {
       serverClosed: [],
       topologyOpening: [],
       topologyDescriptionChanged: [],
-      topologyClosed: [],
-    }
+      topologyClosed: []
+    };
 
     var client = new MongoClient(configuration.url());
-    var events = ['serverDescriptionChanged', 'serverOpening'
-      , 'serverClosed', 'topologyOpening', 'topologyDescriptionChanged'
-      , 'topologyClosed'];
+    var events = [
+      'serverDescriptionChanged',
+      'serverOpening',
+      'serverClosed',
+      'topologyOpening',
+      'topologyDescriptionChanged',
+      'topologyClosed'
+    ];
     events.forEach(function(e) {
       client.on(e, function(result) {
         operations[e].push(result);
@@ -124,13 +141,13 @@ exports['Should correctly emit all Server SDAM operations'] = {
       // console.log("########################################")
       // console.dir(Object.keys(operations))
 
-      for(var name in operations) {
+      for (var name in operations) {
         // console.log("" + name + " :: " + operations[name].length)
         test.ok(operations[name].length > 0);
       }
 
       // console.log(JSON.stringify(operations, null, 2));
-      test.done();      
+      test.done();
     });
   }
-}
+};

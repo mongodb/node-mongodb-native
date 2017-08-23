@@ -1,7 +1,7 @@
-"use strict";
-var expect = require("chai").expect;
+'use strict';
+var expect = require('chai').expect;
 
-describe("Aggregation", function() {
+describe('Aggregation', function() {
   /**
    * Correctly call the aggregation framework using a pipeline in an Array.
    *
@@ -9,20 +9,13 @@ describe("Aggregation", function() {
    * @example-method aggregate
    * @ignore
    */
-  it("should correctly execute simple aggregation pipeline using array", {
+  it('should correctly execute simple aggregation pipeline using array', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
-        mongodb: ">2.1.0",
-        topology: [
-          "single",
-          "replicaset",
-          "sharded",
-          "ssl",
-          "heap",
-          "wiredtiger"
-        ]
+        mongodb: '>2.1.0',
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
     },
 
@@ -43,23 +36,21 @@ describe("Aggregation", function() {
         // Some docs for insertion
         var docs = [
           {
-            title: "this is my title",
-            author: "bob",
+            title: 'this is my title',
+            author: 'bob',
             posted: new Date(),
             pageViews: 5,
-            tags: ["fun", "good", "fun"],
+            tags: ['fun', 'good', 'fun'],
             other: { foo: 5 },
             comments: [
-              { author: "joe", text: "this is cool" },
-              { author: "sam", text: "this is bad" }
+              { author: 'joe', text: 'this is cool' },
+              { author: 'sam', text: 'this is bad' }
             ]
           }
         ];
 
         // Create a collection
-        var collection = db.collection(
-          "shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray"
-        );
+        var collection = db.collection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray');
         // Insert the docs
         collection.insert(docs, { w: 1 }, function(err, result) {
           expect(err).to.be.null;
@@ -73,11 +64,11 @@ describe("Aggregation", function() {
                   tags: 1
                 }
               },
-              { $unwind: "$tags" },
+              { $unwind: '$tags' },
               {
                 $group: {
-                  _id: { tags: "$tags" },
-                  authors: { $addToSet: "$author" }
+                  _id: { tags: '$tags' },
+                  authors: { $addToSet: '$author' }
                 }
               }
             ],
@@ -86,10 +77,10 @@ describe("Aggregation", function() {
 
               cursor.toArray(function(err, result) {
                 expect(err).to.be.null;
-                expect(result[0]._id.tags).to.equal("good");
-                expect(result[0].authors).to.eql(["bob"]);
-                expect(result[1]._id.tags).to.equal("fun");
-                expect(result[1].authors).to.eql(["bob"]);
+                expect(result[0]._id.tags).to.equal('good');
+                expect(result[0].authors).to.eql(['bob']);
+                expect(result[1]._id.tags).to.equal('fun');
+                expect(result[1].authors).to.eql(['bob']);
 
                 client.close();
                 done();
@@ -109,218 +100,13 @@ describe("Aggregation", function() {
    * @example-method aggregate
    * @ignore
    */
-  it(
-    "should fail when executing simple aggregation pipeline using arguments not an array",
-    {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: {
-          mongodb: ">2.1.0",
-          topology: [
-            "single",
-            "replicaset",
-            "sharded",
-            "ssl",
-            "heap",
-            "wiredtiger"
-          ]
-        }
-      },
-
-      // The actual test we wish to run
-      test: function(done) {
-        var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
-          databaseName = this.configuration.db;
-
-        // LINE var MongoClient = require('mongodb').MongoClient;
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-        // REPLACE this.configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE test.
-        // BEGIN
-        client.connect(function(err, client) {
-          expect(err).to.be.null;
-
-          var db = client.db(databaseName);
-          // Some docs for insertion
-          var docs = [
-            {
-              title: "this is my title",
-              author: "bob",
-              posted: new Date(),
-              pageViews: 5,
-              tags: ["fun", "good", "fun"],
-              other: { foo: 5 },
-              comments: [
-                { author: "joe", text: "this is cool" },
-                { author: "sam", text: "this is bad" }
-              ]
-            }
-          ];
-
-          // Create a collection
-          var collection = db.collection(
-            "shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments"
-          );
-          // Insert the docs
-          collection.insert(docs, { w: 1 }, function(err, result) {
-            expect(err).to.be.null;
-
-            // Execute aggregate, notice the pipeline is expressed as function call parameters
-            // instead of an Array.
-            collection.aggregate(
-              {
-                $project: {
-                  author: 1,
-                  tags: 1
-                }
-              },
-              { $unwind: "$tags" },
-              {
-                $group: {
-                  _id: { tags: "$tags" },
-                  authors: { $addToSet: "$author" }
-                }
-              },
-              function(err, cursor) {
-                expect(err).to.be.null;
-
-                cursor.toArray(function(err, result) {
-                  expect(err).to.be.null;
-                  expect(result[0]._id.tags).to.equal("good");
-                  expect(result[0].authors).to.eql(["bob"]);
-                  expect(result[1]._id.tags).to.equal("fun");
-                  expect(result[1].authors).to.eql(["bob"]);
-
-                  client.close();
-                  done();
-                });
-              }
-            );
-          });
-        });
-        // END
-      }
-    }
-  );
-
-  /**
-   * Correctly call the aggregation framework using a pipeline expressed as an argument list.
-   *
-   * @example-class Collection
-   * @example-method aggregate
-   * @ignore
-   */
-  it(
-    "should fail when executing simple aggregation pipeline using arguments using single object",
-    {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: {
-          mongodb: ">2.1.0",
-          topology: [
-            "single",
-            "replicaset",
-            "sharded",
-            "ssl",
-            "heap",
-            "wiredtiger"
-          ]
-        }
-      },
-
-      // The actual test we wish to run
-      test: function(done) {
-        var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
-          databaseName = this.configuration.db;
-
-        // LINE var MongoClient = require('mongodb').MongoClient;
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-        // REPLACE this.configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE test.
-        // BEGIN
-        client.connect(function(err, client) {
-          expect(err).to.be.null;
-
-          var db = client.db(databaseName);
-          // Some docs for insertion
-          var docs = [
-            {
-              title: "this is my title",
-              author: "bob",
-              posted: new Date(),
-              pageViews: 5,
-              tags: ["fun", "good", "fun"],
-              other: { foo: 5 },
-              comments: [
-                { author: "joe", text: "this is cool" },
-                { author: "sam", text: "this is bad" }
-              ]
-            }
-          ];
-
-          // Create a collection
-          var collection = db.collection(
-            "shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments"
-          );
-          // Insert the docs
-          collection.insert(docs, { w: 1 }, function(err, result) {
-            expect(err).to.be.null;
-
-            // Execute aggregate, notice the pipeline is expressed as function call parameters
-            // instead of an Array.
-            collection.aggregate(
-              {
-                $project: {
-                  author: 1,
-                  tags: 1
-                }
-              },
-              { $unwind: "$tags" },
-              {
-                $group: {
-                  _id: { tags: "$tags" },
-                  authors: { $addToSet: "$author" }
-                }
-              },
-              function(err, cursor) {
-                expect(err).to.be.null;
-
-                cursor.toArray(function(err, result) {
-                  expect(err).to.be.null;
-                  expect(result[0]._id.tags).to.equal("good");
-                  expect(result[0].authors).to.eql(["bob"]);
-                  expect(result[1]._id.tags).to.equal("fun");
-                  expect(result[1].authors).to.eql(["bob"]);
-
-                  client.close();
-                  done();
-                });
-              }
-            );
-          });
-        });
-        // END
-      }
-    }
-  );
-
-  /**
-   * Correctly call the aggregation framework to return a cursor
-   *
-   * @example-class Collection
-   * @example-method aggregate
-   * @ignore
-   */
-  it("should correctly return and iterate over all the cursor results", {
+  it('should fail when executing simple aggregation pipeline using arguments not an array', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
-        mongodb: ">2.1.0",
-        topology: "single",
-        node: ">0.10.0"
+        mongodb: '>2.1.0',
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
     },
 
@@ -341,21 +127,206 @@ describe("Aggregation", function() {
         // Some docs for insertion
         var docs = [
           {
-            title: "this is my title",
-            author: "bob",
+            title: 'this is my title',
+            author: 'bob',
             posted: new Date(),
             pageViews: 5,
-            tags: ["fun", "good", "fun"],
+            tags: ['fun', 'good', 'fun'],
             other: { foo: 5 },
             comments: [
-              { author: "joe", text: "this is cool" },
-              { author: "sam", text: "this is bad" }
+              { author: 'joe', text: 'this is cool' },
+              { author: 'sam', text: 'this is bad' }
             ]
           }
         ];
 
         // Create a collection
-        var collection = db.collection("shouldCorrectlyDoAggWithCursorGet");
+        var collection = db.collection(
+          'shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments'
+        );
+        // Insert the docs
+        collection.insert(docs, { w: 1 }, function(err, result) {
+          expect(err).to.be.null;
+
+          // Execute aggregate, notice the pipeline is expressed as function call parameters
+          // instead of an Array.
+          collection.aggregate(
+            {
+              $project: {
+                author: 1,
+                tags: 1
+              }
+            },
+            { $unwind: '$tags' },
+            {
+              $group: {
+                _id: { tags: '$tags' },
+                authors: { $addToSet: '$author' }
+              }
+            },
+            function(err, cursor) {
+              expect(err).to.be.null;
+
+              cursor.toArray(function(err, result) {
+                expect(err).to.be.null;
+                expect(result[0]._id.tags).to.equal('good');
+                expect(result[0].authors).to.eql(['bob']);
+                expect(result[1]._id.tags).to.equal('fun');
+                expect(result[1].authors).to.eql(['bob']);
+
+                client.close();
+                done();
+              });
+            }
+          );
+        });
+      });
+      // END
+    }
+  });
+
+  /**
+   * Correctly call the aggregation framework using a pipeline expressed as an argument list.
+   *
+   * @example-class Collection
+   * @example-method aggregate
+   * @ignore
+   */
+  it('should fail when executing simple aggregation pipeline using arguments using single object', {
+    // Add a tag that our runner can trigger on
+    // in this case we are setting that node needs to be higher than 0.10.X to run
+    metadata: {
+      requires: {
+        mongodb: '>2.1.0',
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+      }
+    },
+
+    // The actual test we wish to run
+    test: function(done) {
+      var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
+        databaseName = this.configuration.db;
+
+      // LINE var MongoClient = require('mongodb').MongoClient;
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // REPLACE this.configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.
+      // BEGIN
+      client.connect(function(err, client) {
+        expect(err).to.be.null;
+
+        var db = client.db(databaseName);
+        // Some docs for insertion
+        var docs = [
+          {
+            title: 'this is my title',
+            author: 'bob',
+            posted: new Date(),
+            pageViews: 5,
+            tags: ['fun', 'good', 'fun'],
+            other: { foo: 5 },
+            comments: [
+              { author: 'joe', text: 'this is cool' },
+              { author: 'sam', text: 'this is bad' }
+            ]
+          }
+        ];
+
+        // Create a collection
+        var collection = db.collection(
+          'shouldCorrectlyExecuteSimpleAggregationPipelineUsingArguments'
+        );
+        // Insert the docs
+        collection.insert(docs, { w: 1 }, function(err, result) {
+          expect(err).to.be.null;
+
+          // Execute aggregate, notice the pipeline is expressed as function call parameters
+          // instead of an Array.
+          collection.aggregate(
+            {
+              $project: {
+                author: 1,
+                tags: 1
+              }
+            },
+            { $unwind: '$tags' },
+            {
+              $group: {
+                _id: { tags: '$tags' },
+                authors: { $addToSet: '$author' }
+              }
+            },
+            function(err, cursor) {
+              expect(err).to.be.null;
+
+              cursor.toArray(function(err, result) {
+                expect(err).to.be.null;
+                expect(result[0]._id.tags).to.equal('good');
+                expect(result[0].authors).to.eql(['bob']);
+                expect(result[1]._id.tags).to.equal('fun');
+                expect(result[1].authors).to.eql(['bob']);
+
+                client.close();
+                done();
+              });
+            }
+          );
+        });
+      });
+      // END
+    }
+  });
+
+  /**
+   * Correctly call the aggregation framework to return a cursor
+   *
+   * @example-class Collection
+   * @example-method aggregate
+   * @ignore
+   */
+  it('should correctly return and iterate over all the cursor results', {
+    // Add a tag that our runner can trigger on
+    // in this case we are setting that node needs to be higher than 0.10.X to run
+    metadata: {
+      requires: {
+        mongodb: '>2.1.0',
+        topology: 'single',
+        node: '>0.10.0'
+      }
+    },
+
+    // The actual test we wish to run
+    test: function(done) {
+      var client = this.configuration.newClient({ w: 1 }, { poolSize: 1 }),
+        databaseName = this.configuration.db;
+
+      // LINE var MongoClient = require('mongodb').MongoClient;
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // REPLACE this.configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.
+      // BEGIN
+      client.connect(function(err, client) {
+        expect(err).to.be.null;
+
+        var db = client.db(databaseName);
+        // Some docs for insertion
+        var docs = [
+          {
+            title: 'this is my title',
+            author: 'bob',
+            posted: new Date(),
+            pageViews: 5,
+            tags: ['fun', 'good', 'fun'],
+            other: { foo: 5 },
+            comments: [
+              { author: 'joe', text: 'this is cool' },
+              { author: 'sam', text: 'this is bad' }
+            ]
+          }
+        ];
+
+        // Create a collection
+        var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
         collection.insert(docs, { w: 1 }, function(err, result) {
           expect(err).to.be.null;
@@ -368,11 +339,11 @@ describe("Aggregation", function() {
                 tags: 1
               }
             },
-            { $unwind: "$tags" },
+            { $unwind: '$tags' },
             {
               $group: {
-                _id: { tags: "$tags" },
-                authors: { $addToSet: "$author" }
+                _id: { tags: '$tags' },
+                authors: { $addToSet: '$author' }
               }
             }
           ]);
@@ -398,14 +369,14 @@ describe("Aggregation", function() {
    * @example-method aggregate
    * @ignore
    */
-  it("should correctly return a cursor and call explain", {
+  it('should correctly return a cursor and call explain', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
-        mongodb: ">2.5.3",
-        topology: "single",
-        node: ">0.10.0"
+        mongodb: '>2.5.3',
+        topology: 'single',
+        node: '>0.10.0'
       }
     },
 
@@ -426,21 +397,21 @@ describe("Aggregation", function() {
         // Some docs for insertion
         var docs = [
           {
-            title: "this is my title",
-            author: "bob",
+            title: 'this is my title',
+            author: 'bob',
             posted: new Date(),
             pageViews: 5,
-            tags: ["fun", "good", "fun"],
+            tags: ['fun', 'good', 'fun'],
             other: { foo: 5 },
             comments: [
-              { author: "joe", text: "this is cool" },
-              { author: "sam", text: "this is bad" }
+              { author: 'joe', text: 'this is cool' },
+              { author: 'sam', text: 'this is bad' }
             ]
           }
         ];
 
         // Create a collection
-        var collection = db.collection("shouldCorrectlyDoAggWithCursorGet");
+        var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
         collection.insert(docs, { w: 1 }, function(err, result) {
           expect(err).to.be.null;
@@ -454,11 +425,11 @@ describe("Aggregation", function() {
                   tags: 1
                 }
               },
-              { $unwind: "$tags" },
+              { $unwind: '$tags' },
               {
                 $group: {
-                  _id: { tags: "$tags" },
-                  authors: { $addToSet: "$author" }
+                  _id: { tags: '$tags' },
+                  authors: { $addToSet: '$author' }
                 }
               }
             ],
@@ -488,14 +459,14 @@ describe("Aggregation", function() {
    * @example-method aggregate
    * @ignore
    */
-  it("should correctly return a cursor with batchSize 1 and call next", {
+  it('should correctly return a cursor with batchSize 1 and call next', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
-        mongodb: ">2.5.3",
-        topology: "single",
-        node: ">0.10.0"
+        mongodb: '>2.5.3',
+        topology: 'single',
+        node: '>0.10.0'
       }
     },
 
@@ -516,21 +487,21 @@ describe("Aggregation", function() {
         // Some docs for insertion
         var docs = [
           {
-            title: "this is my title",
-            author: "bob",
+            title: 'this is my title',
+            author: 'bob',
             posted: new Date(),
             pageViews: 5,
-            tags: ["fun", "good", "fun"],
+            tags: ['fun', 'good', 'fun'],
             other: { foo: 5 },
             comments: [
-              { author: "joe", text: "this is cool" },
-              { author: "sam", text: "this is bad" }
+              { author: 'joe', text: 'this is cool' },
+              { author: 'sam', text: 'this is bad' }
             ]
           }
         ];
 
         // Create a collection
-        var collection = db.collection("shouldCorrectlyDoAggWithCursorGet");
+        var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
         collection.insert(docs, { w: 1 }, function(err, result) {
           expect(err).to.be.null;
@@ -544,11 +515,11 @@ describe("Aggregation", function() {
                   tags: 1
                 }
               },
-              { $unwind: "$tags" },
+              { $unwind: '$tags' },
               {
                 $group: {
-                  _id: { tags: "$tags" },
-                  authors: { $addToSet: "$author" }
+                  _id: { tags: '$tags' },
+                  authors: { $addToSet: '$author' }
                 }
               }
             ],
@@ -560,8 +531,8 @@ describe("Aggregation", function() {
           // Iterate over all the items in the cursor
           cursor.next(function(err, result) {
             expect(err).to.be.null;
-            expect(result._id.tags).to.equal("good");
-            expect(result.authors).to.eql(["bob"]);
+            expect(result._id.tags).to.equal('good');
+            expect(result.authors).to.eql(['bob']);
 
             client.close();
             done();
@@ -579,20 +550,13 @@ describe("Aggregation", function() {
    * @example-method aggregate
    * @ignore
    */
-  it("should correctly write the results out to a new collection", {
+  it('should correctly write the results out to a new collection', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
-        mongodb: ">2.5.0",
-        topology: [
-          "single",
-          "replicaset",
-          "sharded",
-          "ssl",
-          "heap",
-          "wiredtiger"
-        ]
+        mongodb: '>2.5.0',
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
     },
 
@@ -613,21 +577,21 @@ describe("Aggregation", function() {
         // Some docs for insertion
         var docs = [
           {
-            title: "this is my title",
-            author: "bob",
+            title: 'this is my title',
+            author: 'bob',
             posted: new Date(),
             pageViews: 5,
-            tags: ["fun", "good", "fun"],
+            tags: ['fun', 'good', 'fun'],
             other: { foo: 5 },
             comments: [
-              { author: "joe", text: "this is cool" },
-              { author: "sam", text: "this is bad" }
+              { author: 'joe', text: 'this is cool' },
+              { author: 'sam', text: 'this is bad' }
             ]
           }
         ];
 
         // Create a collection
-        var collection = db.collection("shouldCorrectlyDoAggWithCursorGet");
+        var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
         collection.insert(docs, { w: 1 }, function(err, result) {
           expect(err).to.be.null;
@@ -641,16 +605,16 @@ describe("Aggregation", function() {
                   tags: 1
                 }
               },
-              { $unwind: "$tags" },
+              { $unwind: '$tags' },
               {
                 $group: {
-                  _id: { tags: "$tags" },
-                  authors: { $addToSet: "$author" }
+                  _id: { tags: '$tags' },
+                  authors: { $addToSet: '$author' }
                 }
               }
             ],
             {
-              out: "testingOutCollectionForAggregation"
+              out: 'testingOutCollectionForAggregation'
             },
             function(err, cursor) {
               expect(err).to.be.null;
@@ -677,20 +641,13 @@ describe("Aggregation", function() {
    * @example-method aggregate
    * @ignore
    */
-  it("should correctly use allowDiskUse when performing an aggregation", {
+  it('should correctly use allowDiskUse when performing an aggregation', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
-        mongodb: ">2.5.5",
-        topology: [
-          "single",
-          "replicaset",
-          "sharded",
-          "ssl",
-          "heap",
-          "wiredtiger"
-        ]
+        mongodb: '>2.5.5',
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
     },
 
@@ -711,21 +668,21 @@ describe("Aggregation", function() {
         // Some docs for insertion
         var docs = [
           {
-            title: "this is my title",
-            author: "bob",
+            title: 'this is my title',
+            author: 'bob',
             posted: new Date(),
             pageViews: 5,
-            tags: ["fun", "good", "fun"],
+            tags: ['fun', 'good', 'fun'],
             other: { foo: 5 },
             comments: [
-              { author: "joe", text: "this is cool" },
-              { author: "sam", text: "this is bad" }
+              { author: 'joe', text: 'this is cool' },
+              { author: 'sam', text: 'this is bad' }
             ]
           }
         ];
 
         // Create a collection
-        var collection = db.collection("shouldCorrectlyDoAggWithCursorGet");
+        var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
         collection.insert(docs, { w: 1 }, function(err, result) {
           expect(err).to.be.null;
@@ -739,11 +696,11 @@ describe("Aggregation", function() {
                   tags: 1
                 }
               },
-              { $unwind: "$tags" },
+              { $unwind: '$tags' },
               {
                 $group: {
-                  _id: { tags: "$tags" },
-                  authors: { $addToSet: "$author" }
+                  _id: { tags: '$tags' },
+                  authors: { $addToSet: '$author' }
                 }
               }
             ],
@@ -755,10 +712,10 @@ describe("Aggregation", function() {
 
               cursor.toArray(function(err, results) {
                 expect(err).to.be.null;
-                expect(results[0]._id.tags).to.equal("good");
-                expect(results[0].authors).to.eql(["bob"]);
-                expect(results[1]._id.tags).to.equal("fun");
-                expect(results[1].authors).to.eql(["bob"]);
+                expect(results[0]._id.tags).to.equal('good');
+                expect(results[0].authors).to.eql(['bob']);
+                expect(results[1]._id.tags).to.equal('fun');
+                expect(results[1].authors).to.eql(['bob']);
 
                 client.close();
                 done();
@@ -775,39 +732,29 @@ describe("Aggregation", function() {
    * Correctly perform simple group
    * @ignore
    */
-  it("should perform a simple group aggregation", {
+  it('should perform a simple group aggregation', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
-        mongodb: ">2.5.5",
-        topology: [
-          "single",
-          "replicaset",
-          "sharded",
-          "ssl",
-          "heap",
-          "wiredtiger"
-        ]
+        mongodb: '>2.5.5',
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
     },
 
     // The actual test we wish to run
     test: function(done) {
       var databaseName = this.configuration.db;
-      var client = this.configuration.newClient(
-        this.configuration.writeConcernMax(),
-        {
-          poolSize: 1
-        }
-      );
+      var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+        poolSize: 1
+      });
 
       client.connect(function(err, client) {
         expect(err).to.be.null;
 
         var db = client.db(databaseName);
         // Create a collection
-        var col = db.collection("shouldPerformSimpleGroupAggregation");
+        var col = db.collection('shouldPerformSimpleGroupAggregation');
         col.remove({}, function(err) {
           expect(err).to.be.null;
 
@@ -821,7 +768,7 @@ describe("Aggregation", function() {
               .aggregate([
                 { $match: {} },
                 {
-                  $group: { _id: "$a", total: { $sum: "$a" } }
+                  $group: { _id: '$a', total: { $sum: '$a' } }
                 }
               ])
               .toArray(function(err, docs) {
@@ -841,106 +788,90 @@ describe("Aggregation", function() {
    * Correctly perform simple group
    * @ignore
    */
-  it(
-    "should correctly perform an aggregation using a collection name with dot in it",
-    {
-      // Add a tag that our runner can trigger on
-      // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: {
-        requires: {
-          mongodb: ">2.5.5",
-          topology: [
-            "single",
-            "replicaset",
-            "sharded",
-            "ssl",
-            "heap",
-            "wiredtiger"
-          ]
-        }
-      },
-
-      // The actual test we wish to run
-      test: function(done) {
-        var databaseName = this.configuration.db;
-        var client = this.configuration.newClient(
-          this.configuration.writeConcernMax(),
-          {
-            poolSize: 1
-          }
-        );
-
-        client.connect(function(err, client) {
-          expect(err).to.be.null;
-
-          var db = client.db(databaseName);
-          db.collection("te.st", function(err, col) {
-            expect(err).to.be.null;
-            var count = 0;
-
-            col.insert([{ a: 1 }, { a: 1 }, { a: 1 }], function(err, r) {
-              expect(err).to.be.null;
-              expect(r.result.n).to.equal(3);
-
-              //Using callback - OK
-              col.aggregate([{ $project: { a: 1 } }], function(err, cursor) {
-                expect(err).to.be.null;
-
-                cursor.toArray(function(err, docs) {
-                  expect(err).to.be.null;
-                  expect(docs.length).to.be.greaterThan(0);
-
-                  //Using cursor - KO
-                  col
-                    .aggregate([{ $project: { a: 1 } }], {
-                      cursor: { batchSize: 10000 }
-                    })
-                    .forEach(
-                      function() {
-                        count = count + 1;
-                      },
-                      function(err) {
-                        expect(err).to.be.null;
-                        expect(count).to.be.greaterThan(0);
-
-                        client.close();
-                        done();
-                      }
-                    );
-                });
-              });
-            });
-          });
-        });
-      }
-    }
-  );
-
-  /**
-   * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
-   *
-   * @ignore
-   */
-  it("should fail aggregation due to illegal cursor option and streams", {
+  it('should correctly perform an aggregation using a collection name with dot in it', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
-        mongodb: ">2.5.3",
-        topology: "single",
-        node: ">0.10.0"
+        mongodb: '>2.5.5',
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
     },
 
     // The actual test we wish to run
     test: function(done) {
       var databaseName = this.configuration.db;
-      var client = this.configuration.newClient(
-        this.configuration.writeConcernMax(),
-        {
-          poolSize: 1
-        }
-      );
+      var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+        poolSize: 1
+      });
+
+      client.connect(function(err, client) {
+        expect(err).to.be.null;
+
+        var db = client.db(databaseName);
+        db.collection('te.st', function(err, col) {
+          expect(err).to.be.null;
+          var count = 0;
+
+          col.insert([{ a: 1 }, { a: 1 }, { a: 1 }], function(err, r) {
+            expect(err).to.be.null;
+            expect(r.result.n).to.equal(3);
+
+            //Using callback - OK
+            col.aggregate([{ $project: { a: 1 } }], function(err, cursor) {
+              expect(err).to.be.null;
+
+              cursor.toArray(function(err, docs) {
+                expect(err).to.be.null;
+                expect(docs.length).to.be.greaterThan(0);
+
+                //Using cursor - KO
+                col
+                  .aggregate([{ $project: { a: 1 } }], {
+                    cursor: { batchSize: 10000 }
+                  })
+                  .forEach(
+                    function() {
+                      count = count + 1;
+                    },
+                    function(err) {
+                      expect(err).to.be.null;
+                      expect(count).to.be.greaterThan(0);
+
+                      client.close();
+                      done();
+                    }
+                  );
+              });
+            });
+          });
+        });
+      });
+    }
+  });
+
+  /**
+   * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
+   *
+   * @ignore
+   */
+  it('should fail aggregation due to illegal cursor option and streams', {
+    // Add a tag that our runner can trigger on
+    // in this case we are setting that node needs to be higher than 0.10.X to run
+    metadata: {
+      requires: {
+        mongodb: '>2.5.3',
+        topology: 'single',
+        node: '>0.10.0'
+      }
+    },
+
+    // The actual test we wish to run
+    test: function(done) {
+      var databaseName = this.configuration.db;
+      var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+        poolSize: 1
+      });
 
       client.connect(function(err, client) {
         expect(err).to.be.null;
@@ -949,23 +880,21 @@ describe("Aggregation", function() {
         // Some docs for insertion
         var docs = [
           {
-            title: "this is my title",
-            author: "bob",
+            title: 'this is my title',
+            author: 'bob',
             posted: new Date(),
             pageViews: 5,
-            tags: ["fun", "good", "fun"],
+            tags: ['fun', 'good', 'fun'],
             other: { foo: 5 },
             comments: [
-              { author: "joe", text: "this is cool" },
-              { author: "sam", text: "this is bad" }
+              { author: 'joe', text: 'this is cool' },
+              { author: 'sam', text: 'this is bad' }
             ]
           }
         ];
 
         // Create a collection
-        var collection = db.collection(
-          "shouldCorrectlyDoAggWithCursorGetStream"
-        );
+        var collection = db.collection('shouldCorrectlyDoAggWithCursorGetStream');
         // Insert the docs
         collection.insert(docs, { w: 1 }, function(err, result) {
           expect(err).to.be.null;
@@ -980,11 +909,11 @@ describe("Aggregation", function() {
                     tags: 1
                   }
                 },
-                { $unwind: "$tags" },
+                { $unwind: '$tags' },
                 {
                   $group: {
-                    _id: { tags: "$tags" },
-                    authors: { $addToSet: "$author" }
+                    _id: { tags: '$tags' },
+                    authors: { $addToSet: '$author' }
                   }
                 }
               ],
@@ -1010,15 +939,15 @@ describe("Aggregation", function() {
    * @ignore
    */
   it(
-    "should ensure MaxTimeMS is correctly passed down into command execution when using a cursor",
+    'should ensure MaxTimeMS is correctly passed down into command execution when using a cursor',
     {
       // Add a tag that our runner can trigger on
       // in this case we are setting that node needs to be higher than 0.10.X to run
       metadata: {
         requires: {
-          mongodb: ">=2.6.0",
-          topology: "single",
-          node: ">0.10.0"
+          mongodb: '>=2.6.0',
+          topology: 'single',
+          node: '>0.10.0'
         }
       },
 
@@ -1035,23 +964,21 @@ describe("Aggregation", function() {
           // Some docs for insertion
           var docs = [
             {
-              title: "this is my title",
-              author: "bob",
+              title: 'this is my title',
+              author: 'bob',
               posted: new Date(),
               pageViews: 5,
-              tags: ["fun", "good", "fun"],
+              tags: ['fun', 'good', 'fun'],
               other: { foo: 5 },
               comments: [
-                { author: "joe", text: "this is cool" },
-                { author: "sam", text: "this is bad" }
+                { author: 'joe', text: 'this is cool' },
+                { author: 'sam', text: 'this is bad' }
               ]
             }
           ];
 
           // Create a collection
-          var collection = db.collection(
-            "shouldCorrectlyDoAggWithCursorMaxTimeMSSet"
-          );
+          var collection = db.collection('shouldCorrectlyDoAggWithCursorMaxTimeMSSet');
           // Insert the docs
           collection.insert(docs, { w: 1 }, function(err, result) {
             // Execute aggregate, notice the pipeline is expressed as an Array
@@ -1063,11 +990,11 @@ describe("Aggregation", function() {
                     tags: 1
                   }
                 },
-                { $unwind: "$tags" },
+                { $unwind: '$tags' },
                 {
                   $group: {
-                    _id: { tags: "$tags" },
-                    authors: { $addToSet: "$author" }
+                    _id: { tags: '$tags' },
+                    authors: { $addToSet: '$author' }
                   }
                 }
               ],
@@ -1092,8 +1019,8 @@ describe("Aggregation", function() {
             // Iterate over all the items in the cursor
             cursor.next(function(err, result) {
               expect(err).to.be.null;
-              expect(result._id.tags).to.equal("good");
-              expect(result.authors).to.eql(["bob"]);
+              expect(result._id.tags).to.equal('good');
+              expect(result.authors).to.eql(['bob']);
 
               // Validate the command
               db.command = function(c) {
@@ -1113,11 +1040,11 @@ describe("Aggregation", function() {
                       tags: 1
                     }
                   },
-                  { $unwind: "$tags" },
+                  { $unwind: '$tags' },
                   {
                     $group: {
-                      _id: { tags: "$tags" },
-                      authors: { $addToSet: "$author" }
+                      _id: { tags: '$tags' },
+                      authors: { $addToSet: '$author' }
                     }
                   }
                 ],
@@ -1144,26 +1071,23 @@ describe("Aggregation", function() {
    *
    * @ignore
    */
-  it("should correctly handle ISODate date matches in aggregation framework", {
+  it('should correctly handle ISODate date matches in aggregation framework', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
-        mongodb: ">=2.6.0",
-        topology: "single",
-        node: ">0.10.0"
+        mongodb: '>=2.6.0',
+        topology: 'single',
+        node: '>0.10.0'
       }
     },
 
     // The actual test we wish to run
     test: function(done) {
       var databaseName = this.configuration.db;
-      var client = this.configuration.newClient(
-        this.configuration.writeConcernMax(),
-        {
-          poolSize: 1
-        }
-      );
+      var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+        poolSize: 1
+      });
 
       // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
       // DOC_START
@@ -1187,7 +1111,7 @@ describe("Aggregation", function() {
         ];
 
         // Create a collection
-        var collection = db.collection("shouldCorrectlyQueryUsingISODate");
+        var collection = db.collection('shouldCorrectlyQueryUsingISODate');
         // Insert the docs
         collection.insertMany(docs, { w: 1 }, function(err, result) {
           expect(err).to.be.null;
@@ -1220,24 +1144,21 @@ describe("Aggregation", function() {
    *
    * @ignore
    */
-  it("should correctly exercise hasNext function on aggregation cursor", {
+  it('should correctly exercise hasNext function on aggregation cursor', {
     metadata: {
       requires: {
-        mongodb: ">=2.6.0",
-        topology: "single",
-        node: ">0.10.0"
+        mongodb: '>=2.6.0',
+        topology: 'single',
+        node: '>0.10.0'
       }
     },
 
     // The actual test we wish to run
     test: function(done) {
       var databaseName = this.configuration.db;
-      var client = this.configuration.newClient(
-        this.configuration.writeConcernMax(),
-        {
-          poolSize: 1
-        }
-      );
+      var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+        poolSize: 1
+      });
 
       // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
       // DOC_START
@@ -1246,12 +1167,9 @@ describe("Aggregation", function() {
 
         var db = client.db(databaseName);
         // Create a collection
-        var collection = db.collection("shouldCorrectlyQueryUsingISODate3");
+        var collection = db.collection('shouldCorrectlyQueryUsingISODate3');
         // Insert the docs
-        collection.insertMany([{ a: 1 }, { b: 1 }], { w: 1 }, function(
-          err,
-          result
-        ) {
+        collection.insertMany([{ a: 1 }, { b: 1 }], { w: 1 }, function(err, result) {
           expect(err).to.be.null;
 
           // Execute aggregate, notice the pipeline is expressed as an Array

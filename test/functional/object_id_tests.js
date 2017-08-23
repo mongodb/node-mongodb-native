@@ -1,33 +1,35 @@
-"use strict";
+'use strict';
 
 /**
  * @ignore
  */
 exports.shouldCorrectlyGenerateObjectID = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       var number_of_tests_done = 0;
 
       var collection = db.collection('test_object_id_generation.data');
       // Insert test documents (creates collections and test fetch by query)
-      collection.insert({name:"Fred", age:42}, {w:1}, function(err, r) {
+      collection.insert({ name: 'Fred', age: 42 }, { w: 1 }, function(err, r) {
         test.equal(1, r.ops.length);
         test.ok(r.ops[0]['_id'].toHexString().length == 24);
         // Locate the first document inserted
-        collection.findOne({name:"Fred"}, function(err, document) {
+        collection.findOne({ name: 'Fred' }, function(err, document) {
           test.equal(r.ops[0]['_id'].toHexString(), document._id.toHexString());
           number_of_tests_done++;
         });
       });
 
       // Insert another test document and collect using ObjectId
-      collection.insert({name:"Pat", age:21}, {w:1}, function(err, r) {
+      collection.insert({ name: 'Pat', age: 21 }, { w: 1 }, function(err, r) {
         test.equal(1, r.ops.length);
         test.ok(r.ops[0]['_id'].toHexString().length == 24);
         // Locate the first document inserted
@@ -40,7 +42,7 @@ exports.shouldCorrectlyGenerateObjectID = {
       // Manually created id
       var objectId = new ObjectID(null);
       // Insert a manually created document with generated oid
-      collection.insert({"_id":objectId, name:"Donald", age:95}, {w:1}, function(err, r) {
+      collection.insert({ _id: objectId, name: 'Donald', age: 95 }, { w: 1 }, function(err, r) {
         test.equal(1, r.ops.length);
         test.ok(r.ops[0]['_id'].toHexString().length == 24);
         test.equal(objectId.toHexString(), r.ops[0]['_id'].toHexString());
@@ -53,7 +55,7 @@ exports.shouldCorrectlyGenerateObjectID = {
       });
 
       var intervalId = setInterval(function() {
-        if(number_of_tests_done == 3) {
+        if (number_of_tests_done == 3) {
           clearInterval(intervalId);
           client.close();
           test.done();
@@ -61,13 +63,15 @@ exports.shouldCorrectlyGenerateObjectID = {
       }, 100);
     });
   }
-}
+};
 
 /**
  * @ignore
  */
 exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -78,13 +82,15 @@ exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = {
     test.equal(24, objectId.toString().length);
     test.done();
   }
-}
+};
 
 /**
  * @ignore
  */
 exports.shouldCorrectlyRetrieve24CharacterHexStringFromToJSON = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -95,19 +101,21 @@ exports.shouldCorrectlyRetrieve24CharacterHexStringFromToJSON = {
     test.equal(24, objectId.toJSON().length);
     test.done();
   }
-}
+};
 
 /**
  * @ignore
  */
 exports.shouldCorrectlyCreateOIDNotUsingObjectID = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
 
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       var collection = db.collection('test_non_oid_id');
@@ -119,9 +127,9 @@ exports.shouldCorrectlyCreateOIDNotUsingObjectID = {
       date.setUTCMinutes(0);
       date.setUTCSeconds(30);
 
-      collection.insert({'_id':date}, {w:1}, function(err, ids) {
-        collection.find({'_id':date}).toArray(function(err, items) {
-          test.equal(("" + date), ("" + items[0]._id));
+      collection.insert({ _id: date }, { w: 1 }, function(err, ids) {
+        collection.find({ _id: date }).toArray(function(err, items) {
+          test.equal('' + date, '' + items[0]._id);
 
           // Let's close the db
           client.close();
@@ -130,31 +138,35 @@ exports.shouldCorrectlyCreateOIDNotUsingObjectID = {
       });
     });
   }
-}
+};
 
 /**
  * @ignore
  */
 exports.shouldCorrectlyGenerateObjectIDFromTimestamp = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
 
-    var timestamp = Math.floor(new Date().getTime()/1000);
+    var timestamp = Math.floor(new Date().getTime() / 1000);
     var objectID = new ObjectID(timestamp);
     var time2 = objectID.generationTime;
     test.equal(timestamp, time2);
     test.done();
   }
-}
+};
 
 /**
  * @ignore
  */
 exports.shouldCorrectlyCreateAnObjectIDAndOverrideTheTimestamp = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -164,11 +176,11 @@ exports.shouldCorrectlyCreateAnObjectIDAndOverrideTheTimestamp = {
     var objectID = new ObjectID();
     var id1 = objectID.id;
     // Override the timestamp
-    objectID.generationTime = timestamp
+    objectID.generationTime = timestamp;
     var id2 = objectID.id;
 
     // Check the timestamp
-    if(id1 instanceof Buffer && id2 instanceof Buffer) {
+    if (id1 instanceof Buffer && id2 instanceof Buffer) {
       test.deepEqual(id1.slice(0, 4), id2.slice(0, 4));
     } else {
       test.equal(id1.substr(4), id2.substr(4));
@@ -176,23 +188,25 @@ exports.shouldCorrectlyCreateAnObjectIDAndOverrideTheTimestamp = {
 
     test.done();
   }
-}
+};
 
 /**
  * @ignore
  */
 exports.shouldCorrectlyInsertWithObjectId = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       var collection = db.collection('shouldCorrectlyInsertWithObjectId');
-      collection.insert({}, {w:1}, function(err, ids) {
+      collection.insert({}, { w: 1 }, function(err, ids) {
         setTimeout(function() {
-          collection.insert({}, {w:1}, function(err, ids) {
+          collection.insert({}, { w: 1 }, function(err, ids) {
             collection.find().toArray(function(err, items) {
               var compareDate = new Date();
 
@@ -222,4 +236,4 @@ exports.shouldCorrectlyInsertWithObjectId = {
       });
     });
   }
-}
+};

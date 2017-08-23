@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  * rm -rf data; mkdir data; mongod --dbpath=./data --setParameter authenticationMechanisms=SCRAM-SHA-1 --auth
@@ -9,9 +9,9 @@ exports['Should correctly authenticate against scram'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var Db = configuration.require.Db
-      , MongoClient = configuration.require.MongoClient
-      , Server = configuration.require.Server;
+    var Db = configuration.require.Db,
+      MongoClient = configuration.require.MongoClient,
+      Server = configuration.require.Server;
 
     // User and password
     var user = 'test';
@@ -27,41 +27,46 @@ exports['Should correctly authenticate against scram'] = {
         db.close();
 
         // Attempt to reconnect authenticating against the admin database
-        MongoClient.connect('mongodb://test:test@localhost:27017/test?authMechanism=SCRAM-SHA-1&authSource=admin&maxPoolSize=5', function(err, db) {
-          test.equal(null, err);
-
-          db.collection('test').insert({a:1}, function(err, r) {
+        MongoClient.connect(
+          'mongodb://test:test@localhost:27017/test?authMechanism=SCRAM-SHA-1&authSource=admin&maxPoolSize=5',
+          function(err, db) {
             test.equal(null, err);
-            test.ok(r != null);
 
-            // Wait for a reconnect to happen
-            client.topology.once('reconnect', function() {
+            db.collection('test').insert({ a: 1 }, function(err, r) {
+              test.equal(null, err);
+              test.ok(r != null);
 
-              // Perform an insert after reconnect
-              db.collection('test').insert({a:1}, function(err, r) {
-                test.equal(null, err);
-                test.ok(r != null);
-
-                // Attempt to reconnect authenticating against the admin database
-                MongoClient.connect('mongodb://test:test@localhost:27017/test?authMechanism=SCRAM-SHA-1&authSource=admin&maxPoolSize=5', function(err, db2) {
+              // Wait for a reconnect to happen
+              client.topology.once('reconnect', function() {
+                // Perform an insert after reconnect
+                db.collection('test').insert({ a: 1 }, function(err, r) {
                   test.equal(null, err);
+                  test.ok(r != null);
 
-                  // Remove the user
-                  db.admin().removeUser(user, function(err, r) {
-                    test.equal(null, err);
+                  // Attempt to reconnect authenticating against the admin database
+                  MongoClient.connect(
+                    'mongodb://test:test@localhost:27017/test?authMechanism=SCRAM-SHA-1&authSource=admin&maxPoolSize=5',
+                    function(err, db2) {
+                      test.equal(null, err);
 
-                    db.close();
-                    test.done();
-                  });
+                      // Remove the user
+                      db.admin().removeUser(user, function(err, r) {
+                        test.equal(null, err);
+
+                        db.close();
+                        test.done();
+                      });
+                    }
+                  );
                 });
               });
-            });
 
-            // Attempt disconnect again
-            client.topology.connections()[0].destroy();
-          });
-        });
+              // Attempt disconnect again
+              client.topology.connections()[0].destroy();
+            });
+          }
+        );
       });
     });
   }
-}
+};

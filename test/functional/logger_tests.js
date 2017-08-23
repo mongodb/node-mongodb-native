@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var connectToDb = require('./shared').connectToDb;
 
@@ -11,9 +11,9 @@ exports['Should correctly Enable logging'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var Logger = configuration.require.Logger
+    var Logger = configuration.require.Logger;
 
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       test.equal(null, err);
@@ -35,7 +35,7 @@ exports['Should correctly Enable logging'] = {
       });
 
       // Execute the command
-      db.command({ismaster: true}, function(err, r) {
+      db.command({ ismaster: true }, function(err, r) {
         test.equal(null, err);
         test.ok(logged);
 
@@ -46,7 +46,7 @@ exports['Should correctly Enable logging'] = {
       });
     });
   }
-}
+};
 
 /**
  * Should No fail with undefined id
@@ -57,14 +57,18 @@ exports['Should not fail with undefined id'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var MongoClient = configuration.require.MongoClient
-      , Logger = configuration.require.Logger;
+    var MongoClient = configuration.require.MongoClient,
+      Logger = configuration.require.Logger;
 
     // set a custom logger per http://mongodb.github.io/node-mongodb-native/2.0/tutorials/logging/
     Logger.setCurrentLogger(function() {});
     Logger.setLevel('debug');
 
-    connectToDb('mongodb://localhost:27017/test', configuration.database, function(err, db, client) {
+    connectToDb('mongodb://localhost:27017/test', configuration.database, function(
+      err,
+      db,
+      client
+    ) {
       test.equal(null, err);
 
       // perform any operation that gets logged
@@ -78,7 +82,7 @@ exports['Should not fail with undefined id'] = {
       });
     });
   }
-}
+};
 
 /**
  * Should No fail with undefined id
@@ -89,10 +93,14 @@ exports['Should correctly log cursor'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var MongoClient = configuration.require.MongoClient
-      , Logger = configuration.require.Logger;
+    var MongoClient = configuration.require.MongoClient,
+      Logger = configuration.require.Logger;
 
-    connectToDb('mongodb://localhost:27017/test', configuration.database, function(err, db, client) {
+    connectToDb('mongodb://localhost:27017/test', configuration.database, function(
+      err,
+      db,
+      client
+    ) {
       test.equal(null, err);
 
       // Status
@@ -122,7 +130,7 @@ exports['Should correctly log cursor'] = {
       });
     });
   }
-}
+};
 
 /**
  * Should No fail with undefined id
@@ -133,27 +141,35 @@ exports['Pass the logLevel down through the options'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var MongoClient = configuration.require.MongoClient
-      , Logger = configuration.require.Logger;
+    var MongoClient = configuration.require.MongoClient,
+      Logger = configuration.require.Logger;
 
     Logger.filter('class', ['Cursor']);
     var logged = false;
 
-    connectToDb('mongodb://localhost:27017/test', configuration.database, {
-      loggerLevel: 'debug', logger: function() { logged = true; }
-    }, function(err, db, client) {
-      test.equal(null, err);
-
-      // perform any operation that gets logged
-      db.collection('foo').findOne({}, function(err) {
+    connectToDb(
+      'mongodb://localhost:27017/test',
+      configuration.database,
+      {
+        loggerLevel: 'debug',
+        logger: function() {
+          logged = true;
+        }
+      },
+      function(err, db, client) {
         test.equal(null, err);
-        test.ok(logged);
 
-        // Clean up
-        Logger.reset();
-        client.close();
-        test.done();
-      });
-    });
+        // perform any operation that gets logged
+        db.collection('foo').findOne({}, function(err) {
+          test.equal(null, err);
+          test.ok(logged);
+
+          // Clean up
+          Logger.reset();
+          client.close();
+          test.done();
+        });
+      }
+    );
   }
-}
+};
