@@ -1,31 +1,46 @@
-"use strict";
+'use strict';
 
 var BSON = require('mongodb-core').BSON;
-var bson = new BSON([BSON.Binary, BSON.Code, BSON.DBRef, BSON.Decimal128,
-	BSON.Double, BSON.Int32, BSON.Long, BSON.Map, BSON.MaxKey, BSON.MinKey,
-	BSON.ObjectId, BSON.BSONRegExp, BSON.Symbol, BSON.Timestamp]);
+var bson = new BSON([
+  BSON.Binary,
+  BSON.Code,
+  BSON.DBRef,
+  BSON.Decimal128,
+  BSON.Double,
+  BSON.Int32,
+  BSON.Long,
+  BSON.Map,
+  BSON.MaxKey,
+  BSON.MinKey,
+  BSON.ObjectId,
+  BSON.BSONRegExp,
+  BSON.Symbol,
+  BSON.Timestamp
+]);
 
 /**
  * @ignore
  */
 exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
     var Buffer = require('buffer').Buffer;
 
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       db.createCollection('shouldCorrectlySaveDocumentsAndReturnAsRaw', function(err, collection) {
         // Insert some documents
-        collection.insert([{a:1}, {b:2000}, {c:2.3}], {w:1}, function(err, result) {
+        collection.insert([{ a: 1 }, { b: 2000 }, { c: 2.3 }], { w: 1 }, function(err, result) {
           // You have to pass at least query + fields before passing options
-          collection.find({}, null, {raw:true, batchSize: 2}).toArray(function(err, items) {
+          collection.find({}, null, { raw: true, batchSize: 2 }).toArray(function(err, items) {
             var objects = [];
 
-            for(var i = 0; i < items.length; i++) {
+            for (var i = 0; i < items.length; i++) {
               test.ok(Buffer.isBuffer(items[i]));
               objects.push(bson.deserialize(items[i]));
             }
@@ -35,40 +50,45 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = {
             test.equal(2.3, objects[2].c);
 
             // Execute findOne
-            collection.findOne({a:1}, {raw:true}, function(err, item) {
+            collection.findOne({ a: 1 }, { raw: true }, function(err, item) {
               test.ok(Buffer.isBuffer(item));
               var object = bson.deserialize(item);
-              test.equal(1, object.a)
+              test.equal(1, object.a);
               client.close();
               test.done();
-            })
-          })
-        })
+            });
+          });
+        });
       });
     });
   }
-}
+};
 
 /**
  * @ignore
  */
 exports.shouldCorrectlySaveDocumentsAndReturnAsRawWithRawSetAtCollectionLevel = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
     var Buffer = require('buffer').Buffer;
 
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
-      db.createCollection('shouldCorrectlySaveDocumentsAndReturnAsRaw_2', {raw: true}, function(err, collection) {
+      db.createCollection('shouldCorrectlySaveDocumentsAndReturnAsRaw_2', { raw: true }, function(
+        err,
+        collection
+      ) {
         // Insert some documents
-        collection.insert([{a:1}, {b:2000}, {c:2.3}], {w:1}, function(err, result) {
+        collection.insert([{ a: 1 }, { b: 2000 }, { c: 2.3 }], { w: 1 }, function(err, result) {
           // You have to pass at least query + fields before passing options
-          collection.find({}, null, {batchSize: 2}).toArray(function(err, items) {
+          collection.find({}, null, { batchSize: 2 }).toArray(function(err, items) {
             var objects = [];
-            for(var i = 0; i < items.length; i++) {
+            for (var i = 0; i < items.length; i++) {
               test.ok(Buffer.isBuffer(items[i]));
               objects.push(bson.deserialize(items[i]));
             }
@@ -78,16 +98,16 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRawWithRawSetAtCollectionLevel = 
             test.equal(2.3, objects[2].c);
 
             // Execute findOne
-            collection.findOne({a:1}, {raw:true}, function(err, item) {
+            collection.findOne({ a: 1 }, { raw: true }, function(err, item) {
               test.ok(Buffer.isBuffer(item));
               var object = bson.deserialize(item);
-              test.equal(1, object.a)
+              test.equal(1, object.a);
               client.close();
               test.done();
-            })
-          })
-        })
+            });
+          });
+        });
       });
     });
   }
-}
+};

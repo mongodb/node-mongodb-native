@@ -1,19 +1,19 @@
 // Extend the object
 var extend = function(template, fields) {
   var object = {};
-  for(var name in template) {
+  for (var name in template) {
     object[name] = template[name];
   }
 
-  for(var name in fields) {
-   object[name] = fields[name];
+  for (var name in fields) {
+    object[name] = fields[name];
   }
 
   return object;
-}
+};
 
 exports['Successfully pass through collation to findAndModify command'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -27,10 +27,15 @@ exports['Successfully pass through collation to findAndModify command'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 5, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -42,21 +47,26 @@ exports['Successfully pass through collation to findAndModify command'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.listCollections) {
-            request.reply({ok:1, cursor: {
-              id: Long.fromNumber(0), ns: 'test.cmd$.listCollections', firstBatch: []
-            }});
-          } else if(doc.create) {
+          } else if (doc.listCollections) {
+            request.reply({
+              ok: 1,
+              cursor: {
+                id: Long.fromNumber(0),
+                ns: 'test.cmd$.listCollections',
+                firstBatch: []
+              }
+            });
+          } else if (doc.create) {
             commandResult = doc;
-            request.reply({ok:1});
+            request.reply({ ok: 1 });
           }
         }
       }).catch(function(err) {
@@ -71,9 +81,15 @@ exports['Successfully pass through collation to findAndModify command'] = {
         var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
-        db.createCollection('test', {viewOn: 'users', pipeline: [{$match: {}}]}, function(err, r) {
+        db.createCollection('test', { viewOn: 'users', pipeline: [{ $match: {} }] }, function(
+          err,
+          r
+        ) {
           test.equal(null, err);
-          test.deepEqual({ create: 'test', viewOn: 'users', pipeline: [ { '$match': {} } ] }, commandResult)
+          test.deepEqual(
+            { create: 'test', viewOn: 'users', pipeline: [{ $match: {} }] },
+            commandResult
+          );
 
           singleServer.destroy();
           running = false;
@@ -84,4 +100,4 @@ exports['Successfully pass through collation to findAndModify command'] = {
       });
     });
   }
-}
+};

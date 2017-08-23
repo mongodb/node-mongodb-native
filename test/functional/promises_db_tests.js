@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var f = require('util').format;
 
@@ -6,7 +6,7 @@ exports['Should correctly connect with MongoClient.connect using Promise'] = {
   metadata: {
     requires: {
       promises: true,
-      node: ">0.8.0",
+      node: '>0.8.0',
       topology: ['single']
     }
   },
@@ -15,45 +15,44 @@ exports['Should correctly connect with MongoClient.connect using Promise'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     var url = configuration.url();
-    url = url.indexOf('?') != -1
-      ? f('%s&%s', url, 'maxPoolSize=100')
-      : f('%s?%s', url, 'maxPoolSize=100');
+    url =
+      url.indexOf('?') != -1
+        ? f('%s&%s', url, 'maxPoolSize=100')
+        : f('%s?%s', url, 'maxPoolSize=100');
 
     MongoClient.connect(url).then(function(client) {
-      test.equal(1, client
-        .topology
-        .connections().length);
+      test.equal(1, client.topology.connections().length);
 
       client.close();
       test.done();
     });
   }
-}
+};
 
 exports['Should correctly connect using Db.open and promise'] = {
   metadata: {
     requires: {
       promises: true,
-      node: ">0.8.0",
+      node: '>0.8.0',
       topology: ['single']
     }
   },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance({w:1}, {poolSize:1});
+    var client = configuration.newDbInstance({ w: 1 }, { poolSize: 1 });
     client.connect().then(function(client) {
       client.close();
       test.done();
     });
   }
-}
+};
 
 exports['Should correctly execute ismaster using Promise'] = {
   metadata: {
     requires: {
       promises: true,
-      node: ">0.8.0",
+      node: '>0.8.0',
       topology: ['single']
     }
   },
@@ -62,13 +61,12 @@ exports['Should correctly execute ismaster using Promise'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     var url = configuration.url();
-    url = url.indexOf('?') != -1
-      ? f('%s&%s', url, 'maxPoolSize=5')
-      : f('%s?%s', url, 'maxPoolSize=5');
+    url =
+      url.indexOf('?') != -1 ? f('%s&%s', url, 'maxPoolSize=5') : f('%s?%s', url, 'maxPoolSize=5');
 
     MongoClient.connect(url).then(function(client) {
       // Execute ismaster
-      client.db(configuration.database).command({ismaster:true}).then(function(result) {
+      client.db(configuration.database).command({ ismaster: true }).then(function(result) {
         test.ok(result != null);
 
         client.close();
@@ -76,13 +74,13 @@ exports['Should correctly execute ismaster using Promise'] = {
       });
     });
   }
-}
+};
 
 exports['Should correctly catch command error using Promise'] = {
   metadata: {
     requires: {
       promises: true,
-      node: ">0.8.0",
+      node: '>0.8.0',
       topology: ['single']
     }
   },
@@ -91,29 +89,30 @@ exports['Should correctly catch command error using Promise'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     var url = configuration.url();
-    url = url.indexOf('?') != -1
-      ? f('%s&%s', url, 'maxPoolSize=5')
-      : f('%s?%s', url, 'maxPoolSize=5');
+    url =
+      url.indexOf('?') != -1 ? f('%s&%s', url, 'maxPoolSize=5') : f('%s?%s', url, 'maxPoolSize=5');
 
     MongoClient.connect(url).then(function(client) {
       // Execute ismaster
-      client.db(configuration.database).command({nosuchcommand:true}).then(function(result) {
-      }).catch(function(err) {
-
-        // Execute close using promise
-        client.close().then(function() {
-          test.done();
+      client
+        .db(configuration.database)
+        .command({ nosuchcommand: true })
+        .then(function(result) {})
+        .catch(function(err) {
+          // Execute close using promise
+          client.close().then(function() {
+            test.done();
+          });
         });
-      });
     });
   }
-}
+};
 
 exports['Should correctly createCollecton using Promise'] = {
   metadata: {
     requires: {
       promises: true,
-      node: ">0.8.0",
+      node: '>0.8.0',
       topology: ['single']
     }
   },
@@ -122,28 +121,31 @@ exports['Should correctly createCollecton using Promise'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     var url = configuration.url();
-    url = url.indexOf('?') != -1
-      ? f('%s&%s', url, 'maxPoolSize=5')
-      : f('%s?%s', url, 'maxPoolSize=5');
+    url =
+      url.indexOf('?') != -1 ? f('%s&%s', url, 'maxPoolSize=5') : f('%s?%s', url, 'maxPoolSize=5');
 
     MongoClient.connect(url).then(function(client) {
-      client.db(configuration.database).createCollection('promiseCollection').then(function(col) {
-        test.ok(col != null);
+      client
+        .db(configuration.database)
+        .createCollection('promiseCollection')
+        .then(function(col) {
+          test.ok(col != null);
 
-        client.close();
-        test.done();
-      }).catch(function(err) {
-        console.log(err.stack)
-      });
+          client.close();
+          test.done();
+        })
+        .catch(function(err) {
+          console.log(err.stack);
+        });
     });
   }
-}
+};
 
 exports['Should correctly execute stats using Promise'] = {
   metadata: {
     requires: {
       promises: true,
-      node: ">0.8.0",
+      node: '>0.8.0',
       topology: ['single']
     }
   },
@@ -152,9 +154,8 @@ exports['Should correctly execute stats using Promise'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     var url = configuration.url();
-    url = url.indexOf('?') != -1
-      ? f('%s&%s', url, 'maxPoolSize=5')
-      : f('%s?%s', url, 'maxPoolSize=5');
+    url =
+      url.indexOf('?') != -1 ? f('%s&%s', url, 'maxPoolSize=5') : f('%s?%s', url, 'maxPoolSize=5');
 
     MongoClient.connect(url).then(function(client) {
       client.db(configuration.database).stats().then(function(stats) {
@@ -165,13 +166,13 @@ exports['Should correctly execute stats using Promise'] = {
       });
     });
   }
-}
+};
 
 exports['Should correctly execute eval using Promise'] = {
   metadata: {
     requires: {
       promises: true,
-      node: ">0.8.0",
+      node: '>0.8.0',
       topology: ['single']
     }
   },
@@ -180,26 +181,28 @@ exports['Should correctly execute eval using Promise'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     var url = configuration.url();
-    url = url.indexOf('?') != -1
-      ? f('%s&%s', url, 'maxPoolSize=5')
-      : f('%s?%s', url, 'maxPoolSize=5');
+    url =
+      url.indexOf('?') != -1 ? f('%s&%s', url, 'maxPoolSize=5') : f('%s?%s', url, 'maxPoolSize=5');
 
     MongoClient.connect(url).then(function(client) {
-      client.db(configuration.database).eval('function (x) {return x;}', [3], {nolock:true}).then(function(result) {
-        test.ok(result != null);
+      client
+        .db(configuration.database)
+        .eval('function (x) {return x;}', [3], { nolock: true })
+        .then(function(result) {
+          test.ok(result != null);
 
-        client.close();
-        test.done();
-      });
+          client.close();
+          test.done();
+        });
     });
   }
-}
+};
 
 exports['Should correctly rename and drop collection using Promise'] = {
   metadata: {
     requires: {
       promises: true,
-      node: ">0.8.0",
+      node: '>0.8.0',
       topology: ['single']
     }
   },
@@ -208,9 +211,8 @@ exports['Should correctly rename and drop collection using Promise'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     var url = configuration.url();
-    url = url.indexOf('?') != -1
-      ? f('%s&%s', url, 'maxPoolSize=5')
-      : f('%s?%s', url, 'maxPoolSize=5');
+    url =
+      url.indexOf('?') != -1 ? f('%s&%s', url, 'maxPoolSize=5') : f('%s?%s', url, 'maxPoolSize=5');
 
     MongoClient.connect(url).then(function(client) {
       var db = client.db(configuration.database);
@@ -235,13 +237,13 @@ exports['Should correctly rename and drop collection using Promise'] = {
       });
     });
   }
-}
+};
 
 exports['Should correctly drop database using Promise'] = {
   metadata: {
     requires: {
       promises: true,
-      node: ">0.8.0",
+      node: '>0.8.0',
       topology: ['single']
     }
   },
@@ -250,28 +252,31 @@ exports['Should correctly drop database using Promise'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     var url = configuration.url();
-    url = url.indexOf('?') != -1
-      ? f('%s&%s', url, 'maxPoolSize=5')
-      : f('%s?%s', url, 'maxPoolSize=5');
+    url =
+      url.indexOf('?') != -1 ? f('%s&%s', url, 'maxPoolSize=5') : f('%s?%s', url, 'maxPoolSize=5');
 
     MongoClient.connect(url).then(function(client) {
-      client.db(configuration.database).dropDatabase().then(function(r) {
-        test.ok(r);
+      client
+        .db(configuration.database)
+        .dropDatabase()
+        .then(function(r) {
+          test.ok(r);
 
-        client.close();
-        test.done();
-      }).catch(function(e) {
-        console.dir(e)
-      });
+          client.close();
+          test.done();
+        })
+        .catch(function(e) {
+          console.dir(e);
+        });
     });
   }
-}
+};
 
 exports['Should correctly createCollections and call collections with Promise'] = {
   metadata: {
     requires: {
       promises: true,
-      node: ">0.8.0",
+      node: '>0.8.0',
       topology: ['single']
     }
   },
@@ -280,9 +285,8 @@ exports['Should correctly createCollections and call collections with Promise'] 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     var url = configuration.url();
-    url = url.indexOf('?') != -1
-      ? f('%s&%s', url, 'maxPoolSize=5')
-      : f('%s?%s', url, 'maxPoolSize=5');
+    url =
+      url.indexOf('?') != -1 ? f('%s&%s', url, 'maxPoolSize=5') : f('%s?%s', url, 'maxPoolSize=5');
 
     MongoClient.connect(url).then(function(client) {
       var db = client.db(configuration.database);
@@ -303,13 +307,13 @@ exports['Should correctly createCollections and call collections with Promise'] 
       });
     });
   }
-}
+};
 
 exports['Should correctly execute executeDbAdminCommand using Promise'] = {
   metadata: {
     requires: {
       promises: true,
-      node: ">0.8.0",
+      node: '>0.8.0',
       topology: ['single']
     }
   },
@@ -318,27 +322,25 @@ exports['Should correctly execute executeDbAdminCommand using Promise'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     var url = configuration.url();
-    url = url.indexOf('?') != -1
-      ? f('%s&%s', url, 'maxPoolSize=5')
-      : f('%s?%s', url, 'maxPoolSize=5');
+    url =
+      url.indexOf('?') != -1 ? f('%s&%s', url, 'maxPoolSize=5') : f('%s?%s', url, 'maxPoolSize=5');
 
     MongoClient.connect(url).then(function(client) {
-      client.db(configuration.database)
-        .executeDbAdminCommand({ismaster:true}).then(function(r) {
-          test.ok(r);
+      client.db(configuration.database).executeDbAdminCommand({ ismaster: true }).then(function(r) {
+        test.ok(r);
 
-          client.close();
-          test.done();
+        client.close();
+        test.done();
       });
     });
   }
-}
+};
 
 exports['Should correctly execute creatIndex using Promise'] = {
   metadata: {
     requires: {
       promises: true,
-      node: ">0.8.0",
+      node: '>0.8.0',
       topology: ['single']
     }
   },
@@ -347,29 +349,29 @@ exports['Should correctly execute creatIndex using Promise'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     var url = configuration.url();
-    url = url.indexOf('?') != -1
-      ? f('%s&%s', url, 'maxPoolSize=5')
-      : f('%s?%s', url, 'maxPoolSize=5');
+    url =
+      url.indexOf('?') != -1 ? f('%s&%s', url, 'maxPoolSize=5') : f('%s?%s', url, 'maxPoolSize=5');
 
     MongoClient.connect(url).then(function(client) {
       // Create an index
       client
         .db(configuration.database)
-        .createIndex('promiseCollectionCollections1', {a:1}).then(function(r) {
+        .createIndex('promiseCollectionCollections1', { a: 1 })
+        .then(function(r) {
           test.ok(r != null);
 
           client.close();
           test.done();
-      });
+        });
     });
   }
-}
+};
 
 exports['Should correctly execute ensureIndex using Promise'] = {
   metadata: {
     requires: {
       promises: true,
-      node: ">0.8.0",
+      node: '>0.8.0',
       topology: ['single']
     }
   },
@@ -378,29 +380,29 @@ exports['Should correctly execute ensureIndex using Promise'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     var url = configuration.url();
-    url = url.indexOf('?') != -1
-      ? f('%s&%s', url, 'maxPoolSize=5')
-      : f('%s?%s', url, 'maxPoolSize=5');
+    url =
+      url.indexOf('?') != -1 ? f('%s&%s', url, 'maxPoolSize=5') : f('%s?%s', url, 'maxPoolSize=5');
 
     MongoClient.connect(url).then(function(client) {
       // Create an index
       client
         .db(configuration.database)
-        .ensureIndex('promiseCollectionCollections2', {a:1}).then(function(r) {
+        .ensureIndex('promiseCollectionCollections2', { a: 1 })
+        .then(function(r) {
           test.ok(r != null);
 
           client.close();
           test.done();
-      });
+        });
     });
   }
-}
+};
 
 exports['Should correctly execute createCollection using passed down bluebird Promise'] = {
   metadata: {
     requires: {
       promises: true,
-      node: ">0.8.0",
+      node: '>0.8.0',
       topology: ['single']
     }
   },
@@ -412,15 +414,17 @@ exports['Should correctly execute createCollection using passed down bluebird Pr
     var client = null;
     var BlueBird = require('bluebird');
 
-    MongoClient.connect(configuration.url(), {promiseLibrary: BlueBird}).then(function(_client) {
-      client = _client;
-      db = client.db(configuration.database);
-      return db.createCollection('test');
-    }).then(function(col) {
-      test.ok(col.s.options.promiseLibrary != null);
+    MongoClient.connect(configuration.url(), { promiseLibrary: BlueBird })
+      .then(function(_client) {
+        client = _client;
+        db = client.db(configuration.database);
+        return db.createCollection('test');
+      })
+      .then(function(col) {
+        test.ok(col.s.options.promiseLibrary != null);
 
-      client.close();
-      test.done();
-    });
+        client.close();
+        test.done();
+      });
   }
-}
+};

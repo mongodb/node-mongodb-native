@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 //
 // exports['Should Correctly Do MongoClient with bufferMaxEntries:0 and ordered execution'] = {
 //   metadata: {
@@ -32,7 +32,6 @@
 //     }, 3 * 60000);
 //   }
 // }
-
 
 // var mongodb = require("mongodb");
 //

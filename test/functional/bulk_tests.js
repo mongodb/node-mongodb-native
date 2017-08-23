@@ -1,27 +1,29 @@
-"use strict";
+'use strict';
 
 exports['Should correctly handle ordered single batch api write command error'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_1');
 
       // Add unique index on b field causing all updates to fail
-      col.ensureIndex({a:1}, {unique:true, sparse:false}, function(err, result) {
+      col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function(err, result) {
         test.equal(err, null);
 
         // Initialize the Ordered Batch
         var batch = col.initializeOrderedBulkOp();
 
         // Add some operations to be executed in order
-        batch.insert({b:1, a:1});
-        batch.find({b:2}).upsert().updateOne({$set: {a:1}});
-        batch.insert({b:3, a:2});
+        batch.insert({ b: 1, a: 1 });
+        batch.find({ b: 2 }).upsert().updateOne({ $set: { a: 1 } });
+        batch.insert({ b: 3, a: 2 });
 
         // Execute the operations
         batch.execute(function(err, result) {
@@ -53,33 +55,35 @@ exports['Should correctly handle ordered single batch api write command error'] 
       });
     });
   }
-}
+};
 
 exports['Should correctly handle ordered multiple batch api write command error'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_2');
 
       // Add unique index on b field causing all updates to fail
-      col.ensureIndex({a:1}, {unique:true, sparse:false}, function(err, result) {
+      col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function(err, result) {
         test.equal(err, null);
 
         // Initialize the Ordered Batch
         var batch = col.initializeOrderedBulkOp();
 
         // Add some operations to be executed in order
-        batch.insert({b:1, a:1});
-        batch.find({b:2}).upsert().updateOne({$set: {a:1}});
-        batch.find({b:3}).upsert().updateOne({$set: {a:2}});
-        batch.find({b:2}).upsert().updateOne({$set: {a:1}});
-        batch.insert({b:4, a:3});
-        batch.insert({b:5, a:1});
+        batch.insert({ b: 1, a: 1 });
+        batch.find({ b: 2 }).upsert().updateOne({ $set: { a: 1 } });
+        batch.find({ b: 3 }).upsert().updateOne({ $set: { a: 2 } });
+        batch.find({ b: 2 }).upsert().updateOne({ $set: { a: 1 } });
+        batch.insert({ b: 4, a: 3 });
+        batch.insert({ b: 5, a: 1 });
 
         // Execute the operations
         batch.execute(function(err, result) {
@@ -106,67 +110,71 @@ exports['Should correctly handle ordered multiple batch api write command error'
       });
     });
   }
-}
+};
 
 exports['Should fail due to ordered document being to big'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
       var coll = db.collection('batch_write_ordered_ops_3');
       // Set up a giant string to blow through the max message size
-      var hugeString = "";
+      var hugeString = '';
       // Create it bigger than 16MB
-      for(var i = 0; i < (1024 * 1100); i++) {
-        hugeString = hugeString + "1234567890123456"
+      for (var i = 0; i < 1024 * 1100; i++) {
+        hugeString = hugeString + '1234567890123456';
       }
 
       // Set up the batch
       var batch = coll.initializeOrderedBulkOp();
-      batch.insert({b:1, a:1});
+      batch.insert({ b: 1, a: 1 });
       // Should fail on insert due to string being to big
       try {
-        batch.insert({string: hugeString});
+        batch.insert({ string: hugeString });
         test.ok(false);
-      } catch(err) {}
+      } catch (err) {}
 
       // Finish up test
       client.close();
       test.done();
     });
   }
-}
+};
 
 exports['Should correctly split up ordered messages into more batches'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
       var coll = db.collection('batch_write_ordered_ops_4');
 
       // Set up a giant string to blow through the max message size
-      var hugeString = "";
+      var hugeString = '';
       // Create it bigger than 16MB
-      for(var i = 0; i < (1024 * 256); i++) {
-        hugeString = hugeString + "1234567890123456"
+      for (var i = 0; i < 1024 * 256; i++) {
+        hugeString = hugeString + '1234567890123456';
       }
 
       // Insert the string a couple of times, should force split into multiple batches
       var batch = coll.initializeOrderedBulkOp();
-      batch.insert({a:1, b: hugeString});
-      batch.insert({a:2, b: hugeString});
-      batch.insert({a:3, b: hugeString});
-      batch.insert({a:4, b: hugeString});
-      batch.insert({a:5, b: hugeString});
-      batch.insert({a:6, b: hugeString});
+      batch.insert({ a: 1, b: hugeString });
+      batch.insert({ a: 2, b: hugeString });
+      batch.insert({ a: 3, b: hugeString });
+      batch.insert({ a: 4, b: hugeString });
+      batch.insert({ a: 5, b: hugeString });
+      batch.insert({ a: 6, b: hugeString });
 
       // Execute the operations
       batch.execute(function(err, result) {
@@ -180,28 +188,35 @@ exports['Should correctly split up ordered messages into more batches'] = {
       });
     });
   }
-}
+};
 
-exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations using write commands'] = {
-  metadata: { requires: { mongodb: '>2.5.4', topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+exports[
+  'Should Correctly Fail Ordered Batch Operation due to illegal Operations using write commands'
+] = {
+  metadata: {
+    requires: {
+      mongodb: '>2.5.4',
+      topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+    }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_5');
 
       // Add unique index on b field causing all updates to fail
-      col.ensureIndex({b:1}, {unique:true, sparse:false}, function(err, result) {
+      col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function(err, result) {
         test.equal(err, null);
 
         // Initialize the Ordered Batch
         var batch = col.initializeOrderedBulkOp();
 
         // Add illegal insert operation
-        batch.insert({$set:{a:1}});
+        batch.insert({ $set: { a: 1 } });
 
         // Execute the operations
         batch.execute(function(err, result) {
@@ -211,7 +226,7 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
           // Initialize the Ordered Batch
           var batch = col.initializeOrderedBulkOp();
           // Add illegal remove
-          batch.find({$set:{a:1}}).removeOne();
+          batch.find({ $set: { a: 1 } }).removeOne();
           // Execute the operations
           batch.execute(function(err, result) {
             test.ok(err != null);
@@ -219,7 +234,7 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
             // Initialize the Ordered Batch
             var batch = col.initializeOrderedBulkOp();
             // Add illegal update
-            batch.find({a:{$set2:1}}).updateOne({c: {$set:{a:1}}});
+            batch.find({ a: { $set2: 1 } }).updateOne({ c: { $set: { a: 1 } } });
             // Execute the operations
             batch.execute(function(err, result) {
               test.ok(err != null);
@@ -232,30 +247,34 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
       });
     });
   }
-}
+};
 
-exports['Should Correctly Execute Ordered Batch of Write Operations with duplicate key errors on updates'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+exports[
+  'Should Correctly Execute Ordered Batch of Write Operations with duplicate key errors on updates'
+] = {
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_6');
 
       // Add unique index on b field causing all updates to fail
-      col.ensureIndex({b:1}, {unique:true, sparse:false}, function(err, result) {
+      col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function(err, result) {
         test.equal(err, null);
 
         // Initialize the Ordered Batch
         var batch = col.initializeOrderedBulkOp();
 
         // Add some operations to be executed in order
-        batch.insert({a:1});
-        batch.find({a:1}).update({$set: {b: 1}});
-        batch.insert({b:1});
+        batch.insert({ a: 1 });
+        batch.find({ a: 1 }).update({ $set: { b: 1 } });
+        batch.insert({ b: 1 });
 
         // Execute the operations
         batch.execute(function(err, result) {
@@ -279,32 +298,36 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with duplica
       });
     });
   }
-}
+};
 
-exports['Should Correctly Execute Ordered Batch of Write Operations with upserts causing duplicate key errors on updates'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+exports[
+  'Should Correctly Execute Ordered Batch of Write Operations with upserts causing duplicate key errors on updates'
+] = {
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_7');
 
       // Add unique index on b field causing all updates to fail
-      col.ensureIndex({b:1}, {unique:true, sparse:false}, function(err, result) {
+      col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function(err, result) {
         test.equal(err, null);
 
         // Initialize the Ordered Batch
         var batch = col.initializeOrderedBulkOp();
 
         // Add some operations to be executed in order
-        batch.insert({a:1});
-        batch.find({a:1}).update({$set: {b: 1}});
-        batch.find({a:2}).upsert().update({$set: {b: 2}});
-        batch.find({a:3}).upsert().update({$set: {b: 3}});
-        batch.insert({b:1});
+        batch.insert({ a: 1 });
+        batch.find({ a: 1 }).update({ $set: { b: 1 } });
+        batch.find({ a: 2 }).upsert().update({ $set: { b: 2 } });
+        batch.find({ a: 3 }).upsert().update({ $set: { b: 3 } });
+        batch.insert({ b: 1 });
 
         // Execute the operations
         batch.execute(function(err, result) {
@@ -337,14 +360,16 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with upserts
       });
     });
   }
-}
+};
 
 exports['Should correctly perform ordered upsert with custom _id'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
@@ -353,7 +378,7 @@ exports['Should correctly perform ordered upsert with custom _id'] = {
       var batch = col.initializeOrderedBulkOp();
 
       // Add some operations to be executed in order
-      batch.find({_id:2}).upsert().updateOne({$set: {b:2}});
+      batch.find({ _id: 2 }).upsert().updateOne({ $set: { b: 2 } });
 
       // Execute the operations
       batch.execute(function(err, result) {
@@ -375,14 +400,16 @@ exports['Should correctly perform ordered upsert with custom _id'] = {
       });
     });
   }
-}
+};
 
 exports['Should return an error when no operations in ordered batch'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var client = configuration.newDbInstance({ w: 1 }, { poolSize: 1, auto_reconnect: false });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
@@ -398,14 +425,16 @@ exports['Should return an error when no operations in ordered batch'] = {
       });
     });
   }
-}
+};
 
 exports['Should correctly execute ordered batch using w:0'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
@@ -413,14 +442,14 @@ exports['Should correctly execute ordered batch using w:0'] = {
       var threw = false;
 
       var bulk = col.initializeOrderedBulkOp();
-      for(var i = 0; i < 100; i++) {
-        bulk.insert({a:1});
+      for (var i = 0; i < 100; i++) {
+        bulk.insert({ a: 1 });
       }
 
-      bulk.find({b:1}).upsert().update({b:1});
-      bulk.find({c:1}).remove();
+      bulk.find({ b: 1 }).upsert().update({ b: 1 });
+      bulk.find({ c: 1 }).remove();
 
-      bulk.execute({w:0}, function(err, result) {
+      bulk.execute({ w: 0 }, function(err, result) {
         test.equal(null, err);
         // Check state of result
         test.equal(0, result.nUpserted);
@@ -435,30 +464,30 @@ exports['Should correctly execute ordered batch using w:0'] = {
       });
     });
   }
-}
+};
 
 exports['Should correctly handle single unordered batch API'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_unordered_ops_legacy_1');
 
       // Add unique index on b field causing all updates to fail
-      col.ensureIndex({a:1}, {unique:true, sparse:false}, function(err, result) {
+      col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function(err, result) {
         test.equal(err, null);
 
         // Initialize the unordered Batch
         var batch = col.initializeUnorderedBulkOp();
 
         // Add some operations to be executed in order
-        batch.insert({b:1, a:1});
-        batch.find({b:2}).upsert().updateOne({$set: {a:1}});
-        batch.insert({b:3, a:2});
+        batch.insert({ b: 1, a: 1 });
+        batch.find({ b: 2 }).upsert().updateOne({ $set: { a: 1 } });
+        batch.insert({ b: 3, a: 2 });
 
         // Execute the operations
         batch.execute(function(err, result) {
@@ -494,33 +523,33 @@ exports['Should correctly handle single unordered batch API'] = {
       });
     });
   }
-}
+};
 
 exports['Should correctly handle multiple unordered batch API'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_unordered_ops_legacy_2');
 
       // Add unique index on b field causing all updates to fail
-      col.ensureIndex({a:1}, {unique:true, sparse:false}, function(err, result) {
+      col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function(err, result) {
         test.equal(err, null);
 
         // Initialize the unordered Batch
-        var batch = col.initializeUnorderedBulkOp({useLegacyOps: true});
+        var batch = col.initializeUnorderedBulkOp({ useLegacyOps: true });
 
         // Add some operations to be executed in order
-        batch.insert({b:1, a:1});
-        batch.find({b:2}).upsert().updateOne({$set: {a:1}});
-        batch.find({b:3}).upsert().updateOne({$set: {a:2}});
-        batch.find({b:2}).upsert().updateOne({$set: {a:1}});
-        batch.insert({b:4, a:3});
-        batch.insert({b:5, a:1});
+        batch.insert({ b: 1, a: 1 });
+        batch.find({ b: 2 }).upsert().updateOne({ $set: { a: 1 } });
+        batch.find({ b: 3 }).upsert().updateOne({ $set: { a: 2 } });
+        batch.find({ b: 2 }).upsert().updateOne({ $set: { a: 1 } });
+        batch.insert({ b: 4, a: 3 });
+        batch.insert({ b: 5, a: 1 });
 
         // Execute the operations
         batch.execute(function(err, result) {
@@ -530,10 +559,10 @@ exports['Should correctly handle multiple unordered batch API'] = {
           test.ok(3, result.getWriteErrorCount());
 
           // Go over all the errors
-          for(var i = 0; i < result.getWriteErrorCount(); i++) {
+          for (var i = 0; i < result.getWriteErrorCount(); i++) {
             var error = result.getWriteErrorAt(i);
 
-            switch(error.index) {
+            switch (error.index) {
               case 1:
                 test.equal(11000, error.code);
                 test.ok(error.errmsg != null);
@@ -555,13 +584,13 @@ exports['Should correctly handle multiple unordered batch API'] = {
                 test.ok(error.errmsg != null);
                 test.equal(5, error.getOperation().b);
                 test.equal(1, error.getOperation().a);
-                break
+                break;
               case 5:
                 test.equal(11000, error.code);
                 test.ok(error.errmsg != null);
                 test.equal(5, error.getOperation().b);
                 test.equal(1, error.getOperation().a);
-                break
+                break;
               default:
                 test.ok(false);
             }
@@ -574,67 +603,67 @@ exports['Should correctly handle multiple unordered batch API'] = {
       });
     });
   }
-}
+};
 
 exports['Should fail due to document being to big for unordered batch'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
       var coll = db.collection('batch_write_unordered_ops_legacy_3');
       // Set up a giant string to blow through the max message size
-      var hugeString = "";
+      var hugeString = '';
       // Create it bigger than 16MB
-      for(var i = 0; i < (1024 * 1100); i++) {
-        hugeString = hugeString + "1234567890123456"
+      for (var i = 0; i < 1024 * 1100; i++) {
+        hugeString = hugeString + '1234567890123456';
       }
 
       // Set up the batch
       var batch = coll.initializeUnorderedBulkOp();
-      batch.insert({b:1, a:1});
+      batch.insert({ b: 1, a: 1 });
       // Should fail on insert due to string being to big
       try {
-        batch.insert({string: hugeString});
+        batch.insert({ string: hugeString });
         test.ok(false);
-      } catch(err) {}
+      } catch (err) {}
 
       // Finish up test
       client.close();
       test.done();
     });
   }
-}
+};
 
 exports['Should correctly split up messages into more batches for unordered batches'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
       var coll = db.collection('batch_write_unordered_ops_legacy_4');
 
       // Set up a giant string to blow through the max message size
-      var hugeString = "";
+      var hugeString = '';
       // Create it bigger than 16MB
-      for(var i = 0; i < (1024 * 256); i++) {
-        hugeString = hugeString + "1234567890123456"
+      for (var i = 0; i < 1024 * 256; i++) {
+        hugeString = hugeString + '1234567890123456';
       }
 
       // Insert the string a couple of times, should force split into multiple batches
       var batch = coll.initializeUnorderedBulkOp();
-      batch.insert({a:1, b: hugeString});
-      batch.insert({a:2, b: hugeString});
-      batch.insert({a:3, b: hugeString});
-      batch.insert({a:4, b: hugeString});
-      batch.insert({a:5, b: hugeString});
-      batch.insert({a:6, b: hugeString});
+      batch.insert({ a: 1, b: hugeString });
+      batch.insert({ a: 2, b: hugeString });
+      batch.insert({ a: 3, b: hugeString });
+      batch.insert({ a: 4, b: hugeString });
+      batch.insert({ a: 5, b: hugeString });
+      batch.insert({ a: 6, b: hugeString });
 
       // Execute the operations
       batch.execute(function(err, result) {
@@ -648,14 +677,16 @@ exports['Should correctly split up messages into more batches for unordered batc
       });
     });
   }
-}
+};
 
 exports['Should Correctly Fail Unordered Batch Operation due to illegal Operations'] = {
-  metadata: { requires: { mongodb: '>2.5.4', topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: {
+    requires: { mongodb: '>2.5.4', topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
@@ -667,14 +698,14 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
       writeConcern.sparse = false;
 
       // Add unique index on b field causing all updates to fail
-      col.ensureIndex({b:1}, writeConcern, function(err, result) {
+      col.ensureIndex({ b: 1 }, writeConcern, function(err, result) {
         test.equal(err, null);
 
         // Initialize the unordered Batch
         var batch = col.initializeUnorderedBulkOp();
 
         // Add illegal insert operation
-        batch.insert({$set:{a:1}});
+        batch.insert({ $set: { a: 1 } });
 
         // Execute the operations
         batch.execute(function(err, result) {
@@ -683,7 +714,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
           // Initialize the unordered Batch
           var batch = col.initializeUnorderedBulkOp();
           // Add illegal remove
-          batch.find({$set:{a:1}}).removeOne();
+          batch.find({ $set: { a: 1 } }).removeOne();
           // Execute the operations
           batch.execute(function(err, result) {
             test.ok(err != null);
@@ -691,7 +722,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
             // Initialize the unordered Batch
             var batch = col.initializeUnorderedBulkOp();
             // Add illegal update
-            batch.find({$set:{a:1}}).updateOne({c: {$set:{a:1}}});
+            batch.find({ $set: { a: 1 } }).updateOne({ c: { $set: { a: 1 } } });
             // Execute the operations
             batch.execute(function(err, result) {
               test.ok(err != null);
@@ -704,14 +735,14 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
       });
     });
   }
-}
+};
 
 exports['Should Correctly Execute Unordered Batch with duplicate key errors on updates'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
@@ -723,22 +754,22 @@ exports['Should Correctly Execute Unordered Batch with duplicate key errors on u
       writeConcern.sparse = false;
 
       // Add unique index on b field causing all updates to fail
-      col.ensureIndex({b:1}, writeConcern, function(err, result) {
+      col.ensureIndex({ b: 1 }, writeConcern, function(err, result) {
         test.equal(err, null);
 
         // Initialize the unordered Batch
         var batch = col.initializeUnorderedBulkOp();
 
         // Add some operations to be executed in order
-        batch.insert({a:1});
-        batch.find({a:1}).update({$set: {b: 1}});
-        batch.insert({b:1});
-        batch.insert({b:1});
-        batch.insert({b:1});
-        batch.insert({b:1});
+        batch.insert({ a: 1 });
+        batch.find({ a: 1 }).update({ $set: { b: 1 } });
+        batch.insert({ b: 1 });
+        batch.insert({ b: 1 });
+        batch.insert({ b: 1 });
+        batch.insert({ b: 1 });
 
         // Execute the operations
-        batch.execute(configuration.writeConcernMax(),function(err, result) {
+        batch.execute(configuration.writeConcernMax(), function(err, result) {
           // console.log("------------------------------------------------------")
           // console.dir(err)
           // console.log(JSON.stringify(result, null, 2))
@@ -758,33 +789,35 @@ exports['Should Correctly Execute Unordered Batch with duplicate key errors on u
       });
     });
   }
-}
+};
 
-exports['Should Correctly Execute Unordered Batch of with upserts causing duplicate key errors on updates'] = {
+exports[
+  'Should Correctly Execute Unordered Batch of with upserts causing duplicate key errors on updates'
+] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_unordered_ops_legacy_7');
 
       // Add unique index on b field causing all updates to fail
-      col.ensureIndex({b:1}, {unique:true, sparse:false}, function(err, result) {
+      col.ensureIndex({ b: 1 }, { unique: true, sparse: false }, function(err, result) {
         test.equal(err, null);
 
         // Initialize the unordered Batch
         var batch = col.initializeUnorderedBulkOp();
 
         // Add some operations to be executed in order
-        batch.insert({a:1});
-        batch.find({a:1}).update({$set: {b: 1}});
-        batch.find({a:2}).upsert().update({$set: {b: 2}});
-        batch.find({a:3}).upsert().update({$set: {b: 3}});
-        batch.find({a:1}).update({$set: {b: 1}});
-        batch.insert({b:1});
+        batch.insert({ a: 1 });
+        batch.find({ a: 1 }).update({ $set: { b: 1 } });
+        batch.find({ a: 2 }).upsert().update({ $set: { b: 2 } });
+        batch.find({ a: 3 }).upsert().update({ $set: { b: 3 } });
+        batch.find({ a: 1 }).update({ $set: { b: 1 } });
+        batch.insert({ b: 1 });
 
         // Execute the operations
         batch.execute(configuration.writeConcernMax(), function(err, result) {
@@ -816,14 +849,14 @@ exports['Should Correctly Execute Unordered Batch of with upserts causing duplic
       });
     });
   }
-}
+};
 
 exports['Should correctly perform unordered upsert with custom _id'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
@@ -832,7 +865,7 @@ exports['Should correctly perform unordered upsert with custom _id'] = {
       var batch = col.initializeUnorderedBulkOp();
 
       // Add some operations to be executed in order
-      batch.find({_id:2}).upsert().updateOne({$set: {b:2}});
+      batch.find({ _id: 2 }).upsert().updateOne({ $set: { b: 2 } });
 
       // Execute the operations
       batch.execute(configuration.writeConcernMax(), function(err, result) {
@@ -854,14 +887,14 @@ exports['Should correctly perform unordered upsert with custom _id'] = {
       });
     });
   }
-}
+};
 
 exports['Should prohibit batch finds with no selector'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
@@ -873,52 +906,54 @@ exports['Should prohibit batch finds with no selector'] = {
       try {
         unorderedBatch.find();
         test.ok(false);
-      } catch(e) {
-        test.equal("MongoError: Bulk find operation must specify a selector", e.toString());
+      } catch (e) {
+        test.equal('MongoError: Bulk find operation must specify a selector', e.toString());
       }
 
       try {
         orderedBatch.find();
         test.ok(false);
-      } catch(e) {
-        test.equal("MongoError: Bulk find operation must specify a selector", e.toString());
+      } catch (e) {
+        test.equal('MongoError: Bulk find operation must specify a selector', e.toString());
       }
 
       client.close();
       test.done();
     });
   }
-}
+};
 
 exports['Should return an error when no operations in unordered batch'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var client = configuration.newDbInstance({ w: 1 }, { poolSize: 1, auto_reconnect: false });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_8');
 
       // Initialize the Ordered Batch
-      col.initializeUnorderedBulkOp().execute(configuration.writeConcernMax(),function(err, result) {
-        test.equal(err instanceof Error, true);
-        test.equal(err.message, 'Invalid Operation, no operations specified');
+      col
+        .initializeUnorderedBulkOp()
+        .execute(configuration.writeConcernMax(), function(err, result) {
+          test.equal(err instanceof Error, true);
+          test.equal(err.message, 'Invalid Operation, no operations specified');
 
-        client.close();
-        test.done();
-      });
+          client.close();
+          test.done();
+        });
     });
   }
-}
+};
 
 exports['Should correctly execute unordered batch using w:0'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
@@ -926,14 +961,14 @@ exports['Should correctly execute unordered batch using w:0'] = {
       var threw = false;
 
       var bulk = col.initializeUnorderedBulkOp();
-      for(var i = 0; i < 100; i++) {
-        bulk.insert({a:1});
+      for (var i = 0; i < 100; i++) {
+        bulk.insert({ a: 1 });
       }
 
-      bulk.find({b:1}).upsert().update({b:1});
-      bulk.find({c:1}).remove();
+      bulk.find({ b: 1 }).upsert().update({ b: 1 });
+      bulk.find({ c: 1 }).remove();
 
-      bulk.execute({w:0}, function(err, result) {
+      bulk.execute({ w: 0 }, function(err, result) {
         test.equal(null, err);
         // Check state of result
         test.equal(0, result.nUpserted);
@@ -948,7 +983,7 @@ exports['Should correctly execute unordered batch using w:0'] = {
       });
     });
   }
-}
+};
 
 /*******************************************************************
  *
@@ -956,11 +991,11 @@ exports['Should correctly execute unordered batch using w:0'] = {
  *
  *******************************************************************/
 exports['Should fail with w:2 and wtimeout write concern due single mongod instance ordered'] = {
-  metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
+  metadata: { requires: { topology: 'single', mongodb: '>2.5.4' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
@@ -968,11 +1003,11 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
       // Initialize the Ordered Batch
       var batch = col.initializeOrderedBulkOp();
       // Add some operations to be executed in order
-      batch.insert({a:1});
-      batch.insert({a:2});
+      batch.insert({ a: 1 });
+      batch.insert({ a: 2 });
 
       // Execute the operations
-      batch.execute({w:2, wtimeout:1000}, function(err, result) {
+      batch.execute({ w: 2, wtimeout: 1000 }, function(err, result) {
         // console.dir(err)
         test.ok(err != null);
         test.ok(err.code != null);
@@ -984,26 +1019,26 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
       });
     });
   }
-}
+};
 
 exports['Should correctly handle bulk operation split for ordered bulk operation'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
-        mongodb: ">=2.6.0"
-      , topology: 'single'
-      , node: ">0.10.0"
+      mongodb: '>=2.6.0',
+      topology: 'single',
+      node: '>0.10.0'
     }
   },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       var docs = [];
-      for(var i = 0; i < 5; i++) {
+      for (var i = 0; i < 5; i++) {
         docs.push({
           s: new Array(6000000).join('x')
         });
@@ -1022,7 +1057,7 @@ exports['Should correctly handle bulk operation split for ordered bulk operation
       });
     });
   }
-}
+};
 
 /*******************************************************************
  *
@@ -1030,11 +1065,11 @@ exports['Should correctly handle bulk operation split for ordered bulk operation
  *
  *******************************************************************/
 exports['Should fail with w:2 and wtimeout write concern due single mongod instance unordered'] = {
-  metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
+  metadata: { requires: { topology: 'single', mongodb: '>2.5.4' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
@@ -1042,11 +1077,11 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
       // Initialize the Ordered Batch
       var batch = col.initializeUnorderedBulkOp();
       // Add some operations to be executed in order
-      batch.insert({a:1});
-      batch.insert({a:2});
+      batch.insert({ a: 1 });
+      batch.insert({ a: 2 });
 
       // Execute the operations
-      batch.execute({w:2, wtimeout:1000}, function(err, result) {
+      batch.execute({ w: 2, wtimeout: 1000 }, function(err, result) {
         test.ok(err != null);
         test.ok(err.code != null);
         test.ok(err.errmsg != null);
@@ -1057,29 +1092,29 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
       });
     });
   }
-}
+};
 
 exports['should correctly return the number of operations in the bulk'] = {
-  metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
+  metadata: { requires: { topology: 'single', mongodb: '>2.5.4' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('batch_write_concerns_ops_1');
       // Initialize the Ordered Batch
       var batch = col.initializeOrderedBulkOp();
-      batch.insert({a:1});
-      batch.find({}).upsert().update({$set: {b: 1}});
+      batch.insert({ a: 1 });
+      batch.find({}).upsert().update({ $set: { b: 1 } });
 
       // Check how many ops we have
       test.equal(2, batch.length);
 
       var batch = col.initializeUnorderedBulkOp();
-      batch.insert({a:1});
-      batch.find({}).upsert().update({$set: {b: 1}});
+      batch.insert({ a: 1 });
+      batch.find({}).upsert().update({ $set: { b: 1 } });
 
       // Check how many ops we have
       test.equal(2, batch.length);
@@ -1089,14 +1124,14 @@ exports['should correctly return the number of operations in the bulk'] = {
       test.done();
     });
   }
-}
+};
 
 exports['should correctly split unordered bulk batch'] = {
-  metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
+  metadata: { requires: { topology: 'single', mongodb: '>2.5.4' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       var insertFirst = false;
@@ -1105,9 +1140,9 @@ exports['should correctly split unordered bulk batch'] = {
       var collection = db.collection('batch_write_unordered_split_test');
       // Create an unordered bulk
       var operation = collection.initializeUnorderedBulkOp(),
-          documents = [];
+        documents = [];
 
-      for(var i = 0; i < 10000; i++) {
+      for (var i = 0; i < 10000; i++) {
         var document = { name: 'bob' + i };
         documents.push(document);
         operation.insert(document);
@@ -1118,7 +1153,7 @@ exports['should correctly split unordered bulk batch'] = {
 
         operation = collection.initializeUnorderedBulkOp();
 
-        if(insertFirst) {
+        if (insertFirst) {
           // if you add the inserts to the batch first, it works fine.
           insertDocuments();
           replaceDocuments();
@@ -1137,26 +1172,26 @@ exports['should correctly split unordered bulk batch'] = {
       });
 
       function insertDocuments() {
-        for(i = 10000; i < 10200; i++) {
-          operation.insert({name: 'bob' + i});
+        for (i = 10000; i < 10200; i++) {
+          operation.insert({ name: 'bob' + i });
         }
       }
 
       function replaceDocuments() {
-        for(var i = 0; i < batchSize; i++) {
-          operation.find({_id: documents[i]._id}).replaceOne({name: 'joe' + i});
+        for (var i = 0; i < batchSize; i++) {
+          operation.find({ _id: documents[i]._id }).replaceOne({ name: 'joe' + i });
         }
       }
     });
   }
-}
+};
 
 exports['should correctly split ordered bulk batch'] = {
-  metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
+  metadata: { requires: { topology: 'single', mongodb: '>2.5.4' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       var insertFirst = false;
@@ -1165,9 +1200,9 @@ exports['should correctly split ordered bulk batch'] = {
       var collection = db.collection('batch_write_ordered_split_test');
       // Create an unordered bulk
       var operation = collection.initializeOrderedBulkOp(),
-          documents = [];
+        documents = [];
 
-      for(var i = 0; i < 10000; i++) {
+      for (var i = 0; i < 10000; i++) {
         var document = { name: 'bob' + i };
         documents.push(document);
         operation.insert(document);
@@ -1178,7 +1213,7 @@ exports['should correctly split ordered bulk batch'] = {
 
         operation = collection.initializeOrderedBulkOp();
 
-        if(insertFirst) {
+        if (insertFirst) {
           // if you add the inserts to the batch first, it works fine.
           insertDocuments();
           replaceDocuments();
@@ -1197,44 +1232,44 @@ exports['should correctly split ordered bulk batch'] = {
       });
 
       function insertDocuments() {
-        for(i = 10000; i < 10200; i++) {
-          operation.insert({name: 'bob' + i});
+        for (i = 10000; i < 10200; i++) {
+          operation.insert({ name: 'bob' + i });
         }
       }
 
       function replaceDocuments() {
-        for(var i = 0; i < batchSize; i++) {
-          operation.find({_id: documents[i]._id}).replaceOne({name: 'joe' + i});
+        for (var i = 0; i < batchSize; i++) {
+          operation.find({ _id: documents[i]._id }).replaceOne({ name: 'joe' + i });
         }
       }
     });
   }
-}
+};
 
 exports['Should correctly handle bulk operation split for unordered bulk operation'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
-        mongodb: ">=2.6.0"
-      , topology: 'single'
-      , node: ">0.10.0"
+      mongodb: '>=2.6.0',
+      topology: 'single',
+      node: '>0.10.0'
     }
   },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       var docs = [];
-      for(var i = 0; i < 5; i++) {
+      for (var i = 0; i < 5; i++) {
         docs.push({
           s: new Array(6000000).join('x')
         });
       }
 
-      db.collection('bigdocs_unordered').insertMany(docs, {ordered:false}, function(err, r) {
+      db.collection('bigdocs_unordered').insertMany(docs, { ordered: false }, function(err, r) {
         test.equal(null, err);
 
         db.collection('bigdocs_unordered').count(function(err, c) {
@@ -1247,10 +1282,12 @@ exports['Should correctly handle bulk operation split for unordered bulk operati
       });
     });
   }
-}
+};
 
-exports['Should return an error instead of throwing when no operations are provided for ordered bulk operation execute'] = {
-  metadata: { requires: { mongodb: ">=2.6.0" , topology: 'single', node: ">0.10.0" } },
+exports[
+  'Should return an error instead of throwing when no operations are provided for ordered bulk operation execute'
+] = {
+  metadata: { requires: { mongodb: '>=2.6.0', topology: 'single', node: '>0.10.0' } },
   test: function(configuration, test) {
     var client = configuration.newDbInstance({ w: 1 }, { poolSize: 1 });
     client.connect(function(err, client) {
@@ -1263,10 +1300,12 @@ exports['Should return an error instead of throwing when no operations are provi
       });
     });
   }
-}
+};
 
-exports['Should return an error instead of throwing when no operations are provided for unordered bulk operation execute'] = {
-  metadata: { requires: { mongodb: ">=2.6.0" , topology: 'single', node: ">0.10.0" } },
+exports[
+  'Should return an error instead of throwing when no operations are provided for unordered bulk operation execute'
+] = {
+  metadata: { requires: { mongodb: '>=2.6.0', topology: 'single', node: '>0.10.0' } },
   test: function(configuration, test) {
     var client = configuration.newDbInstance({ w: 1 }, { poolSize: 1 });
 
@@ -1280,14 +1319,17 @@ exports['Should return an error instead of throwing when no operations are provi
       });
     });
   }
-}
+};
 
-exports['Should return an error instead of throwing when an empty bulk operation is submitted (with promise)'] = {
-  metadata: { requires: { promises: true, node: ">0.12.0" } },
+exports[
+  'Should return an error instead of throwing when an empty bulk operation is submitted (with promise)'
+] = {
+  metadata: { requires: { promises: true, node: '>0.12.0' } },
   test: function(configuration, test) {
     var client = configuration.newDbInstance({ w: 1 }, { poolSize: 1 });
 
-    return client.connect()
+    return client
+      .connect()
       .then(function() {
         var db = client.db(configuration.database);
         return db.collection('doesnt_matter').insertMany([]);
@@ -1304,4 +1346,4 @@ exports['Should return an error instead of throwing when an empty bulk operation
         test.done();
       });
   }
-}
+};

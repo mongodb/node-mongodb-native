@@ -1,19 +1,19 @@
 // Extend the object
 var extend = function(template, fields) {
   var object = {};
-  for(var name in template) {
+  for (var name in template) {
     object[name] = template[name];
   }
 
-  for(var name in fields) {
-   object[name] = fields[name];
+  for (var name in fields) {
+    object[name] = fields[name];
   }
 
   return object;
-}
+};
 
 exports['Successfully pass through collation to findAndModify command'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -26,10 +26,15 @@ exports['Successfully pass through collation to findAndModify command'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 5, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -40,17 +45,17 @@ exports['Successfully pass through collation to findAndModify command'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.findandmodify) {
+          } else if (doc.findandmodify) {
             commandResult = doc;
-            request.reply({ok:1, result: {}});
+            request.reply({ ok: 1, result: {} });
           }
         }
       }).catch(function(err) {
@@ -65,23 +70,31 @@ exports['Successfully pass through collation to findAndModify command'] = {
         var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
-        db.collection('test').findAndModify({a:1}, [['a', 1]], {$set:{b1:1}}, {new:true, collation: {caseLevel:true}}, function(err, doc) {
-          test.equal(null, err);
-          test.deepEqual({ caseLevel: true }, commandResult.collation);
+        db
+          .collection('test')
+          .findAndModify(
+            { a: 1 },
+            [['a', 1]],
+            { $set: { b1: 1 } },
+            { new: true, collation: { caseLevel: true } },
+            function(err, doc) {
+              test.equal(null, err);
+              test.deepEqual({ caseLevel: true }, commandResult.collation);
 
-          singleServer.destroy();
-          running = false;
+              singleServer.destroy();
+              running = false;
 
-          client.close();
-          test.done();
-        });
+              client.close();
+              test.done();
+            }
+          );
       });
     });
   }
-}
+};
 
 exports['Successfully pass through collation to count command'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -94,10 +107,15 @@ exports['Successfully pass through collation to count command'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 5, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -108,17 +126,17 @@ exports['Successfully pass through collation to count command'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.count) {
+          } else if (doc.count) {
             commandResult = doc;
-            request.reply({ok:1, result: {n:1}});
+            request.reply({ ok: 1, result: { n: 1 } });
           }
         }
       }).catch(function(err) {
@@ -133,7 +151,7 @@ exports['Successfully pass through collation to count command'] = {
         var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
-        db.collection('test').count({}, {collation: {caseLevel:true}}, function(err, doc) {
+        db.collection('test').count({}, { collation: { caseLevel: true } }, function(err, doc) {
           test.equal(null, err);
           test.deepEqual({ caseLevel: true }, commandResult.collation);
 
@@ -146,10 +164,10 @@ exports['Successfully pass through collation to count command'] = {
       });
     });
   }
-}
+};
 
 exports['Successfully pass through collation to aggregation command'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -162,10 +180,15 @@ exports['Successfully pass through collation to aggregation command'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 5, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -176,17 +199,17 @@ exports['Successfully pass through collation to aggregation command'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.aggregate) {
+          } else if (doc.aggregate) {
             commandResult = doc;
-            request.reply({ok:1});
+            request.reply({ ok: 1 });
           }
         }
       }).catch(function(err) {
@@ -201,26 +224,28 @@ exports['Successfully pass through collation to aggregation command'] = {
         var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
-        db.collection('test').aggregate([
-            {$match: {}}
-          , {$out:'readConcernCollectionAggregate1Output'}
-        ], {collation: {caseLevel:true}}).toArray(function(err, doc) {
-          test.equal(null, err);
-          test.deepEqual({ caseLevel: true }, commandResult.collation);
+        db
+          .collection('test')
+          .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }], {
+            collation: { caseLevel: true }
+          })
+          .toArray(function(err, doc) {
+            test.equal(null, err);
+            test.deepEqual({ caseLevel: true }, commandResult.collation);
 
-          singleServer.destroy();
-          running = false;
+            singleServer.destroy();
+            running = false;
 
-          client.close();
-          test.done();
-        });
+            client.close();
+            test.done();
+          });
       });
     });
   }
-}
+};
 
 exports['Successfully pass through collation to distinct command'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -233,10 +258,15 @@ exports['Successfully pass through collation to distinct command'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 5, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -247,17 +277,17 @@ exports['Successfully pass through collation to distinct command'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.distinct) {
+          } else if (doc.distinct) {
             commandResult = doc;
-            request.reply({ok:1});
+            request.reply({ ok: 1 });
           }
         }
       }).catch(function(err) {
@@ -272,23 +302,25 @@ exports['Successfully pass through collation to distinct command'] = {
         var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
-        db.collection('test').distinct('a', {}, {collation: {caseLevel:true}}, function(err, doc) {
-          test.equal(null, err);
-          test.deepEqual({ caseLevel: true }, commandResult.collation);
+        db
+          .collection('test')
+          .distinct('a', {}, { collation: { caseLevel: true } }, function(err, doc) {
+            test.equal(null, err);
+            test.deepEqual({ caseLevel: true }, commandResult.collation);
 
-          singleServer.destroy();
-          running = false;
+            singleServer.destroy();
+            running = false;
 
-          client.close();
-          test.done();
-        });
+            client.close();
+            test.done();
+          });
       });
     });
   }
-}
+};
 
 exports['Successfully pass through collation to geoNear command'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -301,10 +333,15 @@ exports['Successfully pass through collation to geoNear command'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 5, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -315,17 +352,17 @@ exports['Successfully pass through collation to geoNear command'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.geoNear) {
+          } else if (doc.geoNear) {
             commandResult = doc;
-            request.reply({ok:1});
+            request.reply({ ok: 1 });
           }
         }
       }).catch(function(err) {
@@ -340,23 +377,28 @@ exports['Successfully pass through collation to geoNear command'] = {
         var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
-        db.collection('test').geoNear(50, 50, {query:{a:1}, num:1, collation: {caseLevel:true}}, function(err, doc) {
-          test.equal(null, err);
-          test.deepEqual({ caseLevel: true }, commandResult.collation);
+        db
+          .collection('test')
+          .geoNear(50, 50, { query: { a: 1 }, num: 1, collation: { caseLevel: true } }, function(
+            err,
+            doc
+          ) {
+            test.equal(null, err);
+            test.deepEqual({ caseLevel: true }, commandResult.collation);
 
-          singleServer.destroy();
-          running = false;
+            singleServer.destroy();
+            running = false;
 
-          client.close();
-          test.done();
-        });
+            client.close();
+            test.done();
+          });
       });
     });
   }
-}
+};
 
 exports['Successfully pass through collation to group command'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -369,10 +411,15 @@ exports['Successfully pass through collation to group command'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 5, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -383,17 +430,17 @@ exports['Successfully pass through collation to group command'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.group) {
+          } else if (doc.group) {
             commandResult = doc;
-            request.reply({ok:1});
+            request.reply({ ok: 1 });
           }
         }
       }).catch(function(err) {
@@ -408,25 +455,34 @@ exports['Successfully pass through collation to group command'] = {
         var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
-        db.collection('test').group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }"
-          , "function (obj, prev) { prev.count++; }"
-          , true, {collation: {caseLevel:true}}, function(err, results) {
-          test.equal(null, err);
-          test.deepEqual({ caseLevel: true }, commandResult.collation);
+        db
+          .collection('test')
+          .group(
+            [],
+            { a: { $gt: 1 } },
+            { count: 0 },
+            'function (obj, prev) { prev.count++; }',
+            'function (obj, prev) { prev.count++; }',
+            true,
+            { collation: { caseLevel: true } },
+            function(err, results) {
+              test.equal(null, err);
+              test.deepEqual({ caseLevel: true }, commandResult.collation);
 
-          singleServer.destroy();
-          running = false;
+              singleServer.destroy();
+              running = false;
 
-          client.close();
-          test.done();
-        });
+              client.close();
+              test.done();
+            }
+          );
       });
     });
   }
-}
+};
 
 exports['Successfully pass through collation to mapreduce command'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -440,10 +496,15 @@ exports['Successfully pass through collation to mapreduce command'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 5, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -454,17 +515,17 @@ exports['Successfully pass through collation to mapreduce command'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.mapreduce) {
+          } else if (doc.mapreduce) {
             commandResult = doc;
-            request.reply({ok:1, result:'tempCollection'});
+            request.reply({ ok: 1, result: 'tempCollection' });
           }
         }
       }).catch(function(err) {
@@ -479,13 +540,13 @@ exports['Successfully pass through collation to mapreduce command'] = {
         var db = client.db(configuration.database);
 
         // String functions
-        var map = new Code("function() { emit(this.user_id, 1); }");
-        var reduce = new Code("function(k,vals) { return 1; }");
+        var map = new Code('function() { emit(this.user_id, 1); }');
+        var reduce = new Code('function(k,vals) { return 1; }');
 
         // db.collection('test').mapReduce({
         db.collection('test').mapReduce(map, reduce, {
-          out: {replace : 'tempCollection'},
-          collation: {caseLevel:true}
+          out: { replace: 'tempCollection' },
+          collation: { caseLevel: true }
         }, function(err, r) {
           test.equal(null, err);
           test.deepEqual({ caseLevel: true }, commandResult.collation);
@@ -499,10 +560,10 @@ exports['Successfully pass through collation to mapreduce command'] = {
       });
     });
   }
-}
+};
 
 exports['Successfully pass through collation to remove command'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -515,10 +576,15 @@ exports['Successfully pass through collation to remove command'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 5, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -529,17 +595,17 @@ exports['Successfully pass through collation to remove command'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.delete) {
+          } else if (doc.delete) {
             commandResult = doc;
-            request.reply({ok:1});
+            request.reply({ ok: 1 });
           }
         }
       }).catch(function(err) {
@@ -554,23 +620,25 @@ exports['Successfully pass through collation to remove command'] = {
         var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
-        db.collection('test').deleteMany({}, {collation: {caseLevel:true}}, function(err, results) {
-          test.equal(null, err);
-          test.deepEqual({ caseLevel: true }, commandResult.deletes[0].collation);
+        db
+          .collection('test')
+          .deleteMany({}, { collation: { caseLevel: true } }, function(err, results) {
+            test.equal(null, err);
+            test.deepEqual({ caseLevel: true }, commandResult.deletes[0].collation);
 
-          singleServer.destroy();
-          running = false;
+            singleServer.destroy();
+            running = false;
 
-          client.close();
-          test.done();
-        });
+            client.close();
+            test.done();
+          });
       });
     });
   }
-}
+};
 
 exports['Successfully pass through collation to update command'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -583,10 +651,15 @@ exports['Successfully pass through collation to update command'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 5, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -597,17 +670,17 @@ exports['Successfully pass through collation to update command'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.update) {
+          } else if (doc.update) {
             commandResult = doc;
-            request.reply({ok:1});
+            request.reply({ ok: 1 });
           }
         }
       }).catch(function(err) {
@@ -622,23 +695,28 @@ exports['Successfully pass through collation to update command'] = {
         var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
-        db.collection('test').updateOne({a:1}, {$set:{b:1}}, {collation: {caseLevel:true}}, function(err, results) {
-          test.equal(null, err);
-          test.deepEqual({ caseLevel: true }, commandResult.updates[0].collation);
+        db
+          .collection('test')
+          .updateOne({ a: 1 }, { $set: { b: 1 } }, { collation: { caseLevel: true } }, function(
+            err,
+            results
+          ) {
+            test.equal(null, err);
+            test.deepEqual({ caseLevel: true }, commandResult.updates[0].collation);
 
-          singleServer.destroy();
-          running = false;
+            singleServer.destroy();
+            running = false;
 
-          client.close();
-          test.done();
-        });
+            client.close();
+            test.done();
+          });
       });
     });
   }
-}
+};
 
 exports['Successfully pass through collation to find command via options'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -651,10 +729,15 @@ exports['Successfully pass through collation to find command via options'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 5, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -665,17 +748,17 @@ exports['Successfully pass through collation to find command via options'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.find) {
+          } else if (doc.find) {
             commandResult = doc;
-            request.reply({ok:1});
+            request.reply({ ok: 1 });
           }
         }
       }).catch(function(err) {
@@ -690,23 +773,26 @@ exports['Successfully pass through collation to find command via options'] = {
         var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
-        db.collection('test').find({a:1}, {collation: {caseLevel:true}}).toArray(function(err, results) {
-          test.equal(null, err);
-          test.deepEqual({ caseLevel: true }, commandResult.collation);
+        db
+          .collection('test')
+          .find({ a: 1 }, { collation: { caseLevel: true } })
+          .toArray(function(err, results) {
+            test.equal(null, err);
+            test.deepEqual({ caseLevel: true }, commandResult.collation);
 
-          singleServer.destroy();
-          running = false;
+            singleServer.destroy();
+            running = false;
 
-          client.close();
-          test.done();
-        });
+            client.close();
+            test.done();
+          });
       });
     });
   }
-}
+};
 
 exports['Successfully pass through collation to find command via cursor'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -719,10 +805,15 @@ exports['Successfully pass through collation to find command via cursor'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 5, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -733,17 +824,17 @@ exports['Successfully pass through collation to find command via cursor'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.find) {
+          } else if (doc.find) {
             commandResult = doc;
-            request.reply({ok:1});
+            request.reply({ ok: 1 });
           }
         }
       }).catch(function(err) {
@@ -758,23 +849,27 @@ exports['Successfully pass through collation to find command via cursor'] = {
         var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
-        db.collection('test').find({a:1}).collation({caseLevel:true}).toArray(function(err, results) {
-          test.equal(null, err);
-          test.deepEqual({ caseLevel: true }, commandResult.collation);
+        db
+          .collection('test')
+          .find({ a: 1 })
+          .collation({ caseLevel: true })
+          .toArray(function(err, results) {
+            test.equal(null, err);
+            test.deepEqual({ caseLevel: true }, commandResult.collation);
 
-          singleServer.destroy();
-          running = false;
+            singleServer.destroy();
+            running = false;
 
-          client.close();
-          test.done();
-        });
+            client.close();
+            test.done();
+          });
       });
     });
   }
-}
+};
 
 exports['Successfully pass through collation to findOne'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -787,10 +882,15 @@ exports['Successfully pass through collation to findOne'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 5, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -801,17 +901,17 @@ exports['Successfully pass through collation to findOne'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.find) {
+          } else if (doc.find) {
             commandResult = doc;
-            request.reply({ok:1});
+            request.reply({ ok: 1 });
           }
         }
       }).catch(function(err) {
@@ -826,23 +926,25 @@ exports['Successfully pass through collation to findOne'] = {
         var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
-        db.collection('test').findOne({a:1}, {collation: { caseLevel: true }}, function(err, results) {
-          test.equal(null, err);
-          test.deepEqual({ caseLevel: true }, commandResult.collation);
+        db
+          .collection('test')
+          .findOne({ a: 1 }, { collation: { caseLevel: true } }, function(err, results) {
+            test.equal(null, err);
+            test.deepEqual({ caseLevel: true }, commandResult.collation);
 
-          singleServer.destroy();
-          running = false;
+            singleServer.destroy();
+            running = false;
 
-          client.close();
-          test.done();
-        });
+            client.close();
+            test.done();
+          });
       });
     });
   }
-}
+};
 
 exports['Successfully pass through collation to createCollection'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -856,10 +958,15 @@ exports['Successfully pass through collation to createCollection'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 5, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -870,21 +977,26 @@ exports['Successfully pass through collation to createCollection'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.listCollections) {
-            request.reply({ok:1, cursor: {
-              id: Long.fromNumber(0), ns: 'test.cmd$.listCollections', firstBatch: []
-            }});
-          } else if(doc.create) {
+          } else if (doc.listCollections) {
+            request.reply({
+              ok: 1,
+              cursor: {
+                id: Long.fromNumber(0),
+                ns: 'test.cmd$.listCollections',
+                firstBatch: []
+              }
+            });
+          } else if (doc.create) {
             commandResult = doc;
-            request.reply({ok:1});
+            request.reply({ ok: 1 });
           }
         }
       }).catch(function(err) {
@@ -899,7 +1011,7 @@ exports['Successfully pass through collation to createCollection'] = {
         var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
-        db.createCollection('test', {collation: { caseLevel: true }}, function(err, results) {
+        db.createCollection('test', { collation: { caseLevel: true } }, function(err, results) {
           test.equal(null, err);
           test.deepEqual({ caseLevel: true }, commandResult.collation);
 
@@ -912,10 +1024,10 @@ exports['Successfully pass through collation to createCollection'] = {
       });
     });
   }
-}
+};
 
 exports['Fail due to no support for collation'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -928,10 +1040,15 @@ exports['Fail due to no support for collation'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 4, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 4,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -942,17 +1059,17 @@ exports['Fail due to no support for collation'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.find) {
+          } else if (doc.find) {
             commandResult = doc;
-            request.reply({ok:1});
+            request.reply({ ok: 1 });
           }
         }
       }).catch(function(err) {
@@ -967,22 +1084,24 @@ exports['Fail due to no support for collation'] = {
         var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
-        db.collection('test').findOne({a:1}, {collation: { caseLevel: true }}, function(err, results) {
-          test.equal('server localhost:32000 does not support collation', err.message);
+        db
+          .collection('test')
+          .findOne({ a: 1 }, { collation: { caseLevel: true } }, function(err, results) {
+            test.equal('server localhost:32000 does not support collation', err.message);
 
-          singleServer.destroy();
-          running = false;
+            singleServer.destroy();
+            running = false;
 
-          client.close();
-          test.done();
-        });
+            client.close();
+            test.done();
+          });
       });
     });
   }
-}
+};
 
 exports['Fail command due to no support for collation'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -995,10 +1114,15 @@ exports['Fail command due to no support for collation'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 4, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 4,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -1009,17 +1133,17 @@ exports['Fail command due to no support for collation'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.find) {
+          } else if (doc.find) {
             commandResult = doc;
-            request.reply({ok:1});
+            request.reply({ ok: 1 });
           }
         }
       }).catch(function(err) {
@@ -1034,7 +1158,10 @@ exports['Fail command due to no support for collation'] = {
         var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
-        db.command({count: 'test', query: {}, collation: { caseLevel: true }}, function(err, results) {
+        db.command({ count: 'test', query: {}, collation: { caseLevel: true } }, function(
+          err,
+          results
+        ) {
           test.equal('server localhost:32000 does not support collation', err.message);
 
           singleServer.destroy();
@@ -1046,10 +1173,10 @@ exports['Fail command due to no support for collation'] = {
       });
     });
   }
-}
+};
 
 exports['Successfully pass through collation to bulkWrite command'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -1062,10 +1189,15 @@ exports['Successfully pass through collation to bulkWrite command'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 5, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -1076,19 +1208,19 @@ exports['Successfully pass through collation to bulkWrite command'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.update) {
+          } else if (doc.update) {
             commandResult = doc;
-            request.reply({ok:1});
-          } else if(doc.delete) {
-            request.reply({ok:1});
+            request.reply({ ok: 1 });
+          } else if (doc.delete) {
+            request.reply({ ok: 1 });
           }
         }
       }).catch(function(err) {
@@ -1102,25 +1234,38 @@ exports['Successfully pass through collation to bulkWrite command'] = {
         test.equal(null, err);
         var db = client.db(configuration.database);
 
-        db.collection('test').bulkWrite([
-            { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true, collation: { caseLevel: true } } }
-            , { deleteOne: { q: {c:1} } }
-          ], {ordered:true}, function(err, r) {
-            test.ok(commandResult);
-            test.deepEqual({ caseLevel: true }, commandResult.updates[0].collation);
-            singleServer.destroy();
-            running = false;
+        db
+          .collection('test')
+          .bulkWrite(
+            [
+              {
+                updateOne: {
+                  q: { a: 2 },
+                  u: { $set: { a: 2 } },
+                  upsert: true,
+                  collation: { caseLevel: true }
+                }
+              },
+              { deleteOne: { q: { c: 1 } } }
+            ],
+            { ordered: true },
+            function(err, r) {
+              test.ok(commandResult);
+              test.deepEqual({ caseLevel: true }, commandResult.updates[0].collation);
+              singleServer.destroy();
+              running = false;
 
-            client.close();
-            test.done();
-        });
+              client.close();
+              test.done();
+            }
+          );
       });
     });
   }
-}
+};
 
 exports['Successfully fail bulkWrite due to unsupported collation'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -1133,10 +1278,15 @@ exports['Successfully fail bulkWrite due to unsupported collation'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 4, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 4,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -1147,17 +1297,17 @@ exports['Successfully fail bulkWrite due to unsupported collation'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.update) {
+          } else if (doc.update) {
             commandResult = doc;
-            request.reply({ok:1});
+            request.reply({ ok: 1 });
           }
         }
       }).catch(function(err) {
@@ -1171,25 +1321,38 @@ exports['Successfully fail bulkWrite due to unsupported collation'] = {
         test.equal(null, err);
         var db = client.db(configuration.database);
 
-        db.collection('test').bulkWrite([
-              { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true, collation: {caseLevel: true} } }
-            , { deleteOne: { q: {c:1} } }
-          ], {ordered:true}, function(err, r) {
-            test.ok(err);
-            test.equal('server/primary/mongos does not support collation', err.message)
-            singleServer.destroy();
-            running = false;
+        db
+          .collection('test')
+          .bulkWrite(
+            [
+              {
+                updateOne: {
+                  q: { a: 2 },
+                  u: { $set: { a: 2 } },
+                  upsert: true,
+                  collation: { caseLevel: true }
+                }
+              },
+              { deleteOne: { q: { c: 1 } } }
+            ],
+            { ordered: true },
+            function(err, r) {
+              test.ok(err);
+              test.equal('server/primary/mongos does not support collation', err.message);
+              singleServer.destroy();
+              running = false;
 
-            client.close();
-            test.done();
-        });
+              client.close();
+              test.done();
+            }
+          );
       });
     });
   }
-}
+};
 
 exports['Successfully fail bulkWrite due to unsupported collation using replset'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -1206,26 +1369,52 @@ exports['Successfully fail bulkWrite due to unsupported collation using replset'
 
     // Default message fields
     var defaultFields = {
-      "setName": "rs", "setVersion": 1, "electionId": electionIds[0],
-      "maxBsonObjectSize" : 16777216, "maxMessageSizeBytes" : 48000000,
-      "maxWriteBatchSize" : 1000, "localTime" : new Date(), "maxWireVersion" : 4,
-      "minWireVersion" : 0, "ok" : 1, "hosts": ["localhost:32000", "localhost:32001", "localhost:32002"], "arbiters": ["localhost:32002"]
-    }
+      setName: 'rs',
+      setVersion: 1,
+      electionId: electionIds[0],
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 4,
+      minWireVersion: 0,
+      ok: 1,
+      hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002'],
+      arbiters: ['localhost:32002']
+    };
 
     // Primary server states
-    var primary = [extend(defaultFields, {
-      "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
-    })];
+    var primary = [
+      extend(defaultFields, {
+        ismaster: true,
+        secondary: false,
+        me: 'localhost:32000',
+        primary: 'localhost:32000',
+        tags: { loc: 'ny' }
+      })
+    ];
 
     // Primary server states
-    var firstSecondary = [extend(defaultFields, {
-      "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
-    })];
+    var firstSecondary = [
+      extend(defaultFields, {
+        ismaster: false,
+        secondary: true,
+        me: 'localhost:32001',
+        primary: 'localhost:32000',
+        tags: { loc: 'sf' }
+      })
+    ];
 
     // Primary server states
-    var arbiter = [extend(defaultFields, {
-      "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
-    })];
+    var arbiter = [
+      extend(defaultFields, {
+        ismaster: false,
+        secondary: false,
+        arbiterOnly: true,
+        me: 'localhost:32002',
+        primary: 'localhost:32000'
+      })
+    ];
 
     // Boot the mock
     co(function*() {
@@ -1235,11 +1424,11 @@ exports['Successfully fail bulkWrite due to unsupported collation using replset'
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield primaryServer.receive();
           var doc = request.document;
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
           }
         }
@@ -1249,11 +1438,11 @@ exports['Successfully fail bulkWrite due to unsupported collation using replset'
 
       // First secondary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield firstSecondaryServer.receive();
           var doc = request.document;
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(firstSecondary[0]);
           }
         }
@@ -1263,11 +1452,11 @@ exports['Successfully fail bulkWrite due to unsupported collation using replset'
 
       // Second secondary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield arbiterServer.receive();
           var doc = request.document;
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(arbiter[0]);
           }
         }
@@ -1277,30 +1466,46 @@ exports['Successfully fail bulkWrite due to unsupported collation using replset'
     });
 
     // Connect to the mocks
-    MongoClient.connect('mongodb://localhost:32000,localhost:32001/test?replicaSet=rs', function(err, client) {
+    MongoClient.connect('mongodb://localhost:32000,localhost:32001/test?replicaSet=rs', function(
+      err,
+      client
+    ) {
       test.equal(null, err);
       var db = client.db(configuration.database);
 
-      db.collection('test').bulkWrite([
-            { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true, collation: {caseLevel: true} } }
-          , { deleteOne: { q: {c:1} } }
-        ], {ordered:true}, function(err, r) {
-          test.ok(err);
-          test.equal('server/primary/mongos does not support collation', err.message)
-          primaryServer.destroy();
-          firstSecondaryServer.destroy();
-          arbiterServer.destroy();
-          running = false;
+      db
+        .collection('test')
+        .bulkWrite(
+          [
+            {
+              updateOne: {
+                q: { a: 2 },
+                u: { $set: { a: 2 } },
+                upsert: true,
+                collation: { caseLevel: true }
+              }
+            },
+            { deleteOne: { q: { c: 1 } } }
+          ],
+          { ordered: true },
+          function(err, r) {
+            test.ok(err);
+            test.equal('server/primary/mongos does not support collation', err.message);
+            primaryServer.destroy();
+            firstSecondaryServer.destroy();
+            arbiterServer.destroy();
+            running = false;
 
-          client.close();
-          test.done();
-      });
+            client.close();
+            test.done();
+          }
+        );
     });
   }
-}
+};
 
 exports['Successfully create index with collation'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -1313,10 +1518,15 @@ exports['Successfully create index with collation'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 5, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -1327,17 +1537,17 @@ exports['Successfully create index with collation'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.createIndexes) {
+          } else if (doc.createIndexes) {
             commandResult = doc;
-            request.reply({ok:1});
+            request.reply({ ok: 1 });
           }
         }
       }).catch(function(err) {
@@ -1352,23 +1562,31 @@ exports['Successfully create index with collation'] = {
         var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
-        db.collection('test').createIndex({a:1}, {collation: { caseLevel: true }}, function(err, r) {
-          test.equal(null, err);
-          test.deepEqual({"createIndexes":"test","indexes":[{"name":"a_1","key":{"a":1},"collation":{"caseLevel":true}}]}, commandResult);
+        db
+          .collection('test')
+          .createIndex({ a: 1 }, { collation: { caseLevel: true } }, function(err, r) {
+            test.equal(null, err);
+            test.deepEqual(
+              {
+                createIndexes: 'test',
+                indexes: [{ name: 'a_1', key: { a: 1 }, collation: { caseLevel: true } }]
+              },
+              commandResult
+            );
 
-          singleServer.destroy();
-          running = false;
+            singleServer.destroy();
+            running = false;
 
-          client.close();
-          test.done();
-        });
+            client.close();
+            test.done();
+          });
       });
     });
   }
-}
+};
 
 exports['Fail to create index with collation due to no capabilities'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -1381,10 +1599,15 @@ exports['Fail to create index with collation due to no capabilities'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 4, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 4,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -1395,17 +1618,17 @@ exports['Fail to create index with collation due to no capabilities'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.createIndexes) {
+          } else if (doc.createIndexes) {
             commandResult = doc;
-            request.reply({ok:1});
+            request.reply({ ok: 1 });
           }
         }
       }).catch(function(err) {
@@ -1420,23 +1643,25 @@ exports['Fail to create index with collation due to no capabilities'] = {
         var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
-        db.collection('test').createIndex({a:1}, {collation: { caseLevel: true }}, function(err, r) {
-          test.ok(err);
-          test.equal('server/primary/mongos does not support collation', err.message)
+        db
+          .collection('test')
+          .createIndex({ a: 1 }, { collation: { caseLevel: true } }, function(err, r) {
+            test.ok(err);
+            test.equal('server/primary/mongos does not support collation', err.message);
 
-          singleServer.destroy();
-          running = false;
+            singleServer.destroy();
+            running = false;
 
-          client.close();
-          test.done();
-        });
+            client.close();
+            test.done();
+          });
       });
     });
   }
-}
+};
 
 exports['Fail to create indexs with collation due to no capabilities'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -1449,10 +1674,15 @@ exports['Fail to create indexs with collation due to no capabilities'] = {
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true, "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(), "maxWireVersion" : 4, "minWireVersion" : 0, "ok" : 1
-    }
+      ismaster: true,
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 4,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var primary = [extend(defaultFields, {})];
@@ -1463,17 +1693,17 @@ exports['Fail to create indexs with collation due to no capabilities'] = {
 
       // Primary state machine
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield singleServer.receive();
           var doc = request.document;
           // console.log("========================== cmd")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if(doc.createIndexes) {
+          } else if (doc.createIndexes) {
             commandResult = doc;
-            request.reply({ok:1});
+            request.reply({ ok: 1 });
           }
         }
       }).catch(function(err) {
@@ -1488,20 +1718,22 @@ exports['Fail to create indexs with collation due to no capabilities'] = {
         var db = client.db(configuration.database);
 
         // Simple findAndModify command returning the new document
-        db.collection('test').createIndexes([{key: {a:1}, collation: { caseLevel: true }}], function(err, r) {
-          test.ok(err);
-          test.equal('server/primary/mongos does not support collation', err.message)
+        db
+          .collection('test')
+          .createIndexes([{ key: { a: 1 }, collation: { caseLevel: true } }], function(err, r) {
+            test.ok(err);
+            test.equal('server/primary/mongos does not support collation', err.message);
 
-          singleServer.destroy();
-          running = false;
+            singleServer.destroy();
+            running = false;
 
-          client.close();
-          test.done();
-        });
+            client.close();
+            test.done();
+          });
       });
     });
   }
-}
+};
 
 /******************************************************************************
 .___        __                              __  .__
@@ -1512,7 +1744,7 @@ exports['Fail to create indexs with collation due to no capabilities'] = {
         \/          \/_____/            \/                    \/
 ******************************************************************************/
 exports['Should correctly create index with collation'] = {
-  metadata: { requires: { topology: "single", mongodb: ">=3.3.12" } },
+  metadata: { requires: { topology: 'single', mongodb: '>=3.3.12' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -1525,27 +1757,30 @@ exports['Should correctly create index with collation'] = {
 
       var col = db.collection('collation_test');
       // Create collation index
-      col.createIndexes([{key: {a:1}, collation: { locale: 'nn' }, name: 'collation_test'}], function(err, r) {
-        test.equal(null, err);
+      col.createIndexes(
+        [{ key: { a: 1 }, collation: { locale: 'nn' }, name: 'collation_test' }],
+        function(err, r) {
+          test.equal(null, err);
 
-        col.listIndexes().toArray(function(err, r) {
-          var indexes = r.filter(function(i) {
-            return i.name == 'collation_test';
-          })
+          col.listIndexes().toArray(function(err, r) {
+            var indexes = r.filter(function(i) {
+              return i.name == 'collation_test';
+            });
 
-          test.equal(1, indexes.length);
-          test.ok(indexes[0].collation);
+            test.equal(1, indexes.length);
+            test.ok(indexes[0].collation);
 
-          client.close();
-          test.done();
-        });
-      });
+            client.close();
+            test.done();
+          });
+        }
+      );
     });
   }
-}
+};
 
 exports['Should correctly create collection with collation'] = {
-  metadata: { requires: { topology: "single", mongodb: ">=3.3.12" } },
+  metadata: { requires: { topology: 'single', mongodb: '>=3.3.12' } },
 
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient,
@@ -1557,10 +1792,13 @@ exports['Should correctly create collection with collation'] = {
       var db = client.db(configuration.database);
 
       // Simple findAndModify command returning the new document
-      db.createCollection('collation_test2', {collation: { locale: 'nn' }}, function(err, results) {
+      db.createCollection('collation_test2', { collation: { locale: 'nn' } }, function(
+        err,
+        results
+      ) {
         test.equal(null, err);
 
-        db.listCollections({name: 'collation_test2'}).toArray(function(err, collections) {
+        db.listCollections({ name: 'collation_test2' }).toArray(function(err, collections) {
           test.equal(null, err);
           test.equal(1, collections.length);
           test.equal('collation_test2', collections[0].name);
@@ -1572,4 +1810,4 @@ exports['Should correctly create collection with collation'] = {
       });
     });
   }
-}
+};

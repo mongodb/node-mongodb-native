@@ -1,6 +1,6 @@
-var vm = require('vm')
-var fs = require('fs')
-var path = require('path')
+var vm = require('vm');
+var fs = require('fs');
+var path = require('path');
 
 var shared = require('./shared');
 var ind = fs.readFileSync(__dirname + '/other.js', 'utf8');

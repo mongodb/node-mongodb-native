@@ -3,7 +3,7 @@ var fs = require('fs'),
   semver = require('semver');
 
 exports['Execute all read crud specification tests'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     co(function*() {
@@ -12,28 +12,32 @@ exports['Execute all read crud specification tests'] = {
       var client = yield MongoClient.connect(configuration.url());
       var db = client.db(configuration.database);
 
-      console.log("== Execute CRUD read specifications");
+      console.log('== Execute CRUD read specifications');
 
       // Read and parse all the tests cases
-      var scenarios = fs.readdirSync(`${__dirname}/crud/read`).filter(x => {
-        return x.indexOf('json') != -1;
-      }).map(x => {
-        return fs.readFileSync(`${__dirname}/crud/read/${x}`, 'utf8');
-      }).map(x => {
-        return JSON.parse(x);
-      });
+      var scenarios = fs
+        .readdirSync(`${__dirname}/crud/read`)
+        .filter(x => {
+          return x.indexOf('json') != -1;
+        })
+        .map(x => {
+          return fs.readFileSync(`${__dirname}/crud/read/${x}`, 'utf8');
+        })
+        .map(x => {
+          return JSON.parse(x);
+        });
 
-      for(var scenario of scenarios) {
+      for (var scenario of scenarios) {
         yield executeScenario(scenario, configuration, db, test);
       }
 
       test.done();
     });
   }
-}
+};
 
 exports['Execute all write crud specification tests'] = {
-  metadata: { requires: { generators: true, topology: "single" } },
+  metadata: { requires: { generators: true, topology: 'single' } },
 
   test: function(configuration, test) {
     co(function*() {
@@ -42,36 +46,43 @@ exports['Execute all write crud specification tests'] = {
       var client = yield MongoClient.connect(configuration.url());
       var db = client.db(configuration.database);
 
-      console.log("== Execute CRUD read specifications");
+      console.log('== Execute CRUD read specifications');
 
       // Read and parse all the tests cases
-      var scenarios = fs.readdirSync(`${__dirname}/crud/write`).filter(x => {
-        return x.indexOf('json') != -1;
-      }).map(x => {
-        return fs.readFileSync(`${__dirname}/crud/write/${x}`, 'utf8');
-      }).map(x => {
-        return JSON.parse(x);
-      });
+      var scenarios = fs
+        .readdirSync(`${__dirname}/crud/write`)
+        .filter(x => {
+          return x.indexOf('json') != -1;
+        })
+        .map(x => {
+          return fs.readFileSync(`${__dirname}/crud/write/${x}`, 'utf8');
+        })
+        .map(x => {
+          return JSON.parse(x);
+        });
 
-      for(var scenario of scenarios) {
+      for (var scenario of scenarios) {
         yield executeScenario(scenario, configuration, db, test);
       }
 
       test.done();
     });
   }
-}
+};
 
 function executeScenario(scenario, configuration, db, test) {
   return new Promise((resolve, reject) => {
     co(function*() {
-      var buildInfo = yield db.admin().command({buildInfo:true});
+      var buildInfo = yield db.admin().command({ buildInfo: true });
       var mongodbVersion = buildInfo.version.split('-').shift();
       var requiredMongodbVersion = scenario.minServerVersion;
       var collection = db.collection('crud_spec_tests');
 
       // Do we satisfy semver
-      if (semver.satisfies(mongodbVersion, `>=${requiredMongodbVersion}`) || !requiredMongodbVersion) {
+      if (
+        semver.satisfies(mongodbVersion, `>=${requiredMongodbVersion}`) ||
+        !requiredMongodbVersion
+      ) {
         for (var scenarioTest of scenario.tests) {
           var description = scenarioTest.description;
           var name = scenarioTest.operation.name;
@@ -79,12 +90,14 @@ function executeScenario(scenario, configuration, db, test) {
           console.log(`   execute test [${description}]`);
 
           // Drop collection
-          try { yield collection.drop(); } catch(err) {};
+          try {
+            yield collection.drop();
+          } catch (err) {}
 
           if (scenarioTest.outcome.collection && scenarioTest.outcome.collection.name) {
             try {
               yield db.collection(scenarioTest.outcome.collection.name).drop();
-            } catch(err) {};
+            } catch (err) {}
           }
 
           // Insert data
@@ -98,12 +111,11 @@ function executeScenario(scenario, configuration, db, test) {
               options.collation = scenarioTest.operation.arguments.collation;
             }
 
-            var results = yield collection[name](
-              scenarioTest.operation.arguments.pipeline, options
-            )
-            .toArray();
+            var results = yield collection
+              [name](scenarioTest.operation.arguments.pipeline, options)
+              .toArray();
 
-            if(scenarioTest.outcome.collection) {
+            if (scenarioTest.outcome.collection) {
               var collectionResults = yield db
                 .collection(scenarioTest.outcome.collection.name)
                 .find({})
@@ -167,11 +179,15 @@ function executeScenario(scenario, configuration, db, test) {
             delete options.replacement;
 
             // Get the results
-            var result = yield collection[scenarioTest.operation.name](filter, replacement, options);
+            var result = yield collection[scenarioTest.operation.name](
+              filter,
+              replacement,
+              options
+            );
 
             // Go over the results
             for (var name in scenarioTest.outcome.result) {
-              if(name == 'upsertedId') {
+              if (name == 'upsertedId') {
                 test.equal(scenarioTest.outcome.result[name], result[name]._id);
               } else {
                 test.equal(scenarioTest.outcome.result[name], result[name]);
@@ -196,7 +212,7 @@ function executeScenario(scenario, configuration, db, test) {
 
             // Go over the results
             for (var name in scenarioTest.outcome.result) {
-              if(name == 'upsertedId') {
+              if (name == 'upsertedId') {
                 test.equal(scenarioTest.outcome.result[name], result[name]._id);
               } else {
                 test.equal(scenarioTest.outcome.result[name], result[name]);
@@ -207,8 +223,11 @@ function executeScenario(scenario, configuration, db, test) {
               var results = yield collection.find({}).toArray();
               test.deepEqual(scenarioTest.outcome.collection.data, results);
             }
-          } else if (name == 'findOneAndReplace'
-            || name == 'findOneAndUpdate' || name == 'findOneAndDelete') {
+          } else if (
+            name == 'findOneAndReplace' ||
+            name == 'findOneAndUpdate' ||
+            name == 'findOneAndDelete'
+          ) {
             // Unpack the scenario test
             var arguments = scenarioTest.operation.arguments;
             var filter = arguments.filter;
@@ -229,7 +248,7 @@ function executeScenario(scenario, configuration, db, test) {
               var result = yield collection[name](filter, second, options);
             }
 
-            if(scenarioTest.outcome.result) {
+            if (scenarioTest.outcome.result) {
               test.deepEqual(scenarioTest.outcome.result, result.value);
             }
 
@@ -243,7 +262,7 @@ function executeScenario(scenario, configuration, db, test) {
 
       resolve();
     }).catch(err => {
-      console.log(err.stack)
+      console.log(err.stack);
       reject(err);
     });
   });

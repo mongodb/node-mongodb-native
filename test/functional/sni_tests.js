@@ -1,44 +1,52 @@
-"use strict";
+'use strict';
 
 /**
  * @ignore
  */
 exports['Should correct connect to snitest1.10gen.cc'] = {
-  metadata: { requires: { topology: 'sni', os: "!win32"  } },
+  metadata: { requires: { topology: 'sni', os: '!win32' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var MongoClient = configuration.require.MongoClient
+    var MongoClient = configuration.require.MongoClient;
 
     // Let's write the actual connection code
-    MongoClient.connect("mongodb://snitest2.mongodb.com:27777/?ssl=true", {
-      // servername: 'snitest1.10gen.cc',
-    }, function(err, client) {
-      console.dir(err)
-      test.equal(null, err);
-      client.close();
-      test.done();
-    });
+    MongoClient.connect(
+      'mongodb://snitest2.mongodb.com:27777/?ssl=true',
+      {
+        // servername: 'snitest1.10gen.cc',
+      },
+      function(err, client) {
+        console.dir(err);
+        test.equal(null, err);
+        client.close();
+        test.done();
+      }
+    );
   }
-}
+};
 
 /**
  * @ignore
  */
 exports['Should correct connect to snitest2.mongodb.com'] = {
-  metadata: { requires: { topology: 'sni', os: "!win32"  } },
+  metadata: { requires: { topology: 'sni', os: '!win32' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var MongoClient = configuration.require.MongoClient
+    var MongoClient = configuration.require.MongoClient;
 
     // Let's write the actual connection code
-    MongoClient.connect("mongodb://snitest2.mongodb.com:27777/?ssl=true", {
-      // servername: 'snitest2.mongodb.com',
-    }, function(err, client) {
-      test.equal(null, err);
-      client.close();
-      test.done();
-    });
+    MongoClient.connect(
+      'mongodb://snitest2.mongodb.com:27777/?ssl=true',
+      {
+        // servername: 'snitest2.mongodb.com',
+      },
+      function(err, client) {
+        test.equal(null, err);
+        client.close();
+        test.done();
+      }
+    );
   }
-}
+};

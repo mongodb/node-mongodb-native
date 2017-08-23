@@ -1,38 +1,40 @@
-"use strict";
+'use strict';
 
 /**
  * @ignore
  */
 exports.shouldCorrectlyClearOutCollection = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       test.equal(null, err);
-  
+
       db.createCollection('test_clear', function(err, r) {
         test.equal(null, err);
 
         db.collection('test_clear', function(err, collection) {
           test.equal(null, err);
 
-          collection.insert({i:1}, {w:1}, function(err, ids) {
+          collection.insert({ i: 1 }, { w: 1 }, function(err, ids) {
             test.equal(null, err);
-  
-            collection.insert({i:2}, {w:1}, function(err, ids) {
+
+            collection.insert({ i: 2 }, { w: 1 }, function(err, ids) {
               test.equal(null, err);
-    
+
               collection.count(function(err, count) {
                 test.equal(null, err);
                 test.equal(2, count);
                 // Clear the collection
-                collection.remove({}, {w:1}, function(err, r) {
+                collection.remove({}, { w: 1 }, function(err, r) {
                   test.equal(null, err);
                   test.equal(2, r.result.n);
-                  
+
                   collection.count(function(err, count) {
                     test.equal(null, err);
                     test.equal(0, count);
@@ -48,17 +50,19 @@ exports.shouldCorrectlyClearOutCollection = {
       });
     });
   }
-}
+};
 
 /**
  * @ignore
  */
 exports.shouldCorrectlyRemoveDocumentUsingRegExp = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       test.equal(null, err);
@@ -69,13 +73,13 @@ exports.shouldCorrectlyRemoveDocumentUsingRegExp = {
         db.collection('test_remove_regexp', function(err, collection) {
           test.equal(null, err);
 
-          collection.insert({address:'485 7th ave new york'}, {w:1}, function(err, ids) {
+          collection.insert({ address: '485 7th ave new york' }, { w: 1 }, function(err, ids) {
             test.equal(null, err);
 
             // Clear the collection
-            collection.remove({address:/485 7th ave/}, {w:1}, function(err, r) {
+            collection.remove({ address: /485 7th ave/ }, { w: 1 }, function(err, r) {
               test.equal(1, r.result.n);
-              
+
               collection.count(function(err, count) {
                 test.equal(0, count);
                 // Let's close the db
@@ -88,17 +92,19 @@ exports.shouldCorrectlyRemoveDocumentUsingRegExp = {
       });
     });
   }
-}
+};
 
 /**
  * @ignore
  */
 exports.shouldCorrectlyRemoveOnlyFirstDocument = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  },
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
       test.equal(null, err);
@@ -109,14 +115,17 @@ exports.shouldCorrectlyRemoveOnlyFirstDocument = {
         db.collection('shouldCorrectlyRemoveOnlyFirstDocument', function(err, collection) {
           test.equal(null, err);
 
-          collection.insert([{a:1}, {a:1}, {a:1}, {a:1}], {w:1}, function(err, result) {
+          collection.insert([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }], { w: 1 }, function(
+            err,
+            result
+          ) {
             test.equal(null, err);
-            
+
             // Remove the first
-            collection.remove({a:1}, {w:1, single:true}, function(err, r) {
+            collection.remove({ a: 1 }, { w: 1, single: true }, function(err, r) {
               test.equal(1, r.result.n);
-              
-              collection.find({a:1}).count(function(err, result) {
+
+              collection.find({ a: 1 }).count(function(err, result) {
                 test.equal(3, result);
                 client.close();
                 test.done();
@@ -127,4 +136,4 @@ exports.shouldCorrectlyRemoveOnlyFirstDocument = {
       });
     });
   }
-}
+};

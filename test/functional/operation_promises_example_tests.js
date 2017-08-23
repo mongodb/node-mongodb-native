@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var f = require('util').format;
 
@@ -18,57 +18,75 @@ var f = require('util').format;
 exports.aggregationExample2WithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { promises:true, mongodb:">2.1.0", topology: ['single'] } },
+  metadata: { requires: { promises: true, mongodb: '>2.1.0', topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Some docs for insertion
-      var docs = [{
-          title : "this is my title", author : "bob", posted : new Date() ,
-          pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
-          comments : [
-            { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
-          ]}];
+      var docs = [
+        {
+          title: 'this is my title',
+          author: 'bob',
+          posted: new Date(),
+          pageViews: 5,
+          tags: ['fun', 'good', 'fun'],
+          other: { foo: 5 },
+          comments: [
+            { author: 'joe', text: 'this is cool' },
+            { author: 'sam', text: 'this is bad' }
+          ]
+        }
+      ];
 
       // Create a collection
       var collection = db.collection('aggregationExample2_with_promise');
       // Insert the docs
-      collection.insertMany(docs, {w: 1}).then(function(result) {
+      collection.insertMany(docs, { w: 1 }).then(function(result) {
         // Execute aggregate, notice the pipeline is expressed as an Array
-        var cursor = collection.aggregate([
-            { $project : {
-              author : 1,
-              tags : 1
-            }},
-            { $unwind : "$tags" },
-            { $group : {
-              _id : {tags : "$tags"},
-              authors : { $addToSet : "$author" }
-            }}
-          ], { cursor: { batchSize: 1 } });
+        var cursor = collection.aggregate(
+          [
+            {
+              $project: {
+                author: 1,
+                tags: 1
+              }
+            },
+            { $unwind: '$tags' },
+            {
+              $group: {
+                _id: { tags: '$tags' },
+                authors: { $addToSet: '$author' }
+              }
+            }
+          ],
+          { cursor: { batchSize: 1 } }
+        );
         // Get all the aggregation results
-        cursor.toArray().then(function(docs) {
-          test.equal(2, docs.length);
-          test.done();
-          client.close();
-        }).catch(function(err) {
-          console.log(err.stack);
-        });
+        cursor
+          .toArray()
+          .then(function(docs) {
+            test.equal(2, docs.length);
+            test.done();
+            client.close();
+          })
+          .catch(function(err) {
+            console.log(err.stack);
+          });
       });
     });
     // END
   }
-}
+};
 
 /**
  * Call next on an aggregation cursor using a Promise
@@ -80,57 +98,74 @@ exports.aggregationExample2WithPromises = {
 exports['Aggregation Cursor next Test With Promises'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { promises:true, mongodb:">2.1.0", topology: ['single'] } },
+  metadata: { requires: { promises: true, mongodb: '>2.1.0', topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Some docs for insertion
-      var docs = [{
-          title : "this is my title", author : "bob", posted : new Date() ,
-          pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
-          comments : [
-            { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
-          ]}];
+      var docs = [
+        {
+          title: 'this is my title',
+          author: 'bob',
+          posted: new Date(),
+          pageViews: 5,
+          tags: ['fun', 'good', 'fun'],
+          other: { foo: 5 },
+          comments: [
+            { author: 'joe', text: 'this is cool' },
+            { author: 'sam', text: 'this is bad' }
+          ]
+        }
+      ];
 
       // Create a collection
       var collection = db.collection('aggregation_next_example_with_promise');
       // Insert the docs
-      collection.insertMany(docs, {w: 1}).then(function(result) {
-
+      collection.insertMany(docs, { w: 1 }).then(function(result) {
         // Execute aggregate, notice the pipeline is expressed as an Array
-        var cursor = collection.aggregate([
-            { $project : {
-              author : 1,
-              tags : 1
-            }},
-            { $unwind : "$tags" },
-            { $group : {
-              _id : {tags : "$tags"},
-              authors : { $addToSet : "$author" }
-            }}
-          ], { cursor: { batchSize: 1 } });
+        var cursor = collection.aggregate(
+          [
+            {
+              $project: {
+                author: 1,
+                tags: 1
+              }
+            },
+            { $unwind: '$tags' },
+            {
+              $group: {
+                _id: { tags: '$tags' },
+                authors: { $addToSet: '$author' }
+              }
+            }
+          ],
+          { cursor: { batchSize: 1 } }
+        );
         // Get all the aggregation results
-        cursor.next().then(function(docs) {
-          test.done();
-          client.close();
-        }).catch(function(err) {
-          console.dir(err)
-        });
+        cursor
+          .next()
+          .then(function(docs) {
+            test.done();
+            client.close();
+          })
+          .catch(function(err) {
+            console.dir(err);
+          });
       });
     });
     // END
   }
-}
+};
 
 /**
  * Example of running simple count commands against a collection using a Promise.
@@ -140,43 +175,44 @@ exports['Aggregation Cursor next Test With Promises'] = {
  * @ignore
  */
 exports.shouldCorrectlyDoSimpleCountExamplesWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance({ w: 0 }, { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Crete the collection for the distinct example
       var collection = db.collection('countExample1_with_promise');
       // Insert documents to perform distinct against
-      collection.insertMany([{a:1}, {a:2}
-        , {a:3}, {a:4, b:1}], {w: 1}).then(function(ids) {
-        // Perform a total count command
-        collection.count().then(function(count) {
-          test.equal(4, count);
+      collection
+        .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4, b: 1 }], { w: 1 })
+        .then(function(ids) {
+          // Perform a total count command
+          collection.count().then(function(count) {
+            test.equal(4, count);
 
-          // Perform a partial account where b=1
-          collection.count({b:1}).then(function(count) {
-            test.equal(1, count);
+            // Perform a partial account where b=1
+            collection.count({ b: 1 }).then(function(count) {
+              test.equal(1, count);
 
-            client.close();
-            test.done();
+              client.close();
+              test.done();
+            });
           });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * A more complex createIndex using a Promise and a compound unique index in the background and dropping duplicated documents
@@ -186,49 +222,55 @@ exports.shouldCorrectlyDoSimpleCountExamplesWithPromises = {
  * @ignore
  */
 exports.shouldCreateComplexIndexOnTwoFieldsWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Create a collection we want to drop later
       var collection = db.collection('createIndexExample1_with_promise');
       // Insert a bunch of documents for the index
-      collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax()).then(function(result) {
+      collection
+        .insertMany(
+          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          configuration.writeConcernMax()
+        )
+        .then(function(result) {
+          // Create an index on the a field
+          collection
+            .createIndex({ a: 1, b: 1 }, { unique: true, background: true, w: 1 })
+            .then(function(indexName) {
+              // Show that duplicate records got dropped
+              collection.find({}).toArray().then(function(items) {
+                test.equal(4, items.length);
 
-        // Create an index on the a field
-        collection.createIndex({a:1, b:1}
-          , {unique:true, background:true, w:1}).then(function(indexName) {
+                // Perform a query, with explain to show we hit the query
+                collection.find({ a: 2 }).explain().then(function(explanation) {
+                  test.ok(explanation != null);
 
-          // Show that duplicate records got dropped
-          collection.find({}).toArray().then(function(items) {
-            test.equal(4, items.length);
-
-            // Perform a query, with explain to show we hit the query
-            collection.find({a:2}).explain().then(function(explanation) {
-              test.ok(explanation != null);
-
-              client.close();
-              test.done();
+                  client.close();
+                  test.done();
+                });
+              });
             });
-          })
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * Example of running the distinct command using a Promise against a collection
@@ -238,45 +280,55 @@ exports.shouldCreateComplexIndexOnTwoFieldsWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Crete the collection for the distinct example
       var collection = db.collection('distinctExample1_with_promise');
 
       // Insert documents to perform distinct against
-      collection.insertMany([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
-        {a:2, b:{c:'a'}}, {a:3}, {a:3}], configuration.writeConcernMax()).then(function(ids) {
+      collection
+        .insertMany(
+          [
+            { a: 0, b: { c: 'a' } },
+            { a: 1, b: { c: 'b' } },
+            { a: 1, b: { c: 'c' } },
+            { a: 2, b: { c: 'a' } },
+            { a: 3 },
+            { a: 3 }
+          ],
+          configuration.writeConcernMax()
+        )
+        .then(function(ids) {
+          // Perform a distinct query against the a field
+          collection.distinct('a').then(function(docs) {
+            test.deepEqual([0, 1, 2, 3], docs.sort());
 
-        // Perform a distinct query against the a field
-        collection.distinct('a').then(function(docs) {
-          test.deepEqual([0, 1, 2, 3], docs.sort());
+            // Perform a distinct query against the sub-field b.c
+            collection.distinct('b.c').then(function(docs) {
+              test.deepEqual(['a', 'b', 'c'], docs.sort());
 
-          // Perform a distinct query against the sub-field b.c
-          collection.distinct('b.c').then(function(docs) {
-            test.deepEqual(['a', 'b', 'c'], docs.sort());
-
-            client.close();
-            test.done();
+              client.close();
+              test.done();
+            });
           });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * Example of running the distinct command against a collection using a Promise with a filter query
@@ -284,41 +336,51 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyHandleDistinctIndexesWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Crete the collection for the distinct example
       var collection = db.collection('distinctExample2_with_promise');
 
       // Insert documents to perform distinct against
-      collection.insertMany([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
-        {a:2, b:{c:'a'}}, {a:3}, {a:3}, {a:5, c:1}], configuration.writeConcernMax(), function(err, ids) {
+      collection.insertMany(
+        [
+          { a: 0, b: { c: 'a' } },
+          { a: 1, b: { c: 'b' } },
+          { a: 1, b: { c: 'c' } },
+          { a: 2, b: { c: 'a' } },
+          { a: 3 },
+          { a: 3 },
+          { a: 5, c: 1 }
+        ],
+        configuration.writeConcernMax(),
+        function(err, ids) {
+          // Perform a distinct query with a filter against the documents
+          collection.distinct('a', { c: 1 }).then(function(docs) {
+            test.deepEqual([5], docs.sort());
 
-        // Perform a distinct query with a filter against the documents
-        collection.distinct('a', {c:1}).then(function(docs) {
-          test.deepEqual([5], docs.sort());
-
-          client.close();
-          test.done();
-        });
-      })
+            client.close();
+            test.done();
+          });
+        }
+      );
     });
     // END
   }
-}
+};
 
 /**
  * Example of Collection.prototype.drop using a Promise
@@ -328,35 +390,33 @@ exports.shouldCorrectlyHandleDistinctIndexesWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyDropCollectionWithDropFunctionWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a collection we want to drop later
       db.createCollection('test_other_drop_with_promise').then(function(collection) {
         // Drop the collection
         collection.drop().then(function(reply) {
-
           // Ensure we don't have the collection in the set of names
           db.listCollections().toArray().then(function(replies) {
-
             var found = false;
             // For each collection in the list of collection names in this db look for the
             // dropped collection
             replies.forEach(function(document) {
-              if(document.name == "test_other_drop_with_promise") {
+              if (document.name == 'test_other_drop_with_promise') {
                 found = true;
                 return;
               }
@@ -374,8 +434,7 @@ exports.shouldCorrectlyDropCollectionWithDropFunctionWithPromises = {
     });
     // END
   }
-}
-
+};
 
 /**
  * Example of a how to drop all the indexes on a collection using dropAllIndexes with a Promise
@@ -385,21 +444,21 @@ exports.shouldCorrectlyDropCollectionWithDropFunctionWithPromises = {
  * @ignore
  */
 exports.dropAllIndexesExample1WithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       db.createCollection('dropExample1_with_promise').then(function(r) {
         // Drop the collection
         db.collection('dropExample1_with_promise').dropAllIndexes().then(function(reply) {
@@ -411,7 +470,7 @@ exports.dropAllIndexesExample1WithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * An examples showing the creation and dropping of an index using a Promise
@@ -421,48 +480,47 @@ exports.dropAllIndexesExample1WithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyCreateAndDropIndexWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
+    var db = configuration.newDbInstance({ w: 0 }, { poolSize: 1, auto_reconnect: true });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       var collection = db.collection('dropIndexExample1_with_promise');
       // Insert a bunch of documents for the index
-      collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}).then(function(result) {
+      collection
+        .insertMany([{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }], { w: 1 })
+        .then(function(result) {
+          // Create an index on the a field
+          collection
+            .ensureIndex({ a: 1, b: 1 }, { unique: true, background: true, w: 1 })
+            .then(function(indexName) {
+              // Drop the index
+              collection.dropIndex('a_1_b_1').then(function(result) {
+                // Verify that the index is gone
+                collection.indexInformation().then(function(indexInformation) {
+                  test.deepEqual([['_id', 1]], indexInformation._id_);
+                  test.equal(null, indexInformation.a_1_b_1);
 
-        // Create an index on the a field
-        collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, w:1}).then(function(indexName) {
-
-          // Drop the index
-          collection.dropIndex("a_1_b_1").then(function(result) {
-
-            // Verify that the index is gone
-            collection.indexInformation().then(function(indexInformation) {
-              test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
-              test.equal(null, indexInformation.a_1_b_1);
-
-              client.close();
-              test.done();
+                  client.close();
+                  test.done();
+                });
+              });
             });
-          });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * A more complex ensureIndex using a compound unique index in the background and dropping duplicated documents using a Promise.
@@ -472,48 +530,58 @@ exports.shouldCorrectlyCreateAndDropIndexWithPromises = {
  * @ignore
  */
 exports.shouldCreateComplexEnsureIndexWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       var collection = db.collection('ensureIndexExample1_with_promise');
       // Insert a bunch of documents for the index
-      collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax()).then(function(result) {
+      collection
+        .insertMany(
+          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          configuration.writeConcernMax()
+        )
+        .then(function(result) {
+          // Create an index on the a field
+          db
+            .ensureIndex(
+              'ensureIndexExample1_with_promise',
+              { a: 1, b: 1 },
+              { unique: true, background: true, w: 1 }
+            )
+            .then(function(indexName) {
+              // Show that duplicate records got dropped
+              collection.find({}).toArray().then(function(items) {
+                test.equal(4, items.length);
 
-        // Create an index on the a field
-        db.ensureIndex('ensureIndexExample1_with_promise', {a:1, b:1}
-          , {unique:true, background:true, w:1}).then(function(indexName) {
+                // Perform a query, with explain to show we hit the query
+                collection.find({ a: 2 }).explain().then(function(explanation) {
+                  test.ok(explanation != null);
 
-          // Show that duplicate records got dropped
-          collection.find({}).toArray().then(function(items) {
-            test.equal(4, items.length);
-
-            // Perform a query, with explain to show we hit the query
-            collection.find({a:2}).explain().then(function(explanation) {
-              test.ok(explanation != null);
-
-              client.close();
-              test.done();
+                  client.close();
+                  test.done();
+                });
+              });
             });
-          })
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * A more complex ensureIndex using a compound unique index in the background using a Promise.
@@ -523,48 +591,48 @@ exports.shouldCreateComplexEnsureIndexWithPromises = {
  * @ignore
  */
 exports.ensureIndexExampleWithCompountIndexWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
+    var db = configuration.newDbInstance({ w: 0 }, { poolSize: 1, auto_reconnect: true });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       var collection = db.collection('ensureIndexExample2_with_promise');
       // Insert a bunch of documents for the index
-      collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}).then(function(result) {
+      collection
+        .insertMany([{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }], { w: 1 })
+        .then(function(result) {
+          // Create an index on the a field
+          collection
+            .ensureIndex({ a: 1, b: 1 }, { unique: true, background: true, w: 1 })
+            .then(function(indexName) {
+              // Show that duplicate records got dropped
+              collection.find({}).toArray().then(function(items) {
+                test.equal(4, items.length);
 
-        // Create an index on the a field
-        collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, w:1}).then(function(indexName) {
+                // Perform a query, with explain to show we hit the query
+                collection.find({ a: 2 }).explain().then(function(explanation) {
+                  test.ok(explanation != null);
 
-          // Show that duplicate records got dropped
-          collection.find({}).toArray().then(function(items) {
-            test.equal(4, items.length);
-
-            // Perform a query, with explain to show we hit the query
-            collection.find({a:2}).explain().then(function(explanation) {
-              test.ok(explanation != null);
-
-              client.close();
-              test.done();
+                  client.close();
+                  test.done();
+                });
+              });
             });
-          })
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * A simple query using the find method and toArray method with a Promise.
@@ -574,40 +642,44 @@ exports.ensureIndexExampleWithCompountIndexWithPromises = {
  * @ignore
  */
 exports.shouldPerformASimpleQueryWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a collection we want to drop later
       var collection = db.collection('simple_query_with_promise');
 
       // Insert a bunch of documents for the testing
-      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(result) {
+      collection
+        .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }], configuration.writeConcernMax())
+        .then(function(result) {
+          // Perform a simple find and return all the documents
+          collection.find().toArray().then(function(docs) {
+            test.equal(3, docs.length);
 
-        // Perform a simple find and return all the documents
-        collection.find().toArray().then(function(docs) {
-          test.equal(3, docs.length);
-
-          client.close();
-          test.done();
+            client.close();
+            test.done();
+          });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * A simple query showing the explain for a query using a Promise.
@@ -617,39 +689,43 @@ exports.shouldPerformASimpleQueryWithPromises = {
  * @ignore
  */
 exports.shouldPerformASimpleExplainQueryWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a collection we want to drop later
       var collection = db.collection('simple_explain_query_with_promise');
       // Insert a bunch of documents for the testing
-      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(result) {
+      collection
+        .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }], configuration.writeConcernMax())
+        .then(function(result) {
+          // Perform a simple find and return all the documents
+          collection.find({}).explain().then(function(docs) {
+            test.ok(docs != null);
 
-        // Perform a simple find and return all the documents
-        collection.find({}).explain().then(function(docs) {
-          test.ok(docs != null);
-
-          client.close();
-          test.done();
+            client.close();
+            test.done();
+          });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * A simple query showing skip and limit using a Promise.
@@ -659,42 +735,48 @@ exports.shouldPerformASimpleExplainQueryWithPromises = {
  * @ignore
  */
 exports.shouldPerformASimpleLimitSkipQueryWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a collection we want to drop later
       var collection = db.collection('simple_limit_skip_query_with_promise');
       // Insert a bunch of documents for the testing
-      collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax()).then(function(result) {
-
-        // Perform a simple find and return all the documents
-        collection.find({})
-          .skip(1).limit(1).project({b:1}).toArray().then(function(docs) {
+      collection
+        .insertMany(
+          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }],
+          configuration.writeConcernMax()
+        )
+        .then(function(result) {
+          // Perform a simple find and return all the documents
+          collection.find({}).skip(1).limit(1).project({ b: 1 }).toArray().then(function(docs) {
             test.equal(1, docs.length);
             test.equal(null, docs[0].a);
             test.equal(2, docs[0].b);
 
             client.close();
             test.done();
+          });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * A whole set of different ways to use the findAndModify command with a Promise..
@@ -708,58 +790,70 @@ exports.shouldPerformASimpleLimitSkipQueryWithPromises = {
  * @ignore
  */
 exports.shouldPerformSimpleFindAndModifyOperationsWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Create a collection we want to drop later
       var collection = db.collection('simple_find_and_modify_operations_with_promise');
       // Insert some test documentations
-      collection.insertMany([{a:1}, {b:1}, {c:1}], configuration.writeConcernMax()).then(function(result) {
+      collection
+        .insertMany([{ a: 1 }, { b: 1 }, { c: 1 }], configuration.writeConcernMax())
+        .then(function(result) {
+          // Simple findAndModify command returning the new document
+          collection
+            .findAndModify({ a: 1 }, [['a', 1]], { $set: { b1: 1 } }, { new: true })
+            .then(function(doc) {
+              test.equal(1, doc.value.a);
+              test.equal(1, doc.value.b1);
 
-        // Simple findAndModify command returning the new document
-        collection.findAndModify({a:1}, [['a', 1]], {$set:{b1:1}}, {new:true}).then(function(doc) {
-          test.equal(1, doc.value.a);
-          test.equal(1, doc.value.b1);
+              // Simple findAndModify command returning the new document and
+              // removing it at the same time
+              collection
+                .findAndModify({ b: 1 }, [['b', 1]], { $set: { b: 2 } }, { remove: true })
+                .then(function(doc) {
+                  // Verify that the document is gone
+                  collection.findOne({ b: 1 }).then(function(item) {
+                    test.equal(null, item);
 
-          // Simple findAndModify command returning the new document and
-          // removing it at the same time
-          collection.findAndModify({b:1}, [['b', 1]],
-            {$set:{b:2}}, {remove:true}).then(function(doc) {
+                    // Simple findAndModify command performing an upsert and returning the new document
+                    // executing the command safely
+                    collection
+                      .findAndModify(
+                        { d: 1 },
+                        [['b', 1]],
+                        { d: 1, f: 1 },
+                        { new: true, upsert: true, w: 1 }
+                      )
+                      .then(function(doc) {
+                        test.equal(1, doc.value.d);
+                        test.equal(1, doc.value.f);
 
-            // Verify that the document is gone
-            collection.findOne({b:1}).then(function(item) {
-              test.equal(null, item);
-
-              // Simple findAndModify command performing an upsert and returning the new document
-              // executing the command safely
-              collection.findAndModify({d:1}, [['b', 1]],
-                {d:1, f:1}, {new:true, upsert:true, w:1}).then(function(doc) {
-                  test.equal(1, doc.value.d);
-                  test.equal(1, doc.value.f);
-
-                  client.close();
-                  test.done();
-              })
+                        client.close();
+                        test.done();
+                      });
+                  });
+                });
             });
-          });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * An example of using findAndRemove using a Promise.
@@ -769,46 +863,50 @@ exports.shouldPerformSimpleFindAndModifyOperationsWithPromises = {
  * @ignore
  */
 exports.shouldPerformSimpleFindAndRemoveWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a collection we want to drop later
       var collection = db.collection('simple_find_and_modify_operations_2_with_promise');
       // Insert some test documentations
-      collection.insertMany([{a:1}, {b:1, d:1}, {c:1}], configuration.writeConcernMax()).then(function(result) {
+      collection
+        .insertMany([{ a: 1 }, { b: 1, d: 1 }, { c: 1 }], configuration.writeConcernMax())
+        .then(function(result) {
+          // Simple findAndModify command returning the old document and
+          // removing it at the same time
+          collection.findAndRemove({ b: 1 }, [['b', 1]]).then(function(doc) {
+            test.equal(1, doc.value.b);
+            test.equal(1, doc.value.d);
 
-        // Simple findAndModify command returning the old document and
-        // removing it at the same time
-        collection.findAndRemove({b:1}, [['b', 1]]).then(function(doc) {
-          test.equal(1, doc.value.b);
-          test.equal(1, doc.value.d);
+            // Verify that the document is gone
+            collection.findOne({ b: 1 }).then(function(item) {
+              test.equal(null, item);
 
-          // Verify that the document is gone
-          collection.findOne({b:1}).then(function(item) {
-            test.equal(null, item);
-
-            client.close();
-            test.done();
+              client.close();
+              test.done();
+            });
           });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * A simple query using findOne with a Promise.
@@ -818,40 +916,47 @@ exports.shouldPerformSimpleFindAndRemoveWithPromises = {
  * @ignore
  */
 exports.shouldPerformASimpleLimitSkipFindOneQueryWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a collection we want to drop later
       var collection = db.collection('simple_limit_skip_find_one_query_with_promise');
       // Insert a bunch of documents for the testing
-      collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax()).then(function(result) {
+      collection
+        .insertMany(
+          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }],
+          configuration.writeConcernMax()
+        )
+        .then(function(result) {
+          // Perform a simple find and return all the documents
+          collection.findOne({ a: 2 }, { fields: { b: 1 } }).then(function(doc) {
+            test.equal(null, doc.a);
+            test.equal(2, doc.b);
 
-        // Perform a simple find and return all the documents
-        collection.findOne({a:2}, {fields:{b:1}}).then(function(doc) {
-          test.equal(null, doc.a);
-          test.equal(2, doc.b);
-
-          client.close();
-          test.done();
+            client.close();
+            test.done();
+          });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * Example of a simple geoNear query across some documents using a Promise.
@@ -861,44 +966,47 @@ exports.shouldPerformASimpleLimitSkipFindOneQueryWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyPerformSimpleGeoNearCommandWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Fetch the collection
-      var collection = db.collection("simple_geo_near_command_with_promise");
+      var collection = db.collection('simple_geo_near_command_with_promise');
 
       // Add a location based index
-      collection.ensureIndex({loc:"2d"}).then(function(result) {
-
+      collection.ensureIndex({ loc: '2d' }).then(function(result) {
         // Save a new location tagged document
-        collection.insertMany([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], configuration.writeConcernMax()).then(function(result) {
+        collection
+          .insertMany(
+            [{ a: 1, loc: [50, 30] }, { a: 1, loc: [30, 50] }],
+            configuration.writeConcernMax()
+          )
+          .then(function(result) {
+            // Use geoNear command to find document
+            collection.geoNear(50, 50, { query: { a: 1 }, num: 1 }).then(function(docs) {
+              test.equal(1, docs.results.length);
 
-          // Use geoNear command to find document
-          collection.geoNear(50, 50, {query:{a:1}, num:1}).then(function(docs) {
-            test.equal(1, docs.results.length);
-
-            client.close();
-            test.done();
+              client.close();
+              test.done();
+            });
           });
-        });
       });
     });
     // END
   }
-}
+};
 
 /**
  * Example of a simple geoHaystackSearch query across some documents using a Promise.
@@ -908,43 +1016,50 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommandWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithPromises = {
-  metadata: { requires: { promises:true, topology: ["single", "replicaset"] } },
+  metadata: { requires: { promises: true, topology: ['single', 'replicaset'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Fetch the collection
-      var collection = db.collection("simple_geo_haystack_command_with_promise");
+      var collection = db.collection('simple_geo_haystack_command_with_promise');
 
       // Add a location based index
-      collection.ensureIndex({loc: "geoHaystack", type: 1}, {bucketSize: 1}).then(function(result) {
-
-        // Save a new location tagged document
-        collection.insertMany([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], configuration.writeConcernMax()).then(function(result) {
-
-          // Use geoNear command to find document
-          collection.geoHaystackSearch(50, 50, {search:{a:1}, limit:1, maxDistance:100}).then(function(docs) {
-            test.equal(1, docs.results.length);
-            client.close();
-            test.done();
-          });
+      collection
+        .ensureIndex({ loc: 'geoHaystack', type: 1 }, { bucketSize: 1 })
+        .then(function(result) {
+          // Save a new location tagged document
+          collection
+            .insertMany(
+              [{ a: 1, loc: [50, 30] }, { a: 1, loc: [30, 50] }],
+              configuration.writeConcernMax()
+            )
+            .then(function(result) {
+              // Use geoNear command to find document
+              collection
+                .geoHaystackSearch(50, 50, { search: { a: 1 }, limit: 1, maxDistance: 100 })
+                .then(function(docs) {
+                  test.equal(1, docs.results.length);
+                  client.close();
+                  test.done();
+                });
+            });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * A whole lot of different ways to execute the group command using a Promise.
@@ -954,127 +1069,199 @@ exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteGroupFunctionWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
     var Code = configuration.require.Code;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance({ w: 0 }, { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   Code = require('mongodb').Code,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   Code = require('mongodb').Code,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a test collection
       var collection = db.collection('test_group_with_promise');
 
       // Perform a simple group by on an empty collection
-      collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }").then(function(results) {
-        test.deepEqual([], results);
+      collection
+        .group([], {}, { count: 0 }, 'function (obj, prev) { prev.count++; }')
+        .then(function(results) {
+          test.deepEqual([], results);
 
-        // Trigger some inserts on the collection
-        collection.insertMany([{'a':2}, {'b':5}, {'a':1}], {w:1}).then(function(ids) {
+          // Trigger some inserts on the collection
+          collection.insertMany([{ a: 2 }, { b: 5 }, { a: 1 }], { w: 1 }).then(function(ids) {
+            // Perform a group count
+            collection
+              .group([], {}, { count: 0 }, 'function (obj, prev) { prev.count++; }')
+              .then(function(results) {
+                test.equal(3, results[0].count);
 
-          // Perform a group count
-          collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }").then(function(results) {
-            test.equal(3, results[0].count);
+                // Perform a group count using the eval method
+                collection
+                  .group([], {}, { count: 0 }, 'function (obj, prev) { prev.count++; }', false)
+                  .then(function(results) {
+                    test.equal(3, results[0].count);
 
-            // Perform a group count using the eval method
-            collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", false).then(function(results) {
-              test.equal(3, results[0].count);
-
-              // Group with a conditional
-              collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }").then(function(results) {
-                // Results
-                test.equal(1, results[0].count);
-
-                // Group with a conditional using the EVAL method
-                collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }" , false).then(function(results) {
-                  // Results
-                  test.equal(1, results[0].count);
-                  // Insert some more test data
-                  collection.insertMany([{'a':2}, {'b':3}], {w:1}).then(function(ids) {
-
-                    // Do a Group by field a
-                    collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }").then(function(results) {
-                      // Results
-                      test.equal(2, results[0].a);
-                      test.equal(2, results[0].count);
-                      test.equal(null, results[1].a);
-                      test.equal(2, results[1].count);
-                      test.equal(1, results[2].a);
-                      test.equal(1, results[2].count);
-
-                      // Do a Group by field a
-                      collection.group({'a':true}, {}, {"count":0}, function (obj, prev) { prev.count++; }, true).then(function(results) {
+                    // Group with a conditional
+                    collection
+                      .group(
+                        [],
+                        { a: { $gt: 1 } },
+                        { count: 0 },
+                        'function (obj, prev) { prev.count++; }'
+                      )
+                      .then(function(results) {
                         // Results
-                        test.equal(2, results[0].a);
-                        test.equal(2, results[0].count);
-                        test.equal(null, results[1].a);
-                        test.equal(2, results[1].count);
-                        test.equal(1, results[2].a);
-                        test.equal(1, results[2].count);
+                        test.equal(1, results[0].count);
 
-                        // Correctly handle illegal function
-                        collection.group([], {}, {}, "5 ++ 5").then(function(err, results) {
-                        }).catch(function(err) {
-                          test.ok(err.message != null);
-
-                          // Use a function to select the keys used to group by
-                          var keyf = function(doc) { return {a: doc.a}; };
-                          collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}, function(obj, prev) { prev.count++; prev.value += obj.a; }, true).then(function(results) {
+                        // Group with a conditional using the EVAL method
+                        collection
+                          .group(
+                            [],
+                            { a: { $gt: 1 } },
+                            { count: 0 },
+                            'function (obj, prev) { prev.count++; }',
+                            false
+                          )
+                          .then(function(results) {
                             // Results
-                            results.sort(function(a, b) { return b.count - a.count; });
-                            test.equal(2, results[0].count);
-                            test.equal(2, results[0].a);
-                            test.equal(4, results[0].value);
-                            test.equal(1, results[1].count);
-                            test.equal(1, results[1].a);
-                            test.equal(1, results[1].value);
+                            test.equal(1, results[0].count);
+                            // Insert some more test data
+                            collection
+                              .insertMany([{ a: 2 }, { b: 3 }], { w: 1 })
+                              .then(function(ids) {
+                                // Do a Group by field a
+                                collection
+                                  .group(
+                                    ['a'],
+                                    {},
+                                    { count: 0 },
+                                    'function (obj, prev) { prev.count++; }'
+                                  )
+                                  .then(function(results) {
+                                    // Results
+                                    test.equal(2, results[0].a);
+                                    test.equal(2, results[0].count);
+                                    test.equal(null, results[1].a);
+                                    test.equal(2, results[1].count);
+                                    test.equal(1, results[2].a);
+                                    test.equal(1, results[2].count);
 
-                            // Use a Code object to select the keys used to group by
-                            var keyf = new Code(function(doc) { return {a: doc.a}; });
-                            collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}, function(obj, prev) { prev.count++; prev.value += obj.a; }, true).then(function(results) {
-                              // Results
-                              results.sort(function(a, b) { return b.count - a.count; });
-                              test.equal(2, results[0].count);
-                              test.equal(2, results[0].a);
-                              test.equal(4, results[0].value);
-                              test.equal(1, results[1].count);
-                              test.equal(1, results[1].a);
-                              test.equal(1, results[1].value);
+                                    // Do a Group by field a
+                                    collection
+                                      .group(
+                                        { a: true },
+                                        {},
+                                        { count: 0 },
+                                        function(obj, prev) {
+                                          prev.count++;
+                                        },
+                                        true
+                                      )
+                                      .then(function(results) {
+                                        // Results
+                                        test.equal(2, results[0].a);
+                                        test.equal(2, results[0].count);
+                                        test.equal(null, results[1].a);
+                                        test.equal(2, results[1].count);
+                                        test.equal(1, results[2].a);
+                                        test.equal(1, results[2].count);
 
-                              // Correctly handle illegal function when using the EVAL method
-                              collection.group([], {}, {}, "5 ++ 5", false).then(function(results) {
-                              }).catch(function(err) {
-                                test.ok(err.message != null);
+                                        // Correctly handle illegal function
+                                        collection
+                                          .group([], {}, {}, '5 ++ 5')
+                                          .then(function(err, results) {})
+                                          .catch(function(err) {
+                                            test.ok(err.message != null);
 
-                                client.close();
-                                test.done();
+                                            // Use a function to select the keys used to group by
+                                            var keyf = function(doc) {
+                                              return { a: doc.a };
+                                            };
+                                            collection
+                                              .group(
+                                                keyf,
+                                                { a: { $gt: 0 } },
+                                                { count: 0, value: 0 },
+                                                function(obj, prev) {
+                                                  prev.count++;
+                                                  prev.value += obj.a;
+                                                },
+                                                true
+                                              )
+                                              .then(function(results) {
+                                                // Results
+                                                results.sort(function(a, b) {
+                                                  return b.count - a.count;
+                                                });
+                                                test.equal(2, results[0].count);
+                                                test.equal(2, results[0].a);
+                                                test.equal(4, results[0].value);
+                                                test.equal(1, results[1].count);
+                                                test.equal(1, results[1].a);
+                                                test.equal(1, results[1].value);
+
+                                                // Use a Code object to select the keys used to group by
+                                                var keyf = new Code(function(doc) {
+                                                  return { a: doc.a };
+                                                });
+                                                collection
+                                                  .group(
+                                                    keyf,
+                                                    { a: { $gt: 0 } },
+                                                    { count: 0, value: 0 },
+                                                    function(obj, prev) {
+                                                      prev.count++;
+                                                      prev.value += obj.a;
+                                                    },
+                                                    true
+                                                  )
+                                                  .then(function(results) {
+                                                    // Results
+                                                    results.sort(function(a, b) {
+                                                      return b.count - a.count;
+                                                    });
+                                                    test.equal(2, results[0].count);
+                                                    test.equal(2, results[0].a);
+                                                    test.equal(4, results[0].value);
+                                                    test.equal(1, results[1].count);
+                                                    test.equal(1, results[1].a);
+                                                    test.equal(1, results[1].value);
+
+                                                    // Correctly handle illegal function when using the EVAL method
+                                                    collection
+                                                      .group([], {}, {}, '5 ++ 5', false)
+                                                      .then(function(results) {})
+                                                      .catch(function(err) {
+                                                        test.ok(err.message != null);
+
+                                                        client.close();
+                                                        test.done();
+                                                      });
+                                                  });
+                                              });
+                                          });
+                                      });
+                                  });
                               });
-                            });
                           });
-                        });
                       });
-                    });
                   });
-                });
               });
-            });
           });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * A simple map reduce example using a Promise.
@@ -1084,53 +1271,57 @@ exports.shouldCorrectlyExecuteGroupFunctionWithPromises = {
  * @ignore
  */
 exports.shouldPerformSimpleMapReduceFunctionsWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance({ w: 0 }, { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a test collection
       var collection = db.collection('test_map_reduce_functions_with_promise');
 
       // Insert some documents to perform map reduce over
-      collection.insertMany([{'user_id':1}, {'user_id':2}], {w:1}).then(function(r) {
-
+      collection.insertMany([{ user_id: 1 }, { user_id: 2 }], { w: 1 }).then(function(r) {
         // Map function
-        var map = function() { emit(this.user_id, 1); };
+        var map = function() {
+          emit(this.user_id, 1);
+        };
         // Reduce function
-        var reduce = function(k,vals) { return 1; };
+        var reduce = function(k, vals) {
+          return 1;
+        };
 
         // Perform the map reduce
-        collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}).then(function(collection) {
-
-          // Mapreduce returns the temporary collection with the results
-          collection.findOne({'_id':1}).then(function(result) {
-            test.equal(1, result.value);
-
-            collection.findOne({'_id':2}).then(function(result) {
+        collection
+          .mapReduce(map, reduce, { out: { replace: 'tempCollection' } })
+          .then(function(collection) {
+            // Mapreduce returns the temporary collection with the results
+            collection.findOne({ _id: 1 }).then(function(result) {
               test.equal(1, result.value);
 
-              client.close();
-              test.done();
+              collection.findOne({ _id: 2 }).then(function(result) {
+                test.equal(1, result.value);
+
+                client.close();
+                test.done();
+              });
             });
           });
-        });
       });
     });
     // END
   }
-}
+};
 
 /**
  * A simple map reduce example using the inline output type on MongoDB > 1.7.6 returning the statistics using a Promise.
@@ -1142,49 +1333,59 @@ exports.shouldPerformSimpleMapReduceFunctionsWithPromises = {
 exports.shouldPerformMapReduceFunctionInlineWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { promises:true, mongodb: '>1.7.6', topology: ['single'] } },
+  metadata: { requires: { promises: true, mongodb: '>1.7.6', topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance({ w: 0 }, { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a test collection
       var collection = db.collection('test_map_reduce_functions_inline_with_promise');
 
       // Insert some test documents
-      collection.insertMany([{'user_id':1}, {'user_id':2}], {w:1}).then(function(r) {
-
+      collection.insertMany([{ user_id: 1 }, { user_id: 2 }], { w: 1 }).then(function(r) {
         // Map function
-        var map = function() { emit(this.user_id, 1); };
+        var map = function() {
+          emit(this.user_id, 1);
+        };
         // Reduce function
-        var reduce = function(k,vals) { return 1; };
+        var reduce = function(k, vals) {
+          return 1;
+        };
 
         // Execute map reduce and return results inline
-        collection.mapReduce(map, reduce, {out : {inline: 1}, verbose:true}).then(function(result) {
-          test.equal(2, result.results.length);
-          test.ok(result.stats != null);
-
-          collection.mapReduce(map, reduce, {out : {replace: 'mapreduce_integration_test'}, verbose:true}).then(function(result) {
+        collection
+          .mapReduce(map, reduce, { out: { inline: 1 }, verbose: true })
+          .then(function(result) {
+            test.equal(2, result.results.length);
             test.ok(result.stats != null);
-            client.close();
-            test.done();
+
+            collection
+              .mapReduce(map, reduce, {
+                out: { replace: 'mapreduce_integration_test' },
+                verbose: true
+              })
+              .then(function(result) {
+                test.ok(result.stats != null);
+                client.close();
+                test.done();
+              });
           });
-        });
       });
     });
     // END
   }
-}
+};
 
 /**
  * Mapreduce using a provided scope containing a javascript function executed using a Promise.
@@ -1194,80 +1395,84 @@ exports.shouldPerformMapReduceFunctionInlineWithPromises = {
  * @ignore
  */
 exports.shouldPerformMapReduceWithContextWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
     var Code = configuration.require.Code;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance({ w: 0 }, { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   Code = require('mongodb').Code,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   Code = require('mongodb').Code,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a test collection
       var collection = db.collection('test_map_reduce_functions_scope_with_promise');
 
       // Insert some test documents
-      collection.insertMany([{'user_id':1, 'timestamp':new Date()}
-        , {'user_id':2, 'timestamp':new Date()}], {w:1}).then(function(r) {
-
-        // Map function
-        var map = function(){
+      collection
+        .insertMany(
+          [{ user_id: 1, timestamp: new Date() }, { user_id: 2, timestamp: new Date() }],
+          { w: 1 }
+        )
+        .then(function(r) {
+          // Map function
+          var map = function() {
             emit(fn(this.timestamp.getYear()), 1);
-        }
+          };
 
-        // Reduce function
-        var reduce = function(k, v){
+          // Reduce function
+          var reduce = function(k, v) {
             count = 0;
-            for(i = 0; i < v.length; i++) {
-                count += v[i];
+            for (i = 0; i < v.length; i++) {
+              count += v[i];
             }
             return count;
-        }
+          };
 
-        // Javascript function available in the map reduce scope
-        var t = function(val){ return val+1; }
+          // Javascript function available in the map reduce scope
+          var t = function(val) {
+            return val + 1;
+          };
 
-        // Execute the map reduce with the custom scope
-        var o = {};
-        o.scope =  { fn: new Code(t.toString()) }
-        o.out = { replace: 'replacethiscollection' }
+          // Execute the map reduce with the custom scope
+          var o = {};
+          o.scope = { fn: new Code(t.toString()) };
+          o.out = { replace: 'replacethiscollection' };
 
-        collection.mapReduce(map, reduce, o).then(function(outCollection) {
+          collection.mapReduce(map, reduce, o).then(function(outCollection) {
+            // Find all entries in the map-reduce collection
+            outCollection.find().toArray().then(function(results) {
+              test.equal(2, results[0].value);
 
-          // Find all entries in the map-reduce collection
-          outCollection.find().toArray().then(function(results) {
-            test.equal(2, results[0].value)
+              // mapReduce with scope containing plain function
+              var o = {};
+              o.scope = { fn: t };
+              o.out = { replace: 'replacethiscollection' };
 
-            // mapReduce with scope containing plain function
-            var o = {};
-            o.scope =  { fn: t }
-            o.out = { replace: 'replacethiscollection' }
+              collection.mapReduce(map, reduce, o).then(function(outCollection) {
+                // Find all entries in the map-reduce collection
+                outCollection.find().toArray().then(function(results) {
+                  test.equal(2, results[0].value);
 
-            collection.mapReduce(map, reduce, o).then(function(outCollection) {
-              // Find all entries in the map-reduce collection
-              outCollection.find().toArray().then(function(results) {
-                test.equal(2, results[0].value)
-
-                client.close();
-                test.done();
+                  client.close();
+                  test.done();
+                });
               });
             });
           });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * Mapreduce using a scope containing javascript objects with functions using a Promise.
@@ -1277,79 +1482,83 @@ exports.shouldPerformMapReduceWithContextWithPromises = {
  * @ignore
  */
 exports.shouldPerformMapReduceInContextObjectsWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
     var Code = configuration.require.Code;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance({ w: 0 }, { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   Code = require('mongodb').Code,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   Code = require('mongodb').Code,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a test collection
       var collection = db.collection('test_map_reduce_functions_scope_objects_with_promise');
 
       // Insert some test documents
-      collection.insertMany([{'user_id':1, 'timestamp':new Date()}
-        , {'user_id':2, 'timestamp':new Date()}], {w:1}).then(function(r) {
+      collection
+        .insertMany(
+          [{ user_id: 1, timestamp: new Date() }, { user_id: 2, timestamp: new Date() }],
+          { w: 1 }
+        )
+        .then(function(r) {
+          // Map function
+          var map = function() {
+            emit(obj.fn(this.timestamp.getYear()), 1);
+          };
 
-        // Map function
-        var map = function(){
-          emit(obj.fn(this.timestamp.getYear()), 1);
-        }
+          // Reduce function
+          var reduce = function(k, v) {
+            count = 0;
+            for (i = 0; i < v.length; i++) {
+              count += v[i];
+            }
+            return count;
+          };
 
-        // Reduce function
-        var reduce = function(k, v){
-          count = 0;
-          for(i = 0; i < v.length; i++) {
-            count += v[i];
-          }
-          return count;
-        }
+          // Javascript function available in the map reduce scope
+          var t = function(val) {
+            return val + 1;
+          };
 
-        // Javascript function available in the map reduce scope
-        var t = function(val){ return val+1; }
+          // Execute the map reduce with the custom scope containing objects
+          var o = {};
+          o.scope = { obj: { fn: new Code(t.toString()) } };
+          o.out = { replace: 'replacethiscollection' };
 
-        // Execute the map reduce with the custom scope containing objects
-        var o = {};
-        o.scope =  { obj: {fn: new Code(t.toString())} }
-        o.out = { replace: 'replacethiscollection' }
+          collection.mapReduce(map, reduce, o).then(function(outCollection) {
+            // Find all entries in the map-reduce collection
+            outCollection.find().toArray().then(function(results) {
+              test.equal(2, results[0].value);
 
-        collection.mapReduce(map, reduce, o).then(function(outCollection) {
+              // mapReduce with scope containing plain function
+              var o = {};
+              o.scope = { obj: { fn: t } };
+              o.out = { replace: 'replacethiscollection' };
 
-          // Find all entries in the map-reduce collection
-          outCollection.find().toArray().then(function(results) {
-            test.equal(2, results[0].value)
-
-            // mapReduce with scope containing plain function
-            var o = {};
-            o.scope =  { obj: {fn: t} }
-            o.out = { replace: 'replacethiscollection' }
-
-            collection.mapReduce(map, reduce, o).then(function(outCollection) {
-              // Find all entries in the map-reduce collection
-              outCollection.find().toArray().then(function(results) {
-                test.equal(2, results[0].value)
-                client.close();
-                test.done();
+              collection.mapReduce(map, reduce, o).then(function(outCollection) {
+                // Find all entries in the map-reduce collection
+                outCollection.find().toArray().then(function(results) {
+                  test.equal(2, results[0].value);
+                  client.close();
+                  test.done();
+                });
               });
             });
           });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * Example of retrieving a collections indexes using a Promise.
@@ -1359,30 +1568,28 @@ exports.shouldPerformMapReduceInContextObjectsWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetriveACollectionsIndexesWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Crete the collection for the distinct example
       var collection = db.collection('simple_key_based_distinct_with_promise');
 
       // Create a geo 2d index
-      collection.ensureIndex({loc:"2d"}, configuration.writeConcernMax()).then(function(result) {
-
+      collection.ensureIndex({ loc: '2d' }, configuration.writeConcernMax()).then(function(result) {
         // Create a simple single field index
-        collection.ensureIndex({a:1}, configuration.writeConcernMax()).then(function(result) {
-
+        collection.ensureIndex({ a: 1 }, configuration.writeConcernMax()).then(function(result) {
           setTimeout(function() {
             // List all of the indexes on the collection
             collection.indexes().then(function(indexes) {
@@ -1397,7 +1604,7 @@ exports.shouldCorrectlyRetriveACollectionsIndexesWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * An example showing the use of the indexExists function using a Promise for a single index name and a list of index names.
@@ -1407,35 +1614,38 @@ exports.shouldCorrectlyRetriveACollectionsIndexesWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteIndexExistsWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Create a test collection that we are getting the options back from
-      var collection = db.collection('test_collection_index_exists_with_promise', configuration.writeConcernMax());
+      var collection = db.collection(
+        'test_collection_index_exists_with_promise',
+        configuration.writeConcernMax()
+      );
       // Create an index on the collection
       collection.createIndex('a', configuration.writeConcernMax()).then(function(indexName) {
         // Let's test to check if a single index exists
-        collection.indexExists("a_1").then(function(result) {
+        collection.indexExists('a_1').then(function(result) {
           test.equal(true, result);
 
           // Let's test to check if multiple indexes are available
-          collection.indexExists(["a_1", "_id_"]).then(function(result) {
+          collection.indexExists(['a_1', '_id_']).then(function(result) {
             test.equal(true, result);
 
             // Check if a non existing index exists
-            collection.indexExists("c_1").then(function(result) {
+            collection.indexExists('c_1').then(function(result) {
               test.equal(false, result);
 
               client.close();
@@ -1447,7 +1657,7 @@ exports.shouldCorrectlyExecuteIndexExistsWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * An example showing the information returned by indexInformation using a Promise.
@@ -1458,56 +1668,67 @@ exports.shouldCorrectlyExecuteIndexExistsWithPromises = {
  */
 exports.shouldCorrectlyShowTheResultsFromIndexInformationWithPromises = {
   metadata: {
-    requires: { promises:true, topology: ["single", "replicaset"] }
+    requires: { promises: true, topology: ['single', 'replicaset'] }
   },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0, native_parser:false}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(
+      { w: 0, native_parser: false },
+      { poolSize: 1, auto_reconnect: false }
+    );
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a collection we want to drop later
       var collection = db.collection('more_index_information_test_2_with_promise');
       // Insert a bunch of documents for the index
-      collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax()).then(function(result) {
+      collection
+        .insertMany(
+          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          configuration.writeConcernMax()
+        )
+        .then(function(result) {
+          // Create an index on the a field
+          collection
+            .ensureIndex({ a: 1, b: 1 }, { unique: true, background: true, w: 1 })
+            .then(function(indexName) {
+              // Fetch basic indexInformation for collection
+              db
+                .indexInformation('more_index_information_test_2_with_promise')
+                .then(function(indexInformation) {
+                  test.deepEqual([['_id', 1]], indexInformation._id_);
+                  test.deepEqual([['a', 1], ['b', 1]], indexInformation.a_1_b_1);
 
-        // Create an index on the a field
-        collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, w:1}).then(function(indexName) {
-          // Fetch basic indexInformation for collection
-          db.indexInformation('more_index_information_test_2_with_promise').then(function(indexInformation) {
-            test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
-            test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
+                  // Fetch full index information
+                  collection.indexInformation({ full: true }).then(function(indexInformation) {
+                    test.deepEqual({ _id: 1 }, indexInformation[0].key);
+                    test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
 
-            // Fetch full index information
-            collection.indexInformation({full:true}).then(function(indexInformation) {
-              test.deepEqual({ _id: 1 }, indexInformation[0].key);
-              test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
-
-              client.close();
-              test.done();
+                    client.close();
+                    test.done();
+                  });
+                })
+                .catch(function(err) {
+                  console.dir(err);
+                });
             });
-          }).catch(function(err) {
-            console.dir(err)
-          });
+        })
+        .catch(function(err) {
+          console.dir(err);
         });
-      }).catch(function(err) {
-        console.dir(err)
-      });
     });
     // END
   }
-}
+};
 
 /**
  * An examples showing the information returned by indexInformation using a Promise.
@@ -1517,52 +1738,52 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformationWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyShowAllTheResultsFromIndexInformationWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
+    var db = configuration.newDbInstance({ w: 0 }, { poolSize: 1, auto_reconnect: true });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a collection we want to drop later
       var collection = db.collection('more_index_information_test_3_with_promise');
       // Insert a bunch of documents for the index
-      collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}).then(function(result) {
+      collection
+        .insertMany([{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }], { w: 1 })
+        .then(function(result) {
+          // Create an index on the a field
+          collection
+            .ensureIndex({ a: 1, b: 1 }, { unique: true, background: true, w: 1 })
+            .then(function(indexName) {
+              // Fetch basic indexInformation for collection
+              collection.indexInformation().then(function(indexInformation) {
+                test.deepEqual([['_id', 1]], indexInformation._id_);
+                test.deepEqual([['a', 1], ['b', 1]], indexInformation.a_1_b_1);
 
-        // Create an index on the a field
-        collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, w:1}).then(function(indexName) {
+                // Fetch full index information
+                collection.indexInformation({ full: true }).then(function(indexInformation) {
+                  test.deepEqual({ _id: 1 }, indexInformation[0].key);
+                  test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
 
-          // Fetch basic indexInformation for collection
-          collection.indexInformation().then(function(indexInformation) {
-            test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
-            test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
-
-            // Fetch full index information
-            collection.indexInformation({full:true}).then(function(indexInformation) {
-              test.deepEqual({ _id: 1 }, indexInformation[0].key);
-              test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
-
-              client.close();
-              test.done();
+                  client.close();
+                  test.done();
+                });
+              });
             });
-          });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * A simple document insert using a Promise example, not using safe mode to ensure document persistance on MongoDB
@@ -1574,37 +1795,36 @@ exports.shouldCorrectlyShowAllTheResultsFromIndexInformationWithPromises = {
 exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafeWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      var collection = db.collection("simple_document_insert_collection_no_safe_with_promise");
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
+      var collection = db.collection('simple_document_insert_collection_no_safe_with_promise');
       // Insert a single document
-      collection.insertOne({hello:'world_no_safe'});
+      collection.insertOne({ hello: 'world_no_safe' });
 
       // Wait for a second before finishing up, to ensure we have written the item to disk
       setTimeout(function() {
-
         // Fetch the document
-        collection.findOne({hello:'world_no_safe'}).then(function(item) {
+        collection.findOne({ hello: 'world_no_safe' }).then(function(item) {
           test.equal('world_no_safe', item.hello);
           client.close();
           test.done();
-        })
+        });
       }, 100);
     });
     // END
   }
-}
+};
 
 /**
  * A batch document insert using a Promise example, using safe mode to ensure document persistance on MongoDB
@@ -1616,37 +1836,40 @@ exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafeWithPro
 exports.shouldCorrectlyPerformABatchDocumentInsertSafeWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Fetch a collection to insert document into
-      var collection = db.collection("batch_document_insert_collection_safe_with_promise");
+      var collection = db.collection('batch_document_insert_collection_safe_with_promise');
       // Insert a single document
-      collection.insertMany([{hello:'world_safe1'}
-        , {hello:'world_safe2'}], configuration.writeConcernMax()).then(function(result) {
-
-        // Fetch the document
-        collection.findOne({hello:'world_safe2'}).then(function(item) {
-          test.equal('world_safe2', item.hello);
-          client.close();
-          test.done();
-        })
-      });
+      collection
+        .insertMany(
+          [{ hello: 'world_safe1' }, { hello: 'world_safe2' }],
+          configuration.writeConcernMax()
+        )
+        .then(function(result) {
+          // Fetch the document
+          collection.findOne({ hello: 'world_safe2' }).then(function(item) {
+            test.equal('world_safe2', item.hello);
+            client.close();
+            test.done();
+          });
+        });
     });
     // END
   }
-}
+};
 
 /**
  * Example of inserting a document containing functions using a Promise.
@@ -1658,40 +1881,46 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafeWithPromises = {
 exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafeWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Fetch a collection to insert document into
-      var collection = db.collection("simple_document_insert_with_function_safe_with_promise");
+      var collection = db.collection('simple_document_insert_with_function_safe_with_promise');
 
       var o = configuration.writeConcernMax();
       o.serializeFunctions = true;
       // Insert a single document
-      collection.insertOne({hello:'world'
-        , func:function() {}}, o).then(function(result) {
-
-        // Fetch the document
-        collection.findOne({hello:'world'}).then(function(item) {
-          test.ok("function() {}", item.code);
-          client.close();
-          test.done();
-        })
-      });
+      collection
+        .insertOne(
+          {
+            hello: 'world',
+            func: function() {}
+          },
+          o
+        )
+        .then(function(result) {
+          // Fetch the document
+          collection.findOne({ hello: 'world' }).then(function(item) {
+            test.ok('function() {}', item.code);
+            client.close();
+            test.done();
+          });
+        });
     });
     // END
   }
-}
+};
 
 /**
  * Example of using keepGoing to allow batch insert using a Promise to complete even when there are illegal documents in the batch
@@ -1700,53 +1929,64 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafeWithPromises 
  * @example-method insert
  * @ignore
  */
-exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.1 With Promises"] = {
+exports[
+  'Should correctly execute insert with keepGoing option on mongod >= 1.9.1 With Promises'
+] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { promises:true, mongodb:">1.9.1", topology: ['single'] } },
+  metadata: { requires: { promises: true, mongodb: '>1.9.1', topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a collection
       var collection = db.collection('keepGoingExample_with_promise');
       collection.drop(function() {
         // Add an unique index to title to force errors in the batch insert
-        collection.ensureIndex({title:1}, {unique:true}).then(function(indexName) {
-
+        collection.ensureIndex({ title: 1 }, { unique: true }).then(function(indexName) {
           // Insert some intial data into the collection
-          collection.insertMany([{name:"Jim"}
-            , {name:"Sarah", title:"Princess"}], configuration.writeConcernMax()).then(function(result) {
-
-            // Force keep going flag, ignoring unique index issue
-            collection.insert([{name:"Jim"}
-              , {name:"Sarah", title:"Princess"}
-              , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true}).then(function(result) {
-              }).catch(function(err) {
-              // Count the number of documents left (should not include the duplicates)
-              collection.count().then(function(count) {
-                test.equal(3, count);
-                test.done();
-              })
+          collection
+            .insertMany(
+              [{ name: 'Jim' }, { name: 'Sarah', title: 'Princess' }],
+              configuration.writeConcernMax()
+            )
+            .then(function(result) {
+              // Force keep going flag, ignoring unique index issue
+              collection
+                .insert(
+                  [
+                    { name: 'Jim' },
+                    { name: 'Sarah', title: 'Princess' },
+                    { name: 'Gump', title: 'Gump' }
+                  ],
+                  { w: 1, keepGoing: true }
+                )
+                .then(function(result) {})
+                .catch(function(err) {
+                  // Count the number of documents left (should not include the duplicates)
+                  collection.count().then(function(count) {
+                    test.equal(3, count);
+                    test.done();
+                  });
+                });
             });
-          });
         });
       });
     });
     // END
   }
-}
+};
 
 /**
  * An example showing how to establish if it's a capped collection using a Promise.
@@ -1756,38 +1996,40 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
  * @ignore
  */
 exports.shouldCorrectlyExecuteIsCappedWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a test collection that we are getting the options back from
-      db.createCollection('test_collection_is_capped_with_promise', {'capped':true, 'size':1024}).then(function(collection) {
-        test.equal('test_collection_is_capped_with_promise', collection.collectionName);
+      db
+        .createCollection('test_collection_is_capped_with_promise', { capped: true, size: 1024 })
+        .then(function(collection) {
+          test.equal('test_collection_is_capped_with_promise', collection.collectionName);
 
-        // Let's fetch the collection options
-        collection.isCapped().then(function(capped) {
-          test.equal(true, capped);
+          // Let's fetch the collection options
+          collection.isCapped().then(function(capped) {
+            test.equal(true, capped);
 
-          client.close();
-          test.done();
+            client.close();
+            test.done();
+          });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * An example returning the options for a collection using a Promise.
@@ -1797,40 +2039,42 @@ exports.shouldCorrectlyExecuteIsCappedWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetriveCollectionOptionsWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
     var Collection = configuration.require.Collection;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a test collection that we are getting the options back from
-      db.createCollection('test_collection_options_with_promise', {'capped':true, 'size':1024}).then(function(collection) {
-        test.equal('test_collection_options_with_promise', collection.collectionName);
+      db
+        .createCollection('test_collection_options_with_promise', { capped: true, size: 1024 })
+        .then(function(collection) {
+          test.equal('test_collection_options_with_promise', collection.collectionName);
 
-        // Let's fetch the collection options
-        collection.options().then(function(options) {
-          test.equal(true, options.capped);
-          test.ok(options.size >= 1024);
+          // Let's fetch the collection options
+          collection.options().then(function(options) {
+            test.equal(true, options.capped);
+            test.ok(options.size >= 1024);
 
-          client.close();
-          test.done();
+            client.close();
+            test.done();
+          });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * A parallelCollectionScan example using a Promise.
@@ -1842,26 +2086,29 @@ exports.shouldCorrectlyRetriveCollectionOptionsWithPromises = {
 exports['Should correctly execute parallelCollectionScan with multiple cursors With Promises'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { promises:true, mongodb: ">2.5.5", topology: ["single", "replicaset"] } },
+  metadata: { requires: { promises: true, mongodb: '>2.5.5', topology: ['single', 'replicaset'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       var docs = [];
 
       // Insert some documents
-      for(var i = 0; i < 1000; i++) {
-        docs.push({a:i});
+      for (var i = 0; i < 1000; i++) {
+        docs.push({ a: i });
       }
 
       // Get the collection
@@ -1872,19 +2119,19 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors W
         var numCursors = 3;
 
         // Execute parallelCollectionScan command
-        collection.parallelCollectionScan({numCursors:numCursors}).then(function(cursors) {
+        collection.parallelCollectionScan({ numCursors: numCursors }).then(function(cursors) {
           test.ok(cursors != null);
           test.ok(cursors.length > 0);
           var left = cursors.length;
 
-          for(var i = 0; i < cursors.length; i++) {
+          for (var i = 0; i < cursors.length; i++) {
             cursors[i].toArray().then(function(items) {
               // Add docs to results array
               results = results.concat(items);
               left = left - 1;
 
               // No more cursors let's ensure we got all results
-              if(left == 0) {
+              if (left == 0) {
                 test.equal(docs.length, results.length);
 
                 client.close();
@@ -1897,7 +2144,7 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors W
     });
     // END
   }
-}
+};
 
 /**
  * An example showing how to force a reindex of a collection using a Promise.
@@ -1907,51 +2154,53 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors W
  * @ignore
  */
 exports.shouldCorrectlyIndexAndForceReindexOnCollectionWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
+    var db = configuration.newDbInstance({ w: 0 }, { poolSize: 1, auto_reconnect: true });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a collection we want to drop later
       var collection = db.collection('shouldCorrectlyForceReindexOnCollection_with_promise');
       // Insert a bunch of documents for the index
-      collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}).then(function(result) {
+      collection
+        .insertMany([{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4, c: 4 }], {
+          w: 1
+        })
+        .then(function(result) {
+          // Create an index on the a field
+          collection
+            .ensureIndex({ a: 1, b: 1 }, { unique: true, background: true, w: 1 })
+            .then(function(indexName) {
+              // Force a reindex of the collection
+              collection.reIndex().then(function(result) {
+                test.equal(true, result);
 
-        // Create an index on the a field
-        collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, w:1}).then(function(indexName) {
+                // Verify that the index is gone
+                collection.indexInformation().then(function(indexInformation) {
+                  test.deepEqual([['_id', 1]], indexInformation._id_);
+                  test.deepEqual([['a', 1], ['b', 1]], indexInformation.a_1_b_1);
 
-          // Force a reindex of the collection
-          collection.reIndex().then(function(result) {
-            test.equal(true, result);
-
-            // Verify that the index is gone
-            collection.indexInformation().then(function(indexInformation) {
-              test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
-              test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
-
-              client.close();
-              test.done();
+                  client.close();
+                  test.done();
+                });
+              });
             });
-          });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * An example removing all documents in a collection not using safe mode using a Promise.
@@ -1961,26 +2210,26 @@ exports.shouldCorrectlyIndexAndForceReindexOnCollectionWithPromises = {
  * @ignore
  */
 exports.shouldRemoveAllDocumentsNoSafeWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance({ w: 0 }, { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Fetch a collection to insert document into
-      var collection = db.collection("remove_all_documents_no_safe_with_promise");
+      var collection = db.collection('remove_all_documents_no_safe_with_promise');
       // Insert a bunch of documents
-      collection.insertMany([{a:1}, {b:2}], {w:1}).then(function(result) {
+      collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 }).then(function(result) {
         // Remove all the document
         collection.removeMany();
 
@@ -1990,11 +2239,11 @@ exports.shouldRemoveAllDocumentsNoSafeWithPromises = {
           client.close();
           test.done();
         });
-      })
+      });
     });
     // END
   }
-}
+};
 
 /**
  * An example removing a subset of documents using safe mode to ensure removal of documents using a Promise.
@@ -2004,28 +2253,28 @@ exports.shouldRemoveAllDocumentsNoSafeWithPromises = {
  * @ignore
  */
 exports.shouldRemoveSubsetOfDocumentsSafeModeWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance({ w: 0 }, { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Fetch a collection to insert document into
-      var collection = db.collection("remove_subset_of_documents_safe_with_promise");
+      var collection = db.collection('remove_subset_of_documents_safe_with_promise');
       // Insert a bunch of documents
-      collection.insertMany([{a:1}, {b:2}], {w:1}).then(function(result) {
+      collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 }).then(function(result) {
         // Remove all the document
-        collection.removeOne({a:1}, {w:1}).then(function(r) {
+        collection.removeOne({ a: 1 }, { w: 1 }).then(function(r) {
           test.equal(1, r.result.n);
           client.close();
           test.done();
@@ -2034,7 +2283,7 @@ exports.shouldRemoveSubsetOfDocumentsSafeModeWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * An example of illegal and legal renaming of a collection using a Promise.
@@ -2044,101 +2293,111 @@ exports.shouldRemoveSubsetOfDocumentsSafeModeWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRenameCollectionWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Open a couple of collections
       db.createCollection('test_rename_collection_with_promise').then(function(collection1) {
         db.createCollection('test_rename_collection2_with_promise').then(function(collection2) {
           // Attemp to rename a collection to a number
           try {
             collection1.rename(5, function(err, collection) {});
-          } catch(err) {
+          } catch (err) {
             test.ok(err instanceof Error);
-            test.equal("collection name must be a String", err.message);
+            test.equal('collection name must be a String', err.message);
           }
 
           // Attemp to rename a collection to an empty string
           try {
-            collection1.rename("", function(err, collection) {});
-          } catch(err) {
+            collection1.rename('', function(err, collection) {});
+          } catch (err) {
             test.ok(err instanceof Error);
-            test.equal("collection names cannot be empty", err.message);
+            test.equal('collection names cannot be empty', err.message);
           }
 
           // Attemp to rename a collection to an illegal name including the character $
           try {
-            collection1.rename("te$t", function(err, collection) {});
-          } catch(err) {
+            collection1.rename('te$t', function(err, collection) {});
+          } catch (err) {
             test.ok(err instanceof Error);
             test.equal("collection names must not contain '$'", err.message);
           }
 
           // Attemp to rename a collection to an illegal name starting with the character .
           try {
-            collection1.rename(".test", function(err, collection) {});
-          } catch(err) {
+            collection1.rename('.test', function(err, collection) {});
+          } catch (err) {
             test.ok(err instanceof Error);
             test.equal("collection names must not start or end with '.'", err.message);
           }
 
           // Attemp to rename a collection to an illegal name ending with the character .
           try {
-            collection1.rename("test.", function(err, collection) {});
-          } catch(err) {
+            collection1.rename('test.', function(err, collection) {});
+          } catch (err) {
             test.ok(err instanceof Error);
             test.equal("collection names must not start or end with '.'", err.message);
           }
 
           // Attemp to rename a collection to an illegal name with an empty middle name
           try {
-            collection1.rename("tes..t", function(err, collection) {});
-          } catch(err) {
-            test.equal("collection names cannot be empty", err.message);
+            collection1.rename('tes..t', function(err, collection) {});
+          } catch (err) {
+            test.equal('collection names cannot be empty', err.message);
           }
 
           // Insert a couple of documents
-          collection1.insertMany([{'x':1}, {'x':2}], configuration.writeConcernMax()).then(function(docs) {
+          collection1
+            .insertMany([{ x: 1 }, { x: 2 }], configuration.writeConcernMax())
+            .then(function(docs) {
+              // Attemp to rename the first collection to the second one, this will fail
+              collection1
+                .rename('test_rename_collection2_with_promise')
+                .then(function(err, collection) {})
+                .catch(function(err) {
+                  test.ok(err instanceof Error);
+                  test.ok(err.message.length > 0);
 
-            // Attemp to rename the first collection to the second one, this will fail
-            collection1.rename('test_rename_collection2_with_promise').then(function(err, collection) {
-            }).catch(function(err) {
-              test.ok(err instanceof Error);
-              test.ok(err.message.length > 0);
+                  // Attemp to rename the first collection to a name that does not exist
+                  // this will be succesful
+                  collection1
+                    .rename('test_rename_collection3_with_promise')
+                    .then(function(collection2) {
+                      test.equal(
+                        'test_rename_collection3_with_promise',
+                        collection2.collectionName
+                      );
 
-              // Attemp to rename the first collection to a name that does not exist
-              // this will be succesful
-              collection1.rename('test_rename_collection3_with_promise').then(function(collection2) {
-                test.equal("test_rename_collection3_with_promise", collection2.collectionName);
-
-                // Ensure that the collection is pointing to the new one
-                collection2.count().then(function(count) {
-                  test.equal(2, count);
-                  client.close();
-                  test.done();
+                      // Ensure that the collection is pointing to the new one
+                      collection2.count().then(function(count) {
+                        test.equal(2, count);
+                        client.close();
+                        test.done();
+                      });
+                    });
                 });
-              });
             });
-          });
-
         });
       });
     });
     // END
   }
-}
+};
 
 /**
  * Example of a simple document save with safe set to false using a Promise.
@@ -2148,32 +2407,31 @@ exports.shouldCorrectlyRenameCollectionWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlySaveASimpleDocumentWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance({ w: 0 }, { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Fetch the collection
-      var collection = db.collection("save_a_simple_document_with_promise");
+      var collection = db.collection('save_a_simple_document_with_promise');
       // Save a document with no safe option
-      collection.save({hello:'world'});
+      collection.save({ hello: 'world' });
 
       // Wait for a second
       setTimeout(function() {
-
         // Find the saved document
-        collection.findOne({hello:'world'}).then(function(item) {
+        collection.findOne({ hello: 'world' }).then(function(item) {
           test.equal('world', item.hello);
           client.close();
           test.done();
@@ -2182,7 +2440,7 @@ exports.shouldCorrectlySaveASimpleDocumentWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * Example of a simple document save and then resave with safe set to true using a Promise.
@@ -2192,30 +2450,29 @@ exports.shouldCorrectlySaveASimpleDocumentWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveItWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Fetch the collection
-      var collection = db.collection("save_a_simple_document_modify_it_and_resave_it_with_promise");
+      var collection = db.collection('save_a_simple_document_modify_it_and_resave_it_with_promise');
 
       // Save a document with no safe option
-      collection.save({hello:'world'}, configuration.writeConcernMax()).then(function(result) {
-
+      collection.save({ hello: 'world' }, configuration.writeConcernMax()).then(function(result) {
         // Find the saved document
-        collection.findOne({hello:'world'}).then(function(item) {
+        collection.findOne({ hello: 'world' }).then(function(item) {
           test.equal('world', item.hello);
 
           // Update the document
@@ -2223,9 +2480,8 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveItWithPromises = {
 
           // Save the item with the additional field
           collection.save(item, configuration.writeConcernMax()).then(function(result) {
-
             // Find the changed document
-            collection.findOne({hello:'world'}).then(function(item) {
+            collection.findOne({ hello: 'world' }).then(function(item) {
               test.equal('world', item.hello);
               test.equal('world2', item.hello2);
 
@@ -2238,7 +2494,7 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveItWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * Example of a simple document update with safe set to false on an existing document using a Promise.
@@ -2248,36 +2504,34 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveItWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyUpdateASimpleDocumentWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance({ w: 0 }, { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Get a collection
       var collection = db.collection('update_a_simple_document_with_promise');
 
       // Insert a document, then update it
-      collection.insertOne({a:1}, configuration.writeConcernMax()).then(function(doc) {
-
+      collection.insertOne({ a: 1 }, configuration.writeConcernMax()).then(function(doc) {
         // Update the document with an atomic operator
-        collection.updateOne({a:1}, {$set:{b:2}});
+        collection.updateOne({ a: 1 }, { $set: { b: 2 } });
 
         // Wait for a second then fetch the document
         setTimeout(function() {
-
           // Fetch the document that we modified
-          collection.findOne({a:1}).then(function(item) {
+          collection.findOne({ a: 1 }).then(function(item) {
             test.equal(1, item.a);
             test.equal(2, item.b);
             client.close();
@@ -2288,7 +2542,7 @@ exports.shouldCorrectlyUpdateASimpleDocumentWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * Example of a simple document update using upsert (the document will be inserted if it does not exist) using a Promise.
@@ -2298,30 +2552,30 @@ exports.shouldCorrectlyUpdateASimpleDocumentWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyUpsertASimpleDocumentWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Get a collection
       var collection = db.collection('update_a_simple_document_upsert_with_promise');
       // Update the document using an upsert operation, ensuring creation if it does not exist
-      collection.updateOne({a:1}, {b:2, a:1}, {upsert:true, w: 1}).then(function(result) {
+      collection.updateOne({ a: 1 }, { b: 2, a: 1 }, { upsert: true, w: 1 }).then(function(result) {
         test.equal(1, result.result.n);
 
         // Fetch the document that we modified and check if it got inserted correctly
-        collection.findOne({a:1}).then(function(item) {
+        collection.findOne({ a: 1 }).then(function(item) {
           test.equal(1, item.a);
           test.equal(2, item.b);
           client.close();
@@ -2331,7 +2585,7 @@ exports.shouldCorrectlyUpsertASimpleDocumentWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * Example of an update across multiple documents using the multi option and using a Promise.
@@ -2341,48 +2595,49 @@ exports.shouldCorrectlyUpsertASimpleDocumentWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyUpdateMultipleDocumentsWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Get a collection
       var collection = db.collection('update_a_simple_document_multi_with_promise');
 
       // Insert a couple of documentations
-      collection.insertMany([{a:1, b:1}, {a:1, b:2}], configuration.writeConcernMax()).then(function(result) {
+      collection
+        .insertMany([{ a: 1, b: 1 }, { a: 1, b: 2 }], configuration.writeConcernMax())
+        .then(function(result) {
+          var o = configuration.writeConcernMax();
+          collection.updateMany({ a: 1 }, { $set: { b: 0 } }, o).then(function(r) {
+            test.equal(2, r.result.n);
 
-        var o = configuration.writeConcernMax();
-        collection.updateMany({a:1}, {$set:{b:0}}, o).then(function(r) {
-          test.equal(2, r.result.n);
+            // Fetch all the documents and verify that we have changed the b value
+            collection.find().toArray().then(function(items) {
+              test.equal(1, items[0].a);
+              test.equal(0, items[0].b);
+              test.equal(1, items[1].a);
+              test.equal(0, items[1].b);
 
-          // Fetch all the documents and verify that we have changed the b value
-          collection.find().toArray().then(function(items) {
-            test.equal(1, items[0].a);
-            test.equal(0, items[0].b);
-            test.equal(1, items[1].a);
-            test.equal(0, items[1].b);
-
-            client.close();
-            test.done();
+              client.close();
+              test.done();
+            });
           });
-        })
-      });
+        });
     });
     // END
   }
-}
+};
 
 /**
  * Example of retrieving a collections stats using a Promise.
@@ -2392,40 +2647,41 @@ exports.shouldCorrectlyUpdateMultipleDocumentsWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyReturnACollectionsStatsWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Crete the collection for the distinct example
       var collection = db.collection('collection_stats_test_with_promise');
 
       // Insert some documents
-      collection.insertMany([{a:1}, {hello:'world'}], configuration.writeConcernMax()).then(function(result) {
+      collection
+        .insertMany([{ a: 1 }, { hello: 'world' }], configuration.writeConcernMax())
+        .then(function(result) {
+          // Retrieve the statistics for the collection
+          collection.stats().then(function(stats) {
+            test.equal(2, stats.count);
 
-        // Retrieve the statistics for the collection
-        collection.stats().then(function(stats) {
-          test.equal(2, stats.count);
-
-          client.close();
-          test.done();
+            client.close();
+            test.done();
+          });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * An examples showing the creation and dropping of an index using Promises.
@@ -2435,56 +2691,57 @@ exports.shouldCorrectlyReturnACollectionsStatsWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyCreateAndDropAllIndexWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
+    var db = configuration.newDbInstance({ w: 0 }, { poolSize: 1, auto_reconnect: true });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a collection we want to drop later
       var collection = db.collection('shouldCorrectlyCreateAndDropAllIndex_with_promise');
       // Insert a bunch of documents for the index
-      collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}).then(function(result) {
+      collection
+        .insertMany([{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4, c: 4 }], {
+          w: 1
+        })
+        .then(function(result) {
+          // Create an index on the a field
+          collection
+            .ensureIndex({ a: 1, b: 1 }, { unique: true, background: true, w: 1 })
+            .then(function(indexName) {
+              // Create an additional index
+              collection
+                .ensureIndex({ c: 1 }, { unique: true, background: true, sparse: true, w: 1 })
+                .then(function(indexName) {
+                  // Drop the index
+                  collection.dropAllIndexes().then(function(result) {
+                    // Verify that the index is gone
+                    collection.indexInformation().then(function(indexInformation) {
+                      test.deepEqual([['_id', 1]], indexInformation._id_);
+                      test.equal(null, indexInformation.a_1_b_1);
+                      test.equal(null, indexInformation.c_1);
 
-        // Create an index on the a field
-        collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, w:1}).then(function(indexName) {
-
-          // Create an additional index
-          collection.ensureIndex({c:1}
-            , {unique:true, background:true, sparse:true, w:1}).then(function(indexName) {
-
-            // Drop the index
-            collection.dropAllIndexes().then(function(result) {
-
-              // Verify that the index is gone
-              collection.indexInformation().then(function(indexInformation) {
-                test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
-                test.equal(null, indexInformation.a_1_b_1);
-                test.equal(null, indexInformation.c_1);
-
-                client.close();
-                test.done();
-              });
+                      client.close();
+                      test.done();
+                    });
+                  });
+                });
             });
-          });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**************************************************************************
  *
@@ -2500,41 +2757,45 @@ exports.shouldCorrectlyCreateAndDropAllIndexWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDbWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Fetch a collection
       var collection = db.collection('shouldCorrectlyFailOnRetryDueToAppCloseOfDb_with_promise');
       // Insert a document
-      collection.insertOne({a:1}, configuration.writeConcernMax()).then(function(result) {
-
+      collection.insertOne({ a: 1 }, configuration.writeConcernMax()).then(function(result) {
         // Force close the connection
         client.close(true).then(function() {
           // Attemp to insert should fail now with correct message 'db closed by application'
-          collection.insertOne({a:2}, configuration.writeConcernMax()).then(function(result) {
-          }).catch(function(err) {
-            client.close();
-            test.done();
-          });
+          collection
+            .insertOne({ a: 2 }, configuration.writeConcernMax())
+            .then(function(result) {})
+            .catch(function(err) {
+              client.close();
+              test.done();
+            });
         });
       });
     });
     // END
   }
-}
+};
 
 /**
  * A whole bunch of examples on how to use eval on the server with a Promise.
@@ -2544,82 +2805,98 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDbWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteEvalFunctionsWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var Code = configuration.require.Code
-      , ReadPreference = configuration.require.ReadPreference;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var Code = configuration.require.Code,
+      ReadPreference = configuration.require.ReadPreference;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       var numberOfTests = 10;
 
       var tests_done = function() {
         numberOfTests = numberOfTests - 1;
 
-        if(numberOfTests == 0) {
+        if (numberOfTests == 0) {
           client.close();
           test.done();
         }
-      }
+      };
 
       // Evaluate a function on the server with the parameter 3 passed in
       db.eval('function (x) {return x;}', [3]).then(function(result) {
-        test.equal(3, result); tests_done();
+        test.equal(3, result);
+        tests_done();
 
         // Evaluate a function on the server with the parameter 3 passed in no lock aquired for eval
         // on server
-        db.eval('function (x) {return x;}', [3], {nolock:true}).then(function(result) {
-          test.equal(3, result); tests_done();
+        db.eval('function (x) {return x;}', [3], { nolock: true }).then(function(result) {
+          test.equal(3, result);
+          tests_done();
         });
 
         // Evaluate a function on the server that writes to a server collection
-        db.eval('function (x) {db.test_eval_with_promise.save({y:x});}', [5], {readPreference: ReadPreference.PRIMARY}).then(function(result) {
-          setTimeout(function() {
-            // Locate the entry
-            db.collection('test_eval_with_promise', function(err, collection) {
-              collection.findOne().then(function(item) {
-                test.equal(5, item.y); tests_done();
+        db
+          .eval('function (x) {db.test_eval_with_promise.save({y:x});}', [5], {
+            readPreference: ReadPreference.PRIMARY
+          })
+          .then(function(result) {
+            setTimeout(function() {
+              // Locate the entry
+              db.collection('test_eval_with_promise', function(err, collection) {
+                collection.findOne().then(function(item) {
+                  test.equal(5, item.y);
+                  tests_done();
 
-                // Evaluate a function with 2 parameters passed in
-                db.eval('function (x, y) {return x + y;}', [2, 3]).then(function(result) {
-                  test.equal(5, result); tests_done();
+                  // Evaluate a function with 2 parameters passed in
+                  db.eval('function (x, y) {return x + y;}', [2, 3]).then(function(result) {
+                    test.equal(5, result);
+                    tests_done();
 
-                  // Evaluate a function with no parameters passed in
-                  db.eval('function () {return 5;}').then(function(result) {
-                    test.equal(5, result); tests_done();
+                    // Evaluate a function with no parameters passed in
+                    db.eval('function () {return 5;}').then(function(result) {
+                      test.equal(5, result);
+                      tests_done();
 
-                    // Evaluate a statement
-                    db.eval('2 + 3;').then(function(result) {
-                      test.equal(5, result); tests_done();
+                      // Evaluate a statement
+                      db.eval('2 + 3;').then(function(result) {
+                        test.equal(5, result);
+                        tests_done();
 
-                      // Evaluate a statement using the code object
-                      db.eval(new Code("2 + 3;")).then(function(result) {
-                        test.equal(5, result); tests_done();
-
-                        // Evaluate a statement using the code object including a scope
-                        db.eval(new Code("return i;", {'i':2})).then(function(result) {
-                          test.equal(2, result); tests_done();
+                        // Evaluate a statement using the code object
+                        db.eval(new Code('2 + 3;')).then(function(result) {
+                          test.equal(5, result);
+                          tests_done();
 
                           // Evaluate a statement using the code object including a scope
-                          db.eval(new Code("i + 3;", {'i':2})).then(function(result) {
-                            test.equal(5, result); tests_done();
+                          db.eval(new Code('return i;', { i: 2 })).then(function(result) {
+                            test.equal(2, result);
+                            tests_done();
 
-                            // Evaluate an illegal statement
-                            db.eval("5 ++ 5;").then(function(result) {
-                            }).catch(function(err) {
-                              test.ok(err instanceof Error);
-                              test.ok(err.message != null);
+                            // Evaluate a statement using the code object including a scope
+                            db.eval(new Code('i + 3;', { i: 2 })).then(function(result) {
+                              test.equal(5, result);
                               tests_done();
+
+                              // Evaluate an illegal statement
+                              db.eval('5 ++ 5;').then(function(result) {}).catch(function(err) {
+                                test.ok(err instanceof Error);
+                                test.ok(err.message != null);
+                                tests_done();
+                              });
                             });
                           });
                         });
@@ -2628,14 +2905,13 @@ exports.shouldCorrectlyExecuteEvalFunctionsWithPromises = {
                   });
                 });
               });
-            });
-          }, 1000);
-        });
+            }, 1000);
+          });
       });
     });
     // END
   }
-}
+};
 
 /**
  * Defining and calling a system level javascript function (NOT recommended, http://www.mongodb.org/display/DOCS/Server-side+Code+Execution) using a Promise.
@@ -2645,41 +2921,51 @@ exports.shouldCorrectlyExecuteEvalFunctionsWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunctionWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
     var Code = configuration.require.Code;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Clean out the collection
-      db.collection("system.js").deleteMany({}, configuration.writeConcernMax()).then(function(result) {
+      db
+        .collection('system.js')
+        .deleteMany({}, configuration.writeConcernMax())
+        .then(function(result) {
+          // Define a system level function
+          db
+            .collection('system.js')
+            .insertOne(
+              { _id: 'echo', value: new Code('function(x) { return x; }') },
+              configuration.writeConcernMax()
+            )
+            .then(function(result) {
+              db.eval('echo(5)').then(function(result) {
+                test.equal(5, result);
 
-        // Define a system level function
-        db.collection("system.js").insertOne({_id: "echo", value: new Code("function(x) { return x; }")}, configuration.writeConcernMax()).then(function(result) {
-
-          db.eval("echo(5)").then(function(result) {
-            test.equal(5, result);
-
-            client.close();
-            test.done();
-          });
+                client.close();
+                test.done();
+              });
+            });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * An example of a simple single server db connection and close function using a Promise.
@@ -2689,21 +2975,24 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunctionWithPromises =
  * @ignore
  */
 exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallbackWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Close the connection with a callback that is optional
       client.close().then(function(result) {
@@ -2712,7 +3001,7 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallbackWi
     });
     // END
   }
-}
+};
 
 /**
  * An example of retrieving the collections list for a database using a Promise.
@@ -2722,57 +3011,68 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallbackWi
  * @ignore
  */
 exports.shouldCorrectlyRetrievelistCollectionsWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: {
+    requires: { promises: true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Get an empty db
       var db1 = client.db('listCollectionTestDb2');
       // Create a collection
       var collection = db1.collection('shouldCorrectlyRetrievelistCollections_with_promise');
       // Ensure the collection was created
-      collection.insertOne({a:1}).then(function(r) {
-
+      collection.insertOne({ a: 1 }).then(function(r) {
         // Return the information of a single collection name
-        db1.listCollections({name: "shouldCorrectlyRetrievelistCollections_with_promise"}).toArray().then(function(items) {
-          test.equal(1, items.length);
+        db1
+          .listCollections({ name: 'shouldCorrectlyRetrievelistCollections_with_promise' })
+          .toArray()
+          .then(function(items) {
+            test.equal(1, items.length);
 
-          // Return the information of a all collections, using the callback format
-          db1.listCollections().toArray().then(function(items) {
-            test.ok(items.length >= 1);
+            // Return the information of a all collections, using the callback format
+            db1.listCollections().toArray().then(function(items) {
+              test.ok(items.length >= 1);
 
-            client.close();
-            test.done();
+              client.close();
+              test.done();
+            });
+          })
+          .catch(function(err) {
+            console.dir(err);
           });
-        }).catch(function(err) {
-          console.dir(err)
-        });
       });
     });
     // END
   }
-}
+};
 
 /**
  * @ignore
  */
 exports.shouldCorrectlyRetrievelistCollectionsWiredTigerWithPromises = {
-  metadata: { requires: { promises:true, topology: ['wiredtiger'] } },
+  metadata: { requires: { promises: true, topology: ['wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       // Get an empty db
@@ -2780,24 +3080,26 @@ exports.shouldCorrectlyRetrievelistCollectionsWiredTigerWithPromises = {
       // Create a collection
       var collection = db1.collection('shouldCorrectlyRetrievelistCollections_with_promise');
       // Ensure the collection was created
-      collection.insertOne({a:1}).then(function(r) {
-
+      collection.insertOne({ a: 1 }).then(function(r) {
         // Return the information of a single collection name
-        db1.listCollections({name: "shouldCorrectlyRetrievelistCollections_with_promise"}).toArray().then(function(items) {
-          test.equal(1, items.length);
-
-          // Return the information of a all collections, using the callback format
-          db1.listCollections().toArray().then(function(items) {
+        db1
+          .listCollections({ name: 'shouldCorrectlyRetrievelistCollections_with_promise' })
+          .toArray()
+          .then(function(items) {
             test.equal(1, items.length);
 
-            client.close();
-            test.done();
+            // Return the information of a all collections, using the callback format
+            db1.listCollections().toArray().then(function(items) {
+              test.equal(1, items.length);
+
+              client.close();
+              test.done();
+            });
           });
-        });
       });
     });
   }
-}
+};
 
 /**
  * An example of retrieving a collection from a db using the collection function with a Promise.
@@ -2807,43 +3109,53 @@ exports.shouldCorrectlyRetrievelistCollectionsWiredTigerWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyAccessACollectionWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Grab a collection without a callback no safe mode
       var col1 = db.collection('test_correctly_access_collections_with_promise');
       // Grab a collection with a callback but no safe operation
       db.collection('test_correctly_access_collections_with_promise', function(err, col2) {
-
         // Grab a collection with a callback in safe mode, ensuring it exists (should fail as it's not created)
-        db.collection('test_correctly_access_collections_with_promise', {strict:true}, function(err, col3) {
+        db.collection('test_correctly_access_collections_with_promise', { strict: true }, function(
+          err,
+          col3
+        ) {
           // Create the collection
-          db.createCollection('test_correctly_access_collections_with_promise').then(function(err, result) {
-
-            // Retry to get the collection, should work as it's now created
-            db.collection('test_correctly_access_collections_with_promise', {strict:true}, function(err, col3) {
-              client.close();
-              test.done();
+          db
+            .createCollection('test_correctly_access_collections_with_promise')
+            .then(function(err, result) {
+              // Retry to get the collection, should work as it's now created
+              db.collection(
+                'test_correctly_access_collections_with_promise',
+                { strict: true },
+                function(err, col3) {
+                  client.close();
+                  test.done();
+                }
+              );
             });
-          });
         });
       });
     });
     // END
   }
-}
+};
 
 /**
  * An example of retrieving all collections for a db as Collection objects using a Promise.
@@ -2853,21 +3165,24 @@ exports.shouldCorrectlyAccessACollectionWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveAllCollectionsWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Create the collection
       var collection = db.collection('test_correctly_access_collections2_with_promise');
       // Retry to get the collection, should work as it's now created
@@ -2880,7 +3195,7 @@ exports.shouldCorrectlyRetrieveAllCollectionsWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * An example of adding a user to the database using a Promise.
@@ -2890,24 +3205,26 @@ exports.shouldCorrectlyRetrieveAllCollectionsWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyAddUserToDbWithPromises = {
-  metadata: { requires: { promises:true, topology: 'single' } },
+  metadata: { requires: { promises: true, topology: 'single' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Add a user to the database
       db.addUser('user', 'name').then(function(result) {
-
         // Remove the user from the db
         db.removeUser('user').then(function(result) {
           client.close();
@@ -2917,7 +3234,7 @@ exports.shouldCorrectlyAddUserToDbWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * An example of removing a user using a Promise.
@@ -2927,7 +3244,7 @@ exports.shouldCorrectlyAddUserToDbWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyAddAndRemoveUserWithPromises = {
-  metadata: { requires: { promises:true, topology: 'single', mongodb: "<=3.4.x" } },
+  metadata: { requires: { promises: true, topology: 'single', mongodb: '<=3.4.x' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2936,45 +3253,60 @@ exports.shouldCorrectlyAddAndRemoveUserWithPromises = {
     MongoClient.connect(configuration.url(), function(err, client) {
       test.equal(null, err);
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Add a user to the database
       db.addUser('user3', 'name').then(function(result) {
         client.close();
 
-        MongoClient.connect('mongodb://user3:name@localhost:27017/integration_tests').then(function(client) {
-          test.equal(null, err);
-          var db = client.db(configuration.database);
+        MongoClient.connect('mongodb://user3:name@localhost:27017/integration_tests')
+          .then(function(client) {
+            test.equal(null, err);
+            var db = client.db(configuration.database);
 
-          // Logout the db
-          client.logout().then(function(result) {
-            test.equal(true, result);
+            // Logout the db
+            client
+              .logout()
+              .then(function(result) {
+                test.equal(true, result);
 
-            // Remove the user
-            db.removeUser('user3').then(function(result) {
-              test.equal(true, result);
+                // Remove the user
+                db
+                  .removeUser('user3')
+                  .then(function(result) {
+                    test.equal(true, result);
 
-              // Should error out due to user no longer existing
-              MongoClient.connect('mongodb://user3:name@localhost:27017/integration_tests').then(function(client) {
-              }).catch(function(err) {  
-                test.ok(err);
+                    // Should error out due to user no longer existing
+                    MongoClient.connect('mongodb://user3:name@localhost:27017/integration_tests')
+                      .then(function(client) {})
+                      .catch(function(err) {
+                        test.ok(err);
 
-                client.close();
-                test.done();                
+                        client.close();
+                        test.done();
+                      });
+                  })
+                  .catch(function(err) {
+                    console.dir(err);
+                  });
               })
-            }).catch(function(err) {  console.dir(err )})
-          }).catch(function(err) {  console.dir(err )})
-        }).catch(function(err) {  console.dir(err )})
+              .catch(function(err) {
+                console.dir(err);
+              });
+          })
+          .catch(function(err) {
+            console.dir(err);
+          });
       });
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing the creation of a collection using a Promise.
@@ -2984,34 +3316,43 @@ exports.shouldCorrectlyAddAndRemoveUserWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyCreateACollectionWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Create a capped collection with a maximum of 1000 documents
-      db.createCollection("a_simple_collection_with_promise", {capped:true, size:10000, max:1000, w:1}).then(function(collection) {
-
-        // Insert a document in the capped collection
-        collection.insertOne({a:1}, configuration.writeConcernMax()).then(function(result) {
-          client.close();
-          test.done();
+      db
+        .createCollection('a_simple_collection_with_promise', {
+          capped: true,
+          size: 10000,
+          max: 1000,
+          w: 1
+        })
+        .then(function(collection) {
+          // Insert a document in the capped collection
+          collection.insertOne({ a: 1 }, configuration.writeConcernMax()).then(function(result) {
+            client.close();
+            test.done();
+          });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * A simple example creating, dropping a collection and then verifying that the collection is gone using a Promise.
@@ -3021,48 +3362,59 @@ exports.shouldCorrectlyCreateACollectionWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteACommandAgainstTheServerWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Execute ping against the server
-      db.command({ping:1}).then(function(result) {
-
+      db.command({ ping: 1 }).then(function(result) {
         // Create a capped collection with a maximum of 1000 documents
-        db.createCollection("a_simple_create_drop_collection_with_promise", {capped:true, size:10000, max:1000, w:1}).then(function(collection) {
+        db
+          .createCollection('a_simple_create_drop_collection_with_promise', {
+            capped: true,
+            size: 10000,
+            max: 1000,
+            w: 1
+          })
+          .then(function(collection) {
+            // Insert a document in the capped collection
+            collection.insertOne({ a: 1 }, configuration.writeConcernMax()).then(function(result) {
+              // Drop the collection from this world
+              db
+                .dropCollection('a_simple_create_drop_collection_with_promise')
+                .then(function(result) {
+                  // Verify that the collection is gone
+                  db
+                    .listCollections({ name: 'a_simple_create_drop_collection_with_promise' })
+                    .toArray()
+                    .then(function(names) {
+                      test.equal(0, names.length);
 
-          // Insert a document in the capped collection
-          collection.insertOne({a:1}, configuration.writeConcernMax()).then(function(result) {
-
-            // Drop the collection from this world
-            db.dropCollection("a_simple_create_drop_collection_with_promise").then(function(result) {
-
-              // Verify that the collection is gone
-              db.listCollections({name:"a_simple_create_drop_collection_with_promise"}).toArray().then(function(names) {
-                test.equal(0, names.length);
-
-                client.close();
-                test.done();
-              });
+                      client.close();
+                      test.done();
+                    });
+                });
             });
           });
-        });
       });
     });
     // END
   }
-}
+};
 
 /**
  * A simple example executing a command against the server using a Promise.
@@ -3072,30 +3424,33 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServerWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGoneWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Execute ping against the server
-      db.command({ping:1}).then(function(result) {
+      db.command({ ping: 1 }).then(function(result) {
         client.close();
         test.done();
       });
     });
     // END
   }
-}
+};
 
 /**
  * A simple example creating, dropping a collection and then verifying that the collection is gone.
@@ -3105,59 +3460,72 @@ exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGoneWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRenameACollectionWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Create a collection
-      db.createCollection("simple_rename_collection_with_promise", configuration.writeConcernMax()).then(function(collection) {
+      db
+        .createCollection('simple_rename_collection_with_promise', configuration.writeConcernMax())
+        .then(function(collection) {
+          // Insert a document in the collection
+          collection.insertOne({ a: 1 }, configuration.writeConcernMax()).then(function(result) {
+            // Retrieve the number of documents from the collection
+            collection.count().then(function(count) {
+              test.equal(1, count);
 
-        // Insert a document in the collection
-        collection.insertOne({a:1}, configuration.writeConcernMax()).then(function(result) {
+              // Rename the collection
+              db
+                .renameCollection(
+                  'simple_rename_collection_with_promise',
+                  'simple_rename_collection_2_with_promise'
+                )
+                .then(function(collection2) {
+                  // Retrieve the number of documents from the collection
+                  collection2.count().then(function(count) {
+                    test.equal(1, count);
 
-          // Retrieve the number of documents from the collection
-          collection.count().then(function(count) {
-            test.equal(1, count);
+                    // Verify that the collection is gone
+                    db
+                      .listCollections({ name: 'simple_rename_collection_with_promise' })
+                      .toArray()
+                      .then(function(names) {
+                        test.equal(0, names.length);
 
-            // Rename the collection
-            db.renameCollection("simple_rename_collection_with_promise", "simple_rename_collection_2_with_promise").then(function(collection2) {
+                        // Verify that the new collection exists
+                        db
+                          .listCollections({ name: 'simple_rename_collection_2_with_promise' })
+                          .toArray()
+                          .then(function(names) {
+                            test.equal(1, names.length);
 
-              // Retrieve the number of documents from the collection
-              collection2.count().then(function(count) {
-                test.equal(1, count);
-
-                // Verify that the collection is gone
-                db.listCollections({name:"simple_rename_collection_with_promise"}).toArray().then(function(names) {
-                  test.equal(0, names.length);
-
-                  // Verify that the new collection exists
-                  db.listCollections({name:"simple_rename_collection_2_with_promise"}).toArray().then(function(names) {
-                    test.equal(1, names.length);
-
-                    client.close();
-                    test.done();
+                            client.close();
+                            test.done();
+                          });
+                      });
                   });
                 });
-              });
             });
           });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * A more complex createIndex using a compound unique index in the background and dropping duplicated documents using a Promise.
@@ -3167,50 +3535,60 @@ exports.shouldCorrectlyRenameACollectionWithPromises = {
  * @ignore
  */
 exports.shouldCreateOnDbComplexIndexOnTwoFieldsWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a collection we want to drop later
       var collection = db.collection('more_complex_index_test_with_promise');
       // Insert a bunch of documents for the index
-      collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax()).then(function(result) {
+      collection
+        .insertMany(
+          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          configuration.writeConcernMax()
+        )
+        .then(function(result) {
+          // Create an index on the a field
+          db
+            .createIndex(
+              'more_complex_index_test_with_promise',
+              { a: 1, b: 1 },
+              { unique: true, background: true, w: 1 }
+            )
+            .then(function(indexName) {
+              // Show that duplicate records got dropped
+              collection.find({}).toArray().then(function(items) {
+                test.equal(4, items.length);
 
-        // Create an index on the a field
-        db.createIndex('more_complex_index_test_with_promise', {a:1, b:1}
-          , {unique:true, background:true, w:1}).then(function(indexName) {
+                // Perform a query, with explain to show we hit the query
+                collection.find({ a: 2 }).explain().then(function(explanation) {
+                  test.ok(explanation != null);
 
-          // Show that duplicate records got dropped
-          collection.find({}).toArray().then(function(items) {
-            test.equal(4, items.length);
-
-            // Perform a query, with explain to show we hit the query
-            collection.find({a:2}).explain().then(function(explanation) {
-              test.ok(explanation != null);
-
-              client.close();
-              test.done();
+                  client.close();
+                  test.done();
+                });
+              });
             });
-          })
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * A more complex ensureIndex using a compound unique index in the background and dropping duplicated documents using a Promise.
@@ -3220,50 +3598,60 @@ exports.shouldCreateOnDbComplexIndexOnTwoFieldsWithPromises = {
  * @ignore
  */
 exports.shouldCreateComplexEnsureIndexDbWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a collection we want to drop later
       var collection = db.collection('more_complex_ensure_index_db_test_with_promise');
       // Insert a bunch of documents for the index
-      collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax()).then(function(result) {
+      collection
+        .insertMany(
+          [{ a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          configuration.writeConcernMax()
+        )
+        .then(function(result) {
+          // Create an index on the a field
+          db
+            .ensureIndex(
+              'more_complex_ensure_index_db_test_with_promise',
+              { a: 1, b: 1 },
+              { unique: true, background: true, w: 1 }
+            )
+            .then(function(indexName) {
+              // Show that duplicate records got dropped
+              collection.find({}).toArray().then(function(items) {
+                test.equal(4, items.length);
 
-        // Create an index on the a field
-        db.ensureIndex('more_complex_ensure_index_db_test_with_promise', {a:1, b:1}
-          , {unique:true, background:true, w:1}).then(function(indexName) {
+                // Perform a query, with explain to show we hit the query
+                collection.find({ a: 2 }).explain().then(function(explanation) {
+                  test.ok(explanation != null);
 
-          // Show that duplicate records got dropped
-          collection.find({}).toArray().then(function(items) {
-            test.equal(4, items.length);
-
-            // Perform a query, with explain to show we hit the query
-            collection.find({a:2}).explain().then(function(explanation) {
-              test.ok(explanation != null);
-
-              client.close();
-              test.done();
+                  client.close();
+                  test.done();
+                });
+              });
             });
-          })
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * An examples showing the dropping of a database using a Promise.
@@ -3273,58 +3661,63 @@ exports.shouldCreateComplexEnsureIndexDbWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyDropTheDatabaseWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a collection
       var collection = db.collection('more_index_information_test_1_with_promise');
       // Insert a bunch of documents for the index
-      collection.insertMany([{a:1, b:1}, {a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax()).then(function(result) {
+      collection
+        .insertMany(
+          [{ a: 1, b: 1 }, { a: 1, b: 1 }, { a: 2, b: 2 }, { a: 3, b: 3 }, { a: 4, b: 4 }],
+          configuration.writeConcernMax()
+        )
+        .then(function(result) {
+          // Let's drop the database
+          db.dropDatabase().then(function(result) {
+            // Wait two seconds to let it replicate across
+            setTimeout(function() {
+              // Get the admin database
+              db.admin().listDatabases().then(function(dbs) {
+                // Grab the databases
+                dbs = dbs.databases;
+                // Did we find the db
+                var found = false;
 
-        // Let's drop the database
-        db.dropDatabase().then(function(result) {
+                // Check if we have the db in the list
+                for (var i = 0; i < dbs.length; i++) {
+                  if (dbs[i].name == 'integration_tests_to_drop') found = true;
+                }
 
-          // Wait two seconds to let it replicate across
-          setTimeout(function() {
-            // Get the admin database
-            db.admin().listDatabases().then(function(dbs) {
-              // Grab the databases
-              dbs = dbs.databases;
-              // Did we find the db
-              var found = false;
+                // We should not find the databases
+                if (process.env['JENKINS'] == null) test.equal(false, found);
 
-              // Check if we have the db in the list
-              for(var i = 0; i < dbs.length; i++) {
-                if(dbs[i].name == 'integration_tests_to_drop') found = true;
-              }
-
-              // We should not find the databases
-              if(process.env['JENKINS'] == null) test.equal(false, found);
-
-              client.close();
-              test.done();
-            });
-          }, 2000);
+                client.close();
+                test.done();
+              });
+            }, 2000);
+          });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * An example showing how to retrieve the db statistics using a Promise.
@@ -3334,31 +3727,31 @@ exports.shouldCorrectlyDropTheDatabaseWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveDbStatsWithPromisesWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       db.stats().then(function(stats) {
         test.ok(stats != null);
 
         client.close();
         test.done();
-      })
+      });
     });
     // END
   }
-}
+};
 
 /**
  * Simple example connecting to two different databases sharing the socket connections below using a Promise.
@@ -3368,33 +3761,32 @@ exports.shouldCorrectlyRetrieveDbStatsWithPromisesWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Reference a different database sharing the same connections
       // for the data transfer
-      var secondDb = client.db("integration_tests_2");
+      var secondDb = client.db('integration_tests_2');
 
       // Fetch the collections
-      var multipleColl1 = db.collection("multiple_db_instances_with_promise");
-      var multipleColl2 = secondDb.collection("multiple_db_instances_with_promise");
+      var multipleColl1 = db.collection('multiple_db_instances_with_promise');
+      var multipleColl2 = secondDb.collection('multiple_db_instances_with_promise');
 
       // Write a record into each and then count the records stored
-      multipleColl1.insertOne({a:1}, {w:1}).then(function(result) {
-        multipleColl2.insertOne({a:1}, {w:1}).then(function(result) {
-
+      multipleColl1.insertOne({ a: 1 }, { w: 1 }).then(function(result) {
+        multipleColl2.insertOne({ a: 1 }, { w: 1 }).then(function(result) {
           // Count over the results ensuring only on record in each collection
           multipleColl1.count().then(function(count) {
             test.equal(1, count);
@@ -3411,7 +3803,7 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithPromises
     });
     // END
   }
-}
+};
 
 /**
  * Simple replicaset connection setup, requires a running replicaset on the correct ports using a Promise.
@@ -3421,41 +3813,42 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithPromises
  * @ignore
  */
 exports['Should correctly connect with default replicasetNoOption With Promises'] = {
-  metadata: { requires: { promises:true, topology: 'replicaset' } },
+  metadata: { requires: { promises: true, topology: 'replicaset' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSet = configuration.require.ReplSet
-      , MongoClient = configuration.require.MongoClient
-      , Server = configuration.require.Server
-      , Db = configuration.require.Db;
+    var ReplSet = configuration.require.ReplSet,
+      MongoClient = configuration.require.MongoClient,
+      Server = configuration.require.Server,
+      Db = configuration.require.Db;
 
     // Replica configuration
-    var replSet = new ReplSet([
+    var replSet = new ReplSet(
+      [
         new Server(configuration.host, configuration.port),
         new Server(configuration.host, configuration.port + 1),
         new Server(configuration.host, configuration.port + 2)
-      ]
-      , {rs_name:configuration.replicasetName}
+      ],
+      { rs_name: configuration.replicasetName }
     );
 
-    var client = new MongoClient(replSet, {w:0});
+    var client = new MongoClient(replSet, { w: 0 });
     client.connect(function(err, client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE restartAndDone
+      // REMOVE-LINE test.done();
+      // BEGIN
       client.close();
       test.done();
     });
     // END
   }
-}
+};
 
 /**************************************************************************
  *
@@ -3471,22 +3864,22 @@ exports['Should correctly connect with default replicasetNoOption With Promises'
  * @ignore
  */
 exports.shouldCorrectlyRetrieveBuildInfoWithPromises = {
-  metadata: { requires: { promises:true, topology: 'single' } },
+  metadata: { requires: { promises: true, topology: 'single' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE restartAndDone
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Use the admin database for the operation
       var adminDb = db.admin();
@@ -3501,7 +3894,7 @@ exports.shouldCorrectlyRetrieveBuildInfoWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * Retrieve the buildInfo using the command function using a Promise.
@@ -3511,35 +3904,35 @@ exports.shouldCorrectlyRetrieveBuildInfoWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveBuildInfoUsingCommandWithPromises = {
-  metadata: { requires: { promises:true, topology: 'single' } },
+  metadata: { requires: { promises: true, topology: 'single' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE restartAndDone
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Use the admin database for the operation
       var adminDb = db.admin();
 
       // Retrive the build information using the admin command
-      adminDb.command({buildInfo:1}).then(function(info) {
+      adminDb.command({ buildInfo: 1 }).then(function(info) {
         client.close();
         test.done();
       });
     });
     // END
   }
-}
+};
 
 /**
  * Retrieve the current profiling level set for the MongoDB instance using a Promise.
@@ -3549,30 +3942,29 @@ exports.shouldCorrectlyRetrieveBuildInfoUsingCommandWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlySetDefaultProfilingLevelWithPromises = {
-  metadata: { requires: { promises:true, topology: 'single' } },
+  metadata: { requires: { promises: true, topology: 'single' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE restartAndDone
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Grab a collection object
       var collection = db.collection('test_with_promise');
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insertOne({'a':1}, {w: 1}).then(function(doc) {
-
+      collection.insertOne({ a: 1 }, { w: 1 }).then(function(doc) {
         // Use the admin database for the operation
         var adminDb = client.db('admin');
 
@@ -3587,7 +3979,7 @@ exports.shouldCorrectlySetDefaultProfilingLevelWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * An example of how to use the setProfilingInfo using a Promise.
@@ -3598,74 +3990,72 @@ exports.shouldCorrectlySetDefaultProfilingLevelWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyChangeProfilingLevelWithPromises = {
-  metadata: { requires: { promises:true, topology: 'single' } },
+  metadata: { requires: { promises: true, topology: 'single' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE restartAndDone
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Grab a collection object
       var collection = db.collection('test_with_promise');
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insertOne({'a':1}, {w: 1}).then(function(doc) {
-
+      collection.insertOne({ a: 1 }, { w: 1 }).then(function(doc) {
         // Use the admin database for the operation
         var adminDb = client.db('admin');
 
         // Set the profiling level to only profile slow queries
         adminDb.setProfilingLevel('slow_only').then(function(level) {
-
           // Retrive the profiling level and verify that it's set to slow_only
           adminDb.profilingLevel().then(function(level) {
             test.equal('slow_only', level);
 
             // Turn profiling off
             adminDb.setProfilingLevel('off').then(function(level) {
-
               // Retrive the profiling level and verify that it's set to off
               adminDb.profilingLevel().then(function(level) {
                 test.equal('off', level);
 
                 // Set the profiling level to log all queries
                 adminDb.setProfilingLevel('all').then(function(level) {
-
                   // Retrive the profiling level and verify that it's set to all
                   adminDb.profilingLevel().then(function(level) {
                     test.equal('all', level);
 
                     // Attempt to set an illegal profiling level
-                    adminDb.setProfilingLevel('medium').then(function(level) {
-                    }).catch(function(err) {
-                      test.ok(err instanceof Error);
-                      test.equal("Error: illegal profiling level value medium", err.message);
+                    adminDb
+                      .setProfilingLevel('medium')
+                      .then(function(level) {})
+                      .catch(function(err) {
+                        test.ok(err instanceof Error);
+                        test.equal('Error: illegal profiling level value medium', err.message);
 
-                      client.close();
-                      test.done();
-                    });
-                  })
+                        client.close();
+                        test.done();
+                      });
+                  });
                 });
-              })
+              });
             });
-          })
+          });
         });
       });
     });
     // END
   }
-}
+};
 
 /**
  * An example of how to use the profilingInfo using a Promise.
@@ -3676,44 +4066,41 @@ exports.shouldCorrectlyChangeProfilingLevelWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlySetAndExtractProfilingInfoWithPromises = {
-  metadata: { requires: { promises:true, topology: 'single' } },
+  metadata: { requires: { promises: true, topology: 'single' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE restartAndDone
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Grab a collection object
       var collection = db.collection('test_with_promise');
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insertOne({'a':1}, {w: 1}).then(function(doc) {
-
+      collection.insertOne({ a: 1 }, { w: 1 }).then(function(doc) {
         // Use the admin database for the operation
         // Set the profiling level to all
         db.setProfilingLevel('all').then(function(level) {
-
           // Execute a query command
           collection.find().toArray().then(function(items) {
             test.ok(items.length > 0);
 
             // Turn off profiling
             db.setProfilingLevel('off').then(function(level) {
-
               // Retrive the profiling information
               db.profilingInfo().then(function(infos) {
-                console.dir(infos)
+                console.dir(infos);
                 test.ok(infos.constructor == Array);
                 test.ok(infos.length >= 1);
                 test.ok(infos[0].ts.constructor == Date);
@@ -3729,7 +4116,7 @@ exports.shouldCorrectlySetAndExtractProfilingInfoWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * An example of how to use the validateCollection command using a Promise.
@@ -3740,30 +4127,29 @@ exports.shouldCorrectlySetAndExtractProfilingInfoWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyCallValidateCollectionWithPromises = {
-  metadata: { requires: { promises:true, topology: 'single' } },
+  metadata: { requires: { promises: true, topology: 'single' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE restartAndDone
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Grab a collection object
       var collection = db.collection('test_with_promise');
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insertOne({'a':1}, {w: 1}).then(function(doc) {
-
+      collection.insertOne({ a: 1 }, { w: 1 }).then(function(doc) {
         // Use the admin database for the operation
         var adminDb = db.admin();
 
@@ -3777,7 +4163,7 @@ exports.shouldCorrectlyCallValidateCollectionWithPromises = {
       });
     });
   }
-}
+};
 
 /**
  * An example of how to add a user to the admin database using a Promise.
@@ -3787,22 +4173,22 @@ exports.shouldCorrectlyCallValidateCollectionWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyPingTheMongoDbInstanceWithPromises = {
-  metadata: { requires: { promises:true, topology: 'single' } },
+  metadata: { requires: { promises: true, topology: 'single' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE restartAndDone
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Use the admin database for the operation
       var adminDb = db.admin();
@@ -3817,7 +4203,7 @@ exports.shouldCorrectlyPingTheMongoDbInstanceWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * An example of how to add a user to the admin database using a Promise.
@@ -3827,22 +4213,22 @@ exports.shouldCorrectlyPingTheMongoDbInstanceWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyAddAUserToAdminDbWithPromises = {
-  metadata: { requires: { promises:true, topology: 'single' } },
+  metadata: { requires: { promises: true, topology: 'single' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE restartAndDone
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Use the admin database for the operation
       var adminDb = db.admin();
@@ -3860,7 +4246,7 @@ exports.shouldCorrectlyAddAUserToAdminDbWithPromises = {
       });
     });
   }
-}
+};
 
 /**
  * An example of how to remove a user from the admin database using a Promise.
@@ -3870,22 +4256,22 @@ exports.shouldCorrectlyAddAUserToAdminDbWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDbWithPromises = {
-  metadata: { requires: { promises:true, topology: 'single' } },
+  metadata: { requires: { promises: true, topology: 'single' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE restartAndDone
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Use the admin database for the operation
       var adminDb = db.admin();
@@ -3905,7 +4291,7 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDbWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * An example of listing all available databases. using a Promise.
@@ -3915,22 +4301,22 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDbWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyListAllAvailableDatabasesWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE restartAndDone
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Use the admin database for the operation
       var adminDb = db.admin();
@@ -3945,7 +4331,7 @@ exports.shouldCorrectlyListAllAvailableDatabasesWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * Retrieve the current server Info using a Promise.
@@ -3955,36 +4341,34 @@ exports.shouldCorrectlyListAllAvailableDatabasesWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveServerInfoWithPromises = {
-  metadata: { requires: { promises:true, topology: 'single' } },
+  metadata: { requires: { promises: true, topology: 'single' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE restartAndDone
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Grab a collection object
       var collection = db.collection('test_with_promise');
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insertOne({'a':1}, {w: 1}).then(function(doc) {
-
+      collection.insertOne({ a: 1 }, { w: 1 }).then(function(doc) {
         // Use the admin database for the operation
         var adminDb = db.admin();
 
         // Add the new user to the admin database
         adminDb.addUser('admin13', 'admin13').then(function(result) {
-
           // Retrive the server Info
           adminDb.serverStatus().then(function(info) {
             test.ok(info != null);
@@ -4001,7 +4385,7 @@ exports.shouldCorrectlyRetrieveServerInfoWithPromises = {
     });
     // END
   }
-}
+};
 
 /**************************************************************************
  *
@@ -4020,29 +4404,31 @@ var fs = require('fs');
 exports.shouldCorrectlyExecuteToArrayWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE restartAndDone
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a collection to hold our documents
       var collection = db.collection('test_array_with_promise');
 
       // Insert a test document
-      collection.insertOne({'b':[1, 2, 3]}, configuration.writeConcernMax()).then(function(ids) {
-
+      collection.insertOne({ b: [1, 2, 3] }, configuration.writeConcernMax()).then(function(ids) {
         // Retrieve all the documents in the collection
         collection.find().toArray().then(function(documents) {
           test.equal(1, documents.length);
@@ -4055,7 +4441,7 @@ exports.shouldCorrectlyExecuteToArrayWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing the count function of the cursor using a Promise.
@@ -4067,41 +4453,45 @@ exports.shouldCorrectlyExecuteToArrayWithPromises = {
 exports.shouldCorrectlyUseCursorCountFunctionWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE restartAndDone
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Creat collection
       var collection = db.collection('cursor_count_collection_with_promise');
 
       // Insert some docs
-      collection.insertMany([{a:1}, {a:2}], configuration.writeConcernMax()).then(function(docs) {
+      collection
+        .insertMany([{ a: 1 }, { a: 2 }], configuration.writeConcernMax())
+        .then(function(docs) {
+          // Do a find and get the cursor count
+          collection.find().count().then(function(count) {
+            test.equal(2, count);
 
-        // Do a find and get the cursor count
-        collection.find().count().then(function(count) {
-          test.equal(2, count);
-
-          client.close();
-          test.done();
-        })
-      });
+            client.close();
+            test.done();
+          });
+        });
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing the use of next using a Promise.
@@ -4113,41 +4503,45 @@ exports.shouldCorrectlyUseCursorCountFunctionWithPromises = {
 exports.shouldCorrectlyPerformNextOnCursorWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE restartAndDone
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a collection
       var collection = db.collection('simple_next_object_collection_with_promise');
 
       // Insert some documents we can sort on
-      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(docs) {
+      collection
+        .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }], configuration.writeConcernMax())
+        .then(function(docs) {
+          // Do normal ascending sort
+          collection.find().next().then(function(item) {
+            test.equal(1, item.a);
 
-        // Do normal ascending sort
-        collection.find().next().then(function(item) {
-          test.equal(1, item.a);
-
-          client.close();
-          test.done();
+            client.close();
+            test.done();
+          });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing the use of the cursor explain function using a Promise.
@@ -4159,39 +4553,43 @@ exports.shouldCorrectlyPerformNextOnCursorWithPromises = {
 exports.shouldCorrectlyPerformSimpleExplainCursorWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE restartAndDone
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a collection
       var collection = db.collection('simple_explain_collection_with_promise');
 
       // Insert some documents we can sort on
-      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(docs) {
-
-        // Do normal ascending sort
-        collection.find().explain().then(function(explaination) {
-          client.close();
-          test.done();
+      collection
+        .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }], configuration.writeConcernMax())
+        .then(function(docs) {
+          // Do normal ascending sort
+          collection.find().explain().then(function(explaination) {
+            client.close();
+            test.done();
+          });
         });
-      });
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing the use of the cursor close function using a Promise.
@@ -4203,27 +4601,30 @@ exports.shouldCorrectlyPerformSimpleExplainCursorWithPromises = {
 exports.shouldStreamDocumentsUsingTheCloseFunctionWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE restartAndDone
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Create a lot of documents to insert
-      var docs = []
-      for(var i = 0; i < 100; i++) {
-        docs.push({'a':i})
+      var docs = [];
+      for (var i = 0; i < 100; i++) {
+        docs.push({ a: i });
       }
 
       // Create a collection
@@ -4236,7 +4637,6 @@ exports.shouldStreamDocumentsUsingTheCloseFunctionWithPromises = {
 
         // Fetch the first object
         cursor.next().then(function(object) {
-
           // Close the cursor, this is the same as reseting the query
           cursor.close().then(function(result) {
             client.close();
@@ -4247,7 +4647,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunctionWithPromises = {
     });
     // END
   }
-}
+};
 
 /**************************************************************************
  *
@@ -4263,45 +4663,52 @@ exports.shouldStreamDocumentsUsingTheCloseFunctionWithPromises = {
  * @ignore
  */
 exports['Should correctly connect to a replicaset With Promises'] = {
-  metadata: { requires: { promises:true, topology: 'replicaset' } },
+  metadata: { requires: { promises: true, topology: 'replicaset' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var mongo = configuration.require
-      , MongoClient = mongo.MongoClient;
+    var mongo = configuration.require,
+      MongoClient = mongo.MongoClient;
 
     // Create url
-    var url = f("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
-      , f("%s:%s", configuration.host, configuration.port)
-      , f("%s:%s", configuration.host, configuration.port + 1)
-      , "integration_test_"
-      , configuration.replicasetName
-      , "primary");
+    var url = f(
+      'mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s',
+      f('%s:%s', configuration.host, configuration.port),
+      f('%s:%s', configuration.host, configuration.port + 1),
+      'integration_test_',
+      configuration.replicasetName,
+      'primary'
+    );
 
-    MongoClient.connect(url).then(function(client) {
-      var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
-      test.ok(db != null);
+    MongoClient.connect(url)
+      .then(function(client) {
+        var db = client.db(configuration.database);
+        // LINE var MongoClient = require('mongodb').MongoClient,
+        // LINE   test = require('assert');
+        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE   var db = client.db('test);
+        // REPLACE configuration.writeConcernMax() WITH {w:1}
+        // REMOVE-LINE restartAndDone
+        // REMOVE-LINE test.done();
+        // BEGIN
+        test.ok(db != null);
 
-      db.collection("replicaset_mongo_client_collection_with_promise").updateOne({a:1}, {b:1}, {upsert:true}).then(function(result) {
-        test.equal(1, result.result.n);
+        db
+          .collection('replicaset_mongo_client_collection_with_promise')
+          .updateOne({ a: 1 }, { b: 1 }, { upsert: true })
+          .then(function(result) {
+            test.equal(1, result.result.n);
 
-        client.close();
-        test.done();
+            client.close();
+            test.done();
+          });
+      })
+      .catch(function(err) {
+        console.dir(err);
       });
-    }).catch(function(err) {
-      console.dir(err)
-    });
     // END
   }
-}
+};
 
 /**
  * Example of a simple url connection string to a shard, with acknowledgement of writes using a Promise.
@@ -4311,38 +4718,45 @@ exports['Should correctly connect to a replicaset With Promises'] = {
  * @ignore
  */
 exports['Should connect to mongos proxies using connectiong string With Promises'] = {
-  metadata: { requires: { promises:true, topology: 'mongos' } },
+  metadata: { requires: { promises: true, topology: 'mongos' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
 
-    var url = f('mongodb://%s:%s,%s:%s/sharded_test_db?w=1'
-      , configuration.host, configuration.port
-      , configuration.host, configuration.port + 1);
+    var url = f(
+      'mongodb://%s:%s,%s:%s/sharded_test_db?w=1',
+      configuration.host,
+      configuration.port,
+      configuration.host,
+      configuration.port + 1
+    );
 
     MongoClient.connect(url).then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE restartAndDone
+      // REMOVE-LINE test.done();
+      // BEGIN
       test.ok(db != null);
 
-      db.collection("replicaset_mongo_client_collection_with_promise").updateOne({a:1}, {b:1}, {upsert:true}).then(function(result) {
-        test.equal(1, result);
+      db
+        .collection('replicaset_mongo_client_collection_with_promise')
+        .updateOne({ a: 1 }, { b: 1 }, { upsert: true })
+        .then(function(result) {
+          test.equal(1, result);
 
-        client.close();
-        test.done();
-      });
+          client.close();
+          test.done();
+        });
     });
     // END
   }
-}
+};
 
 /**
  * Example of a simple url connection string for a single server connection
@@ -4351,37 +4765,44 @@ exports['Should connect to mongos proxies using connectiong string With Promises
  * @example-method MongoClient.connect
  * @ignore
  */
-exports['Should correctly connect using MongoClient to a single server using connect With Promises'] = {
+exports[
+  'Should correctly connect using MongoClient to a single server using connect With Promises'
+] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { promises:true, topology: 'single'} },
+  metadata: { requires: { promises: true, topology: 'single' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var MongoClient = configuration.require.MongoClient
-      , Server = configuration.require.Server;
+    var MongoClient = configuration.require.MongoClient,
+      Server = configuration.require.Server;
     // DOC_START
     // Connect using the connection string
-    MongoClient.connect("mongodb://localhost:27017/integration_tests", {native_parser:true}).then(function(client) {
+    MongoClient.connect('mongodb://localhost:27017/integration_tests', {
+      native_parser: true
+    }).then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
-      db.collection('mongoclient_test_with_promise').updateOne({a:1}, {b:1}, {upsert:true}).then(function(result) {
-        test.equal(1, result.result.n);
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE restartAndDone
+      // REMOVE-LINE test.done();
+      // BEGIN
+      db
+        .collection('mongoclient_test_with_promise')
+        .updateOne({ a: 1 }, { b: 1 }, { upsert: true })
+        .then(function(result) {
+          test.equal(1, result.result.n);
 
-        client.close();
-        test.done();
-      });
+          client.close();
+          test.done();
+        });
     });
     // END
   }
-}
+};
 
 /**************************************************************************
  *
@@ -4397,40 +4818,37 @@ exports['Should correctly connect using MongoClient to a single server using con
  * @ignore
  */
 exports.shouldCorrectlyExecuteGridStoreExistsByObjectIdWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var GridStore = configuration.require.GridStore,
+      ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Open a file for writing
-      var gridStore = new GridStore(db, null, "w");
+      var gridStore = new GridStore(db, null, 'w');
       gridStore.open().then(function(gridStore) {
-
         // Writing some content to the file
-        gridStore.write("hello world!").then(function(gridStore) {
-
+        gridStore.write('hello world!').then(function(gridStore) {
           // Flush the file to GridFS
           gridStore.close().then(function(result) {
-
             // Check if the file exists using the id returned from the close function
             GridStore.exist(db, result._id).then(function(result) {
               test.equal(true, result);
-            })
+            });
 
             // Show that the file does not exist for a random ObjectID
             GridStore.exist(db, new ObjectID()).then(function(result) {
@@ -4450,7 +4868,7 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectIdWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing the usage of the eof method using a Promise.
@@ -4460,42 +4878,40 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectIdWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteGridStoreListWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var GridStore = configuration.require.GridStore,
+      ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Our file id
       var fileId = new ObjectID();
 
       // Open a file for writing
-      var gridStore = new GridStore(db, fileId, "foobar2", "w");
+      var gridStore = new GridStore(db, fileId, 'foobar2', 'w');
       gridStore.open().then(function(gridStore) {
-
         // Write some content to the file
-        gridStore.write("hello world!").then(function(gridStore) {
+        gridStore.write('hello world!').then(function(gridStore) {
           // Flush to GridFS
           gridStore.close().then(function(result) {
-
             // List the existing files
             GridStore.list(db).then(function(items) {
               var found = false;
               items.forEach(function(filename) {
-                if(filename == 'foobar2') found = true;
+                if (filename == 'foobar2') found = true;
               });
 
               test.ok(items.length >= 1);
@@ -4503,7 +4919,7 @@ exports.shouldCorrectlyExecuteGridStoreListWithPromises = {
             });
 
             // List the existing files but return only the file ids
-            GridStore.list(db, {id:true}).then(function(items) {
+            GridStore.list(db, { id: true }).then(function(items) {
               var found = false;
               items.forEach(function(id) {
                 test.ok(typeof id == 'object');
@@ -4516,7 +4932,7 @@ exports.shouldCorrectlyExecuteGridStoreListWithPromises = {
             GridStore.list(db, 'fs').then(function(items) {
               var found = false;
               items.forEach(function(filename) {
-                if(filename == 'foobar2') found = true;
+                if (filename == 'foobar2') found = true;
               });
 
               test.ok(items.length >= 1);
@@ -4527,7 +4943,7 @@ exports.shouldCorrectlyExecuteGridStoreListWithPromises = {
             GridStore.list(db, 'my_fs').then(function(items) {
               var found = false;
               items.forEach(function(filename) {
-                if(filename == 'foobar2') found = true;
+                if (filename == 'foobar2') found = true;
               });
 
               test.ok(items.length >= 0);
@@ -4536,21 +4952,20 @@ exports.shouldCorrectlyExecuteGridStoreListWithPromises = {
               // Specify seperate id
               var fileId2 = new ObjectID();
               // Write another file to GridFS
-              var gridStore2 = new GridStore(db, fileId2, "foobar3", "w");
+              var gridStore2 = new GridStore(db, fileId2, 'foobar3', 'w');
               gridStore2.open().then(function(gridStore) {
                 // Write the content
                 gridStore2.write('my file').then(function(gridStore) {
                   // Flush to GridFS
                   gridStore.close().then(function(result) {
-
                     // List all the available files and verify that our files are there
                     GridStore.list(db).then(function(items) {
                       var found = false;
                       var found2 = false;
 
                       items.forEach(function(filename) {
-                        if(filename == 'foobar2') found = true;
-                        if(filename == 'foobar3') found2 = true;
+                        if (filename == 'foobar2') found = true;
+                        if (filename == 'foobar3') found2 = true;
                       });
 
                       test.ok(items.length >= 2);
@@ -4570,7 +4985,7 @@ exports.shouldCorrectlyExecuteGridStoreListWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing the usage of the puts method using a Promise.
@@ -4580,37 +4995,34 @@ exports.shouldCorrectlyExecuteGridStoreListWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyReadlinesAndPutLinesWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var GridStore = configuration.require.GridStore,
+      ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Open a file for writing
-      var gridStore = new GridStore(db, "test_gs_puts_and_readlines", "w");
+      var gridStore = new GridStore(db, 'test_gs_puts_and_readlines', 'w');
       gridStore.open().then(function(gridStore) {
-
         // Write a line to the file using the puts method
-        gridStore.puts("line one").then(function(gridStore) {
-
+        gridStore.puts('line one').then(function(gridStore) {
           // Flush the file to GridFS
           gridStore.close().then(function(result) {
-
             // Read in the entire contents
             GridStore.read(db, 'test_gs_puts_and_readlines').then(function(data) {
-              test.equal("line one\n", data.toString());
+              test.equal('line one\n', data.toString());
 
               client.close();
               test.done();
@@ -4621,7 +5033,7 @@ exports.shouldCorrectlyReadlinesAndPutLinesWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing the usage of the GridStore.unlink method using a Promise.
@@ -4631,42 +5043,38 @@ exports.shouldCorrectlyReadlinesAndPutLinesWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyUnlinkWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var GridStore = configuration.require.GridStore,
+      ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
 
       // Open a new file for writing
-      var gridStore = new GridStore(db, "test_gs_unlink", "w");
+      var gridStore = new GridStore(db, 'test_gs_unlink', 'w');
       db.dropDatabase().then(function(r) {
-
         gridStore.open().then(function(gridStore) {
-
           // Write some content
-          gridStore.write("hello, world!").then(function(gridStore) {
-
+          gridStore.write('hello, world!').then(function(gridStore) {
             // Flush file to GridFS
             gridStore.close().then(function(result) {
-
               // Verify the existance of the fs.files document
               db.collection('fs.files', function(err, collection) {
                 collection.count().then(function(count) {
                   test.equal(1, count);
-                })
+                });
               });
 
               // Verify the existance of the fs.chunks chunk document
@@ -4676,12 +5084,11 @@ exports.shouldCorrectlyUnlinkWithPromises = {
 
                   // Unlink the file (removing it)
                   GridStore.unlink(db, 'test_gs_unlink').then(function(gridStore) {
-
                     // Verify that fs.files document is gone
                     db.collection('fs.files', function(err, collection) {
                       collection.count().then(function(count) {
                         test.equal(0, count);
-                      })
+                      });
                     });
 
                     // Verify that fs.chunks chunk documents are gone
@@ -4691,10 +5098,10 @@ exports.shouldCorrectlyUnlinkWithPromises = {
 
                         client.close();
                         test.done();
-                      })
+                      });
                     });
                   });
-                })
+                });
               });
             });
           });
@@ -4703,7 +5110,7 @@ exports.shouldCorrectlyUnlinkWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing the usage of the read method using a Promise.
@@ -4713,37 +5120,36 @@ exports.shouldCorrectlyUnlinkWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyWriteAndReadJpgImageWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var GridStore = configuration.require.GridStore,
+      ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Read in the content of a file
       var data = fs.readFileSync('./test/functional/data/iya_logo_final_bw.jpg');
       // Create a new file
-      var gs = new GridStore(db, "test", "w");
+      var gs = new GridStore(db, 'test', 'w');
       // Open the file
       gs.open().then(function(gs) {
         // Write the file to GridFS
         gs.write(data).then(function(gs) {
           // Flush to the GridFS
           gs.close().then(function(gs) {
-
             // Define the file we wish to read
-            var gs2 = new GridStore(db, "test", "r");
+            var gs2 = new GridStore(db, 'test', 'r');
             // Open the file
             gs2.open().then(function(gs) {
               // Set the pointer of the read head to the start of the gridstored file
@@ -4764,7 +5170,7 @@ exports.shouldCorrectlyWriteAndReadJpgImageWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing opening a file using a filename, writing to it and saving it using a Promise.
@@ -4774,36 +5180,33 @@ exports.shouldCorrectlyWriteAndReadJpgImageWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilenameWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var GridStore = configuration.require.GridStore,
+      ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Create a new instance of the gridstore
       var gridStore = new GridStore(db, 'ourexamplefiletowrite.txt', 'w');
 
       // Open the file
       gridStore.open().then(function(gridStore) {
-
         // Write some data to the file
         gridStore.write('bar').then(function(gridStore) {
-
           // Close (Flushes the data to MongoDB)
           gridStore.close().then(function(result) {
-
             // Verify that the file exists
             GridStore.exist(db, 'ourexamplefiletowrite.txt').then(function(result) {
               test.equal(true, result);
@@ -4817,7 +5220,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilenameWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing opening a file using an ObjectID, writing to it and saving it using a Promise.
@@ -4827,24 +5230,24 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilenameWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectIDWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var GridStore = configuration.require.GridStore,
+      ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Our file ID
       var fileId = new ObjectID();
 
@@ -4853,13 +5256,10 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectIDWithPromises = {
 
       // Open the file
       gridStore.open().then(function(gridStore) {
-
         // Write some data to the file
         gridStore.write('bar').then(function(gridStore) {
-
           // Close (Flushes the data to MongoDB)
           gridStore.close().then(function(result) {
-
             // Verify that the file exists
             GridStore.exist(db, fileId).then(function(result) {
               test.equal(true, result);
@@ -4873,7 +5273,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectIDWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing how to write a file to Gridstore using file location path using a Promise.
@@ -4883,24 +5283,24 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectIDWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var GridStore = configuration.require.GridStore,
+      ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Our file ID
       var fileId = new ObjectID();
 
@@ -4914,71 +5314,8 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithPromises = {
 
       // Open the new file
       gridStore.open().then(function(gridStore) {
-
         // Write the file to gridFS
         gridStore.writeFile('./test/functional/data/test_gs_weird_bug.png').then(function(doc) {
-
-          // Read back all the written content and verify the correctness
-          GridStore.read(db, fileId).then(function(fileData) {
-            test.equal(data.toString('base64'), fileData.toString('base64'))
-            test.equal(fileSize, fileData.length);
-
-            client.close();
-            test.done();
-          });
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * A simple example showing how to write a file to Gridstore using a file handle using a Promise.
- *
- * @example-class GridStore
- * @example-method writeFile
- * @ignore
- */
-exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandleWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.connect().then(function(client) {
-      var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      // Our file ID
-      var fileId = new ObjectID();
-
-      // Open a new file
-      var gridStore = new GridStore(db, fileId, 'w');
-
-      // Read the filesize of file on disk (provide your own)
-      var fileSize = fs.statSync('./test/functional/data/test_gs_weird_bug.png').size;
-      // Read the buffered data for comparision reasons
-      var data = fs.readFileSync('./test/functional/data/test_gs_weird_bug.png');
-
-      // Open a file handle for reading the file
-      var fd = fs.openSync('./test/functional/data/test_gs_weird_bug.png', 'r', parseInt('0666',8));
-
-      // Open the new file
-      gridStore.open().then(function(gridStore) {
-
-        // Write the file to gridFS using the file handle
-        gridStore.writeFile(fd).then(function(doc) {
-
           // Read back all the written content and verify the correctness
           GridStore.read(db, fileId).then(function(fileData) {
             test.equal(data.toString('base64'), fileData.toString('base64'));
@@ -4992,7 +5329,70 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandleWithProm
     });
     // END
   }
-}
+};
+
+/**
+ * A simple example showing how to write a file to Gridstore using a file handle using a Promise.
+ *
+ * @example-class GridStore
+ * @example-method writeFile
+ * @ignore
+ */
+exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandleWithPromises = {
+  metadata: { requires: { promises: true, topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridStore = configuration.require.GridStore,
+      ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
+    db.connect().then(function(client) {
+      var db = client.db(configuration.database);
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
+      // Our file ID
+      var fileId = new ObjectID();
+
+      // Open a new file
+      var gridStore = new GridStore(db, fileId, 'w');
+
+      // Read the filesize of file on disk (provide your own)
+      var fileSize = fs.statSync('./test/functional/data/test_gs_weird_bug.png').size;
+      // Read the buffered data for comparision reasons
+      var data = fs.readFileSync('./test/functional/data/test_gs_weird_bug.png');
+
+      // Open a file handle for reading the file
+      var fd = fs.openSync(
+        './test/functional/data/test_gs_weird_bug.png',
+        'r',
+        parseInt('0666', 8)
+      );
+
+      // Open the new file
+      gridStore.open().then(function(gridStore) {
+        // Write the file to gridFS using the file handle
+        gridStore.writeFile(fd).then(function(doc) {
+          // Read back all the written content and verify the correctness
+          GridStore.read(db, fileId).then(function(fileData) {
+            test.equal(data.toString('base64'), fileData.toString('base64'));
+            test.equal(fileSize, fileData.length);
+
+            client.close();
+            test.done();
+          });
+        });
+      });
+    });
+    // END
+  }
+};
 
 /**
  * A simple example showing how to use the write command with strings and Buffers using a Promise.
@@ -5002,24 +5402,24 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandleWithProm
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffersWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var GridStore = configuration.require.GridStore,
+      ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Our file ID
       var fileId = new ObjectID();
 
@@ -5028,16 +5428,12 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffersW
 
       // Open the new file
       gridStore.open().then(function(gridStore) {
-
         // Write a text string
         gridStore.write('Hello world').then(function(gridStore) {
-
           // Write a buffer
           gridStore.write(new Buffer('Buffer Hello world')).then(function(gridStore) {
-
             // Close the
             gridStore.close().then(function(result) {
-
               // Read back all the written content and verify the correctness
               GridStore.read(db, fileId).then(function(fileData) {
                 test.equal('Hello worldBuffer Hello world', fileData.toString());
@@ -5052,7 +5448,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffersW
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing how to use the write command with strings and Buffers using a Promise.
@@ -5062,24 +5458,24 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffersW
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var GridStore = configuration.require.GridStore,
+      ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Our file ID
       var fileId = new ObjectID();
 
@@ -5088,13 +5484,10 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseWithPromises = {
 
       // Open the new file
       gridStore.open().then(function(gridStore) {
-
         // Write a text string
         gridStore.write('Hello world').then(function(gridStore) {
-
           // Close the
           gridStore.close().then(function(result) {
-
             client.close();
             test.done();
           });
@@ -5103,7 +5496,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing how to use the instance level unlink command to delete a gridstore item using a Promise.
@@ -5113,24 +5506,24 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkItWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var GridStore = configuration.require.GridStore,
+      ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Our file ID
       var fileId = new ObjectID();
 
@@ -5139,19 +5532,14 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkItWithPro
 
       // Open the new file
       gridStore.open().then(function(gridStore) {
-
         // Write a text string
         gridStore.write('Hello world').then(function(gridStore) {
-
           // Close the
           gridStore.close().then(function(result) {
-
             // Open the file again and unlin it
             new GridStore(db, fileId, 'r').open().then(function(gridStore) {
-
               // Unlink the file
               gridStore.unlink().then(function(result) {
-
                 // Verify that the file no longer exists
                 GridStore.exist(db, fileId).then(function(result) {
                   test.equal(false, result);
@@ -5167,7 +5555,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkItWithPro
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing reading back using readlines to split the text into lines by the separator provided using a Promise.
@@ -5177,24 +5565,24 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkItWithPro
  * @ignore
  */
 exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlinesWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var GridStore = configuration.require.GridStore,
+      ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Our file ID
       var fileId = new ObjectID();
 
@@ -5203,22 +5591,17 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlinesWithPromises =
 
       // Open the new file
       gridStore.open().then(function(gridStore) {
-
         // Write one line to gridStore
-        gridStore.puts("line one").then(function(gridStore) {
-
+        gridStore.puts('line one').then(function(gridStore) {
           // Write second line to gridStore
-          gridStore.puts("line two").then(function(gridStore) {
-
+          gridStore.puts('line two').then(function(gridStore) {
             // Write third line to gridStore
-            gridStore.puts("line three").then(function(gridStore) {
-
+            gridStore.puts('line three').then(function(gridStore) {
               // Flush file to disk
               gridStore.close().then(function(result) {
-
                 // Read back all the lines
                 GridStore.readlines(db, fileId).then(function(lines) {
-                  test.deepEqual(["line one\n", "line two\n", "line three\n"], lines);
+                  test.deepEqual(['line one\n', 'line two\n', 'line three\n'], lines);
 
                   client.close();
                   test.done();
@@ -5231,7 +5614,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlinesWithPromises =
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing reading back using readlines to split the text into lines by the separator provided using a Promise.
@@ -5241,24 +5624,24 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlinesWithPromises =
  * @ignore
  */
 exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlinesWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var GridStore = configuration.require.GridStore,
+      ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Our file ID
       var fileId = new ObjectID();
 
@@ -5267,26 +5650,20 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlinesWithPr
 
       // Open the new file
       gridStore.open().then(function(gridStore) {
-
         // Write one line to gridStore
-        gridStore.puts("line one").then(function(gridStore) {
-
+        gridStore.puts('line one').then(function(gridStore) {
           // Write second line to gridStore
-          gridStore.puts("line two").then(function(gridStore) {
-
+          gridStore.puts('line two').then(function(gridStore) {
             // Write third line to gridStore
-            gridStore.puts("line three").then(function(gridStore) {
-
+            gridStore.puts('line three').then(function(gridStore) {
               // Flush file to disk
               gridStore.close().then(function(result) {
-
                 // Open file for reading
                 gridStore = new GridStore(db, fileId, 'r');
                 gridStore.open().then(function(gridStore) {
-
                   // Read all the lines and verify correctness
                   gridStore.readlines().then(function(lines) {
-                    test.deepEqual(["line one\n", "line two\n", "line three\n"], lines);
+                    test.deepEqual(['line one\n', 'line two\n', 'line three\n'], lines);
 
                     client.close();
                     test.done();
@@ -5300,7 +5677,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlinesWithPr
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing the usage of the read method using a Promise.
@@ -5310,28 +5687,28 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlinesWithPr
  * @ignore
  */
 exports.shouldCorrectlyPutACoupleOfLinesInGridStoreReadWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var GridStore = configuration.require.GridStore,
+      ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Create a new file
-      var gridStore = new GridStore(db, null, "w");
+      var gridStore = new GridStore(db, null, 'w');
       // Read in the content from a file, replace with your own
-      var data = fs.readFileSync("./test/functional/data/test_gs_weird_bug.png");
+      var data = fs.readFileSync('./test/functional/data/test_gs_weird_bug.png');
 
       // Open the file
       gridStore.open().then(function(gridStore) {
@@ -5339,7 +5716,6 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreReadWithPromises = {
         gridStore.write(data).then(function(gridStore) {
           // Flush the remaining data to GridFS
           gridStore.close().then(function(result) {
-
             // Read in the whole file and check that it's the same content
             GridStore.read(db, result._id).then(function(fileData) {
               test.equal(data.length, fileData.length);
@@ -5353,7 +5729,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreReadWithPromises = {
     });
     // END
   }
-}
+};
 
 /*
  * A simple example showing the usage of the seek method using a Promise.
@@ -5363,33 +5739,32 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreReadWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlySeekWithBufferWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Create a file and open it
-      var gridStore = new GridStore(db, "test_gs_seek_with_buffer", "w");
+      var gridStore = new GridStore(db, 'test_gs_seek_with_buffer', 'w');
       gridStore.open().then(function(gridStore) {
         // Write some content to the file
-        gridStore.write(new Buffer("hello, world!", "utf8")).then(function(gridStore) {
+        gridStore.write(new Buffer('hello, world!', 'utf8')).then(function(gridStore) {
           // Flush the file to GridFS
           gridStore.close().then(function(result) {
-
             // Open the file in read mode
-            var gridStore2 = new GridStore(db, "test_gs_seek_with_buffer", "r");
+            var gridStore2 = new GridStore(db, 'test_gs_seek_with_buffer', 'r');
             gridStore2.open().then(function(gridStore) {
               // Seek to start
               gridStore.seek(0).then(function(gridStore) {
@@ -5401,7 +5776,7 @@ exports.shouldCorrectlySeekWithBufferWithPromises = {
             });
 
             // Open the file in read mode
-            var gridStore3 = new GridStore(db, "test_gs_seek_with_buffer", "r");
+            var gridStore3 = new GridStore(db, 'test_gs_seek_with_buffer', 'r');
             gridStore3.open().then(function(gridStore) {
               // Seek to 7 characters from the beginning off the file and verify
               gridStore.seek(7).then(function(gridStore) {
@@ -5412,7 +5787,7 @@ exports.shouldCorrectlySeekWithBufferWithPromises = {
             });
 
             // Open the file in read mode
-            var gridStore5 = new GridStore(db, "test_gs_seek_with_buffer", "r");
+            var gridStore5 = new GridStore(db, 'test_gs_seek_with_buffer', 'r');
             gridStore5.open().then(function(gridStore) {
               // Seek to -1 characters from the end off the file and verify
               gridStore.seek(-1, GridStore.IO_SEEK_END).then(function(gridStore) {
@@ -5423,7 +5798,7 @@ exports.shouldCorrectlySeekWithBufferWithPromises = {
             });
 
             // Open the file in read mode
-            var gridStore6 = new GridStore(db, "test_gs_seek_with_buffer", "r");
+            var gridStore6 = new GridStore(db, 'test_gs_seek_with_buffer', 'r');
             gridStore6.open().then(function(gridStore) {
               // Seek to -6 characters from the end off the file and verify
               gridStore.seek(-6, GridStore.IO_SEEK_END).then(function(gridStore) {
@@ -5434,9 +5809,8 @@ exports.shouldCorrectlySeekWithBufferWithPromises = {
             });
 
             // Open the file in read mode
-            var gridStore7 = new GridStore(db, "test_gs_seek_with_buffer", "r");
+            var gridStore7 = new GridStore(db, 'test_gs_seek_with_buffer', 'r');
             gridStore7.open().then(function(gridStore) {
-
               // Seek forward 7 characters from the current read position and verify
               gridStore.seek(7, GridStore.IO_SEEK_CUR).then(function(gridStore) {
                 gridStore.getc().then(function(chr) {
@@ -5474,7 +5848,7 @@ exports.shouldCorrectlySeekWithBufferWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing how to rewind and overwrite the file using a Promise.
@@ -5484,54 +5858,49 @@ exports.shouldCorrectlySeekWithBufferWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRewingAndTruncateOnWriteWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var GridStore = configuration.require.GridStore,
+      ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Our file ID
       var fileId = new ObjectID();
 
       // Create a new file
-      var gridStore = new GridStore(db, fileId, "w");
+      var gridStore = new GridStore(db, fileId, 'w');
       // Open the file
       gridStore.open().then(function(gridStore) {
         // Write to the file
-        gridStore.write("hello, world!").then(function(gridStore) {
+        gridStore.write('hello, world!').then(function(gridStore) {
           // Flush the file to disk
           gridStore.close().then(function(result) {
-
             // Reopen the file
-            gridStore = new GridStore(db, fileId, "w");
+            gridStore = new GridStore(db, fileId, 'w');
             gridStore.open().then(function(gridStore) {
               // Write some more text to the file
               gridStore.write('some text is inserted here').then(function(gridStore) {
-
                 // Let's rewind to truncate the file
                 gridStore.rewind().then(function(gridStore) {
-
                   // Write something from the start
                   gridStore.write('abc').then(function(gridStore) {
-
                     // Flush the data to mongodb
                     gridStore.close().then(function(result) {
-
                       // Verify that the new data was written
                       GridStore.read(db, fileId).then(function(data) {
-                        test.equal("abc", data);
+                        test.equal('abc', data);
 
                         client.close();
                         test.done();
@@ -5547,7 +5916,7 @@ exports.shouldCorrectlyRewingAndTruncateOnWriteWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing the usage of the tell method using a Promise.
@@ -5557,39 +5926,37 @@ exports.shouldCorrectlyRewingAndTruncateOnWriteWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteGridstoreTellWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Create a new file
-      var gridStore = new GridStore(db, "test_gs_tell", "w");
+      var gridStore = new GridStore(db, 'test_gs_tell', 'w');
       // Open the file
       gridStore.open().then(function(gridStore) {
         // Write a string to the file
-        gridStore.write("hello, world!").then(function(gridStore) {
+        gridStore.write('hello, world!').then(function(gridStore) {
           // Flush the file to GridFS
           gridStore.close().then(function(result) {
-
             // Open the file in read only mode
-            var gridStore2 = new GridStore(db, "test_gs_tell", "r");
+            var gridStore2 = new GridStore(db, 'test_gs_tell', 'r');
             gridStore2.open().then(function(gridStore) {
-
               // Read the first 5 characters
               gridStore.read(5).then(function(data) {
-                test.equal("hello", data);
+                test.equal('hello', data);
 
                 // Get the current position of the read head
                 gridStore.tell().then(function(position) {
@@ -5606,7 +5973,7 @@ exports.shouldCorrectlyExecuteGridstoreTellWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing the usage of the seek method using a Promise.
@@ -5616,35 +5983,33 @@ exports.shouldCorrectlyExecuteGridstoreTellWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Create a file and open it
-      var gridStore = new GridStore(db, "test_gs_getc_file", "w");
+      var gridStore = new GridStore(db, 'test_gs_getc_file', 'w');
       gridStore.open().then(function(gridStore) {
         // Write some content to the file
-        gridStore.write(new Buffer("hello, world!", "utf8")).then(function(gridStore) {
+        gridStore.write(new Buffer('hello, world!', 'utf8')).then(function(gridStore) {
           // Flush the file to GridFS
           gridStore.close().then(function(result) {
-
             // Open the file in read mode
-            var gridStore2 = new GridStore(db, "test_gs_getc_file", "r");
+            var gridStore2 = new GridStore(db, 'test_gs_getc_file', 'r');
             gridStore2.open().then(function(gridStore) {
-
               // Read first character and verify
               gridStore.getc().then(function(chr) {
                 test.equal('h', chr);
@@ -5659,7 +6024,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithPromises = {
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing how to save a file with a filename allowing for multiple files with the same name using a Promise.
@@ -5669,60 +6034,56 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithPromises = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    var GridStore = configuration.require.GridStore,
+      ObjectID = configuration.require.ObjectID;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), { poolSize: 1 });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   GridStore = require('mongodb').GridStore,
+      // LINE   ObjectID = require('mongodb').ObjectID,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Create a file and open it
-      var gridStore = new GridStore(db, new ObjectID(), "test_gs_getc_file", "w");
+      var gridStore = new GridStore(db, new ObjectID(), 'test_gs_getc_file', 'w');
       gridStore.open().then(function(gridStore) {
         // Write some content to the file
-        gridStore.write(new Buffer("hello, world!", "utf8")).then(function(gridStore) {
+        gridStore.write(new Buffer('hello, world!', 'utf8')).then(function(gridStore) {
           // Flush the file to GridFS
           gridStore.close().then(function(fileData) {
-
             // Create another file with same name and and save content to it
-            gridStore = new GridStore(db, new ObjectID(), "test_gs_getc_file", "w");
+            gridStore = new GridStore(db, new ObjectID(), 'test_gs_getc_file', 'w');
             gridStore.open().then(function(gridStore) {
               // Write some content to the file
-              gridStore.write(new Buffer("hello, world!", "utf8")).then(function(gridStore) {
+              gridStore.write(new Buffer('hello, world!', 'utf8')).then(function(gridStore) {
                 // Flush the file to GridFS
                 gridStore.close().then(function(fileData) {
-
                   // Open the file in read mode using the filename
-                  var gridStore2 = new GridStore(db, "test_gs_getc_file", "r");
+                  var gridStore2 = new GridStore(db, 'test_gs_getc_file', 'r');
                   gridStore2.open().then(function(gridStore) {
-
                     // Read first character and verify
                     gridStore.getc().then(function(chr) {
                       test.equal('h', chr);
 
                       // Open the file using an object id
-                      gridStore2 = new GridStore(db, fileData._id, "r");
+                      gridStore2 = new GridStore(db, fileData._id, 'r');
                       gridStore2.open().then(function(gridStore) {
-
                         // Read first character and verify
                         gridStore.getc().then(function(chr) {
                           test.equal('h', chr);
 
                           client.close();
                           test.done();
-                        })
+                        });
                       });
                     });
                   });
@@ -5735,7 +6096,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithPromises = {
     });
     // END
   }
-}
+};
 
 /**************************************************************************
  *
@@ -5750,31 +6111,36 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithPromises = {
  * @example-method initializeOrderedBulkOp
  * @ignore
  */
-exports['Should correctly execute ordered batch with no errors using write commands With Promises'] = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+exports[
+  'Should correctly execute ordered batch with no errors using write commands With Promises'
+] = {
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Get the collection
       var col = db.collection('batch_write_ordered_ops_0_with_promise');
       // Initialize the Ordered Batch
       var batch = col.initializeOrderedBulkOp();
       // Add some operations to be executed in order
-      batch.insert({a:1});
-      batch.find({a:1}).updateOne({$set: {b:1}});
-      batch.find({a:2}).upsert().updateOne({$set: {b:2}});
-      batch.insert({a:3});
-      batch.find({a:3}).remove({a:3});
+      batch.insert({ a: 1 });
+      batch.find({ a: 1 }).updateOne({ $set: { b: 1 } });
+      batch.find({ a: 2 }).upsert().updateOne({ $set: { b: 2 } });
+      batch.insert({ a: 3 });
+      batch.find({ a: 3 }).remove({ a: 3 });
 
       // Execute the operations
       batch.execute().then(function(result) {
@@ -5801,7 +6167,7 @@ exports['Should correctly execute ordered batch with no errors using write comma
     });
     // END
   }
-}
+};
 
 /**
  * Example of a simple ordered insert/update/upsert/remove ordered collection using a Promise.
@@ -5812,31 +6178,34 @@ exports['Should correctly execute ordered batch with no errors using write comma
  * @ignore
  */
 exports['Should correctly execute unordered batch with no errors With Promises'] = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Get the collection
       var col = db.collection('batch_write_unordered_ops_legacy_0_with_promise');
       // Initialize the unordered Batch
       var batch = col.initializeUnorderedBulkOp();
 
       // Add some operations to be executed in order
-      batch.insert({a:1});
-      batch.find({a:1}).updateOne({$set: {b:1}});
-      batch.find({a:2}).upsert().updateOne({$set: {b:2}});
-      batch.insert({a:3});
-      batch.find({a:3}).remove({a:3});
+      batch.insert({ a: 1 });
+      batch.find({ a: 1 }).updateOne({ $set: { b: 1 } });
+      batch.find({ a: 2 }).upsert().updateOne({ $set: { b: 2 } });
+      batch.insert({ a: 3 });
+      batch.find({ a: 3 }).remove({ a: 3 });
 
       // Execute the operations
       batch.execute().then(function(result) {
@@ -5863,7 +6232,7 @@ exports['Should correctly execute unordered batch with no errors With Promises']
     });
     // END
   }
-}
+};
 
 /**************************************************************************
  *
@@ -5879,23 +6248,26 @@ exports['Should correctly execute unordered batch with no errors With Promises']
  * @ignore
  */
 exports['Should correctly execute insertOne operation With Promises'] = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Get the collection
       var col = db.collection('insert_one_with_promise');
-      col.insertOne({a:1}).then(function(r) {
+      col.insertOne({ a: 1 }).then(function(r) {
         test.equal(1, r.insertedCount);
         // Finish up test
         client.close();
@@ -5904,7 +6276,7 @@ exports['Should correctly execute insertOne operation With Promises'] = {
     });
     // END
   }
-}
+};
 
 /**
  * Example of a simple insertMany operation using a Promise.
@@ -5914,23 +6286,26 @@ exports['Should correctly execute insertOne operation With Promises'] = {
  * @ignore
  */
 exports['Should correctly execute insertMany operation With Promises'] = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Get the collection
       var col = db.collection('insert_many_with_promise');
-      col.insertMany([{a:1}, {a:2}]).then(function(r) {
+      col.insertMany([{ a: 1 }, { a: 2 }]).then(function(r) {
         test.equal(2, r.insertedCount);
         // Finish up test
         client.close();
@@ -5939,7 +6314,7 @@ exports['Should correctly execute insertMany operation With Promises'] = {
     });
     // END
   }
-}
+};
 
 /**
  * Example of a simple updateOne operation using a Promise.
@@ -5949,25 +6324,26 @@ exports['Should correctly execute insertMany operation With Promises'] = {
  * @ignore
  */
 exports['Should correctly execute updateOne operation With Promises'] = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Get the collection
       var col = db.collection('update_one_with_promise');
-      col.updateOne({a:1}
-        , {$set: {a:2}}
-        , {upsert:true}).then(function(r) {
+      col.updateOne({ a: 1 }, { $set: { a: 2 } }, { upsert: true }).then(function(r) {
         test.equal(0, r.matchedCount);
         test.equal(1, r.upsertedCount);
         // Finish up test
@@ -5977,7 +6353,7 @@ exports['Should correctly execute updateOne operation With Promises'] = {
     });
     // END
   }
-}
+};
 
 /**
  * Example of a simple updateMany operation using a Promise.
@@ -5987,28 +6363,31 @@ exports['Should correctly execute updateOne operation With Promises'] = {
  * @ignore
  */
 exports['Should correctly execute updateMany operation With Promises'] = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Get the collection
       var col = db.collection('update_many_with_promise');
-      col.insertMany([{a:1}, {a:1}]).then(function(r) {
+      col.insertMany([{ a: 1 }, { a: 1 }]).then(function(r) {
         test.equal(2, r.insertedCount);
 
         // Update all documents
-        col.updateMany({a:1}, {$set: {b: 1}}).then(function(r) {
-          if(r.n) {
+        col.updateMany({ a: 1 }, { $set: { b: 1 } }).then(function(r) {
+          if (r.n) {
             test.equal(2, r.n);
           } else {
             test.equal(2, r.matchedCount);
@@ -6023,7 +6402,7 @@ exports['Should correctly execute updateMany operation With Promises'] = {
     });
     // END
   }
-}
+};
 
 /**
  * Example of a simple removeOne operation using a Promise.
@@ -6033,26 +6412,29 @@ exports['Should correctly execute updateMany operation With Promises'] = {
  * @ignore
  */
 exports['Should correctly execute removeOne operation With Promises'] = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Get the collection
       var col = db.collection('remove_one_with_promise');
-      col.insertMany([{a:1}, {a:1}]).then(function(r) {
+      col.insertMany([{ a: 1 }, { a: 1 }]).then(function(r) {
         test.equal(2, r.insertedCount);
 
-        col.removeOne({a:1}).then(function(r) {
+        col.removeOne({ a: 1 }).then(function(r) {
           test.equal(1, r.deletedCount);
           // Finish up test
           client.close();
@@ -6062,7 +6444,7 @@ exports['Should correctly execute removeOne operation With Promises'] = {
     });
     // END
   }
-}
+};
 
 /**
  * Example of a simple removeMany operation using a Promise.
@@ -6072,27 +6454,30 @@ exports['Should correctly execute removeOne operation With Promises'] = {
  * @ignore
  */
 exports['Should correctly execute removeMany operation With Promises'] = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Get the collection
       var col = db.collection('remove_many_with_promise');
-      col.insertMany([{a:1}, {a:1}]).then(function(r) {
+      col.insertMany([{ a: 1 }, { a: 1 }]).then(function(r) {
         test.equal(2, r.insertedCount);
 
         // Update all documents
-        col.removeMany({a:1}).then(function(r) {
+        col.removeMany({ a: 1 }).then(function(r) {
           test.equal(2, r.deletedCount);
 
           // Finish up test
@@ -6103,7 +6488,7 @@ exports['Should correctly execute removeMany operation With Promises'] = {
     });
     // END
   }
-}
+};
 
 /**
  * Example of a simple bulkWrite operation using a Promise.
@@ -6113,77 +6498,90 @@ exports['Should correctly execute removeMany operation With Promises'] = {
  * @ignore
  */
 exports['Should correctly execute bulkWrite operation With Promises'] = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Get the collection
       var col = db.collection('bulk_write_with_promise');
-      col.bulkWrite([
-          { insertOne: { document: { a: 1 } } }
-        , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
-        , { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
-        , { deleteOne: { filter: {c:1} } }
-        , { deleteMany: { filter: {c:1} } }
-        , { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}]
-      , {ordered:true, w:1}).then(function(r) {
-        // console.log(JSON.stringify(r, null, 2))
-        test.equal(1, r.nInserted);
-        test.equal(2, r.nUpserted);
-        test.equal(0, r.nRemoved);
-        // Crud fields
-        test.equal(1, r.insertedCount);
-        test.equal(1, Object.keys(r.insertedIds).length);
-        test.equal(1, r.matchedCount);
-        test.ok(r.modifiedCount == 0 || r.modifiedCount == 1);
-        test.equal(0, r.deletedCount);
-        test.equal(2, r.upsertedCount);
-        test.equal(2, Object.keys(r.upsertedIds).length);
+      col
+        .bulkWrite(
+          [
+            { insertOne: { document: { a: 1 } } },
+            { updateOne: { filter: { a: 2 }, update: { $set: { a: 2 } }, upsert: true } },
+            { updateMany: { filter: { a: 2 }, update: { $set: { a: 2 } }, upsert: true } },
+            { deleteOne: { filter: { c: 1 } } },
+            { deleteMany: { filter: { c: 1 } } },
+            { replaceOne: { filter: { c: 3 }, replacement: { c: 4 }, upsert: true } }
+          ],
+          { ordered: true, w: 1 }
+        )
+        .then(function(r) {
+          // console.log(JSON.stringify(r, null, 2))
+          test.equal(1, r.nInserted);
+          test.equal(2, r.nUpserted);
+          test.equal(0, r.nRemoved);
+          // Crud fields
+          test.equal(1, r.insertedCount);
+          test.equal(1, Object.keys(r.insertedIds).length);
+          test.equal(1, r.matchedCount);
+          test.ok(r.modifiedCount == 0 || r.modifiedCount == 1);
+          test.equal(0, r.deletedCount);
+          test.equal(2, r.upsertedCount);
+          test.equal(2, Object.keys(r.upsertedIds).length);
 
-        // Ordered bulk operation
-        client.close();
-        test.done();
-      });
+          // Ordered bulk operation
+          client.close();
+          test.done();
+        });
     });
     // END
   }
-}
+};
 
 /**
  * Duplicate key error
  */
 exports['Should correctly handle duplicate key error with bulkWrite'] = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
       // Get the collection
       var col = db.collection('bulk_write_with_promise_write_error');
-      col.bulkWrite([
-          { insertOne: { document: { _id: 1 } } },
-          { insertOne: { document: { _id: 1 } } }]
-      , {ordered:true, w:1}).then(function(r) {
-        test.equal(true, r.hasWriteErrors());
-        // Ordered bulk operation
-        client.close();
-        test.done();
-      });
+      col
+        .bulkWrite(
+          [{ insertOne: { document: { _id: 1 } } }, { insertOne: { document: { _id: 1 } } }],
+          { ordered: true, w: 1 }
+        )
+        .then(function(r) {
+          test.equal(true, r.hasWriteErrors());
+          // Ordered bulk operation
+          client.close();
+          test.done();
+        });
     });
   }
-}
+};
 
 /**
  * Example of a simple findOneAndDelete operation using a Promise.
@@ -6193,39 +6591,40 @@ exports['Should correctly handle duplicate key error with bulkWrite'] = {
  * @ignore
  */
 exports['Should correctly execute findOneAndDelete operation With Promises'] = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Get the collection
       var col = db.collection('find_one_and_delete_with_promise');
-      col.insertMany([{a:1, b:1}], {w:1}).then(function(r) {
+      col.insertMany([{ a: 1, b: 1 }], { w: 1 }).then(function(r) {
         test.equal(1, r.result.n);
 
-        col.findOneAndDelete({a:1}
-          , { projection: {b:1}, sort: {a:1} }
-          ).then(function(r) {
-            test.equal(1, r.lastErrorObject.n);
-            test.equal(1, r.value.b);
+        col.findOneAndDelete({ a: 1 }, { projection: { b: 1 }, sort: { a: 1 } }).then(function(r) {
+          test.equal(1, r.lastErrorObject.n);
+          test.equal(1, r.value.b);
 
-            client.close();
-            test.done();
+          client.close();
+          test.done();
         });
       });
     });
     // END
   }
-}
+};
 
 /**
  * Example of a simple findOneAndReplace operation using a Promise.
@@ -6235,46 +6634,52 @@ exports['Should correctly execute findOneAndDelete operation With Promises'] = {
  * @ignore
  */
 exports['Should correctly execute findOneAndReplace operation With Promises'] = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Get the collection
       var col = db.collection('find_one_and_replace_with_promise');
-      col.insertMany([{a:1, b:1}], {w:1}).then(function(r) {
+      col.insertMany([{ a: 1, b: 1 }], { w: 1 }).then(function(r) {
         test.equal(1, r.result.n);
 
-        col.findOneAndReplace({a:1}
-          , {c:1, b:1}
-          , {
-                projection: {b:1, c:1}
-              , sort: {a:1}
-              , returnOriginal: false
-              , upsert: true
+        col
+          .findOneAndReplace(
+            { a: 1 },
+            { c: 1, b: 1 },
+            {
+              projection: { b: 1, c: 1 },
+              sort: { a: 1 },
+              returnOriginal: false,
+              upsert: true
             }
-          ).then(function(r) {
+          )
+          .then(function(r) {
             test.equal(1, r.lastErrorObject.n);
             test.equal(1, r.value.b);
             test.equal(1, r.value.c);
 
             client.close();
             test.done();
-        });
+          });
       });
     });
     // END
   }
-}
+};
 
 /**
  * Example of a simple findOneAndUpdate operation using a Promise.
@@ -6284,46 +6689,52 @@ exports['Should correctly execute findOneAndReplace operation With Promises'] = 
  * @ignore
  */
 exports['Should correctly execute findOneAndUpdate operation With Promises'] = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Get the collection
       var col = db.collection('find_one_and_update_with_promise');
-      col.insertMany([{a:1, b:1}], {w:1}).then(function(r) {
+      col.insertMany([{ a: 1, b: 1 }], { w: 1 }).then(function(r) {
         test.equal(1, r.result.n);
 
-        col.findOneAndUpdate({a:1}
-          , {$set: {d:1}}
-          , {
-                projection: {b:1, d:1}
-              , sort: {a:1}
-              , returnOriginal: false
-              , upsert: true
+        col
+          .findOneAndUpdate(
+            { a: 1 },
+            { $set: { d: 1 } },
+            {
+              projection: { b: 1, d: 1 },
+              sort: { a: 1 },
+              returnOriginal: false,
+              upsert: true
             }
-          ).then(function(r) {
+          )
+          .then(function(r) {
             test.equal(1, r.lastErrorObject.n);
             test.equal(1, r.value.b);
             test.equal(1, r.value.d);
 
             client.close();
             test.done();
-        });
+          });
       });
     });
     // END
   }
-}
+};
 
 /**
  * A simple example showing the listening to a capped collection using a Promise.
@@ -6333,54 +6744,65 @@ exports['Should correctly execute findOneAndUpdate operation With Promises'] = {
  * @ignore
  */
 exports['Should correctly add capped collection options to cursor With Promises'] = {
-  metadata: { requires: { promises:true, topology: ['single'] } },
+  metadata: { requires: { promises: true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize: 1,
+      auto_reconnect: false
+    });
 
     db.connect().then(function(client) {
       var db = client.db(configuration.database);
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-    // LINE   var db = client.db('test);
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+      // LINE   var db = client.db('test);
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
       // Create a capped collection with a maximum of 1000 documents
-      db.createCollection("a_simple_collection_2_with_promise", {capped:true, size:100000, max:10000, w:1}).then(function(collection) {
-        var docs = [];
-        for(var i = 0; i < 1000; i++) docs.push({a:i});
+      db
+        .createCollection('a_simple_collection_2_with_promise', {
+          capped: true,
+          size: 100000,
+          max: 10000,
+          w: 1
+        })
+        .then(function(collection) {
+          var docs = [];
+          for (var i = 0; i < 1000; i++) docs.push({ a: i });
 
-        // Insert a document in the capped collection
-        collection.insertMany(docs, configuration.writeConcernMax()).then(function(result) {
-          // Start date
-          var s = new Date();
-          var total = 0;
+          // Insert a document in the capped collection
+          collection.insertMany(docs, configuration.writeConcernMax()).then(function(result) {
+            // Start date
+            var s = new Date();
+            var total = 0;
 
-          // Get the cursor
-          var cursor = collection.find({a: {$gte:0}})
-            .addCursorFlag('tailable', true)
-            .addCursorFlag('awaitData', true)
+            // Get the cursor
+            var cursor = collection
+              .find({ a: { $gte: 0 } })
+              .addCursorFlag('tailable', true)
+              .addCursorFlag('awaitData', true);
 
-          cursor.on('data', function(d) {
-            total = total + 1;
+            cursor.on('data', function(d) {
+              total = total + 1;
 
-            if(total == 1000) {
-              cursor.kill();
-            }
-          });
+              if (total == 1000) {
+                cursor.kill();
+              }
+            });
 
-          cursor.on('end', function() {
-            test.ok((new Date().getTime() - s.getTime()) > 1000);
+            cursor.on('end', function() {
+              test.ok(new Date().getTime() - s.getTime() > 1000);
 
-            client.close();
-            test.done();
+              client.close();
+              test.done();
+            });
           });
         });
-      });
     });
     // END
   }
-}
+};

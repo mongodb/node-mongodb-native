@@ -1,24 +1,24 @@
-"use strict";
+'use strict';
 
 // Extend the object
 var extend = function(template, fields) {
   var object = {};
-  for(var name in template) {
+  for (var name in template) {
     object[name] = template[name];
   }
 
-  for(var name in fields) {
-   object[name] = fields[name];
+  for (var name in fields) {
+    object[name] = fields[name];
   }
 
   return object;
-}
+};
 
 exports['Should correctly set maxStalenessSeconds on Mongos query using MongoClient.connect'] = {
   metadata: {
     requires: {
       generators: true,
-      topology: "single"
+      topology: 'single'
     }
   },
 
@@ -40,22 +40,22 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using MongoCli
 
     // Extend the object
     var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
+      for (var name in template) fields[name] = template[name];
       return fields;
-    }
+    };
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true,
-      "msg" : "isdbgrid",
-      "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000,
-      "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(),
-      "maxWireVersion" : 5,
-      "minWireVersion" : 0,
-      "ok" : 1
-    }
+      ismaster: true,
+      msg: 'isdbgrid',
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var serverIsMaster = [extend(defaultFields, {})];
@@ -67,7 +67,7 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using MongoCli
 
       // Mongos
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield mongos1.receive();
 
           // Get the document
@@ -75,49 +75,57 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using MongoCli
           // console.log("================================== doc")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(serverIsMaster[0]);
-          } else if(doc['$query'] && doc['$readPreference']) {
+          } else if (doc['$query'] && doc['$readPreference']) {
             command = doc;
             request.reply({
-              "waitedMS" : Long.ZERO,
-              "cursor" : {
-                "id" : Long.ZERO,
-                "ns" : "test.t",
-                "firstBatch" : [ ]
+              waitedMS: Long.ZERO,
+              cursor: {
+                id: Long.ZERO,
+                ns: 'test.t',
+                firstBatch: []
               },
-              "ok" : 1
+              ok: 1
             });
           }
         }
       });
 
-      MongoClient.connect('mongodb://localhost:62001/test?readPreference=secondary&maxStalenessSeconds=250', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.database);
-
-        db.collection('test').find({}).toArray(function(err, r) {
+      MongoClient.connect(
+        'mongodb://localhost:62001/test?readPreference=secondary&maxStalenessSeconds=250',
+        function(err, client) {
           test.equal(null, err);
-          test.deepEqual({
-            '$query':  { find: 'test', filter: {} },
-            '$readPreference': { mode: 'secondary', maxStalenessSeconds: 250 }
-          }, command);
+          var db = client.db(configuration.database);
 
-          client.close();
-          mongos1.destroy();
-          running = false;
-          test.done();
-        });
-      });
+          db.collection('test').find({}).toArray(function(err, r) {
+            test.equal(null, err);
+            test.deepEqual(
+              {
+                $query: { find: 'test', filter: {} },
+                $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
+              },
+              command
+            );
+
+            client.close();
+            mongos1.destroy();
+            running = false;
+            test.done();
+          });
+        }
+      );
     });
   }
-}
+};
 
-exports['Should correctly set maxStalenessSeconds on Mongos query using db level readPreference'] = {
+exports[
+  'Should correctly set maxStalenessSeconds on Mongos query using db level readPreference'
+] = {
   metadata: {
     requires: {
       generators: true,
-      topology: "single"
+      topology: 'single'
     }
   },
 
@@ -139,22 +147,22 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using db level
 
     // Extend the object
     var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
+      for (var name in template) fields[name] = template[name];
       return fields;
-    }
+    };
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true,
-      "msg" : "isdbgrid",
-      "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000,
-      "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(),
-      "maxWireVersion" : 5,
-      "minWireVersion" : 0,
-      "ok" : 1
-    }
+      ismaster: true,
+      msg: 'isdbgrid',
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var serverIsMaster = [extend(defaultFields, {})];
@@ -166,7 +174,7 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using db level
 
       // Mongos
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield mongos1.receive();
 
           // Get the document
@@ -174,18 +182,18 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using db level
           // console.log("================================== doc")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(serverIsMaster[0]);
-          } else if(doc['$query'] && doc['$readPreference']) {
+          } else if (doc['$query'] && doc['$readPreference']) {
             command = doc;
             request.reply({
-              "waitedMS" : Long.ZERO,
-              "cursor" : {
-                "id" : Long.ZERO,
-                "ns" : "test.t",
-                "firstBatch" : [ ]
+              waitedMS: Long.ZERO,
+              cursor: {
+                id: Long.ZERO,
+                ns: 'test.t',
+                firstBatch: []
               },
-              "ok" : 1
+              ok: 1
             });
           }
         }
@@ -196,13 +204,18 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using db level
         var db = client.db(configuration.database);
 
         // Get a db with a new readPreference
-        var db1 = client.db('test', {readPreference: new ReadPreference('secondary', {maxStalenessSeconds: 250})})
+        var db1 = client.db('test', {
+          readPreference: new ReadPreference('secondary', { maxStalenessSeconds: 250 })
+        });
         db1.collection('test').find({}).toArray(function(err, r) {
           test.equal(null, err);
-          test.deepEqual({
-            '$query':  { find: 'test', filter: {} },
-            '$readPreference': { mode: 'secondary', maxStalenessSeconds: 250 }
-          }, command);
+          test.deepEqual(
+            {
+              $query: { find: 'test', filter: {} },
+              $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
+            },
+            command
+          );
 
           client.close();
           mongos1.destroy();
@@ -212,13 +225,15 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using db level
       });
     });
   }
-}
+};
 
-exports['Should correctly set maxStalenessSeconds on Mongos query using collection level readPreference'] = {
+exports[
+  'Should correctly set maxStalenessSeconds on Mongos query using collection level readPreference'
+] = {
   metadata: {
     requires: {
       generators: true,
-      topology: "single"
+      topology: 'single'
     }
   },
 
@@ -240,22 +255,22 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using collecti
 
     // Extend the object
     var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
+      for (var name in template) fields[name] = template[name];
       return fields;
-    }
+    };
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true,
-      "msg" : "isdbgrid",
-      "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000,
-      "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(),
-      "maxWireVersion" : 5,
-      "minWireVersion" : 0,
-      "ok" : 1
-    }
+      ismaster: true,
+      msg: 'isdbgrid',
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var serverIsMaster = [extend(defaultFields, {})];
@@ -267,7 +282,7 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using collecti
 
       // Mongos
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield mongos1.receive();
 
           // Get the document
@@ -275,18 +290,18 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using collecti
           // console.log("================================== doc")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(serverIsMaster[0]);
-          } else if(doc['$query'] && doc['$readPreference']) {
+          } else if (doc['$query'] && doc['$readPreference']) {
             command = doc;
             request.reply({
-              "waitedMS" : Long.ZERO,
-              "cursor" : {
-                "id" : Long.ZERO,
-                "ns" : "test.t",
-                "firstBatch" : [ ]
+              waitedMS: Long.ZERO,
+              cursor: {
+                id: Long.ZERO,
+                ns: 'test.t',
+                firstBatch: []
               },
-              "ok" : 1
+              ok: 1
             });
           }
         }
@@ -297,28 +312,38 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using collecti
         var db = client.db(configuration.database);
 
         // Get a db with a new readPreference
-        db.collection('test', {readPreference: new ReadPreference('secondary', {maxStalenessSeconds: 250})}).find({}).toArray(function(err, r) {
-          test.equal(null, err);
-          test.deepEqual({
-            '$query':  { find: 'test', filter: {} },
-            '$readPreference': { mode: 'secondary', maxStalenessSeconds: 250 }
-          }, command);
+        db
+          .collection('test', {
+            readPreference: new ReadPreference('secondary', { maxStalenessSeconds: 250 })
+          })
+          .find({})
+          .toArray(function(err, r) {
+            test.equal(null, err);
+            test.deepEqual(
+              {
+                $query: { find: 'test', filter: {} },
+                $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
+              },
+              command
+            );
 
-          client.close();
-          mongos1.destroy();
-          running = false;
-          test.done();
-        });
+            client.close();
+            mongos1.destroy();
+            running = false;
+            test.done();
+          });
       });
     });
   }
-}
+};
 
-exports['Should correctly set maxStalenessSeconds on Mongos query using cursor level readPreference'] = {
+exports[
+  'Should correctly set maxStalenessSeconds on Mongos query using cursor level readPreference'
+] = {
   metadata: {
     requires: {
       generators: true,
-      topology: "single"
+      topology: 'single'
     }
   },
 
@@ -340,22 +365,22 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using cursor l
 
     // Extend the object
     var extend = function(template, fields) {
-      for(var name in template) fields[name] = template[name];
+      for (var name in template) fields[name] = template[name];
       return fields;
-    }
+    };
 
     // Default message fields
     var defaultFields = {
-      "ismaster" : true,
-      "msg" : "isdbgrid",
-      "maxBsonObjectSize" : 16777216,
-      "maxMessageSizeBytes" : 48000000,
-      "maxWriteBatchSize" : 1000,
-      "localTime" : new Date(),
-      "maxWireVersion" : 5,
-      "minWireVersion" : 0,
-      "ok" : 1
-    }
+      ismaster: true,
+      msg: 'isdbgrid',
+      maxBsonObjectSize: 16777216,
+      maxMessageSizeBytes: 48000000,
+      maxWriteBatchSize: 1000,
+      localTime: new Date(),
+      maxWireVersion: 5,
+      minWireVersion: 0,
+      ok: 1
+    };
 
     // Primary server states
     var serverIsMaster = [extend(defaultFields, {})];
@@ -367,7 +392,7 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using cursor l
 
       // Mongos
       co(function*() {
-        while(running) {
+        while (running) {
           var request = yield mongos1.receive();
 
           // Get the document
@@ -375,18 +400,18 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using cursor l
           // console.log("================================== doc")
           // console.dir(doc)
 
-          if(doc.ismaster) {
+          if (doc.ismaster) {
             request.reply(serverIsMaster[0]);
-          } else if(doc['$query'] && doc['$readPreference']) {
+          } else if (doc['$query'] && doc['$readPreference']) {
             command = doc;
             request.reply({
-              "waitedMS" : Long.ZERO,
-              "cursor" : {
-                "id" : Long.ZERO,
-                "ns" : "test.t",
-                "firstBatch" : [ ]
+              waitedMS: Long.ZERO,
+              cursor: {
+                id: Long.ZERO,
+                ns: 'test.t',
+                firstBatch: []
               },
-              "ok" : 1
+              ok: 1
             });
           }
         }
@@ -397,19 +422,26 @@ exports['Should correctly set maxStalenessSeconds on Mongos query using cursor l
         var db = client.db(configuration.database);
 
         // Get a db with a new readPreference
-        db.collection('test').find({}).setReadPreference(new ReadPreference('secondary', {maxStalenessSeconds: 250})).toArray(function(err, r) {
-          test.equal(null, err);
-          test.deepEqual({
-            '$query':  { find: 'test', filter: {} },
-            '$readPreference': { mode: 'secondary', maxStalenessSeconds: 250 }
-          }, command);
+        db
+          .collection('test')
+          .find({})
+          .setReadPreference(new ReadPreference('secondary', { maxStalenessSeconds: 250 }))
+          .toArray(function(err, r) {
+            test.equal(null, err);
+            test.deepEqual(
+              {
+                $query: { find: 'test', filter: {} },
+                $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
+              },
+              command
+            );
 
-          client.close();
-          mongos1.destroy();
-          running = false;
-          test.done();
-        });
+            client.close();
+            mongos1.destroy();
+            running = false;
+            test.done();
+          });
       });
     });
   }
-}
+};

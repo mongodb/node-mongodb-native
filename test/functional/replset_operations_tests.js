@@ -1,19 +1,19 @@
-"use strict";
+'use strict';
 
 var format = require('util').format;
 
 var restartAndDone = function(configuration, test) {
-  console.log("-- restartAndDone")
+  console.log('-- restartAndDone');
   configuration.manager.restart().then(function() {
     test.done();
   });
-}
+};
 
 exports.beforeTests = function(configuration, callback) {
   configuration.manager.restart().then(function() {
     callback();
   });
-}
+};
 
 /*******************************************************************
  *
@@ -25,23 +25,27 @@ exports.beforeTests = function(configuration, callback) {
  * @ignore
  */
 exports['Should fail due to w:5 and wtimeout:1 with ordered batch api'] = {
-  metadata: { requires: {
-      topology: 'replicaset'
-    , mongodb: '>=2.6.0'
-  } },
+  metadata: {
+    requires: {
+      topology: 'replicaset',
+      mongodb: '>=2.6.0'
+    }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var mongo = configuration.require
-      , MongoClient = mongo.MongoClient;
+    var mongo = configuration.require,
+      MongoClient = mongo.MongoClient;
 
     // Create url
-    var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
-      , format("%s:%s", configuration.host, configuration.port)
-      , format("%s:%s", configuration.host, configuration.port + 1)
-      , "integration_test_"
-      , configuration.replicasetName
-      , "primary");
+    var url = format(
+      'mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s',
+      format('%s:%s', configuration.host, configuration.port),
+      format('%s:%s', configuration.host, configuration.port + 1),
+      'integration_test_',
+      configuration.replicasetName,
+      'primary'
+    );
 
     // legacy tests
     var executeTests = function(_db, _callback) {
@@ -53,16 +57,16 @@ exports['Should fail due to w:5 and wtimeout:1 with ordered batch api'] = {
         test.equal(null, err);
 
         // ensure index
-        col.ensureIndex({a:1}, {unique:true}, function(err) {
+        col.ensureIndex({ a: 1 }, { unique: true }, function(err) {
           test.equal(null, err);
 
           // Initialize the Ordered Batch
           var batch = col.initializeOrderedBulkOp();
-          batch.insert({a:1});
-          batch.insert({a:2});
+          batch.insert({ a: 1 });
+          batch.insert({ a: 2 });
 
           // Execute the operations
-          batch.execute({w:5, wtimeout:1}, function(err, result) {
+          batch.execute({ w: 5, wtimeout: 1 }, function(err, result) {
             test.equal(2, result.nInserted);
             test.equal(0, result.nMatched);
             test.equal(0, result.nUpserted);
@@ -81,7 +85,7 @@ exports['Should fail due to w:5 and wtimeout:1 with ordered batch api'] = {
           });
         });
       });
-    }
+    };
 
     MongoClient.connect(url, function(err, client) {
       test.equal(null, err);
@@ -94,29 +98,35 @@ exports['Should fail due to w:5 and wtimeout:1 with ordered batch api'] = {
       });
     });
   }
-}
+};
 
 /**
  * @ignore
  */
-exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key errors with ordered batch api'] = {
-  metadata: { requires: {
-      topology: 'replicaset'
-    , mongodb: '>=2.6.0'
-  } },
+exports[
+  'Should fail due to w:5 and wtimeout:1 combined with duplicate key errors with ordered batch api'
+] = {
+  metadata: {
+    requires: {
+      topology: 'replicaset',
+      mongodb: '>=2.6.0'
+    }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var mongo = configuration.require
-      , MongoClient = mongo.MongoClient;
+    var mongo = configuration.require,
+      MongoClient = mongo.MongoClient;
 
     // Create url
-    var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
-      , format("%s:%s", configuration.host, configuration.port)
-      , format("%s:%s", configuration.host, configuration.port + 1)
-      , "integration_test_"
-      , configuration.replicasetName
-      , "primary");
+    var url = format(
+      'mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s',
+      format('%s:%s', configuration.host, configuration.port),
+      format('%s:%s', configuration.host, configuration.port + 1),
+      'integration_test_',
+      configuration.replicasetName,
+      'primary'
+    );
 
     // legacy tests
     var executeTests = function(_db, _callback) {
@@ -128,18 +138,18 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
         test.equal(null, err);
 
         // ensure index
-        col.ensureIndex({a:1}, {unique:true}, function(err) {
+        col.ensureIndex({ a: 1 }, { unique: true }, function(err) {
           test.equal(null, err);
 
           // Initialize the Ordered Batch
           var batch = col.initializeOrderedBulkOp();
-          batch.insert({a:1});
-          batch.find({a:3}).upsert().updateOne({a:3, b:1})
-          batch.insert({a:1})
-          batch.insert({a:2});
+          batch.insert({ a: 1 });
+          batch.find({ a: 3 }).upsert().updateOne({ a: 3, b: 1 });
+          batch.insert({ a: 1 });
+          batch.insert({ a: 2 });
 
           // Execute the operations
-          batch.execute({w:5, wtimeout:1}, function(err, result) {
+          batch.execute({ w: 5, wtimeout: 1 }, function(err, result) {
             test.equal(1, result.nInserted);
             test.equal(0, result.nMatched);
             test.equal(1, result.nUpserted);
@@ -165,7 +175,7 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
           });
         });
       });
-    }
+    };
 
     MongoClient.connect(url, function(err, client) {
       test.equal(null, err);
@@ -178,7 +188,7 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
       });
     });
   }
-}
+};
 
 /*******************************************************************
  *
@@ -190,23 +200,27 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
  * @ignore
  */
 exports['Should fail due to w:5 and wtimeout:1 with unordered batch api'] = {
-  metadata: { requires: {
-      topology: 'replicaset'
-    , mongodb: '>=2.6.0'
-  } },
+  metadata: {
+    requires: {
+      topology: 'replicaset',
+      mongodb: '>=2.6.0'
+    }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var mongo = configuration.require
-      , MongoClient = mongo.MongoClient;
+    var mongo = configuration.require,
+      MongoClient = mongo.MongoClient;
 
     // Create url
-    var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
-      , format("%s:%s", configuration.host, configuration.port)
-      , format("%s:%s", configuration.host, configuration.port + 1)
-      , "integration_test_"
-      , configuration.replicasetName
-      , "primary");
+    var url = format(
+      'mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s',
+      format('%s:%s', configuration.host, configuration.port),
+      format('%s:%s', configuration.host, configuration.port + 1),
+      'integration_test_',
+      configuration.replicasetName,
+      'primary'
+    );
 
     // legacy tests
     var executeTests = function(_db, _callback) {
@@ -218,17 +232,17 @@ exports['Should fail due to w:5 and wtimeout:1 with unordered batch api'] = {
         test.equal(null, err);
 
         // ensure index
-        col.ensureIndex({a:1}, {unique:true}, function(err) {
+        col.ensureIndex({ a: 1 }, { unique: true }, function(err) {
           test.equal(null, err);
 
           // Initialize the Ordered Batch
           var batch = col.initializeUnorderedBulkOp();
-          batch.insert({a:1});
-          batch.find({a:3}).upsert().updateOne({a:3, b:1})
-          batch.insert({a:2});
+          batch.insert({ a: 1 });
+          batch.find({ a: 3 }).upsert().updateOne({ a: 3, b: 1 });
+          batch.insert({ a: 2 });
 
           // Execute the operations
-          batch.execute({w:5, wtimeout:1}, function(err, result) {
+          batch.execute({ w: 5, wtimeout: 1 }, function(err, result) {
             test.equal(2, result.nInserted);
             test.equal(0, result.nMatched);
             test.equal(1, result.nUpserted);
@@ -247,7 +261,7 @@ exports['Should fail due to w:5 and wtimeout:1 with unordered batch api'] = {
           });
         });
       });
-    }
+    };
 
     MongoClient.connect(url, function(err, client) {
       test.equal(null, err);
@@ -260,29 +274,35 @@ exports['Should fail due to w:5 and wtimeout:1 with unordered batch api'] = {
       });
     });
   }
-}
+};
 
 /**
  * @ignore
  */
-exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key errors with unordered batch api'] = {
-  metadata: { requires: {
-      topology: 'replicaset'
-    , mongodb: '>=2.6.0'
-  } },
+exports[
+  'Should fail due to w:5 and wtimeout:1 combined with duplicate key errors with unordered batch api'
+] = {
+  metadata: {
+    requires: {
+      topology: 'replicaset',
+      mongodb: '>=2.6.0'
+    }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var mongo = configuration.require
-      , MongoClient = mongo.MongoClient;
+    var mongo = configuration.require,
+      MongoClient = mongo.MongoClient;
 
     // Create url
-    var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
-      , format("%s:%s", configuration.host, configuration.port)
-      , format("%s:%s", configuration.host, configuration.port + 1)
-      , "integration_test_"
-      , configuration.replicasetName
-      , "primary");
+    var url = format(
+      'mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s',
+      format('%s:%s', configuration.host, configuration.port),
+      format('%s:%s', configuration.host, configuration.port + 1),
+      'integration_test_',
+      configuration.replicasetName,
+      'primary'
+    );
 
     // legacy tests
     var executeTests = function(_db, _callback) {
@@ -294,18 +314,18 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
         test.equal(null, err);
 
         // ensure index
-        col.ensureIndex({a:1}, {unique:true}, function(err) {
+        col.ensureIndex({ a: 1 }, { unique: true }, function(err) {
           test.equal(null, err);
 
           // Initialize the Ordered Batch
           var batch = col.initializeOrderedBulkOp();
-          batch.insert({a:1});
-          batch.find({a:3}).upsert().updateOne({a:3, b:1})
-          batch.insert({a:1})
-          batch.insert({a:2});
+          batch.insert({ a: 1 });
+          batch.find({ a: 3 }).upsert().updateOne({ a: 3, b: 1 });
+          batch.insert({ a: 1 });
+          batch.insert({ a: 2 });
 
           // Execute the operations
-          batch.execute({w:5, wtimeout:1}, function(err, result) {
+          batch.execute({ w: 5, wtimeout: 1 }, function(err, result) {
             test.equal(1, result.nInserted);
             test.equal(0, result.nMatched);
             test.equal(1, result.nUpserted);
@@ -322,7 +342,7 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
             test.ok(result.getWriteErrorCount() == 0 || result.getWriteErrorCount() == 1);
 
             // If we have an error it should be a duplicate key error
-            if(result.getWriteErrorCount() == 1) {
+            if (result.getWriteErrorCount() == 1) {
               var error = result.getWriteErrorAt(0);
               test.ok(error.index == 0 || error.index == 2);
               test.equal(11000, error.code);
@@ -335,7 +355,7 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
           });
         });
       });
-    }
+    };
 
     MongoClient.connect(url, function(err, client) {
       test.equal(null, err);
@@ -348,24 +368,26 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
       });
     });
   }
-}
+};
 
 exports['Should fail to do map reduce to out collection'] = {
   metadata: { requires: { topology: 'replicaset', mongodb: '>1.7.6' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var mongo = configuration.require
-      , MongoClient = mongo.MongoClient
-      , ReadPreference = mongo.ReadPreference;
+    var mongo = configuration.require,
+      MongoClient = mongo.MongoClient,
+      ReadPreference = mongo.ReadPreference;
 
     // Create url
-    var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
-      , format("%s:%s", configuration.host, configuration.port)
-      , format("%s:%s", configuration.host, configuration.port + 1)
-      , "integration_test_"
-      , configuration.replicasetName
-      , "primary");
+    var url = format(
+      'mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s',
+      format('%s:%s', configuration.host, configuration.port),
+      format('%s:%s', configuration.host, configuration.port + 1),
+      'integration_test_',
+      configuration.replicasetName,
+      'primary'
+    );
 
     var manager = configuration.manager;
 
@@ -374,44 +396,54 @@ exports['Should fail to do map reduce to out collection'] = {
       var db = client.db(configuration.database);
 
       var collection = db.collection('test_map_reduce_functions_notInline_map_reduce', {
-            readPreference: ReadPreference.SECONDARY
-          , w:2, wtimeout: 10000
-        });
+        readPreference: ReadPreference.SECONDARY,
+        w: 2,
+        wtimeout: 10000
+      });
 
       // Parse version of server if available
-      db.admin().serverInfo(function(err, result){
+      db.admin().serverInfo(function(err, result) {
         // Map function
-        var map = function() { emit(this.user_id, 1); };
+        var map = function() {
+          emit(this.user_id, 1);
+        };
         // Reduce function
-        var reduce = function(k,vals) { return 1; };
+        var reduce = function(k, vals) {
+          return 1;
+        };
 
         // Execute map reduce and return results inline
-        collection.mapReduce(map, reduce
-          , {out : {replace:'replacethiscollection'}, readPreference:ReadPreference.SECONDARY}, function(err, results) {
-          client.close();
-          test.done();
-        });
+        collection.mapReduce(
+          map,
+          reduce,
+          { out: { replace: 'replacethiscollection' }, readPreference: ReadPreference.SECONDARY },
+          function(err, results) {
+            client.close();
+            test.done();
+          }
+        );
       });
     });
   }
-}
+};
 
 exports['Should correctly execute ensureIndex with readPreference primaryPreferred'] = {
   metadata: { requires: { topology: 'replicaset', mongodb: '>1.7.6' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var mongo = configuration.require
-      , MongoClient = mongo.MongoClient
-      , ReadPreference = mongo.ReadPreference;
+    var mongo = configuration.require,
+      MongoClient = mongo.MongoClient,
+      ReadPreference = mongo.ReadPreference;
 
     // MongoClient.connect(url, function(err, db) {
-    MongoClient.connect('mongodb://localhost:31001/integration_test_?replicaSet=rs&readPreference=primaryPreferred')
-    .then(function(client) {
+    MongoClient.connect(
+      'mongodb://localhost:31001/integration_test_?replicaSet=rs&readPreference=primaryPreferred'
+    ).then(function(client) {
       // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
       var db = client.db(configuration.database);
       var collection = db.collection('ensureIndexWithPrimaryPreferred');
-      collection.ensureIndex({a:1}, function(err, r) {
+      collection.ensureIndex({ a: 1 }, function(err, r) {
         // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 1")
         test.equal(null, err);
 
@@ -420,24 +452,26 @@ exports['Should correctly execute ensureIndex with readPreference primaryPreferr
       });
     });
   }
-}
+};
 
 exports['Should Correctly group using replicaset'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var mongo = configuration.require
-      , MongoClient = mongo.MongoClient
-      , ReadPreference = mongo.ReadPreference;
+    var mongo = configuration.require,
+      MongoClient = mongo.MongoClient,
+      ReadPreference = mongo.ReadPreference;
 
     // Create url
-    var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
-      , format("%s:%s", configuration.host, configuration.port)
-      , format("%s:%s", configuration.host, configuration.port + 1)
-      , "integration_test_"
-      , configuration.replicasetName
-      , "primary");
+    var url = format(
+      'mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s',
+      format('%s:%s', configuration.host, configuration.port),
+      format('%s:%s', configuration.host, configuration.port + 1),
+      'integration_test_',
+      configuration.replicasetName,
+      'primary'
+    );
 
     var manager = configuration.manager;
 
@@ -446,47 +480,61 @@ exports['Should Correctly group using replicaset'] = {
       var db = client.db(configuration.database);
 
       var collection = db.collection('testgroup_replicaset', {
-            readPreference: ReadPreference.SECONDARY
-          , w:2, wtimeout: 10000
-        });
-
-      collection.insert([{key:1,x:10}, {key:2,x:30}, {key:1,x:20}, {key:3,x:20}], configuration.writeConcernMax(), function(err, result) {
-        // Kill the primary
-        manager.primary().then(function(m) {
-          // Stop the primary
-          m.stop().then(function() {
-            // Do a collection find
-            collection.group(['key'], {}, {sum:0}, function reduce(record, memo){
-              memo.sum += record.x;
-            }, true, function(err, items){
-              test.equal(null, err);
-              test.equal(3, items.length);
-              client.close();
-              restartAndDone(configuration, test);
-            })
-          });
-        });
+        readPreference: ReadPreference.SECONDARY,
+        w: 2,
+        wtimeout: 10000
       });
+
+      collection.insert(
+        [{ key: 1, x: 10 }, { key: 2, x: 30 }, { key: 1, x: 20 }, { key: 3, x: 20 }],
+        configuration.writeConcernMax(),
+        function(err, result) {
+          // Kill the primary
+          manager.primary().then(function(m) {
+            // Stop the primary
+            m.stop().then(function() {
+              // Do a collection find
+              collection.group(
+                ['key'],
+                {},
+                { sum: 0 },
+                function reduce(record, memo) {
+                  memo.sum += record.x;
+                },
+                true,
+                function(err, items) {
+                  test.equal(null, err);
+                  test.equal(3, items.length);
+                  client.close();
+                  restartAndDone(configuration, test);
+                }
+              );
+            });
+          });
+        }
+      );
     });
   }
-}
+};
 
 exports['Should Correctly execute createIndex with secondary readPreference'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var mongo = configuration.require
-      , MongoClient = mongo.MongoClient
-      , ReadPreference = mongo.ReadPreference;
+    var mongo = configuration.require,
+      MongoClient = mongo.MongoClient,
+      ReadPreference = mongo.ReadPreference;
 
     // Create url
-    var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
-      , format("%s:%s", configuration.host, configuration.port)
-      , format("%s:%s", configuration.host, configuration.port + 1)
-      , "integration_test_"
-      , configuration.replicasetName
-      , "secondary");
+    var url = format(
+      'mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s',
+      format('%s:%s', configuration.host, configuration.port),
+      format('%s:%s', configuration.host, configuration.port + 1),
+      'integration_test_',
+      configuration.replicasetName,
+      'secondary'
+    );
 
     var manager = configuration.manager;
 
@@ -495,11 +543,12 @@ exports['Should Correctly execute createIndex with secondary readPreference'] = 
       var db = client.db(configuration.database);
 
       var collection = db.collection('testgroup_replicaset_2', {
-            readPreference: ReadPreference.SECONDARY
-          , w:2, wtimeout: 10000
-        });
+        readPreference: ReadPreference.SECONDARY,
+        w: 2,
+        wtimeout: 10000
+      });
 
-      collection.createIndexes([{name: 'a_1', key: {a:1}}], function(err, r) {
+      collection.createIndexes([{ name: 'a_1', key: { a: 1 } }], function(err, r) {
         test.equal(null, err);
 
         client.close();
@@ -507,4 +556,4 @@ exports['Should Correctly execute createIndex with secondary readPreference'] = 
       });
     });
   }
-}
+};
