@@ -1,41 +1,52 @@
 'use strict';
+var test = require('./shared').assert;
+var setupDatabase = require('./shared').setupDatabase;
 
-/**
- * @ignore
- */
-exports.shouldCreateRecordsWithCustomPKFactory = {
-  metadata: {
-    requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-  },
+describe('Custom PK', function() {
+  before(function() {
+    return setupDatabase(this.configuration);
+  });
 
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var ObjectID = configuration.require.ObjectID;
+  /**
+   * @ignore
+   */
+  it('should create records with custom PK factory', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
 
-    // Custom factory (need to provide a 12 byte array);
-    var CustomPKFactory = function() {};
-    CustomPKFactory.prototype = new Object();
-    CustomPKFactory.createPk = function() {
-      return new ObjectID('aaaaaaaaaaaa');
-    };
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var ObjectID = configuration.require.ObjectID;
 
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {
-      poolSize: 1,
-      pkFactory: CustomPKFactory
-    });
-    client.connect(function(err, client) {
-      var db = client.db(configuration.database);
+      // Custom factory (need to provide a 12 byte array);
+      var CustomPKFactory = function() {};
+      CustomPKFactory.prototype = new Object();
+      CustomPKFactory.createPk = function() {
+        return new ObjectID('aaaaaaaaaaaa');
+      };
 
-      var collection = db.collection('test_custom_key');
+      var client = configuration.newClient({
+        w: 1,
+        poolSize: 1,
+        pkFactory: CustomPKFactory
+      });
 
-      collection.insert({ a: 1 }, { w: 1 }, function(err, doc) {
-        collection.find({ _id: new ObjectID('aaaaaaaaaaaa') }).toArray(function(err, items) {
-          test.equal(1, items.length);
+      client.connect(function(err, client) {
+        var db = client.db(configuration.db);
+        var collection = db.collection('test_custom_key');
 
-          client.close();
-          test.done();
+        collection.insert({ a: 1 }, { w: 1 }, function(err) {
+          test.equal(null, err);
+          collection.find({ _id: new ObjectID('aaaaaaaaaaaa') }).toArray(function(err, items) {
+            test.equal(1, items.length);
+
+            client.close();
+            done();
+          });
         });
       });
-    });
-  }
-};
+    }
+  });
+});
