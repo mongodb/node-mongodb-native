@@ -30,6 +30,10 @@ var assert = {
     expect(a).to.equal(b);
   },
 
+  deepEqual: function(a, b) {
+    expect(a).to.eql(b);
+  },
+
   ok: function(a) {
     expect(a).to.be.ok;
   }
