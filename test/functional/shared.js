@@ -41,6 +41,10 @@ var assert = {
     expect(a).to.eql(b);
   },
 
+  notEqual: function(a, b) {
+    expect(a).to.not.equal(b);
+  },
+
   ok: function(a) {
     expect(a).to.be.ok;
   },
