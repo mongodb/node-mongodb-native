@@ -21,7 +21,14 @@ function setupDatabase(configuration) {
 
   return client.connect().then(function() {
     var db = client.db(dbName);
-    return db.dropDatabase();
+    return db
+      .command({
+        dropAllUsersFromDatabase: 1,
+        writeConcern: { w: 1 }
+      })
+      .then(function() {
+        return db.dropDatabase();
+      });
   });
 }
 
@@ -36,6 +43,10 @@ var assert = {
 
   ok: function(a) {
     expect(a).to.be.ok;
+  },
+
+  throws: function(func) {
+    expect(func).to.throw;
   }
 };
 
