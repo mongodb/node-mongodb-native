@@ -1,133 +1,124 @@
-/**
- * @ignore
- */
-exports['Should correctly stop reconnection attempts after limit reached'] = {
-  metadata: { requires: { topology: ['single'] }, ignore: { travis: true } },
+'use strict';
+var test = require('./shared').assert;
+var setupDatabase = require('./shared').setupDatabase;
 
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    // Create a new db instance
-    var client = configuration.newDbInstance(
-      { w: 1 },
-      {
-        poolSize: 1,
-        auto_reconnect: true,
-        reconnectTries: 2,
-        reconnectInterval: 100
-      }
-    );
+describe('Reconnect', function() {
+  before(function() {
+    return setupDatabase(this.configuration);
+  });
 
-    client.connect(function(err, client) {
-      var db = client.db(configuration.database);
-      // console.log("----------- 0")
-      // Now let's stop the server
-      configuration.manager.stop().then(function() {
-        // console.log("----------- 1")
+  /**
+   * @ignore
+   */
+  it('Should correctly stop reconnection attempts after limit reached', {
+    metadata: { requires: { topology: ['single'] }, ignore: { travis: true } },
 
-        db.collection('waiting_for_reconnect').insert({ a: 1 }, function(err, r) {
-          // console.log("----------- 2")
-          // console.dir(err)
-          // console.dir(err)
-          test.ok(err != null);
-          client.close();
+    // The actual test we wish to run
+    test: function(done) {
+      // Create a new db instance
+      var configuration = this.configuration;
+      var client = configuration.newClient(
+        { w: 1 },
+        {
+          poolSize: 1,
+          auto_reconnect: true,
+          reconnectTries: 2,
+          reconnectInterval: 100
+        }
+      );
 
-          configuration.manager.start().then(function() {
-            // console.log("----------- 3")
-            test.done();
+      client.connect(function(err, client) {
+        var db = client.db(configuration.db);
+        // Now let's stop the server
+        configuration.manager.stop().then(function() {
+          db.collection('waiting_for_reconnect').insert({ a: 1 }, function(err) {
+            test.ok(err != null);
+            client.close();
+
+            configuration.manager.start().then(function() {
+              done();
+            });
           });
         });
       });
-    });
-  }
-};
+    }
+  });
 
-/**
- * @ignore
- */
-exports['Should correctly recover when bufferMaxEntries: -1 and multiple restarts'] = {
-  metadata: { requires: { topology: ['single'] }, ignore: { travis: true } },
+  /**
+   * @ignore
+   */
+  it('Should correctly recover when bufferMaxEntries: -1 and multiple restarts', {
+    metadata: { requires: { topology: ['single'] }, ignore: { travis: true } },
 
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var MongoClient = configuration.require.MongoClient,
-      f = require('util').format;
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var MongoClient = configuration.require.MongoClient;
 
-    var done = false;
-
-    MongoClient.connect(
-      'mongodb://localhost:27017/test',
-      {
-        db: { native_parser: true, bufferMaxEntries: -1 },
-        server: {
-          poolSize: 20,
-          socketOptions: { autoReconnect: true, keepAlive: 50 },
-          reconnectTries: 1000,
-          reconnectInterval: 1000
-        }
-      },
-      function(err, client) {
-        var db = client.db(configuration.database);
-        // console.log("======================================= 0")
-        var col = db.collection('t');
-        var count = 1;
-        var allDone = 0;
-
-        var execute = function() {
-          if (!done) {
-            // console.log("======================================= 1:1")
-            col.insertOne({ a: 1, count: count }, function(err, r) {
-              // console.log("======================================= 1:2")
-              count = count + 1;
-
-              col.findOne({}, function(err, doc) {
-                // console.log("======================================= 1:3")
-                setTimeout(execute, 500);
-              });
-            });
-          } else {
-            // console.log("======================================= 2:1")
-            col.insertOne({ a: 1, count: count }, function(err, r) {
-              // console.log("======================================= 2:2")
-              test.equal(null, err);
-
-              col.findOne({}, function(err, doc) {
-                // console.log("======================================= 2:3")
-                test.equal(null, err);
-                client.close();
-                test.done();
-              });
-            });
+      MongoClient.connect(
+        'mongodb://localhost:27017/test',
+        {
+          db: { native_parser: true, bufferMaxEntries: -1 },
+          server: {
+            poolSize: 20,
+            socketOptions: { autoReconnect: true, keepAlive: 50 },
+            reconnectTries: 1000,
+            reconnectInterval: 1000
           }
-        };
+        },
+        function(err, client) {
+          var db = client.db(configuration.db);
+          var col = db.collection('t');
+          var count = 1;
 
-        setTimeout(execute, 500);
-      }
-    );
+          var execute = function() {
+            if (!done) {
+              col.insertOne({ a: 1, count: count }, function(err) {
+                test.equal(null, err);
+                count = count + 1;
 
-    var count = 2;
+                col.findOne({}, function(err) {
+                  test.equal(null, err);
+                  setTimeout(execute, 500);
+                });
+              });
+            } else {
+              col.insertOne({ a: 1, count: count }, function(err) {
+                test.equal(null, err);
 
-    var restartServer = function() {
-      // console.log("==== restartServer 1")
-      if (count == 0) {
-        // console.log("==== restartServer DONE")
-        done = true;
-        return;
-      }
+                col.findOne({}, function(err) {
+                  test.equal(null, err);
+                  client.close();
+                  done();
+                });
+              });
+            }
+          };
 
-      count = count - 1;
+          setTimeout(execute, 500);
+        }
+      );
 
-      configuration.manager.stop().then(function() {
-        // console.log("==== restartServer 2")
-        setTimeout(function() {
-          // console.log("==== restartServer 3")
-          configuration.manager.start().then(function() {
-            // console.log("==== restartServer 4")
-            setTimeout(restartServer, 1000);
-          });
-        }, 2000);
-      });
-    };
+      var count = 2;
 
-    setTimeout(restartServer, 1000);
-  }
-};
+      var restartServer = function() {
+        if (count == 0) {
+          done = true;
+          return;
+        }
+
+        count = count - 1;
+
+        configuration.manager.stop().then(function() {
+          setTimeout(function() {
+            configuration.manager.start().then(function() {
+              setTimeout(restartServer, 1000);
+            });
+          }, 2000);
+        });
+      };
+
+      setTimeout(restartServer, 1000);
+    }
+  });
+});
