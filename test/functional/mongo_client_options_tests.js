@@ -1,97 +1,110 @@
-/**
- * @ignore
- */
-exports['pass in server and db top level options'] = {
-  metadata: { requires: { topology: 'single' } },
+'use strict';
+var test = require('./shared').assert;
+var setupDatabase = require('./shared').setupDatabase;
 
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var connect = configuration.require;
+describe('MongoClient Options', function() {
+  before(function() {
+    return setupDatabase(this.configuration);
+  });
 
-    connect(
-      configuration.url(),
-      { autoReconnect: true, poolSize: 4 },
-      connectionTester(test, configuration, 'testConnectServerOptions', function(client) {
-        test.equal(1, client.topology.poolSize);
-        test.equal(4, client.topology.s.server.s.pool.size);
-        test.equal(true, client.topology.autoReconnect);
-        db.close();
-        test.done();
-      })
-    );
-  }
-};
+  /**
+   * @ignore
+   */
+  it('pass in server and db top level options', {
+    metadata: { requires: { topology: 'single' } },
 
-/**
- * @ignore
- */
-exports['pass in server and db top level options'] = {
-  metadata: { requires: { topology: 'single' } },
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var connect = configuration.require;
 
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var connect = configuration.require;
+      connect(
+        configuration.url(),
+        { autoReconnect: true, poolSize: 4 },
+        connectionTester(configuration, 'testConnectServerOptions', function(client) {
+          test.equal(1, client.topology.poolSize);
+          test.equal(4, client.topology.s.server.s.pool.size);
+          test.equal(true, client.topology.autoReconnect);
+          client.close();
+          done();
+        })
+      );
+    }
+  });
 
-    connect(
-      configuration.url(),
-      { autoReconnect: true, poolSize: 4 },
-      connectionTester(test, configuration, 'testConnectServerOptions', function(client) {
-        test.equal(1, client.topology.poolSize);
-        test.equal(4, client.topology.s.server.s.pool.size);
-        test.equal(true, client.topology.autoReconnect);
-        client.close();
-        test.done();
-      })
-    );
-  }
-};
+  /**
+   * @ignore
+   */
+  it('pass in server and db top level options', {
+    metadata: { requires: { topology: 'single' } },
 
-/**
- * @ignore
- */
-exports['should error on unexpected options'] = {
-  metadata: { requires: { topology: 'single' } },
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var connect = configuration.require;
 
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var connect = configuration.require;
+      connect(
+        configuration.url(),
+        { autoReconnect: true, poolSize: 4 },
+        connectionTester(configuration, 'testConnectServerOptions', function(client) {
+          test.equal(1, client.topology.poolSize);
+          test.equal(4, client.topology.s.server.s.pool.size);
+          test.equal(true, client.topology.autoReconnect);
+          client.close();
+          done();
+        })
+      );
+    }
+  });
 
-    connect(
-      configuration.url(),
-      {
-        autoReconnect: true,
-        poolSize: 4,
-        notlegal: {},
-        validateOptions: true
-      },
-      function(err, client) {
-        test.ok(err.message.indexOf('option notlegal is not supported') != -1);
-        test.done();
-      }
-    );
-  }
-};
+  /**
+   * @ignore
+   */
+  it('should error on unexpected options', {
+    metadata: { requires: { topology: 'single' } },
 
-/**
- * @ignore
- */
-function connectionTester(test, configuration, testName, callback) {
-  return function(err, client) {
-    test.equal(err, null);
-    var db = client.db(configuration.database);
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var connect = configuration.require;
 
-    db.collection(testName, function(err, collection) {
+      connect(
+        configuration.url(),
+        {
+          autoReconnect: true,
+          poolSize: 4,
+          notlegal: {},
+          validateOptions: true
+        },
+        function(err, client) {
+          test.ok(err.message.indexOf('option notlegal is not supported') != -1);
+          test.equal(undefined, client);
+          done();
+        }
+      );
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  function connectionTester(configuration, testName, callback) {
+    return function(err, client) {
       test.equal(err, null);
-      var doc = { foo: 123 };
-      collection.insert({ foo: 123 }, { w: 1 }, function(err, docs) {
+      var db = client.db(configuration.db);
+
+      db.collection(testName, function(err, collection) {
         test.equal(err, null);
-        db.dropDatabase(function(err, done) {
+
+        collection.insert({ foo: 123 }, { w: 1 }, function(err) {
           test.equal(err, null);
-          test.ok(done);
-          if (callback) return callback(client);
-          test.done();
+          db.dropDatabase(function(err, dropped) {
+            test.equal(err, null);
+            test.ok(dropped);
+            if (callback) return callback(client);
+          });
         });
       });
-    });
-  };
-}
+    };
+  }
+});
