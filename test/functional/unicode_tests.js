@@ -179,6 +179,7 @@ describe('Unicode', function() {
             test.equal(null, err);
             collection.find({}, { fields: ['šđžčćŠĐŽČĆ'] }).toArray(function(err, items) {
               test.equal(1, items[0]['šđžčćŠĐŽČĆ']);
+              // Let's close the db
               client.close();
               done();
             });
