@@ -1,269 +1,309 @@
-var fs = require('fs'),
-  co = require('co'),
-  semver = require('semver');
+var fs = require('fs');
+var path = require('path');
+var semver = require('semver');
+var test = require('./shared').assert;
+var assign = require('../../lib/utils').assign;
 
-exports['Execute all read crud specification tests'] = {
-  metadata: { requires: { generators: true, topology: 'single' } },
-
-  test: function(configuration, test) {
-    co(function*() {
-      // Create db connection
-      var MongoClient = configuration.require.MongoClient;
-      var client = yield MongoClient.connect(configuration.url());
-      var db = client.db(configuration.database);
-
-      console.log('== Execute CRUD read specifications');
-
-      // Read and parse all the tests cases
-      var scenarios = fs
-        .readdirSync(`${__dirname}/crud/read`)
-        .filter(x => {
-          return x.indexOf('json') != -1;
-        })
-        .map(x => {
-          return fs.readFileSync(`${__dirname}/crud/read/${x}`, 'utf8');
-        })
-        .map(x => {
-          return JSON.parse(x);
-        });
-
-      for (var scenario of scenarios) {
-        yield executeScenario(scenario, configuration, db, test);
-      }
-
-      test.done();
+function findScenarios(type) {
+  return fs
+    .readdirSync(path.join(__dirname, 'crud', type))
+    .filter(x => {
+      return x.indexOf('json') != -1;
+    })
+    .map(x => {
+      return [x, fs.readFileSync(path.join(__dirname, 'crud', type, x), 'utf8')];
+    })
+    .map(x => {
+      return [path.basename(x[0], '.json'), JSON.parse(x[1])];
     });
-  }
-};
+}
 
-exports['Execute all write crud specification tests'] = {
-  metadata: { requires: { generators: true, topology: 'single' } },
+var readScenarios = findScenarios('read');
+var writeScenarios = findScenarios('write');
 
-  test: function(configuration, test) {
-    co(function*() {
-      // Create db connection
-      var MongoClient = configuration.require.MongoClient;
-      var client = yield MongoClient.connect(configuration.url());
-      var db = client.db(configuration.database);
+var testContext = {};
+describe('CRUD spec', function() {
+  beforeEach(function() {
+    var configuration = this.configuration;
+    var MongoClient = configuration.require.MongoClient;
+    return MongoClient.connect(configuration.url())
+      .then(function(client) {
+        testContext.client = client;
+        testContext.db = client.db(configuration.db);
 
-      console.log('== Execute CRUD read specifications');
+        return testContext.db.admin().command({ buildInfo: true });
+      })
+      .then(function(buildInfo) {
+        testContext.mongodbVersion = buildInfo.version.split('-').shift();
+      });
+  });
 
-      // Read and parse all the tests cases
-      var scenarios = fs
-        .readdirSync(`${__dirname}/crud/write`)
-        .filter(x => {
-          return x.indexOf('json') != -1;
-        })
-        .map(x => {
-          return fs.readFileSync(`${__dirname}/crud/write/${x}`, 'utf8');
-        })
-        .map(x => {
-          return JSON.parse(x);
+  describe('read', function() {
+    readScenarios.forEach(function(scenarioData) {
+      var scenarioName = scenarioData[0];
+      var scenario = scenarioData[1];
+      scenario.name = scenarioName;
+
+      describe(scenarioName, function() {
+        scenario.tests.forEach(function(scenarioTest) {
+          beforeEach(function() {
+            return testContext.db.dropDatabase();
+          });
+
+          it(scenarioTest.description, {
+            metadata: { requires: { topology: 'single' } },
+            test: function() {
+              if (
+                !!scenario.minServerVersion &&
+                !semver.satisfies(testContext.mongodbVersion, '>=' + scenario.minServerVersion)
+              ) {
+                this.skip();
+                return;
+              }
+
+              return executeScenario(scenario, scenarioTest, this.configuration, testContext);
+            }
+          });
         });
-
-      for (var scenario of scenarios) {
-        yield executeScenario(scenario, configuration, db, test);
-      }
-
-      test.done();
-    });
-  }
-};
-
-function executeScenario(scenario, configuration, db, test) {
-  return new Promise((resolve, reject) => {
-    co(function*() {
-      var buildInfo = yield db.admin().command({ buildInfo: true });
-      var mongodbVersion = buildInfo.version.split('-').shift();
-      var requiredMongodbVersion = scenario.minServerVersion;
-      var collection = db.collection('crud_spec_tests');
-
-      // Do we satisfy semver
-      if (
-        semver.satisfies(mongodbVersion, `>=${requiredMongodbVersion}`) ||
-        !requiredMongodbVersion
-      ) {
-        for (var scenarioTest of scenario.tests) {
-          var description = scenarioTest.description;
-          var name = scenarioTest.operation.name;
-
-          console.log(`   execute test [${description}]`);
-
-          // Drop collection
-          try {
-            yield collection.drop();
-          } catch (err) {}
-
-          if (scenarioTest.outcome.collection && scenarioTest.outcome.collection.name) {
-            try {
-              yield db.collection(scenarioTest.outcome.collection.name).drop();
-            } catch (err) {}
-          }
-
-          // Insert data
-          if (scenario.data) {
-            yield collection.insertMany(scenario.data);
-          }
-
-          if (name === 'aggregate') {
-            var options = {};
-            if (scenarioTest.operation.arguments.collation) {
-              options.collation = scenarioTest.operation.arguments.collation;
-            }
-
-            var results = yield collection
-              [name](scenarioTest.operation.arguments.pipeline, options)
-              .toArray();
-
-            if (scenarioTest.outcome.collection) {
-              var collectionResults = yield db
-                .collection(scenarioTest.outcome.collection.name)
-                .find({})
-                .toArray();
-              test.deepEqual(scenarioTest.outcome.result, collectionResults);
-            } else {
-              test.deepEqual(scenarioTest.outcome.result, results);
-            }
-          } else if (name == 'count') {
-            var arguments = scenarioTest.operation.arguments;
-            var filter = arguments.filter;
-            var options = Object.assign({}, arguments);
-            delete options.filter;
-
-            var result = yield collection.count(filter, options);
-            test.equal(scenarioTest.outcome.result, result);
-          } else if (name == 'distinct') {
-            var arguments = scenarioTest.operation.arguments;
-            var fieldName = arguments.fieldName;
-            var options = Object.assign({}, arguments);
-            var filter = arguments.filter || {};
-            delete options.fieldName;
-            delete options.filter;
-
-            var result = yield collection.distinct(fieldName, filter, options);
-            test.deepEqual(scenarioTest.outcome.result, result);
-          } else if (name == 'find') {
-            var arguments = scenarioTest.operation.arguments;
-            var filter = arguments.filter;
-            var options = Object.assign({}, arguments);
-            delete options.filter;
-
-            var results = yield collection.find(filter, options).toArray();
-            test.deepEqual(scenarioTest.outcome.result, results);
-          } else if (name == 'deleteMany' || name == 'deleteOne') {
-            // Unpack the scenario test
-            var arguments = scenarioTest.operation.arguments;
-            var filter = arguments.filter;
-            var options = Object.assign({}, arguments);
-            delete options.filter;
-
-            // Get the results
-            var result = yield collection[scenarioTest.operation.name](filter, options);
-
-            // Go over the results
-            for (var name in scenarioTest.outcome.result) {
-              test.equal(scenarioTest.outcome.result[name], result[name]);
-            }
-
-            if (scenarioTest.outcome.collection) {
-              var results = yield collection.find({}).toArray();
-              test.deepEqual(scenarioTest.outcome.collection.data, results);
-            }
-          } else if (name == 'replaceOne') {
-            // Unpack the scenario test
-            var arguments = scenarioTest.operation.arguments;
-            var filter = arguments.filter;
-            var replacement = arguments.replacement;
-            var options = Object.assign({}, arguments);
-            delete options.filter;
-            delete options.replacement;
-
-            // Get the results
-            var result = yield collection[scenarioTest.operation.name](
-              filter,
-              replacement,
-              options
-            );
-
-            // Go over the results
-            for (var name in scenarioTest.outcome.result) {
-              if (name == 'upsertedId') {
-                test.equal(scenarioTest.outcome.result[name], result[name]._id);
-              } else {
-                test.equal(scenarioTest.outcome.result[name], result[name]);
-              }
-            }
-
-            if (scenarioTest.outcome.collection) {
-              var results = yield collection.find({}).toArray();
-              test.deepEqual(scenarioTest.outcome.collection.data, results);
-            }
-          } else if (name == 'updateOne' || name == 'updateMany') {
-            // Unpack the scenario test
-            var arguments = scenarioTest.operation.arguments;
-            var filter = arguments.filter;
-            var update = arguments.update;
-            var options = Object.assign({}, arguments);
-            delete options.filter;
-            delete options.update;
-
-            // Get the results
-            var result = yield collection[scenarioTest.operation.name](filter, update, options);
-
-            // Go over the results
-            for (var name in scenarioTest.outcome.result) {
-              if (name == 'upsertedId') {
-                test.equal(scenarioTest.outcome.result[name], result[name]._id);
-              } else {
-                test.equal(scenarioTest.outcome.result[name], result[name]);
-              }
-            }
-
-            if (scenarioTest.outcome.collection) {
-              var results = yield collection.find({}).toArray();
-              test.deepEqual(scenarioTest.outcome.collection.data, results);
-            }
-          } else if (
-            name == 'findOneAndReplace' ||
-            name == 'findOneAndUpdate' ||
-            name == 'findOneAndDelete'
-          ) {
-            // Unpack the scenario test
-            var arguments = scenarioTest.operation.arguments;
-            var filter = arguments.filter;
-            var second = arguments.update || arguments.replacement;
-            var options = Object.assign({}, arguments);
-            if (options.returnDocument) {
-              options.returnOriginal = options.returnDocument == 'After' ? false : true;
-            }
-
-            delete options.filter;
-            delete options.update;
-            delete options.replacement;
-            delete options.returnDocument;
-
-            if (name == 'findOneAndDelete') {
-              var result = yield collection[name](filter, options);
-            } else {
-              var result = yield collection[name](filter, second, options);
-            }
-
-            if (scenarioTest.outcome.result) {
-              test.deepEqual(scenarioTest.outcome.result, result.value);
-            }
-
-            if (scenarioTest.outcome.collection) {
-              var results = yield collection.find({}).toArray();
-              test.deepEqual(scenarioTest.outcome.collection.data, results);
-            }
-          }
-        }
-      }
-
-      resolve();
-    }).catch(err => {
-      console.log(err.stack);
-      reject(err);
+      });
     });
   });
-}
+
+  describe('write', function() {
+    writeScenarios.forEach(function(scenarioData) {
+      var scenarioName = scenarioData[0];
+      var scenario = scenarioData[1];
+      scenario.name = scenarioName;
+
+      describe(scenarioName, function() {
+        beforeEach(function() {
+          return testContext.db.dropDatabase();
+        });
+
+        scenario.tests.forEach(function(scenarioTest) {
+          it(scenarioTest.description, {
+            metadata: { requires: { topology: 'single' } },
+            test: function() {
+              if (
+                !!scenario.minServerVersion &&
+                !semver.satisfies(testContext.mongodbVersion, '>=' + scenario.minServerVersion)
+              ) {
+                this.skip();
+                return;
+              }
+
+              return executeScenario(scenario, scenarioTest, this.configuration, testContext);
+            }
+          });
+        });
+      });
+    });
+  });
+
+  function executeAggregateTest(scenarioTest, db, collection) {
+    var options = {};
+    if (scenarioTest.operation.arguments.collation) {
+      options.collation = scenarioTest.operation.arguments.collation;
+    }
+
+    var pipeline = scenarioTest.operation.arguments.pipeline;
+    return collection.aggregate(pipeline, options).toArray().then(function(results) {
+      if (scenarioTest.outcome.collection) {
+        return db
+          .collection(scenarioTest.outcome.collection.name)
+          .find({})
+          .toArray()
+          .then(function(collectionResults) {
+            test.deepEqual(scenarioTest.outcome.result, collectionResults);
+          });
+      }
+
+      test.deepEqual(scenarioTest.outcome.result, results);
+      return Promise.resolve();
+    });
+  }
+
+  function executeCountTest(scenarioTest, db, collection) {
+    var args = scenarioTest.operation.arguments;
+    var filter = args.filter;
+    var options = assign({}, args);
+    delete options.filter;
+
+    return collection.count(filter, options).then(function(result) {
+      test.equal(scenarioTest.outcome.result, result);
+    });
+  }
+
+  function executeDistinctTest(scenarioTest, db, collection) {
+    var args = scenarioTest.operation.arguments;
+    var fieldName = args.fieldName;
+    var options = assign({}, args);
+    var filter = args.filter || {};
+    delete options.fieldName;
+    delete options.filter;
+
+    return collection.distinct(fieldName, filter, options).then(function(result) {
+      test.deepEqual(scenarioTest.outcome.result, result);
+    });
+  }
+
+  function executeFindTest(scenarioTest, db, collection) {
+    var args = scenarioTest.operation.arguments;
+    var filter = args.filter;
+    var options = assign({}, args);
+    delete options.filter;
+
+    return collection.find(filter, options).toArray().then(function(results) {
+      test.deepEqual(scenarioTest.outcome.result, results);
+    });
+  }
+
+  function executeDeleteTest(scenarioTest, db, collection) {
+    // Unpack the scenario test
+    var args = scenarioTest.operation.arguments;
+    var filter = args.filter;
+    var options = assign({}, args);
+    delete options.filter;
+
+    return collection[scenarioTest.operation.name](filter, options).then(function(result) {
+      Object.keys(scenarioTest.outcome.result).forEach(function(resultName) {
+        test.equal(scenarioTest.outcome.result[resultName], result[resultName]);
+      });
+
+      if (scenarioTest.outcome.collection) {
+        return collection.find({}).toArray().then(function(results) {
+          test.deepEqual(scenarioTest.outcome.collection.data, results);
+        });
+      }
+    });
+  }
+
+  function executeReplaceTest(scenarioTest, db, collection) {
+    var args = scenarioTest.operation.arguments;
+    var filter = args.filter;
+    var replacement = args.replacement;
+    var options = assign({}, args);
+    delete options.filter;
+    delete options.replacement;
+    var opName = scenarioTest.operation.name;
+
+    // Get the results
+    return collection[opName](filter, replacement, options).then(function(result) {
+      Object.keys(scenarioTest.outcome.result).forEach(function(resultName) {
+        if (resultName == 'upsertedId') {
+          test.equal(scenarioTest.outcome.result[resultName], result[resultName]._id);
+        } else {
+          test.equal(scenarioTest.outcome.result[resultName], result[resultName]);
+        }
+      });
+
+      if (scenarioTest.outcome.collection) {
+        return collection.find({}).toArray().then(function(results) {
+          test.deepEqual(scenarioTest.outcome.collection.data, results);
+        });
+      }
+    });
+  }
+
+  function executeUpdateTest(scenarioTest, db, collection) {
+    var args = scenarioTest.operation.arguments;
+    var filter = args.filter;
+    var update = args.update;
+    var options = assign({}, args);
+    delete options.filter;
+    delete options.update;
+
+    return collection[scenarioTest.operation.name](filter, update, options).then(function(result) {
+      Object.keys(scenarioTest.outcome.result).forEach(function(resultName) {
+        if (resultName == 'upsertedId') {
+          test.equal(scenarioTest.outcome.result[resultName], result[resultName]._id);
+        } else {
+          test.equal(scenarioTest.outcome.result[resultName], result[resultName]);
+        }
+      });
+
+      if (scenarioTest.outcome.collection) {
+        return collection.find({}).toArray().then(function(results) {
+          test.deepEqual(scenarioTest.outcome.collection.data, results);
+        });
+      }
+    });
+  }
+
+  function executeFindOneTest(scenarioTest, db, collection) {
+    var args = scenarioTest.operation.arguments;
+    var filter = args.filter;
+    var second = args.update || args.replacement;
+    var options = assign({}, args);
+    if (options.returnDocument) {
+      options.returnOriginal = options.returnDocument == 'After' ? false : true;
+    }
+
+    delete options.filter;
+    delete options.update;
+    delete options.replacement;
+    delete options.returnDocument;
+
+    var opName = scenarioTest.operation.name;
+    var findPromise =
+      opName === 'findOneAndDelete'
+        ? collection[opName](filter, options)
+        : collection[opName](filter, second, options);
+
+    return findPromise.then(function(result) {
+      if (scenarioTest.outcome.result) {
+        test.deepEqual(scenarioTest.outcome.result, result.value);
+      }
+
+      if (scenarioTest.outcome.collection) {
+        return collection.find({}).toArray().then(function(results) {
+          test.deepEqual(scenarioTest.outcome.collection.data, results);
+        });
+      }
+    });
+  }
+
+  function executeScenario(scenario, scenarioTest, configuration, context) {
+    var collection = context.db.collection(
+      'crud_spec_tests_' + scenario.name + '_' + scenarioTest.operation.name
+    );
+
+    // Test setup
+    var setupPromises = [];
+    setupPromises.push(collection.drop().catch(function() {}));
+    if (scenarioTest.outcome.collection && scenarioTest.outcome.collection.name) {
+      setupPromises.push(
+        context.db.collection(scenarioTest.outcome.collection.name).drop().catch(function() {})
+      );
+    }
+
+    if (scenario.data) {
+      setupPromises.push(collection.insertMany(scenario.data));
+    }
+
+    return Promise.all(setupPromises).then(function() {
+      switch (scenarioTest.operation.name) {
+        case 'aggregate':
+          return executeAggregateTest(scenarioTest, context.db, collection);
+        case 'count':
+          return executeCountTest(scenarioTest, context.db, collection);
+        case 'distinct':
+          return executeDistinctTest(scenarioTest, context.db, collection);
+        case 'find':
+          return executeFindTest(scenarioTest, context.db, collection);
+        case 'deleteOne':
+        case 'deleteMany':
+          return executeDeleteTest(scenarioTest, context.db, collection);
+        case 'replaceOne':
+          return executeReplaceTest(scenarioTest, context.db, collection);
+        case 'updateOne':
+        case 'updateMany':
+          return executeUpdateTest(scenarioTest, context.db, collection);
+        case 'findOneAndReplace':
+        case 'findOneAndUpdate':
+        case 'findOneAndDelete':
+          return executeFindOneTest(scenarioTest, context.db, collection);
+      }
+    });
+  }
+});
