@@ -1810,12 +1810,12 @@ exports['should be able to stream documents'] = {
             }
           });
 
-          stream.on('error', function (er) {
+          stream.once('error', function (er) {
             err = er;
             done();
           });
 
-          stream.on('end', function () {
+          stream.once('end', function () {
             closed++;
             done();
           });
