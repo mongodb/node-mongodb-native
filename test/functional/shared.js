@@ -13,22 +13,31 @@ function connectToDb(url, db, options, callback) {
   });
 }
 
-function setupDatabase(configuration) {
-  var dbName = configuration.db;
+function setupDatabase(configuration, dbsToClean) {
+  dbsToClean = Array.isArray(dbsToClean) ? dbsToClean : [];
+  var configDbName = configuration.db;
   var client = configuration.newClient(configuration.writeConcernMax(), {
     poolSize: 1
   });
 
+  dbsToClean.push(configDbName);
   return client.connect().then(function() {
-    var db = client.db(dbName);
-    return db
-      .command({
-        dropAllUsersFromDatabase: 1,
-        writeConcern: { w: 1 }
-      })
-      .then(function() {
-        return db.dropDatabase();
-      });
+    var cleanPromises = [];
+    dbsToClean.forEach(function(dbName) {
+      var cleanPromise = client
+        .db(dbName)
+        .command({
+          dropAllUsersFromDatabase: 1,
+          writeConcern: { w: 1 }
+        })
+        .then(function() {
+          return client.db(dbName).dropDatabase();
+        });
+
+      cleanPromises.push(cleanPromise);
+    });
+
+    return Promise.all(cleanPromises);
   });
 }
 
