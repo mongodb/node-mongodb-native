@@ -67,8 +67,17 @@ var assert = {
   }
 };
 
+var delay = function(timeout) {
+  return new Promise(function(resolve) {
+    setTimeout(function() {
+      resolve();
+    }, timeout);
+  });
+};
+
 module.exports = {
   connectToDb: connectToDb,
   setupDatabase: setupDatabase,
-  assert: assert
+  assert: assert,
+  delay: delay
 };
