@@ -307,11 +307,11 @@ function diff(previous, current) {
   }
 
   // Check if there are any severs that don't exist
-  for (var j = 0; j < current.servers.length; j++) {
-    var found = false;
+  for (j = 0; j < current.servers.length; j++) {
+    found = false;
 
     // Go over all the previous servers
-    for (var i = 0; i < previous.servers.length; i++) {
+    for (i = 0; i < previous.servers.length; i++) {
       if (previous.servers[i].address.toLowerCase() === current.servers[j].address.toLowerCase()) {
         found = true;
         break;
@@ -329,11 +329,11 @@ function diff(previous, current) {
   }
 
   // Got through all the servers
-  for (var i = 0; i < previous.servers.length; i++) {
+  for (i = 0; i < previous.servers.length; i++) {
     var prevServer = previous.servers[i];
 
     // Go through all current servers
-    for (var j = 0; j < current.servers.length; j++) {
+    for (j = 0; j < current.servers.length; j++) {
       var currServer = current.servers[j];
 
       // Matching server

@@ -85,10 +85,10 @@ var hi = function(data, salt, iterations) {
   }
 
   // generate the salt and store it in the cache for the next worker
-  var data = crypto.pbkdf2Sync(data, salt, iterations, 20, 'sha1');
-  _hiCache[key] = data;
+  var result = crypto.pbkdf2Sync(data, salt, iterations, 20, 'sha1');
+  _hiCache[key] = result;
 
-  return data;
+  return result;
 };
 
 /**

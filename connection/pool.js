@@ -10,8 +10,6 @@ var inherits = require('util').inherits,
   Query = require('./commands').Query,
   CommandResult = require('./command_result'),
   assign = require('../utils').assign,
-  Snappy = require('./utils').retrieveSnappy(),
-  zlib = require('zlib'),
   MESSAGE_HEADER_SIZE = require('../wireprotocol/shared').MESSAGE_HEADER_SIZE,
   opcodes = require('../wireprotocol/shared').opcodes,
   compress = require('../wireprotocol/compression').compress,
@@ -336,9 +334,8 @@ function attemptReconnect(self) {
     }
 
     // If we have failure schedule a retry
-    function _connectionFailureHandler(self, event) {
+    function _connectionFailureHandler(self) {
       return function() {
-        // console.log("========== _connectionFailureHandler :: " + event)
         if (this._connectionFailHandled) return;
         this._connectionFailHandled = true;
         // Destroy the connection
@@ -942,7 +939,7 @@ Pool.prototype.destroy = function(force) {
     while (self.queue.length > 0) {
       var workItem = self.queue.shift();
       if (typeof workItem.cb == 'function') {
-        workItem.cb(null, err);
+        workItem.cb(null, new Error('force flushing work queue'));
       }
     }
 
@@ -1311,6 +1308,7 @@ function _execute(self) {
       }
 
       // As long as we have available connections
+      // eslint-disable-next-line
       while (true) {
         // Total availble connections
         var totalConnections =
@@ -1361,7 +1359,7 @@ function _execute(self) {
           if (workItem.monitoring) {
             var foundValidConnection = false;
 
-            for (var i = 0; i < self.availableConnections.length; i++) {
+            for (i = 0; i < self.availableConnections.length; i++) {
               // If the connection is connected
               // And there are no pending workItems on it
               // Then we can safely use it for monitoring.
@@ -1438,7 +1436,7 @@ function _execute(self) {
 
           // Put operation on the wire
           if (Array.isArray(buffer)) {
-            for (var i = 0; i < buffer.length; i++) {
+            for (i = 0; i < buffer.length; i++) {
               writeSuccessful = connection.write(buffer[i]);
             }
           } else {

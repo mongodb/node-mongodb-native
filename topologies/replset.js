@@ -537,6 +537,11 @@ var monitorServer = function(host, self, options) {
     if (_server) {
       // Ping the server
       return pingServer(self, _server, function(err) {
+        if (err) {
+          // NOTE: should something happen here?
+          return;
+        }
+
         if (self.state == DESTROYED || self.state == UNREFERENCED) {
           intervalId.stop();
           return;
@@ -738,9 +743,11 @@ function applyAuthenticationContexts(self, server, callback) {
     // Copy the params
     var customAuthContext = authContext.slice(0);
     // Push our callback handler
-    customAuthContext.push(function(err) {
-      applyAuth(authContexts, server, callback);
-    });
+    customAuthContext.push(
+      function(/* err */) {
+        applyAuth(authContexts, server, callback);
+      }
+    );
 
     // Attempt authentication
     server.auth.apply(server, customAuthContext);

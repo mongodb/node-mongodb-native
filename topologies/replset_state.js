@@ -826,7 +826,6 @@ var filterByTags = function(readPreference, servers) {
 function pickNearestMaxStalenessSeconds(self, readPreference) {
   // Only get primary and secondaries as seeds
   var servers = [];
-  var heartbeatFrequencyMS = self.heartbeatFrequencyMS;
 
   // Get the maxStalenessMS
   var maxStalenessMS = readPreference.maxStalenessSeconds * 1000;

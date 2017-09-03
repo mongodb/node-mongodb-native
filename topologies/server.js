@@ -638,16 +638,6 @@ Server.prototype.command = function(ns, cmd, options, callback) {
     return callback(new MongoError(f('server %s does not support collation', this.name)));
   }
 
-  // Query options
-  var queryOptions = {
-    numberToSkip: 0,
-    numberToReturn: -1,
-    checkKeys: typeof options.checkKeys == 'boolean' ? options.checkKeys : false,
-    serializeFunctions:
-      typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false,
-    ignoreUndefined: typeof options.ignoreUndefined == 'boolean' ? options.ignoreUndefined : false
-  };
-
   // Are we executing against a specific topology
   var topology = options.topology || {};
   // Create the query object

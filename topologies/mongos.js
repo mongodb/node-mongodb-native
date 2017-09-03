@@ -10,7 +10,6 @@ var inherits = require('util').inherits,
   Server = require('./server'),
   assign = require('../utils').assign,
   clone = require('./shared').clone,
-  sdam = require('./shared'),
   diff = require('./shared').diff,
   cloneOptions = require('./shared').cloneOptions,
   createClientInfo = require('./shared').createClientInfo;
@@ -663,9 +662,11 @@ function applyAuthenticationContexts(self, server, callback) {
     // Copy the params
     var customAuthContext = authContext.slice(0);
     // Push our callback handler
-    customAuthContext.push(function(err) {
-      applyAuth(authContexts, server, callback);
-    });
+    customAuthContext.push(
+      function(/* err */) {
+        applyAuth(authContexts, server, callback);
+      }
+    );
 
     // Attempt authentication
     server.auth.apply(server, customAuthContext);
@@ -1235,8 +1236,6 @@ Mongos.prototype.connections = function() {
 function emitTopologyDescriptionChanged(self) {
   if (self.listeners('topologyDescriptionChanged').length > 0) {
     var topology = 'Unknown';
-    var setName = self.setName;
-
     if (self.connectedProxies.length > 0) {
       topology = 'Sharded';
     }

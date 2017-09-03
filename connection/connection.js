@@ -12,8 +12,6 @@ var inherits = require('util').inherits,
   Response = require('./commands').Response,
   MongoNetworkError = require('../error').MongoNetworkError,
   Logger = require('./logger'),
-  zlib = require('zlib'),
-  Snappy = require('./utils').retrieveSnappy(),
   OP_COMPRESSED = require('../wireprotocol/shared').opcodes.OP_COMPRESSED,
   MESSAGE_HEADER_SIZE = require('../wireprotocol/shared').MESSAGE_HEADER_SIZE;
 
@@ -628,7 +626,7 @@ Connection.prototype.destroy = function() {
     // Catch posssible exception thrown by node 0.10.x
     try {
       this.connection.end();
-    } catch (err) {}
+    } catch (err) {} // eslint-disable-line
     // Destroy connection
     this.connection.destroy();
   }

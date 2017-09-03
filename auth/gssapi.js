@@ -27,7 +27,7 @@ try {
   Kerberos = require_optional('kerberos').Kerberos;
   // Authentication process for Mongo
   MongoAuthProcess = require_optional('kerberos').processes.MongoAuthProcess;
-} catch (err) {}
+} catch (err) {} // eslint-disable-line
 
 /**
  * Creates a new GSSAPI authentication mechanism

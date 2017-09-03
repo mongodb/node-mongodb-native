@@ -35,7 +35,7 @@ var Query = function(bson, ns, query, options) {
   if (query == null) throw new Error('query must be specified for query');
 
   // Validate that we are not passing 0x00 in the collection name
-  if (!!~ns.indexOf('\x00')) {
+  if (ns.indexOf('\x00') !== -1) {
     throw new Error('namespace cannot contain a null character');
   }
 

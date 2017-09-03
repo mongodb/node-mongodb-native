@@ -75,7 +75,7 @@ var retrieveBSON = function() {
       optionalBSON.native = true;
       return optionalBSON;
     }
-  } catch (err) {}
+  } catch (err) {} // eslint-disable-line
 
   return BSON;
 };
