@@ -8,9 +8,10 @@ var Server = require('..').Server,
   Mongos = require('..').Mongos;
 
 // topology managers
-var ServerManager = require('mongodb-topology-manager').Server,
-  ReplSetManager = require('mongodb-topology-manager').ReplSet,
-  ShardingManager = require('mongodb-topology-manager').Sharded;
+var topologyManagers = require('mongodb-test-runner').topologyManagers,
+  ServerManager = topologyManagers.Server,
+  ReplSetManager = topologyManagers.ReplSet,
+  ShardingManager = topologyManagers.Sharded;
 
 // utilities
 var clone = function(obj) {
