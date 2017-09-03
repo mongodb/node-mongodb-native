@@ -1,9 +1,9 @@
 'use strict';
 var expect = require('chai').expect,
-    co = require('co'),
-    assign = require('../../../../lib/utils').assign,
-    Connection = require('../../../../lib/connection/connection'),
-    mockupdb = require('../../../mock');
+  co = require('co'),
+  assign = require('../../../../lib/utils').assign,
+  Connection = require('../../../../lib/connection/connection'),
+  mockupdb = require('../../../mock');
 
 describe('ReplSet All Servers Close (mocks)', function() {
   it('Successful reconnect when driver loses touch with entire replicaset', {
@@ -16,7 +16,7 @@ describe('ReplSet All Servers Close (mocks)', function() {
 
     test: function(done) {
       var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId;
+        ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var primaryServer = null;
@@ -28,26 +28,52 @@ describe('ReplSet All Servers Close (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'setName': 'rs', 'setVersion': 1, 'electionId': electionIds[0],
-        'maxBsonObjectSize': 16777216, 'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000, 'localTime': new Date(), 'maxWireVersion': 4,
-        'minWireVersion': 0, 'ok': 1, 'hosts': ['localhost:32000', 'localhost:32001', 'localhost:32002'], 'arbiters': ['localhost:32002']
+        setName: 'rs',
+        setVersion: 1,
+        electionId: electionIds[0],
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 4,
+        minWireVersion: 0,
+        ok: 1,
+        hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002'],
+        arbiters: ['localhost:32002']
       };
 
       // Primary server states
-      var primary = [assign({}, defaultFields, {
-        'ismaster': true, 'secondary': false, 'me': 'localhost:32000', 'primary': 'localhost:32000', 'tags': { 'loc': 'ny' }
-      })];
+      var primary = [
+        assign({}, defaultFields, {
+          ismaster: true,
+          secondary: false,
+          me: 'localhost:32000',
+          primary: 'localhost:32000',
+          tags: { loc: 'ny' }
+        })
+      ];
 
       // Primary server states
-      var firstSecondary = [assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32001', 'primary': 'localhost:32000', 'tags': { 'loc': 'sf' }
-      })];
+      var firstSecondary = [
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32001',
+          primary: 'localhost:32000',
+          tags: { loc: 'sf' }
+        })
+      ];
 
       // Primary server states
-      var arbiter = [assign({}, defaultFields, {
-        'ismaster': false, 'secondary': false, 'arbiterOnly': true, 'me': 'localhost:32002', 'primary': 'localhost:32000'
-      })];
+      var arbiter = [
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: false,
+          arbiterOnly: true,
+          me: 'localhost:32002',
+          primary: 'localhost:32000'
+        })
+      ];
 
       // Boot the mock
       co(function*() {
@@ -67,11 +93,11 @@ describe('ReplSet All Servers Close (mocks)', function() {
               if (doc.ismaster) {
                 request.reply(primary[0]);
               } else if (doc.insert) {
-                request.reply({ 'ok': 1, 'n': 1 });
+                request.reply({ ok: 1, n: 1 });
               }
             }
           }
-        }).catch(function(err) {
+        }).catch(function() {
           // console.log(err.stack);
         });
 
@@ -89,7 +115,7 @@ describe('ReplSet All Servers Close (mocks)', function() {
               }
             }
           }
-        }).catch(function(err) {
+        }).catch(function() {
           // console.log(err.stack);
         });
 
@@ -107,22 +133,26 @@ describe('ReplSet All Servers Close (mocks)', function() {
               }
             }
           }
-        }).catch(function(err) {
+        }).catch(function() {
           // console.log(err.stack);
         });
 
         Connection.enableConnectionAccounting();
         // Attempt to connect
-        var server = new ReplSet([
-          { host: 'localhost', port: 32000 },
-          { host: 'localhost', port: 32001 },
-          { host: 'localhost', port: 32002 }], {
-          setName: 'rs',
-          connectionTimeout: 2000,
-          socketTimeout: 2000,
-          haInterval: 500,
-          size: 500
-        });
+        var server = new ReplSet(
+          [
+            { host: 'localhost', port: 32000 },
+            { host: 'localhost', port: 32001 },
+            { host: 'localhost', port: 32002 }
+          ],
+          {
+            setName: 'rs',
+            connectionTimeout: 2000,
+            socketTimeout: 2000,
+            haInterval: 500,
+            size: 500
+          }
+        );
 
         server.on('connect', function(_server) {
           setTimeout(function() {
@@ -132,7 +162,8 @@ describe('ReplSet All Servers Close (mocks)', function() {
               die = false;
 
               setTimeout(function() {
-                _server.command('admin.$cmd', {ismaster: true}, function(err, r) {
+                _server.command('admin.$cmd', { ismaster: true }, function(err, r) {
+                  expect(r).to.exist;
                   expect(err).to.be.null;
                   expect(_server.s.replicaSetState.primary).to.not.be.null;
                   expect(_server.s.replicaSetState.secondaries).to.have.length(1);
@@ -155,8 +186,6 @@ describe('ReplSet All Servers Close (mocks)', function() {
           }, 2500);
         });
 
-        // Add event listeners
-        server.on('fullsetup', function(_server) {});
         // Gives proxies a chance to boot up
         setTimeout(function() {
           server.connect();
@@ -175,7 +204,7 @@ describe('ReplSet All Servers Close (mocks)', function() {
 
     test: function(done) {
       var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId;
+        ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var primaryServer = null;
@@ -187,26 +216,52 @@ describe('ReplSet All Servers Close (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'setName': 'rs', 'setVersion': 1, 'electionId': electionIds[0],
-        'maxBsonObjectSize': 16777216, 'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000, 'localTime': new Date(), 'maxWireVersion': 4,
-        'minWireVersion': 0, 'ok': 1, 'hosts': ['localhost:34000', 'localhost:34001', 'localhost:34002'], 'arbiters': ['localhost:34002']
+        setName: 'rs',
+        setVersion: 1,
+        electionId: electionIds[0],
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 4,
+        minWireVersion: 0,
+        ok: 1,
+        hosts: ['localhost:34000', 'localhost:34001', 'localhost:34002'],
+        arbiters: ['localhost:34002']
       };
 
       // Primary server states
-      var primary = [assign({}, defaultFields, {
-        'ismaster': true, 'secondary': false, 'me': 'localhost:34000', 'primary': 'localhost:34000', 'tags': { 'loc': 'ny' }
-      })];
+      var primary = [
+        assign({}, defaultFields, {
+          ismaster: true,
+          secondary: false,
+          me: 'localhost:34000',
+          primary: 'localhost:34000',
+          tags: { loc: 'ny' }
+        })
+      ];
 
       // Primary server states
-      var firstSecondary = [assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:34001', 'primary': 'localhost:34000', 'tags': { 'loc': 'sf' }
-      })];
+      var firstSecondary = [
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:34001',
+          primary: 'localhost:34000',
+          tags: { loc: 'sf' }
+        })
+      ];
 
       // Primary server states
-      var arbiter = [assign({}, defaultFields, {
-        'ismaster': false, 'secondary': false, 'arbiterOnly': true, 'me': 'localhost:34002', 'primary': 'localhost:34000'
-      })];
+      var arbiter = [
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: false,
+          arbiterOnly: true,
+          me: 'localhost:34002',
+          primary: 'localhost:34000'
+        })
+      ];
 
       // Boot the mock
       co(function*() {
@@ -228,7 +283,7 @@ describe('ReplSet All Servers Close (mocks)', function() {
               }
             }
           }
-        }).catch(function(err) {
+        }).catch(function() {
           // console.log(err.stack);
         });
 
@@ -246,7 +301,7 @@ describe('ReplSet All Servers Close (mocks)', function() {
               }
             }
           }
-        }).catch(function(err) {
+        }).catch(function() {
           // console.log(err.stack);
         });
 
@@ -264,31 +319,36 @@ describe('ReplSet All Servers Close (mocks)', function() {
               }
             }
           }
-        }).catch(function(err) {
+        }).catch(function() {
           // console.log(err.stack);
         });
       });
 
       Connection.enableConnectionAccounting();
       // Attempt to connect
-      var server = new ReplSet([
-        { host: 'localhost', port: 34000 },
-        { host: 'localhost', port: 34001 },
-        { host: 'localhost', port: 34002 }
-      ], {
-        setName: 'rs',
-        connectionTimeout: 5000,
-        socketTimeout: 5000,
-        haInterval: 1000,
-        size: 1
-      });
+      var server = new ReplSet(
+        [
+          { host: 'localhost', port: 34000 },
+          { host: 'localhost', port: 34001 },
+          { host: 'localhost', port: 34002 }
+        ],
+        {
+          setName: 'rs',
+          connectionTimeout: 5000,
+          socketTimeout: 5000,
+          haInterval: 1000,
+          size: 1
+        }
+      );
 
-      server.on('connect', function(e) {
+      server.on('connect', function() {
         setTimeout(function() {
           die = true;
 
           var intervalId = setInterval(function() {
-            server.command('admin.$cmd', {ismaster: true}, function(err, r) {});
+            server.command('admin.$cmd', { ismaster: true }, function(err) {
+              expect(err).to.not.exist;
+            });
           }, 2000);
 
           setTimeout(function() {
@@ -296,7 +356,8 @@ describe('ReplSet All Servers Close (mocks)', function() {
             setTimeout(function() {
               clearInterval(intervalId);
 
-              server.command('admin.$cmd', {ismaster: true}, function(err, r) {
+              server.command('admin.$cmd', { ismaster: true }, function(err, r) {
+                expect(r).to.exist;
                 expect(err).to.be.null;
                 expect(server.s.replicaSetState.primary).to.not.be.null;
                 expect(server.s.replicaSetState.secondaries).to.have.length(1);
@@ -319,8 +380,6 @@ describe('ReplSet All Servers Close (mocks)', function() {
         }, 2500);
       });
 
-      // Add event listeners
-      server.on('fullsetup', function(_server) {});
       // Gives proxies a chance to boot up
       setTimeout(function() {
         server.connect();

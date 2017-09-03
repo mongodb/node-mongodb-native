@@ -1,9 +1,9 @@
 'use strict';
 var expect = require('chai').expect,
-    assign = require('../../../../lib/utils').assign,
-    co = require('co'),
-    Connection = require('../../../../lib/connection/connection'),
-    mockupdb = require('../../../mock');
+  assign = require('../../../../lib/utils').assign,
+  co = require('co'),
+  Connection = require('../../../../lib/connection/connection'),
+  mockupdb = require('../../../mock');
 
 describe('ReplSet Failover (mocks)', function() {
   it('Successfully failover to new primary', {
@@ -16,8 +16,8 @@ describe('ReplSet Failover (mocks)', function() {
 
     test: function(done) {
       var ReplSet = this.configuration.mongo.ReplSet,
-          Server = this.configuration.mongo.Server,
-          ObjectId = this.configuration.mongo.BSON.ObjectId;
+        Server = this.configuration.mongo.Server,
+        ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var primaryServer = null;
@@ -30,41 +30,97 @@ describe('ReplSet Failover (mocks)', function() {
       var electionIds = [new ObjectId(0), new ObjectId(1)];
       // Default message fields
       var defaultFields = {
-        'setName': 'rs', 'setVersion': 1, 'electionId': electionIds[0],
-        'maxBsonObjectSize': 16777216, 'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000, 'localTime': new Date(), 'maxWireVersion': 4,
-        'minWireVersion': 0, 'ok': 1, 'hosts': ['localhost:32000', 'localhost:32001', 'localhost:32002'], 'arbiters': ['localhost:32002']
+        setName: 'rs',
+        setVersion: 1,
+        electionId: electionIds[0],
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 4,
+        minWireVersion: 0,
+        ok: 1,
+        hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002'],
+        arbiters: ['localhost:32002']
       };
 
       // Primary server states
-      var primary = [assign({}, defaultFields, {
-        'ismaster': true, 'secondary': false, 'me': 'localhost:32000', 'primary': 'localhost:32000', 'tags': { 'loc': 'ny' }
-      }), assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32000', 'primary': 'localhost:32000', 'tags': { 'loc': 'ny' }
-      }), assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32000', 'primary': 'localhost:32001', 'tags': { 'loc': 'ny' },
-        'electionId': electionIds[1]
-      })];
+      var primary = [
+        assign({}, defaultFields, {
+          ismaster: true,
+          secondary: false,
+          me: 'localhost:32000',
+          primary: 'localhost:32000',
+          tags: { loc: 'ny' }
+        }),
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32000',
+          primary: 'localhost:32000',
+          tags: { loc: 'ny' }
+        }),
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32000',
+          primary: 'localhost:32001',
+          tags: { loc: 'ny' },
+          electionId: electionIds[1]
+        })
+      ];
 
       // Primary server states
-      var firstSecondary = [assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32001', 'primary': 'localhost:32000', 'tags': { 'loc': 'sf' }
-      }), assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32001', 'primary': 'localhost:32000', 'tags': { 'loc': 'sf' }
-      }), assign({}, defaultFields, {
-        'ismaster': true, 'secondary': false, 'me': 'localhost:32001', 'primary': 'localhost:32001', 'tags': { 'loc': 'ny' },
-        'electionId': electionIds[1]
-      })];
+      var firstSecondary = [
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32001',
+          primary: 'localhost:32000',
+          tags: { loc: 'sf' }
+        }),
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32001',
+          primary: 'localhost:32000',
+          tags: { loc: 'sf' }
+        }),
+        assign({}, defaultFields, {
+          ismaster: true,
+          secondary: false,
+          me: 'localhost:32001',
+          primary: 'localhost:32001',
+          tags: { loc: 'ny' },
+          electionId: electionIds[1]
+        })
+      ];
 
       // Primary server states
-      var secondSecondary = [assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32002', 'primary': 'localhost:32000', 'tags': { 'loc': 'sf' }
-      }), assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32002', 'primary': 'localhost:32000', 'tags': { 'loc': 'sf' }
-      }), assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32002', 'primary': 'localhost:32001', 'tags': { 'loc': 'ny' },
-        'electionId': electionIds[1]
-      })];
+      var secondSecondary = [
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32002',
+          primary: 'localhost:32000',
+          tags: { loc: 'sf' }
+        }),
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32002',
+          primary: 'localhost:32000',
+          tags: { loc: 'sf' }
+        }),
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32002',
+          primary: 'localhost:32001',
+          tags: { loc: 'ny' },
+          electionId: electionIds[1]
+        })
+      ];
 
       // Die
       var die = false;
@@ -89,7 +145,7 @@ describe('ReplSet Failover (mocks)', function() {
               }
             }
           }
-        }).catch(function(err) {
+        }).catch(function() {
           // console.log(err.stack);
         });
 
@@ -107,7 +163,7 @@ describe('ReplSet Failover (mocks)', function() {
               }
             }
           }
-        }).catch(function(err) {
+        }).catch(function() {
           // console.log(err.stack);
         });
 
@@ -125,27 +181,31 @@ describe('ReplSet Failover (mocks)', function() {
               }
             }
           }
-        }).catch(function(err) {
+        }).catch(function() {
           // console.log(err.stack);
         });
       });
 
       Connection.enableConnectionAccounting();
       // Attempt to connect
-      var server = new ReplSet([
-        { host: 'localhost', port: 32000 },
-        { host: 'localhost', port: 32001 },
-        { host: 'localhost', port: 32002 }], {
-        setName: 'rs',
-        connectionTimeout: 3000,
-        socketTimeout: 0,
-        haInterval: 2000,
-        size: 1
-      });
+      var server = new ReplSet(
+        [
+          { host: 'localhost', port: 32000 },
+          { host: 'localhost', port: 32001 },
+          { host: 'localhost', port: 32002 }
+        ],
+        {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 2000,
+          size: 1
+        }
+      );
 
       Server.enableServerAccounting();
 
-      server.on('connect', function(e) {
+      server.on('connect', function() {
         server.__connected = true;
 
         // Perform the two steps
@@ -216,8 +276,8 @@ describe('ReplSet Failover (mocks)', function() {
 
     test: function(done) {
       var ReplSet = this.configuration.mongo.ReplSet,
-          Server = this.configuration.mongo.Server,
-          ObjectId = this.configuration.mongo.BSON.ObjectId;
+        Server = this.configuration.mongo.Server,
+        ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var primaryServer = null;
@@ -230,41 +290,97 @@ describe('ReplSet Failover (mocks)', function() {
       var electionIds = [new ObjectId(0), new ObjectId(1)];
       // Default message fields
       var defaultFields = {
-        'setName': 'rs', 'setVersion': 1, 'electionId': electionIds[0],
-        'maxBsonObjectSize': 16777216, 'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000, 'localTime': new Date(), 'maxWireVersion': 4,
-        'minWireVersion': 0, 'ok': 1, 'hosts': ['localhost:32000', 'localhost:32001', 'localhost:32002'], 'arbiters': ['localhost:32002']
+        setName: 'rs',
+        setVersion: 1,
+        electionId: electionIds[0],
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 4,
+        minWireVersion: 0,
+        ok: 1,
+        hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002'],
+        arbiters: ['localhost:32002']
       };
 
       // Primary server states
-      var primary = [assign({}, defaultFields, {
-        'ismaster': true, 'secondary': false, 'me': 'localhost:32000', 'primary': 'localhost:32000', 'tags': { 'loc': 'ny' }
-      }), assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32000', 'primary': 'localhost:32000', 'tags': { 'loc': 'ny' }
-      }), assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32000', 'primary': 'localhost:32001', 'tags': { 'loc': 'ny' },
-        'electionId': electionIds[1]
-      })];
+      var primary = [
+        assign({}, defaultFields, {
+          ismaster: true,
+          secondary: false,
+          me: 'localhost:32000',
+          primary: 'localhost:32000',
+          tags: { loc: 'ny' }
+        }),
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32000',
+          primary: 'localhost:32000',
+          tags: { loc: 'ny' }
+        }),
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32000',
+          primary: 'localhost:32001',
+          tags: { loc: 'ny' },
+          electionId: electionIds[1]
+        })
+      ];
 
       // Primary server states
-      var firstSecondary = [assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32001', 'primary': 'localhost:32000', 'tags': { 'loc': 'sf' }
-      }), assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32001', 'primary': 'localhost:32000', 'tags': { 'loc': 'sf' }
-      }), assign({}, defaultFields, {
-        'ismaster': true, 'secondary': false, 'me': 'localhost:32001', 'primary': 'localhost:32001', 'tags': { 'loc': 'ny' },
-        'electionId': electionIds[1]
-      })];
+      var firstSecondary = [
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32001',
+          primary: 'localhost:32000',
+          tags: { loc: 'sf' }
+        }),
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32001',
+          primary: 'localhost:32000',
+          tags: { loc: 'sf' }
+        }),
+        assign({}, defaultFields, {
+          ismaster: true,
+          secondary: false,
+          me: 'localhost:32001',
+          primary: 'localhost:32001',
+          tags: { loc: 'ny' },
+          electionId: electionIds[1]
+        })
+      ];
 
       // Primary server states
-      var secondSecondary = [assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32002', 'primary': 'localhost:32000', 'tags': { 'loc': 'sf' }
-      }), assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32002', 'primary': 'localhost:32000', 'tags': { 'loc': 'sf' }
-      }), assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32002', 'primary': 'localhost:32001', 'tags': { 'loc': 'ny' },
-        'electionId': electionIds[1]
-      })];
+      var secondSecondary = [
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32002',
+          primary: 'localhost:32000',
+          tags: { loc: 'sf' }
+        }),
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32002',
+          primary: 'localhost:32000',
+          tags: { loc: 'sf' }
+        }),
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32002',
+          primary: 'localhost:32001',
+          tags: { loc: 'ny' },
+          electionId: electionIds[1]
+        })
+      ];
 
       // Die
       var die = false;
@@ -289,7 +405,7 @@ describe('ReplSet Failover (mocks)', function() {
               }
             }
           }
-        }).catch(function(err) {
+        }).catch(function() {
           // console.log(err.stack);
         });
 
@@ -307,7 +423,7 @@ describe('ReplSet Failover (mocks)', function() {
               }
             }
           }
-        }).catch(function(err) {
+        }).catch(function() {
           // console.log(err.stack);
         });
 
@@ -325,28 +441,31 @@ describe('ReplSet Failover (mocks)', function() {
               }
             }
           }
-        }).catch(function(err) {
+        }).catch(function() {
           // console.log(err.stack);
         });
       });
 
       Connection.enableConnectionAccounting();
       // Attempt to connect
-      var server = new ReplSet([
-        { host: 'localhost', port: 32000 },
-        { host: 'localhost', port: 32001 },
-        { host: 'localhost', port: 32002 }
-      ], {
-        setName: 'rs',
-        connectionTimeout: 3000,
-        socketTimeout: 0,
-        haInterval: 2000,
-        size: 1
-      });
+      var server = new ReplSet(
+        [
+          { host: 'localhost', port: 32000 },
+          { host: 'localhost', port: 32001 },
+          { host: 'localhost', port: 32002 }
+        ],
+        {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 2000,
+          size: 1
+        }
+      );
 
       Server.enableServerAccounting();
 
-      server.on('connect', function(e) {
+      server.on('connect', function() {
         server.__connected = true;
 
         // Perform the two steps

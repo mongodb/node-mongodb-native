@@ -1,12 +1,12 @@
 'use strict';
 
 var expect = require('chai').expect,
-    f = require('util').format,
-    Connection = require('../../../lib/connection/connection'),
-    ReplSet = require('../../../lib/topologies/replset');
+  f = require('util').format,
+  Connection = require('../../../lib/connection/connection'),
+  ReplSet = require('../../../lib/topologies/replset');
 
 var restartAndDone = function(configuration, done) {
-  configuration.manager.restart(9, {waitMS: 2000}).then(function() {
+  configuration.manager.restart(9, { waitMS: 2000 }).then(function() {
     done();
   });
 };
@@ -28,18 +28,23 @@ describe('A replica set', function() {
         Connection.enableConnectionAccounting();
         // Attempt to connect
         try {
-          var server = new ReplSet([{
-            host: _manager.host,
-            port: _manager.port
-          }], {
-            setName: self.configuration.setName
-          });
+          var server = new ReplSet(
+            [
+              {
+                host: _manager.host,
+                port: _manager.port
+              }
+            ],
+            {
+              setName: self.configuration.setName
+            }
+          );
         } catch (err) {
           console.log(err);
           done();
         }
 
-        server.on('joined', function(_type, _server) {
+        server.on('joined', function(_type) {
           if (_type === 'arbiter') {
             server.destroy();
 
@@ -69,12 +74,17 @@ describe('A replica set', function() {
         // Enable connections accounting
         Connection.enableConnectionAccounting();
         // Attempt to connect
-        var server = new ReplSet([{
-          host: _manager.host,
-          port: _manager.port
-        }], {
-          setName: self.configuration.setName
-        });
+        var server = new ReplSet(
+          [
+            {
+              host: _manager.host,
+              port: _manager.port
+            }
+          ],
+          {
+            setName: self.configuration.setName
+          }
+        );
 
         server.on('joined', function(_type, _server) {
           if (_type === 'secondary' && _server.lastIsMaster().passive) {
@@ -106,14 +116,19 @@ describe('A replica set', function() {
         // Enable connections accounting
         Connection.enableConnectionAccounting();
         // Attempt to connect
-        var server = new ReplSet([{
-          host: _manager.host,
-          port: _manager.port
-        }], {
-          setName: self.configuration.setName
-        });
+        var server = new ReplSet(
+          [
+            {
+              host: _manager.host,
+              port: _manager.port
+            }
+          ],
+          {
+            setName: self.configuration.setName
+          }
+        );
 
-        server.on('joined', function(_type, _server) {
+        server.on('joined', function(_type) {
           if (_type === 'primary') {
             server.destroy();
 
@@ -143,15 +158,20 @@ describe('A replica set', function() {
         // Enable connections accounting
         Connection.enableConnectionAccounting();
         // Attempt to connect
-        var server = new ReplSet([{
-          host: _manager.host,
-          port: _manager.port
-        }], {
-          setName: self.configuration.setName
-        });
+        var server = new ReplSet(
+          [
+            {
+              host: _manager.host,
+              port: _manager.port
+            }
+          ],
+          {
+            setName: self.configuration.setName
+          }
+        );
 
         var count = 0;
-        server.on('joined', function(_type, _server) {
+        server.on('joined', function(_type) {
           if (_type === 'secondary') count = count + 1;
           if (count === 2) {
             server.destroy();
@@ -178,18 +198,23 @@ describe('A replica set', function() {
       var manager = this.configuration.manager;
 
       // State
-      var state = {'primary': 1, 'secondary': 2, 'arbiter': 1, 'passive': 1};
+      var state = { primary: 1, secondary: 2, arbiter: 1, passive: 1 };
       // Get the primary server
       manager.primary().then(function(_manager) {
         // Enable connections accounting
         Connection.enableConnectionAccounting();
         // Attempt to connect
-        var server = new ReplSet([{
-          host: _manager.host,
-          port: _manager.port
-        }], {
-          setName: self.configuration.setName
-        });
+        var server = new ReplSet(
+          [
+            {
+              host: _manager.host,
+              port: _manager.port
+            }
+          ],
+          {
+            setName: self.configuration.setName
+          }
+        );
 
         server.on('joined', function(_type, _server) {
           if (_type === 'secondary' && _server.lastIsMaster().passive) {
@@ -198,10 +223,12 @@ describe('A replica set', function() {
             state[_type] = state[_type] - 1;
           }
 
-          if (state.primary === 0
-              && state.secondary === 0
-              && state.arbiter === 0
-              && state.passive === 0) {
+          if (
+            state.primary === 0 &&
+            state.secondary === 0 &&
+            state.arbiter === 0 &&
+            state.passive === 0
+          ) {
             server.destroy();
 
             setTimeout(function() {
@@ -230,19 +257,26 @@ describe('A replica set', function() {
       var manager = this.configuration.manager;
 
       // State
-      var state = {'primary': 1, 'secondary': 2, 'arbiter': 1, 'passive': 1};
+      var state = { primary: 1, secondary: 2, arbiter: 1, passive: 1 };
       // Get the primary server
       manager.primary().then(function(_manager) {
         Connection.enableConnectionAccounting();
         // Attempt to connect
-        var server = new ReplSet([{
-          host: _manager.host,
-          port: _manager.port
-        }, {
-          host: 'localhost', port: 41000
-        }], {
-          setName: self.configuration.setName
-        });
+        var server = new ReplSet(
+          [
+            {
+              host: _manager.host,
+              port: _manager.port
+            },
+            {
+              host: 'localhost',
+              port: 41000
+            }
+          ],
+          {
+            setName: self.configuration.setName
+          }
+        );
 
         server.on('joined', function(_type, _server) {
           // console.log('======= joined :: ' + _type + ' :: ' + _server.name)
@@ -254,10 +288,12 @@ describe('A replica set', function() {
 
           // console.dir(state)
 
-          if (state.primary === 0
-              && state.secondary === 0
-              && state.arbiter === 0
-              && state.passive === 0) {
+          if (
+            state.primary === 0 &&
+            state.secondary === 0 &&
+            state.arbiter === 0 &&
+            state.passive === 0
+          ) {
             server.destroy();
 
             setTimeout(function() {
@@ -284,10 +320,10 @@ describe('A replica set', function() {
     test: function(done) {
       var self = this;
       var ServerManager = require('mongodb-topology-manager').Server,
-          manager = this.configuration.manager;
+        manager = this.configuration.manager;
 
       // State
-      var state = {'primary': 1, 'secondary': 1, 'arbiter': 1, 'passive': 1};
+      var state = { primary: 1, secondary: 1, arbiter: 1, passive: 1 };
       // Get the primary server
       manager.primary().then(function(primaryManager) {
         // Get the secondary server
@@ -306,10 +342,12 @@ describe('A replica set', function() {
             // Start a non replset member
             nonReplSetMember.start().then(function() {
               // console.log('------------------------ 4')
-              var config = [{
-                host: primaryManager.host,
-                port: primaryManager.port
-              }];
+              var config = [
+                {
+                  host: primaryManager.host,
+                  port: primaryManager.port
+                }
+              ];
 
               var options = {
                 setName: self.configuration.setName
@@ -329,15 +367,16 @@ describe('A replica set', function() {
                   }
                   // console.dir(state)
 
-                  if (state.primary === 0
-                      && state.secondary === 0
-                      && state.arbiter === 0
-                      && state.passive === 0) {
+                  if (
+                    state.primary === 0 &&
+                    state.secondary === 0 &&
+                    state.arbiter === 0 &&
+                    state.passive === 0
+                  ) {
                     replset.destroy();
                     setTimeout(function() {
                       expect(Object.keys(Connection.connections()).length).to.equal(0);
                       Connection.disableConnectionAccounting();
-
 
                       // Stop the normal server
                       nonReplSetMember.stop().then(function() {
@@ -378,24 +417,24 @@ describe('A replica set', function() {
         manager.secondaries().then(function(managers) {
           var secondaryServerManager = managers[0];
 
-          var config = [{
-            host: primaryServerManager.host,
-            port: primaryServerManager.port
-          }];
+          var config = [
+            {
+              host: primaryServerManager.host,
+              port: primaryServerManager.port
+            }
+          ];
 
           var options = {
             setName: self.configuration.setName
           };
 
-          // Contains the details for the removed server
-          var removedServer = false;
           // console.log('============================= 3')
           // Enable connections accounting
           Connection.enableConnectionAccounting();
           // console.log('============================= 4')
           // Attempt to connect
           var server = new ReplSet(config, options);
-          server.on('fullsetup', function(_server) {
+          server.on('fullsetup', function() {
             // console.log('------------------------------------------ 0')
             // Save number of secondaries
             var numberOfSecondaries = server.s.replicaSetState.secondaries.length;
@@ -404,7 +443,9 @@ describe('A replica set', function() {
             server.on('left', function(_t, _server) {
               if (_server.s.options.port === secondaryServerManager.options.port) {
                 expect(server.s.replicaSetState.primary).to.not.be.null;
-                expect(server.s.replicaSetState.secondaries.length).to.be.below(numberOfSecondaries);
+                expect(server.s.replicaSetState.secondaries.length).to.be.below(
+                  numberOfSecondaries
+                );
                 expect(server.s.replicaSetState.arbiters.length).to.equal(1);
                 server.destroy();
 
@@ -419,17 +460,11 @@ describe('A replica set', function() {
               }
             });
 
-            server.on('joined', function(_t, _server) {
-            });
-
             // Remove the secondary server
             manager.removeMember(secondaryServerManager, {
-              returnImmediately: false, force: false, skipWait: true
-            }).then(function() {
-              // // Step down primary and block until we have a new primary
-              setTimeout(function() {
-                removedServer = true;
-              }, 15000);
+              returnImmediately: false,
+              force: false,
+              skipWait: true
             });
           });
 
@@ -447,8 +482,8 @@ describe('A replica set', function() {
     test: function(done) {
       var self = this;
       var Server = this.configuration.mongo.Server,
-          ReadPreference = this.configuration.require.ReadPreference,
-          manager = this.configuration.manager;
+        ReadPreference = this.configuration.require.ReadPreference,
+        manager = this.configuration.manager;
 
       // Get the primary server
       manager.primary().then(function(_manager) {
@@ -456,12 +491,17 @@ describe('A replica set', function() {
         Connection.enableConnectionAccounting();
         Server.enableServerAccounting();
         // Attempt to connect
-        var server = new ReplSet([{
-          host: _manager.host,
-          port: _manager.port
-        }], {
-          setName: self.configuration.setName
-        });
+        var server = new ReplSet(
+          [
+            {
+              host: _manager.host,
+              port: _manager.port
+            }
+          ],
+          {
+            setName: self.configuration.setName
+          }
+        );
 
         var donecount = 0;
 
@@ -486,7 +526,7 @@ describe('A replica set', function() {
           var insertcount = 10000;
           var querycount = 10000;
 
-          var insertCountDecrement = function(err, results) {
+          var insertCountDecrement = function() {
             insertcount = insertcount - 1;
 
             if (insertcount === 0) {
@@ -494,7 +534,7 @@ describe('A replica set', function() {
             }
           };
 
-          var queryCountDecrement = function(err, d) {
+          var queryCountDecrement = function() {
             querycount = querycount - 1;
 
             if (querycount === 0) {
@@ -503,17 +543,27 @@ describe('A replica set', function() {
           };
 
           for (var i = 0; i < 10000; i++) {
-            _server.insert(f('%s.inserts', self.configuration.db), [{a: 1}], {
-              writeConcern: {w: 1}, ordered: true
-            }, insertCountDecrement);
+            _server.insert(
+              f('%s.inserts', self.configuration.db),
+              [{ a: 1 }],
+              {
+                writeConcern: { w: 1 },
+                ordered: true
+              },
+              insertCountDecrement
+            );
           }
 
           for (var j = 0; j < 10000; j++) {
             // Execute find
-            var cursor = _server.cursor(f('%s.inserts1', self.configuration.db), {
-              find: f('%s.inserts1', self.configuration.db),
-              query: {}
-            }, {readPreference: ReadPreference.secondary});
+            var cursor = _server.cursor(
+              f('%s.inserts1', self.configuration.db),
+              {
+                find: f('%s.inserts1', self.configuration.db),
+                query: {}
+              },
+              { readPreference: ReadPreference.secondary }
+            );
             cursor.setCursorLimit(1);
             // Execute next
             cursor.next(queryCountDecrement);

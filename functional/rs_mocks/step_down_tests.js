@@ -1,5 +1,4 @@
-"use strict";
-var assign = require('../../../../lib/utils').assign;
+'use strict';
 
 // SCENARIO
 // ------------------------------------------------------------------
@@ -255,8 +254,6 @@ var assign = require('../../../../lib/utils').assign;
 //       //   });
 //       // });
 
-
-
 //       // primaryServer.destroy();
 //       // firstSecondaryServer.destroy();
 //       // arbiterServer.destroy();
@@ -266,9 +263,10 @@ var assign = require('../../../../lib/utils').assign;
 //       // test.done();
 //     });
 
-    // // Gives proxies a chance to boot up
-    // setTimeout(function() {
-    //   server.connect();
-    // }, 100)
+// // Gives proxies a chance to boot up
+// setTimeout(function() {
+//   server.connect();
+// }, 100)
 //   }
 // }
+

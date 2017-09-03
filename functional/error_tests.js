@@ -1,10 +1,10 @@
 'use strict';
 
 var expect = require('chai').expect,
-    f = require('util').format;
+  f = require('util').format;
 
 describe('Error tests', function() {
-  it('should return helpful error when geoHaystack fails',  {
+  it('should return helpful error when geoHaystack fails', {
     metadata: {
       requires: { topology: ['single', 'replicaset'] }
     },
@@ -15,8 +15,9 @@ describe('Error tests', function() {
       self.configuration.newTopology(function(err, server) {
         var ns = f('%s.geohaystack1', self.configuration.db);
         server.on('connect', function(_server) {
-          _server.command('system.$cmd', {geoNear: ns}, {}, function(_err, result) {
-            expect(/can\'t find ns/.test(_err)).to.be.ok;
+          _server.command('system.$cmd', { geoNear: ns }, {}, function(_err, result) {
+            expect(result).to.not.exist;
+            expect(/can't find ns/.test(_err)).to.be.ok;
             _server.destroy();
             done();
           });
@@ -28,7 +29,7 @@ describe('Error tests', function() {
     }
   });
 
-  it('should create a MongoError from string',  {
+  it('should create a MongoError from string', {
     metadata: {
       requires: { topology: ['single'] }
     },
@@ -46,7 +47,7 @@ describe('Error tests', function() {
     }
   });
 
-  it('should create a MongoError from Error',  {
+  it('should create a MongoError from Error', {
     metadata: {
       requires: { topology: ['single'] }
     },
@@ -64,7 +65,7 @@ describe('Error tests', function() {
     }
   });
 
-  it('should create a MongoError from object',  {
+  it('should create a MongoError from object', {
     metadata: {
       requires: { topology: ['single'] }
     },
@@ -73,7 +74,7 @@ describe('Error tests', function() {
       var MongoError = require('../../../lib/error.js').MongoError;
 
       var errorMessage = 'A test error';
-      var err = new MongoError({message: errorMessage, someData: 12345});
+      var err = new MongoError({ message: errorMessage, someData: 12345 });
       expect(err).to.be.an.instanceof(Error);
       expect(err.name).to.equal('MongoError');
       expect(err.message).to.equal(errorMessage);
@@ -83,7 +84,7 @@ describe('Error tests', function() {
     }
   });
 
-  it('should create a MongoNetworkError',  {
+  it('should create a MongoNetworkError', {
     metadata: {
       requires: { topology: ['single'] }
     },

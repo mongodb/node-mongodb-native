@@ -15,7 +15,7 @@ describe('Server operation example tests', function() {
    * @example-method insert
    * @ignore
    */
-  it('simple insert into db',  {
+  it('simple insert into db', {
     metadata: {
       requires: {
         topology: 'single'
@@ -23,8 +23,7 @@ describe('Server operation example tests', function() {
     },
 
     test: function(done) {
-      var Server = this.configuration.mongo.Server,
-          ReadPreference = this.configuration.mongo.ReadPreference;
+      var Server = this.configuration.mongo.Server;
 
       // Attempt to connect
       var server = new Server({
@@ -42,15 +41,21 @@ describe('Server operation example tests', function() {
       // Add event listeners
       server.on('connect', function(_server) {
         // Execute the insert
-        _server.insert('integration_tests.inserts_example1', [{a: 1}], {
-          writeConcern: {w: 1}, ordered: true
-        }, function(err, results) {
-          expect(err).to.be.null;
-          expect(results.result.n).to.equal(1);
+        _server.insert(
+          'integration_tests.inserts_example1',
+          [{ a: 1 }],
+          {
+            writeConcern: { w: 1 },
+            ordered: true
+          },
+          function(err, results) {
+            expect(err).to.be.null;
+            expect(results.result.n).to.equal(1);
 
-          _server.destroy();
-          done();
-        });
+            _server.destroy();
+            done();
+          }
+        );
       });
 
       // Start connection
@@ -66,7 +71,7 @@ describe('Server operation example tests', function() {
    * @example-method update
    * @ignore
    */
-  it('update using Server instance',  {
+  it('update using Server instance', {
     metadata: {
       requires: {
         topology: 'single'
@@ -74,8 +79,7 @@ describe('Server operation example tests', function() {
     },
 
     test: function(done) {
-      var Server = this.configuration.require.Server,
-          ReadPreference = this.configuration.require.ReadPreference;
+      var Server = this.configuration.require.Server;
 
       // Attempt to connect
       var server = new Server({
@@ -93,25 +97,40 @@ describe('Server operation example tests', function() {
       // Add event listeners
       server.on('connect', function(_server) {
         // Execute the insert
-        _server.insert('integration_tests.inserts_example2', [{a: 1}], {
-          writeConcern: {w: 1}, ordered: true
-        }, function(err, results) {
-          expect(err).to.be.null;
-          expect(results.result.n).to.equal(1);
+        _server.insert(
+          'integration_tests.inserts_example2',
+          [{ a: 1 }],
+          {
+            writeConcern: { w: 1 },
+            ordered: true
+          },
+          function(err, results) {
+            expect(err).to.be.null;
+            expect(results.result.n).to.equal(1);
 
-          // Execute the write
-          _server.update('integration_tests.inserts_example2', [{
-            q: {a: 1}, u: {'$set': {b: 1}}
-          }], {
-            writeConcern: {w: 1}, ordered: true
-          }, function(updateErr, updateResults) {
-            expect(updateErr).to.be.null;
-            expect(updateResults.result.n).to.equal(1);
+            // Execute the write
+            _server.update(
+              'integration_tests.inserts_example2',
+              [
+                {
+                  q: { a: 1 },
+                  u: { $set: { b: 1 } }
+                }
+              ],
+              {
+                writeConcern: { w: 1 },
+                ordered: true
+              },
+              function(updateErr, updateResults) {
+                expect(updateErr).to.be.null;
+                expect(updateResults.result.n).to.equal(1);
 
-            _server.destroy();
-            done();
-          });
-        });
+                _server.destroy();
+                done();
+              }
+            );
+          }
+        );
       });
 
       // Start connection
@@ -127,7 +146,7 @@ describe('Server operation example tests', function() {
    * @example-method remove
    * @ignore
    */
-  it('remove using Server instance',  {
+  it('remove using Server instance', {
     metadata: {
       requires: {
         topology: 'single'
@@ -135,8 +154,7 @@ describe('Server operation example tests', function() {
     },
 
     test: function(done) {
-      var Server = this.configuration.require.Server,
-          ReadPreference = this.configuration.require.ReadPreference;
+      var Server = this.configuration.require.Server;
 
       // Attempt to connect
       var server = new Server({
@@ -154,25 +172,40 @@ describe('Server operation example tests', function() {
       // Add event listeners
       server.on('connect', function(_server) {
         // Execute the insert
-        _server.insert('integration_tests.inserts_example3', [{a: 1}], {
-          writeConcern: {w: 1}, ordered: true
-        }, function(err, results) {
-          expect(err).to.be.null;
-          expect(results.result.n).to.equal(1);
+        _server.insert(
+          'integration_tests.inserts_example3',
+          [{ a: 1 }],
+          {
+            writeConcern: { w: 1 },
+            ordered: true
+          },
+          function(err, results) {
+            expect(err).to.be.null;
+            expect(results.result.n).to.equal(1);
 
-          // Execute the write
-          _server.remove('integration_tests.inserts_example3', [{
-            q: {a: 1}, limit: 1
-          }], {
-            writeConcern: {w: 1}, ordered: true
-          }, function(removeErr, removeResults) {
-            expect(removeErr).to.be.null;
-            expect(removeResults.result.n).to.equal(1);
+            // Execute the write
+            _server.remove(
+              'integration_tests.inserts_example3',
+              [
+                {
+                  q: { a: 1 },
+                  limit: 1
+                }
+              ],
+              {
+                writeConcern: { w: 1 },
+                ordered: true
+              },
+              function(removeErr, removeResults) {
+                expect(removeErr).to.be.null;
+                expect(removeResults.result.n).to.equal(1);
 
-            _server.destroy();
-            done();
-          });
-        });
+                _server.destroy();
+                done();
+              }
+            );
+          }
+        );
       });
 
       // Start connection
@@ -188,7 +221,7 @@ describe('Server operation example tests', function() {
    * @example-method cursor
    * @ignore
    */
-  it('cursor using Server instance',  {
+  it('cursor using Server instance', {
     metadata: {
       requires: {
         topology: 'single'
@@ -196,8 +229,7 @@ describe('Server operation example tests', function() {
     },
 
     test: function(done) {
-      var Server = this.configuration.require.Server,
-          ReadPreference = this.configuration.require.ReadPreference;
+      var Server = this.configuration.require.Server;
 
       // Attempt to connect
       var server = new Server({
@@ -215,27 +247,33 @@ describe('Server operation example tests', function() {
       // Add event listeners
       server.on('connect', function(_server) {
         // Execute the insert
-        _server.insert('integration_tests.inserts_example4', [{a: 1}], {
-          writeConcern: {w: 1}, ordered: true
-        }, function(err, results) {
-          expect(err).to.be.null;
-          expect(results.result.n).to.equal(1);
+        _server.insert(
+          'integration_tests.inserts_example4',
+          [{ a: 1 }],
+          {
+            writeConcern: { w: 1 },
+            ordered: true
+          },
+          function(err, results) {
+            expect(err).to.be.null;
+            expect(results.result.n).to.equal(1);
 
-          // Execute the write
-          var cursor = _server.cursor('integration_tests.inserts_example4', {
-            find: 'integration_tests.example4',
-            query: {a: 1}
-          });
+            // Execute the write
+            var cursor = _server.cursor('integration_tests.inserts_example4', {
+              find: 'integration_tests.example4',
+              query: { a: 1 }
+            });
 
-          // Get the first document
-          cursor.next(function(cursorErr, doc) {
-            expect(cursorErr).to.be.null;
-            expect(doc.a).to.equal(1);
+            // Get the first document
+            cursor.next(function(cursorErr, doc) {
+              expect(cursorErr).to.be.null;
+              expect(doc.a).to.equal(1);
 
-            _server.destroy();
-            done();
-          });
-        });
+              _server.destroy();
+              done();
+            });
+          }
+        );
       });
 
       // Start connection
@@ -251,7 +289,7 @@ describe('Server operation example tests', function() {
    * @example-method command
    * @ignore
    */
-  it('command using Server instance',  {
+  it('command using Server instance', {
     metadata: {
       requires: {
         topology: 'single'
@@ -259,8 +297,7 @@ describe('Server operation example tests', function() {
     },
 
     test: function(done) {
-      var Server = this.configuration.require.Server,
-          ReadPreference = this.configuration.require.ReadPreference;
+      var Server = this.configuration.require.Server;
 
       // Attempt to connect
       var server = new Server({
@@ -278,7 +315,8 @@ describe('Server operation example tests', function() {
       // Add event listeners
       server.on('connect', function(_server) {
         // Execute the command
-        _server.command('system.$cmd', {ismaster: true}, function(err, result) {
+        _server.command('system.$cmd', { ismaster: true }, function(err, result) {
+          expect(result).to.exist;
           expect(err).to.be.null;
           _server.destroy();
           done();
@@ -306,7 +344,7 @@ describe('Replset operation example tests', function() {
    * @example-method insert
    * @ignore
    */
-  it('simple insert into db using ReplSet',  {
+  it('simple insert into db using ReplSet', {
     metadata: {
       requires: {
         topology: 'replicaset'
@@ -314,13 +352,14 @@ describe('Replset operation example tests', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet,
-          ReadPreference = this.configuration.require.ReadPreference;
+      var ReplSet = this.configuration.require.ReplSet;
 
-      var config = [{
-        host: this.configuration.host,
-        port: this.configuration.port
-      }];
+      var config = [
+        {
+          host: this.configuration.host,
+          port: this.configuration.port
+        }
+      ];
 
       var options = {
         setName: this.configuration.setName
@@ -337,15 +376,21 @@ describe('Replset operation example tests', function() {
       // Add event listeners
       server.on('connect', function(_server) {
         // Execute the insert
-        _server.insert('integration_tests.inserts_example_replset_1', [{a:1}], {
-          writeConcern: {w: 1}, ordered: true
-        }, function(err, results) {
-          expect(err).to.be.null;
-          expect(results.result.n).to.equal(1);
+        _server.insert(
+          'integration_tests.inserts_example_replset_1',
+          [{ a: 1 }],
+          {
+            writeConcern: { w: 1 },
+            ordered: true
+          },
+          function(err, results) {
+            expect(err).to.be.null;
+            expect(results.result.n).to.equal(1);
 
-          _server.destroy();
-          done();
-        });
+            _server.destroy();
+            done();
+          }
+        );
       });
 
       // Start connection
@@ -361,7 +406,7 @@ describe('Replset operation example tests', function() {
    * @example-method update
    * @ignore
    */
-  it('update using ReplSet instance',  {
+  it('update using ReplSet instance', {
     metadata: {
       requires: {
         topology: 'replicaset'
@@ -369,13 +414,14 @@ describe('Replset operation example tests', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet,
-          ReadPreference = this.configuration.require.ReadPreference;
+      var ReplSet = this.configuration.require.ReplSet;
 
-      var config = [{
-        host: this.configuration.host,
-        port: this.configuration.port
-      }];
+      var config = [
+        {
+          host: this.configuration.host,
+          port: this.configuration.port
+        }
+      ];
 
       var options = {
         setName: this.configuration.setName
@@ -392,25 +438,40 @@ describe('Replset operation example tests', function() {
       // Add event listeners
       server.on('connect', function(_server) {
         // Execute the insert
-        _server.insert('integration_tests.inserts_example_replset_2', [{a: 1}], {
-          writeConcern: {w: 1}, ordered: true
-        }, function(err, results) {
-          expect(err).to.be.null;
-          expect(results.result.n).to.equal(1);
+        _server.insert(
+          'integration_tests.inserts_example_replset_2',
+          [{ a: 1 }],
+          {
+            writeConcern: { w: 1 },
+            ordered: true
+          },
+          function(err, results) {
+            expect(err).to.be.null;
+            expect(results.result.n).to.equal(1);
 
-          // Execute the write
-          _server.update('integration_tests.inserts_example_replset_2', [{
-            q: {a: 1}, u: {'$set': {b: 1}}
-          }], {
-            writeConcern: {w: 1}, ordered: true
-          }, function(updateErr, updateResults) {
-            expect(updateErr).to.be.null;
-            expect(updateResults.result.n).to.equal(1);
+            // Execute the write
+            _server.update(
+              'integration_tests.inserts_example_replset_2',
+              [
+                {
+                  q: { a: 1 },
+                  u: { $set: { b: 1 } }
+                }
+              ],
+              {
+                writeConcern: { w: 1 },
+                ordered: true
+              },
+              function(updateErr, updateResults) {
+                expect(updateErr).to.be.null;
+                expect(updateResults.result.n).to.equal(1);
 
-            _server.destroy();
-            done();
-          });
-        });
+                _server.destroy();
+                done();
+              }
+            );
+          }
+        );
       });
 
       // Start connection
@@ -426,7 +487,7 @@ describe('Replset operation example tests', function() {
    * @example-method remove
    * @ignore
    */
-  it('remove using ReplSet instance',  {
+  it('remove using ReplSet instance', {
     metadata: {
       requires: {
         topology: 'replicaset'
@@ -434,13 +495,14 @@ describe('Replset operation example tests', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet,
-          ReadPreference = this.configuration.require.ReadPreference;
+      var ReplSet = this.configuration.require.ReplSet;
 
-      var config = [{
-        host: this.configuration.host,
-        port: this.configuration.port
-      }];
+      var config = [
+        {
+          host: this.configuration.host,
+          port: this.configuration.port
+        }
+      ];
 
       var options = {
         setName: this.configuration.setName
@@ -457,25 +519,40 @@ describe('Replset operation example tests', function() {
       // Add event listeners
       server.on('connect', function(_server) {
         // Execute the insert
-        _server.insert('integration_tests.inserts_example_replset_3', [{a:1}], {
-          writeConcern: {w: 1}, ordered: true
-        }, function(err, results) {
-          expect(err).to.be.null;
-          expect(results.result.n).to.equal(1);
+        _server.insert(
+          'integration_tests.inserts_example_replset_3',
+          [{ a: 1 }],
+          {
+            writeConcern: { w: 1 },
+            ordered: true
+          },
+          function(err, results) {
+            expect(err).to.be.null;
+            expect(results.result.n).to.equal(1);
 
-          // Execute the write
-          _server.remove('integration_tests.inserts_example_replset_3', [{
-            q: {a: 1}, limit: 1
-          }], {
-            writeConcern: {w: 1}, ordered: true
-          }, function(removeErr, removeResults) {
-            expect(removeErr).to.be.null;
-            expect(removeResults.result.n).to.equal(1);
+            // Execute the write
+            _server.remove(
+              'integration_tests.inserts_example_replset_3',
+              [
+                {
+                  q: { a: 1 },
+                  limit: 1
+                }
+              ],
+              {
+                writeConcern: { w: 1 },
+                ordered: true
+              },
+              function(removeErr, removeResults) {
+                expect(removeErr).to.be.null;
+                expect(removeResults.result.n).to.equal(1);
 
-            _server.destroy();
-            done();
-          });
-        });
+                _server.destroy();
+                done();
+              }
+            );
+          }
+        );
       });
 
       // Start connection
@@ -491,7 +568,7 @@ describe('Replset operation example tests', function() {
    * @example-method cursor
    * @ignore
    */
-  it('cursor using ReplSet instance',  {
+  it('cursor using ReplSet instance', {
     metadata: {
       requires: {
         topology: 'replicaset'
@@ -499,13 +576,14 @@ describe('Replset operation example tests', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet,
-          ReadPreference = this.configuration.require.ReadPreference;
+      var ReplSet = this.configuration.require.ReplSet;
 
-      var config = [{
-        host: this.configuration.host,
-        port: this.configuration.port
-      }];
+      var config = [
+        {
+          host: this.configuration.host,
+          port: this.configuration.port
+        }
+      ];
 
       var options = {
         setName: this.configuration.setName
@@ -522,27 +600,33 @@ describe('Replset operation example tests', function() {
       // Add event listeners
       server.on('connect', function(_server) {
         // Execute the insert
-        _server.insert('integration_tests.inserts_example_replset_4', [{a:1}], {
-          writeConcern: {w: 1}, ordered: true
-        }, function(err, results) {
-          expect(err).to.be.null;
-          expect(results.result.n).to.equal(1);
+        _server.insert(
+          'integration_tests.inserts_example_replset_4',
+          [{ a: 1 }],
+          {
+            writeConcern: { w: 1 },
+            ordered: true
+          },
+          function(err, results) {
+            expect(err).to.be.null;
+            expect(results.result.n).to.equal(1);
 
-          // Execute the write
-          var cursor = _server.cursor('integration_tests.inserts_example_replset_4', {
-            find: 'integration_tests.example4',
-            query: {a: 1}
-          });
+            // Execute the write
+            var cursor = _server.cursor('integration_tests.inserts_example_replset_4', {
+              find: 'integration_tests.example4',
+              query: { a: 1 }
+            });
 
-          // Get the first document
-          cursor.next(function(cursorErr, doc) {
-            expect(cursorErr).to.be.null;
-            expect(doc.a).to.equal(1);
+            // Get the first document
+            cursor.next(function(cursorErr, doc) {
+              expect(cursorErr).to.be.null;
+              expect(doc.a).to.equal(1);
 
-            _server.destroy();
-            done();
-          });
-        });
+              _server.destroy();
+              done();
+            });
+          }
+        );
       });
 
       // Start connection
@@ -558,7 +642,7 @@ describe('Replset operation example tests', function() {
    * @example-method command
    * @ignore
    */
-  it('command using ReplSet instance',  {
+  it('command using ReplSet instance', {
     metadata: {
       requires: {
         topology: 'replicaset'
@@ -566,13 +650,14 @@ describe('Replset operation example tests', function() {
     },
 
     test: function(done) {
-      var ReplSet = this.configuration.require.ReplSet,
-          ReadPreference = this.configuration.require.ReadPreference;
+      var ReplSet = this.configuration.require.ReplSet;
 
-      var config = [{
-        host: this.configuration.host,
-        port: this.configuration.port
-      }];
+      var config = [
+        {
+          host: this.configuration.host,
+          port: this.configuration.port
+        }
+      ];
 
       var options = {
         setName: this.configuration.setName
@@ -589,7 +674,8 @@ describe('Replset operation example tests', function() {
       // Add event listeners
       server.on('connect', function(_server) {
         // Execute the command
-        _server.command('system.$cmd', {ismaster: true}, function(err, result) {
+        _server.command('system.$cmd', { ismaster: true }, function(err, result) {
+          expect(result).to.exist;
           expect(err).to.be.null;
           server.destroy();
           done();
@@ -617,7 +703,7 @@ describe.skip('Mongos operation example tests', function() {
    * @example-method insert
    * @ignore
    */
-  it('simple insert into db using Mongos',  {
+  it('simple insert into db using Mongos', {
     metadata: {
       requires: {
         topology: 'mongos'
@@ -628,23 +714,31 @@ describe.skip('Mongos operation example tests', function() {
       var Mongos = this.configuration.require.Mongos;
 
       // Attempt to connect
-      var server = new Mongos([{
-        host: this.configuration.host,
-        port: this.configuration.port
-      }]);
+      var server = new Mongos([
+        {
+          host: this.configuration.host,
+          port: this.configuration.port
+        }
+      ]);
 
       // Add event listeners
       server.on('connect', function(_server) {
         // Execute the insert
-        _server.insert('integration_tests.inserts_example_mongos_1', [{a: 1}], {
-          writeConcern: {w: 1}, ordered: true
-        }, function(insertErr, insertResults) {
-          expect(insertErr).to.be.null;
-          expect(insertResults.result.n).to.equal(1);
+        _server.insert(
+          'integration_tests.inserts_example_mongos_1',
+          [{ a: 1 }],
+          {
+            writeConcern: { w: 1 },
+            ordered: true
+          },
+          function(insertErr, insertResults) {
+            expect(insertErr).to.be.null;
+            expect(insertResults.result.n).to.equal(1);
 
-          _server.destroy();
-          done();
-        });
+            _server.destroy();
+            done();
+          }
+        );
       });
 
       // Start connection
@@ -659,7 +753,7 @@ describe.skip('Mongos operation example tests', function() {
    * @example-method update
    * @ignore
    */
-  it('update using ReplSet instance',  {
+  it('update using ReplSet instance', {
     metadata: {
       requires: {
         topology: 'mongos'
@@ -670,33 +764,50 @@ describe.skip('Mongos operation example tests', function() {
       var Mongos = this.configuration.require.Mongos;
 
       // Attempt to connect
-      var server = new Mongos([{
-        host: this.configuration.host,
-        port: this.configuration.port
-      }]);
+      var server = new Mongos([
+        {
+          host: this.configuration.host,
+          port: this.configuration.port
+        }
+      ]);
 
       // Add event listeners
       server.on('connect', function(_server) {
         // Execute the insert
-        _server.insert('integration_tests.inserts_example_mongos_2', [{a: 1}], {
-          writeConcern: {w: 1}, ordered: true
-        }, function(err, results) {
-          expect(err).to.be.null;
-          expect(results.result.n).to.equal(1);
+        _server.insert(
+          'integration_tests.inserts_example_mongos_2',
+          [{ a: 1 }],
+          {
+            writeConcern: { w: 1 },
+            ordered: true
+          },
+          function(err, results) {
+            expect(err).to.be.null;
+            expect(results.result.n).to.equal(1);
 
-          // Execute the write
-          _server.update('integration_tests.inserts_example_mongos_2', [{
-            q: {a: 1}, u: {'$set': {b: 1}}
-          }], {
-            writeConcern: {w: 1}, ordered: true
-          }, function(updateErr, updateResults) {
-            expect(updateErr).to.be.null;
-            expect(updateResults.result.n).to.equal(1);
+            // Execute the write
+            _server.update(
+              'integration_tests.inserts_example_mongos_2',
+              [
+                {
+                  q: { a: 1 },
+                  u: { $set: { b: 1 } }
+                }
+              ],
+              {
+                writeConcern: { w: 1 },
+                ordered: true
+              },
+              function(updateErr, updateResults) {
+                expect(updateErr).to.be.null;
+                expect(updateResults.result.n).to.equal(1);
 
-            _server.destroy();
-            done();
-          });
-        });
+                _server.destroy();
+                done();
+              }
+            );
+          }
+        );
       });
 
       // Start connection
@@ -711,7 +822,7 @@ describe.skip('Mongos operation example tests', function() {
    * @example-method remove
    * @ignore
    */
-  it('remove using Mongos instance',  {
+  it('remove using Mongos instance', {
     metadata: {
       requires: {
         topology: 'mongos'
@@ -722,33 +833,50 @@ describe.skip('Mongos operation example tests', function() {
       var Mongos = this.configuration.require.Mongos;
 
       // Attempt to connect
-      var server = new Mongos([{
-        host: this.configuration.host,
-        port: this.configuration.port
-      }]);
+      var server = new Mongos([
+        {
+          host: this.configuration.host,
+          port: this.configuration.port
+        }
+      ]);
 
       // Add event listeners
       server.on('connect', function(_server) {
         // Execute the insert
-        _server.insert('integration_tests.inserts_example_mongos_3', [{a: 1}], {
-          writeConcern: {w: 1}, ordered: true
-        }, function(err, results) {
-          expect(err).to.be.null;
-          expect(results.result.n).to.equal(1);
+        _server.insert(
+          'integration_tests.inserts_example_mongos_3',
+          [{ a: 1 }],
+          {
+            writeConcern: { w: 1 },
+            ordered: true
+          },
+          function(err, results) {
+            expect(err).to.be.null;
+            expect(results.result.n).to.equal(1);
 
-          // Execute the write
-          _server.remove('integration_tests.inserts_example_mongos_3', [{
-            q: {a: 1}, limit: 1
-          }], {
-            writeConcern: {w: 1}, ordered: true
-          }, function(removeErr, removeResults) {
-            expect(removeErr).to.be.null;
-            expect(removeResults.result.n).to.equal(1);
+            // Execute the write
+            _server.remove(
+              'integration_tests.inserts_example_mongos_3',
+              [
+                {
+                  q: { a: 1 },
+                  limit: 1
+                }
+              ],
+              {
+                writeConcern: { w: 1 },
+                ordered: true
+              },
+              function(removeErr, removeResults) {
+                expect(removeErr).to.be.null;
+                expect(removeResults.result.n).to.equal(1);
 
-            _server.destroy();
-            done();
-          });
-        });
+                _server.destroy();
+                done();
+              }
+            );
+          }
+        );
       });
 
       // Start connection
@@ -763,7 +891,7 @@ describe.skip('Mongos operation example tests', function() {
    * @example-method cursor
    * @ignore
    */
-  it('cursor using Mongos instance',  {
+  it('cursor using Mongos instance', {
     metadata: {
       requires: {
         topology: 'mongos'
@@ -774,35 +902,43 @@ describe.skip('Mongos operation example tests', function() {
       var Mongos = this.configuration.require.Mongos;
 
       // Attempt to connect
-      var server = new Mongos([{
-        host: this.configuration.host,
-        port: this.configuration.port
-      }]);
+      var server = new Mongos([
+        {
+          host: this.configuration.host,
+          port: this.configuration.port
+        }
+      ]);
 
       // Add event listeners
       server.on('connect', function(_server) {
         // Execute the insert
-        _server.insert('integration_tests.inserts_example_mongos_4', [{a: 1}], {
-          writeConcern: {w: 1}, ordered: true
-        }, function(err, results) {
-          expect(err).to.be.null;
-          expect(results.result.n).to.equal(1);
+        _server.insert(
+          'integration_tests.inserts_example_mongos_4',
+          [{ a: 1 }],
+          {
+            writeConcern: { w: 1 },
+            ordered: true
+          },
+          function(err, results) {
+            expect(err).to.be.null;
+            expect(results.result.n).to.equal(1);
 
-          // Execute the write
-          var cursor = _server.cursor('integration_tests.inserts_example_mongos_4', {
-            find: 'integration_tests.example4',
-            query: {a: 1}
-          });
+            // Execute the write
+            var cursor = _server.cursor('integration_tests.inserts_example_mongos_4', {
+              find: 'integration_tests.example4',
+              query: { a: 1 }
+            });
 
-          // Get the first document
-          cursor.next(function(cursorErr, doc) {
-            expect(cursorErr).to.be.null;
-            expect(doc.a).to.equal(1);
+            // Get the first document
+            cursor.next(function(cursorErr, doc) {
+              expect(cursorErr).to.be.null;
+              expect(doc.a).to.equal(1);
 
-            _server.destroy();
-            done();
-          });
-        });
+              _server.destroy();
+              done();
+            });
+          }
+        );
       });
 
       // Start connection
@@ -817,7 +953,7 @@ describe.skip('Mongos operation example tests', function() {
    * @example-method command
    * @ignore
    */
-  it('command using Mongos instance',  {
+  it('command using Mongos instance', {
     metadata: {
       requires: {
         topology: 'mongos'
@@ -828,15 +964,18 @@ describe.skip('Mongos operation example tests', function() {
       var Mongos = this.configuration.require.Mongos;
 
       // Attempt to connect
-      var server = new Mongos([{
-        host: this.configuration.host,
-        port: this.configuration.port
-      }]);
+      var server = new Mongos([
+        {
+          host: this.configuration.host,
+          port: this.configuration.port
+        }
+      ]);
 
       // Add event listeners
       server.on('connect', function(_server) {
         // Execute the command
-        _server.command('system.$cmd', {ismaster: true}, function(err, result) {
+        _server.command('system.$cmd', { ismaster: true }, function(err, result) {
+          expect(result).to.exist;
           expect(err).to.be.null;
           _server.destroy();
           done();

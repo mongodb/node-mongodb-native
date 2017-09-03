@@ -1,11 +1,11 @@
 'use strict';
 var expect = require('chai').expect,
-    assign = require('../../../../lib/utils').assign,
-    co = require('co'),
-    mockupdb = require('../../../mock');
+  assign = require('../../../../lib/utils').assign,
+  co = require('co'),
+  mockupdb = require('../../../mock');
 
 var timeoutPromise = function(timeout) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function(resolve) {
     setTimeout(function() {
       resolve();
     }, timeout);
@@ -33,15 +33,15 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'ismaster': true,
-        'msg': 'isdbgrid',
-        'maxBsonObjectSize': 16777216,
-        'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000,
-        'localTime': new Date(),
-        'maxWireVersion': 3,
-        'minWireVersion': 0,
-        'ok': 1
+        ismaster: true,
+        msg: 'isdbgrid',
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 3,
+        minWireVersion: 0,
+        ok: 1
       };
 
       // Primary server states
@@ -61,7 +61,7 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
             if (doc.ismaster) {
               request.reply(serverIsMaster[0]);
             } else if (doc.insert && currentStep === 1) {
-              request.reply({ok: 1, n: doc.documents, lastOp: new Date()});
+              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
             }
           }
         }).catch(function() {});
@@ -76,22 +76,22 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
             if (doc.ismaster) {
               request.reply(serverIsMaster[0]);
             } else if (doc.insert) {
-              request.reply({ok: 1, n: doc.documents, lastOp: new Date()});
+              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
             }
           }
         }).catch(function() {});
       });
 
       // Attempt to connect
-      var server = new Mongos([
-        { host: 'localhost', port: 62000 },
-        { host: 'localhost', port: 62001 }
-      ], {
-        connectionTimeout: 3000,
-        socketTimeout: 1500,
-        haInterval: 1000,
-        size: 1
-      });
+      var server = new Mongos(
+        [{ host: 'localhost', port: 62000 }, { host: 'localhost', port: 62001 }],
+        {
+          connectionTimeout: 3000,
+          socketTimeout: 1500,
+          haInterval: 1000,
+          size: 1
+        }
+      );
 
       // Add event listeners
       server.once('fullsetup', function(_server) {
@@ -125,55 +125,57 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
                     mongos2.destroy();
 
                     setTimeout(function() {
-                      var results = [{
-                        'topologyId': _server.s.id,
-                        'previousDescription': {
-                          'topologyType': 'Sharded',
-                          'servers': []
+                      var results = [
+                        {
+                          topologyId: _server.s.id,
+                          previousDescription: {
+                            topologyType: 'Sharded',
+                            servers: []
+                          },
+                          newDescription: {
+                            topologyType: 'Sharded',
+                            servers: [
+                              {
+                                type: 'Mongos',
+                                address: 'localhost:62000'
+                              },
+                              {
+                                type: 'Unknown',
+                                address: 'localhost:62001'
+                              }
+                            ]
+                          }
                         },
-                        'newDescription': {
-                          'topologyType': 'Sharded',
-                          'servers': [
-                            {
-                              'type': 'Mongos',
-                              'address': 'localhost:62000'
-                            },
-                            {
-                              'type': 'Unknown',
-                              'address': 'localhost:62001'
-                            }
-                          ]
+                        {
+                          topologyId: _server.s.id,
+                          previousDescription: {
+                            topologyType: 'Sharded',
+                            servers: [
+                              {
+                                type: 'Mongos',
+                                address: 'localhost:62000'
+                              },
+                              {
+                                type: 'Unknown',
+                                address: 'localhost:62001'
+                              }
+                            ]
+                          },
+                          newDescription: {
+                            topologyType: 'Sharded',
+                            servers: [
+                              {
+                                type: 'Mongos',
+                                address: 'localhost:62000'
+                              },
+                              {
+                                type: 'Mongos',
+                                address: 'localhost:62001'
+                              }
+                            ]
+                          }
                         }
-                      },
-                      {
-                        'topologyId': _server.s.id,
-                        'previousDescription': {
-                          'topologyType': 'Sharded',
-                          'servers': [
-                            {
-                              'type': 'Mongos',
-                              'address': 'localhost:62000'
-                            },
-                            {
-                              'type': 'Unknown',
-                              'address': 'localhost:62001'
-                            }
-                          ]
-                        },
-                        'newDescription': {
-                          'topologyType': 'Sharded',
-                          'servers': [
-                            {
-                              'type': 'Mongos',
-                              'address': 'localhost:62000'
-                            },
-                            {
-                              'type': 'Mongos',
-                              'address': 'localhost:62001'
-                            }
-                          ]
-                        }
-                      }];
+                      ];
 
                       for (var i = 0; i < responses.topologyDescriptionChanged.length; i++) {
                         expect(results[i]).to.eql(responses.topologyDescriptionChanged[i]);
@@ -197,43 +199,45 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       };
 
       server.on('serverOpening', function(event) {
-        add({type: 'serverOpening', event: event});
+        add({ type: 'serverOpening', event: event });
       });
 
       server.on('serverClosed', function(event) {
-        add({type: 'serverClosed', event: event});
+        add({ type: 'serverClosed', event: event });
       });
 
       server.on('serverDescriptionChanged', function(event) {
-        add({type: 'serverDescriptionChanged', event: event});
+        add({ type: 'serverDescriptionChanged', event: event });
       });
 
       server.on('topologyOpening', function(event) {
-        add({type: 'topologyOpening', event: event});
+        add({ type: 'topologyOpening', event: event });
       });
 
       server.on('topologyClosed', function(event) {
-        add({type: 'topologyClosed', event: event});
+        add({ type: 'topologyClosed', event: event });
       });
 
       server.on('topologyDescriptionChanged', function(event) {
-        add({type: 'topologyDescriptionChanged', event: event});
+        add({ type: 'topologyDescriptionChanged', event: event });
       });
 
       server.on('serverHeartbeatStarted', function(event) {
-        add({type: 'serverHeartbeatStarted', event: event});
+        add({ type: 'serverHeartbeatStarted', event: event });
       });
 
       server.on('serverHeartbeatSucceeded', function(event) {
-        add({type: 'serverHeartbeatSucceeded', event: event});
+        add({ type: 'serverHeartbeatSucceeded', event: event });
       });
 
       server.on('serverHeartbeatFailed', function(event) {
-        add({type: 'serverHeartbeatFailed', event: event});
+        add({ type: 'serverHeartbeatFailed', event: event });
       });
 
       server.on('error', done);
-      setTimeout(function() { server.connect(); }, 100);
+      setTimeout(function() {
+        server.connect();
+      }, 100);
     }
   });
 
@@ -255,15 +259,15 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'ismaster': true,
-        'msg': 'isdbgrid',
-        'maxBsonObjectSize': 16777216,
-        'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000,
-        'localTime': new Date(),
-        'maxWireVersion': 3,
-        'minWireVersion': 0,
-        'ok': 1
+        ismaster: true,
+        msg: 'isdbgrid',
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 3,
+        minWireVersion: 0,
+        ok: 1
       };
 
       // Primary server states
@@ -300,22 +304,22 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
             if (doc.ismaster) {
               request.reply(serverIsMaster[0]);
             } else if (doc.insert) {
-              request.reply({ok: 1, n: doc.documents, lastOp: new Date() });
+              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
             }
           }
         });
       });
 
       // Attempt to connect
-      var server = new Mongos([
-        { host: 'localhost', port: 62002 },
-        { host: 'localhost', port: 62003 }
-      ], {
-        connectionTimeout: 3000,
-        socketTimeout: 5000,
-        haInterval: 1000,
-        size: 1
-      });
+      var server = new Mongos(
+        [{ host: 'localhost', port: 62002 }, { host: 'localhost', port: 62003 }],
+        {
+          connectionTimeout: 3000,
+          socketTimeout: 5000,
+          haInterval: 1000,
+          size: 1
+        }
+      );
 
       // Add event listeners
       server.once('fullsetup', function(_server) {
@@ -343,55 +347,57 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
                   expect(responses.serverDescriptionChanged.length).to.be.greaterThan(0);
                   expect(responses.topologyDescriptionChanged).to.have.length(2);
 
-                  var results = [{
-                    'topologyId': _server.s.id,
-                    'previousDescription': {
-                      'topologyType': 'Sharded',
-                      'servers': []
+                  var results = [
+                    {
+                      topologyId: _server.s.id,
+                      previousDescription: {
+                        topologyType: 'Sharded',
+                        servers: []
+                      },
+                      newDescription: {
+                        topologyType: 'Sharded',
+                        servers: [
+                          {
+                            type: 'Mongos',
+                            address: 'localhost:62002'
+                          },
+                          {
+                            type: 'Unknown',
+                            address: 'localhost:62003'
+                          }
+                        ]
+                      }
                     },
-                    'newDescription': {
-                      'topologyType': 'Sharded',
-                      'servers': [
-                        {
-                          'type': 'Mongos',
-                          'address': 'localhost:62002'
-                        },
-                        {
-                          'type': 'Unknown',
-                          'address': 'localhost:62003'
-                        }
-                      ]
+                    {
+                      topologyId: _server.s.id,
+                      previousDescription: {
+                        topologyType: 'Sharded',
+                        servers: [
+                          {
+                            type: 'Mongos',
+                            address: 'localhost:62002'
+                          },
+                          {
+                            type: 'Unknown',
+                            address: 'localhost:62003'
+                          }
+                        ]
+                      },
+                      newDescription: {
+                        topologyType: 'Sharded',
+                        servers: [
+                          {
+                            type: 'Mongos',
+                            address: 'localhost:62002'
+                          },
+                          {
+                            type: 'Mongos',
+                            address: 'localhost:62003'
+                          }
+                        ]
+                      }
                     }
-                  },
-                  {
-                    'topologyId': _server.s.id,
-                    'previousDescription': {
-                      'topologyType': 'Sharded',
-                      'servers': [
-                        {
-                          'type': 'Mongos',
-                          'address': 'localhost:62002'
-                        },
-                        {
-                          'type': 'Unknown',
-                          'address': 'localhost:62003'
-                        }
-                      ]
-                    },
-                    'newDescription': {
-                      'topologyType': 'Sharded',
-                      'servers': [
-                        {
-                          'type': 'Mongos',
-                          'address': 'localhost:62002'
-                        },
-                        {
-                          'type': 'Mongos',
-                          'address': 'localhost:62003'
-                        }
-                      ]
-                    }
-                  }];
+                  ];
 
                   expect(results).to.eql(responses.topologyDescriptionChanged);
                   running = false;
@@ -410,39 +416,39 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       };
 
       server.on('serverOpening', function(event) {
-        add({type: 'serverOpening', event: event});
+        add({ type: 'serverOpening', event: event });
       });
 
       server.on('serverClosed', function(event) {
-        add({type: 'serverClosed', event: event});
+        add({ type: 'serverClosed', event: event });
       });
 
       server.on('serverDescriptionChanged', function(event) {
-        add({type: 'serverDescriptionChanged', event: event});
+        add({ type: 'serverDescriptionChanged', event: event });
       });
 
       server.on('topologyOpening', function(event) {
-        add({type: 'topologyOpening', event: event});
+        add({ type: 'topologyOpening', event: event });
       });
 
       server.on('topologyClosed', function(event) {
-        add({type: 'topologyClosed', event: event});
+        add({ type: 'topologyClosed', event: event });
       });
 
       server.on('topologyDescriptionChanged', function(event) {
-        add({type: 'topologyDescriptionChanged', event: event});
+        add({ type: 'topologyDescriptionChanged', event: event });
       });
 
       server.on('serverHeartbeatStarted', function(event) {
-        add({type: 'serverHeartbeatStarted', event: event});
+        add({ type: 'serverHeartbeatStarted', event: event });
       });
 
       server.on('serverHeartbeatSucceeded', function(event) {
-        add({type: 'serverHeartbeatSucceeded', event: event});
+        add({ type: 'serverHeartbeatSucceeded', event: event });
       });
 
       server.on('serverHeartbeatFailed', function(event) {
-        add({type: 'serverHeartbeatFailed', event: event});
+        add({ type: 'serverHeartbeatFailed', event: event });
       });
 
       server.on('error', done);
@@ -470,15 +476,15 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'ismaster': true,
-        'msg': 'isdbgrid',
-        'maxBsonObjectSize': 16777216,
-        'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000,
-        'localTime': new Date(),
-        'maxWireVersion': 3,
-        'minWireVersion': 0,
-        'ok': 1
+        ismaster: true,
+        msg: 'isdbgrid',
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 3,
+        minWireVersion: 0,
+        ok: 1
       };
 
       // Primary server states
@@ -536,18 +542,15 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       });
 
       // Attempt to connect
-      var server = new Mongos([
-        { host: 'localhost', port: 62004 },
-        { host: 'localhost', port: 62005 }
-      ], {
-        connectionTimeout: 3000,
-        socketTimeout: 1500,
-        haInterval: 1000,
-        size: 1
-      });
-
-      // Add event listeners
-      server.once('fullsetup', function(_server) {});
+      var server = new Mongos(
+        [{ host: 'localhost', port: 62004 }, { host: 'localhost', port: 62005 }],
+        {
+          connectionTimeout: 3000,
+          socketTimeout: 1500,
+          haInterval: 1000,
+          size: 1
+        }
+      );
 
       var responses = {};
       var add = function(a) {
@@ -556,39 +559,39 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       };
 
       server.on('serverOpening', function(event) {
-        add({type: 'serverOpening', event: event});
+        add({ type: 'serverOpening', event: event });
       });
 
       server.on('serverClosed', function(event) {
-        add({type: 'serverClosed', event: event});
+        add({ type: 'serverClosed', event: event });
       });
 
       server.on('serverDescriptionChanged', function(event) {
-        add({type: 'serverDescriptionChanged', event: event});
+        add({ type: 'serverDescriptionChanged', event: event });
       });
 
       server.on('topologyOpening', function(event) {
-        add({type: 'topologyOpening', event: event});
+        add({ type: 'topologyOpening', event: event });
       });
 
       server.on('topologyClosed', function(event) {
-        add({type: 'topologyClosed', event: event});
+        add({ type: 'topologyClosed', event: event });
       });
 
       server.on('topologyDescriptionChanged', function(event) {
-        add({type: 'topologyDescriptionChanged', event: event});
+        add({ type: 'topologyDescriptionChanged', event: event });
       });
 
       server.on('serverHeartbeatStarted', function(event) {
-        add({type: 'serverHeartbeatStarted', event: event});
+        add({ type: 'serverHeartbeatStarted', event: event });
       });
 
       server.on('serverHeartbeatSucceeded', function(event) {
-        add({type: 'serverHeartbeatSucceeded', event: event});
+        add({ type: 'serverHeartbeatSucceeded', event: event });
       });
 
       server.on('serverHeartbeatFailed', function(event) {
-        add({type: 'serverHeartbeatFailed', event: event});
+        add({ type: 'serverHeartbeatFailed', event: event });
       });
 
       server.on('error', done);

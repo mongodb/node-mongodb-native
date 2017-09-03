@@ -1,8 +1,8 @@
 'use strict';
 var assign = require('../../../../lib/utils').assign,
-    co = require('co'),
-    Connection = require('../../../../lib/connection/connection'),
-    mockupdb = require('../../../mock');
+  co = require('co'),
+  Connection = require('../../../../lib/connection/connection'),
+  mockupdb = require('../../../mock');
 
 describe('ReplSet Primary Loses Network (mocks)', function() {
   it('Recover from Primary loosing network connectivity', {
@@ -15,7 +15,7 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
 
     test: function(done) {
       var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId;
+        ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var primaryServer = null;
@@ -27,32 +27,72 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'setName': 'rs', 'setVersion': 1, 'electionId': new ObjectId(),
-        'maxBsonObjectSize': 16777216, 'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000, 'localTime': new Date(), 'maxWireVersion': 4,
-        'minWireVersion': 0, 'ok': 1, 'hosts': ['localhost:32000', 'localhost:32001', 'localhost:32002']
+        setName: 'rs',
+        setVersion: 1,
+        electionId: new ObjectId(),
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 4,
+        minWireVersion: 0,
+        ok: 1,
+        hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002']
       };
 
       // Primary server states
-      var primary = [assign({}, defaultFields, {
-        'ismaster': true, 'secondary': false, 'me': 'localhost:32000', 'primary': 'localhost:32000', 'tags': { 'loc': 'ny' }
-      }), assign({}, defaultFields, {
-        'ismaster': true, 'secondary': false, 'me': 'localhost:32000', 'primary': 'localhost:32000', 'tags': { 'loc': 'ny' }
-      })];
+      var primary = [
+        assign({}, defaultFields, {
+          ismaster: true,
+          secondary: false,
+          me: 'localhost:32000',
+          primary: 'localhost:32000',
+          tags: { loc: 'ny' }
+        }),
+        assign({}, defaultFields, {
+          ismaster: true,
+          secondary: false,
+          me: 'localhost:32000',
+          primary: 'localhost:32000',
+          tags: { loc: 'ny' }
+        })
+      ];
 
       // Primary server states
-      var firstSecondary = [assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32001', 'primary': 'localhost:32000', 'tags': { 'loc': 'sf' }
-      }), assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32001', 'primary': 'localhost:32002', 'tags': { 'loc': 'sf' }
-      })];
+      var firstSecondary = [
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32001',
+          primary: 'localhost:32000',
+          tags: { loc: 'sf' }
+        }),
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32001',
+          primary: 'localhost:32002',
+          tags: { loc: 'sf' }
+        })
+      ];
 
       // Primary server states
-      var secondSecondary = [assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32002', 'primary': 'localhost:32000', 'tags': { 'loc': 'sf' }
-      }), assign({}, defaultFields, {
-        'ismaster': true, 'secondary': false, 'me': 'localhost:32002', 'primary': 'localhost:32002', 'tags': { 'loc': 'sf' }
-      })];
+      var secondSecondary = [
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32002',
+          primary: 'localhost:32000',
+          tags: { loc: 'sf' }
+        }),
+        assign({}, defaultFields, {
+          ismaster: true,
+          secondary: false,
+          me: 'localhost:32002',
+          primary: 'localhost:32002',
+          tags: { loc: 'sf' }
+        })
+      ];
 
       // Boot the mock
       co(function*() {
@@ -73,7 +113,7 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
               request.reply(primary[currentIsMasterIndex]);
             }
           }
-        }).catch(function(err) {
+        }).catch(function() {
           // console.log(err.stack);
         });
 
@@ -87,7 +127,7 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
               request.reply(firstSecondary[currentIsMasterIndex]);
             }
           }
-        }).catch(function(err) {
+        }).catch(function() {
           // console.log(err.stack);
         });
 
@@ -101,7 +141,7 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
               request.reply(secondSecondary[currentIsMasterIndex]);
             }
           }
-        }).catch(function(err) {
+        }).catch(function() {
           // console.log(err.stack);
         });
       });
@@ -109,20 +149,23 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
       Connection.enableConnectionAccounting();
 
       // Attempt to connect
-      var server = new ReplSet([
-        { host: 'localhost', port: 32000 },
-        { host: 'localhost', port: 32001 },
-        { host: 'localhost', port: 32002 }
-      ], {
-        setName: 'rs',
-        connectionTimeout: 3000,
-        socketTimeout: 0,
-        haInterval: 2000,
-        size: 1
-      });
+      var server = new ReplSet(
+        [
+          { host: 'localhost', port: 32000 },
+          { host: 'localhost', port: 32001 },
+          { host: 'localhost', port: 32002 }
+        ],
+        {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 2000,
+          size: 1
+        }
+      );
 
       server.on('error', done);
-      server.on('left', function(_type, _server) {
+      server.on('left', function(_type) {
         if (_type === 'primary') {
           server.on('joined', function(__type, __server) {
             if (__type === 'primary' && __server.name === 'localhost:32002') {
@@ -142,7 +185,7 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
         server.__connected = true;
 
         setInterval(function() {
-          _server.command('system.$cmd', { ismaster: 1 }, function(err, result) {
+          _server.command('system.$cmd', { ismaster: 1 }, function(err) {
             if (err) {
               // console.error(err);
             } else {
@@ -163,8 +206,6 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
         }, 2000);
       });
 
-      // Add event listeners
-      server.on('fullsetup', function(_server) {});
       // Gives proxies a chance to boot up
       setTimeout(function() {
         server.connect();

@@ -1,12 +1,14 @@
 'use strict';
 var assign = require('../../../../lib/utils').assign,
-    co = require('co'),
-    Connection = require('../../../../lib/connection/connection'),
-    mockupdb = require('../../../mock');
+  co = require('co'),
+  Connection = require('../../../../lib/connection/connection'),
+  mockupdb = require('../../../mock');
 
 var timeoutPromise = function(timeout) {
-  return new Promise(function(resolve, reject) {
-    setTimeout(function() { resolve(); }, timeout);
+  return new Promise(function(resolve) {
+    setTimeout(function() {
+      resolve();
+    }, timeout);
   });
 };
 
@@ -21,7 +23,7 @@ describe('ReplSet No Primary Found (mocks)', function() {
 
     test: function(done) {
       var ReplSet = this.configuration.mongo.ReplSet,
-          ObjectId = this.configuration.mongo.BSON.ObjectId;
+        ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var primaryServer = null;
@@ -32,32 +34,60 @@ describe('ReplSet No Primary Found (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'setName': 'rs', 'setVersion': 1, 'electionId': new ObjectId(),
-        'maxBsonObjectSize': 16777216, 'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000, 'localTime': new Date(), 'maxWireVersion': 3,
-        'minWireVersion': 0, 'ok': 1, 'hosts': ['localhost:32000', 'localhost:32001', 'localhost:32002'],
-        'arbiters': ['localhost:32003']
+        setName: 'rs',
+        setVersion: 1,
+        electionId: new ObjectId(),
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 3,
+        minWireVersion: 0,
+        ok: 1,
+        hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002'],
+        arbiters: ['localhost:32003']
       };
 
       // Primary server states
-      var primary = [assign({}, defaultFields, {
-        'ismaster': true, 'secondary': false, 'me': 'localhost:32000', 'primary': 'localhost:32000'
-      })];
+      var primary = [
+        assign({}, defaultFields, {
+          ismaster: true,
+          secondary: false,
+          me: 'localhost:32000',
+          primary: 'localhost:32000'
+        })
+      ];
 
       // Primary server states
-      var firstSecondary = [assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32001', 'primary': 'localhost:32000'
-      })];
+      var firstSecondary = [
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32001',
+          primary: 'localhost:32000'
+        })
+      ];
 
       // Primary server states
-      var secondSecondary = [assign({}, defaultFields, {
-        'ismaster': false, 'secondary': true, 'me': 'localhost:32002', 'primary': 'localhost:32000'
-      })];
+      var secondSecondary = [
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: true,
+          me: 'localhost:32002',
+          primary: 'localhost:32000'
+        })
+      ];
 
       // Primary server states
-      var arbiter = [assign({}, defaultFields, {
-        'ismaster': false, 'secondary': false, 'arbiterOnly': true, 'me': 'localhost:32003', 'primary': 'localhost:32000'
-      })];
+      var arbiter = [
+        assign({}, defaultFields, {
+          ismaster: false,
+          secondary: false,
+          arbiterOnly: true,
+          me: 'localhost:32003',
+          primary: 'localhost:32000'
+        })
+      ];
 
       // Boot the mock
       co(function*() {
@@ -114,16 +144,14 @@ describe('ReplSet No Primary Found (mocks)', function() {
               request.reply(arbiter[0]);
             }
           }
-        }).catch(function(err) {
+        }).catch(function() {
           // console.log(err.stack);
         });
       });
 
       Connection.enableConnectionAccounting();
       // Attempt to connect
-      var server = new ReplSet([
-        { host: 'localhost', port: 32000 }
-      ], {
+      var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
         setName: 'rs',
         connectionTimeout: 2000,
         socketTimeout: 4000,
@@ -132,7 +160,7 @@ describe('ReplSet No Primary Found (mocks)', function() {
       });
 
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function() {
         // Destroy mock
         primaryServer.destroy();
         firstSecondaryServer.destroy();

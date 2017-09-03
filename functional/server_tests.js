@@ -1,12 +1,12 @@
 'use strict';
 
 var expect = require('chai').expect,
-    f = require('util').format,
-    locateAuthMethod = require('./shared').locateAuthMethod,
-    executeCommand = require('./shared').executeCommand,
-    Server = require('../../../lib/topologies/server'),
-    Bson = require('bson'),
-    Connection = require('../../../lib/connection/connection');
+  f = require('util').format,
+  locateAuthMethod = require('./shared').locateAuthMethod,
+  executeCommand = require('./shared').executeCommand,
+  Server = require('../../../lib/topologies/server'),
+  Bson = require('bson'),
+  Connection = require('../../../lib/connection/connection');
 
 var WIRE_PROTOCOL_COMPRESSION_SUPPORT_MIN_VERSION = 5;
 
@@ -23,7 +23,7 @@ describe('Server tests', function() {
       });
 
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function() {
         server.destroy();
         done();
       });
@@ -45,8 +45,8 @@ describe('Server tests', function() {
       });
 
       // Add event listeners
-      server.on('connect', function(_server) {
-        server.command('admin.$cmd', {ismaster: true}, function(err, r) {
+      server.on('connect', function() {
+        server.command('admin.$cmd', { ismaster: true }, function(err, r) {
           expect(err).to.be.null;
           expect(r.result.ismaster).to.be.true;
           expect(r.connection).to.not.be.null;
@@ -73,17 +73,22 @@ describe('Server tests', function() {
       });
 
       // Add event listeners
-      server.on('connect', function(_server) {
-        server.command('admin.$cmd', {ismaster: true}, {
-          raw: true
-        }, function(err, r) {
-          expect(err).to.be.null;
-          expect(r.result).to.be.an.instanceof(Buffer);
-          expect(r.connection).to.not.be.null;
+      server.on('connect', function() {
+        server.command(
+          'admin.$cmd',
+          { ismaster: true },
+          {
+            raw: true
+          },
+          function(err, r) {
+            expect(err).to.be.null;
+            expect(r.result).to.be.an.instanceof(Buffer);
+            expect(r.connection).to.not.be.null;
 
-          server.destroy();
-          done();
-        });
+            server.destroy();
+            done();
+          }
+        );
       });
 
       // Start connection
@@ -103,12 +108,15 @@ describe('Server tests', function() {
       });
 
       // Add event listeners
-      server.on('connect', function(_server) {
-        server.insert('integration_tests.inserts', {a: 1}, function(insertOneErr, insertOneR) {
+      server.on('connect', function() {
+        server.insert('integration_tests.inserts', { a: 1 }, function(insertOneErr, insertOneR) {
           expect(insertOneErr).to.be.null;
           expect(insertOneR.result.n).to.equal(1);
 
-          server.insert('integration_tests.inserts', {a: 1}, {ordered: false}, function(insertTwoErr, insertTwoR) {
+          server.insert('integration_tests.inserts', { a: 1 }, { ordered: false }, function(
+            insertTwoErr,
+            insertTwoR
+          ) {
             expect(insertTwoErr).to.be.null;
             expect(insertTwoR.result.n).to.equal(1);
 
@@ -123,38 +131,47 @@ describe('Server tests', function() {
     }
   });
 
-  it('should correctly connect server to single instance and send an uncompressed message if an uncompressible command is specified', {
-    metadata: { requires: { topology: 'single' } },
+  it(
+    'should correctly connect server to single instance and send an uncompressed message if an uncompressible command is specified',
+    {
+      metadata: { requires: { topology: 'single' } },
 
-    test: function(done) {
-      var Server = this.configuration.mongo.Server,
+      test: function(done) {
+        var Server = this.configuration.mongo.Server,
           ReadPreference = this.configuration.mongo.ReadPreference;
 
-      // Attempt to connect
-      var server = new Server({
-        host: this.configuration.host,
-        port: this.configuration.port,
-        bson: new Bson(),
-        compression: { compressors: ['snappy', 'zlib'] }
-      });
-
-      // Add event listeners
-      server.on('connect', function(_server) {
-        server.command('system.$cmd', {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
-          if (err) {
-            console.log(err);
-          }
-          expect(err).to.be.null;
-
-          server.destroy();
-          done();
+        // Attempt to connect
+        var server = new Server({
+          host: this.configuration.host,
+          port: this.configuration.port,
+          bson: new Bson(),
+          compression: { compressors: ['snappy', 'zlib'] }
         });
-      });
 
-      // Start connection
-      server.connect();
+        // Add event listeners
+        server.on('connect', function() {
+          server.command(
+            'system.$cmd',
+            { ismaster: true },
+            { readPreference: new ReadPreference('primary') },
+            function(err, result) {
+              if (err) {
+                console.log(err);
+              }
+              expect(err).to.be.null;
+              expect(result).to.exist;
+
+              server.destroy();
+              done();
+            }
+          );
+        });
+
+        // Start connection
+        server.connect();
+      }
     }
-  });
+  );
 
   it('should correctly connect server to single instance and execute bulk insert', {
     metadata: { requires: { topology: 'single' } },
@@ -168,18 +185,26 @@ describe('Server tests', function() {
       });
 
       // Add event listeners
-      server.on('connect', function(_server) {
-        server.insert('integration_tests.inserts', [{a: 1}, {b: 1}], function(insertOneErr, insertOneR) {
+      server.on('connect', function() {
+        server.insert('integration_tests.inserts', [{ a: 1 }, { b: 1 }], function(
+          insertOneErr,
+          insertOneR
+        ) {
           expect(insertOneErr).to.be.null;
           expect(insertOneR.result.n).to.equal(2);
 
-          server.insert('integration_tests.inserts', [{a: 1}, {b: 1}], {ordered: false}, function(insertTwoErr, insertTwoR) {
-            expect(insertTwoErr).to.be.null;
-            expect(insertTwoR.result.n).to.equal(2);
+          server.insert(
+            'integration_tests.inserts',
+            [{ a: 1 }, { b: 1 }],
+            { ordered: false },
+            function(insertTwoErr, insertTwoR) {
+              expect(insertTwoErr).to.be.null;
+              expect(insertTwoR.result.n).to.equal(2);
 
-            server.destroy();
-            done();
-          });
+              server.destroy();
+              done();
+            }
+          );
         });
       });
 
@@ -200,18 +225,26 @@ describe('Server tests', function() {
       });
 
       // Add event listeners
-      server.on('connect', function(_server) {
-        server.insert('integration_tests.inserts', {a: 1}, {writeConcern: {w: 0}}, function(insertOneErr, insertOneR) {
+      server.on('connect', function() {
+        server.insert('integration_tests.inserts', { a: 1 }, { writeConcern: { w: 0 } }, function(
+          insertOneErr,
+          insertOneR
+        ) {
           expect(insertOneErr).to.be.null;
           expect(insertOneR.result.ok).to.equal(1);
 
-          server.insert('integration_tests.inserts', {a: 1}, {ordered: false, writeConcern: {w: 0}}, function(insertTwoErr, insertTwoR) {
-            expect(insertTwoErr).to.be.null;
-            expect(insertTwoR.result.ok).to.equal(1);
+          server.insert(
+            'integration_tests.inserts',
+            { a: 1 },
+            { ordered: false, writeConcern: { w: 0 } },
+            function(insertTwoErr, insertTwoR) {
+              expect(insertTwoErr).to.be.null;
+              expect(insertTwoR.result.ok).to.equal(1);
 
-            server.destroy();
-            done();
-          });
+              server.destroy();
+              done();
+            }
+          );
         });
       });
 
@@ -233,17 +266,27 @@ describe('Server tests', function() {
 
       // Add event listeners
       server.on('connect', function(_server) {
-        _server.update('integration_tests.inserts_example2', [{
-          q: {a: 1}, u: {'$set': {b: 1}}, upsert: true
-        }], {
-          writeConcern: {w: 1}, ordered: true
-        }, function(err, results) {
-          expect(err).to.be.null;
-          expect(results.result.n).to.equal(1);
+        _server.update(
+          'integration_tests.inserts_example2',
+          [
+            {
+              q: { a: 1 },
+              u: { $set: { b: 1 } },
+              upsert: true
+            }
+          ],
+          {
+            writeConcern: { w: 1 },
+            ordered: true
+          },
+          function(err, results) {
+            expect(err).to.be.null;
+            expect(results.result.n).to.equal(1);
 
-          _server.destroy();
-          done();
-        });
+            _server.destroy();
+            done();
+          }
+        );
       });
 
       // Start connection
@@ -264,19 +307,25 @@ describe('Server tests', function() {
 
       // Add event listeners
       server.on('connect', function(_server) {
-        server.insert('integration_tests.remove_example', {a: 1}, function(err, r) {
+        server.insert('integration_tests.remove_example', { a: 1 }, function(err, r) {
           expect(err).to.be.null;
           expect(r.result.ok).to.equal(1);
 
-          _server.remove('integration_tests.remove_example', [{q: {a: 1}, limit: 1}], {
-            writeConcern: {w: 1}, ordered: true
-          }, function(removeErr, results) {
-            expect(removeErr).to.be.null;
-            expect(results.result.n).to.equal(1);
+          _server.remove(
+            'integration_tests.remove_example',
+            [{ q: { a: 1 }, limit: 1 }],
+            {
+              writeConcern: { w: 1 },
+              ordered: true
+            },
+            function(removeErr, results) {
+              expect(removeErr).to.be.null;
+              expect(results.result.n).to.equal(1);
 
-            _server.destroy();
-            done();
-          });
+              _server.destroy();
+              done();
+            }
+          );
         });
       });
 
@@ -309,31 +358,37 @@ describe('Server tests', function() {
 
         var execute = function() {
           if (!testDone) {
-            server.insert(ns, {a: 1, count: count}, function(err, r) {
+            server.insert(ns, { a: 1, count: count }, function() {
               count = count + 1;
 
               // Execute find
               var cursor = _server.cursor(ns, {
-                find: ns, query: {}, batchSize: 2
+                find: ns,
+                query: {},
+                batchSize: 2
               });
 
               // Execute next
-              cursor.next(function(cursorErr, d) {
+              cursor.next(function() {
                 setTimeout(execute, 500);
               });
             });
           } else {
-            server.insert(ns, {a: 1, count: count}, function(err, r) {
+            server.insert(ns, { a: 1, count: count }, function(err, r) {
               expect(err).to.be.null;
+              expect(r).to.exist;
 
               // Execute find
               var cursor = _server.cursor(ns, {
-                find: ns, query: {}, batchSize: 2
+                find: ns,
+                query: {},
+                batchSize: 2
               });
 
               // Execute next
               cursor.next(function(cursorErr, d) {
                 expect(err).to.be.null;
+                expect(d).to.exist;
                 server.destroy();
                 done();
               });
@@ -377,7 +432,7 @@ describe('Server tests', function() {
 
     test: function(done) {
       var Server = this.configuration.mongo.Server,
-          ReadPreference = this.configuration.mongo.ReadPreference;
+        ReadPreference = this.configuration.mongo.ReadPreference;
 
       // Attempt to connect
       var server = new Server({
@@ -394,27 +449,38 @@ describe('Server tests', function() {
       // Add event listeners
       server.on('connect', function(_server) {
         // Execute the command
-        _server.command('system.$cmd', {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
-          expect(err).to.be.null;
-          _server.s.currentReconnectRetry = 10;
+        _server.command(
+          'system.$cmd',
+          { ismaster: true },
+          { readPreference: new ReadPreference('primary') },
+          function(err, result) {
+            expect(err).to.be.null;
+            _server.s.currentReconnectRetry = 10;
 
-          // Write garbage, force socket closure
-          try {
-            var a = new Buffer(100);
-            for (var i = 0; i < 100; i++) a[i] = i;
-            result.connection.write(a);
-          } catch (loopErr) {
-            console.log(loopErr);
+            // Write garbage, force socket closure
+            try {
+              var a = new Buffer(100);
+              for (var i = 0; i < 100; i++) a[i] = i;
+              result.connection.write(a);
+            } catch (loopErr) {
+              console.log(loopErr);
+            }
+
+            // Ensure the server died
+            setTimeout(function() {
+              // Attempt a proper command
+              _server.command(
+                'system.$cmd',
+                { ismaster: true },
+                { readPreference: new ReadPreference('primary') },
+                function(cmdErr, cmdResult) {
+                  expect(cmdResult).to.exist;
+                  expect(cmdErr).to.not.be.null;
+                }
+              );
+            }, 100);
           }
-
-          // Ensure the server died
-          setTimeout(function() {
-            // Attempt a proper command
-            _server.command('system.$cmd', {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(cmdErr, cmdResult) {
-              expect(cmdErr).to.not.be.null;
-            });
-          }, 100);
-        });
+        );
       });
 
       server.once('close', function() {
@@ -438,15 +504,13 @@ describe('Server tests', function() {
     metadata: {
       requires: {
         topology: 'single'
-      },
+      }
       // ignore: { travis:true }
     },
 
     test: function(done) {
-      var self = this;
-
       var Server = this.configuration.require.Server,
-          ReadPreference = this.configuration.require.ReadPreference;
+        ReadPreference = this.configuration.require.ReadPreference;
 
       // Attempt to connect
       var server = new Server({
@@ -462,22 +526,33 @@ describe('Server tests', function() {
       // Add event listeners
       server.on('connect', function(_server) {
         // Execute the command
-        _server.command('system.$cmd', {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
-          expect(err).to.be.null;
-          // Write garbage, force socket closure
-          try {
-            result.connection.destroy();
-          } catch (destroyErr) {
-            console.log(destroyErr);
-          }
+        _server.command(
+          'system.$cmd',
+          { ismaster: true },
+          { readPreference: new ReadPreference('primary') },
+          function(err, result) {
+            expect(err).to.be.null;
+            // Write garbage, force socket closure
+            try {
+              result.connection.destroy();
+            } catch (destroyErr) {
+              console.log(destroyErr);
+            }
 
-          process.nextTick(function() {
-            // Attempt a proper command
-            _server.command('system.$cmd', {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(cmdErr, cmdResult) {
-              expect(cmdErr).to.not.be.null;
+            process.nextTick(function() {
+              // Attempt a proper command
+              _server.command(
+                'system.$cmd',
+                { ismaster: true },
+                { readPreference: new ReadPreference('primary') },
+                function(cmdErr, cmdResult) {
+                  expect(cmdErr).to.not.be.null;
+                  expect(cmdResult).to.exist;
+                }
+              );
             });
-          });
-        });
+          }
+        );
       });
 
       server.on('close', function() {
@@ -508,8 +583,7 @@ describe('Server tests', function() {
       var self = this;
 
       var Server = this.configuration.require.Server,
-          ReadPreference = this.configuration.require.ReadPreference,
-          manager = this.configuration.manager;
+        manager = this.configuration.manager;
 
       manager.stop('SIGINT').then(function() {
         // Attempt to connect while server is down
@@ -552,7 +626,7 @@ describe('Server tests', function() {
 
     test: function(done) {
       var Server = this.configuration.require.Server,
-          ReadPreference = this.configuration.require.ReadPreference;
+        ReadPreference = this.configuration.require.ReadPreference;
 
       // Attempt to connect
       var server = new Server({
@@ -566,30 +640,37 @@ describe('Server tests', function() {
       // Add event listeners
       server.on('connect', function(_server) {
         // Execute the command
-        _server.command('system.$cmd', {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
-          expect(err).to.be.null;
-          _server.s.currentReconnectRetry = 10;
+        _server.command(
+          'system.$cmd',
+          { ismaster: true },
+          { readPreference: new ReadPreference('primary') },
+          function(err, result) {
+            expect(err).to.be.null;
+            _server.s.currentReconnectRetry = 10;
 
-          // Write garbage, force socket closure
-          try {
-            var a = new Buffer(100);
-            for (var i = 0; i < 100; i++) a[i] = i;
-            result.connection.write(a);
-          } catch (garbageErr) {
-            console.log(garbageErr);
+            // Write garbage, force socket closure
+            try {
+              var a = new Buffer(100);
+              for (var i = 0; i < 100; i++) a[i] = i;
+              result.connection.write(a);
+            } catch (garbageErr) {
+              console.log(garbageErr);
+            }
           }
-        });
+        );
       });
 
       server.once('reconnect', function() {
         for (var i = 0; i < 100; i++) {
-          server.command('system.$cmd', {ismaster: true}, function(err, result) {
+          server.command('system.$cmd', { ismaster: true }, function(err, result) {
             expect(err).to.be.null;
+            expect(result).to.exist;
           });
         }
 
-        server.command('system.$cmd', {ismaster: true}, function(err, result) {
+        server.command('system.$cmd', { ismaster: true }, function(err, result) {
           expect(err).to.be.null;
+          expect(result).to.exist;
 
           setTimeout(function() {
             expect(server.s.pool.availableConnections.length).to.be.above(0);
@@ -618,9 +699,7 @@ describe('Server tests', function() {
     test: function(done) {
       var self = this;
 
-      var Server = this.configuration.require.Server,
-          ReadPreference = this.configuration.require.ReadPreference,
-          manager = this.configuration.manager;
+      var Server = this.configuration.require.Server;
 
       // Attempt to connect while server is down
       var server = new Server({
@@ -636,6 +715,9 @@ describe('Server tests', function() {
         var left = 5000;
 
         var leftDecrement = function(err, results) {
+          expect(err).to.not.exist;
+          expect(results).to.exist;
+
           left = left - 1;
 
           if (!left) {
@@ -647,9 +729,15 @@ describe('Server tests', function() {
         };
 
         for (var i = 0; i < 5000; i++) {
-          server.insert(f('%s.massInsertsTest', self.configuration.db), [{a: 1}], {
-            writeConcern: {w: 1}, ordered: true
-          }, leftDecrement);
+          server.insert(
+            f('%s.massInsertsTest', self.configuration.db),
+            [{ a: 1 }],
+            {
+              writeConcern: { w: 1 },
+              ordered: true
+            },
+            leftDecrement
+          );
         }
       });
 
@@ -670,11 +758,14 @@ describe('Server tests', function() {
       });
 
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function() {
         var left = 5;
         var start = new Date().getTime();
 
         var leftDecrement = function(err, r) {
+          expect(err).to.not.exist;
+          expect(r).to.exist;
+
           left = left - 1;
 
           if (left === 0) {
@@ -688,7 +779,7 @@ describe('Server tests', function() {
         };
 
         for (var i = 0; i < left; i++) {
-          server.command('system.$cmd', {eval: 'sleep(100);'}, leftDecrement);
+          server.command('system.$cmd', { eval: 'sleep(100);' }, leftDecrement);
         }
       });
 
@@ -718,7 +809,7 @@ describe('Server tests', function() {
       var ns = 'integration_tests.remove_example';
 
       // Add event listeners
-      server.on('connect', function(_server) {
+      server.on('connect', function() {
         var docs = new Array(150).fill(0).map(function(_, i) {
           return {
             _id: 'needle_' + i,
@@ -734,13 +825,17 @@ describe('Server tests', function() {
           expect(r.result.ok).to.equal(1);
 
           // Execute find
-          var cursor = server.cursor(ns, {
-            find: ns,
-            query: {},
-            limit: 102
-          }, {
-            promoteValues: false
-          });
+          var cursor = server.cursor(
+            ns,
+            {
+              find: ns,
+              query: {},
+              limit: 102
+            },
+            {
+              promoteValues: false
+            }
+          );
 
           function callNext(_cursor) {
             _cursor.next(function(cursorErr, doc) {
@@ -774,7 +869,7 @@ describe('Server tests', function() {
     test: function(done) {
       // Attempt to connect
       try {
-        var server = new Server({
+        new Server({
           host: this.configuration.host,
           port: this.configuration.port,
           bson: new Bson(),
@@ -787,147 +882,185 @@ describe('Server tests', function() {
     }
   });
 
-  it('should correctly connect server specifying compression to single instance with authentication and insert documents', {
-    metadata: { requires: { topology: ['auth', 'snappyCompression'] } },
+  it(
+    'should correctly connect server specifying compression to single instance with authentication and insert documents',
+    {
+      metadata: { requires: { topology: ['auth', 'snappyCompression'] } },
 
-    test: function(done) {
-      var self = this;
+      test: function(done) {
+        var self = this;
 
-      Connection.enableConnectionAccounting();
+        Connection.enableConnectionAccounting();
 
-      self.configuration.manager.restart(true).then(function() {
-        locateAuthMethod(self.configuration, function(err, method) {
-          expect(err).to.be.null;
+        self.configuration.manager.restart(true).then(function() {
+          locateAuthMethod(self.configuration, function(err, method) {
+            expect(err).to.be.null;
 
-          // Attempt to connect
-          executeCommand(self.configuration, 'admin', {
-            createUser: 'root',
-            pwd: 'root',
-            roles: [ { role: 'root', db: 'admin' } ],
-            digestPassword: true
-          }, function(cmdErr, r) {
-            var server = new Server({
-              host: self.configuration.host,
-              port: self.configuration.port,
-              bson: new Bson(),
-              compression: { compressors: ['snappy', 'zlib'] }
-            });
+            // Attempt to connect
+            executeCommand(
+              self.configuration,
+              'admin',
+              {
+                createUser: 'root',
+                pwd: 'root',
+                roles: [{ role: 'root', db: 'admin' }],
+                digestPassword: true
+              },
+              function(cmdErr, r) {
+                expect(cmdErr).to.not.exist;
+                expect(r).to.exist;
 
-            // Add event listeners
-            server.on('connect', function(_server) {
-              server.insert('integration_tests.inserts', {a: 1}, function(insertOneErr, insertOneRes) {
-                expect(insertOneErr).to.be.null;
-                expect(insertOneRes.result.n).to.equal(1);
+                var server = new Server({
+                  host: self.configuration.host,
+                  port: self.configuration.port,
+                  bson: new Bson(),
+                  compression: { compressors: ['snappy', 'zlib'] }
+                });
 
-                server.insert('integration_tests.inserts', {a: 1}, {ordered: false}, function(insertTwoErr, insertTwoR) {
-                  expect(insertTwoErr).to.be.null;
-                  expect(insertTwoR.result.n).to.equal(1);
+                // Add event listeners
+                server.on('connect', function() {
+                  server.insert('integration_tests.inserts', { a: 1 }, function(
+                    insertOneErr,
+                    insertOneRes
+                  ) {
+                    expect(insertOneErr).to.be.null;
+                    expect(insertOneRes.result.n).to.equal(1);
 
-                  server.destroy();
+                    server.insert(
+                      'integration_tests.inserts',
+                      { a: 1 },
+                      { ordered: false },
+                      function(insertTwoErr, insertTwoR) {
+                        expect(insertTwoErr).to.be.null;
+                        expect(insertTwoR.result.n).to.equal(1);
+
+                        server.destroy();
+                        Connection.disableConnectionAccounting();
+                        done();
+                      }
+                    );
+                  });
+                });
+
+                server.connect({ auth: [method, 'admin', 'root', 'root'] });
+              }
+            );
+          });
+        });
+      }
+    }
+  );
+
+  it(
+    'should fail to connect server specifying compression to single instance with incorrect authentication credentials',
+    {
+      metadata: { requires: { topology: ['auth', 'snappyCompression'] } },
+
+      test: function(done) {
+        var self = this;
+
+        Connection.enableConnectionAccounting();
+
+        this.configuration.manager.restart(true).then(function() {
+          locateAuthMethod(self.configuration, function(err, method) {
+            expect(err).to.be.null;
+
+            // Attempt to connect
+            executeCommand(
+              self.configuration,
+              'admin',
+              {
+                createUser: 'root',
+                pwd: 'root',
+                roles: [{ role: 'root', db: 'admin' }],
+                digestPassword: true
+              },
+              function(cmdErr, r) {
+                expect(cmdErr).to.not.exist;
+                expect(r).to.exist;
+
+                var server = new Server({
+                  host: self.configuration.host,
+                  port: self.configuration.port,
+                  bson: new Bson(),
+                  compression: { compressors: ['snappy', 'zlib'] }
+                });
+
+                // Add event listeners
+                server.on('error', function() {
+                  expect(Object.keys(Connection.connections()).length).to.equal(0);
                   Connection.disableConnectionAccounting();
                   done();
                 });
-              });
-            });
 
-            server.connect({auth: [method, 'admin', 'root', 'root']});
+                server.connect({ auth: [method, 'admin', 'root2', 'root'] });
+              }
+            );
           });
         });
-      });
+      }
     }
-  });
+  );
 
-  it('should fail to connect server specifying compression to single instance with incorrect authentication credentials', {
-    metadata: { requires: { topology: ['auth', 'snappyCompression'] } },
+  it(
+    'should correctly connect server to single instance and execute insert with snappy compression if supported by the server',
+    {
+      metadata: { requires: { topology: ['single', 'snappyCompression'] } },
 
-    test: function(done) {
-      var self = this;
+      test: function(done) {
+        var self = this;
 
-      Connection.enableConnectionAccounting();
-
-      this.configuration.manager.restart(true).then(function() {
-        locateAuthMethod(self.configuration, function(err, method) {
-          expect(err).to.be.null;
-
-          // Attempt to connect
-          executeCommand(self.configuration, 'admin', {
-            createUser: 'root',
-            pwd: 'root',
-            roles: [ { role: 'root', db: 'admin' } ],
-            digestPassword: true
-          }, function(cmdErr, r) {
-            var server = new Server({
-              host: self.configuration.host,
-              port: self.configuration.port,
-              bson: new Bson(),
-              compression: { compressors: ['snappy', 'zlib'] }
-            });
-
-            // Add event listeners
-            server.on('error', function() {
-              expect(Object.keys(Connection.connections()).length).to.equal(0);
-              Connection.disableConnectionAccounting();
-              done();
-            });
-
-            server.connect({auth: [method, 'admin', 'root2', 'root']});
-          });
+        // Attempt to connect to server
+        var server = new Server({
+          host: this.configuration.host,
+          port: this.configuration.port,
+          bson: new Bson(),
+          compression: {
+            compressors: ['snappy', 'zlib']
+          }
         });
-      });
-    }
-  });
 
-  it('should correctly connect server to single instance and execute insert with snappy compression if supported by the server', {
-    metadata: { requires: { topology: ['single', 'snappyCompression'] } },
+        // Add event listeners
+        server.on('connect', function() {
+          var envShouldSupportCompression =
+            self.configuration.manager.options.networkMessageCompressors === 'snappy' &&
+            server.ismaster.maxWireVersion >= WIRE_PROTOCOL_COMPRESSION_SUPPORT_MIN_VERSION;
 
-    test: function(done) {
-      var self = this;
-
-      // Attempt to connect to server
-      var server = new Server({
-        host: this.configuration.host,
-        port: this.configuration.port,
-        bson: new Bson(),
-        compression: {
-          compressors: ['snappy', 'zlib']
-        }
-      });
-
-      // Add event listeners
-      server.on('connect', function(_server) {
-        var envShouldSupportCompression = self.configuration.manager.options.networkMessageCompressors === 'snappy' && server.ismaster.maxWireVersion >= WIRE_PROTOCOL_COMPRESSION_SUPPORT_MIN_VERSION;
-
-        // Check compression has been negotiated
-        if (envShouldSupportCompression) {
-          expect(server.s.pool.options.agreedCompressor).to.equal('snappy');
-        }
-
-        server.insert('integration_tests.inserts', {a: 1}, function(insertOneErr, insertOneR) {
-          expect(insertOneErr).to.be.null;
-          expect(insertOneR.result.n).to.equal(1);
+          // Check compression has been negotiated
           if (envShouldSupportCompression) {
-            expect(insertOneR.message.fromCompressed).to.be.true;
-          } else {
-            expect(insertOneR.message.fromCompressed).to.not.exist;
+            expect(server.s.pool.options.agreedCompressor).to.equal('snappy');
           }
 
-          server.insert('integration_tests.inserts', {a: 2}, {ordered: false}, function(err, r) {
-            expect(err).to.be.null;
-            expect(r.result.n).to.equal(1);
+          server.insert('integration_tests.inserts', { a: 1 }, function(insertOneErr, insertOneR) {
+            expect(insertOneErr).to.be.null;
+            expect(insertOneR.result.n).to.equal(1);
             if (envShouldSupportCompression) {
-              expect(r.message.fromCompressed).to.be.true;
+              expect(insertOneR.message.fromCompressed).to.be.true;
             } else {
-              expect(r.message.fromCompressed).to.not.exist;
+              expect(insertOneR.message.fromCompressed).to.not.exist;
             }
 
-            server.destroy();
-            done();
+            server.insert('integration_tests.inserts', { a: 2 }, { ordered: false }, function(
+              err,
+              r
+            ) {
+              expect(err).to.be.null;
+              expect(r.result.n).to.equal(1);
+              if (envShouldSupportCompression) {
+                expect(r.message.fromCompressed).to.be.true;
+              } else {
+                expect(r.message.fromCompressed).to.not.exist;
+              }
+
+              server.destroy();
+              done();
+            });
           });
         });
-      });
 
-      // Start connection
-      server.connect();
+        // Start connection
+        server.connect();
+      }
     }
-  });
+  );
 });

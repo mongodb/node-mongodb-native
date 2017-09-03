@@ -1,11 +1,11 @@
 'use strict';
 
 var expect = require('chai').expect,
-    f = require('util').format,
-    fs = require('fs'),
-    Mongos = require('../../../lib/topologies/mongos'),
-    ReadPreference = require('../../../lib/topologies/read_preference'),
-    Server = require('../../../lib/topologies/server');
+  f = require('util').format,
+  fs = require('fs'),
+  Mongos = require('../../../lib/topologies/mongos'),
+  ReadPreference = require('../../../lib/topologies/read_preference'),
+  Server = require('../../../lib/topologies/server');
 
 describe('Mongos server selection tests', function() {
   it('should correctly execute server selection tests using Mongos Topology', {
@@ -55,9 +55,11 @@ function executeEntry(file, path) {
 
       // Add additional information
       if (s.avg_rtt_ms) server.lastIsMasterMS = s.avg_rtt_ms;
-      if (s.tags) server.ismaster = {tags: s.tags};
+      if (s.tags) server.ismaster = { tags: s.tags };
       // Ensure the server looks connected
-      server.isConnected = function() {return true; };
+      server.isConnected = function() {
+        return true;
+      };
       // Add server to topology
       topology.connectedProxies.push(server);
     });

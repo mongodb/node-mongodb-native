@@ -1,12 +1,12 @@
 'use strict';
 
 var expect = require('chai').expect,
-    f = require('util').format,
-    fs = require('fs'),
-    ReplSetState = require('../../../lib/topologies/replset_state'),
-    MongoError = require('../../../lib/error').MongoError,
-    ReadPreference = require('../../../lib/topologies/read_preference'),
-    Server = require('../../../lib/topologies/server');
+  f = require('util').format,
+  fs = require('fs'),
+  ReplSetState = require('../../../lib/topologies/replset_state'),
+  MongoError = require('../../../lib/error').MongoError,
+  ReadPreference = require('../../../lib/topologies/read_preference'),
+  Server = require('../../../lib/topologies/server');
 
 describe('Replica set with no primary', function() {
   it('should correctly execute max staleness tests', {
@@ -36,11 +36,14 @@ describe('Replica set with primary', function() {
     test: function(done) {
       var path = f('%s/../max-staleness/ReplicaSetWithPrimary', __dirname);
       console.dir(path);
-      var entries = fs.readdirSync(path).filter(function(x) {
-        return x.indexOf('.json') !== -1;
-      }).filter(function(x) {
-        return x.indexOf('LongHeartbeat2.json') === -1;
-      });
+      var entries = fs
+        .readdirSync(path)
+        .filter(function(x) {
+          return x.indexOf('.json') !== -1;
+        })
+        .filter(function(x) {
+          return x.indexOf('LongHeartbeat2.json') === -1;
+        });
 
       // Execute each of the entries
       entries.forEach(function(x) {
@@ -96,7 +99,9 @@ function executeEntry(entry, path) {
       if (s.tags) server.ismaster.tags = s.tags;
       if (s.maxWireVersion) server.ismaster.maxWireVersion = s.maxWireVersion;
       // Ensure the server looks connected
-      server.isConnected = function() {return true; };
+      server.isConnected = function() {
+        return true;
+      };
 
       if (s.type === 'RSSecondary') {
         server.ismaster.secondary = true;
@@ -144,8 +149,12 @@ function executeEntry(entry, path) {
     // console.dir(server)
     // console.dir(found_window)
 
-    if (['ReplicaSetNoPrimary', 'Primary', 'ReplicaSetWithPrimary'].indexOf(topologyDescription.type) !== -1
-        && inLatencyWindow.length === 0) {
+    if (
+      ['ReplicaSetNoPrimary', 'Primary', 'ReplicaSetWithPrimary'].indexOf(
+        topologyDescription.type
+      ) !== -1 &&
+      inLatencyWindow.length === 0
+    ) {
       if (server instanceof MongoError) {
         // console.dir(server)
         expect(server.message).to.equal('maxStalenessSeconds must be set to at least 90 seconds');

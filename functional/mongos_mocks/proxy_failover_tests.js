@@ -1,12 +1,14 @@
 'use strict';
 var expect = require('chai').expect,
-    assign = require('../../../../lib/utils').assign,
-    co = require('co'),
-    mockupdb = require('../../../mock');
+  assign = require('../../../../lib/utils').assign,
+  co = require('co'),
+  mockupdb = require('../../../mock');
 
 var timeoutPromise = function(timeout) {
-  return new Promise(function(resolve, reject) {
-    setTimeout(function() { resolve(); }, timeout);
+  return new Promise(function(resolve) {
+    setTimeout(function() {
+      resolve();
+    }, timeout);
   });
 };
 
@@ -29,19 +31,19 @@ describe('Mongos Proxy Failover (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'ismaster': true,
-        'msg': 'isdbgrid',
-        'maxBsonObjectSize': 16777216,
-        'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000,
-        'localTime': new Date(),
-        'maxWireVersion': 3,
-        'minWireVersion': 0,
-        'ok': 1
+        ismaster: true,
+        msg: 'isdbgrid',
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 3,
+        minWireVersion: 0,
+        ok: 1
       };
 
       // Primary server states
-      var serverIsMaster = [ assign({}, defaultFields) ];
+      var serverIsMaster = [assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
         mongos1 = yield mockupdb.createServer(52007, 'localhost');
@@ -58,11 +60,10 @@ describe('Mongos Proxy Failover (mocks)', function() {
               request.reply(serverIsMaster[0]);
             } else if (doc.insert) {
               mongos1.destroy();
-              request.reply({ ok: 1, n: doc.documents, lastOp: new Date()});
+              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
             }
           }
-        }).catch(function(err) {
-        });
+        }).catch(function() {});
 
         // Mongos
         co(function*() {
@@ -74,27 +75,25 @@ describe('Mongos Proxy Failover (mocks)', function() {
             if (doc.ismaster) {
               request.reply(serverIsMaster[0]);
             } else if (doc.insert) {
-              request.reply({ok: 1, n: doc.documents, lastOp: new Date()});
+              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
             }
           }
-        }).catch(function(err) {
-        });
-      }).catch(function(err) {
-      });
+        }).catch(function() {});
+      }).catch(function() {});
 
       // Attempt to connect
-      var server = new Mongos([
-        { host: 'localhost', port: 52007 },
-        { host: 'localhost', port: 52008 }
-      ], {
-        connectionTimeout: 3000,
-        socketTimeout: 5000,
-        haInterval: 1000,
-        size: 1
-      });
+      var server = new Mongos(
+        [{ host: 'localhost', port: 52007 }, { host: 'localhost', port: 52008 }],
+        {
+          connectionTimeout: 3000,
+          socketTimeout: 5000,
+          haInterval: 1000,
+          size: 1
+        }
+      );
 
       // Add event listeners
-      server.once('fullsetup', function(_server) {
+      server.once('fullsetup', function() {
         var intervalId = setInterval(function() {
           server.insert('test.test', [{ created: new Date() }], function(err, r) {
             // If we have a successful insert
@@ -113,7 +112,9 @@ describe('Mongos Proxy Failover (mocks)', function() {
       });
 
       server.on('error', done);
-      setTimeout(function() { server.connect(); }, 100);
+      setTimeout(function() {
+        server.connect();
+      }, 100);
     }
   });
 
@@ -137,19 +138,19 @@ describe('Mongos Proxy Failover (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'ismaster': true,
-        'msg': 'isdbgrid',
-        'maxBsonObjectSize': 16777216,
-        'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000,
-        'localTime': new Date(),
-        'maxWireVersion': 3,
-        'minWireVersion': 0,
-        'ok': 1
+        ismaster: true,
+        msg: 'isdbgrid',
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 3,
+        minWireVersion: 0,
+        ok: 1
       };
 
       // Primary server states
-      var serverIsMaster = [ assign({}, defaultFields) ];
+      var serverIsMaster = [assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
         mongos1 = yield mockupdb.createServer(52009, 'localhost');
@@ -171,8 +172,7 @@ describe('Mongos Proxy Failover (mocks)', function() {
               request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
             }
           }
-        }).catch(function(err) {
-        });
+        }).catch(function() {});
 
         // Mongos
         co(function*() {
@@ -187,24 +187,22 @@ describe('Mongos Proxy Failover (mocks)', function() {
               request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
             }
           }
-        }).catch(function(err) {
-        });
-      }).catch(function(err) {
-      });
+        }).catch(function() {});
+      }).catch(function() {});
 
       // Attempt to connect
-      var server = new Mongos([
-        { host: 'localhost', port: 52009 },
-        { host: 'localhost', port: 52010 }
-      ], {
-        connectionTimeout: 3000,
-        socketTimeout: 1500,
-        haInterval: 1000,
-        size: 1
-      });
+      var server = new Mongos(
+        [{ host: 'localhost', port: 52009 }, { host: 'localhost', port: 52010 }],
+        {
+          connectionTimeout: 3000,
+          socketTimeout: 1500,
+          haInterval: 1000,
+          size: 1
+        }
+      );
 
       // Add event listeners
-      server.once('fullsetup', function(_server) {
+      server.once('fullsetup', function() {
         var intervalId = setInterval(function() {
           server.insert('test.test', [{ created: new Date() }], function(err, r) {
             // If we have a successful insert
@@ -244,7 +242,9 @@ describe('Mongos Proxy Failover (mocks)', function() {
       });
 
       server.on('error', done);
-      setTimeout(function() { server.connect(); }, 100);
+      setTimeout(function() {
+        server.connect();
+      }, 100);
     }
   });
 
@@ -268,19 +268,19 @@ describe('Mongos Proxy Failover (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'ismaster': true,
-        'msg': 'isdbgrid',
-        'maxBsonObjectSize': 16777216,
-        'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000,
-        'localTime': new Date(),
-        'maxWireVersion': 3,
-        'minWireVersion': 0,
-        'ok': 1
+        ismaster: true,
+        msg: 'isdbgrid',
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 3,
+        minWireVersion: 0,
+        ok: 1
       };
 
       // Primary server states
-      var serverIsMaster = [ assign({}, defaultFields) ];
+      var serverIsMaster = [assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
         mongos1 = yield mockupdb.createServer(52011, 'localhost');
@@ -302,8 +302,7 @@ describe('Mongos Proxy Failover (mocks)', function() {
               request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
             }
           }
-        }).catch(function(err) {
-        });
+        }).catch(function() {});
 
         // Mongos
         co(function*() {
@@ -321,26 +320,27 @@ describe('Mongos Proxy Failover (mocks)', function() {
               request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
             }
           }
-        }).catch(function(err) {
-        });
-      }).catch(function(err) {
-      });
+        }).catch(function() {});
+      }).catch(function() {});
 
       // Attempt to connect
-      var server = new Mongos([
-        { host: 'localhost', port: 52011 },
-        { host: 'localhost', port: 52012 }
-      ], {
-        connectionTimeout: 3000,
-        socketTimeout: 500,
-        haInterval: 1000,
-        size: 1
-      });
+      var server = new Mongos(
+        [{ host: 'localhost', port: 52011 }, { host: 'localhost', port: 52012 }],
+        {
+          connectionTimeout: 3000,
+          socketTimeout: 500,
+          haInterval: 1000,
+          size: 1
+        }
+      );
 
       // Add event listeners
-      server.once('fullsetup', function(_server) {
+      server.once('fullsetup', function() {
         var intervalId = setInterval(function() {
           server.insert('test.test', [{ created: new Date() }], function(err, r) {
+            expect(r).to.exist;
+            expect(err).to.not.exist;
+
             if (intervalId === null) return;
             // Clear out the interval
             clearInterval(intervalId);
@@ -378,7 +378,9 @@ describe('Mongos Proxy Failover (mocks)', function() {
       });
 
       server.on('error', done);
-      setTimeout(function() { server.connect(); }, 100);
+      setTimeout(function() {
+        server.connect();
+      }, 100);
     }
   });
 });

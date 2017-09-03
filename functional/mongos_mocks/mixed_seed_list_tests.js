@@ -1,8 +1,8 @@
 'use strict';
 var expect = require('chai').expect,
-    assign = require('../../../../lib/utils').assign,
-    co = require('co'),
-    mockupdb = require('../../../mock');
+  assign = require('../../../../lib/utils').assign,
+  co = require('co'),
+  mockupdb = require('../../../mock');
 
 describe('Mongos Mixed Seed List (mocks)', function() {
   it('Should correctly print warning when non mongos proxy passed in seed list', {
@@ -15,8 +15,8 @@ describe('Mongos Mixed Seed List (mocks)', function() {
 
     test: function(done) {
       var Mongos = this.configuration.mongo.Mongos,
-          ObjectId = this.configuration.mongo.BSON.ObjectId,
-          Logger = this.configuration.mongo.Logger;
+        ObjectId = this.configuration.mongo.BSON.ObjectId,
+        Logger = this.configuration.mongo.Logger;
 
       // Contain mock server
       var mongos1 = null;
@@ -25,23 +25,31 @@ describe('Mongos Mixed Seed List (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'ismaster': true,
-        'msg': 'isdbgrid',
-        'maxBsonObjectSize': 16777216,
-        'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000,
-        'localTime': new Date(),
-        'maxWireVersion': 3,
-        'minWireVersion': 0,
-        'ok': 1
+        ismaster: true,
+        msg: 'isdbgrid',
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 3,
+        minWireVersion: 0,
+        ok: 1
       };
 
       // Default message fields
       var defaultRSFields = {
-        'setName': 'rs', 'setVersion': 1, 'electionId': new ObjectId(),
-        'maxBsonObjectSize': 16777216, 'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000, 'localTime': new Date(), 'maxWireVersion': 4,
-        'minWireVersion': 0, 'ok': 1, 'hosts': ['localhost:32000', 'localhost:32001', 'localhost:32002'], 'arbiters': ['localhost:32002']
+        setName: 'rs',
+        setVersion: 1,
+        electionId: new ObjectId(),
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 4,
+        minWireVersion: 0,
+        ok: 1,
+        hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002'],
+        arbiters: ['localhost:32002']
       };
 
       // Primary server states
@@ -62,11 +70,10 @@ describe('Mongos Mixed Seed List (mocks)', function() {
             if (doc.ismaster) {
               request.reply(serverIsMaster[0]);
             } else if (doc.insert) {
-              request.reply({ok: 1, n: doc.documents, lastOp: new Date()});
+              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
             }
           }
-        }).catch(function(err) {
-        });
+        }).catch(function() {});
 
         // Mongos
         co(function*() {
@@ -78,33 +85,33 @@ describe('Mongos Mixed Seed List (mocks)', function() {
             if (doc.ismaster) {
               request.reply(serverIsMaster[1]);
             } else if (doc.insert) {
-              request.reply({ok: 1, n: doc.documents, lastOp: new Date()});
+              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
             }
           }
-        }).catch(function(err) {
-        });
+        }).catch(function() {});
 
         // Attempt to connect
-        var server = new Mongos([
-          { host: 'localhost', port: 52005 },
-          { host: 'localhost', port: 52006 }
-        ], {
-          connectionTimeout: 3000,
-          socketTimeout: 1000,
-          haInterval: 1000,
-          localThresholdMS: 500,
-          size: 1
-        });
+        var server = new Mongos(
+          [{ host: 'localhost', port: 52005 }, { host: 'localhost', port: 52006 }],
+          {
+            connectionTimeout: 3000,
+            socketTimeout: 1000,
+            haInterval: 1000,
+            localThresholdMS: 500,
+            size: 1
+          }
+        );
 
         var logger = Logger.currentLogger();
         Logger.setCurrentLogger(function(msg, state) {
           expect(state.type).to.equal('warn');
-          expect(state.message)
-            .to.equal('expected mongos proxy, but found replicaset member mongod for server localhost:52006');
+          expect(state.message).to.equal(
+            'expected mongos proxy, but found replicaset member mongod for server localhost:52006'
+          );
         });
 
         // Add event listeners
-        server.once('connect', function(_server) {
+        server.once('connect', function() {
           Logger.setCurrentLogger(logger);
 
           running = false;
@@ -115,7 +122,9 @@ describe('Mongos Mixed Seed List (mocks)', function() {
         });
 
         server.on('error', done);
-        setTimeout(function() { server.connect(); }, 100);
+        setTimeout(function() {
+          server.connect();
+        }, 100);
       });
     }
   });

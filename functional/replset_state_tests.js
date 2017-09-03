@@ -1,10 +1,10 @@
 'use strict';
 
 var expect = require('chai').expect,
-    f = require('util').format,
-    fs = require('fs'),
-    ObjectId = require('bson').ObjectId,
-    ReplSetState = require('../../../lib/topologies/replset_state');
+  f = require('util').format,
+  fs = require('fs'),
+  ObjectId = require('bson').ObjectId,
+  ReplSetState = require('../../../lib/topologies/replset_state');
 
 describe('A replica set state', function() {
   it('should correctly execute state machine tests', {
@@ -37,20 +37,23 @@ function executeEntry(path) {
   console.log(f('+ Starting: %s [%s]', description, path.split(/\//).pop()));
 
   // Get replicaset name if any
-  var match = uri.match(/replicaSet\=[a-z|A-Z|0-9]*/);
+  var match = uri.match(/replicaSet=[a-z|A-Z|0-9]*/);
   var replicaSet = match ? match.toString().split(/=/)[1] : null;
 
   // Replicaset
   // Create a replset state
-  var state = new ReplSetState({setName: replicaSet});
+  var state = new ReplSetState({ setName: replicaSet });
 
   // Get all the server instances
-  var parts = uri.split('mongodb://')[1].split('/')[0].split(',');
+  var parts = uri
+    .split('mongodb://')[1]
+    .split('/')[0]
+    .split(',');
   // For each of the servers
   parts.forEach(function(x) {
     var params = x.split(':');
     state.update({
-      name: f('%s:%s', params[0], params[1] ? parseInt(params[1], 10) :  27017),
+      name: f('%s:%s', params[0], params[1] ? parseInt(params[1], 10) : 27017),
       lastIsMaster: function() {
         return null;
       },

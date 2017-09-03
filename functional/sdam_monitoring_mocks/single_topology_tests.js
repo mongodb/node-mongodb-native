@@ -1,8 +1,8 @@
 'use strict';
 var expect = require('chai').expect,
-    assign = require('../../../../lib/utils').assign,
-    co = require('co'),
-    mockupdb = require('../../../mock');
+  assign = require('../../../../lib/utils').assign,
+  co = require('co'),
+  mockupdb = require('../../../mock');
 
 describe.skip('Single SDAM Monitoring (mocks)', function() {
   it('Should correctly emit sdam monitoring events for single server', {
@@ -22,14 +22,14 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'ismaster': true,
-        'maxBsonObjectSize': 16777216,
-        'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000,
-        'localTime': new Date(),
-        'maxWireVersion': 3,
-        'minWireVersion': 0,
-        'ok': 1
+        ismaster: true,
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 3,
+        minWireVersion: 0,
+        ok: 1
       };
 
       // Primary server states
@@ -70,7 +70,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       // Add event listeners
       server.once('connect', function(_server) {
         id = _server.id;
-        _server.destroy({emitClose: true});
+        _server.destroy({ emitClose: true });
       });
 
       server.on('serverOpening', function(event) {
@@ -102,47 +102,51 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
         setTimeout(function() {
           expect({ topologyId: id, address: 'localhost:37018' }).to.eql(flags[0]);
           expect({ topologyId: id, address: 'localhost:37018' }).to.eql(flags[1]);
-          expect({ 'topologyId': id, 'address': 'localhost:37018',
-            'previousDescription': {
-              'address': 'localhost:37018',
-              'arbiters': [],
-              'hosts': [],
-              'passives': [],
-              'type': 'Unknown'
+          expect({
+            topologyId: id,
+            address: 'localhost:37018',
+            previousDescription: {
+              address: 'localhost:37018',
+              arbiters: [],
+              hosts: [],
+              passives: [],
+              type: 'Unknown'
             },
-            'newDescription': {
-              'address': 'localhost:37018',
-              'arbiters': [],
-              'hosts': [],
-              'passives': [],
-              'type': 'Standalone'
+            newDescription: {
+              address: 'localhost:37018',
+              arbiters: [],
+              hosts: [],
+              passives: [],
+              type: 'Standalone'
             }
           }).to.eql(flags[2]);
 
           expect({ topologyId: id }).to.eql(flags[3]);
           expect({ topologyId: id }).to.eql(flags[4]);
-          expect({ 'topologyId': id, 'address': 'localhost:37018',
-            'previousDescription': {
-              'topologyType': 'Unknown',
-              'servers': [
+          expect({
+            topologyId: id,
+            address: 'localhost:37018',
+            previousDescription: {
+              topologyType: 'Unknown',
+              servers: [
                 {
-                  'address': 'localhost:37018',
-                  'arbiters': [],
-                  'hosts': [],
-                  'passives': [],
-                  'type': 'Unknown'
+                  address: 'localhost:37018',
+                  arbiters: [],
+                  hosts: [],
+                  passives: [],
+                  type: 'Unknown'
                 }
               ]
             },
-            'newDescription': {
-              'topologyType': 'Single',
-              'servers': [
+            newDescription: {
+              topologyType: 'Single',
+              servers: [
                 {
-                  'address': 'localhost:37018',
-                  'arbiters': [],
-                  'hosts': [],
-                  'passives': [],
-                  'type': 'Standalone'
+                  address: 'localhost:37018',
+                  arbiters: [],
+                  hosts: [],
+                  passives: [],
+                  type: 'Standalone'
                 }
               ]
             }
@@ -153,7 +157,9 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
         }, 100);
       });
 
-      setTimeout(function() { server.connect(); }, 100);
+      setTimeout(function() {
+        server.connect();
+      }, 100);
     }
   });
 
@@ -169,15 +175,15 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'ismaster': true,
-        'maxBsonObjectSize': 16777216,
-        'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000,
-        'localTime': new Date(),
-        'maxWireVersion': 3,
-        'minWireVersion': 0,
-        'ok': 1,
-        'hosts': [ 'a:27017', 'b:27017' ] // <-- this makes it an RSPrimary
+        ismaster: true,
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 3,
+        minWireVersion: 0,
+        ok: 1,
+        hosts: ['a:27017', 'b:27017'] // <-- this makes it an RSPrimary
       };
 
       // Primary server states
@@ -218,7 +224,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       // Add event listeners
       server.once('connect', function(_server) {
         id = _server.id;
-        _server.destroy({emitClose: true});
+        _server.destroy({ emitClose: true });
       });
 
       server.on('serverOpening', function(event) {
@@ -250,46 +256,50 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
         setTimeout(function() {
           expect({ topologyId: id, address: 'localhost:37008' }, flags[0]);
           expect({ topologyId: id, address: 'localhost:37008' }, flags[1]);
-          expect({ 'topologyId': id, 'address': 'localhost:37008',
-            'previousDescription': {
-              'address': 'localhost:37008',
-              'arbiters': [],
-              'hosts': [],
-              'passives': [],
-              'type': 'Unknown'
+          expect({
+            topologyId: id,
+            address: 'localhost:37008',
+            previousDescription: {
+              address: 'localhost:37008',
+              arbiters: [],
+              hosts: [],
+              passives: [],
+              type: 'Unknown'
             },
-            'newDescription': {
-              'address': 'localhost:37008',
-              'arbiters': [],
-              'hosts': [],
-              'passives': [],
-              'type': 'RSPrimary'
+            newDescription: {
+              address: 'localhost:37008',
+              arbiters: [],
+              hosts: [],
+              passives: [],
+              type: 'RSPrimary'
             }
           }).to.eql(flags[2]);
           expect({ topologyId: id }).to.eql(flags[3]);
           expect({ topologyId: id }).to.eql(flags[4]);
-          expect({ 'topologyId': id, 'address': 'localhost:37008',
-            'previousDescription': {
-              'topologyType': 'Unknown',
-              'servers': [
+          expect({
+            topologyId: id,
+            address: 'localhost:37008',
+            previousDescription: {
+              topologyType: 'Unknown',
+              servers: [
                 {
-                  'address': 'localhost:37008',
-                  'arbiters': [],
-                  'hosts': [],
-                  'passives': [],
-                  'type': 'Unknown'
+                  address: 'localhost:37008',
+                  arbiters: [],
+                  hosts: [],
+                  passives: [],
+                  type: 'Unknown'
                 }
               ]
             },
-            'newDescription': {
-              'topologyType': 'Single',
-              'servers': [
+            newDescription: {
+              topologyType: 'Single',
+              servers: [
                 {
-                  'address': 'localhost:37008',
-                  'arbiters': [],
-                  'hosts': [],
-                  'passives': [],
-                  'type': 'RSPrimary'
+                  address: 'localhost:37008',
+                  arbiters: [],
+                  hosts: [],
+                  passives: [],
+                  type: 'RSPrimary'
                 }
               ]
             }
@@ -300,8 +310,9 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
         }, 100);
       });
 
-      setTimeout(function() { server.connect(); }, 100);
+      setTimeout(function() {
+        server.connect();
+      }, 100);
     }
   });
 });
-

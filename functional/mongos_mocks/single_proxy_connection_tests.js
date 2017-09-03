@@ -1,13 +1,15 @@
 'use strict';
 var expect = require('chai').expect,
-    f = require('util').format,
-    co = require('co'),
-    assign = require('../../../../lib/utils').assign,
-    mockupdb = require('../../../mock');
+  f = require('util').format,
+  co = require('co'),
+  assign = require('../../../../lib/utils').assign,
+  mockupdb = require('../../../mock');
 
 var timeoutPromise = function(timeout) {
-  return new Promise(function(resolve, reject) {
-    setTimeout(function() { resolve(); }, timeout);
+  return new Promise(function(resolve) {
+    setTimeout(function() {
+      resolve();
+    }, timeout);
   });
 };
 
@@ -33,19 +35,19 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'ismaster': true,
-        'msg': 'isdbgrid',
-        'maxBsonObjectSize': 16777216,
-        'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000,
-        'localTime': new Date(),
-        'maxWireVersion': 3,
-        'minWireVersion': 0,
-        'ok': 1
+        ismaster: true,
+        msg: 'isdbgrid',
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 3,
+        minWireVersion: 0,
+        ok: 1
       };
 
       // Primary server states
-      var serverIsMaster = [ assign({}, defaultFields) ];
+      var serverIsMaster = [assign({}, defaultFields)];
 
       // Boot the mock
       co(function*() {
@@ -74,23 +76,19 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
             } else if (doc.ismaster) {
               request.reply(serverIsMaster[0]);
             } else if (doc.insert && currentStep === 2) {
-              request.reply({ok: 1, n: doc.documents, lastOp: new Date()});
+              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
             }
           }
-        }).catch(function(err) {
-        });
+        }).catch(function() {});
 
         // Start dropping the packets
         setTimeout(function() {
           stopRespondingPrimary = true;
         }, 500);
-      }).catch(function(err) {
-      });
+      }).catch(function() {});
 
       // Attempt to connect
-      var _server = new Mongos([
-        { host: 'localhost', port: 52017 }
-      ], {
+      var _server = new Mongos([{ host: 'localhost', port: 52017 }], {
         connectionTimeout: 3000,
         socketTimeout: 1000,
         haInterval: 500,
@@ -132,8 +130,8 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
 
     test: function(done) {
       var Mongos = this.configuration.mongo.Mongos,
-          Long = this.configuration.mongo.BSON.Long,
-          ObjectId = this.configuration.mongo.BSON.ObjectId;
+        Long = this.configuration.mongo.BSON.Long,
+        ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Contain mock server
       var server = null;
@@ -141,19 +139,19 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'ismaster': true,
-        'msg': 'isdbgrid',
-        'maxBsonObjectSize': 16777216,
-        'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000,
-        'localTime': new Date(),
-        'maxWireVersion': 4,
-        'minWireVersion': 0,
-        'ok': 1
+        ismaster: true,
+        msg: 'isdbgrid',
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 4,
+        minWireVersion: 0,
+        ok: 1
       };
 
       // Primary server states
-      var serverIsMaster = [ assign({}, defaultFields) ];
+      var serverIsMaster = [assign({}, defaultFields)];
 
       // Boot the mock
       co(function*() {
@@ -173,38 +171,30 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
               yield timeoutPromise(600);
               // Reply with first batch
               request.reply({
-                'cursor': {
-                  'id': Long.fromNumber(1),
-                  'ns': f('%s.cursor1', 'test'),
-                  'firstBatch': [
-                    { _id: new ObjectId(), a: 1 }
-                  ]
+                cursor: {
+                  id: Long.fromNumber(1),
+                  ns: f('%s.cursor1', 'test'),
+                  firstBatch: [{ _id: new ObjectId(), a: 1 }]
                 },
-                'ok': 1
+                ok: 1
               });
             } else if (doc.getMore) {
               // Reply with first batch
               request.reply({
-                'cursor': {
-                  'id': Long.fromNumber(1),
-                  'ns': f('%s.cursor1', 'test'),
-                  'nextBatch': [
-                    { _id: new ObjectId(), a: 1 }
-                  ]
+                cursor: {
+                  id: Long.fromNumber(1),
+                  ns: f('%s.cursor1', 'test'),
+                  nextBatch: [{ _id: new ObjectId(), a: 1 }]
                 },
-                'ok': 1
+                ok: 1
               });
             }
           }
-        }).catch(function(err) {
-        });
-      }).catch(function(err) {
-      });
+        }).catch(function() {});
+      }).catch(function() {});
 
       // Attempt to connect
-      var _server = new Mongos([
-        { host: 'localhost', port: 52018 }
-      ], {
+      var _server = new Mongos([{ host: 'localhost', port: 52018 }], {
         connectionTimeout: 30000,
         socketTimeout: 30000,
         haInterval: 500,
@@ -223,9 +213,11 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
         // Execute next
         cursor.next(function(err, d) {
           expect(err).to.not.exist;
+          expect(d).to.exist;
 
           cursor.next(function(_err, _d) {
             expect(_err).to.not.exist;
+            expect(_d).to.exist;
 
             running = false;
             server.destroy();
@@ -235,7 +227,9 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
       });
 
       _server.on('error', done);
-      setTimeout(function() { _server.connect(); }, 100);
+      setTimeout(function() {
+        _server.connect();
+      }, 100);
     }
   });
 });

@@ -1,8 +1,8 @@
 'use strict';
 var expect = require('chai').expect,
-    assign = require('../../../../lib/utils').assign,
-    co = require('co'),
-    mockupdb = require('../../../mock');
+  assign = require('../../../../lib/utils').assign,
+  co = require('co'),
+  mockupdb = require('../../../mock');
 
 describe('Mongos Proxy Read Preference (mocks)', function() {
   it('Should correctly set query and readpreference field on wire protocol for 3.2', {
@@ -15,8 +15,8 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
 
     test: function(done) {
       var Mongos = this.configuration.mongo.Mongos,
-          Long = this.configuration.mongo.BSON.Long,
-          ReadPreference = this.configuration.mongo.ReadPreference;
+        Long = this.configuration.mongo.BSON.Long,
+        ReadPreference = this.configuration.mongo.ReadPreference;
 
       // Contain mock server
       var mongos1 = null;
@@ -24,19 +24,19 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'ismaster': true,
-        'msg': 'isdbgrid',
-        'maxBsonObjectSize': 16777216,
-        'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000,
-        'localTime': new Date(),
-        'maxWireVersion': 5,
-        'minWireVersion': 0,
-        'ok': 1
+        ismaster: true,
+        msg: 'isdbgrid',
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 5,
+        minWireVersion: 0,
+        ok: 1
       };
 
       // Primary server states
-      var serverIsMaster = [ assign({}, defaultFields) ];
+      var serverIsMaster = [assign({}, defaultFields)];
       // Received command on server
       var command = null;
       // Boot the mock
@@ -56,24 +56,21 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
             } else if (doc.$query && doc.$readPreference) {
               command = doc;
               request.reply({
-                'waitedMS': Long.ZERO,
-                'cursor': {
-                  'id': Long.ZERO,
-                  'ns': 'test.t',
-                  'firstBatch': [ ]
+                waitedMS: Long.ZERO,
+                cursor: {
+                  id: Long.ZERO,
+                  ns: 'test.t',
+                  firstBatch: []
                 },
-                'ok': 1
+                ok: 1
               });
             }
           }
         });
-      }).catch(function(err) {
-      });
+      }).catch(function() {});
 
       // Attempt to connect
-      var server = new Mongos([
-        { host: 'localhost', port: 52013 }
-      ], {
+      var server = new Mongos([{ host: 'localhost', port: 52013 }], {
         connectionTimeout: 3000,
         socketTimeout: 5000,
         haInterval: 1000,
@@ -105,7 +102,9 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
       });
 
       server.on('error', done);
-      setTimeout(function() { server.connect(); }, 100);
+      setTimeout(function() {
+        server.connect();
+      }, 100);
     }
   });
 
@@ -119,8 +118,8 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
 
     test: function(done) {
       var Mongos = this.configuration.mongo.Mongos,
-          Long = this.configuration.mongo.BSON.Long,
-          ReadPreference = this.configuration.mongo.ReadPreference;
+        Long = this.configuration.mongo.BSON.Long,
+        ReadPreference = this.configuration.mongo.ReadPreference;
 
       // Contain mock server
       var mongos1 = null;
@@ -128,19 +127,19 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'ismaster': true,
-        'msg': 'isdbgrid',
-        'maxBsonObjectSize': 16777216,
-        'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000,
-        'localTime': new Date(),
-        'maxWireVersion': 5,
-        'minWireVersion': 0,
-        'ok': 1
+        ismaster: true,
+        msg: 'isdbgrid',
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 5,
+        minWireVersion: 0,
+        ok: 1
       };
 
       // Primary server states
-      var serverIsMaster = [ assign({}, defaultFields) ];
+      var serverIsMaster = [assign({}, defaultFields)];
       // Received command on server
       var command = null;
       // Boot the mock
@@ -160,24 +159,21 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
             } else if (doc.$query && doc.$readPreference) {
               command = doc;
               request.reply({
-                'waitedMS': Long.ZERO,
-                'cursor': {
-                  'id': Long.ZERO,
-                  'ns': 'test.t',
-                  'firstBatch': [ ]
+                waitedMS: Long.ZERO,
+                cursor: {
+                  id: Long.ZERO,
+                  ns: 'test.t',
+                  firstBatch: []
                 },
-                'ok': 1
+                ok: 1
               });
             }
           }
         });
-      }).catch(function(err) {
-      });
+      }).catch(function() {});
 
       // Attempt to connect
-      var server = new Mongos([
-        { host: 'localhost', port: 52014 }
-      ], {
+      var server = new Mongos([{ host: 'localhost', port: 52014 }], {
         connectionTimeout: 3000,
         socketTimeout: 5000,
         haInterval: 1000,
@@ -198,7 +194,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
         cursor.next(function(err, d) {
           expect(err).to.be.null;
           expect(d).to.be.null;
-          expect(command).to.have.keys([ '$query', '$readPreference' ]);
+          expect(command).to.have.keys(['$query', '$readPreference']);
           expect(command.$readPreference.mode).to.equal('nearest');
           expect(command.$readPreference.tags).to.eql([{ db: 'sf' }]);
 
@@ -210,7 +206,9 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
       });
 
       server.on('error', done);
-      setTimeout(function() { server.connect(); }, 100);
+      setTimeout(function() {
+        server.connect();
+      }, 100);
     }
   });
 
@@ -224,7 +222,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
 
     test: function(done) {
       var Mongos = this.configuration.mongo.Mongos,
-          ReadPreference = this.configuration.mongo.ReadPreference;
+        ReadPreference = this.configuration.mongo.ReadPreference;
 
       // Contain mock server
       var mongos1 = null;
@@ -232,19 +230,19 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'ismaster': true,
-        'msg': 'isdbgrid',
-        'maxBsonObjectSize': 16777216,
-        'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000,
-        'localTime': new Date(),
-        'maxWireVersion': 3,
-        'minWireVersion': 0,
-        'ok': 1
+        ismaster: true,
+        msg: 'isdbgrid',
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 3,
+        minWireVersion: 0,
+        ok: 1
       };
 
       // Primary server states
-      var serverIsMaster = [ assign({}, defaultFields) ];
+      var serverIsMaster = [assign({}, defaultFields)];
       // Received command on server
       var command = null;
       // Boot the mock
@@ -267,13 +265,10 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
             }
           }
         });
-      }).catch(function(err) {
-      });
+      }).catch(function() {});
 
       // Attempt to connect
-      var server = new Mongos([
-        { host: 'localhost', port: 52015 }
-      ], {
+      var server = new Mongos([{ host: 'localhost', port: 52015 }], {
         connectionTimeout: 3000,
         socketTimeout: 5000,
         haInterval: 1000,
@@ -294,7 +289,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
         cursor.next(function(err, d) {
           expect(err).to.be.null;
           expect(d).to.be.null;
-          expect(command).to.have.keys([ '$query', '$readPreference' ]);
+          expect(command).to.have.keys(['$query', '$readPreference']);
           expect(command.$readPreference.mode, 'secondary');
 
           server.destroy();
@@ -305,7 +300,9 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
       });
 
       server.on('error', done);
-      setTimeout(function() { server.connect(); }, 100);
+      setTimeout(function() {
+        server.connect();
+      }, 100);
     }
   });
 });

@@ -1,8 +1,8 @@
 'use strict';
 
 var expect = require('chai').expect,
-    inherits = require('util').inherits,
-    f = require('util').format;
+  inherits = require('util').inherits,
+  f = require('util').format;
 
 describe('Extend cursor tests', function() {
   it('should correctly extend the cursor with custom implementation', {
@@ -17,7 +17,7 @@ describe('Extend cursor tests', function() {
       var Cursor = this.configuration.mongo.Cursor;
 
       // Create an extended cursor that adds a toArray function
-      var ExtendedCursor = function(bson, ns, cmd, options, connection, callbacks, topologyOptions) {
+      var ExtendedCursor = function() {
         Cursor.apply(this, Array.prototype.slice.call(arguments, 0));
         var extendedCursorSelf = this;
 
@@ -35,7 +35,7 @@ describe('Extend cursor tests', function() {
         this.toArray = function(callback) {
           var items = [];
 
-          getAllNexts(items, function(err, r) {
+          getAllNexts(items, function(err) {
             if (err) return callback(err, null);
             callback(null, items);
           });
@@ -55,32 +55,38 @@ describe('Extend cursor tests', function() {
       // Add event listeners
       server.on('connect', function(_server) {
         // Execute the write
-        _server.insert(f('%s.inserts_extend_cursors', self.configuration.db), [{a: 1}, {a: 2}, {a: 3}], {
-          writeConcern: {w: 1}, ordered: true
-        }, function(err, results) {
-          expect(err).to.be.null;
-          expect(results.result.n).to.equal(3);
+        _server.insert(
+          f('%s.inserts_extend_cursors', self.configuration.db),
+          [{ a: 1 }, { a: 2 }, { a: 3 }],
+          {
+            writeConcern: { w: 1 },
+            ordered: true
+          },
+          function(err, results) {
+            expect(err).to.be.null;
+            expect(results.result.n).to.equal(3);
 
-          // Execute find
-          var cursor = _server.cursor(f('%s.inserts_extend_cursors', self.configuration.db), {
-            find: f('%s.inserts_extend_cursors', self.configuration.db),
-            query: {}
-          });
+            // Execute find
+            var cursor = _server.cursor(f('%s.inserts_extend_cursors', self.configuration.db), {
+              find: f('%s.inserts_extend_cursors', self.configuration.db),
+              query: {}
+            });
 
-          // Force a single
-          // Logger.setLevel('debug');
-          // Set the batch size
-          cursor.batchSize = 2;
-          // Execute next
-          cursor.toArray(function(cursorErr, cursorItems) {
-            expect(cursorErr).to.be.null;
-            expect(cursorItems.length).to.equal(3);
-            // Destroy the connection
-            _server.destroy();
-            // Finish the test
-            done();
-          });
-        });
+            // Force a single
+            // Logger.setLevel('debug');
+            // Set the batch size
+            cursor.batchSize = 2;
+            // Execute next
+            cursor.toArray(function(cursorErr, cursorItems) {
+              expect(cursorErr).to.be.null;
+              expect(cursorItems.length).to.equal(3);
+              // Destroy the connection
+              _server.destroy();
+              // Finish the test
+              done();
+            });
+          }
+        );
       });
 
       // Start connection

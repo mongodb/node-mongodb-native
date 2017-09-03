@@ -1,12 +1,14 @@
 'use strict';
 var expect = require('chai').expect,
-    assign = require('../../../../lib/utils').assign,
-    co = require('co'),
-    mockupdb = require('../../../mock');
+  assign = require('../../../../lib/utils').assign,
+  co = require('co'),
+  mockupdb = require('../../../mock');
 
 var timeoutPromise = function(timeout) {
-  return new Promise(function(resolve, reject) {
-    setTimeout(function() { resolve(); }, timeout);
+  return new Promise(function(resolve) {
+    setTimeout(function() {
+      resolve();
+    }, timeout);
   });
 };
 
@@ -29,15 +31,15 @@ describe('Mongos Multiple Proxies (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'ismaster': true,
-        'msg': 'isdbgrid',
-        'maxBsonObjectSize': 16777216,
-        'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000,
-        'localTime': new Date(),
-        'maxWireVersion': 3,
-        'minWireVersion': 0,
-        'ok': 1
+        ismaster: true,
+        msg: 'isdbgrid',
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 3,
+        minWireVersion: 0,
+        ok: 1
       };
 
       // Primary server states
@@ -60,8 +62,7 @@ describe('Mongos Multiple Proxies (mocks)', function() {
               request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
             }
           }
-        }).catch(function(err) {
-        });
+        }).catch(function() {});
 
         // Mongos
         co(function*() {
@@ -76,26 +77,25 @@ describe('Mongos Multiple Proxies (mocks)', function() {
               request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
             }
           }
-        }).catch(function(err) {
-        });
+        }).catch(function() {});
 
         // Attempt to connect
-        var server = new Mongos([
-          { host: 'localhost', port: 11000 },
-          { host: 'localhost', port: 11001 }
-        ], {
-          connectionTimeout: 3000,
-          socketTimeout: 1000,
-          haInterval: 1000,
-          localThresholdMS: 500,
-          size: 1
-        });
+        var server = new Mongos(
+          [{ host: 'localhost', port: 11000 }, { host: 'localhost', port: 11001 }],
+          {
+            connectionTimeout: 3000,
+            socketTimeout: 1000,
+            haInterval: 1000,
+            localThresholdMS: 500,
+            size: 1
+          }
+        );
 
         // Add event listeners
         server.once('connect', function(_server) {
           _server.insert('test.test', [{ created: new Date() }], function(err, r) {
             expect(err).to.be.null;
-            expect(r.connection.port).to.be.oneOf([ 11000, 1001 ]);
+            expect(r.connection.port).to.be.oneOf([11000, 1001]);
             global.port = r.connection.port === 11000 ? 11001 : 11000;
 
             _server.insert('test.test', [{ created: new Date() }], function(_err, _r) {
@@ -119,8 +119,7 @@ describe('Mongos Multiple Proxies (mocks)', function() {
 
         server.on('error', done);
         server.connect();
-      }).catch(function(err) {
-      });
+      }).catch(function() {});
     }
   });
 
@@ -142,15 +141,15 @@ describe('Mongos Multiple Proxies (mocks)', function() {
 
       // Default message fields
       var defaultFields = {
-        'ismaster': true,
-        'msg': 'isdbgrid',
-        'maxBsonObjectSize': 16777216,
-        'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000,
-        'localTime': new Date(),
-        'maxWireVersion': 3,
-        'minWireVersion': 0,
-        'ok': 1
+        ismaster: true,
+        msg: 'isdbgrid',
+        maxBsonObjectSize: 16777216,
+        maxMessageSizeBytes: 48000000,
+        maxWriteBatchSize: 1000,
+        localTime: new Date(),
+        maxWireVersion: 3,
+        minWireVersion: 0,
+        ok: 1
       };
 
       // Primary server states
@@ -193,19 +192,19 @@ describe('Mongos Multiple Proxies (mocks)', function() {
       });
 
       // Attempt to connect
-      var server = new Mongos([
-        { host: 'localhost', port: 11002 },
-        { host: 'localhost', port: 11003 }
-      ], {
-        connectionTimeout: 3000,
-        localThresholdMS: 50,
-        socketTimeout: 1000,
-        haInterval: 1000,
-        size: 1
-      });
+      var server = new Mongos(
+        [{ host: 'localhost', port: 11002 }, { host: 'localhost', port: 11003 }],
+        {
+          connectionTimeout: 3000,
+          localThresholdMS: 50,
+          socketTimeout: 1000,
+          haInterval: 1000,
+          size: 1
+        }
+      );
 
       // Add event listeners
-      server.once('fullsetup', function(_server) {
+      server.once('fullsetup', function() {
         server.insert('test.test', [{ created: new Date() }], function(err, r) {
           expect(err).to.be.null;
           expect(r.connection.port).to.equal(11002);
@@ -216,19 +215,19 @@ describe('Mongos Multiple Proxies (mocks)', function() {
             server.destroy();
 
             // Attempt to connect
-            var server2 = new Mongos([
-              { host: 'localhost', port: 11002 },
-              { host: 'localhost', port: 11003 }
-            ], {
-              connectionTimeout: 3000,
-              localThresholdMS: 1000,
-              socketTimeout: 1000,
-              haInterval: 1000,
-              size: 1
-            });
+            var server2 = new Mongos(
+              [{ host: 'localhost', port: 11002 }, { host: 'localhost', port: 11003 }],
+              {
+                connectionTimeout: 3000,
+                localThresholdMS: 1000,
+                socketTimeout: 1000,
+                haInterval: 1000,
+                size: 1
+              }
+            );
 
             // Add event listeners
-            server2.once('fullsetup', function(__server) {
+            server2.once('fullsetup', function() {
               server2.insert('test.test', [{ created: new Date() }], function(__err, __r) {
                 expect(__err).to.be.null;
                 expect(__r.connection.port).to.equal(11002);
@@ -246,13 +245,17 @@ describe('Mongos Multiple Proxies (mocks)', function() {
               });
             });
 
-            setTimeout(function() { server2.connect(); }, 100);
+            setTimeout(function() {
+              server2.connect();
+            }, 100);
           });
         });
       });
 
       server.on('error', done);
-      setTimeout(function() { server.connect(); }, 100);
+      setTimeout(function() {
+        server.connect();
+      }, 100);
     }
   });
 });

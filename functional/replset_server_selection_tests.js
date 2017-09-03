@@ -1,19 +1,22 @@
 'use strict';
 
 var expect = require('chai').expect,
-    f = require('util').format,
-    fs = require('fs'),
-    ReplSetState = require('../../../lib/topologies/replset_state'),
-    MongoError = require('../../../lib/error').MongoError,
-    ReadPreference = require('../../../lib/topologies/read_preference'),
-    Server = require('../../../lib/topologies/server');
+  f = require('util').format,
+  fs = require('fs'),
+  ReplSetState = require('../../../lib/topologies/replset_state'),
+  MongoError = require('../../../lib/error').MongoError,
+  ReadPreference = require('../../../lib/topologies/read_preference'),
+  Server = require('../../../lib/topologies/server');
 
 describe('A replicaset with no primary', function() {
   it('should correctly execute server selection tests', {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
-      var path = f('%s/../server-selection/tests/server_selection/ReplicaSetNoPrimary/read', __dirname);
+      var path = f(
+        '%s/../server-selection/tests/server_selection/ReplicaSetNoPrimary/read',
+        __dirname
+      );
       var entries = fs.readdirSync(path).filter(function(x) {
         return x.indexOf('.json') !== -1;
       });
@@ -33,7 +36,10 @@ describe('A replicaset with a primary', function() {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
-      var path = f('%s/../server-selection/tests/server_selection/ReplicaSetWithPrimary/read', __dirname);
+      var path = f(
+        '%s/../server-selection/tests/server_selection/ReplicaSetWithPrimary/read',
+        __dirname
+      );
       var entries = fs.readdirSync(path).filter(function(x) {
         return x.indexOf('.json') !== -1;
       });
@@ -76,9 +82,11 @@ function executeEntry(file, path) {
 
       // Add additional information
       if (s.avg_rtt_ms) server.lastIsMasterMS = s.avg_rtt_ms;
-      if (s.tags) server.ismaster = {tags: s.tags};
+      if (s.tags) server.ismaster = { tags: s.tags };
       // Ensure the server looks connected
-      server.isConnected = function() {return true;};
+      server.isConnected = function() {
+        return true;
+      };
 
       if (s.type === 'RSSecondary') {
         replset.secondaries.push(server);
@@ -106,8 +114,12 @@ function executeEntry(file, path) {
       }
     }
 
-    if (['ReplicaSetNoPrimary', 'Primary', 'ReplicaSetWithPrimary'].indexOf(topologyDescription.type) !== -1
-        && inLatencyWindow.length === 0) {
+    if (
+      ['ReplicaSetNoPrimary', 'Primary', 'ReplicaSetWithPrimary'].indexOf(
+        topologyDescription.type
+      ) !== -1 &&
+      inLatencyWindow.length === 0
+    ) {
       if (server instanceof MongoError) {
         expect(server.message).to.equal('no primary server available');
       } else {

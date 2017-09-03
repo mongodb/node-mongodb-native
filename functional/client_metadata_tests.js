@@ -1,9 +1,9 @@
 'use strict';
 
 var expect = require('chai').expect,
-    Server = require('../../../lib/topologies/server'),
-    Bson = require('bson'),
-    Mongos = require('../../../lib/topologies/mongos');
+  Server = require('../../../lib/topologies/server'),
+  Bson = require('bson'),
+  Mongos = require('../../../lib/topologies/mongos');
 
 describe('Client metadata tests', function() {
   it('should correctly pass the configuration settings to server', {
@@ -30,17 +30,23 @@ describe('Client metadata tests', function() {
       var self = this;
 
       var ReplSet = this.configuration.mongo.ReplSet,
-          manager = this.configuration.manager;
+        manager = this.configuration.manager;
 
       // Get the primary server
       manager.primary().then(function(_manager) {
         // Attempt to connect
-        var server = new ReplSet([{
-          host: _manager.host,
-          port: _manager.port
-        }], {
-          setName: self.configuration.setName, appname: 'My application name'
-        });
+        var server = new ReplSet(
+          [
+            {
+              host: _manager.host,
+              port: _manager.port
+            }
+          ],
+          {
+            setName: self.configuration.setName,
+            appname: 'My application name'
+          }
+        );
 
         server.on('connect', function(_server) {
           _server.s.replicaSetState.allServers().forEach(function(x) {
@@ -63,12 +69,17 @@ describe('Client metadata tests', function() {
 
     test: function(done) {
       // Attempt to connect
-      var _server = new Mongos([{
-        host: 'localhost',
-        port: 51000
-      }], {
-        appname: 'My application name'
-      });
+      var _server = new Mongos(
+        [
+          {
+            host: 'localhost',
+            port: 51000
+          }
+        ],
+        {
+          appname: 'My application name'
+        }
+      );
 
       // Add event listeners
       _server.once('connect', function(server) {

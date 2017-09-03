@@ -1,11 +1,11 @@
 'use strict';
 
 var expect = require('chai').expect,
-    f = require('util').format,
-    locateAuthMethod = require('./shared').locateAuthMethod,
-    executeCommand = require('./shared').executeCommand,
-    ReplSet = require('../../../lib/topologies/replset'),
-    Connection = require('../../../lib/connection/connection');
+  f = require('util').format,
+  locateAuthMethod = require('./shared').locateAuthMethod,
+  executeCommand = require('./shared').executeCommand,
+  ReplSet = require('../../../lib/topologies/replset'),
+  Connection = require('../../../lib/connection/connection');
 
 var setUp = function(configuration, options, callback) {
   var ReplSetManager = require('mongodb-topology-manager').ReplSet;
@@ -24,39 +24,51 @@ var setUp = function(configuration, options, callback) {
     rsOptions = {
       server: {
         keyFile: __dirname + '/key/keyfile.key',
-        auth: null, replSet: 'rs'
+        auth: null,
+        replSet: 'rs'
       },
       client: { replSet: 'rs' }
     };
   }
 
   // Set up the nodes
-  var nodes = [{
-    options: {
-      bind_ip: 'localhost', port: 31000,
-      dbpath: f('%s/../db/31000', __dirname)
+  var nodes = [
+    {
+      options: {
+        bind_ip: 'localhost',
+        port: 31000,
+        dbpath: f('%s/../db/31000', __dirname)
+      }
+    },
+    {
+      options: {
+        bind_ip: 'localhost',
+        port: 31001,
+        dbpath: f('%s/../db/31001', __dirname)
+      }
+    },
+    {
+      options: {
+        bind_ip: 'localhost',
+        port: 31002,
+        dbpath: f('%s/../db/31002', __dirname)
+      }
+    },
+    {
+      options: {
+        bind_ip: 'localhost',
+        port: 31003,
+        dbpath: f('%s/../db/31003', __dirname)
+      }
+    },
+    {
+      options: {
+        bind_ip: 'localhost',
+        port: 31004,
+        dbpath: f('%s/../db/31004', __dirname)
+      }
     }
-  }, {
-    options: {
-      bind_ip: 'localhost', port: 31001,
-      dbpath: f('%s/../db/31001', __dirname)
-    }
-  }, {
-    options: {
-      bind_ip: 'localhost', port: 31002,
-      dbpath: f('%s/../db/31002', __dirname)
-    }
-  }, {
-    options: {
-      bind_ip: 'localhost', port: 31003,
-      dbpath: f('%s/../db/31003', __dirname)
-    }
-  }, {
-    options: {
-      bind_ip: 'localhost', port: 31004,
-      dbpath: f('%s/../db/31004', __dirname)
-    }
-  }];
+  ];
 
   // Merge in any node start up options
   for (var i = 0; i < nodes.length; i++) {
@@ -70,13 +82,16 @@ var setUp = function(configuration, options, callback) {
   // Purge the set
   replicasetManager.purge().then(function() {
     // Start the server
-    replicasetManager.start().then(function() {
-      setTimeout(function() {
-        callback(null, replicasetManager);
-      }, 10000);
-    }).catch(function(e) {
-      console.dir(e);
-    });
+    replicasetManager
+      .start()
+      .then(function() {
+        setTimeout(function() {
+          callback(null, replicasetManager);
+        }, 10000);
+      })
+      .catch(function(e) {
+        console.dir(e);
+      });
   });
 };
 
@@ -93,51 +108,71 @@ describe.skip('Basic replica set server auth tests', function() {
 
         // Get right auth method
         locateAuthMethod(self.configuration, function(locateErr, method) {
-          expect(locateErr).to.be.null;
+          expect(locateErr).to.not.exist;
 
-          executeCommand(self.configuration, 'admin', {
-            createUser: 'root',
-            pwd: 'root',
-            roles: [ { role: 'root', db: 'admin' } ],
-            digestPassword: true
-          }, {
-            host: 'localhost', port: 31000
-          }, function(createUserErr, createUserRes) {
-            expect(createUserErr).to.be.null;
-
-            // Attempt to connect
-            var server = new ReplSet([{
+          executeCommand(
+            self.configuration,
+            'admin',
+            {
+              createUser: 'root',
+              pwd: 'root',
+              roles: [{ role: 'root', db: 'admin' }],
+              digestPassword: true
+            },
+            {
               host: 'localhost',
               port: 31000
-            }, {
-              host: 'localhost',
-              port: 31001
-            }], {
-              setName: 'rs'
-            });
+            },
+            function(createUserErr, createUserRes) {
+              expect(createUserRes).to.exist;
+              expect(createUserErr).to.not.exist;
 
-            server.on('connect', function(_server) {
-            });
+              // Attempt to connect
+              var server = new ReplSet(
+                [
+                  {
+                    host: 'localhost',
+                    port: 31000
+                  },
+                  {
+                    host: 'localhost',
+                    port: 31001
+                  }
+                ],
+                {
+                  setName: 'rs'
+                }
+              );
 
-            server.on('error', function() {
-              // console.log('=================== ' + Object.keys(Connection.connections()).length)
-              expect(Object.keys(Connection.connections()).length).to.equal(0);
-              Connection.disableConnectionAccounting();
+              server.on('error', function() {
+                // console.log('=================== ' + Object.keys(Connection.connections()).length)
+                expect(Object.keys(Connection.connections()).length).to.equal(0);
+                Connection.disableConnectionAccounting();
 
-              executeCommand(self.configuration, 'admin', {
-                dropUser: 'root'
-              }, {
-                auth: [method, 'admin', 'root', 'root'],
-                host: 'localhost', port: 31000
-              }, function(dropUserErr, dropUserRes) {
-                replicasetManager.stop().then(function() {
-                  done();
-                });
+                executeCommand(
+                  self.configuration,
+                  'admin',
+                  {
+                    dropUser: 'root'
+                  },
+                  {
+                    auth: [method, 'admin', 'root', 'root'],
+                    host: 'localhost',
+                    port: 31000
+                  },
+                  function(dropUserErr, dropUserRes) {
+                    expect(dropUserErr).to.not.exist;
+                    expect(dropUserRes).to.exist;
+                    replicasetManager.stop().then(function() {
+                      done();
+                    });
+                  }
+                );
               });
-            });
 
-            server.connect({auth: [method, 'admin', 'root2', 'root']});
-          });
+              server.connect({ auth: [method, 'admin', 'root2', 'root'] });
+            }
+          );
         });
       });
     }
@@ -154,54 +189,77 @@ describe.skip('Basic replica set server auth tests', function() {
         Connection.enableConnectionAccounting();
 
         locateAuthMethod(self.configuration, function(locateErr, method) {
-          expect(locateErr).to.be.null;
+          expect(locateErr).to.not.exist;
 
-          executeCommand(self.configuration, 'admin', {
-            createUser: 'root',
-            pwd: 'root',
-            roles: [ { role: 'root', db: 'admin' } ],
-            digestPassword: true
-          }, {
-            host: 'localhost', port: 31000
-          }, function(createUserErr, createUserRes) {
-            expect(createUserErr).to.be.null;
+          executeCommand(
+            self.configuration,
+            'admin',
+            {
+              createUser: 'root',
+              pwd: 'root',
+              roles: [{ role: 'root', db: 'admin' }],
+              digestPassword: true
+            },
+            {
+              host: 'localhost',
+              port: 31000
+            },
+            function(createUserErr, createUserRes) {
+              expect(createUserRes).to.exist;
+              expect(createUserErr).to.not.exist;
 
-            // Attempt to connect
-            var server = new ReplSet([{
-              host: 'localhost', port: 31000
-            }, {
-              host: 'localhost', port: 31001
-            }], {
-              setName: 'rs'
-            });
+              // Attempt to connect
+              var server = new ReplSet(
+                [
+                  {
+                    host: 'localhost',
+                    port: 31000
+                  },
+                  {
+                    host: 'localhost',
+                    port: 31001
+                  }
+                ],
+                {
+                  setName: 'rs'
+                }
+              );
 
-            server.on('connect', function(_server) {
-              _server.insert('test.test', [{a: 1}], function(insertErr, insertRes) {
-                expect(err).to.be.null;
-                expect(insertRes.result.n).to.equal(1);
+              server.on('connect', function(_server) {
+                _server.insert('test.test', [{ a: 1 }], function(insertErr, insertRes) {
+                  expect(err).to.not.exist;
+                  expect(insertRes.result.n).to.equal(1);
 
-                executeCommand(self.configuration, 'admin', {
-                  dropUser: 'root'
-                }, {
-                  auth: [method, 'admin', 'root', 'root'],
-                  host: 'localhost', port: 31000
-                }, function(dropUserErr, dropUserRes) {
-                  expect(dropUserErr).to.be.null;
+                  executeCommand(
+                    self.configuration,
+                    'admin',
+                    {
+                      dropUser: 'root'
+                    },
+                    {
+                      auth: [method, 'admin', 'root', 'root'],
+                      host: 'localhost',
+                      port: 31000
+                    },
+                    function(dropUserErr, dropUserRes) {
+                      expect(dropUserRes).to.exist;
+                      expect(dropUserErr).to.not.exist;
 
-                  _server.destroy();
-                  // console.log('=================== ' + Object.keys(Connection.connections()).length)
-                  expect(Object.keys(Connection.connections()).length).to.equal(0);
-                  Connection.disableConnectionAccounting();
+                      _server.destroy();
+                      expect(Object.keys(Connection.connections()).length).to.equal(0);
+                      Connection.disableConnectionAccounting();
 
-                  replicasetManager.stop().then(function() {
-                    done();
-                  });
+                      replicasetManager.stop().then(function() {
+                        done();
+                      });
+                    }
+                  );
                 });
               });
-            });
 
-            server.connect({auth: [method, 'admin', 'root', 'root']});
-          });
+              server.connect({ auth: [method, 'admin', 'root', 'root'] });
+            }
+          );
         });
       });
     }
@@ -218,57 +276,81 @@ describe.skip('Basic replica set server auth tests', function() {
         Connection.enableConnectionAccounting();
 
         locateAuthMethod(self.configuration, function(locateErr, method) {
-          expect(locateErr).to.be.null;
+          expect(locateErr).to.not.exist;
 
-          executeCommand(self.configuration, 'admin', {
-            createUser: 'root',
-            pwd: 'root',
-            roles: [ { role: 'root', db: 'admin' } ],
-            digestPassword: true
-          }, {
-            host: 'localhost', port: 31000
-          }, function(createUserErr, createUserRes) {
-            expect(createUserErr).to.be.null;
-            // process.exit(0)
+          executeCommand(
+            self.configuration,
+            'admin',
+            {
+              createUser: 'root',
+              pwd: 'root',
+              roles: [{ role: 'root', db: 'admin' }],
+              digestPassword: true
+            },
+            {
+              host: 'localhost',
+              port: 31000
+            },
+            function(createUserErr, createUserRes) {
+              expect(createUserRes).to.exist;
+              expect(createUserErr).to.not.exist;
 
-            // Attempt to connect
-            var server = new ReplSet([{
-              host: 'localhost', port: 31000
-            }], {
-              setName: 'rs'
-            });
+              // Attempt to connect
+              var server = new ReplSet(
+                [
+                  {
+                    host: 'localhost',
+                    port: 31000
+                  }
+                ],
+                {
+                  setName: 'rs'
+                }
+              );
 
-            server.on('connect', function(_server) {
-              //{auth: [method, 'admin', 'root', 'root']}
-              // Attempt authentication
-              _server.auth(method, 'admin', 'root', 'root', function(authErr, authRes) {
-                _server.insert('test.test', [{a: 1}], function(insertErr, insertRes) {
-                  expect(insertErr).to.be.null;
-                  expect(insertRes.result.n).to.equal(1);
+              server.on('connect', function(_server) {
+                //{auth: [method, 'admin', 'root', 'root']}
+                // Attempt authentication
+                _server.auth(method, 'admin', 'root', 'root', function(authErr, authRes) {
+                  expect(authRes).to.exist;
+                  expect(authErr).to.not.exist;
 
-                  executeCommand(self.configuration, 'admin', {
-                    dropUser: 'root'
-                  }, {
-                    auth: [method, 'admin', 'root', 'root'],
-                    host: 'localhost', port: 31000
-                  }, function(dropUserErr, dropUserRes) {
-                    expect(dropUserErr).to.be.null;
+                  _server.insert('test.test', [{ a: 1 }], function(insertErr, insertRes) {
+                    expect(insertErr).to.not.exist;
+                    expect(insertRes.result.n).to.equal(1);
 
-                    _server.destroy();
-                    // console.log('=================== ' + Object.keys(Connection.connections()).length)
-                    expect(Object.keys(Connection.connections()).length).to.equal(0);
-                    Connection.disableConnectionAccounting();
+                    executeCommand(
+                      self.configuration,
+                      'admin',
+                      {
+                        dropUser: 'root'
+                      },
+                      {
+                        auth: [method, 'admin', 'root', 'root'],
+                        host: 'localhost',
+                        port: 31000
+                      },
+                      function(dropUserErr, dropUserRes) {
+                        expect(dropUserRes).to.exist;
+                        expect(dropUserErr).to.not.exist;
 
-                    replicasetManager.stop().then(function() {
-                      done();
-                    });
+                        _server.destroy();
+                        // console.log('=================== ' + Object.keys(Connection.connections()).length)
+                        expect(Object.keys(Connection.connections()).length).to.equal(0);
+                        Connection.disableConnectionAccounting();
+
+                        replicasetManager.stop().then(function() {
+                          done();
+                        });
+                      }
+                    );
                   });
                 });
               });
-            });
 
-            server.connect();
-          });
+              server.connect();
+            }
+          );
         });
       });
     }
@@ -286,73 +368,92 @@ describe.skip('Basic replica set server auth tests', function() {
         Connection.enableConnectionAccounting();
 
         locateAuthMethod(self.configuration, function(locateErr, method) {
-          expect(locateErr).to.be.null;
+          expect(locateErr).to.not.exist;
 
-          executeCommand(self.configuration, 'admin', {
-            createUser: 'root',
-            pwd: 'root',
-            roles: [ { role: 'root', db: 'admin' } ],
-            digestPassword: true
-          }, {
-            host: 'localhost', port: 31000
-          }, function(createUserErr, createUserRes) {
-            expect(createUserErr).to.be.null;
-            // process.exit(0)
+          executeCommand(
+            self.configuration,
+            'admin',
+            {
+              createUser: 'root',
+              pwd: 'root',
+              roles: [{ role: 'root', db: 'admin' }],
+              digestPassword: true
+            },
+            {
+              host: 'localhost',
+              port: 31000
+            },
+            function(createUserErr, createUserRes) {
+              expect(createUserRes).to.exist;
+              expect(createUserErr).to.not.exist;
 
-            // console.log('------------------------------ -1')
-            // Attempt to connect
-            var server = new ReplSet([{
-              host: 'localhost', port: 31000
-            }], {
-              setName: 'rs'
-            });
+              // Attempt to connect
+              var server = new ReplSet(
+                [
+                  {
+                    host: 'localhost',
+                    port: 31000
+                  }
+                ],
+                {
+                  setName: 'rs'
+                }
+              );
 
-            server.on('connect', function(_server) {
-              // console.log('----------------- 0')
-              //{auth: [method, 'admin', 'root', 'root']}
-              // Attempt authentication
-              _server.auth(method, 'admin', 'root', 'root', function(authErr, authRes) {
-                // console.log('----------------- 1')
-                _server.insert('test.test', [{a: 1}], function(insertErr, insertRes) {
-                  // console.log('----------------- 2')
-                  expect(insertErr).to.be.null;
-                  expect(insertRes.result.n).to.equal(1);
+              server.on('connect', function(_server) {
+                // Attempt authentication
+                _server.auth(method, 'admin', 'root', 'root', function(authErr, authRes) {
+                  expect(authErr).to.exist;
+                  expect(authRes).to.not.exist;
 
-                  // console.log('----------------- 3')
-                  _server.logout('admin', function(logoutErr, logoutRes) {
-                    // console.log('----------------- 4')
-                    expect(logoutErr).to.be.null;
+                  _server.insert('test.test', [{ a: 1 }], function(insertErr, insertRes) {
+                    expect(insertErr).to.not.exist;
+                    expect(insertRes.result.n).to.equal(1);
 
-                    _server.insert('test.test', [{a: 1}], function(secondInsertErr, secondInsertRes) {
-                      // console.log('=====================================')
-                      // console.dir(err)
-                      if (secondInsertRes) console.dir(secondInsertRes.result);
+                    _server.logout('admin', function(logoutErr, logoutRes) {
+                      expect(logoutRes).to.exist;
+                      expect(logoutErr).to.not.exist;
 
-                      executeCommand(self.configuration, 'admin', {
-                        dropUser: 'root'
-                      }, {
-                        auth: [method, 'admin', 'root', 'root'],
-                        host: 'localhost', port: 31000
-                      }, function(dropUserErr, dropUserRes) {
-                        expect(dropUserErr).to.be.null;
+                      _server.insert('test.test', [{ a: 1 }], function(
+                        secondInsertErr,
+                        secondInsertRes
+                      ) {
+                        if (secondInsertRes) console.dir(secondInsertRes.result);
 
-                        _server.destroy();
-                        // console.log('=================== ' + Object.keys(Connection.connections()).length)
-                        expect(Object.keys(Connection.connections()).length).to.equal(0);
-                        Connection.disableConnectionAccounting();
+                        executeCommand(
+                          self.configuration,
+                          'admin',
+                          {
+                            dropUser: 'root'
+                          },
+                          {
+                            auth: [method, 'admin', 'root', 'root'],
+                            host: 'localhost',
+                            port: 31000
+                          },
+                          function(dropUserErr, dropUserRes) {
+                            expect(dropUserRes).to.exist;
+                            expect(dropUserErr).to.not.exist;
 
-                        replicasetManager.stop().then(function() {
-                          done();
-                        });
+                            _server.destroy();
+                            // console.log('=================== ' + Object.keys(Connection.connections()).length)
+                            expect(Object.keys(Connection.connections()).length).to.equal(0);
+                            Connection.disableConnectionAccounting();
+
+                            replicasetManager.stop().then(function() {
+                              done();
+                            });
+                          }
+                        );
                       });
                     });
                   });
                 });
               });
-            });
 
-            server.connect();
-          });
+              server.connect();
+            }
+          );
         });
       });
     }
