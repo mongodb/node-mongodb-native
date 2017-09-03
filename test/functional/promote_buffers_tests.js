@@ -105,13 +105,16 @@ describe('Promote Buffers', function() {
           }, function(err) {
             test.equal(null, err);
 
-            db.collection('shouldCorrectlyHonorPromoteBuffer3').find().next(function(err, doc) {
-              test.equal(null, err);
-              test.ok(doc.doc instanceof Buffer);
+            db
+              .collection('shouldCorrectlyHonorPromoteBuffer3')
+              .find()
+              .next(function(err, doc) {
+                test.equal(null, err);
+                test.ok(doc.doc instanceof Buffer);
 
-              client.close();
-              done();
-            });
+                client.close();
+                done();
+              });
           });
         }
       );

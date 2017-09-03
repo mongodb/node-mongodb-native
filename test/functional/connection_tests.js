@@ -77,13 +77,16 @@ describe('Connection', function() {
         db.collection('domainSocketCollection0').insert({ a: 1 }, { w: 1 }, function(err) {
           test.equal(null, err);
 
-          db.collection('domainSocketCollection0').find({ a: 1 }).toArray(function(err, items) {
-            test.equal(null, err);
-            test.equal(1, items.length);
+          db
+            .collection('domainSocketCollection0')
+            .find({ a: 1 })
+            .toArray(function(err, items) {
+              test.equal(null, err);
+              test.equal(1, items.length);
 
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            });
         });
       });
     }
@@ -178,13 +181,16 @@ describe('Connection', function() {
         db.collection('domainSocketCollection1').insert({ x: 1 }, { w: 1 }, function(err) {
           test.equal(null, err);
 
-          db.collection('domainSocketCollection1').find({ x: 1 }).toArray(function(err, items) {
-            test.equal(null, err);
-            test.equal(1, items.length);
+          db
+            .collection('domainSocketCollection1')
+            .find({ x: 1 })
+            .toArray(function(err, items) {
+              test.equal(null, err);
+              test.equal(1, items.length);
 
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            });
         });
       });
     }

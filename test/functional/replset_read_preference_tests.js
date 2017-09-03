@@ -647,11 +647,14 @@ describe('ReplSet (ReadPreference)', function() {
           });
 
           // Attempt to read (should fail due to the server not being a primary);
-          collection.find().setReadPreference(ReadPreference.SECONDARY).toArray(function(err) {
-            test.equal(null, err);
-            client.close();
-            restartAndDone(done);
-          });
+          collection
+            .find()
+            .setReadPreference(ReadPreference.SECONDARY)
+            .toArray(function(err) {
+              test.equal(null, err);
+              client.close();
+              restartAndDone(done);
+            });
         });
       });
 
@@ -888,11 +891,15 @@ describe('ReplSet (ReadPreference)', function() {
           test.equal('ny', readPreference.tags['loc']);
         });
 
-        client.db('local').collection('system.replset').find().toArray(function(err) {
-          test.equal(null, err);
-          client.close();
-          restartAndDone(done);
-        });
+        client
+          .db('local')
+          .collection('system.replset')
+          .find()
+          .toArray(function(err) {
+            test.equal(null, err);
+            client.close();
+            restartAndDone(done);
+          });
       });
 
       client.connect(function(err) {
@@ -940,12 +947,16 @@ describe('ReplSet (ReadPreference)', function() {
           success = true;
         });
 
-        client.db('local').collection('system.replset').find().toArray(function(err) {
-          test.equal(null, err);
-          test.ok(success);
-          client.close();
-          restartAndDone(done);
-        });
+        client
+          .db('local')
+          .collection('system.replset')
+          .find()
+          .toArray(function(err) {
+            test.equal(null, err);
+            test.ok(success);
+            client.close();
+            restartAndDone(done);
+          });
       });
 
       client.connect(function(err) {

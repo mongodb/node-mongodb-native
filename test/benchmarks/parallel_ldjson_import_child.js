@@ -11,25 +11,29 @@ module.exports = function(o, callback) {
     // Collection
     var collection = client.collection('corpus');
     // Read in all the files
-    for(var i = 0; i < files.length; i++) {
+    for (var i = 0; i < files.length; i++) {
       fs.readFile(files[i], 'ascii', function(err, data) {
         // Split the data
         var entries = data.split('\n');
         entries.pop();
 
         // Insert docs
-        collection.insertMany(entries.map(function(x) {
-          var obj = JSON.parse(x);
-          obj._i = index++;
-          return obj;
-        }), {ordered:false}, function() {
-          left = left - 1;
+        collection.insertMany(
+          entries.map(function(x) {
+            var obj = JSON.parse(x);
+            obj._i = index++;
+            return obj;
+          }),
+          { ordered: false },
+          function() {
+            left = left - 1;
 
-          if(left == 0) {
-            callback();
+            if (left == 0) {
+              callback();
+            }
           }
-        });
+        );
       });
     }
   });
-}
+};

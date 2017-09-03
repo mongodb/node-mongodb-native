@@ -19,27 +19,29 @@ module.exports = function(o, callback) {
 
     // console.dir({$gte: {_i: skip}, $lte: {_i: end}})
     // Perform the query
-    collection.find({_i : {$gte: skip, $lte: end}}).each(function(err, doc) {
-      if(doc == null) return callback();
+    collection.find({ _i: { $gte: skip, $lte: end } }).each(function(err, doc) {
+      if (doc == null) return callback();
       docs.push(doc);
       totalDocs++;
 
       // Do we have 5000 docs
-      if(docs.length === 5000) {
-        var docsString = docs.map(function(x) {
-          return JSON.stringify(x);
-        }).join('\n');
+      if (docs.length === 5000) {
+        var docsString = docs
+          .map(function(x) {
+            return JSON.stringify(x);
+          })
+          .join('\n');
         docs = [];
 
         // Write the file
         fs.writeFile(f('%s/../../files%s.tmp', __dirname, index++), docsString, function(e, r) {
           left = left - 1;
 
-          if(left == 0) {
+          if (left == 0) {
             callback();
           }
         });
       }
     });
   });
-}
+};

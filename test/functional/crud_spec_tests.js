@@ -107,20 +107,23 @@ describe('CRUD spec', function() {
     }
 
     var pipeline = scenarioTest.operation.arguments.pipeline;
-    return collection.aggregate(pipeline, options).toArray().then(function(results) {
-      if (scenarioTest.outcome.collection) {
-        return db
-          .collection(scenarioTest.outcome.collection.name)
-          .find({})
-          .toArray()
-          .then(function(collectionResults) {
-            test.deepEqual(scenarioTest.outcome.result, collectionResults);
-          });
-      }
+    return collection
+      .aggregate(pipeline, options)
+      .toArray()
+      .then(function(results) {
+        if (scenarioTest.outcome.collection) {
+          return db
+            .collection(scenarioTest.outcome.collection.name)
+            .find({})
+            .toArray()
+            .then(function(collectionResults) {
+              test.deepEqual(scenarioTest.outcome.result, collectionResults);
+            });
+        }
 
-      test.deepEqual(scenarioTest.outcome.result, results);
-      return Promise.resolve();
-    });
+        test.deepEqual(scenarioTest.outcome.result, results);
+        return Promise.resolve();
+      });
   }
 
   function executeCountTest(scenarioTest, db, collection) {
@@ -153,9 +156,12 @@ describe('CRUD spec', function() {
     var options = assign({}, args);
     delete options.filter;
 
-    return collection.find(filter, options).toArray().then(function(results) {
-      test.deepEqual(scenarioTest.outcome.result, results);
-    });
+    return collection
+      .find(filter, options)
+      .toArray()
+      .then(function(results) {
+        test.deepEqual(scenarioTest.outcome.result, results);
+      });
   }
 
   function executeDeleteTest(scenarioTest, db, collection) {
@@ -171,9 +177,12 @@ describe('CRUD spec', function() {
       });
 
       if (scenarioTest.outcome.collection) {
-        return collection.find({}).toArray().then(function(results) {
-          test.deepEqual(scenarioTest.outcome.collection.data, results);
-        });
+        return collection
+          .find({})
+          .toArray()
+          .then(function(results) {
+            test.deepEqual(scenarioTest.outcome.collection.data, results);
+          });
       }
     });
   }
@@ -198,9 +207,12 @@ describe('CRUD spec', function() {
       });
 
       if (scenarioTest.outcome.collection) {
-        return collection.find({}).toArray().then(function(results) {
-          test.deepEqual(scenarioTest.outcome.collection.data, results);
-        });
+        return collection
+          .find({})
+          .toArray()
+          .then(function(results) {
+            test.deepEqual(scenarioTest.outcome.collection.data, results);
+          });
       }
     });
   }
@@ -223,9 +235,12 @@ describe('CRUD spec', function() {
       });
 
       if (scenarioTest.outcome.collection) {
-        return collection.find({}).toArray().then(function(results) {
-          test.deepEqual(scenarioTest.outcome.collection.data, results);
-        });
+        return collection
+          .find({})
+          .toArray()
+          .then(function(results) {
+            test.deepEqual(scenarioTest.outcome.collection.data, results);
+          });
       }
     });
   }
@@ -256,9 +271,12 @@ describe('CRUD spec', function() {
       }
 
       if (scenarioTest.outcome.collection) {
-        return collection.find({}).toArray().then(function(results) {
-          test.deepEqual(scenarioTest.outcome.collection.data, results);
-        });
+        return collection
+          .find({})
+          .toArray()
+          .then(function(results) {
+            test.deepEqual(scenarioTest.outcome.collection.data, results);
+          });
       }
     });
   }
@@ -273,7 +291,10 @@ describe('CRUD spec', function() {
     setupPromises.push(collection.drop().catch(function() {}));
     if (scenarioTest.outcome.collection && scenarioTest.outcome.collection.name) {
       setupPromises.push(
-        context.db.collection(scenarioTest.outcome.collection.name).drop().catch(function() {})
+        context.db
+          .collection(scenarioTest.outcome.collection.name)
+          .drop()
+          .catch(function() {})
       );
     }
 

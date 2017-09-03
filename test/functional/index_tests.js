@@ -46,10 +46,12 @@ describe('Indexes', function() {
                     var count1 = 0,
                       count2 = 0;
                     // Get count of indexes
-                    for (var i in collectionInfo) { // eslint-disable-line
+                    for (var i in collectionInfo) {
+                      // eslint-disable-line
                       count1 += 1;
                     }
-                    for (var i in collectionInfo2) { // eslint-disable-line
+                    for (var i in collectionInfo2) {
+                      // eslint-disable-line
                       count2 += 1;
                     }
 
@@ -103,7 +105,8 @@ describe('Indexes', function() {
                 db.indexInformation(collection.collectionName, function(err, collectionInfo) {
                   var count1 = 0;
                   // Get count of indexes
-                  for (var i in collectionInfo) { // eslint-disable-line
+                  for (var i in collectionInfo) {
+                    // eslint-disable-line
                     count1 += 1;
                   }
 
@@ -895,13 +898,16 @@ describe('Indexes', function() {
           test.equal(null, err);
 
           // Get the list of indexes
-          db.collection('testListIndexes').listIndexes().toArray(function(err, indexes) {
-            test.equal(null, err);
-            test.equal(2, indexes.length);
+          db
+            .collection('testListIndexes')
+            .listIndexes()
+            .toArray(function(err, indexes) {
+              test.equal(null, err);
+              test.equal(2, indexes.length);
 
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            });
         });
       });
     }
@@ -922,13 +928,16 @@ describe('Indexes', function() {
           test.equal(null, err);
 
           // Get the list of indexes
-          db.collection('testListIndexes_2').listIndexes().hasNext(function(err, result) {
-            test.equal(null, err);
-            test.equal(true, result);
+          db
+            .collection('testListIndexes_2')
+            .listIndexes()
+            .hasNext(function(err, result) {
+              test.equal(null, err);
+              test.equal(true, result);
 
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            });
         });
       });
     }
@@ -981,20 +990,23 @@ describe('Indexes', function() {
             test.equal(null, err);
             test.equal(3, r.numIndexesAfter);
 
-            db.collection('createIndexes').listIndexes().toArray(function(err, docs) {
-              test.equal(null, err);
-              var keys = {};
+            db
+              .collection('createIndexes')
+              .listIndexes()
+              .toArray(function(err, docs) {
+                test.equal(null, err);
+                var keys = {};
 
-              for (var i = 0; i < docs.length; i++) {
-                keys[docs[i].name] = true;
-              }
+                for (var i = 0; i < docs.length; i++) {
+                  keys[docs[i].name] = true;
+                }
 
-              test.ok(keys['a_1']);
-              test.ok(keys['hello1']);
+                test.ok(keys['a_1']);
+                test.ok(keys['hello1']);
 
-              client.close();
-              done();
-            });
+                client.close();
+                done();
+              });
           });
       });
     }

@@ -10,12 +10,12 @@ module.exports = function(o, callback) {
     var left = o.e - o.s;
 
     // Read all the indexes
-    for(var i = o.s; i < o.e; i++) {
+    for (var i = o.s; i < o.e; i++) {
       var stream = fs.createWriteStream(f('%s/../../files%s.tmp', __dirname, i), 'binary');
       stream.on('close', function() {
         left = left - 1;
 
-        if(left == 0) {
+        if (left == 0) {
           callback();
         }
       });
@@ -23,4 +23,4 @@ module.exports = function(o, callback) {
       bucket.openDownloadStreamByName(f('files%s.txt', i)).pipe(stream);
     }
   });
-}
+};

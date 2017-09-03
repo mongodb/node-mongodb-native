@@ -1,28 +1,27 @@
-"use strict";
+'use strict';
 
-var Runner = require('integra').Runner
-  , Cover = require('integra').Cover
-  , RCover = require('integra').RCover
-  , f = require('util').format
-  , path = require('path')
-  , assign = require('../lib/utils').assign
-  , NodeVersionFilter = require('./filters/node_version_filter')
-  , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
-  , MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
-  , ES6PromisesSupportedFilter = require('./filters/es6_promises_supported_filter')
-  , ES6GeneratorsSupportedFilter = require('./filters/es6_generators_supported_filter')
-  , OSFilter = require('./filters/os_filter')
-  , TravisFilter = require('./filters/travis_filter')
-  , FileFilter = require('integra').FileFilter
-  , TestNameFilter = require('integra').TestNameFilter
-  , semver = require('semver');
+var Runner = require('integra').Runner,
+  Cover = require('integra').Cover,
+  RCover = require('integra').RCover,
+  f = require('util').format,
+  path = require('path'),
+  assign = require('../lib/utils').assign,
+  NodeVersionFilter = require('./filters/node_version_filter'),
+  MongoDBVersionFilter = require('./filters/mongodb_version_filter'),
+  MongoDBTopologyFilter = require('./filters/mongodb_topology_filter'),
+  ES6PromisesSupportedFilter = require('./filters/es6_promises_supported_filter'),
+  ES6GeneratorsSupportedFilter = require('./filters/es6_generators_supported_filter'),
+  OSFilter = require('./filters/os_filter'),
+  TravisFilter = require('./filters/travis_filter'),
+  FileFilter = require('integra').FileFilter,
+  TestNameFilter = require('integra').TestNameFilter,
+  semver = require('semver');
 
 var detector = require('gleak')();
 var smokePlugin = require('./smoke_plugin.js');
 var argv = require('optimist')
-    .usage('Usage: $0 -t [target] -e [environment] -n [name] -f [filename] -r [smoke report file]')
-    .demand(['t'])
-    .argv;
+  .usage('Usage: $0 -t [target] -e [environment] -n [name] -f [filename] -r [smoke report file]')
+  .demand(['t']).argv;
 
 // MongoDB Topology Manager
 var ServerManager = require('mongodb-topology-manager').Server,
@@ -31,28 +30,28 @@ var ServerManager = require('mongodb-topology-manager').Server,
 
 // Skipping parameters
 var startupOptions = {
-    skipStartup: true
-  , skipRestart: true
-  , skipShutdown: true
-  , skip: false
-}
+  skipStartup: true,
+  skipRestart: true,
+  skipShutdown: true,
+  skip: false
+};
 
 // Skipping parameters
 var startupOptions = {
-    skipStartup: false
-  , skipRestart: false
-  , skipShutdown: false
-  , skip: false
-}
+  skipStartup: false,
+  skipRestart: false,
+  skipShutdown: false,
+  skip: false
+};
 
 // Skipping parameters
-if(argv.s) {
+if (argv.s) {
   var startupOptions = {
-      skipStartup: true
-    , skipRestart: true
-    , skipShutdown: true
-    , skip: false
-  }
+    skipStartup: true,
+    skipRestart: true,
+    skipShutdown: true,
+    skip: false
+  };
 }
 
 /**
@@ -61,32 +60,33 @@ if(argv.s) {
 var f = require('util').format;
 var Server = require('..').Server,
   ReplSet = require('..').ReplSet,
-  Mongos = require('..').Mongos, 
-  Db = require('..').Db, 
-  MongoClient = require('..').MongoClient, 
+  Mongos = require('..').Mongos,
+  Db = require('..').Db,
+  MongoClient = require('..').MongoClient,
   Logger = require('..').Logger;
 
 var clone = function(obj) {
   var copy = {};
-  for(var name in obj) copy[name] = obj[name];
+  for (var name in obj) copy[name] = obj[name];
   return copy;
-}
+};
 
 var Configuration = function(options) {
   options = options || {};
   var host = options.host || 'localhost';
   var port = options.port || 27017;
   var db = options.db || 'integration_tests';
-  var url = options.url || "mongodb://%slocalhost:27017/" + db;
+  var url = options.url || 'mongodb://%slocalhost:27017/' + db;
   var manager = options.manager;
   var skipStart = typeof options.skipStart == 'boolean' ? options.skipStart : false;
-  var skipTermination = typeof options.skipTermination == 'boolean' ? options.skipTermination : false;
+  var skipTermination =
+    typeof options.skipTermination == 'boolean' ? options.skipTermination : false;
   var setName = options.setName || 'rs';
   var replicasetName = options.replicasetName || 'rs';
 
   // Write concerns
-  var writeConcern = options.writeConcern || {w:1};
-  var writeConcernMax = options.writeConcernMax || {w:1};
+  var writeConcern = options.writeConcern || { w: 1 };
+  var writeConcernMax = options.writeConcernMax || { w: 1 };
 
   // Default function
   var defaultFunction = function(host, port, options) {
@@ -100,54 +100,63 @@ var Configuration = function(options) {
     return {
       start: function(callback) {
         var self = this;
-        if(skipStart) return callback();
+        if (skipStart) return callback();
 
-        manager.discover().then(function(result) {
-          // Create string representation
-          var currentVersion = result.version.join('.');
-          console.log("==== Running against MongodDB " + currentVersion);
-          // If we have a ReplSetManager and the version is >= 3.4.0
-          if(semver.satisfies(currentVersion, ">=3.4.0")) {
-            if(manager instanceof ReplSetManager) {
-              manager.managers = manager.managers.map(function(manager) {
-                manager.options.enableMajorityReadConcern = null;
-                return manager;
-              });
-            }
-          }
-
-          // Purge the database
-          manager.purge().then(function() {
-            console.log("[purge the directories]");
-
-            var Logger = require('mongodb-topology-manager').Logger;
-            manager.start().then(function() {
-              console.log("[started the topology]");
-              var Logger = require('mongodb-topology-manager').Logger;
-              // Logger.setLevel('info');
-              
-              // Create an instance
-              new MongoClient(topology(host, port)).connect(function(err, client) {
-                if(err) return callback(err);
-
-                client.db(self.db).dropDatabase(function(err) {
-                  client.close();
-                  callback();
+        manager
+          .discover()
+          .then(function(result) {
+            // Create string representation
+            var currentVersion = result.version.join('.');
+            console.log('==== Running against MongodDB ' + currentVersion);
+            // If we have a ReplSetManager and the version is >= 3.4.0
+            if (semver.satisfies(currentVersion, '>=3.4.0')) {
+              if (manager instanceof ReplSetManager) {
+                manager.managers = manager.managers.map(function(manager) {
+                  manager.options.enableMajorityReadConcern = null;
+                  return manager;
                 });
+              }
+            }
+
+            // Purge the database
+            manager
+              .purge()
+              .then(function() {
+                console.log('[purge the directories]');
+
+                var Logger = require('mongodb-topology-manager').Logger;
+                manager
+                  .start()
+                  .then(function() {
+                    console.log('[started the topology]');
+                    var Logger = require('mongodb-topology-manager').Logger;
+                    // Logger.setLevel('info');
+
+                    // Create an instance
+                    new MongoClient(topology(host, port)).connect(function(err, client) {
+                      if (err) return callback(err);
+
+                      client.db(self.db).dropDatabase(function(err) {
+                        client.close();
+                        callback();
+                      });
+                    });
+                  })
+                  .catch(function(err) {
+                    console.log(err.stack);
+                  });
+              })
+              .catch(function(err) {
+                console.log(err.stack);
               });
-            }).catch(function(err) {
-              console.log(err.stack);
-            });
-          }).catch(function(err) {
+          })
+          .catch(function(err) {
             console.log(err.stack);
           });
-        }).catch(function(err) {
-          console.log(err.stack);
-        });
       },
 
       stop: function(callback) {
-        if(skipTermination) return callback();
+        if (skipTermination) return callback();
         // Stop the servers
         manager.stop(9).then(function() {
           callback();
@@ -155,8 +164,9 @@ var Configuration = function(options) {
       },
 
       restart: function(options, callback) {
-        if(typeof options == 'function') callback = options, options = {purge:true, kill:true};
-        if(skipTermination) return callback();
+        if (typeof options == 'function')
+          (callback = options), (options = { purge: true, kill: true });
+        if (skipTermination) return callback();
 
         // Stop the servers
         manager.restart().then(function() {
@@ -175,22 +185,22 @@ var Configuration = function(options) {
       newDbInstance: function(dbOptions, serverOptions) {
         serverOptions = serverOptions || {};
         // Override implementation
-        if(options.newDbInstance) {
+        if (options.newDbInstance) {
           return options.newDbInstance(dbOptions, serverOptions);
         }
 
         // Set up the options
         var keys = Object.keys(options);
-        if(keys.indexOf('sslOnNormalPorts') != -1) serverOptions.ssl = true;
+        if (keys.indexOf('sslOnNormalPorts') != -1) serverOptions.ssl = true;
 
         // Fall back
-        var port = serverOptions && serverOptions.port || options.port || 27017;
-        var host = serverOptions && serverOptions.host || 'localhost';
+        var port = (serverOptions && serverOptions.port) || options.port || 27017;
+        var host = (serverOptions && serverOptions.host) || 'localhost';
 
         // Default topology
         var topology = Server;
         // If we have a specific topology
-        if(options.topology) {
+        if (options.topology) {
           topology = options.topology;
         }
 
@@ -207,23 +217,24 @@ var Configuration = function(options) {
 
       newDbInstanceWithDomainSocket: function(dbOptions, serverOptions) {
         // Override implementation
-        if(options.newDbInstanceWithDomainSocket) return options.newDbInstanceWithDomainSocket(dbOptions, serverOptions);
+        if (options.newDbInstanceWithDomainSocket)
+          return options.newDbInstanceWithDomainSocket(dbOptions, serverOptions);
 
         // Default topology
         var topology = Server;
         // If we have a specific topology
-        if(options.topology) {
+        if (options.topology) {
           topology = options.topology;
         }
 
         // Fall back
-        var host = serverOptions && serverOptions.host || "%2Ftmp%2Fmongodb-27017.sock";
+        var host = (serverOptions && serverOptions.host) || '%2Ftmp%2Fmongodb-27017.sock';
 
         // Set up the options
         var keys = Object.keys(options);
-        if(keys.indexOf('sslOnNormalPorts') != -1) serverOptions.ssl = true;
+        if (keys.indexOf('sslOnNormalPorts') != -1) serverOptions.ssl = true;
         // If we explicitly testing undefined port behavior
-        if(serverOptions && serverOptions.port == 'undefined') {
+        if (serverOptions && serverOptions.port == 'undefined') {
           return new Db(db, topology(host, undefined, serverOptions), dbOptions);
         }
 
@@ -233,10 +244,10 @@ var Configuration = function(options) {
 
       url: function(username, password) {
         // Fall back
-        var auth = "";
+        var auth = '';
 
-        if(username && password) {
-          auth = f("%s:%s@", username, password);
+        if (username && password) {
+          auth = f('%s:%s@', username, password);
         }
 
         return f(url, auth);
@@ -251,124 +262,134 @@ var Configuration = function(options) {
       db: db,
       manager: manager,
       replicasetName: replicasetName,
-      writeConcern: function() { return clone(writeConcern) },
-      writeConcernMax: function() { return clone(writeConcernMax) }
-    }
-  }
-}
+      writeConcern: function() {
+        return clone(writeConcern);
+      },
+      writeConcernMax: function() {
+        return clone(writeConcernMax);
+      }
+    };
+  };
+};
 
 // Set up the runner
 var runner = new Runner({
-    logLevel:'error'
+  logLevel: 'error',
   // , logLevel:'info'
-  , runners: 1
-  , failFast: true
+  runners: 1,
+  failFast: true
 });
 
 var testFiles = [
   // Logging tests
-    '/test/functional/logger_tests.js'
+  '/test/functional/logger_tests.js',
 
   // APM tests
-  , '/test/functional/apm_tests.js'
+  '/test/functional/apm_tests.js',
 
   // Connection spec tests
-  , '/test/functional/connection_string_spec_tests.js'
+  '/test/functional/connection_string_spec_tests.js',
 
   // Replicaset read concern (make sure no illegal state due to teardown tests)
-  , '/test/functional/readconcern_tests.js'
+  '/test/functional/readconcern_tests.js',
 
   // Promise tests
-  , '/test/functional/promises_db_tests.js'
-  , '/test/functional/promises_collection_tests.js'
-  , '/test/functional/promises_cursor_tests.js'
-  , '/test/functional/operation_promises_example_tests.js'
-  , '/test/functional/byo_promises_tests.js'
+  '/test/functional/promises_db_tests.js',
+  '/test/functional/promises_collection_tests.js',
+  '/test/functional/promises_cursor_tests.js',
+  '/test/functional/operation_promises_example_tests.js',
+  '/test/functional/byo_promises_tests.js',
 
   // Functionality tests
-  , '/test/functional/mongo_client_tests.js'
-  , '/test/functional/collection_tests.js'
-  , '/test/functional/db_tests.js'
-  , '/test/functional/cursor_tests.js'
-  , '/test/functional/insert_tests.js'
-  , '/test/functional/aggregation_tests.js'
-  , '/test/functional/connection_tests.js'
-  , '/test/functional/cursorstream_tests.js'
-  , '/test/functional/custom_pk_tests.js'
-  , '/test/functional/error_tests.js'
-  , '/test/functional/find_tests.js'
-  , '/test/functional/index_tests.js'
-  , '/test/functional/mapreduce_tests.js'
-  , '/test/functional/maxtimems_tests.js'
-  , '/test/functional/multiple_db_tests.js'
-  , '/test/functional/object_id_tests.js'
-  , '/test/functional/raw_tests.js'
-  , '/test/functional/readpreference_tests.js'
-  , '/test/functional/remove_tests.js'
-  , '/test/functional/unicode_tests.js'
-  , '/test/functional/uri_tests.js'
-  , '/test/functional/url_parser_tests.js'
-  , '/test/functional/gridfs_tests.js'
-  , '/test/functional/bulk_tests.js'
-  , '/test/functional/operation_example_tests.js'
-  , '/test/functional/crud_api_tests.js'
-  , '/test/functional/document_validation_tests.js'
-  , '/test/functional/ignore_undefined_tests.js'
-  , '/test/functional/mongo_client_options_tests.js'
-  , '/test/functional/decimal128_tests.js'
-  , '/test/functional/find_and_modify_tests.js'
-  , '/test/functional/change_stream_tests.js'
-  , '/test/functional/hang_tests.js',
-  , '/test/functional/disconnect_handler_tests.js',
-  , '/test/functional/promote_values_tests.js',
-  , '/test/functional/promote_buffers_tests.js',
+  '/test/functional/mongo_client_tests.js',
+  '/test/functional/collection_tests.js',
+  '/test/functional/db_tests.js',
+  '/test/functional/cursor_tests.js',
+  '/test/functional/insert_tests.js',
+  '/test/functional/aggregation_tests.js',
+  '/test/functional/connection_tests.js',
+  '/test/functional/cursorstream_tests.js',
+  '/test/functional/custom_pk_tests.js',
+  '/test/functional/error_tests.js',
+  '/test/functional/find_tests.js',
+  '/test/functional/index_tests.js',
+  '/test/functional/mapreduce_tests.js',
+  '/test/functional/maxtimems_tests.js',
+  '/test/functional/multiple_db_tests.js',
+  '/test/functional/object_id_tests.js',
+  '/test/functional/raw_tests.js',
+  '/test/functional/readpreference_tests.js',
+  '/test/functional/remove_tests.js',
+  '/test/functional/unicode_tests.js',
+  '/test/functional/uri_tests.js',
+  '/test/functional/url_parser_tests.js',
+  '/test/functional/gridfs_tests.js',
+  '/test/functional/bulk_tests.js',
+  '/test/functional/operation_example_tests.js',
+  '/test/functional/crud_api_tests.js',
+  '/test/functional/document_validation_tests.js',
+  '/test/functional/ignore_undefined_tests.js',
+  '/test/functional/mongo_client_options_tests.js',
+  '/test/functional/decimal128_tests.js',
+  '/test/functional/find_and_modify_tests.js',
+  '/test/functional/change_stream_tests.js',
+  '/test/functional/hang_tests.js',
+  ,
+  '/test/functional/disconnect_handler_tests.js',
+  ,
+  '/test/functional/promote_values_tests.js',
+  ,
+  '/test/functional/promote_buffers_tests.js',
 
+  ,
   // Replicaset tests
-  , '/test/functional/replset_read_preference_tests.js'
-  , '/test/functional/replset_operations_tests.js'
-  , '/test/functional/replset_failover_tests.js'
-  , '/test/functional/replset_connection_tests.js'
-  , '/test/functional/sdam_tests.js'
+  '/test/functional/replset_read_preference_tests.js',
+  '/test/functional/replset_operations_tests.js',
+  '/test/functional/replset_failover_tests.js',
+  '/test/functional/replset_connection_tests.js',
+  '/test/functional/sdam_tests.js',
 
   // Sharding tests
-  , '/test/functional/sharding_failover_tests.js'
-  , '/test/functional/sharding_connection_tests.js'
-  , '/test/functional/sharding_read_preference_tests.js'
+  '/test/functional/sharding_failover_tests.js',
+  '/test/functional/sharding_connection_tests.js',
+  '/test/functional/sharding_read_preference_tests.js',
 
   // SSL tests
-  , '/test/functional/ssl_mongoclient_tests.js'
-  , '/test/functional/ssl_validation_tests.js'
-  , '/test/functional/ssl_x509_connect_tests.js'
-  , '/test/functional/sni_tests.js'
+  '/test/functional/ssl_mongoclient_tests.js',
+  '/test/functional/ssl_validation_tests.js',
+  '/test/functional/ssl_x509_connect_tests.js',
+  '/test/functional/sni_tests.js',
 
   // SCRAM tests
-  , '/test/functional/scram_tests.js'
+  '/test/functional/scram_tests.js',
 
   // LDAP Tests
-  , '/test/functional/ldap_tests.js'
+  '/test/functional/ldap_tests.js',
 
   // Kerberos Tests
-  , '/test/functional/kerberos_tests.js'
+  '/test/functional/kerberos_tests.js',
 
   // Authentication Tests
-  , '/test/functional/authentication_tests.js'
+  '/test/functional/authentication_tests.js',
 
   // GridFS
-  , '/test/functional/gridfs_stream_tests.js'
+  '/test/functional/gridfs_stream_tests.js',
 
   // Reconnection tests
-  , '/test/functional/reconnect_tests.js',
+  '/test/functional/reconnect_tests.js',
 
+  ,
   // Bug tests
-  , '/test/functional/jira_bug_tests.js',
+  '/test/functional/jira_bug_tests.js',
 
+  ,
   // Domain tests
-  , '/test/functional/domain_tests.js'
-]
+  '/test/functional/domain_tests.js'
+];
 
 // Check if we support es6 generators
 try {
-  eval("(function *(){})");
+  eval('(function *(){})');
   // Generator tests
   testFiles.push('/test/functional/operation_generators_example_tests.js');
   // Mock tests
@@ -383,11 +404,11 @@ try {
 
   // Test examples
   testFiles.push('/test/functional/examples_tests.js');
-} catch(err) {}
+} catch (err) {}
 
 // Add all the tests to run
 testFiles.forEach(function(t) {
-  if(t != "") runner.add(t);
+  if (t != '') runner.add(t);
 });
 
 // // Add the Coverage plugin
@@ -427,7 +448,7 @@ runner.plugin(new ES6GeneratorsSupportedFilter());
 
 // Exit when done
 runner.on('exit', function(errors, results) {
-  process.exit(0)
+  process.exit(0);
 });
 
 // Set Logger level for driver
@@ -443,13 +464,13 @@ Logger.setLevel('error');
 // Logger.filter('class', ['ReplSet']);
 
 // We want to export a smoke.py style json file
-if(argv.r) {
-  console.log("Writing smoke output to " + argv.r);
+if (argv.r) {
+  console.log('Writing smoke output to ' + argv.r);
   smokePlugin.attachToRunner(runner, argv.r);
 }
 
 // Are we running a functional test
-if(argv.t == 'functional') {
+if (argv.t == 'functional') {
   // Contain the config
   var config = null;
 
@@ -457,11 +478,11 @@ if(argv.t == 'functional') {
   // Execute the final code
   var executeTestSuite = function(_config) {
     // If we have a test we are filtering by
-    if(argv.f) {
+    if (argv.f) {
       runner.plugin(new FileFilter(argv.f));
     }
 
-    if(argv.n) {
+    if (argv.n) {
       runner.plugin(new TestNameFilter(argv.n));
     }
 
@@ -469,12 +490,12 @@ if(argv.t == 'functional') {
     runner.plugin(new TravisFilter());
 
     // Skip startup
-    if(startupOptions.skipStartup) {
+    if (startupOptions.skipStartup) {
       return runner.run(Configuration(_config));
     }
 
     // Skip the version download and use local mongod in PATH
-    if(argv.l) {
+    if (argv.l) {
       return runner.run(Configuration(_config));
     }
 
@@ -482,70 +503,76 @@ if(argv.t == 'functional') {
     var m = require('mongodb-version-manager');
     // Kill any running MongoDB processes and
     // `install $MONGODB_VERSION` || `use existing installation` || `install stable`
-    m(function(err){
-      if(err) return console.error(err) && process.exit(1);
+    m(function(err) {
+      if (err) return console.error(err) && process.exit(1);
 
-      m.current(function(err, version){
-        if(err) return console.error(err) && process.exit(1);
+      m.current(function(err, version) {
+        if (err) return console.error(err) && process.exit(1);
         console.log('Running tests against MongoDB version `%s`', version);
         // Run the configuration
         runner.run(Configuration(_config));
       });
     });
-  }
+  };
 
   //
   // Replicaset configuration
-  if(argv.e == 'replicaset') {
+  if (argv.e == 'replicaset') {
     // Establish the server version
     new ServerManager('mongod').discover().then(function(r) {
       // The individual nodes
-      var nodes = [{
-        tags: {loc: 'ny'},
-        // mongod process options
-        options: {
-          bind_ip: 'localhost',
-          port: 31000,
-          dbpath: f('%s/../db/31000', __dirname),
-          setParameter: ['enableTestCommands=1']
+      var nodes = [
+        {
+          tags: { loc: 'ny' },
+          // mongod process options
+          options: {
+            bind_ip: 'localhost',
+            port: 31000,
+            dbpath: f('%s/../db/31000', __dirname),
+            setParameter: ['enableTestCommands=1']
+          }
+        },
+        {
+          tags: { loc: 'sf' },
+          options: {
+            bind_ip: 'localhost',
+            port: 31001,
+            dbpath: f('%s/../db/31001', __dirname),
+            setParameter: ['enableTestCommands=1']
+          }
+        },
+        {
+          tags: { loc: 'sf' },
+          options: {
+            bind_ip: 'localhost',
+            port: 31002,
+            dbpath: f('%s/../db/31002', __dirname),
+            setParameter: ['enableTestCommands=1']
+          }
+        },
+        {
+          tags: { loc: 'sf' },
+          priority: 0,
+          options: {
+            bind_ip: 'localhost',
+            port: 31003,
+            dbpath: f('%s/../db/31003', __dirname),
+            setParameter: ['enableTestCommands=1']
+          }
+        },
+        {
+          arbiter: true,
+          options: {
+            bind_ip: 'localhost',
+            port: 31004,
+            dbpath: f('%s/../db/31004', __dirname),
+            setParameter: ['enableTestCommands=1']
+          }
         }
-      }, {
-        tags: {loc: 'sf'},
-        options: {
-          bind_ip: 'localhost',
-          port: 31001,
-          dbpath: f('%s/../db/31001', __dirname),
-          setParameter: ['enableTestCommands=1']
-        }
-      }, {
-        tags: {loc: 'sf'},
-        options: {
-          bind_ip: 'localhost',
-          port: 31002,
-          dbpath: f('%s/../db/31002', __dirname),
-          setParameter: ['enableTestCommands=1']
-        }
-      }, {
-        tags: {loc: 'sf'},
-        priority: 0,
-        options: {
-          bind_ip: 'localhost',
-          port: 31003,
-          dbpath: f('%s/../db/31003', __dirname),
-          setParameter: ['enableTestCommands=1']
-        }
-      }, {
-        arbiter: true,
-        options: {
-          bind_ip: 'localhost',
-          port: 31004,
-          dbpath: f('%s/../db/31004', __dirname),
-          setParameter: ['enableTestCommands=1']
-        }
-      }];
+      ];
 
       // Do we have 3.2
-      if(r.version[0] == 3 && r.version[1] == 2) {
+      if (r.version[0] == 3 && r.version[1] == 2) {
         nodes = nodes.map(function(x) {
           x.options.enableMajorityReadConcern = null;
           return x;
@@ -554,26 +581,27 @@ if(argv.t == 'functional') {
 
       // Test suite Configuration
       config = {
-          host: 'localhost', port: 31000, setName: 'rs'
-        , url: "mongodb://%slocalhost:31000/integration_tests?rs_name=rs"
-        , writeConcernMax: {w: 'majority', wtimeout: 30000}
-        , replicasetName: 'rs'
-        , skipStart: startupOptions.skipStartup
-        , skipTermination: startupOptions.skipShutdown
-        , topology: function(host, port, serverOptions) {
-            host = host || 'localhost'; port = port || 31000;
-            serverOptions = clone(serverOptions);
-            serverOptions.rs_name = 'rs';
-            serverOptions.poolSize = 1;
-            serverOptions.autoReconnect = false;
-            return new ReplSet([
-              new Server(host, port, serverOptions)
-            ], serverOptions);
-          }
-        , manager: new ReplSetManager('mongod', nodes, {
+        host: 'localhost',
+        port: 31000,
+        setName: 'rs',
+        url: 'mongodb://%slocalhost:31000/integration_tests?rs_name=rs',
+        writeConcernMax: { w: 'majority', wtimeout: 30000 },
+        replicasetName: 'rs',
+        skipStart: startupOptions.skipStartup,
+        skipTermination: startupOptions.skipShutdown,
+        topology: function(host, port, serverOptions) {
+          host = host || 'localhost';
+          port = port || 31000;
+          serverOptions = clone(serverOptions);
+          serverOptions.rs_name = 'rs';
+          serverOptions.poolSize = 1;
+          serverOptions.autoReconnect = false;
+          return new ReplSet([new Server(host, port, serverOptions)], serverOptions);
+        },
+        manager: new ReplSetManager('mongod', nodes, {
           replSet: 'rs'
         })
-      }
+      };
 
       // Execute test suite
       executeTestSuite(config);
@@ -582,39 +610,38 @@ if(argv.t == 'functional') {
 
   //
   // Sharded configuration
-  if(argv.e == 'sharded') {
+  if (argv.e == 'sharded') {
     //
     // Sharded
     config = {
-        host: 'localhost'
-      , port: 51000
-      , url: "mongodb://%slocalhost:51000/integration_tests"
-      , writeConcernMax: {w: 'majority', wtimeout: 30000}
-      , skipStart: startupOptions.skipStartup
-      , skipTermination: startupOptions.skipShutdown
-      , topology: function(host, port, options) {
+      host: 'localhost',
+      port: 51000,
+      url: 'mongodb://%slocalhost:51000/integration_tests',
+      writeConcernMax: { w: 'majority', wtimeout: 30000 },
+      skipStart: startupOptions.skipStartup,
+      skipTermination: startupOptions.skipShutdown,
+      topology: function(host, port, options) {
         var options = options || {};
         options.autoReconnect = false;
 
-        return new Mongos([
-          new Server(host, port, options)
-        ], options);
-      }, manager: new ShardingManager({})
-    }
+        return new Mongos([new Server(host, port, options)], options);
+      },
+      manager: new ShardingManager({})
+    };
 
     executeTestSuite(config);
   }
 
   //
   // SSL configuration
-  if(argv.e == 'ssl') {
+  if (argv.e == 'ssl') {
     // Create ssl server
     config = {
-        sslOnNormalPorts: null
-      , fork:null
-      , sslPEMKeyFile: __dirname + "/functional/ssl/server.pem"
-      , url: "mongodb://%slocalhost:27017/integration_tests?ssl=true&sslValidate=false"
-      , topology: function(host, port, serverOptions) {
+      sslOnNormalPorts: null,
+      fork: null,
+      sslPEMKeyFile: __dirname + '/functional/ssl/server.pem',
+      url: 'mongodb://%slocalhost:27017/integration_tests?ssl=true&sslValidate=false',
+      topology: function(host, port, serverOptions) {
         host = host || 'localhost';
         port = port || 27017;
         serverOptions = clone(serverOptions);
@@ -622,51 +649,53 @@ if(argv.t == 'functional') {
         serverOptions.ssl = true;
         serverOptions.sslValidate = false;
         return new Server(host, port, serverOptions);
-      }, manager: new ServerManager('mongod', {
-        dbpath: path.join(path.resolve('db'), f("data-%d", 27017)),
+      },
+      manager: new ServerManager('mongod', {
+        dbpath: path.join(path.resolve('db'), f('data-%d', 27017)),
         sslOnNormalPorts: null,
-        sslPEMKeyFile: __dirname + "/functional/ssl/server.pem",
+        sslPEMKeyFile: __dirname + '/functional/ssl/server.pem',
         setParameter: ['enableTestCommands=1']
       })
-    }
+    };
 
     executeTestSuite(config);
   }
 
   //
   // Authentication Configuration
-  if(argv.e == 'auth') {
+  if (argv.e == 'auth') {
     // Create ssl server
     config = {
-        url: "mongodb://%slocalhost:27017/integration_tests"
-      , topology: function(host, port, serverOptions) {
+      url: 'mongodb://%slocalhost:27017/integration_tests',
+      topology: function(host, port, serverOptions) {
         host = host || 'localhost';
         port = port || 27017;
         serverOptions = clone(serverOptions);
         serverOptions.poolSize = 1;
         return new Server(host, port, serverOptions);
-      }, manager: new ServerManager('mongod', {
-        dbpath: path.join(path.resolve('db'), f("data-%d", 27017)),
-        auth:null
+      },
+      manager: new ServerManager('mongod', {
+        dbpath: path.join(path.resolve('db'), f('data-%d', 27017)),
+        auth: null
       })
-    }
+    };
 
     executeTestSuite(config);
   }
 
   //
   // Single server
-  if(!argv.e || (argv.e == 'kerberos' || argv.e == 'ldap' || argv.e == 'sni')) {
+  if (!argv.e || (argv.e == 'kerberos' || argv.e == 'ldap' || argv.e == 'sni')) {
     config = {
-        host: 'localhost'
-      , port: 27017
-      , skipStart: startupOptions.skipStartup
-      , skipTermination: startupOptions.skipShutdown
-      , manager: new ServerManager('mongod', {
-          dbpath: path.join(path.resolve('db'), f("data-%d", 27017)),
-          setParameter: ['enableTestCommands=1']
+      host: 'localhost',
+      port: 27017,
+      skipStart: startupOptions.skipStartup,
+      skipTermination: startupOptions.skipShutdown,
+      manager: new ServerManager('mongod', {
+        dbpath: path.join(path.resolve('db'), f('data-%d', 27017)),
+        setParameter: ['enableTestCommands=1']
       })
-    }
+    };
 
     executeTestSuite(config);
   }

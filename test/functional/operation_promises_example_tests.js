@@ -1426,11 +1426,10 @@ describe('Operation (Promises)', function() {
           })
           .then(function(reducedCollection) {
             // Mapreduce returns the temporary collection with the results
-            return reducedCollection.findOne({ _id: 1 })
-              .then(function(result) {
-                test.equal(1, result.value);
-                return reducedCollection;
-              });
+            return reducedCollection.findOne({ _id: 1 }).then(function(result) {
+              test.equal(1, result.value);
+              return reducedCollection;
+            });
           })
           .then(function(reducedCollection) {
             return reducedCollection.findOne({ _id: 2 });

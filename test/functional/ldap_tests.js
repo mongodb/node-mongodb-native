@@ -37,13 +37,16 @@ describe('LDAP', function() {
       MongoClient.connect(url, function(err, client) {
         test.equal(null, err);
 
-        client.db('ldap').collection('test').findOne(function(err, doc) {
-          test.equal(null, err);
-          test.equal(true, doc.ldap);
+        client
+          .db('ldap')
+          .collection('test')
+          .findOne(function(err, doc) {
+            test.equal(null, err);
+            test.equal(true, doc.ldap);
 
-          client.close();
-          done();
-        });
+            client.close();
+            done();
+          });
       });
     }
   });
@@ -76,33 +79,42 @@ describe('LDAP', function() {
       MongoClient.connect(url, function(err, client) {
         test.equal(null, err);
 
-        client.db('ldap').collection('test').findOne(function(err, doc) {
-          test.equal(null, err);
-          test.equal(true, doc.ldap);
+        client
+          .db('ldap')
+          .collection('test')
+          .findOne(function(err, doc) {
+            test.equal(null, err);
+            test.equal(true, doc.ldap);
 
-          client.topology.once('reconnect', function() {
-            // Await reconnect and re-authentication
-            client.db('ldap').collection('test').findOne(function(err, doc) {
-              test.equal(null, err);
-              test.equal(true, doc.ldap);
-
-              // Attempt disconnect again
-              client.topology.connections()[0].destroy();
-
+            client.topology.once('reconnect', function() {
               // Await reconnect and re-authentication
-              client.db('ldap').collection('test').findOne(function(err, doc) {
-                test.equal(null, err);
-                test.equal(true, doc.ldap);
+              client
+                .db('ldap')
+                .collection('test')
+                .findOne(function(err, doc) {
+                  test.equal(null, err);
+                  test.equal(true, doc.ldap);
 
-                client.close();
-                done();
-              });
+                  // Attempt disconnect again
+                  client.topology.connections()[0].destroy();
+
+                  // Await reconnect and re-authentication
+                  client
+                    .db('ldap')
+                    .collection('test')
+                    .findOne(function(err, doc) {
+                      test.equal(null, err);
+                      test.equal(true, doc.ldap);
+
+                      client.close();
+                      done();
+                    });
+                });
             });
-          });
 
-          // Force close
-          client.topology.connections()[0].destroy();
-        });
+            // Force close
+            client.topology.connections()[0].destroy();
+          });
       });
     }
   });

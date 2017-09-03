@@ -1143,13 +1143,17 @@ describe('Find', function() {
             configuration.writeConcernMax(),
             function(err) {
               test.equal(null, err);
-              collection.find().skip(1).limit(-1).toArray(function(err, items) {
-                test.equal(null, err);
-                test.equal(1, items.length);
-                test.equal(2, items[0].b);
-                client.close();
-                done();
-              });
+              collection
+                .find()
+                .skip(1)
+                .limit(-1)
+                .toArray(function(err, items) {
+                  test.equal(null, err);
+                  test.equal(1, items.length);
+                  test.equal(2, items[0].b);
+                  client.close();
+                  done();
+                });
             }
           );
         });
@@ -1177,15 +1181,19 @@ describe('Find', function() {
             configuration.writeConcernMax(),
             function(err) {
               test.equal(null, err);
-              collection.find().skip(1).limit(-3).toArray(function(err, items) {
-                test.equal(null, err);
-                test.equal(3, items.length);
-                test.equal(2, items[0].b);
-                test.equal(3, items[1].c);
-                test.equal(4, items[2].d);
-                client.close();
-                done();
-              });
+              collection
+                .find()
+                .skip(1)
+                .limit(-3)
+                .toArray(function(err, items) {
+                  test.equal(null, err);
+                  test.equal(3, items.length);
+                  test.equal(2, items[0].b);
+                  test.equal(3, items[1].c);
+                  test.equal(4, items[2].d);
+                  client.close();
+                  done();
+                });
             }
           );
         });
@@ -2214,13 +2222,16 @@ describe('Find', function() {
             test.equal(null, err);
 
             // Perform a simple find and return all the documents
-            collection.find({}).limit(-10).toArray(function(err, docs) {
-              test.equal(null, err);
-              test.equal(10, docs.length);
+            collection
+              .find({})
+              .limit(-10)
+              .toArray(function(err, docs) {
+                test.equal(null, err);
+                test.equal(10, docs.length);
 
-              client.close();
-              done();
-            });
+                client.close();
+                done();
+              });
           });
         });
       });
@@ -2894,13 +2905,16 @@ describe('Find', function() {
             function(err) {
               test.equal(null, err);
               // Ensure correct insertion testing via the cursor and the count function
-              collection.find().batchSize(-5).toArray(function(err, documents) {
-                test.equal(null, err);
-                test.equal(3, documents.length);
-                // Let's close the db
-                client.close();
-                done();
-              });
+              collection
+                .find()
+                .batchSize(-5)
+                .toArray(function(err, documents) {
+                  test.equal(null, err);
+                  test.equal(3, documents.length);
+                  // Let's close the db
+                  client.close();
+                  done();
+                });
             }
           );
         });
@@ -2933,14 +2947,17 @@ describe('Find', function() {
             function(err) {
               test.equal(null, err);
               // Ensure correct insertion testing via the cursor and the count function
-              collection.find().limit(-5).toArray(function(err, documents) {
-                test.equal(null, err);
-                test.equal(3, documents.length);
+              collection
+                .find()
+                .limit(-5)
+                .toArray(function(err, documents) {
+                  test.equal(null, err);
+                  test.equal(3, documents.length);
 
-                // Let's close the db
-                client.close();
-                done();
-              });
+                  // Let's close the db
+                  client.close();
+                  done();
+                });
             }
           );
         });
@@ -3037,13 +3054,16 @@ describe('Find', function() {
           // Insert some test documents
           collection.insertMany(docs, configuration.writeConcernMax(), function(err, r) {
             // Ensure correct insertion testing via the cursor and the count function
-            collection.find().limit(200).toArray(function(err, documents) {
-              test.equal(null, err);
-              test.equal(200, documents.length);
-              // Let's close the db
-              client.close();
-              done();
-            });
+            collection
+              .find()
+              .limit(200)
+              .toArray(function(err, documents) {
+                test.equal(null, err);
+                test.equal(200, documents.length);
+                // Let's close the db
+                client.close();
+                done();
+              });
           });
         });
       });

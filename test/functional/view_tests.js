@@ -76,7 +76,11 @@ describe('Views', function() {
             r
           ) {
             expect(err).to.not.exist;
-            expect(commandResult).to.eql({ create: 'test', viewOn: 'users', pipeline: [{ $match: {} }] });
+            expect(commandResult).to.eql({
+              create: 'test',
+              viewOn: 'users',
+              pipeline: [{ $match: {} }]
+            });
 
             singleServer.destroy();
             running = false;

@@ -8,13 +8,13 @@ var Request = function(server, connection, response) {
   this.connection = connection;
   this.response = response;
   this.bson = server.bson;
-}
+};
 
 Request.prototype.receive = function() {
   return new Promise(function(resolve, reject) {
     resolve();
   });
-}
+};
 
 Request.prototype.reply = function(documents, options) {
   options = options || {};
@@ -27,8 +27,8 @@ Request.prototype.reply = function(documents, options) {
   var numberReturned = documents.length;
 
   // Additional response Options
-  var killConnectionAfterNBytes = typeof options.killConnectionAfterNBytes == 'number'
-    ? options.killConnectionAfterNBytes : null;
+  var killConnectionAfterNBytes =
+    typeof options.killConnectionAfterNBytes == 'number' ? options.killConnectionAfterNBytes : null;
 
   // Create the Response document
   var response = new Response(this.bson, documents, {
@@ -47,16 +47,16 @@ Request.prototype.reply = function(documents, options) {
   var buffer = response.toBin();
 
   // Do we kill connection after n bytes
-  if(killConnectionAfterNBytes == null) {
+  if (killConnectionAfterNBytes == null) {
     this.connection.write(buffer);
   } else {
     // Fail to send whole reply
-    if(killConnectionAfterNBytes <= buffer.length) {
+    if (killConnectionAfterNBytes <= buffer.length) {
       this.connection.write(buffer.slice(0, killConnectionAfterNBytes));
       this.connection.destroy();
     }
   }
-}
+};
 
 Object.defineProperty(Request.prototype, 'type', {
   get: function() {
@@ -78,14 +78,14 @@ var Response = function(bson, documents, options) {
   this.opCode = 1;
 
   // Message fields
-  this.cursorId = options.cursorId,
-  this.responseFlags = options.responseFlags,
-  this.startingFrom = options.startingFrom,
-  this.numberReturned = options.numberReturned
+  (this.cursorId = options.cursorId),
+    (this.responseFlags = options.responseFlags),
+    (this.startingFrom = options.startingFrom),
+    (this.numberReturned = options.numberReturned);
 
   // Store documents
   this.documents = documents;
-}
+};
 
 Response.prototype.toBin = function() {
   var self = this;
@@ -103,9 +103,16 @@ Response.prototype.toBin = function() {
   });
 
   // Calculate total size
-  var totalSize = 4 + 4 + 4 + 4 // Header size
-    + 4 + 8 + 4 + 4             // OP_REPLY Header size
-    + docsSize;                 // OP_REPLY Documents
+  var totalSize =
+    4 +
+    4 +
+    4 +
+    4 + // Header size
+    4 +
+    8 +
+    4 +
+    4 + // OP_REPLY Header size
+    docsSize; // OP_REPLY Documents
 
   // Header and op_reply fields
   var header = new Buffer(4 + 4 + 4 + 4 + 4 + 8 + 4 + 4);
@@ -133,7 +140,7 @@ Response.prototype.toBin = function() {
   buffers = buffers.concat(docs);
   // Return all the buffers
   return Buffer.concat(buffers);
-}
+};
 
 var writeInt32 = function(buffer, index, value) {
   buffer[index] = value & 0xff;
@@ -141,7 +148,7 @@ var writeInt32 = function(buffer, index, value) {
   buffer[index + 2] = (value >> 16) & 0xff;
   buffer[index + 3] = (value >> 24) & 0xff;
   return;
-}
+};
 
 var writeInt64 = function(buffer, index, value) {
   var lowBits = value.getLowBits();
@@ -157,6 +164,6 @@ var writeInt64 = function(buffer, index, value) {
   buffer[index + 6] = (highBits >> 16) & 0xff;
   buffer[index + 7] = (highBits >> 24) & 0xff;
   return;
-}
+};
 
 module.exports = Request;

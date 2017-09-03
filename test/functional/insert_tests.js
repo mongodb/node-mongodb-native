@@ -2089,7 +2089,7 @@ describe('Insert', function() {
         try {
           db.collection(k.toString());
           test.fail(false);
-        } catch (err) {}  // eslint-disable-line
+        } catch (err) {} // eslint-disable-line
 
         client.close();
         done();
@@ -2834,13 +2834,16 @@ describe('Insert', function() {
           test.equal(null, err);
           test.ok(r);
 
-          db.collection('sub_documents').find({}).next(function(err, v) {
-            test.equal(null, err);
-            test.equal('a', v.products[0].suppliers[0].shipments[0].shipment1);
+          db
+            .collection('sub_documents')
+            .find({})
+            .next(function(err, v) {
+              test.equal(null, err);
+              test.equal('a', v.products[0].suppliers[0].shipments[0].shipment1);
 
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            });
         });
       });
     }

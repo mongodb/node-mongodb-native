@@ -1167,9 +1167,12 @@ describe('Examples', function() {
 
           promise =
             // Start Example 56
-            db.collection('inventory').deleteMany({}).then(function(result) {
-              processResult(result);
-            });
+            db
+              .collection('inventory')
+              .deleteMany({})
+              .then(function(result) {
+                processResult(result);
+              });
           // End Example 56
           yield promise;
           cursor = db.collection('inventory').find({});

@@ -148,7 +148,10 @@ describe('ReplSet (Operations)', function() {
               // Initialize the Ordered Batch
               var batch = col.initializeOrderedBulkOp();
               batch.insert({ a: 1 });
-              batch.find({ a: 3 }).upsert().updateOne({ a: 3, b: 1 });
+              batch
+                .find({ a: 3 })
+                .upsert()
+                .updateOne({ a: 3, b: 1 });
               batch.insert({ a: 1 });
               batch.insert({ a: 2 });
 
@@ -244,7 +247,10 @@ describe('ReplSet (Operations)', function() {
             // Initialize the Ordered Batch
             var batch = col.initializeUnorderedBulkOp();
             batch.insert({ a: 1 });
-            batch.find({ a: 3 }).upsert().updateOne({ a: 3, b: 1 });
+            batch
+              .find({ a: 3 })
+              .upsert()
+              .updateOne({ a: 3, b: 1 });
             batch.insert({ a: 2 });
 
             // Execute the operations
@@ -327,7 +333,10 @@ describe('ReplSet (Operations)', function() {
               // Initialize the Ordered Batch
               var batch = col.initializeOrderedBulkOp();
               batch.insert({ a: 1 });
-              batch.find({ a: 3 }).upsert().updateOne({ a: 3, b: 1 });
+              batch
+                .find({ a: 3 })
+                .upsert()
+                .updateOne({ a: 3, b: 1 });
               batch.insert({ a: 1 });
               batch.insert({ a: 2 });
 
@@ -414,10 +423,11 @@ describe('ReplSet (Operations)', function() {
 
           // Map function
           var map = function() {
-            emit(this.user_id, 1);  // eslint-disable-line
+            emit(this.user_id, 1); // eslint-disable-line
           };
           // Reduce function
-          var reduce = function(k, vals) {  // eslint-disable-line
+          var reduce = function(k, vals) {
+            // eslint-disable-line
             return 1;
           };
 

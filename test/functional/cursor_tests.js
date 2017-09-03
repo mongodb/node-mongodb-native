@@ -427,7 +427,10 @@ describe('Cursor', function() {
             test.deepEqual(['b', 1], entries.next().value);
             finished();
 
-            cursor = collection.find().sort('a', 1).sort('a', -1);
+            cursor = collection
+              .find()
+              .sort('a', 1)
+              .sort('a', -1);
             test.deepEqual([['a', -1]], cursor.sortValue);
             finished();
 
@@ -441,21 +444,27 @@ describe('Cursor', function() {
               }
             });
 
-            collection.find().sort('a', 25).next(function(err) {
-              test.equal(
-                "Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]",
-                err.message
-              );
-              finished();
-            });
+            collection
+              .find()
+              .sort('a', 25)
+              .next(function(err) {
+                test.equal(
+                  "Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]",
+                  err.message
+                );
+                finished();
+              });
 
-            collection.find().sort(25).next(function(err) {
-              test.equal(
-                "Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]",
-                err.message
-              );
-              finished();
-            });
+            collection
+              .find()
+              .sort(25)
+              .next(function(err) {
+                test.equal(
+                  "Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]",
+                  err.message
+                );
+                finished();
+              });
           }
 
           insert(function() {
@@ -550,14 +559,17 @@ describe('Cursor', function() {
           }
 
           function finished() {
-            collection.find().limit(5).toArray(function(err, items) {
-              test.equal(5, items.length);
+            collection
+              .find()
+              .limit(5)
+              .toArray(function(err, items) {
+                test.equal(5, items.length);
 
-              // Let's close the db
-              test.equal(null, err);
-              client.close();
-              done();
-            });
+                // Let's close the db
+                test.equal(null, err);
+                client.close();
+                done();
+              });
           }
 
           insert(function() {
@@ -602,14 +614,17 @@ describe('Cursor', function() {
           }
 
           function finished() {
-            collection.find().limit(-1).toArray(function(err, items) {
-              test.equal(null, err);
-              test.equal(1, items.length);
+            collection
+              .find()
+              .limit(-1)
+              .toArray(function(err, items) {
+                test.equal(null, err);
+                test.equal(1, items.length);
 
-              // Let's close the db
-              client.close();
-              done();
-            });
+                // Let's close the db
+                client.close();
+                done();
+              });
           }
 
           insert(function() {
@@ -654,14 +669,17 @@ describe('Cursor', function() {
           }
 
           function finished() {
-            collection.find().limit(-5).toArray(function(err, items) {
-              test.equal(null, err);
-              test.equal(5, items.length);
+            collection
+              .find()
+              .limit(-5)
+              .toArray(function(err, items) {
+                test.equal(null, err);
+                test.equal(5, items.length);
 
-              // Let's close the db
-              client.close();
-              done();
-            });
+                // Let's close the db
+                client.close();
+                done();
+              });
           }
 
           insert(function() {
@@ -813,24 +831,27 @@ describe('Cursor', function() {
                 test.equal(null, err);
                 test.equal(10, items.length);
 
-                collection.find().skip(2).toArray(function(err, items2) {
-                  test.equal(null, err);
-                  test.equal(8, items2.length);
+                collection
+                  .find()
+                  .skip(2)
+                  .toArray(function(err, items2) {
+                    test.equal(null, err);
+                    test.equal(8, items2.length);
 
-                  // Check that we have the same elements
-                  var numberEqual = 0;
-                  var sliced = items.slice(2, 10);
+                    // Check that we have the same elements
+                    var numberEqual = 0;
+                    var sliced = items.slice(2, 10);
 
-                  for (var i = 0; i < sliced.length; i++) {
-                    if (sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
-                  }
+                    for (var i = 0; i < sliced.length; i++) {
+                      if (sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
+                    }
 
-                  test.equal(8, numberEqual);
+                    test.equal(8, numberEqual);
 
-                  // Let's close the db
-                  client.close();
-                  done();
-                });
+                    // Let's close the db
+                    client.close();
+                    done();
+                  });
               });
             });
           }
@@ -1318,23 +1339,27 @@ describe('Cursor', function() {
             test.equal(null, err);
             test.equal(10, items.length);
 
-            collection.find().limit(5).skip(3).toArray(function(err, items2) {
-              test.equal(null, err);
-              test.equal(5, items2.length);
+            collection
+              .find()
+              .limit(5)
+              .skip(3)
+              .toArray(function(err, items2) {
+                test.equal(null, err);
+                test.equal(5, items2.length);
 
-              // Check that we have the same elements
-              var numberEqual = 0;
-              var sliced = items.slice(3, 8);
+                // Check that we have the same elements
+                var numberEqual = 0;
+                var sliced = items.slice(3, 8);
 
-              for (var i = 0; i < sliced.length; i++) {
-                if (sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
-              }
-              test.equal(5, numberEqual);
+                for (var i = 0; i < sliced.length; i++) {
+                  if (sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
+                }
+                test.equal(5, numberEqual);
 
-              // Let's close the db
-              client.close();
-              done();
-            });
+                // Let's close the db
+                client.close();
+                done();
+              });
           });
         }
 
@@ -1384,23 +1409,27 @@ describe('Cursor', function() {
               test.equal(null, err);
               test.equal(10, items.length);
 
-              collection.find().limit(5).skip(3).toArray(function(err, items2) {
-                test.equal(null, err);
-                test.equal(5, items2.length);
+              collection
+                .find()
+                .limit(5)
+                .skip(3)
+                .toArray(function(err, items2) {
+                  test.equal(null, err);
+                  test.equal(5, items2.length);
 
-                // Check that we have the same elements
-                var numberEqual = 0;
-                var sliced = items.slice(3, 8);
+                  // Check that we have the same elements
+                  var numberEqual = 0;
+                  var sliced = items.slice(3, 8);
 
-                for (var i = 0; i < sliced.length; i++) {
-                  if (sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
-                }
-                test.equal(5, numberEqual);
+                  for (var i = 0; i < sliced.length; i++) {
+                    if (sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
+                  }
+                  test.equal(5, numberEqual);
 
-                // Let's close the db
-                client.close();
-                done();
-              });
+                  // Let's close the db
+                  client.close();
+                  done();
+                });
             });
           }
 
@@ -2734,13 +2763,16 @@ describe('Cursor', function() {
                 test.equal(null, err);
                 test.ok(result != null);
 
-                collection.find({ _keywords: 'red' }, {}).limit(10).explain(function(err, result) {
-                  test.equal(null, err);
-                  test.ok(result != null);
+                collection
+                  .find({ _keywords: 'red' }, {})
+                  .limit(10)
+                  .explain(function(err, result) {
+                    test.equal(null, err);
+                    test.ok(result != null);
 
-                  client.close();
-                  done();
-                });
+                    client.close();
+                    done();
+                  });
               });
           });
         });
@@ -2972,21 +3004,25 @@ describe('Cursor', function() {
         collection.insert(docs, configuration.writeConcernMax(), function(err) {
           test.equal(null, err);
 
-          collection.find({}, { OrderNumber: 1 }).skip(10).limit(10).toArray(function(err, items) {
-            test.equal(null, err);
-            test.equal(10, items[0].OrderNumber);
+          collection
+            .find({}, { OrderNumber: 1 })
+            .skip(10)
+            .limit(10)
+            .toArray(function(err, items) {
+              test.equal(null, err);
+              test.equal(10, items[0].OrderNumber);
 
-            collection
-              .find({}, { OrderNumber: 1 })
-              .skip(10)
-              .limit(10)
-              .count(true, function(err, count) {
-                test.equal(null, err);
-                test.equal(10, count);
-                client.close();
-                done();
-              });
-          });
+              collection
+                .find({}, { OrderNumber: 1 })
+                .skip(10)
+                .limit(10)
+                .count(true, function(err, count) {
+                  test.equal(null, err);
+                  test.equal(10, count);
+                  client.close();
+                  done();
+                });
+            });
         });
       });
     }
@@ -3743,13 +3779,17 @@ describe('Cursor', function() {
           test.equal(null, err);
 
           // Let's attempt to skip and limit
-          collection.find({}).limit(2016).skip(2016).toArray(function(err, docs) {
-            test.equal(null, err);
-            test.equal(2016, docs.length);
+          collection
+            .find({})
+            .limit(2016)
+            .skip(2016)
+            .toArray(function(err, docs) {
+              test.equal(null, err);
+              test.equal(2016, docs.length);
 
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            });
         });
       });
     }
@@ -3893,13 +3933,16 @@ describe('Cursor', function() {
               test.equal(null, err);
 
               // Find with sort
-              collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
-                test.equal(null, err);
+              collection
+                .find()
+                .sort(['createdAt', 'asc'])
+                .toArray(function(err, items) {
+                  test.equal(null, err);
 
-                test.equal(1, items.length);
-                client.close();
-                done();
-              });
+                  test.equal(1, items.length);
+                  client.close();
+                  done();
+                });
             });
           });
         });
@@ -3945,19 +3988,25 @@ describe('Cursor', function() {
 
             // Create a cursor for the content
             var cursor = collection.find({});
-            cursor.limit(100).skip(0).count(function(err, c) {
-              test.equal(null, err);
-              test.equal(50, c);
-
-              var cursor = collection.find({});
-              cursor.limit(100).skip(0).toArray(function(err) {
+            cursor
+              .limit(100)
+              .skip(0)
+              .count(function(err, c) {
                 test.equal(null, err);
                 test.equal(50, c);
 
-                client.close();
-                done();
+                var cursor = collection.find({});
+                cursor
+                  .limit(100)
+                  .skip(0)
+                  .toArray(function(err) {
+                    test.equal(null, err);
+                    test.equal(50, c);
+
+                    client.close();
+                    done();
+                  });
               });
-            });
           });
         });
       });

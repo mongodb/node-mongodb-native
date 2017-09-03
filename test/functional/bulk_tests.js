@@ -28,7 +28,10 @@ describe('Bulk', function() {
 
           var batch = col.initializeOrderedBulkOp();
           batch.insert({ b: 1, a: 1 });
-          batch.find({ b: 2 }).upsert().updateOne({ $set: { a: 1 } });
+          batch
+            .find({ b: 2 })
+            .upsert()
+            .updateOne({ $set: { a: 1 } });
           batch.insert({ b: 3, a: 2 });
 
           batch.execute(function(err, result) {
@@ -83,9 +86,18 @@ describe('Bulk', function() {
 
           var batch = col.initializeOrderedBulkOp();
           batch.insert({ b: 1, a: 1 });
-          batch.find({ b: 2 }).upsert().updateOne({ $set: { a: 1 } });
-          batch.find({ b: 3 }).upsert().updateOne({ $set: { a: 2 } });
-          batch.find({ b: 2 }).upsert().updateOne({ $set: { a: 1 } });
+          batch
+            .find({ b: 2 })
+            .upsert()
+            .updateOne({ $set: { a: 1 } });
+          batch
+            .find({ b: 3 })
+            .upsert()
+            .updateOne({ $set: { a: 2 } });
+          batch
+            .find({ b: 2 })
+            .upsert()
+            .updateOne({ $set: { a: 1 } });
           batch.insert({ b: 4, a: 3 });
           batch.insert({ b: 5, a: 1 });
 
@@ -332,8 +344,14 @@ describe('Bulk', function() {
             var batch = col.initializeOrderedBulkOp();
             batch.insert({ a: 1 });
             batch.find({ a: 1 }).update({ $set: { b: 1 } });
-            batch.find({ a: 2 }).upsert().update({ $set: { b: 2 } });
-            batch.find({ a: 3 }).upsert().update({ $set: { b: 3 } });
+            batch
+              .find({ a: 2 })
+              .upsert()
+              .update({ $set: { b: 2 } });
+            batch
+              .find({ a: 3 })
+              .upsert()
+              .update({ $set: { b: 3 } });
             batch.insert({ b: 1 });
 
             // Execute the operations
@@ -387,7 +405,10 @@ describe('Bulk', function() {
         var batch = col.initializeOrderedBulkOp();
 
         // Add some operations to be executed in order
-        batch.find({ _id: 2 }).upsert().updateOne({ $set: { b: 2 } });
+        batch
+          .find({ _id: 2 })
+          .upsert()
+          .updateOne({ $set: { b: 2 } });
 
         // Execute the operations
         batch.execute(function(err, result) {
@@ -455,7 +476,10 @@ describe('Bulk', function() {
           bulk.insert({ a: 1 });
         }
 
-        bulk.find({ b: 1 }).upsert().update({ b: 1 });
+        bulk
+          .find({ b: 1 })
+          .upsert()
+          .update({ b: 1 });
         bulk.find({ c: 1 }).remove();
 
         bulk.execute({ w: 0 }, function(err, result) {
@@ -496,7 +520,10 @@ describe('Bulk', function() {
 
           // Add some operations to be executed in order
           batch.insert({ b: 1, a: 1 });
-          batch.find({ b: 2 }).upsert().updateOne({ $set: { a: 1 } });
+          batch
+            .find({ b: 2 })
+            .upsert()
+            .updateOne({ $set: { a: 1 } });
           batch.insert({ b: 3, a: 2 });
 
           // Execute the operations
@@ -557,9 +584,18 @@ describe('Bulk', function() {
 
           // Add some operations to be executed in order
           batch.insert({ b: 1, a: 1 });
-          batch.find({ b: 2 }).upsert().updateOne({ $set: { a: 1 } });
-          batch.find({ b: 3 }).upsert().updateOne({ $set: { a: 2 } });
-          batch.find({ b: 2 }).upsert().updateOne({ $set: { a: 1 } });
+          batch
+            .find({ b: 2 })
+            .upsert()
+            .updateOne({ $set: { a: 1 } });
+          batch
+            .find({ b: 3 })
+            .upsert()
+            .updateOne({ $set: { a: 2 } });
+          batch
+            .find({ b: 2 })
+            .upsert()
+            .updateOne({ $set: { a: 1 } });
           batch.insert({ b: 4, a: 3 });
           batch.insert({ b: 5, a: 1 });
 
@@ -836,8 +872,14 @@ describe('Bulk', function() {
             // Add some operations to be executed in order
             batch.insert({ a: 1 });
             batch.find({ a: 1 }).update({ $set: { b: 1 } });
-            batch.find({ a: 2 }).upsert().update({ $set: { b: 2 } });
-            batch.find({ a: 3 }).upsert().update({ $set: { b: 3 } });
+            batch
+              .find({ a: 2 })
+              .upsert()
+              .update({ $set: { b: 2 } });
+            batch
+              .find({ a: 3 })
+              .upsert()
+              .update({ $set: { b: 3 } });
             batch.find({ a: 1 }).update({ $set: { b: 1 } });
             batch.insert({ b: 1 });
 
@@ -889,7 +931,10 @@ describe('Bulk', function() {
         var batch = col.initializeUnorderedBulkOp();
 
         // Add some operations to be executed in order
-        batch.find({ _id: 2 }).upsert().updateOne({ $set: { b: 2 } });
+        batch
+          .find({ _id: 2 })
+          .upsert()
+          .updateOne({ $set: { b: 2 } });
 
         // Execute the operations
         batch.execute(self.configuration.writeConcernMax(), function(err, result) {
@@ -990,7 +1035,10 @@ describe('Bulk', function() {
           bulk.insert({ a: 1 });
         }
 
-        bulk.find({ b: 1 }).upsert().update({ b: 1 });
+        bulk
+          .find({ b: 1 })
+          .upsert()
+          .update({ b: 1 });
         bulk.find({ c: 1 }).remove();
 
         bulk.execute({ w: 0 }, function(err, result) {
@@ -1130,12 +1178,18 @@ describe('Bulk', function() {
         var col = db.collection('batch_write_concerns_ops_1');
         var batch = col.initializeOrderedBulkOp();
         batch.insert({ a: 1 });
-        batch.find({}).upsert().update({ $set: { b: 1 } });
+        batch
+          .find({})
+          .upsert()
+          .update({ $set: { b: 1 } });
         test.equal(2, batch.length);
 
         batch = col.initializeUnorderedBulkOp();
         batch.insert({ a: 1 });
-        batch.find({}).upsert().update({ $set: { b: 1 } });
+        batch
+          .find({})
+          .upsert()
+          .update({ $set: { b: 1 } });
         test.equal(2, batch.length);
 
         client.close();

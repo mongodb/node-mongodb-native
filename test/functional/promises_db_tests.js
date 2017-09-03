@@ -77,12 +77,15 @@ describe('Promises (Db)', function() {
 
       MongoClient.connect(url).then(function(client) {
         // Execute ismaster
-        client.db(configuration.db).command({ ismaster: true }).then(function(result) {
-          test.ok(result != null);
+        client
+          .db(configuration.db)
+          .command({ ismaster: true })
+          .then(function(result) {
+            test.ok(result != null);
 
-          client.close();
-          done();
-        });
+            client.close();
+            done();
+          });
       });
     }
   });
@@ -178,12 +181,15 @@ describe('Promises (Db)', function() {
           : f('%s?%s', url, 'maxPoolSize=5');
 
       MongoClient.connect(url).then(function(client) {
-        client.db(configuration.db).stats().then(function(stats) {
-          test.ok(stats != null);
+        client
+          .db(configuration.db)
+          .stats()
+          .then(function(stats) {
+            test.ok(stats != null);
 
-          client.close();
-          done();
-        });
+            client.close();
+            done();
+          });
       });
     }
   });
@@ -361,12 +367,15 @@ describe('Promises (Db)', function() {
           : f('%s?%s', url, 'maxPoolSize=5');
 
       MongoClient.connect(url).then(function(client) {
-        client.db(configuration.db).executeDbAdminCommand({ ismaster: true }).then(function(r) {
-          test.ok(r);
+        client
+          .db(configuration.db)
+          .executeDbAdminCommand({ ismaster: true })
+          .then(function(r) {
+            test.ok(r);
 
-          client.close();
-          done();
-        });
+            client.close();
+            done();
+          });
       });
     }
   });

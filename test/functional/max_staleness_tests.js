@@ -74,18 +74,21 @@ describe('Max Staleness', function() {
             expect(err).to.not.exist;
             var db = client.db(self.configuration.db);
 
-            db.collection('test').find({}).toArray(function(err) {
-              expect(err).to.not.exist;
-              expect(command).to.eql({
-                $query: { find: 'test', filter: {} },
-                $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
-              });
+            db
+              .collection('test')
+              .find({})
+              .toArray(function(err) {
+                expect(err).to.not.exist;
+                expect(command).to.eql({
+                  $query: { find: 'test', filter: {} },
+                  $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
+                });
 
-              client.close();
-              mongos1.destroy();
-              running = false;
-              done();
-            });
+                client.close();
+                mongos1.destroy();
+                running = false;
+                done();
+              });
           }
         );
       });
@@ -164,18 +167,21 @@ describe('Max Staleness', function() {
             readPreference: new ReadPreference('secondary', { maxStalenessSeconds: 250 })
           });
 
-          db1.collection('test').find({}).toArray(function(err) {
-            expect(err).to.not.exist;
-            expect(command).to.eql({
-              $query: { find: 'test', filter: {} },
-              $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
-            });
+          db1
+            .collection('test')
+            .find({})
+            .toArray(function(err) {
+              expect(err).to.not.exist;
+              expect(command).to.eql({
+                $query: { find: 'test', filter: {} },
+                $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
+              });
 
-            client.close();
-            mongos1.destroy();
-            running = false;
-            done();
-          });
+              client.close();
+              mongos1.destroy();
+              running = false;
+              done();
+            });
         });
       });
     }
@@ -345,18 +351,22 @@ describe('Max Staleness', function() {
           var readPreference = new ReadPreference('secondary', { maxStalenessSeconds: 250 });
 
           // Get a db with a new readPreference
-          db.collection('test').find({}).setReadPreference(readPreference).toArray(function(err) {
-            expect(err).to.not.exist;
-            expect(command).to.eql({
-              $query: { find: 'test', filter: {} },
-              $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
-            });
+          db
+            .collection('test')
+            .find({})
+            .setReadPreference(readPreference)
+            .toArray(function(err) {
+              expect(err).to.not.exist;
+              expect(command).to.eql({
+                $query: { find: 'test', filter: {} },
+                $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
+              });
 
-            client.close();
-            mongos1.destroy();
-            running = false;
-            done();
-          });
+              client.close();
+              mongos1.destroy();
+              running = false;
+              done();
+            });
         });
       });
     }

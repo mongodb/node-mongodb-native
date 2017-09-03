@@ -1365,10 +1365,11 @@ describe('Operation (Generators)', function() {
 
         // Map function
         var map = function() {
-          emit(this.user_id, 1);  // eslint-disable-line
+          emit(this.user_id, 1); // eslint-disable-line
         };
         // Reduce function
-        var reduce = function(k, vals) {  // eslint-disable-line
+        var reduce = function(k, vals) {
+          // eslint-disable-line
           return 1;
         };
 
@@ -1431,10 +1432,11 @@ describe('Operation (Generators)', function() {
 
         // Map function
         var map = function() {
-          emit(this.user_id, 1);  // eslint-disable-line
+          emit(this.user_id, 1); // eslint-disable-line
         };
         // Reduce function
-        var reduce = function(k, vals) {  // eslint-disable-line
+        var reduce = function(k, vals) {
+          // eslint-disable-line
           return 1;
         };
 
@@ -1498,7 +1500,7 @@ describe('Operation (Generators)', function() {
 
         // Map function
         var map = function() {
-          emit(fn(this.timestamp.getYear()), 1);  // eslint-disable-line
+          emit(fn(this.timestamp.getYear()), 1); // eslint-disable-line
         };
 
         // Reduce function
@@ -1587,7 +1589,7 @@ describe('Operation (Generators)', function() {
 
         // Map function
         var map = function() {
-          emit(obj.fn(this.timestamp.getYear()), 1);  // eslint-disable-line
+          emit(obj.fn(this.timestamp.getYear()), 1); // eslint-disable-line
         };
 
         // Reduce function
@@ -2068,7 +2070,7 @@ describe('Operation (Generators)', function() {
             ],
             { w: 1, keepGoing: true }
           );
-        } catch (err) {}  // eslint-disable-line
+        } catch (err) {} // eslint-disable-line
         // Count the number of documents left (should not include the duplicates)
         var count = yield collection.count();
         test.equal(3, count);
@@ -2425,7 +2427,7 @@ describe('Operation (Generators)', function() {
         var collection2 = yield db.createCollection('test_rename_collection2_with_generators');
         // Attemp to rename a collection to a number
         try {
-          collection1.rename(5, function(err, collection) {});  // eslint-disable-line
+          collection1.rename(5, function(err, collection) {}); // eslint-disable-line
         } catch (err) {
           test.ok(err instanceof Error);
           test.equal('collection name must be a String', err.message);
@@ -2449,7 +2451,7 @@ describe('Operation (Generators)', function() {
 
         // Attemp to rename a collection to an illegal name starting with the character .
         try {
-          collection1.rename('.test', function(err, collection) {});  // eslint-disable-line
+          collection1.rename('.test', function(err, collection) {}); // eslint-disable-line
         } catch (err) {
           test.ok(err instanceof Error);
           test.equal("collection names must not start or end with '.'", err.message);
@@ -2457,7 +2459,7 @@ describe('Operation (Generators)', function() {
 
         // Attemp to rename a collection to an illegal name ending with the character .
         try {
-          collection1.rename('test.', function(err, collection) {});  // eslint-disable-line
+          collection1.rename('test.', function(err, collection) {}); // eslint-disable-line
         } catch (err) {
           test.ok(err instanceof Error);
           test.equal("collection names must not start or end with '.'", err.message);
@@ -3284,7 +3286,7 @@ describe('Operation (Generators)', function() {
           // Authenticate
           yield MongoClient.connect('mongodb://user:name@localhost:27017/admin');
           test.ok(false);
-        } catch (err) {}  // eslint-disable-line
+        } catch (err) {} // eslint-disable-line
 
         client.close();
       }).catch(function(err) {

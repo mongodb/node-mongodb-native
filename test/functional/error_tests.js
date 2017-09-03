@@ -119,7 +119,7 @@ describe.skip('Errors', function() {
         var db = client.db(configuration.db);
         var c = db.collection('test_error_object_should_include_message');
         c.findOne({}, function() {
-          ggg;  // eslint-disable-line
+          ggg; // eslint-disable-line
         });
       });
     }
@@ -144,7 +144,7 @@ describe.skip('Errors', function() {
         var db = client.db(configuration.db);
         var c = db.collection('test_error_object_should_include_message');
         c.find({}).count(function() {
-          ggg;  // eslint-disable-line
+          ggg; // eslint-disable-line
         });
       });
     }
@@ -166,7 +166,7 @@ describe.skip('Errors', function() {
       });
 
       client.connect(function() {
-        testdfdma();  // eslint-disable-line
+        testdfdma(); // eslint-disable-line
         test.ok(false);
       });
     }
@@ -191,7 +191,7 @@ describe.skip('Errors', function() {
         });
 
         db.collection('t').findOne(function() {
-          testdfdma();  // eslint-disable-line
+          testdfdma(); // eslint-disable-line
         });
       });
     }
@@ -221,7 +221,7 @@ describe.skip('Errors', function() {
 
       d.run(function() {
         MongoClient.connect(configuration.url(), function() {
-          testdfdma();  // eslint-disable-line
+          testdfdma(); // eslint-disable-line
           test.ok(false);
         });
       });
@@ -250,7 +250,7 @@ describe.skip('Errors', function() {
         });
 
         db.collection('t').findOne(function() {
-          testdfdma();  // eslint-disable-line
+          testdfdma(); // eslint-disable-line
         });
       });
     }
@@ -293,9 +293,12 @@ describe.skip('Errors', function() {
           db.collection('throwerrorduringoperation').insert([{ a: 1 }, { a: 1 }], function(err) {
             test.equal(null, err);
 
-            db.collection('throwerrorduringoperation').find().toArray(function() {
-              err = a;  // eslint-disable-line
-            });
+            db
+              .collection('throwerrorduringoperation')
+              .find()
+              .toArray(function() {
+                err = a; // eslint-disable-line
+              });
           });
         }
       );

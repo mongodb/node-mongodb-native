@@ -1046,17 +1046,20 @@ describe('GridFS Stream', function() {
                 var num = data.length;
                 data.forEach(function(data) {
                   var collection = data.insert;
-                  db.collection(collection).find({}).toArray(function(error, docs) {
-                    test.equal(data.documents.length, docs.length);
+                  db
+                    .collection(collection)
+                    .find({})
+                    .toArray(function(error, docs) {
+                      test.equal(data.documents.length, docs.length);
 
-                    for (var i = 0; i < docs.length; ++i) {
-                      testResultDoc(test, data.documents[i], docs[i], res.id);
-                    }
+                      for (var i = 0; i < docs.length; ++i) {
+                        testResultDoc(test, data.documents[i], docs[i], res.id);
+                      }
 
-                    if (--num === 0) {
-                      done();
-                    }
-                  });
+                      if (--num === 0) {
+                        done();
+                      }
+                    });
                 });
               });
 

@@ -167,7 +167,8 @@ describe('ReadPreference', function() {
         };
 
         // Execute count
-        collection.geoNear(50, 50, { query: { a: 1 }, num: 1 }, function(err) { // eslint-disable-line
+        collection.geoNear(50, 50, { query: { a: 1 }, num: 1 }, function(err) {
+          // eslint-disable-line
           client.topology.command = command;
 
           client.close();
@@ -211,7 +212,8 @@ describe('ReadPreference', function() {
           50,
           50,
           { search: { a: 1 }, limit: 1, maxDistance: 100 },
-          function(err) { // eslint-disable-line
+          function(err) {
+            // eslint-disable-line
             client.topology.command = command;
 
             client.close();
@@ -253,15 +255,17 @@ describe('ReadPreference', function() {
 
         // Map function
         var map = function() {
-          emit(this.user_id, 1);  // eslint-disable-line
+          emit(this.user_id, 1); // eslint-disable-line
         };
         // Reduce function
-        var reduce = function(k, vals) {  // eslint-disable-line
+        var reduce = function(k, vals) {
+          // eslint-disable-line
           return 1;
         };
 
         // Perform the map reduce
-        collection.mapReduce(map, reduce, { out: { inline: 1 } }, function(err) { // eslint-disable-line
+        collection.mapReduce(map, reduce, { out: { inline: 1 } }, function(err) {
+          // eslint-disable-line
           client.topology.command = command;
 
           client.close();
@@ -304,16 +308,18 @@ describe('ReadPreference', function() {
 
           // Map function
           var map = function() {
-            emit(this.user_id, 1);  // eslint-disable-line
+            emit(this.user_id, 1); // eslint-disable-line
           };
 
           // Reduce function
-          var reduce = function(k, vals) {  // eslint-disable-line
+          var reduce = function(k, vals) {
+            // eslint-disable-line
             return 1;
           };
 
           // Perform the map reduce
-          collection.mapReduce(map, reduce, { out: 'inline' }, function(err) { // eslint-disable-line
+          collection.mapReduce(map, reduce, { out: 'inline' }, function(err) {
+            // eslint-disable-line
             client.topology.command = command;
 
             client.close();
@@ -350,7 +356,8 @@ describe('ReadPreference', function() {
         };
 
         // Reduce function
-        var reduce = function(k, vals) { // eslint-disable-line
+        var reduce = function(k, vals) {
+          // eslint-disable-line
           return 1;
         };
 
@@ -457,7 +464,8 @@ describe('ReadPreference', function() {
         };
 
         // Perform the map reduce
-        collection.stats(function(err) { // eslint-disable-line
+        collection.stats(function(err) {
+          // eslint-disable-line
           client.topology.command = command;
 
           client.close();

@@ -33,18 +33,21 @@ describe('APM', function() {
         var db = client.db(self.configuration.db);
         expect(err).to.be.null;
 
-        db.collection('apm_test').insertOne({ a: 1 }).then(function(r) {
-          expect(r.insertedCount).to.equal(1);
-          expect(started.length).to.equal(1);
-          expect(started[0].commandName).to.equal('insert');
-          expect(started[0].command.insert).to.equal('apm_test');
-          expect(succeeded.length).to.equal(1);
-          expect(callbackTriggered).to.be.true;
+        db
+          .collection('apm_test')
+          .insertOne({ a: 1 })
+          .then(function(r) {
+            expect(r.insertedCount).to.equal(1);
+            expect(started.length).to.equal(1);
+            expect(started[0].commandName).to.equal('insert');
+            expect(started[0].command.insert).to.equal('apm_test');
+            expect(succeeded.length).to.equal(1);
+            expect(callbackTriggered).to.be.true;
 
-          listener.uninstrument();
-          client.close();
-          done();
-        });
+            listener.uninstrument();
+            client.close();
+            done();
+          });
       });
     }
   });
@@ -264,19 +267,22 @@ describe('APM', function() {
         client.connect(function(err, client) {
           var db = client.db(self.configuration.db);
 
-          db.collection('apm_test_1').insertOne({ a: 1 }).then(function() {
-            expect(started).to.have.length(1);
-            expect(succeeded).to.have.length(1);
-            expect(started[0].commandName).to.equal('insert');
-            expect(started[0].command.insert).to.equal('apm_test_1');
-            expect(started[0].operationId).to.equal(10000);
-            expect(succeeded[0].duration).to.equal(0);
-            expect(callbackTriggered).to.be.true;
+          db
+            .collection('apm_test_1')
+            .insertOne({ a: 1 })
+            .then(function() {
+              expect(started).to.have.length(1);
+              expect(succeeded).to.have.length(1);
+              expect(started[0].commandName).to.equal('insert');
+              expect(started[0].command.insert).to.equal('apm_test_1');
+              expect(started[0].operationId).to.equal(10000);
+              expect(succeeded[0].duration).to.equal(0);
+              expect(callbackTriggered).to.be.true;
 
-            listener.uninstrument();
-            client.close();
-            done();
-          });
+              listener.uninstrument();
+              client.close();
+              done();
+            });
         });
       }
     }
@@ -302,7 +308,8 @@ describe('APM', function() {
       // Do we have a getMore command or killCursor command
       if (commandName == 'getMore') {
         expect(result.command.getMore.isZero()).to.be.false;
-      } else if (commandName == 'killCursors') {  // eslint-disable-line
+      } else if (commandName == 'killCursors') {
+        // eslint-disable-line
       } else {
         expect(command).to.eql(result.command);
       }
@@ -651,7 +658,7 @@ describe('APM', function() {
                   // Success messages
                   expect(succeeded[0].reply).to.not.be.null;
                   expect(succeeded[0].operationId).to.equal(succeeded[1].operationId);
-                  expect(succeeded[0].operationId).to.equal(succeeded[2].operationId)
+                  expect(succeeded[0].operationId).to.equal(succeeded[2].operationId);
                   expect(succeeded[1].reply).to.not.be.null;
                   expect(succeeded[2].reply).to.not.be.null;
 
@@ -1068,17 +1075,20 @@ describe('APM', function() {
         var db = client.db(self.configuration.db);
         expect(err).to.be.null;
 
-        db.collection('apm_test_u_3').deleteOne({ a: 1 }).then(function(r) {
-          expect(r).to.exist;
-          expect(started).to.have.length(1);
-          expect(started[0].commandName).to.equal('delete');
-          expect(started[0].command.delete).to.equal('apm_test_u_3');
-          expect(succeeded).to.have.length(1);
+        db
+          .collection('apm_test_u_3')
+          .deleteOne({ a: 1 })
+          .then(function(r) {
+            expect(r).to.exist;
+            expect(started).to.have.length(1);
+            expect(started[0].commandName).to.equal('delete');
+            expect(started[0].command.delete).to.equal('apm_test_u_3');
+            expect(succeeded).to.have.length(1);
 
-          listener.uninstrument();
-          client.close();
-          done();
-        });
+            listener.uninstrument();
+            client.close();
+            done();
+          });
       });
     }
   });
@@ -1169,14 +1179,20 @@ describe('APM', function() {
         .connect()
         .then(function() {
           db = client.db(self.configuration.db);
-          return db.collection('apm_test_u_4').drop().catch(function() {});
+          return db
+            .collection('apm_test_u_4')
+            .drop()
+            .catch(function() {});
         })
         .then(function() {
           return db.collection('apm_test_u_4').insertMany(docs);
         })
         .then(function(r) {
           expect(r).to.exist;
-          return db.collection('apm_test_u_4').aggregate([{ $match: {} }]).toArray();
+          return db
+            .collection('apm_test_u_4')
+            .aggregate([{ $match: {} }])
+            .toArray();
         })
         .then(function(r) {
           expect(r).to.exist;
@@ -1234,22 +1250,26 @@ describe('APM', function() {
         Promise.all(promises).then(function(r) {
           expect(r).to.exist;
 
-          db.listCollections().batchSize(10).toArray().then(function(r) {
-            expect(r).to.exist;
-            expect(started).to.have.length(1);
-            expect(succeeded).to.have.length(1);
+          db
+            .listCollections()
+            .batchSize(10)
+            .toArray()
+            .then(function(r) {
+              expect(r).to.exist;
+              expect(started).to.have.length(1);
+              expect(succeeded).to.have.length(1);
 
-            var cursors = succeeded.map(function(x) {
-              return x.reply.cursor;
+              var cursors = succeeded.map(function(x) {
+                return x.reply.cursor;
+              });
+
+              // Check we have a cursor
+              expect(cursors[0].id).to.exist;
+
+              listener.uninstrument();
+              client.close();
+              done();
             });
-
-            // Check we have a cursor
-            expect(cursors[0].id).to.exist;
-
-            listener.uninstrument();
-            client.close();
-            done();
-          });
         });
       });
     }

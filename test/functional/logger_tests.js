@@ -122,15 +122,18 @@ describe('Logger', function() {
         Logger.filter('class', ['Cursor']);
 
         // perform any operation that gets logged
-        db.collection('logging').find().toArray(function(err) {
-          expect(err).to.not.exist;
-          expect(logged).to.be.true;
+        db
+          .collection('logging')
+          .find()
+          .toArray(function(err) {
+            expect(err).to.not.exist;
+            expect(logged).to.be.true;
 
-          // Clean up
-          Logger.reset();
-          client.close();
-          done();
-        });
+            // Clean up
+            Logger.reset();
+            client.close();
+            done();
+          });
       });
     }
   });

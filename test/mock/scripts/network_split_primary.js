@@ -1,6 +1,6 @@
-var mockupdb = require('../')
-  , co = require('co')
-  , assert = require('assert');
+var mockupdb = require('../'),
+  co = require('co'),
+  assert = require('assert');
 
 // Simple ismaster exhange
 co(function*() {
@@ -12,36 +12,36 @@ co(function*() {
   // primary server interactions
   co(function*() {
     // Wait for the request
-    var request = yield primary.receive()
+    var request = yield primary.receive();
     // Assert we received an op_query message
     assert.equal('op_query', request.type);
     // Assert we received the ismaster
-    assert.deepEqual({ismaster:true}, request.document);
+    assert.deepEqual({ ismaster: true }, request.document);
     // Return the ismaster result
-    request.reply({ok:1});
+    request.reply({ ok: 1 });
   });
 
   // first secondary server interactions
   co(function*() {
     // Wait for the request
-    var request = yield firstSecondary.receive()
+    var request = yield firstSecondary.receive();
     // Assert we received an op_query message
     assert.equal('op_query', request.type);
     // Assert we received the ismaster
-    assert.deepEqual({ismaster:true}, request.document);
+    assert.deepEqual({ ismaster: true }, request.document);
     // Return the ismaster result
-    request.reply({ok:1});
+    request.reply({ ok: 1 });
   });
 
   // second secondary server interactions
   co(function*() {
     // Wait for the request
-    var request = yield secondSecondary.receive()
+    var request = yield secondSecondary.receive();
     // Assert we received an op_query message
     assert.equal('op_query', request.type);
     // Assert we received the ismaster
-    assert.deepEqual({ismaster:true}, request.document);
+    assert.deepEqual({ ismaster: true }, request.document);
     // Return the ismaster result
-    request.reply({ok:1});
+    request.reply({ ok: 1 });
   });
 });

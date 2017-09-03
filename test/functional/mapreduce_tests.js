@@ -181,7 +181,7 @@ describe('MapReduce', function() {
 
               // String functions
               var map = function() {
-                emit(this.user_id, 1);  // eslint-disable-line
+                emit(this.user_id, 1); // eslint-disable-line
               };
               var reduce = function() {
                 return 1;
@@ -376,7 +376,7 @@ describe('MapReduce', function() {
               test.equal(null, err);
               // Map function
               var map = function() {
-                emit(this.user_id, 1);  // eslint-disable-line
+                emit(this.user_id, 1); // eslint-disable-line
               };
               // Reduce function
               var reduce = function() {

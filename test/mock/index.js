@@ -7,5 +7,5 @@ module.exports = {
   createServer: function(port, host, options) {
     options = options || {};
     return new Server(port, host, options).start();
-  },
-}
+  }
+};

@@ -9,8 +9,11 @@ function globalSetup() {
   return new Promise(function(resolve, reject) {
     co(function*() {
       var manager = new ServerManager('mongod', {
-          bind_ip: 'localhost', port: 27017, dbpath: f('%s/../db/27017', __dirname)
-        , storageEngine: 'inMemory', quiet: null
+        bind_ip: 'localhost',
+        port: 27017,
+        dbpath: f('%s/../db/27017', __dirname),
+        storageEngine: 'inMemory',
+        quiet: null
       });
 
       // Purge the directory
@@ -27,7 +30,9 @@ function globalSetup() {
 function getDb(db, poolSize) {
   return new Promise(function(resolve, reject) {
     co(function*() {
-      resolve(yield MongoClient.connect(f('mongodb://localhost:27017/%s?maxPoolSize=%s', db, poolSize)));
+      resolve(
+        yield MongoClient.connect(f('mongodb://localhost:27017/%s?maxPoolSize=%s', db, poolSize))
+      );
     }).catch(reject);
   });
 }
@@ -43,28 +48,28 @@ function isObject(value) {
 
 // Map the extended json to type
 var map = {
-  '$oid': function(data) {
+  $oid: function(data) {
     return bson.ObjectID(data.$oid.toString());
   },
-  '$binary': function(val) {
+  $binary: function(val) {
     return bson.Binary(new Buffer(val.$binary, 'base64'));
   },
-  '$ref': function(val) {
+  $ref: function(val) {
     return bson.DBRef(val.$ref, val.$id);
   },
-  '$timestamp': function(val) {
+  $timestamp: function(val) {
     return bson.Timestamp(val.$timestamp.$t, val.$timestamp.$i);
   },
-  '$numberLong': function(val){
+  $numberLong: function(val) {
     return bson.Long.fromString(val.$numberLong.toString());
   },
-  '$maxKey': function() {
+  $maxKey: function() {
     return bson.MaxKey();
   },
-  '$minKey': function() {
+  $minKey: function() {
     return bson.MinKey();
   },
-  '$date': function(val) {
+  $date: function(val) {
     var d = new Date();
 
     // Kernel bug.  See #2 http://git.io/AEbmFg
@@ -73,13 +78,13 @@ var map = {
     }
     return d;
   },
-  '$regex': function(val) {
+  $regex: function(val) {
     return new RegExp(val.$regex, val.$options);
   },
-  '$undefined': function() {
+  $undefined: function() {
     return undefined;
   }
-}
+};
 
 function deflate(data) {
   if (Array.isArray(data)) return data.map(deflate);
@@ -97,10 +102,10 @@ function deflate(data) {
   }
 
   return caster(data);
-};
+}
 
 module.exports = {
   globalSetup: globalSetup,
   getDb: getDb,
   deflate: deflate
-}
+};

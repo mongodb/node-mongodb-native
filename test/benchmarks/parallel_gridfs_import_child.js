@@ -15,7 +15,7 @@ module.exports = function(o, callback) {
     var bucket = new GridFSBucket(client);
 
     // Read in all the files
-    for(var i = 0; i < files.length; i++) {
+    for (var i = 0; i < files.length; i++) {
       var stream = fs.createReadStream(files[i], 'binary');
       // Create an upload stream
       var uploadStream = bucket.openUploadStream(f('files%s.txt', i + o.index));
@@ -23,7 +23,7 @@ module.exports = function(o, callback) {
       uploadStream.once('finish', function() {
         left = left - 1;
 
-        if(left == 0) {
+        if (left == 0) {
           callback();
         }
       });
@@ -31,4 +31,4 @@ module.exports = function(o, callback) {
       stream.pipe(uploadStream);
     }
   });
-}
+};

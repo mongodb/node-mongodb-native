@@ -1,16 +1,26 @@
 {
-  "extends": ["eslint:recommended"],
+  "extends": [
+    "eslint:recommended"
+  ],
   "env": {
     "node": true,
     "mocha": true
-   },
-   "ecmaFeatures": {
-    "es6": true,
-   },
-   "plugins": [
-   ],
-   "rules": {
+  },
+  "globals": {
+    "Promise": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2017
+  },
+  "plugins": [
+    "prettier"
+  ],
+  "rules": {
     "no-console": 0,
-    "semi": 1
-   }
+    "prettier/prettier": ["error", {
+      "singleQuote": true,
+      "tabWidth": 2,
+      "printWidth": 100
+    }]
+  }
 }

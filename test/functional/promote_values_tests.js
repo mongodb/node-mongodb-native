@@ -128,16 +128,19 @@ describe('Promote Values', function() {
           }, function(err) {
             test.equal(null, err);
 
-            db.collection('shouldCorrectlyHonorPromoteValues').find().next(function(err, doc) {
-              test.equal(null, err);
+            db
+              .collection('shouldCorrectlyHonorPromoteValues')
+              .find()
+              .next(function(err, doc) {
+                test.equal(null, err);
 
-              test.deepEqual(Long.fromNumber(10), doc.doc);
-              test.deepEqual(new Int32(10), doc.int);
-              test.deepEqual(new Double(2.2222), doc.double);
+                test.deepEqual(Long.fromNumber(10), doc.doc);
+                test.deepEqual(new Int32(10), doc.int);
+                test.deepEqual(new Double(2.2222), doc.double);
 
-              client.close();
-              done();
-            });
+                client.close();
+                done();
+              });
           });
         }
       );

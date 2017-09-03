@@ -41,13 +41,16 @@ describe('Kerberos', function() {
           test.equal(null, err);
           var db = client.db('kerberos');
 
-          db.collection('test').find().toArray(function(err, docs) {
-            test.equal(null, err);
-            test.ok(true, docs[0].kerberos);
+          db
+            .collection('test')
+            .find()
+            .toArray(function(err, docs) {
+              test.equal(null, err);
+              test.ok(true, docs[0].kerberos);
 
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            });
         }
       );
     }
@@ -80,13 +83,16 @@ describe('Kerberos', function() {
           test.equal(null, err);
           var db = client.db('kerberos');
 
-          db.collection('test').find().toArray(function(err, docs) {
-            test.equal(null, err);
-            test.ok(true, docs[0].kerberos);
+          db
+            .collection('test')
+            .find()
+            .toArray(function(err, docs) {
+              test.equal(null, err);
+              test.ok(true, docs[0].kerberos);
 
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            });
         }
       );
     }
@@ -121,13 +127,16 @@ describe('Kerberos', function() {
             test.equal(null, err);
             var db = client.db('kerberos');
 
-            db.collection('test').find().toArray(function(err, docs) {
-              test.equal(null, err);
-              test.ok(true, docs[0].kerberos);
+            db
+              .collection('test')
+              .find()
+              .toArray(function(err, docs) {
+                test.equal(null, err);
+                test.ok(true, docs[0].kerberos);
 
-              client.close();
-              done();
-            });
+                client.close();
+                done();
+              });
           }
         );
       }
@@ -160,33 +169,42 @@ describe('Kerberos', function() {
         function(err, client) {
           test.equal(null, err);
 
-          client.db('kerberos').collection('test').findOne(function(err, doc) {
-            test.equal(null, err);
-            test.equal(true, doc.kerberos);
+          client
+            .db('kerberos')
+            .collection('test')
+            .findOne(function(err, doc) {
+              test.equal(null, err);
+              test.equal(true, doc.kerberos);
 
-            client.topology.once('reconnect', function() {
-              // Await reconnect and re-authentication
-              client.db('kerberos').collection('test').findOne(function(err, doc) {
-                test.equal(null, err);
-                test.equal(true, doc.kerberos);
-
-                // Attempt disconnect again
-                client.topology.connections()[0].destroy();
-
+              client.topology.once('reconnect', function() {
                 // Await reconnect and re-authentication
-                client.db('kerberos').collection('test').findOne(function(err, doc) {
-                  test.equal(null, err);
-                  test.equal(true, doc.kerberos);
+                client
+                  .db('kerberos')
+                  .collection('test')
+                  .findOne(function(err, doc) {
+                    test.equal(null, err);
+                    test.equal(true, doc.kerberos);
 
-                  client.close();
-                  done();
-                });
+                    // Attempt disconnect again
+                    client.topology.connections()[0].destroy();
+
+                    // Await reconnect and re-authentication
+                    client
+                      .db('kerberos')
+                      .collection('test')
+                      .findOne(function(err, doc) {
+                        test.equal(null, err);
+                        test.equal(true, doc.kerberos);
+
+                        client.close();
+                        done();
+                      });
+                  });
               });
-            });
 
-            // Force close
-            client.topology.connections()[0].destroy();
-          });
+              // Force close
+              client.topology.connections()[0].destroy();
+            });
         }
       );
     }
@@ -217,13 +235,16 @@ describe('Kerberos', function() {
         test.equal(null, err);
 
         // Await reconnect and re-authentication
-        client.db('kerberos').collection('test').findOne(function(err, doc) {
-          test.equal(null, err);
-          test.equal(true, doc.kerberos);
+        client
+          .db('kerberos')
+          .collection('test')
+          .findOne(function(err, doc) {
+            test.equal(null, err);
+            test.equal(true, doc.kerberos);
 
-          client.close();
-          done();
-        });
+            client.close();
+            done();
+          });
       });
     }
   });
@@ -290,13 +311,16 @@ describe('Kerberos', function() {
           test.equal(null, err);
           var db = client.db('kerberos');
 
-          db.collection('test').find().toArray(function(err, docs) {
-            test.equal(null, err);
-            test.ok(true, docs[0].kerberos);
+          db
+            .collection('test')
+            .find()
+            .toArray(function(err, docs) {
+              test.equal(null, err);
+              test.ok(true, docs[0].kerberos);
 
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            });
         }
       );
     }
@@ -331,33 +355,42 @@ describe('Kerberos', function() {
         function(err, client) {
           test.equal(null, err);
 
-          client.db('kerberos').collection('test').findOne(function(err, doc) {
-            test.equal(null, err);
-            test.equal(true, doc.kerberos);
+          client
+            .db('kerberos')
+            .collection('test')
+            .findOne(function(err, doc) {
+              test.equal(null, err);
+              test.equal(true, doc.kerberos);
 
-            client.topology.once('reconnect', function() {
-              // Await reconnect and re-authentication
-              client.db('kerberos').collection('test').findOne(function(err, doc) {
-                test.equal(null, err);
-                test.equal(true, doc.kerberos);
-
-                // Attempt disconnect again
-                client.topology.connections()[0].destroy();
-
+              client.topology.once('reconnect', function() {
                 // Await reconnect and re-authentication
-                client.db('kerberos').collection('test').findOne(function(err, doc) {
-                  test.equal(null, err);
-                  test.equal(true, doc.kerberos);
+                client
+                  .db('kerberos')
+                  .collection('test')
+                  .findOne(function(err, doc) {
+                    test.equal(null, err);
+                    test.equal(true, doc.kerberos);
 
-                  client.close();
-                  done();
-                });
+                    // Attempt disconnect again
+                    client.topology.connections()[0].destroy();
+
+                    // Await reconnect and re-authentication
+                    client
+                      .db('kerberos')
+                      .collection('test')
+                      .findOne(function(err, doc) {
+                        test.equal(null, err);
+                        test.equal(true, doc.kerberos);
+
+                        client.close();
+                        done();
+                      });
+                  });
               });
-            });
 
-            // Force close
-            client.topology.connections()[0].destroy();
-          });
+              // Force close
+              client.topology.connections()[0].destroy();
+            });
         }
       );
     }
@@ -391,13 +424,16 @@ describe('Kerberos', function() {
         test.equal(null, err);
         var db = client.db('kerberos');
 
-        db.collection('test').find().toArray(function(err, docs) {
-          test.equal(null, err);
-          test.ok(true, docs[0].kerberos);
+        db
+          .collection('test')
+          .find()
+          .toArray(function(err, docs) {
+            test.equal(null, err);
+            test.ok(true, docs[0].kerberos);
 
-          client.close();
-          done();
-        });
+            client.close();
+            done();
+          });
       });
     }
   });

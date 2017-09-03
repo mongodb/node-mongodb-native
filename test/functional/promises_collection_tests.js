@@ -31,12 +31,15 @@ describe('Promises (Collection)', function() {
         test.equal(1, client.topology.connections().length);
         var db = client.db(configuration.db);
 
-        db.collection('insertOne').insertOne({ a: 1 }).then(function(r) {
-          test.equal(1, r.insertedCount);
+        db
+          .collection('insertOne')
+          .insertOne({ a: 1 })
+          .then(function(r) {
+            test.equal(1, r.insertedCount);
 
-          client.close();
-          done();
-        });
+            client.close();
+            done();
+          });
       });
     }
   });

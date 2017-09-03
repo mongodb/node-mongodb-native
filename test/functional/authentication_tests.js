@@ -394,7 +394,10 @@ describe('Authentication', function() {
             // Add some operations to be executed in order
             batch.insert({ a: 1 });
             batch.find({ a: 1 }).updateOne({ $set: { b: 1 } });
-            batch.find({ a: 2 }).upsert().updateOne({ $set: { b: 2 } });
+            batch
+              .find({ a: 2 })
+              .upsert()
+              .updateOne({ $set: { b: 2 } });
             batch.insert({ a: 3 });
             batch.find({ a: 3 }).remove({ a: 3 });
 
@@ -447,7 +450,10 @@ describe('Authentication', function() {
             // Add some operations to be executed in order
             batch.insert({ a: 1 });
             batch.find({ a: 1 }).updateOne({ $set: { b: 1 } });
-            batch.find({ a: 2 }).upsert().updateOne({ $set: { b: 2 } });
+            batch
+              .find({ a: 2 })
+              .upsert()
+              .updateOne({ $set: { b: 2 } });
             batch.insert({ a: 3 });
             batch.find({ a: 3 }).remove({ a: 3 });
 
@@ -1558,16 +1564,19 @@ describe('Authentication', function() {
                       test.equal(null, err);
 
                       // Find the document
-                      db.collection('authcollectiontest').find().toArray(function(err, docs) {
-                        test.equal(1, docs.length);
-                        test.equal(1, docs[0].a);
+                      db
+                        .collection('authcollectiontest')
+                        .find()
+                        .toArray(function(err, docs) {
+                          test.equal(1, docs.length);
+                          test.equal(1, docs[0].a);
 
-                        client.close();
+                          client.close();
 
-                        replicasetManager.stop().then(function() {
-                          done();
+                          replicasetManager.stop().then(function() {
+                            done();
+                          });
                         });
-                      });
                     });
                   // });
                 }
@@ -1641,17 +1650,20 @@ describe('Authentication', function() {
                         test.equal(null, err);
 
                         // Find the document
-                        db.collection('authcollectiontest1').find().toArray(function(err, docs) {
-                          test.equal(null, err);
-                          test.equal(1, docs.length);
-                          test.equal(1, docs[0].a);
+                        db
+                          .collection('authcollectiontest1')
+                          .find()
+                          .toArray(function(err, docs) {
+                            test.equal(null, err);
+                            test.equal(1, docs.length);
+                            test.equal(1, docs[0].a);
 
-                          client.close();
+                            client.close();
 
-                          replicasetManager.stop().then(function() {
-                            done();
+                            replicasetManager.stop().then(function() {
+                              done();
+                            });
                           });
-                        });
                       });
                   }
                 );
@@ -1756,11 +1768,7 @@ describe('Authentication', function() {
 
                 setTimeout(function() {
                   // connection string
-                  var config = f(
-                    'mongodb://me:secret@localhost:%s/%s',
-                    51000,
-                    configuration.db
-                  );
+                  var config = f('mongodb://me:secret@localhost:%s/%s', 51000, configuration.db);
                   // Connect
                   MongoClient.connect(config, function(error, client) {
                     test.equal(null, error);
@@ -1827,11 +1835,7 @@ describe('Authentication', function() {
                 client.close();
 
                 // connection string
-                var config = f(
-                  'mongodb://me:secret@localhost:%s/%s',
-                  51000,
-                  configuration.db
-                );
+                var config = f('mongodb://me:secret@localhost:%s/%s', 51000, configuration.db);
                 // Connect
                 MongoClient.connect(config, function(error, client) {
                   test.equal(null, error);

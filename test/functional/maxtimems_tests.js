@@ -34,11 +34,14 @@ describe('Unicode', function() {
           test.equal(null, err);
 
           // Execute a find command
-          col.find({ $where: 'sleep(100) || true' }).maxTimeMS(50).count(function(err) {
-            test.ok(err != null);
-            client.close();
-            done();
-          });
+          col
+            .find({ $where: 'sleep(100) || true' })
+            .maxTimeMS(50)
+            .count(function(err) {
+              test.ok(err != null);
+              client.close();
+              done();
+            });
         });
       });
     }
@@ -71,11 +74,14 @@ describe('Unicode', function() {
           test.equal(null, err);
 
           // Execute a find command
-          col.find({ $where: 'sleep(100) || true' }).maxTimeMS(50).toArray(function(err) {
-            test.ok(err != null);
-            client.close();
-            done();
-          });
+          col
+            .find({ $where: 'sleep(100) || true' })
+            .maxTimeMS(50)
+            .toArray(function(err) {
+              test.ok(err != null);
+              client.close();
+              done();
+            });
         });
       });
     }
@@ -115,21 +121,24 @@ describe('Unicode', function() {
               test.equal(null, err);
               test.equal(1, result.ok);
 
-              col.find({}).maxTimeMS(10).toArray(function(err) {
-                test.ok(err != null);
+              col
+                .find({})
+                .maxTimeMS(10)
+                .toArray(function(err) {
+                  test.ok(err != null);
 
-                db
-                  .admin()
-                  .command({ configureFailPoint: 'maxTimeAlwaysTimeOut', mode: 'off' }, function(
-                    err,
-                    result
-                  ) {
-                    test.equal(null, err);
-                    test.equal(1, result.ok);
-                    client.close();
-                    done();
-                  });
-              });
+                  db
+                    .admin()
+                    .command({ configureFailPoint: 'maxTimeAlwaysTimeOut', mode: 'off' }, function(
+                      err,
+                      result
+                    ) {
+                      test.equal(null, err);
+                      test.equal(1, result.ok);
+                      client.close();
+                      done();
+                    });
+                });
             });
         });
       });

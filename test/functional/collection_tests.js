@@ -809,22 +809,28 @@ describe('Collection', function() {
           collection.save(doc, self.configuration.writeConcernMax(), function(err) {
             test.equal(null, err);
 
-            collection.find({}, { name: 1 }).limit(1).toArray(function(err, users) {
-              var user = users[0];
+            collection
+              .find({}, { name: 1 })
+              .limit(1)
+              .toArray(function(err, users) {
+                var user = users[0];
 
-              if (err) {
-                throw new Error(err);
-              } else if (user) {
-                user.pants = 'worn';
+                if (err) {
+                  throw new Error(err);
+                } else if (user) {
+                  user.pants = 'worn';
 
-                collection.save(user, self.configuration.writeConcernMax(), function(err, result) {
-                  test.equal(null, err);
-                  test.equal(1, result.result.n);
-                  client.close();
-                  done();
-                });
-              }
-            });
+                  collection.save(user, self.configuration.writeConcernMax(), function(
+                    err,
+                    result
+                  ) {
+                    test.equal(null, err);
+                    test.equal(1, result.result.n);
+                    client.close();
+                    done();
+                  });
+                }
+              });
           });
         });
       });
@@ -874,29 +880,32 @@ describe('Collection', function() {
             collection.save(doc, self.configuration.writeConcernMax(), function(err) {
               test.equal(null, err);
 
-              collection.find({}).limit(1).toArray(function(err, users) {
-                test.equal(null, err);
-                var user = users[0];
-                user.friends.splice(1, 1);
-
-                collection.save(user, function(err) {
+              collection
+                .find({})
+                .limit(1)
+                .toArray(function(err, users) {
                   test.equal(null, err);
+                  var user = users[0];
+                  user.friends.splice(1, 1);
 
-                  // Update again
-                  collection.update(
-                    { _id: new ObjectID(user._id.toString()) },
-                    { friends: user.friends },
-                    { upsert: true, w: 1 },
-                    function(err, result) {
-                      test.equal(null, err);
-                      test.equal(1, result.result.n);
+                  collection.save(user, function(err) {
+                    test.equal(null, err);
 
-                      client.close();
-                      done();
-                    }
-                  );
+                    // Update again
+                    collection.update(
+                      { _id: new ObjectID(user._id.toString()) },
+                      { friends: user.friends },
+                      { upsert: true, w: 1 },
+                      function(err, result) {
+                        test.equal(null, err);
+                        test.equal(1, result.result.n);
+
+                        client.close();
+                        done();
+                      }
+                    );
+                  });
                 });
-              });
             });
           });
         });
