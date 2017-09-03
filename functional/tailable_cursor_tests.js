@@ -52,9 +52,8 @@ describe('Tailable cursor tests', function() {
 
                     var s = new Date();
 
-                    cursor.next(function(secondCursorErr, secondCursorD) {
+                    cursor.next(function(secondCursorErr) {
                       expect(secondCursorErr).to.not.exist;
-                      expect(secondCursorD).to.exist;
 
                       var e = new Date();
                       expect(e.getTime() - s.getTime()).to.be.at.least(300);

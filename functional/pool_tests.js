@@ -255,10 +255,6 @@ describe('Pool tests', function() {
       var messageHandler = function(err) {
         if (err) errorCount = errorCount + 1;
         index = index + 1;
-        if (index > 490) {
-          console.log('--- messageHandler :: ' + index);
-        }
-
         if (index === 500) {
           expect(errorCount).to.be.at.least(250);
           pool.destroy();

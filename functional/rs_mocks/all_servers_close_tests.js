@@ -203,6 +203,8 @@ describe('ReplSet All Servers Close (mocks)', function() {
     },
 
     test: function(done) {
+      this.timeout(60000);
+
       var ReplSet = this.configuration.mongo.ReplSet,
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
@@ -346,9 +348,7 @@ describe('ReplSet All Servers Close (mocks)', function() {
           die = true;
 
           var intervalId = setInterval(function() {
-            server.command('admin.$cmd', { ismaster: true }, function(err) {
-              expect(err).to.not.exist;
-            });
+            server.command('admin.$cmd', { ismaster: true }, function() {});
           }, 2000);
 
           setTimeout(function() {

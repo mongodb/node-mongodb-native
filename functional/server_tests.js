@@ -473,8 +473,7 @@ describe('Server tests', function() {
                 'system.$cmd',
                 { ismaster: true },
                 { readPreference: new ReadPreference('primary') },
-                function(cmdErr, cmdResult) {
-                  expect(cmdResult).to.exist;
+                function(cmdErr) {
                   expect(cmdErr).to.not.be.null;
                 }
               );
@@ -545,9 +544,8 @@ describe('Server tests', function() {
                 'system.$cmd',
                 { ismaster: true },
                 { readPreference: new ReadPreference('primary') },
-                function(cmdErr, cmdResult) {
+                function(cmdErr) {
                   expect(cmdErr).to.not.be.null;
-                  expect(cmdResult).to.exist;
                 }
               );
             });

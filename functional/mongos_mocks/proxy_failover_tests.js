@@ -337,10 +337,7 @@ describe('Mongos Proxy Failover (mocks)', function() {
       // Add event listeners
       server.once('fullsetup', function() {
         var intervalId = setInterval(function() {
-          server.insert('test.test', [{ created: new Date() }], function(err, r) {
-            expect(r).to.exist;
-            expect(err).to.not.exist;
-
+          server.insert('test.test', [{ created: new Date() }], function() {
             if (intervalId === null) return;
             // Clear out the interval
             clearInterval(intervalId);
