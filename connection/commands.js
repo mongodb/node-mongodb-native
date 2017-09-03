@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var retrieveBSON = require('./utils').retrieveBSON;
 var BSON = retrieveBSON();
@@ -31,12 +31,12 @@ var AWAIT_CAPABLE = 8;
 var Query = function(bson, ns, query, options) {
   var self = this;
   // Basic options needed to be passed in
-  if(ns == null) throw new Error("ns must be specified for query");
-  if(query == null) throw new Error("query must be specified for query");
+  if (ns == null) throw new Error('ns must be specified for query');
+  if (query == null) throw new Error('query must be specified for query');
 
   // Validate that we are not passing 0x00 in the collection name
-  if(!!~ns.indexOf("\x00")) {
-    throw new Error("namespace cannot contain a null character");
+  if (!!~ns.indexOf('\x00')) {
+    throw new Error('namespace cannot contain a null character');
   }
 
   // Basic options
@@ -54,33 +54,35 @@ var Query = function(bson, ns, query, options) {
   this.requestId = Query.getRequestId();
 
   // Serialization option
-  this.serializeFunctions = typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
-  this.ignoreUndefined = typeof options.ignoreUndefined == 'boolean' ? options.ignoreUndefined : false;
+  this.serializeFunctions =
+    typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
+  this.ignoreUndefined =
+    typeof options.ignoreUndefined == 'boolean' ? options.ignoreUndefined : false;
   this.maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
   this.checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys : true;
   this.batchSize = self.numberToReturn;
 
   // Flags
   this.tailable = false;
-  this.slaveOk = typeof options.slaveOk == 'boolean'? options.slaveOk : false;
+  this.slaveOk = typeof options.slaveOk == 'boolean' ? options.slaveOk : false;
   this.oplogReplay = false;
   this.noCursorTimeout = false;
   this.awaitData = false;
   this.exhaust = false;
   this.partial = false;
-}
+};
 
 //
 // Assign a new request Id
 Query.prototype.incRequestId = function() {
   this.requestId = _requestId++;
-}
+};
 
 //
 // Assign a new request Id
 Query.nextRequestId = function() {
   return _requestId + 1;
-}
+};
 
 //
 // Uses a single allocated buffer for the process, avoiding multiple memory allocations
@@ -91,44 +93,45 @@ Query.prototype.toBin = function() {
 
   // Set up the flags
   var flags = 0;
-  if(this.tailable) {
+  if (this.tailable) {
     flags |= OPTS_TAILABLE_CURSOR;
   }
 
-  if(this.slaveOk) {
+  if (this.slaveOk) {
     flags |= OPTS_SLAVE;
   }
 
-  if(this.oplogReplay) {
+  if (this.oplogReplay) {
     flags |= OPTS_OPLOG_REPLAY;
   }
 
-  if(this.noCursorTimeout) {
+  if (this.noCursorTimeout) {
     flags |= OPTS_NO_CURSOR_TIMEOUT;
   }
 
-  if(this.awaitData) {
+  if (this.awaitData) {
     flags |= OPTS_AWAIT_DATA;
   }
 
-  if(this.exhaust) {
+  if (this.exhaust) {
     flags |= OPTS_EXHAUST;
   }
 
-  if(this.partial) {
+  if (this.partial) {
     flags |= OPTS_PARTIAL;
   }
 
   // If batchSize is different to self.numberToReturn
-  if(self.batchSize != self.numberToReturn) self.numberToReturn = self.batchSize;
+  if (self.batchSize != self.numberToReturn) self.numberToReturn = self.batchSize;
 
   // Allocate write protocol header buffer
   var header = new Buffer(
-    4 * 4 // Header
-    + 4   // Flags
-    + Buffer.byteLength(self.ns) + 1 // namespace
-    + 4 // numberToSkip
-    + 4 // numberToReturn
+    4 * 4 + // Header
+    4 + // Flags
+    Buffer.byteLength(self.ns) +
+    1 + // namespace
+    4 + // numberToSkip
+      4 // numberToReturn
   );
 
   // Add header to buffers
@@ -138,18 +141,18 @@ Query.prototype.toBin = function() {
   var query = self.bson.serialize(this.query, {
     checkKeys: this.checkKeys,
     serializeFunctions: this.serializeFunctions,
-    ignoreUndefined: this.ignoreUndefined,
+    ignoreUndefined: this.ignoreUndefined
   });
 
   // Add query document
   buffers.push(query);
 
-  if(self.returnFieldSelector && Object.keys(self.returnFieldSelector).length > 0) {
+  if (self.returnFieldSelector && Object.keys(self.returnFieldSelector).length > 0) {
     // Serialize the projection document
     projection = self.bson.serialize(this.returnFieldSelector, {
       checkKeys: this.checkKeys,
       serializeFunctions: this.serializeFunctions,
-      ignoreUndefined: this.ignoreUndefined,
+      ignoreUndefined: this.ignoreUndefined
     });
     // Add projection document
     buffers.push(projection);
@@ -165,34 +168,34 @@ Query.prototype.toBin = function() {
   header[3] = (totalLength >> 24) & 0xff;
   header[2] = (totalLength >> 16) & 0xff;
   header[1] = (totalLength >> 8) & 0xff;
-  header[0] = (totalLength) & 0xff;
+  header[0] = totalLength & 0xff;
 
   // Write header information requestId
   header[index + 3] = (this.requestId >> 24) & 0xff;
   header[index + 2] = (this.requestId >> 16) & 0xff;
   header[index + 1] = (this.requestId >> 8) & 0xff;
-  header[index] = (this.requestId) & 0xff;
+  header[index] = this.requestId & 0xff;
   index = index + 4;
 
   // Write header information responseTo
   header[index + 3] = (0 >> 24) & 0xff;
   header[index + 2] = (0 >> 16) & 0xff;
   header[index + 1] = (0 >> 8) & 0xff;
-  header[index] = (0) & 0xff;
+  header[index] = 0 & 0xff;
   index = index + 4;
 
   // Write header information OP_QUERY
   header[index + 3] = (opcodes.OP_QUERY >> 24) & 0xff;
   header[index + 2] = (opcodes.OP_QUERY >> 16) & 0xff;
   header[index + 1] = (opcodes.OP_QUERY >> 8) & 0xff;
-  header[index] = (opcodes.OP_QUERY) & 0xff;
+  header[index] = opcodes.OP_QUERY & 0xff;
   index = index + 4;
 
   // Write header information flags
   header[index + 3] = (flags >> 24) & 0xff;
   header[index + 2] = (flags >> 16) & 0xff;
   header[index + 1] = (flags >> 8) & 0xff;
-  header[index] = (flags) & 0xff;
+  header[index] = flags & 0xff;
   index = index + 4;
 
   // Write collection name
@@ -203,23 +206,23 @@ Query.prototype.toBin = function() {
   header[index + 3] = (this.numberToSkip >> 24) & 0xff;
   header[index + 2] = (this.numberToSkip >> 16) & 0xff;
   header[index + 1] = (this.numberToSkip >> 8) & 0xff;
-  header[index] = (this.numberToSkip) & 0xff;
+  header[index] = this.numberToSkip & 0xff;
   index = index + 4;
 
   // Write header information flags numberToReturn
   header[index + 3] = (this.numberToReturn >> 24) & 0xff;
   header[index + 2] = (this.numberToReturn >> 16) & 0xff;
   header[index + 1] = (this.numberToReturn >> 8) & 0xff;
-  header[index] = (this.numberToReturn) & 0xff;
+  header[index] = this.numberToReturn & 0xff;
   index = index + 4;
 
   // Return the buffers
   return buffers;
-}
+};
 
 Query.getRequestId = function() {
   return ++_requestId;
-}
+};
 
 /**************************************************************
  * GETMORE
@@ -231,12 +234,12 @@ var GetMore = function(bson, ns, cursorId, opts) {
   this.bson = bson;
   this.ns = ns;
   this.cursorId = cursorId;
-}
+};
 
 //
 // Uses a single allocated buffer for the process, avoiding multiple memory allocations
 GetMore.prototype.toBin = function() {
-  var length = 4 + Buffer.byteLength(this.ns) + 1 + 4 + 8 + (4 * 4);
+  var length = 4 + Buffer.byteLength(this.ns) + 1 + 4 + 8 + 4 * 4;
   // Create command buffer
   var index = 0;
   // Allocate buffer
@@ -247,35 +250,35 @@ GetMore.prototype.toBin = function() {
   _buffer[index + 3] = (length >> 24) & 0xff;
   _buffer[index + 2] = (length >> 16) & 0xff;
   _buffer[index + 1] = (length >> 8) & 0xff;
-  _buffer[index] = (length) & 0xff;
+  _buffer[index] = length & 0xff;
   index = index + 4;
 
   // index = write32bit(index, _buffer, requestId);
   _buffer[index + 3] = (this.requestId >> 24) & 0xff;
   _buffer[index + 2] = (this.requestId >> 16) & 0xff;
   _buffer[index + 1] = (this.requestId >> 8) & 0xff;
-  _buffer[index] = (this.requestId) & 0xff;
+  _buffer[index] = this.requestId & 0xff;
   index = index + 4;
 
   // index = write32bit(index, _buffer, 0);
   _buffer[index + 3] = (0 >> 24) & 0xff;
   _buffer[index + 2] = (0 >> 16) & 0xff;
   _buffer[index + 1] = (0 >> 8) & 0xff;
-  _buffer[index] = (0) & 0xff;
+  _buffer[index] = 0 & 0xff;
   index = index + 4;
 
   // index = write32bit(index, _buffer, OP_GETMORE);
   _buffer[index + 3] = (opcodes.OP_GETMORE >> 24) & 0xff;
   _buffer[index + 2] = (opcodes.OP_GETMORE >> 16) & 0xff;
   _buffer[index + 1] = (opcodes.OP_GETMORE >> 8) & 0xff;
-  _buffer[index] = (opcodes.OP_GETMORE) & 0xff;
+  _buffer[index] = opcodes.OP_GETMORE & 0xff;
   index = index + 4;
 
   // index = write32bit(index, _buffer, 0);
   _buffer[index + 3] = (0 >> 24) & 0xff;
   _buffer[index + 2] = (0 >> 16) & 0xff;
   _buffer[index + 1] = (0 >> 8) & 0xff;
-  _buffer[index] = (0) & 0xff;
+  _buffer[index] = 0 & 0xff;
   index = index + 4;
 
   // Write collection name
@@ -287,7 +290,7 @@ GetMore.prototype.toBin = function() {
   _buffer[index + 3] = (this.numberToReturn >> 24) & 0xff;
   _buffer[index + 2] = (this.numberToReturn >> 16) & 0xff;
   _buffer[index + 1] = (this.numberToReturn >> 8) & 0xff;
-  _buffer[index] = (this.numberToReturn) & 0xff;
+  _buffer[index] = this.numberToReturn & 0xff;
   index = index + 4;
 
   // Write cursor id
@@ -295,19 +298,19 @@ GetMore.prototype.toBin = function() {
   _buffer[index + 3] = (this.cursorId.getLowBits() >> 24) & 0xff;
   _buffer[index + 2] = (this.cursorId.getLowBits() >> 16) & 0xff;
   _buffer[index + 1] = (this.cursorId.getLowBits() >> 8) & 0xff;
-  _buffer[index] = (this.cursorId.getLowBits()) & 0xff;
+  _buffer[index] = this.cursorId.getLowBits() & 0xff;
   index = index + 4;
 
   // index = write32bit(index, _buffer, cursorId.getHighBits());
   _buffer[index + 3] = (this.cursorId.getHighBits() >> 24) & 0xff;
   _buffer[index + 2] = (this.cursorId.getHighBits() >> 16) & 0xff;
   _buffer[index + 1] = (this.cursorId.getHighBits() >> 8) & 0xff;
-  _buffer[index] = (this.cursorId.getHighBits()) & 0xff;
+  _buffer[index] = this.cursorId.getHighBits() & 0xff;
   index = index + 4;
 
   // Return buffer
   return _buffer;
-}
+};
 
 /**************************************************************
  * KILLCURSOR
@@ -315,12 +318,12 @@ GetMore.prototype.toBin = function() {
 var KillCursor = function(bson, cursorIds) {
   this.requestId = _requestId++;
   this.cursorIds = cursorIds;
-}
+};
 
 //
 // Uses a single allocated buffer for the process, avoiding multiple memory allocations
 KillCursor.prototype.toBin = function() {
-  var length = 4 + 4 + (4 * 4) + (this.cursorIds.length * 8);
+  var length = 4 + 4 + 4 * 4 + this.cursorIds.length * 8;
 
   // Create command buffer
   var index = 0;
@@ -331,35 +334,35 @@ KillCursor.prototype.toBin = function() {
   _buffer[index + 3] = (length >> 24) & 0xff;
   _buffer[index + 2] = (length >> 16) & 0xff;
   _buffer[index + 1] = (length >> 8) & 0xff;
-  _buffer[index] = (length) & 0xff;
+  _buffer[index] = length & 0xff;
   index = index + 4;
 
   // index = write32bit(index, _buffer, requestId);
   _buffer[index + 3] = (this.requestId >> 24) & 0xff;
   _buffer[index + 2] = (this.requestId >> 16) & 0xff;
   _buffer[index + 1] = (this.requestId >> 8) & 0xff;
-  _buffer[index] = (this.requestId) & 0xff;
+  _buffer[index] = this.requestId & 0xff;
   index = index + 4;
 
   // index = write32bit(index, _buffer, 0);
   _buffer[index + 3] = (0 >> 24) & 0xff;
   _buffer[index + 2] = (0 >> 16) & 0xff;
   _buffer[index + 1] = (0 >> 8) & 0xff;
-  _buffer[index] = (0) & 0xff;
+  _buffer[index] = 0 & 0xff;
   index = index + 4;
 
   // index = write32bit(index, _buffer, OP_KILL_CURSORS);
   _buffer[index + 3] = (opcodes.OP_KILL_CURSORS >> 24) & 0xff;
   _buffer[index + 2] = (opcodes.OP_KILL_CURSORS >> 16) & 0xff;
   _buffer[index + 1] = (opcodes.OP_KILL_CURSORS >> 8) & 0xff;
-  _buffer[index] = (opcodes.OP_KILL_CURSORS) & 0xff;
+  _buffer[index] = opcodes.OP_KILL_CURSORS & 0xff;
   index = index + 4;
 
   // index = write32bit(index, _buffer, 0);
   _buffer[index + 3] = (0 >> 24) & 0xff;
   _buffer[index + 2] = (0 >> 16) & 0xff;
   _buffer[index + 1] = (0 >> 8) & 0xff;
-  _buffer[index] = (0) & 0xff;
+  _buffer[index] = 0 & 0xff;
   index = index + 4;
 
   // Write batch size
@@ -367,33 +370,33 @@ KillCursor.prototype.toBin = function() {
   _buffer[index + 3] = (this.cursorIds.length >> 24) & 0xff;
   _buffer[index + 2] = (this.cursorIds.length >> 16) & 0xff;
   _buffer[index + 1] = (this.cursorIds.length >> 8) & 0xff;
-  _buffer[index] = (this.cursorIds.length) & 0xff;
+  _buffer[index] = this.cursorIds.length & 0xff;
   index = index + 4;
 
   // Write all the cursor ids into the array
-  for(var i = 0; i < this.cursorIds.length; i++) {
+  for (var i = 0; i < this.cursorIds.length; i++) {
     // Write cursor id
     // index = write32bit(index, _buffer, cursorIds[i].getLowBits());
     _buffer[index + 3] = (this.cursorIds[i].getLowBits() >> 24) & 0xff;
     _buffer[index + 2] = (this.cursorIds[i].getLowBits() >> 16) & 0xff;
     _buffer[index + 1] = (this.cursorIds[i].getLowBits() >> 8) & 0xff;
-    _buffer[index] = (this.cursorIds[i].getLowBits()) & 0xff;
+    _buffer[index] = this.cursorIds[i].getLowBits() & 0xff;
     index = index + 4;
 
     // index = write32bit(index, _buffer, cursorIds[i].getHighBits());
     _buffer[index + 3] = (this.cursorIds[i].getHighBits() >> 24) & 0xff;
     _buffer[index + 2] = (this.cursorIds[i].getHighBits() >> 16) & 0xff;
     _buffer[index + 1] = (this.cursorIds[i].getHighBits() >> 8) & 0xff;
-    _buffer[index] = (this.cursorIds[i].getHighBits()) & 0xff;
+    _buffer[index] = this.cursorIds[i].getHighBits() & 0xff;
     index = index + 4;
   }
 
   // Return buffer
   return _buffer;
-}
+};
 
 var Response = function(bson, message, msgHeader, msgBody, opts) {
-  opts = opts || {promoteLongs: true, promoteValues: true, promoteBuffers: false};
+  opts = opts || { promoteLongs: true, promoteValues: true, promoteBuffers: false };
   this.parsed = false;
   this.raw = message;
   this.data = msgBody;
@@ -424,29 +427,26 @@ var Response = function(bson, message, msgHeader, msgBody, opts) {
   this.promoteLongs = typeof opts.promoteLongs == 'boolean' ? opts.promoteLongs : true;
   this.promoteValues = typeof opts.promoteValues == 'boolean' ? opts.promoteValues : true;
   this.promoteBuffers = typeof opts.promoteBuffers == 'boolean' ? opts.promoteBuffers : false;
-}
+};
 
 Response.prototype.isParsed = function() {
   return this.parsed;
-}
+};
 
 Response.prototype.parse = function(options) {
   // Don't parse again if not needed
-  if(this.parsed) return;
+  if (this.parsed) return;
   options = options || {};
 
   // Allow the return of raw documents instead of parsing
   var raw = options.raw || false;
   var documentsReturnedIn = options.documentsReturnedIn || null;
-  var promoteLongs = typeof options.promoteLongs == 'boolean'
-    ? options.promoteLongs
-    : this.opts.promoteLongs;
-  var promoteValues = typeof options.promoteValues == 'boolean'
-    ? options.promoteValues
-    : this.opts.promoteValues;
-  var promoteBuffers = typeof options.promoteBuffers == 'boolean'
-    ? options.promoteBuffers
-    : this.opts.promoteBuffers
+  var promoteLongs =
+    typeof options.promoteLongs == 'boolean' ? options.promoteLongs : this.opts.promoteLongs;
+  var promoteValues =
+    typeof options.promoteValues == 'boolean' ? options.promoteValues : this.opts.promoteValues;
+  var promoteBuffers =
+    typeof options.promoteBuffers == 'boolean' ? options.promoteBuffers : this.opts.promoteBuffers;
   var bsonSize, _options;
 
   // Set up the options
@@ -463,13 +463,17 @@ Response.prototype.parse = function(options) {
   //
   // Single document and documentsReturnedIn set
   //
-  if(this.numberReturned == 1 && documentsReturnedIn != null && raw) {
+  if (this.numberReturned == 1 && documentsReturnedIn != null && raw) {
     // Calculate the bson size
-    bsonSize = this.data[this.index] | this.data[this.index + 1] << 8 | this.data[this.index + 2] << 16 | this.data[this.index + 3] << 24;
+    bsonSize =
+      this.data[this.index] |
+      (this.data[this.index + 1] << 8) |
+      (this.data[this.index + 2] << 16) |
+      (this.data[this.index + 3] << 24);
     // Slice out the buffer containing the command result document
     var document = this.data.slice(this.index, this.index + bsonSize);
     // Set up field we wish to keep as raw
-    var fieldsAsRaw = {}
+    var fieldsAsRaw = {};
     fieldsAsRaw[documentsReturnedIn] = true;
     _options.fieldsAsRaw = fieldsAsRaw;
 
@@ -480,29 +484,35 @@ Response.prototype.parse = function(options) {
     this.documents = doc.cursor[documentsReturnedIn];
     this.numberReturned = this.documents.length;
     // Ensure we have a Long valie cursor id
-    this.cursorId = typeof doc.cursor.id == 'number'
-      ? Long.fromNumber(doc.cursor.id)
-      : doc.cursor.id;
+    this.cursorId =
+      typeof doc.cursor.id == 'number' ? Long.fromNumber(doc.cursor.id) : doc.cursor.id;
 
     // Adjust the index
     this.index = this.index + bsonSize;
 
     // Set as parsed
-    this.parsed = true
+    this.parsed = true;
     return;
   }
 
   //
   // Parse Body
   //
-  for(var i = 0; i < this.numberReturned; i++) {
-    bsonSize = this.data[this.index] | this.data[this.index + 1] << 8 | this.data[this.index + 2] << 16 | this.data[this.index + 3] << 24;
+  for (var i = 0; i < this.numberReturned; i++) {
+    bsonSize =
+      this.data[this.index] |
+      (this.data[this.index + 1] << 8) |
+      (this.data[this.index + 2] << 16) |
+      (this.data[this.index + 3] << 24);
 
     // If we have raw results specified slice the return document
-    if(raw) {
+    if (raw) {
       this.documents[i] = this.data.slice(this.index, this.index + bsonSize);
     } else {
-      this.documents[i] = this.bson.deserialize(this.data.slice(this.index, this.index + bsonSize), _options);
+      this.documents[i] = this.bson.deserialize(
+        this.data.slice(this.index, this.index + bsonSize),
+        _options
+      );
     }
 
     // Adjust the index
@@ -511,11 +521,11 @@ Response.prototype.parse = function(options) {
 
   // Set parsed
   this.parsed = true;
-}
+};
 
 module.exports = {
-    Query: Query
-  , GetMore: GetMore
-  , Response: Response
-  , KillCursor: KillCursor
-}
+  Query: Query,
+  GetMore: GetMore,
+  Response: Response,
+  KillCursor: KillCursor
+};

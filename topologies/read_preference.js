@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var needSlaveOk = ['primaryPreferred', 'secondary', 'secondaryPreferred', 'nearest'];
 
@@ -45,14 +45,14 @@ var ReadPreference = function(preference, tags, options) {
   this.options = options;
 
   // Add the maxStalenessSeconds value to the read Preference
-  if(this.options && this.options.maxStalenessSeconds != null) {
+  if (this.options && this.options.maxStalenessSeconds != null) {
     this.options = options;
-    this.maxStalenessSeconds = this.options.maxStalenessSeconds >= 0
-      ? this.options.maxStalenessSeconds : null;
-  } else if(tags && typeof tags == 'object') {
-    this.options = tags, tags = null;
+    this.maxStalenessSeconds =
+      this.options.maxStalenessSeconds >= 0 ? this.options.maxStalenessSeconds : null;
+  } else if (tags && typeof tags == 'object') {
+    (this.options = tags), (tags = null);
   }
-}
+};
 
 /**
  * This needs slaveOk bit set
@@ -61,7 +61,7 @@ var ReadPreference = function(preference, tags, options) {
  */
 ReadPreference.prototype.slaveOk = function() {
   return needSlaveOk.indexOf(this.preference) != -1;
-}
+};
 
 /**
  * Are the two read preference equal
@@ -70,7 +70,7 @@ ReadPreference.prototype.slaveOk = function() {
  */
 ReadPreference.prototype.equals = function(readPreference) {
   return readPreference.preference == this.preference;
-}
+};
 
 /**
  * Return JSON representation
@@ -78,11 +78,11 @@ ReadPreference.prototype.equals = function(readPreference) {
  * @return {Object}
  */
 ReadPreference.prototype.toJSON = function() {
-  var readPreference = {mode: this.preference};
-  if(Array.isArray(this.tags)) readPreference.tags = this.tags;
-  if(this.maxStalenessSeconds) readPreference.maxStalenessSeconds = this.maxStalenessSeconds;
+  var readPreference = { mode: this.preference };
+  if (Array.isArray(this.tags)) readPreference.tags = this.tags;
+  if (this.maxStalenessSeconds) readPreference.maxStalenessSeconds = this.maxStalenessSeconds;
   return readPreference;
-}
+};
 
 /**
  * Primary read preference

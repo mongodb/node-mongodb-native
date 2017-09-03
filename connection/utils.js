@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var f = require('util').format,
   require_optional = require('require_optional');
@@ -6,53 +6,55 @@ var f = require('util').format,
 // Set property function
 var setProperty = function(obj, prop, flag, values) {
   Object.defineProperty(obj, prop.name, {
-      enumerable:true,
-      set: function(value) {
-        if(typeof value != 'boolean') throw new Error(f("%s required a boolean", prop.name));
-        // Flip the bit to 1
-        if(value == true) values.flags |= flag;
-        // Flip the bit to 0 if it's set, otherwise ignore
-        if(value == false && (values.flags & flag) == flag) values.flags ^= flag;
-        prop.value = value;
-      }
-    , get: function() { return prop.value; }
+    enumerable: true,
+    set: function(value) {
+      if (typeof value != 'boolean') throw new Error(f('%s required a boolean', prop.name));
+      // Flip the bit to 1
+      if (value == true) values.flags |= flag;
+      // Flip the bit to 0 if it's set, otherwise ignore
+      if (value == false && (values.flags & flag) == flag) values.flags ^= flag;
+      prop.value = value;
+    },
+    get: function() {
+      return prop.value;
+    }
   });
-}
+};
 
 // Set property function
 var getProperty = function(obj, propName, fieldName, values, func) {
   Object.defineProperty(obj, propName, {
-    enumerable:true,
+    enumerable: true,
     get: function() {
       // Not parsed yet, parse it
-      if(values[fieldName] == null && obj.isParsed && !obj.isParsed()) {
+      if (values[fieldName] == null && obj.isParsed && !obj.isParsed()) {
         obj.parse();
       }
 
       // Do we have a post processing function
-      if(typeof func == 'function') return func(values[fieldName]);
+      if (typeof func == 'function') return func(values[fieldName]);
       // Return raw value
       return values[fieldName];
     }
   });
-}
+};
 
 // Set simple property
 var getSingleProperty = function(obj, name, value) {
   Object.defineProperty(obj, name, {
-    enumerable:true,
+    enumerable: true,
     get: function() {
-      return value
+      return value;
     }
   });
-}
+};
 
 // Shallow copy
 var copy = function(fObj, tObj) {
   tObj = tObj || {};
-  for(var name in fObj) tObj[name] = fObj[name];
+  for (var name in fObj) tObj[name] = fObj[name];
   return tObj;
-}
+};
 
 var debugOptions = function(debugFields, options) {
   var finaloptions = {};
@@ -61,7 +63,7 @@ var debugOptions = function(debugFields, options) {
   });
 
   return finaloptions;
-}
+};
 
 var retrieveBSON = function() {
   var BSON = require('bson');
@@ -69,19 +71,21 @@ var retrieveBSON = function() {
 
   try {
     var optionalBSON = require_optional('bson-ext');
-    if(optionalBSON) {
+    if (optionalBSON) {
       optionalBSON.native = true;
       return optionalBSON;
     }
-  } catch(err) {}
+  } catch (err) {}
 
   return BSON;
-}
+};
 
 // Throw an error if an attempt to use Snappy is made when Snappy is not installed
 var noSnappyWarning = function() {
-  throw new Error('Attempted to use Snappy compression, but Snappy is not installed. Install or disable Snappy compression and try again.')
-}
+  throw new Error(
+    'Attempted to use Snappy compression, but Snappy is not installed. Install or disable Snappy compression and try again.'
+  );
+};
 
 // Facilitate loading Snappy optionally
 var retrieveSnappy = function() {
@@ -92,10 +96,10 @@ var retrieveSnappy = function() {
       uncompress: noSnappyWarning,
       compressSync: noSnappyWarning,
       uncompressSync: noSnappyWarning
-    }
+    };
   }
   return snappy;
-}
+};
 
 exports.setProperty = setProperty;
 exports.getProperty = getProperty;

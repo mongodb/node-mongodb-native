@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var util = require('util');
 
@@ -43,7 +43,7 @@ util.inherits(MongoError, Error);
  */
 MongoError.create = function(options) {
   return new MongoError(options);
-}
+};
 
 /**
  * Creates a new MongoNetworkError

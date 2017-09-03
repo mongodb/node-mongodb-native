@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-var f = require('util').format
-  , MongoError = require('../error').MongoError;
+var f = require('util').format,
+  MongoError = require('../error').MongoError;
 
 // Filters for classes
 var classFilters = {};
@@ -22,27 +22,27 @@ var currentLogger = null;
  * @return {Logger} a Logger instance.
  */
 var Logger = function(className, options) {
-  if(!(this instanceof Logger)) return new Logger(className, options);
+  if (!(this instanceof Logger)) return new Logger(className, options);
   options = options || {};
 
   // Current reference
   this.className = className;
 
   // Current logger
-  if(options.logger) {
+  if (options.logger) {
     currentLogger = options.logger;
-  } else if(currentLogger == null) {
+  } else if (currentLogger == null) {
     currentLogger = console.log;
   }
 
   // Set level of logging, default is error
-  if(options.loggerLevel) {
+  if (options.loggerLevel) {
     level = options.loggerLevel || 'error';
   }
 
   // Add all class names
-  if(filteredClasses[this.className] == null) classFilters[this.className] =  true;
-}
+  if (filteredClasses[this.className] == null) classFilters[this.className] = true;
+};
 
 /**
  * Log a message at the debug level
@@ -52,18 +52,24 @@ var Logger = function(className, options) {
  * @return {null}
  */
 Logger.prototype.debug = function(message, object) {
-  if(this.isDebug()
-    && ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className])
-      || (Object.keys(filteredClasses).length == 0 && classFilters[this.className]))) {
+  if (
+    this.isDebug() &&
+    ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className]) ||
+      (Object.keys(filteredClasses).length == 0 && classFilters[this.className]))
+  ) {
     var dateTime = new Date().getTime();
-    var msg = f("[%s-%s:%s] %s %s", 'DEBUG', this.className, pid, dateTime, message);
+    var msg = f('[%s-%s:%s] %s %s', 'DEBUG', this.className, pid, dateTime, message);
     var state = {
-      type: 'debug', message: message, className: this.className, pid: pid, date: dateTime
+      type: 'debug',
+      message: message,
+      className: this.className,
+      pid: pid,
+      date: dateTime
     };
-    if(object) state.meta = object;
+    if (object) state.meta = object;
     currentLogger(msg, state);
   }
-}
+};
 
 /**
  * Log a message at the warn level
@@ -72,97 +78,109 @@ Logger.prototype.debug = function(message, object) {
  * @param {object} object additional meta data to log
  * @return {null}
  */
-Logger.prototype.warn = function(message, object) {
-  if(this.isWarn()
-    && ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className])
-      || (Object.keys(filteredClasses).length == 0 && classFilters[this.className]))) {
+(Logger.prototype.warn = function(message, object) {
+  if (
+    this.isWarn() &&
+    ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className]) ||
+      (Object.keys(filteredClasses).length == 0 && classFilters[this.className]))
+  ) {
     var dateTime = new Date().getTime();
-    var msg = f("[%s-%s:%s] %s %s", 'WARN', this.className, pid, dateTime, message);
+    var msg = f('[%s-%s:%s] %s %s', 'WARN', this.className, pid, dateTime, message);
     var state = {
-      type: 'warn', message: message, className: this.className, pid: pid, date: dateTime
+      type: 'warn',
+      message: message,
+      className: this.className,
+      pid: pid,
+      date: dateTime
     };
-    if(object) state.meta = object;
+    if (object) state.meta = object;
     currentLogger(msg, state);
   }
-},
-
-/**
+}),
+  /**
  * Log a message at the info level
  * @method
  * @param {string} message The message to log
  * @param {object} object additional meta data to log
  * @return {null}
  */
-Logger.prototype.info = function(message, object) {
-  if(this.isInfo()
-    && ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className])
-      || (Object.keys(filteredClasses).length == 0 && classFilters[this.className]))) {
-    var dateTime = new Date().getTime();
-    var msg = f("[%s-%s:%s] %s %s", 'INFO', this.className, pid, dateTime, message);
-    var state = {
-      type: 'info', message: message, className: this.className, pid: pid, date: dateTime
-    };
-    if(object) state.meta = object;
-    currentLogger(msg, state);
-  }
-},
-
-/**
+  (Logger.prototype.info = function(message, object) {
+    if (
+      this.isInfo() &&
+      ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className]) ||
+        (Object.keys(filteredClasses).length == 0 && classFilters[this.className]))
+    ) {
+      var dateTime = new Date().getTime();
+      var msg = f('[%s-%s:%s] %s %s', 'INFO', this.className, pid, dateTime, message);
+      var state = {
+        type: 'info',
+        message: message,
+        className: this.className,
+        pid: pid,
+        date: dateTime
+      };
+      if (object) state.meta = object;
+      currentLogger(msg, state);
+    }
+  }),
+  /**
  * Log a message at the error level
  * @method
  * @param {string} message The message to log
  * @param {object} object additional meta data to log
  * @return {null}
  */
-Logger.prototype.error = function(message, object) {
-  if(this.isError()
-    && ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className])
-      || (Object.keys(filteredClasses).length == 0 && classFilters[this.className]))) {
-    var dateTime = new Date().getTime();
-    var msg = f("[%s-%s:%s] %s %s", 'ERROR', this.className, pid, dateTime, message);
-    var state = {
-      type: 'error', message: message, className: this.className, pid: pid, date: dateTime
-    };
-    if(object) state.meta = object;
-    currentLogger(msg, state);
-  }
-},
-
-/**
+  (Logger.prototype.error = function(message, object) {
+    if (
+      this.isError() &&
+      ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className]) ||
+        (Object.keys(filteredClasses).length == 0 && classFilters[this.className]))
+    ) {
+      var dateTime = new Date().getTime();
+      var msg = f('[%s-%s:%s] %s %s', 'ERROR', this.className, pid, dateTime, message);
+      var state = {
+        type: 'error',
+        message: message,
+        className: this.className,
+        pid: pid,
+        date: dateTime
+      };
+      if (object) state.meta = object;
+      currentLogger(msg, state);
+    }
+  }),
+  /**
  * Is the logger set at info level
  * @method
  * @return {boolean}
  */
-Logger.prototype.isInfo = function() {
-  return level == 'info' || level == 'debug';
-},
-
-/**
+  (Logger.prototype.isInfo = function() {
+    return level == 'info' || level == 'debug';
+  }),
+  /**
  * Is the logger set at error level
  * @method
  * @return {boolean}
  */
-Logger.prototype.isError = function() {
-  return level == 'error' || level == 'info' || level == 'debug';
-},
-
-/**
+  (Logger.prototype.isError = function() {
+    return level == 'error' || level == 'info' || level == 'debug';
+  }),
+  /**
  * Is the logger set at error level
  * @method
  * @return {boolean}
  */
-Logger.prototype.isWarn = function() {
-  return level == 'error' || level == 'warn' || level == 'info' || level == 'debug';
-},
-
-/**
+  (Logger.prototype.isWarn = function() {
+    return level == 'error' || level == 'warn' || level == 'info' || level == 'debug';
+  }),
+  /**
  * Is the logger set at debug level
  * @method
  * @return {boolean}
  */
-Logger.prototype.isDebug = function() {
-  return level == 'debug';
-}
+  (Logger.prototype.isDebug = function() {
+    return level == 'debug';
+  });
 
 /**
  * Resets the logger to default settings, error and no filtered classes
@@ -172,7 +190,7 @@ Logger.prototype.isDebug = function() {
 Logger.reset = function() {
   level = 'error';
   filteredClasses = {};
-}
+};
 
 /**
  * Get the current logger function
@@ -181,7 +199,7 @@ Logger.reset = function() {
  */
 Logger.currentLogger = function() {
   return currentLogger;
-}
+};
 
 /**
  * Set the current logger function
@@ -190,9 +208,9 @@ Logger.currentLogger = function() {
  * @return {null}
  */
 Logger.setCurrentLogger = function(logger) {
-  if(typeof logger != 'function') throw new MongoError("current logger must be a function");
+  if (typeof logger != 'function') throw new MongoError('current logger must be a function');
   currentLogger = logger;
-}
+};
 
 /**
  * Set what classes to log.
@@ -202,14 +220,14 @@ Logger.setCurrentLogger = function(logger) {
  * @return {null}
  */
 Logger.filter = function(type, values) {
-  if(type == 'class' && Array.isArray(values)) {
+  if (type == 'class' && Array.isArray(values)) {
     filteredClasses = {};
 
     values.forEach(function(x) {
       filteredClasses[x] = true;
     });
   }
-}
+};
 
 /**
  * Set the current log level
@@ -218,11 +236,11 @@ Logger.filter = function(type, values) {
  * @return {null}
  */
 Logger.setLevel = function(_level) {
-  if(_level != 'info' && _level != 'error' && _level != 'debug' && _level != 'warn') {
-    throw new Error(f("%s is an illegal logging level", _level));
+  if (_level != 'info' && _level != 'error' && _level != 'debug' && _level != 'warn') {
+    throw new Error(f('%s is an illegal logging level', _level));
   }
 
   level = _level;
-}
+};
 
 module.exports = Logger;

@@ -4,7 +4,7 @@ var fs = require('fs');
  * of these can exist at any given time. This plugin and anything else that
  * uses process.on('uncaughtException') will conflict. */
 exports.attachToRunner = function(runner, outputFile) {
-  var smokeOutput = { results : [] };
+  var smokeOutput = { results: [] };
   var runningTests = {};
 
   var integraPlugin = {
@@ -20,7 +20,7 @@ exports.attachToRunner = function(runner, outputFile) {
         end: Date.now(),
         test_file: test.name,
         exit_code: 0,
-        url: ""
+        url: ''
       });
       delete runningTests[test.name];
       callback();
@@ -37,12 +37,12 @@ exports.attachToRunner = function(runner, outputFile) {
     // Mark all currently running tests as failed
     for (var testName in runningTests) {
       smokeOutput.results.push({
-        status: "fail",
+        status: 'fail',
         start: runningTests[testName].startTime,
         end: Date.now(),
         test_file: testName,
         exit_code: 0,
-        url: ""
+        url: ''
       });
     }
 

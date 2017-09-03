@@ -1,4 +1,4 @@
-"use strict"
+'use strict';
 
 var ReadPreference = require('../topologies/read_preference'),
   MongoError = require('../error').MongoError;
@@ -16,26 +16,26 @@ var opcodes = {
   OP_DELETE: 2006,
   OP_KILL_CURSORS: 2007,
   OP_COMPRESSED: 2012
-}
+};
 
 var getReadPreference = function(cmd, options) {
   // Default to command version of the readPreference
   var readPreference = cmd.readPreference || new ReadPreference('primary');
   // If we have an option readPreference override the command one
-  if(options.readPreference) {
+  if (options.readPreference) {
     readPreference = options.readPreference;
   }
 
-  if(typeof readPreference == 'string') {
+  if (typeof readPreference == 'string') {
     readPreference = new ReadPreference(readPreference);
   }
 
-  if(!(readPreference instanceof ReadPreference)) {
+  if (!(readPreference instanceof ReadPreference)) {
     throw new MongoError('readPreference must be a ReadPreference instance');
   }
 
   return readPreference;
-}
+};
 
 // Parses the header of a wire protocol message
 var parseHeader = function(message) {
@@ -44,12 +44,12 @@ var parseHeader = function(message) {
     requestId: message.readInt32LE(4),
     responseTo: message.readInt32LE(8),
     opCode: message.readInt32LE(12)
-  }
-}
+  };
+};
 
 module.exports = {
   getReadPreference: getReadPreference,
   MESSAGE_HEADER_SIZE: MESSAGE_HEADER_SIZE,
   opcodes: opcodes,
   parseHeader: parseHeader
-}
+};

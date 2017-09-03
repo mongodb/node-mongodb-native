@@ -1,20 +1,20 @@
-"use strict";
+'use strict';
 
-var f = require('util').format
-  , Query = require('../connection/commands').Query
-  , MongoError = require('../error').MongoError;
+var f = require('util').format,
+  Query = require('../connection/commands').Query,
+  MongoError = require('../error').MongoError;
 
 var AuthSession = function(db, username, password) {
   this.db = db;
   this.username = username;
   this.password = password;
-}
+};
 
 AuthSession.prototype.equal = function(session) {
-  return session.db == this.db
-    && session.username == this.username
-    && session.password == this.password;
-}
+  return (
+    session.db == this.db && session.username == this.username && session.password == this.password
+  );
+};
 
 /**
  * Creates a new X509 authentication mechanism
@@ -24,7 +24,7 @@ AuthSession.prototype.equal = function(session) {
 var X509 = function(bson) {
   this.bson = bson;
   this.authStore = [];
-}
+};
 
 /**
  * Authenticate
@@ -41,81 +41,87 @@ X509.prototype.auth = function(server, connections, db, username, password, call
   var self = this;
   // Total connections
   var count = connections.length;
-  if(count == 0) return callback(null, null);
+  if (count == 0) return callback(null, null);
 
   // Valid connections
   var numberOfValidConnections = 0;
   var errorObject = null;
 
   // For each connection we need to authenticate
-  while(connections.length > 0) {
+  while (connections.length > 0) {
     // Execute MongoCR
     var execute = function(connection) {
       // Let's start the sasl process
       var command = {
-          authenticate: 1
-        , mechanism: 'MONGODB-X509'
+        authenticate: 1,
+        mechanism: 'MONGODB-X509'
       };
 
       // Add username if specified
-      if(username) {
+      if (username) {
         command.user = username;
       }
 
       // Let's start the process
-      server(connection, new Query(self.bson, "$external.$cmd", command, {
-        numberToSkip: 0, numberToReturn: 1
-      }), function(err, r) {
-        // Adjust count
-        count = count - 1;
+      server(
+        connection,
+        new Query(self.bson, '$external.$cmd', command, {
+          numberToSkip: 0,
+          numberToReturn: 1
+        }),
+        function(err, r) {
+          // Adjust count
+          count = count - 1;
 
-        // If we have an error
-        if(err) {
-          errorObject = err;
-        } else if(r.result['$err']) {
-          errorObject = r.result;
-        } else if(r.result['errmsg']) {
-          errorObject = r.result;
-        } else {
-          numberOfValidConnections = numberOfValidConnections + 1;
-        }
+          // If we have an error
+          if (err) {
+            errorObject = err;
+          } else if (r.result['$err']) {
+            errorObject = r.result;
+          } else if (r.result['errmsg']) {
+            errorObject = r.result;
+          } else {
+            numberOfValidConnections = numberOfValidConnections + 1;
+          }
 
-        // We have authenticated all connections
-        if(count == 0 && numberOfValidConnections > 0) {
-          // Store the auth details
-          addAuthSession(self.authStore, new AuthSession(db, username, password));
-          // Return correct authentication
-          callback(null, true);
-        } else if(count == 0) {
-          if(errorObject == null) errorObject = new MongoError(f("failed to authenticate using mongocr"));
-          callback(errorObject, false);
+          // We have authenticated all connections
+          if (count == 0 && numberOfValidConnections > 0) {
+            // Store the auth details
+            addAuthSession(self.authStore, new AuthSession(db, username, password));
+            // Return correct authentication
+            callback(null, true);
+          } else if (count == 0) {
+            if (errorObject == null)
+              errorObject = new MongoError(f('failed to authenticate using mongocr'));
+            callback(errorObject, false);
+          }
         }
-      });
-    }
+      );
+    };
 
     var _execute = function(_connection) {
       process.nextTick(function() {
         execute(_connection);
       });
-    }
+    };
 
     _execute(connections.shift());
   }
-}
+};
 
 // Add to store only if it does not exist
 var addAuthSession = function(authStore, session) {
   var found = false;
 
-  for(var i = 0; i < authStore.length; i++) {
-    if(authStore[i].equal(session)) {
+  for (var i = 0; i < authStore.length; i++) {
+    if (authStore[i].equal(session)) {
       found = true;
       break;
     }
   }
 
-  if(!found) authStore.push(session);
-}
+  if (!found) authStore.push(session);
+};
 
 /**
  * Remove authStore credentials
@@ -127,7 +133,7 @@ X509.prototype.logout = function(dbName) {
   this.authStore = this.authStore.filter(function(x) {
     return x.db != dbName;
   });
-}
+};
 
 /**
  * Re authenticate pool
@@ -140,18 +146,25 @@ X509.prototype.logout = function(dbName) {
 X509.prototype.reauthenticate = function(server, connections, callback) {
   var authStore = this.authStore.slice(0);
   var count = authStore.length;
-  if(count == 0) return callback(null, null);
+  if (count == 0) return callback(null, null);
   // Iterate over all the auth details stored
-  for(var i = 0; i < authStore.length; i++) {
-    this.auth(server, connections, authStore[i].db, authStore[i].username, authStore[i].password, function(err) {
-      count = count - 1;
-      // Done re-authenticating
-      if(count == 0) {
-        callback(err, null);
+  for (var i = 0; i < authStore.length; i++) {
+    this.auth(
+      server,
+      connections,
+      authStore[i].db,
+      authStore[i].username,
+      authStore[i].password,
+      function(err) {
+        count = count - 1;
+        // Done re-authenticating
+        if (count == 0) {
+          callback(err, null);
+        }
       }
-    });
+    );
   }
-}
+};
 
 /**
  * This is a result from a authentication strategy

@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  * Creates a new CommandResult instance
@@ -11,7 +11,7 @@ var CommandResult = function(result, connection, message) {
   this.result = result;
   this.connection = connection;
   this.message = message;
-}
+};
 
 /**
  * Convert CommandResult to JSON
@@ -20,7 +20,7 @@ var CommandResult = function(result, connection, message) {
  */
 CommandResult.prototype.toJSON = function() {
   return this.result;
-}
+};
 
 /**
  * Convert CommandResult to String representation
@@ -29,6 +29,6 @@ CommandResult.prototype.toJSON = function() {
  */
 CommandResult.prototype.toString = function() {
   return JSON.stringify(this.toJSON());
-}
+};
 
 module.exports = CommandResult;
