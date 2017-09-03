@@ -93,7 +93,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
               request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
             }
           }
-        });
+        }).catch(function() {});
 
         // First secondary state machine
         co(function*() {
@@ -188,7 +188,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         setTimeout(function() {
           server.connect();
         }, 100);
-      });
+      }).catch(function() {});
     }
   });
 
@@ -279,7 +279,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
               request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
             }
           }
-        });
+        }).catch(function() {});
 
         // First secondary state machine
         co(function*() {
@@ -374,7 +374,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         setTimeout(function() {
           server.connect();
         }, 100);
-      });
+      }).catch(function() {});
     }
   });
 
@@ -465,7 +465,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
               request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
             }
           }
-        });
+        }).catch(function() {});
 
         // First secondary state machine
         co(function*() {
@@ -594,7 +594,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         setTimeout(function() {
           server.connect();
         }, 100);
-      });
+      }).catch(function() {});
     }
   });
 
@@ -671,7 +671,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
               request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
             }
           }
-        });
+        }).catch(function() {});
 
         // First secondary state machine
         co(function*() {
@@ -791,7 +791,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         setTimeout(function() {
           server.connect();
         }, 100);
-      });
+      }).catch(function() {});
     }
   });
 
@@ -883,7 +883,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
               break;
             }
           }
-        });
+        }).catch(function() {});
 
         // First secondary state machine
         co(function*() {
@@ -1009,7 +1009,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         setTimeout(function() {
           server.connect();
         }, 100);
-      });
+      }).catch(function() {});
     }
   });
 
@@ -1100,7 +1100,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
               request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
             }
           }
-        });
+        }).catch(function() {});
 
         // First secondary state machine
         co(function*() {
@@ -1202,7 +1202,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         setTimeout(function() {
           server.connect();
         }, 100);
-      });
+      }).catch(function() {});
     }
   });
 
@@ -1293,7 +1293,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
               request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
             }
           }
-        });
+        }).catch(function() {});
 
         // First secondary state machine
         co(function*() {
@@ -1396,7 +1396,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         setTimeout(function() {
           server.connect();
         }, 100);
-      });
+      }).catch(function() {});
     }
   });
 
@@ -1463,7 +1463,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
                 request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
               }
             }
-          });
+          }).catch(function() {});
 
           Connection.enableConnectionAccounting();
           // Attempt to connect
@@ -1517,7 +1517,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
           setTimeout(function() {
             server.connect();
           }, 100);
-        });
+        }).catch(function() {});
       }
     }
   );
@@ -1609,7 +1609,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
               request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
             }
           }
-        });
+        }).catch(function() {});
 
         // First secondary state machine
         co(function*() {
@@ -1713,7 +1713,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         setTimeout(function() {
           server.connect();
         }, 100);
-      });
+      }).catch(function() {});
     }
   });
 });
