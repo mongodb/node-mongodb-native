@@ -1,6 +1,5 @@
 var mockupdb = require('../'),
-  co = require('co'),
-  assert = require('assert');
+  co = require('co');
 
 // Simple ismaster exhange
 co(function*() {
@@ -24,7 +23,7 @@ co(function*() {
   console.dir(request.document);
   request.reply({ ok: 0, errmsg: 'not running with --replSet', code: 76 });
 
-  var request = yield server.receive();
+  request = yield server.receive();
   console.dir(request.document);
   request.reply({
     ismaster: true,

@@ -1,5 +1,4 @@
 var net = require('net'),
-  Long = require('bson').Long,
   BSON = require('bson'),
   Request = require('./request'),
   Query = require('./protocol').Query,
@@ -9,7 +8,6 @@ var net = require('net'),
   Update = require('./protocol').Update,
   Delete = require('./protocol').Delete,
   EventEmitter = require('events').EventEmitter,
-  WireResponse = require('./wire_response'),
   inherits = require('util').inherits;
 
 /*
@@ -65,7 +63,10 @@ Server.prototype.start = function() {
       self.connections = self.connections + 1;
       self.sockets.push(c);
 
-      c.on('error', function(e) {});
+      c.on('error', function(e) {
+        console.warn('connection error: ', e);
+      });
+
       c.on(
         'data',
         dataHandler(
@@ -240,7 +241,7 @@ var dataHandler = function(server, self, connection) {
             var sizeOfMessage = data[0] | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
             // If we have a negative sizeOfMessage emit error and return
             if (sizeOfMessage < 0 || sizeOfMessage > self.maxBsonMessageSize) {
-              var errorObject = {
+              errorObject = {
                 err: 'socketHandler',
                 trace: '',
                 bin: self.buffer,
@@ -278,7 +279,7 @@ var dataHandler = function(server, self, connection) {
               sizeOfMessage == data.length
             ) {
               try {
-                var emitBuffer = data;
+                emitBuffer = data;
                 // Reset state of buffer
                 self.buffer = null;
                 self.sizeOfMessage = 0;
@@ -289,7 +290,7 @@ var dataHandler = function(server, self, connection) {
                 // Emit the message
                 server.emit('message', protocol(server, emitBuffer), connection);
               } catch (err) {
-                var errorObject = {
+                errorObject = {
                   err: 'socketHandler',
                   trace: err,
                   bin: self.buffer,
@@ -303,7 +304,7 @@ var dataHandler = function(server, self, connection) {
                 server.emit('parseError', errorObject, self);
               }
             } else if (sizeOfMessage <= 4 || sizeOfMessage > self.maxBsonMessageSize) {
-              var errorObject = {
+              errorObject = {
                 err: 'socketHandler',
                 trace: null,
                 bin: data,
@@ -325,7 +326,7 @@ var dataHandler = function(server, self, connection) {
               // Exit parsing loop
               data = new Buffer(0);
             } else {
-              var emitBuffer = data.slice(0, sizeOfMessage);
+              emitBuffer = data.slice(0, sizeOfMessage);
               // Reset state of buffer
               self.buffer = null;
               self.sizeOfMessage = 0;

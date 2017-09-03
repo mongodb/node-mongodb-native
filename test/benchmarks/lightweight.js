@@ -1,16 +1,16 @@
 var Suite = require('betterbenchmarks').Suite,
   Benchmark = require('betterbenchmarks').Benchmark,
-  JSONStream = require('JSONStream'),
-  es = require('event-stream'),
+  // JSONStream = require('JSONStream'),
+  // es = require('event-stream'),
   co = require('co'),
   stream = require('stream'),
   f = require('util').format,
   fs = require('fs'),
-  ldj = require('ldjson-stream'),
+  // ldj = require('ldjson-stream'),
   globalSetup = require('./shared').globalSetup,
   getDb = require('./shared').getDb,
   deflate = require('./shared').deflate,
-  MongoClient = require('../../').MongoClient,
+  // MongoClient = require('../../').MongoClient,
   GridFSBucket = require('../../').GridFSBucket;
 
 // Created a BSON instance
@@ -136,14 +136,12 @@ suite.addTest(
   new Benchmark('find one by id')
     // The benchmark function
     .set(function(context, callback) {
-      context.collection.findOne({ _id: context.queryId++ }, function(e, r) {
+      context.collection.findOne({ _id: context.queryId++ }, function() {
         callback();
       });
     })
     .setup(function(context, options, callback) {
       co(function*() {
-        // Create a bson serializer
-        var bson = new BSON();
         // Start up the server
         context.manager = yield globalSetup();
         // Get db connection
@@ -284,7 +282,7 @@ suite.addTest(
         {
           forceServerObjectId: true
         },
-        function(err, r) {
+        function() {
           callback();
         }
       );
@@ -423,7 +421,7 @@ suite.addTest(
         {
           forceServerObjectId: true
         },
-        function(err, r) {
+        function() {
           callback();
         }
       );
@@ -628,7 +626,7 @@ suite.addTest(
           ordered: false,
           forceServerObjectId: true
         },
-        function(err) {
+        function() {
           stats.endIteration();
           callback();
         }
@@ -714,7 +712,7 @@ suite.addTest(
           ordered: false,
           forceServerObjectId: true
         },
-        function(err) {
+        function() {
           stats.endIteration();
           callback();
         }
@@ -821,10 +819,10 @@ suite.addTest(
         // Drop existing collections
         try {
           yield context.db.collection('files').drop();
-        } catch (e) {}
+        } catch (e) {}  // eslint-disable-line
         try {
           yield context.db.collection('chunks').drop();
-        } catch (e) {}
+        } catch (e) {}  // eslint-disable-line
 
         // Create a simple read stream
         var readStream = new stream.Readable();
@@ -899,7 +897,7 @@ suite.addTest(
       });
 
       // Add data listener
-      downloadStream.on('data', function(data) {});
+      downloadStream.on('data', function() {});
       // Start timing of operation
       stats.startIteration();
     })

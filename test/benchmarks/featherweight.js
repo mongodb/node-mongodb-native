@@ -1,8 +1,8 @@
 var Suite = require('betterbenchmarks').Suite,
   Benchmark = require('betterbenchmarks').Benchmark,
-  JSONStream = require('JSONStream'),
-  es = require('event-stream'),
-  co = require('co'),
+  // JSONStream = require('JSONStream'),
+  // es = require('event-stream'),
+  // co = require('co'),
   f = require('util').format,
   fs = require('fs'),
   deflate = require('./shared').deflate;
@@ -138,7 +138,7 @@ suite.addTest(
         var data = context.bson;
         // Deserialize the document
         var s = process.hrtime();
-        var obj = bson.deserialize(data, options);
+        bson.deserialize(data, options);
         measurements.push(process.hrtime(s));
       }
 

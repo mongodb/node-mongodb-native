@@ -9,8 +9,6 @@ module.exports = function(o, callback) {
     var files = o.files;
     // Files left
     var left = files.length;
-    // Collection
-    var collection = client.collection('corpus');
     // Open the bucket
     var bucket = new GridFSBucket(client);
 

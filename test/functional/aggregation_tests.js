@@ -29,7 +29,7 @@ describe('Aggregation', function() {
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
-      client.connect(function(err, db) {
+      client.connect(function(err, client) {
         expect(err).to.be.null;
 
         var db = client.db(databaseName);
@@ -53,6 +53,7 @@ describe('Aggregation', function() {
         var collection = db.collection('shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray');
         // Insert the docs
         collection.insert(docs, { w: 1 }, function(err, result) {
+          expect(result).to.exist;
           expect(err).to.be.null;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
@@ -146,6 +147,7 @@ describe('Aggregation', function() {
         );
         // Insert the docs
         collection.insert(docs, { w: 1 }, function(err, result) {
+          expect(result).to.exist;
           expect(err).to.be.null;
 
           // Execute aggregate, notice the pipeline is expressed as function call parameters
@@ -238,6 +240,7 @@ describe('Aggregation', function() {
         );
         // Insert the docs
         collection.insert(docs, { w: 1 }, function(err, result) {
+          expect(result).to.exist;
           expect(err).to.be.null;
 
           // Execute aggregate, notice the pipeline is expressed as function call parameters
@@ -330,6 +333,7 @@ describe('Aggregation', function() {
         // Insert the docs
         collection.insert(docs, { w: 1 }, function(err, result) {
           expect(err).to.be.null;
+          expect(result).to.exist;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
           var cursor = collection.aggregate([
@@ -349,7 +353,7 @@ describe('Aggregation', function() {
           ]);
 
           // Iterate over all the items in the cursor
-          cursor.toArray(function(err, results) {
+          cursor.toArray(function(err, result) {
             expect(err).to.be.null;
             expect(result).to.exist;
 
@@ -414,6 +418,7 @@ describe('Aggregation', function() {
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
         collection.insert(docs, { w: 1 }, function(err, result) {
+          expect(result).to.exist;
           expect(err).to.be.null;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
@@ -504,6 +509,7 @@ describe('Aggregation', function() {
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
         collection.insert(docs, { w: 1 }, function(err, result) {
+          expect(result).to.exist;
           expect(err).to.be.null;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
@@ -594,6 +600,7 @@ describe('Aggregation', function() {
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
         collection.insert(docs, { w: 1 }, function(err, result) {
+          expect(result).to.exist;
           expect(err).to.be.null;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
@@ -685,6 +692,7 @@ describe('Aggregation', function() {
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGet');
         // Insert the docs
         collection.insert(docs, { w: 1 }, function(err, result) {
+          expect(result).to.exist;
           expect(err).to.be.null;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
@@ -897,6 +905,7 @@ describe('Aggregation', function() {
         var collection = db.collection('shouldCorrectlyDoAggWithCursorGetStream');
         // Insert the docs
         collection.insert(docs, { w: 1 }, function(err, result) {
+          expect(result).to.exist;
           expect(err).to.be.null;
 
           try {
@@ -981,6 +990,9 @@ describe('Aggregation', function() {
           var collection = db.collection('shouldCorrectlyDoAggWithCursorMaxTimeMSSet');
           // Insert the docs
           collection.insert(docs, { w: 1 }, function(err, result) {
+            expect(result).to.exist;
+            expect(err).to.not.exist;
+
             // Execute aggregate, notice the pipeline is expressed as an Array
             var cursor = collection.aggregate(
               [
@@ -1032,7 +1044,7 @@ describe('Aggregation', function() {
               };
 
               // Execute aggregate, notice the pipeline is expressed as an Array
-              var cursor = collection.aggregate(
+              collection.aggregate(
                 [
                   {
                     $project: {
@@ -1052,6 +1064,9 @@ describe('Aggregation', function() {
                   maxTimeMS: 1000
                 },
                 function(err, r) {
+                  expect(err).to.not.exist;
+                  expect(r).to.exist;
+
                   // Return the command
                   db.command = cmd;
                   client.close();
@@ -1114,6 +1129,7 @@ describe('Aggregation', function() {
         var collection = db.collection('shouldCorrectlyQueryUsingISODate');
         // Insert the docs
         collection.insertMany(docs, { w: 1 }, function(err, result) {
+          expect(result).to.exist;
           expect(err).to.be.null;
 
           // Execute aggregate, notice the pipeline is expressed as an Array
@@ -1170,6 +1186,7 @@ describe('Aggregation', function() {
         var collection = db.collection('shouldCorrectlyQueryUsingISODate3');
         // Insert the docs
         collection.insertMany([{ a: 1 }, { b: 1 }], { w: 1 }, function(err, result) {
+          expect(result).to.exist;
           expect(err).to.be.null;
 
           // Execute aggregate, notice the pipeline is expressed as an Array

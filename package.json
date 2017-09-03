@@ -49,7 +49,7 @@
   "scripts": {
     "test": "mongodb-test-runner -t 60000 test/functional",
     "coverage": "node_modules/.bin/nyc node test/runner.js -t functional && node_modules/.bin/nyc report --reporter=text-lcov | node_modules/.bin/coveralls",
-    "lint": "eslint lib",
+    "lint": "eslint lib test",
     "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'"
   },
   "nyc": {

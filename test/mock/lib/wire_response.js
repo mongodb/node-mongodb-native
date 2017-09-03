@@ -101,16 +101,6 @@ Response.prototype.isParsed = function() {
   return this.parsed;
 };
 
-// Validation buffers
-var firstBatch = new Buffer('firstBatch', 'utf8');
-var nextBatch = new Buffer('nextBatch', 'utf8');
-var cursorId = new Buffer('id', 'utf8').toString('hex');
-
-var documentBuffers = {
-  firstBatch: firstBatch.toString('hex'),
-  nextBatch: nextBatch.toString('hex')
-};
-
 Response.prototype.parse = function(options) {
   // Don't parse again if not needed
   if (this.parsed) return;
@@ -160,13 +150,14 @@ Response.prototype.parse = function(options) {
   // Parse Body
   //
   for (var i = 0; i < this.numberReturned; i++) {
-    var bsonSize =
+    bsonSize =
       this.data[this.index] |
       (this.data[this.index + 1] << 8) |
       (this.data[this.index + 2] << 16) |
       (this.data[this.index + 3] << 24);
+
     // Parse options
-    var _options = { promoteLongs: this.opts.promoteLongs };
+    _options = { promoteLongs: this.opts.promoteLongs };
 
     // If we have raw results specified slice the return document
     if (raw) {

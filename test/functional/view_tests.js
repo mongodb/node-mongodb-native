@@ -31,7 +31,6 @@ describe('Views', function() {
 
       // Primary server states
       var primary = [assign({}, defaultFields)];
-      var commandResult = null;
 
       // Boot the mock
       co(function*() {
@@ -59,7 +58,7 @@ describe('Views', function() {
               request.reply({ ok: 1 });
             }
           }
-        }).catch(function(err) {
+        }).catch(function() {
           // console.log(err.stack);
         });
 
@@ -75,6 +74,7 @@ describe('Views', function() {
             err,
             r
           ) {
+            expect(r).to.exist;
             expect(err).to.not.exist;
             expect(commandResult).to.eql({
               create: 'test',

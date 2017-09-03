@@ -1,5 +1,4 @@
 'use strict';
-
 var co = require('co');
 
 // Load the test suites
@@ -12,7 +11,7 @@ co(function*() {
   // Execute feather weight
   yield featherWeightSuite.execute();
   // // Execute light weight benchmarks
-  // yield lightWeightSuite.execute();
+  yield lightWeightSuite.execute();
   // // Execute parallel suite
-  // yield parallelSuite.execute();
+  yield parallelSuite.execute();
 });

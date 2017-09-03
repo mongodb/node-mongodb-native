@@ -2163,7 +2163,7 @@ describe('Operation Examples', function() {
           };
 
           // Reduce function
-          var reduce = function(k, vals) {
+          var reduce = function(k, vals) { // eslint-disable-line
             // eslint-disable-line
             return 1;
           };

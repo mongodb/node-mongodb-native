@@ -11,7 +11,7 @@ var Request = function(server, connection, response) {
 };
 
 Request.prototype.receive = function() {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function(resolve) {
     resolve();
   });
 };

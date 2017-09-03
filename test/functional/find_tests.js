@@ -1804,6 +1804,7 @@ describe('Find', function() {
             collection.insert(doc, configuration.writeConcernMax(), function(err) {
               test.equal(null, err);
               collection.findAndModify(q, [], set, opts, function(err) {
+                test.equal(null, err);
                 client.close();
                 done();
               });
@@ -3053,6 +3054,9 @@ describe('Find', function() {
 
           // Insert some test documents
           collection.insertMany(docs, configuration.writeConcernMax(), function(err, r) {
+            test.equal(null, err);
+            test.ok(r);
+
             // Ensure correct insertion testing via the cursor and the count function
             collection
               .find()

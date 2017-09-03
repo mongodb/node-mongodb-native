@@ -1,17 +1,18 @@
 var Suite = require('betterbenchmarks').Suite,
   Benchmark = require('betterbenchmarks').Benchmark,
-  JSONStream = require('JSONStream'),
-  es = require('event-stream'),
+  // JSONStream = require('JSONStream'),
+  // es = require('event-stream'),
   co = require('co'),
-  stream = require('stream'),
+  // stream = require('stream'),
   f = require('util').format,
   fs = require('fs'),
-  ldj = require('ldjson-stream'),
+  // ldj = require('ldjson-stream'),
   globalSetup = require('./shared').globalSetup,
-  getDb = require('./shared').getDb,
-  deflate = require('./shared').deflate,
-  MongoClient = require('../../').MongoClient,
-  GridFSBucket = require('../../').GridFSBucket;
+  getDb = require('./shared').getDb;
+
+// deflate = require('./shared').deflate,
+// MongoClient = require('../../').MongoClient,
+// GridFSBucket = require('../../').GridFSBucket;
 
 // Create a suite
 var suite = new Suite('feather weight test suite', {
@@ -70,7 +71,7 @@ suite.addTest(
             index: index,
             files: files.slice(index, index + range)
           },
-          function(err, outp) {
+          function() {
             workersleft = workersleft - 1;
 
             if (workersleft == 0) {
@@ -154,7 +155,7 @@ suite.addTest(
 
       // Go over all the workers
       for (var i = 0; i < workers; i++) {
-        processes({ s: index, e: index + range }, function(err, outp) {
+        processes({ s: index, e: index + range }, function() {
           workersleft = workersleft - 1;
 
           if (workersleft == 0) {
@@ -224,7 +225,7 @@ suite.addTest(
               index: index,
               files: files.slice(index, index + range)
             },
-            function(err, outp) {
+            function() {
               workersleft = workersleft - 1;
               context.docs += 5000;
 
@@ -304,7 +305,7 @@ suite.addTest(
             index: index,
             files: files.slice(index, index + range)
           },
-          function(err, outp) {
+          function() {
             workersleft = workersleft - 1;
 
             if (workersleft == 0) {
@@ -388,7 +389,7 @@ suite.addTest(
 
       // Go over all the workers
       for (var i = 0; i < workers; i++) {
-        processes({ s: index, e: index + range }, function(err, outp) {
+        processes({ s: index, e: index + range }, function() {
           workersleft = workersleft - 1;
 
           if (workersleft == 0) {
@@ -449,7 +450,7 @@ suite.addTest(
               index: index,
               files: files.slice(index, index + range)
             },
-            function(err, outp) {
+            function() {
               workersleft = workersleft - 1;
 
               if (workersleft == 0) {

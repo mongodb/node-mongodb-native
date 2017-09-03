@@ -1309,7 +1309,7 @@ describe.skip('SSL (MongoClient)', function() {
                     secondary.destroy({ emitClose: true });
                     sets.push({});
 
-                    client.topology.once('joined', function(t, o, s) {
+                    client.topology.once('joined', function() {
                       setTimeout(function() {
                         clearInterval(interval);
 

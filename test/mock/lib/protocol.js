@@ -61,8 +61,8 @@ var Query = function(bson, data) {
   index = index + 4;
 
   // Read the document size
-  var docSize = (numberToReturn =
-    data[index] | (data[index + 1] << 8) | (data[index + 2] << 16) | (data[index + 3] << 24));
+  var docSize =
+    data[index] | (data[index + 1] << 8) | (data[index + 2] << 16) | (data[index + 3] << 24);
 
   // Deserialize the document
   this.documents.push(bson.deserialize(data.slice(index, index + docSize)));
@@ -74,20 +74,20 @@ var Query = function(bson, data) {
   }
 
   // Read the projection document size
-  var docSize = (numberToReturn =
-    data[index] | (data[index + 1] << 8) | (data[index + 2] << 16) | (data[index + 3] << 24));
+  docSize =
+    data[index] | (data[index + 1] << 8) | (data[index + 2] << 16) | (data[index + 3] << 24);
   this.projection = bson.deserialize(data.slice(index, index + docSize));
 };
 
-var GetMore = function(bson, message) {};
+var GetMore = function() {};
 
-var KillCursor = function(bson, message) {};
+var KillCursor = function() {};
 
-var Insert = function(bson, message) {};
+var Insert = function() {};
 
-var Update = function(bson, message) {};
+var Update = function() {};
 
-var Delete = function(bson, message) {};
+var Delete = function() {};
 
 module.exports = {
   Query: Query,

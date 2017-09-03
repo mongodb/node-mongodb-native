@@ -1290,6 +1290,7 @@ describe('Collation', function() {
             },
             { deleteOne: { q: { c: 1 } } }
           ], { ordered: true }, function(err, r) {
+            test.equal(null, r);
             test.ok(err);
             test.equal('server/primary/mongos does not support collation', err.message);
             singleServer.destroy();
@@ -1595,6 +1596,7 @@ describe('Collation', function() {
           db
             .collection('test')
             .createIndex({ a: 1 }, { collation: { caseLevel: true } }, function(err, r) {
+              test.equal(null, r);
               test.ok(err);
               test.equal('server/primary/mongos does not support collation', err.message);
 
@@ -1666,6 +1668,7 @@ describe('Collation', function() {
           db
             .collection('test')
             .createIndexes([{ key: { a: 1 }, collation: { caseLevel: true } }], function(err, r) {
+              test.equal(null, r);
               test.ok(err);
               test.equal('server/primary/mongos does not support collation', err.message);
 

@@ -168,6 +168,8 @@ describe('ReadPreference', function() {
 
         // Execute count
         collection.geoNear(50, 50, { query: { a: 1 }, num: 1 }, function(err) {
+          test.equal(null, err);
+
           // eslint-disable-line
           client.topology.command = command;
 
@@ -213,6 +215,8 @@ describe('ReadPreference', function() {
           50,
           { search: { a: 1 }, limit: 1, maxDistance: 100 },
           function(err) {
+            test.equal(null, err);
+
             // eslint-disable-line
             client.topology.command = command;
 
@@ -258,13 +262,15 @@ describe('ReadPreference', function() {
           emit(this.user_id, 1); // eslint-disable-line
         };
         // Reduce function
-        var reduce = function(k, vals) {
+        var reduce = function(k, vals) {  // eslint-disable-line
           // eslint-disable-line
           return 1;
         };
 
         // Perform the map reduce
         collection.mapReduce(map, reduce, { out: { inline: 1 } }, function(err) {
+          test.equal(null, err);
+
           // eslint-disable-line
           client.topology.command = command;
 
@@ -312,13 +318,15 @@ describe('ReadPreference', function() {
           };
 
           // Reduce function
-          var reduce = function(k, vals) {
+          var reduce = function(k, vals) {  // eslint-disable-line
             // eslint-disable-line
             return 1;
           };
 
           // Perform the map reduce
           collection.mapReduce(map, reduce, { out: 'inline' }, function(err) {
+            test.equal(null, err);
+
             // eslint-disable-line
             client.topology.command = command;
 
@@ -356,7 +364,7 @@ describe('ReadPreference', function() {
         };
 
         // Reduce function
-        var reduce = function(k, vals) {
+        var reduce = function(k, vals) {  // eslint-disable-line
           // eslint-disable-line
           return 1;
         };
@@ -465,6 +473,8 @@ describe('ReadPreference', function() {
 
         // Perform the map reduce
         collection.stats(function(err) {
+          test.equal(null, err);
+
           // eslint-disable-line
           client.topology.command = command;
 
