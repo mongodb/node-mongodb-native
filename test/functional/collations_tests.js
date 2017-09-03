@@ -1261,8 +1261,6 @@ describe('Collation', function() {
           while (running) {
             var request = yield singleServer.receive();
             var doc = request.document;
-            // console.log("========================== cmd")
-            // console.dir(doc)
 
             if (doc.ismaster) {
               request.reply(primary[0]);
@@ -1289,8 +1287,7 @@ describe('Collation', function() {
               }
             },
             { deleteOne: { q: { c: 1 } } }
-          ], { ordered: true }, function(err, r) {
-            test.equal(null, r);
+          ], { ordered: true }, function(err) {
             test.ok(err);
             test.equal('server/primary/mongos does not support collation', err.message);
             singleServer.destroy();
@@ -1574,9 +1571,6 @@ describe('Collation', function() {
           while (running) {
             var request = yield singleServer.receive();
             var doc = request.document;
-            // console.log("========================== cmd")
-            // console.dir(doc)
-
             if (doc.ismaster) {
               request.reply(primary[0]);
             } else if (doc.createIndexes) {
@@ -1595,8 +1589,7 @@ describe('Collation', function() {
           // Simple findAndModify command returning the new document
           db
             .collection('test')
-            .createIndex({ a: 1 }, { collation: { caseLevel: true } }, function(err, r) {
-              test.equal(null, r);
+            .createIndex({ a: 1 }, { collation: { caseLevel: true } }, function(err) {
               test.ok(err);
               test.equal('server/primary/mongos does not support collation', err.message);
 
@@ -1646,9 +1639,6 @@ describe('Collation', function() {
           while (running) {
             var request = yield singleServer.receive();
             var doc = request.document;
-            // console.log("========================== cmd")
-            // console.dir(doc)
-
             if (doc.ismaster) {
               request.reply(primary[0]);
             } else if (doc.createIndexes) {
@@ -1667,8 +1657,7 @@ describe('Collation', function() {
           // Simple findAndModify command returning the new document
           db
             .collection('test')
-            .createIndexes([{ key: { a: 1 }, collation: { caseLevel: true } }], function(err, r) {
-              test.equal(null, r);
+            .createIndexes([{ key: { a: 1 }, collation: { caseLevel: true } }], function(err) {
               test.ok(err);
               test.equal('server/primary/mongos does not support collation', err.message);
 

@@ -167,15 +167,20 @@ describe('ReadPreference', function() {
         };
 
         // Execute count
-        collection.geoNear(50, 50, { query: { a: 1 }, num: 1 }, function(err) {
-          test.equal(null, err);
+        collection.geoNear(
+          50,
+          50,
+          { query: { a: 1 }, num: 1 },
+          function(/* err */) {
+            // test.equal(null, err);
 
-          // eslint-disable-line
-          client.topology.command = command;
+            // eslint-disable-line
+            client.topology.command = command;
 
-          client.close();
-          done();
-        });
+            client.close();
+            done();
+          }
+        );
       });
     }
   });
@@ -214,12 +219,9 @@ describe('ReadPreference', function() {
           50,
           50,
           { search: { a: 1 }, limit: 1, maxDistance: 100 },
-          function(err) {
-            test.equal(null, err);
-
-            // eslint-disable-line
+          function(/* err */) {
+            // test.equal(null, err);
             client.topology.command = command;
-
             client.close();
             done();
           }
@@ -268,15 +270,20 @@ describe('ReadPreference', function() {
         };
 
         // Perform the map reduce
-        collection.mapReduce(map, reduce, { out: { inline: 1 } }, function(err) {
-          test.equal(null, err);
+        collection.mapReduce(
+          map,
+          reduce,
+          { out: { inline: 1 } },
+          function(/* err */) {
+            // test.equal(null, err);
 
-          // eslint-disable-line
-          client.topology.command = command;
+            // eslint-disable-line
+            client.topology.command = command;
 
-          client.close();
-          done();
-        });
+            client.close();
+            done();
+          }
+        );
       });
     }
   });
@@ -324,15 +331,17 @@ describe('ReadPreference', function() {
           };
 
           // Perform the map reduce
-          collection.mapReduce(map, reduce, { out: 'inline' }, function(err) {
-            test.equal(null, err);
-
-            // eslint-disable-line
-            client.topology.command = command;
-
-            client.close();
-            done();
-          });
+          collection.mapReduce(
+            map,
+            reduce,
+            { out: 'inline' },
+            function(/* err */) {
+              // test.equal(null, err);
+              client.topology.command = command;
+              client.close();
+              done();
+            }
+          );
         });
       }
     }
@@ -472,15 +481,14 @@ describe('ReadPreference', function() {
         };
 
         // Perform the map reduce
-        collection.stats(function(err) {
-          test.equal(null, err);
-
-          // eslint-disable-line
-          client.topology.command = command;
-
-          client.close();
-          done();
-        });
+        collection.stats(
+          function(/* err */) {
+            // test.equal(null, err);
+            client.topology.command = command;
+            client.close();
+            done();
+          }
+        );
       });
     }
   });
