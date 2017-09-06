@@ -13,56 +13,57 @@
       "x": 33
     }
   ],
-  "minServerVersion": "2.6",
+  "maxServerVersion": "2.4.99",
   "tests": [
     {
-      "description": "ReplaceOne when many documents match",
+      "description": "UpdateOne when many documents match",
       "operation": {
-        "name": "replaceOne",
+        "name": "updateOne",
         "arguments": {
           "filter": {
             "_id": {
               "$gt": 1
             }
           },
-          "replacement": {
-            "x": 111
+          "update": {
+            "$inc": {
+              "x": 1
+            }
           }
         }
       },
       "outcome": {
         "result": {
           "matchedCount": 1,
-          "modifiedCount": 1,
           "upsertedCount": 0
         }
       }
     },
     {
-      "description": "ReplaceOne when one document matches",
+      "description": "UpdateOne when one document matches",
       "operation": {
-        "name": "replaceOne",
+        "name": "updateOne",
         "arguments": {
           "filter": {
             "_id": 1
           },
-          "replacement": {
-            "_id": 1,
-            "x": 111
+          "update": {
+            "$inc": {
+              "x": 1
+            }
           }
         }
       },
       "outcome": {
         "result": {
           "matchedCount": 1,
-          "modifiedCount": 1,
           "upsertedCount": 0
         },
         "collection": {
           "data": [
             {
               "_id": 1,
-              "x": 111
+              "x": 12
             },
             {
               "_id": 2,
@@ -77,23 +78,23 @@
       }
     },
     {
-      "description": "ReplaceOne when no documents match",
+      "description": "UpdateOne when no documents match",
       "operation": {
-        "name": "replaceOne",
+        "name": "updateOne",
         "arguments": {
           "filter": {
             "_id": 4
           },
-          "replacement": {
-            "_id": 4,
-            "x": 1
+          "update": {
+            "$inc": {
+              "x": 1
+            }
           }
         }
       },
       "outcome": {
         "result": {
           "matchedCount": 0,
-          "modifiedCount": 0,
           "upsertedCount": 0
         },
         "collection": {
@@ -115,59 +116,17 @@
       }
     },
     {
-      "description": "ReplaceOne with upsert when no documents match without an id specified",
+      "description": "UpdateOne with upsert when no documents match",
       "operation": {
-        "name": "replaceOne",
+        "name": "updateOne",
         "arguments": {
           "filter": {
             "_id": 4
           },
-          "replacement": {
-            "x": 1
-          },
-          "upsert": true
-        }
-      },
-      "outcome": {
-        "result": {
-          "matchedCount": 0,
-          "modifiedCount": 0,
-          "upsertedCount": 1,
-          "upsertedId": 4
-        },
-        "collection": {
-          "data": [
-            {
-              "_id": 1,
-              "x": 11
-            },
-            {
-              "_id": 2,
-              "x": 22
-            },
-            {
-              "_id": 3,
-              "x": 33
-            },
-            {
-              "_id": 4,
+          "update": {
+            "$inc": {
               "x": 1
             }
-          ]
-        }
-      }
-    },
-    {
-      "description": "ReplaceOne with upsert when no documents match with an id specified",
-      "operation": {
-        "name": "replaceOne",
-        "arguments": {
-          "filter": {
-            "_id": 4
-          },
-          "replacement": {
-            "_id": 4,
-            "x": 1
           },
           "upsert": true
         }
@@ -175,7 +134,6 @@
       "outcome": {
         "result": {
           "matchedCount": 0,
-          "modifiedCount": 0,
           "upsertedCount": 1,
           "upsertedId": 4
         },
