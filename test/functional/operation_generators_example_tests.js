@@ -1368,7 +1368,8 @@ describe('Operation (Generators)', function() {
           emit(this.user_id, 1); // eslint-disable-line
         };
         // Reduce function
-        var reduce = function(k, vals) {  // eslint-disable-line
+        var reduce = function(k, vals) {
+          // eslint-disable-line
           // eslint-disable-line
           return 1;
         };
@@ -1435,7 +1436,8 @@ describe('Operation (Generators)', function() {
           emit(this.user_id, 1); // eslint-disable-line
         };
         // Reduce function
-        var reduce = function(k, vals) {  // eslint-disable-line
+        var reduce = function(k, vals) {
+          // eslint-disable-line
           // eslint-disable-line
           return 1;
         };
@@ -1553,7 +1555,7 @@ describe('Operation (Generators)', function() {
    * @example-method mapReduce
    * @ignore
    */
-  it('shouldPerformMapReduceInContextObjectsWithGenerators', {
+  it.skip('shouldPerformMapReduceInContextObjectsWithGenerators', {
     metadata: { requires: { generators: true, topology: ['single'] } },
 
     // The actual test we wish to run

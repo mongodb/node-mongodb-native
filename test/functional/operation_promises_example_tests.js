@@ -1611,7 +1611,7 @@ describe('Operation (Promises)', function() {
    * @example-method mapReduce
    * @ignore
    */
-  it('shouldPerformMapReduceInContextObjectsWithPromises', {
+  it.skip('shouldPerformMapReduceInContextObjectsWithPromises', {
     metadata: { requires: { promises: true, topology: ['single'] } },
 
     // The actual test we wish to run

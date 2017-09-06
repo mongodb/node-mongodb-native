@@ -2163,7 +2163,8 @@ describe('Operation Examples', function() {
           };
 
           // Reduce function
-          var reduce = function(k, vals) { // eslint-disable-line
+          var reduce = function(k, vals) {
+            // eslint-disable-line
             // eslint-disable-line
             return 1;
           };
@@ -2298,7 +2299,7 @@ describe('Operation Examples', function() {
    * @example-method mapReduce
    * @ignore
    */
-  it('shouldPerformMapReduceInContextObjects', {
+  it.skip('shouldPerformMapReduceInContextObjects', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
