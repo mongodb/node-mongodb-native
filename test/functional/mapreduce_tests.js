@@ -477,7 +477,7 @@ describe('MapReduce', function() {
   * Mapreduce tests
   * @ignore
   */
-  it('shouldPerformMapReduceWithScopeContainingFunction', {
+  it.skip('shouldPerformMapReduceWithScopeContainingFunction', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
