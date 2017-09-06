@@ -2,6 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 var f = require('util').format;
+var expect = require('chai').expect;
 
 describe('Operation Examples', function() {
   before(function() {
@@ -4822,7 +4823,7 @@ describe('Operation Examples', function() {
    * @example-method dropDatabase
    * @ignore
    */
-  it('shouldCorrectlyDropTheDatabase', {
+  it('should correctly drop the database', {
     metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
@@ -5436,7 +5437,7 @@ describe('Operation Examples', function() {
    * @example-method listDatabases
    * @ignore
    */
-  it('shouldCorrectlyListAllAvailableDatabases', {
+  it('should correctly list all available databases', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -5463,6 +5464,52 @@ describe('Operation Examples', function() {
         adminDb.listDatabases(function(err, dbs) {
           test.equal(null, err);
           test.ok(dbs.databases.length > 0);
+
+          client.close();
+          done();
+        });
+      });
+      // END
+    }
+  });
+
+  it('should correctly list all available databases names and no database sizes', {
+    metadata: {
+      requires: {
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+        mongodb: '>=3.2.13'
+      }
+    },
+
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      client.connect(function(err, client) {
+        // LINE var MongoClient = require('mongodb').MongoClient,
+        // LINE   test = require('assert');
+        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE   var db = client.db('test);
+        // REPLACE configuration.writeConcernMax() WITH {w:1}
+        // REMOVE-LINE restartAndDone
+        // REMOVE-LINE done();
+        // REMOVE-LINE var db = client.db(configuration.db);
+        // BEGIN
+        var db = client.db(configuration.db);
+        // Use the admin database for the operation
+        var adminDb = db.admin();
+
+        // List all the available databases
+        adminDb.listDatabases({ nameOnly: 1 }, function(err, dbs) {
+          expect(err).to.not.exist;
+          expect(dbs.databases).to.include.deep.members([
+            {
+              name: 'admin'
+            },
+            {
+              name: 'local'
+            }
+          ]);
 
           client.close();
           done();
