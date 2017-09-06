@@ -2,13 +2,16 @@ data:
     - {_id: 1, x: 11}
     - {_id: 2, x: 22}
     - {_id: 3, x: 33}
-minServerVersion: '2.6'
+# This file includes the same test cases as updateMany.yml with some omissions
+# for pre-2.6 servers. We cannot verify the update result's modifiedCount as it
+# is not available with legacy write operations and getLastError.
+maxServerVersion: '2.4.99'
 
 tests:
     -
-        description: "UpdateOne when many documents match"
+        description: "UpdateMany when many documents match"
         operation:
-            name: "updateOne"
+            name: "updateMany"
             arguments:
                 filter: 
                     _id: {$gt: 1}
@@ -17,15 +20,17 @@ tests:
 
         outcome:
             result:
-                matchedCount: 1
-                modifiedCount: 1
+                matchedCount: 2
                 upsertedCount: 0
-            # Can't verify collection data because we don't have a way of
-            # knowing which document gets updated.
+            collection:
+                data:
+                    - {_id: 1, x: 11}
+                    - {_id: 2, x: 23}
+                    - {_id: 3, x: 34}
     -
-        description: "UpdateOne when one document matches"
+        description: "UpdateMany when one document matches"
         operation:
-            name: "updateOne"
+            name: "updateMany"
             arguments:
                 filter: {_id: 1}
                 update: 
@@ -34,7 +39,6 @@ tests:
         outcome:
             result:
                 matchedCount: 1
-                modifiedCount: 1
                 upsertedCount: 0
             collection:
                 data:
@@ -42,9 +46,9 @@ tests:
                     - {_id: 2, x: 22}
                     - {_id: 3, x: 33}
     -
-        description: "UpdateOne when no documents match"
+        description: "UpdateMany when no documents match"
         operation:
-            name: "updateOne"
+            name: "updateMany"
             arguments:
                 filter: {_id: 4}
                 update: 
@@ -53,7 +57,6 @@ tests:
         outcome:
             result:
                 matchedCount: 0
-                modifiedCount: 0
                 upsertedCount: 0
             collection:
                 data:
@@ -61,9 +64,9 @@ tests:
                     - {_id: 2, x: 22}
                     - {_id: 3, x: 33}
     -
-        description: "UpdateOne with upsert when no documents match"
+        description: "UpdateMany with upsert when no documents match"
         operation:
-            name: "updateOne"
+            name: "updateMany"
             arguments:
                 filter: {_id: 4}
                 update: 
@@ -73,7 +76,6 @@ tests:
         outcome:
             result:
                 matchedCount: 0
-                modifiedCount: 0
                 upsertedCount: 1
                 upsertedId: 4
             collection:

@@ -2,7 +2,10 @@ data:
     - {_id: 1, x: 11}
     - {_id: 2, x: 22}
     - {_id: 3, x: 33}
-minServerVersion: '2.6'
+# This file includes the same test cases as updateOne.yml with some omissions
+# for pre-2.6 servers. We cannot verify the update result's modifiedCount as it
+# is not available with legacy write operations and getLastError.
+maxServerVersion: '2.4.99'
 
 tests:
     -
@@ -18,7 +21,6 @@ tests:
         outcome:
             result:
                 matchedCount: 1
-                modifiedCount: 1
                 upsertedCount: 0
             # Can't verify collection data because we don't have a way of
             # knowing which document gets updated.
@@ -34,7 +36,6 @@ tests:
         outcome:
             result:
                 matchedCount: 1
-                modifiedCount: 1
                 upsertedCount: 0
             collection:
                 data:
@@ -53,7 +54,6 @@ tests:
         outcome:
             result:
                 matchedCount: 0
-                modifiedCount: 0
                 upsertedCount: 0
             collection:
                 data:
@@ -73,7 +73,6 @@ tests:
         outcome:
             result:
                 matchedCount: 0
-                modifiedCount: 0
                 upsertedCount: 1
                 upsertedId: 4
             collection:

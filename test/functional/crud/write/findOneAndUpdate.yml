@@ -107,7 +107,10 @@ tests:
                 update: 
                     $inc: {x: 1}
                 projection: {x: 1, _id: 0}
-                sort: {x: 1}
+                # Omit the sort option as it has no effect when no documents
+                # match and would only cause an inconsistent return value on
+                # pre-3.0 servers when combined with returnDocument "before"
+                # (see: SERVER-17650).
                 upsert: true
 
         outcome:

@@ -13,7 +13,7 @@
       "x": 33
     }
   ],
-  "minServerVersion": "2.6",
+  "maxServerVersion": "2.4.99",
   "tests": [
     {
       "description": "ReplaceOne when many documents match",
@@ -33,7 +33,6 @@
       "outcome": {
         "result": {
           "matchedCount": 1,
-          "modifiedCount": 1,
           "upsertedCount": 0
         }
       }
@@ -55,7 +54,6 @@
       "outcome": {
         "result": {
           "matchedCount": 1,
-          "modifiedCount": 1,
           "upsertedCount": 0
         },
         "collection": {
@@ -93,7 +91,6 @@
       "outcome": {
         "result": {
           "matchedCount": 0,
-          "modifiedCount": 0,
           "upsertedCount": 0
         },
         "collection": {
@@ -131,29 +128,7 @@
       "outcome": {
         "result": {
           "matchedCount": 0,
-          "modifiedCount": 0,
-          "upsertedCount": 1,
-          "upsertedId": 4
-        },
-        "collection": {
-          "data": [
-            {
-              "_id": 1,
-              "x": 11
-            },
-            {
-              "_id": 2,
-              "x": 22
-            },
-            {
-              "_id": 3,
-              "x": 33
-            },
-            {
-              "_id": 4,
-              "x": 1
-            }
-          ]
+          "upsertedCount": 1
         }
       }
     },
@@ -175,7 +150,6 @@
       "outcome": {
         "result": {
           "matchedCount": 0,
-          "modifiedCount": 0,
           "upsertedCount": 1,
           "upsertedId": 4
         },

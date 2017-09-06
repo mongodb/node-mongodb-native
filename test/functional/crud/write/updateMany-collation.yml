@@ -20,6 +20,7 @@ tests:
             result:
                 matchedCount: 2
                 modifiedCount: 2
+                upsertedCount: 0
             collection:
                 data:
                     - {_id: 1, x: 11}
