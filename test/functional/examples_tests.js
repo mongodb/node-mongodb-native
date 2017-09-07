@@ -1035,8 +1035,16 @@ describe('Examples', function() {
               .updateOne(
                 { item: 'paper' },
                 {
-                  item: 'paper',
-                  instock: [{ warehouse: 'A', qty: 60 }, { warehouse: 'B', qty: 40 }]
+                  $set: {
+                    item: 'paper',
+                    instock: [{ warehouse: 'A', qty: 60 }, { warehouse: 'B', qty: 40 }]
+                  },
+                  $unset: {
+                    qty: '',
+                    size: '',
+                    status: '',
+                    lastModified: ''
+                  }
                 }
               )
               .then(function(result) {
