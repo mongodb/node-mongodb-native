@@ -2789,7 +2789,7 @@ describe('Operation (Promises)', function() {
 
         // Update the document using an upsert operation, ensuring creation if it does not exist
         return collection
-          .updateOne({ a: 1 }, { b: 2, a: 1 }, { upsert: true, w: 1 })
+          .updateOne({ a: 1 }, { $set: { b: 2, a: 1 } }, { upsert: true, w: 1 })
           .then(function(result) {
             test.equal(1, result.result.n);
 
@@ -5077,7 +5077,7 @@ describe('Operation (Promises)', function() {
         // BEGIN
         return db
           .collection('mongoclient_test_with_promise')
-          .updateOne({ a: 1 }, { b: 1 }, { upsert: true })
+          .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true })
           .then(function(result) {
             test.equal(1, result.result.n);
             client.close();

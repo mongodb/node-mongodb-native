@@ -3531,7 +3531,7 @@ describe('Operation Examples', function() {
         // Get a collection
         var collection = db.collection('update_a_simple_document_upsert');
         // Update the document using an upsert operation, ensuring creation if it does not exist
-        collection.updateOne({ a: 1 }, { b: 2, a: 1 }, { upsert: true, w: 1 }, function(
+        collection.updateOne({ a: 1 }, { $set: { b: 2, a: 1 } }, { upsert: true, w: 1 }, function(
           err,
           result
         ) {
@@ -6777,7 +6777,7 @@ describe('Operation Examples', function() {
 
           db
             .collection('mongoclient_test')
-            .updateOne({ a: 1 }, { b: 1 }, { upsert: true }, function(err, result) {
+            .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true }, function(err, result) {
               test.equal(null, err);
               test.equal(1, result.result.n);
 

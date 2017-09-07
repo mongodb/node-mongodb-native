@@ -2697,7 +2697,11 @@ describe('Operation (Generators)', function() {
         // Get a collection
         var collection = db.collection('update_a_simple_document_upsert_with_generators');
         // Update the document using an upsert operation, ensuring creation if it does not exist
-        var result = yield collection.updateOne({ a: 1 }, { b: 2, a: 1 }, { upsert: true, w: 1 });
+        var result = yield collection.updateOne(
+          { a: 1 },
+          { $set: { b: 2, a: 1 } },
+          { upsert: true, w: 1 }
+        );
         test.equal(1, result.result.n);
 
         // Fetch the document that we modified and check if it got inserted correctly

@@ -1,6 +1,7 @@
 'use strict';
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
+var test = require('./shared').assert,
+  setupDatabase = require('./shared').setupDatabase,
+  expect = require('chai').expect;
 
 // instanceof cannot be use reliably to detect the new models in js due to scoping and new
 // contexts killing class info find/distinct/count thus cannot be overloaded without breaking
@@ -1007,6 +1008,83 @@ describe('CRUD API', function() {
           test.ok(err !== null);
           client.close();
           done();
+        });
+      });
+    }
+  });
+
+  it('should correctly throw error if update doc for updateOne lacks atomic operator', {
+    // Add a tag that our runner can trigger on
+    // in this case we are setting that node needs to be higher than 0.10.X to run
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      client.connect(function(err, client) {
+        expect(err).to.not.exist;
+        var db = client.db(configuration.db);
+        var col = db.collection('t21_1');
+        col.insertOne({ a: 1, b: 2, c: 3 }, function(err, r) {
+          expect(err).to.not.exist;
+          expect(r.insertedCount).to.equal(1);
+
+          // empty update document
+          col.updateOne({ a: 1 }, {}, function(err, r) {
+            expect(err).to.exist;
+            expect(r).to.not.exist;
+
+            // update document non empty but still lacks atomic operator
+            col.updateOne({ a: 1 }, { b: 5 }, function(err, r) {
+              expect(err).to.exist;
+              expect(r).to.not.exist;
+
+              client.close();
+              done();
+            });
+          });
+        });
+      });
+    }
+  });
+
+  it('should correctly throw error if update doc for updateMany lacks atomic operator', {
+    // Add a tag that our runner can trigger on
+    // in this case we are setting that node needs to be higher than 0.10.X to run
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      client.connect(function(err, client) {
+        expect(err).to.not.exist;
+        var db = client.db(configuration.db);
+        var col = db.collection('t22_1');
+        col.insertMany([{ a: 1, b: 2 }, { a: 1, b: 3 }, { a: 1, b: 4 }], function(err, r) {
+          console.dir(err);
+          expect(err).to.not.exist;
+          expect(r.insertedCount).to.equal(3);
+
+          // empty update document
+          col.updateMany({ a: 1 }, {}, function(err, r) {
+            expect(err).to.exist;
+            expect(r).to.not.exist;
+
+            // update document non empty but still lacks atomic operator
+            col.updateMany({ a: 1 }, { b: 5 }, function(err, r) {
+              expect(err).to.exist;
+              expect(r).to.not.exist;
+
+              client.close();
+              done();
+            });
+          });
         });
       });
     }
