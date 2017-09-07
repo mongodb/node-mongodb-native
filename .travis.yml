@@ -1,20 +1,34 @@
 sudo: required
 dist: trusty
-language: node_js
 
-node_js:
-  - "4"
-  - "6"
-  - "8"
+language: node_js
 
 cache:
   yarn: true
   directories:
     - node_modules
 
-env:
-  - MONGODB_VERSION=2.6.x
-  - MONGODB_VERSION=3.0.x
-  - MONGODB_VERSION=3.2.x
-  - MONGODB_VERSION=3.4.x
-  - MONGODB_VERSION=3.5.x
+jobs:
+  include:
+    - stage: tests
+      node_js: 4
+      env: MONGODB_VERSION=2.6.x
+    - stage: tests
+      node_js: 4
+      env: MONGODB_VERSION=3.0.x
+    - stage: tests
+      node_js: 4
+      env: MONGODB_VERSION=3.2.x
+    - stage: tests
+      node_js: 4
+      env: MONGODB_VERSION=3.4.x
+    - stage: tests
+      node_js: 4
+      env: MONGODB_VERSION=3.5.x
+
+    - stage: tests
+      node_js: 6
+      env: MONGODB_VERSION=3.4.x
+    - stage: tests
+      node_js: 8
+      env: MONGODB_VERSION=3.4.x
