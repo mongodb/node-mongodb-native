@@ -16,11 +16,13 @@
     "prettier"
   ],
   "rules": {
-    "no-console": 0,
     "prettier/prettier": ["error", {
       "singleQuote": true,
       "tabWidth": 2,
       "printWidth": 100
-    }]
+    }],
+
+    "no-console": 0,
+    "eqeqeq": ["error", "always", {"null": "ignore"}]
   }
 }
