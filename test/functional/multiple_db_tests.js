@@ -20,6 +20,8 @@ describe('Multiple Databases', function() {
       if (process.platform !== 'linux') {
         var configuration = this.configuration;
         var client = configuration.newClient({ w: 1 }, { poolSize: 1 });
+
+        var client = new MongoClient({ options: ... });
         // All inserted docs
         var numberOfCloses = 0;
 
@@ -29,7 +31,7 @@ describe('Multiple Databases', function() {
           numberOfCloses = numberOfCloses + 1;
         });
 
-        client.connect(function(err, client) {
+        client.connect({}, function(err, client) {
           var db = client.db(configuration.db);
 
           db.createCollection('shouldCorrectlyErrorOnAllDbs', function(err, collection) {

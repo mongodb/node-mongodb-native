@@ -24,8 +24,8 @@ describe('MongoClient', function() {
       MongoClient.connect(
         configuration.url(),
         {
-          db: { bufferMaxEntries: 0 },
-          server: { sslValidate: false }
+          bufferMaxEntries: 0,
+          sslValidate: false
         },
         function(err, client) {
           var db = client.db(configuration.db);
@@ -71,8 +71,8 @@ describe('MongoClient', function() {
       MongoClient.connect(
         configuration.url(),
         {
-          db: { bufferMaxEntries: 0 },
-          server: { sslValidate: false }
+          bufferMaxEntries: 0,
+          sslValidate: false
         },
         function(err, client) {
           var db = client.db(configuration.db);
@@ -121,24 +121,22 @@ describe('MongoClient', function() {
       MongoClient.connect(
         configuration.url(),
         {
-          db: {
-            w: 1,
-            wtimeout: 1000,
-            fsync: true,
-            j: true,
-            readPreference: 'nearest',
-            readPreferenceTags: { loc: 'ny' },
-            native_parser: false,
-            forceServerObjectId: true,
-            pkFactory: function() {
-              return 1;
-            },
-            serializeFunctions: true,
-            raw: true,
-            retryMiliSeconds: 1000,
-            numberOfRetries: 10,
-            bufferMaxEntries: 0
-          }
+          w: 1,
+          wtimeout: 1000,
+          fsync: true,
+          j: true,
+          readPreference: 'nearest',
+          readPreferenceTags: { loc: 'ny' },
+          native_parser: false,
+          forceServerObjectId: true,
+          pkFactory: function() {
+            return 1;
+          },
+          serializeFunctions: true,
+          raw: true,
+          retryMiliSeconds: 1000,
+          numberOfRetries: 10,
+          bufferMaxEntries: 0
         },
         function(err, client) {
           var db = client.db(configuration.db);
@@ -167,7 +165,7 @@ describe('MongoClient', function() {
     }
   });
 
-  it('Should correctly pass through extra server options', {
+  it.only('Should correctly pass through extra server options', {
     metadata: {
       requires: {
         node: '>0.8.0',
@@ -182,20 +180,15 @@ describe('MongoClient', function() {
       MongoClient.connect(
         configuration.url(),
         {
-          server: {
-            poolSize: 10,
-            autoReconnect: false,
-            socketOptions: {
-              noDelay: false,
-              keepAlive: 100,
-              connectTimeoutMS: 444444,
-              socketTimeoutMS: 555555
-            }
-          }
+          poolSize: 10,
+          autoReconnect: false,
+          noDelay: false,
+          keepAlive: 100,
+          connectTimeoutMS: 444444,
+          socketTimeoutMS: 555555
         },
         function(err, client) {
           var db = client.db(configuration.db);
-
           test.equal(10, db.s.topology.s.poolSize);
           test.equal(false, db.s.topology.autoReconnect);
           test.equal(444444, db.s.topology.s.clonedOptions.connectionTimeout);
@@ -226,19 +219,17 @@ describe('MongoClient', function() {
       MongoClient.connect(
         url,
         {
-          replSet: {
-            ha: false,
-            haInterval: 10000,
-            replicaSet: 'rs',
-            secondaryAcceptableLatencyMS: 100,
-            connectWithNoPrimary: true,
-            poolSize: 1,
-            socketOptions: {
-              noDelay: false,
-              keepAlive: 100,
-              connectTimeoutMS: 444444,
-              socketTimeoutMS: 555555
-            }
+          ha: false,
+          haInterval: 10000,
+          replicaSet: 'rs',
+          secondaryAcceptableLatencyMS: 100,
+          connectWithNoPrimary: true,
+          poolSize: 1,
+          socketOptions: {
+            noDelay: false,
+            keepAlive: 100,
+            connectTimeoutMS: 444444,
+            socketTimeoutMS: 555555
           }
         },
         function(err, client) {
@@ -278,17 +269,15 @@ describe('MongoClient', function() {
       MongoClient.connect(
         configuration.url(),
         {
-          mongos: {
-            ha: false,
-            haInterval: 10000,
-            acceptableLatencyMS: 100,
-            poolSize: 1,
-            socketOptions: {
-              noDelay: false,
-              keepAlive: 100,
-              connectTimeoutMS: 444444,
-              socketTimeoutMS: 555555
-            }
+          ha: false,
+          haInterval: 10000,
+          acceptableLatencyMS: 100,
+          poolSize: 1,
+          socketOptions: {
+            noDelay: false,
+            keepAlive: 100,
+            connectTimeoutMS: 444444,
+            socketTimeoutMS: 555555
           }
         },
         function(err, client) {

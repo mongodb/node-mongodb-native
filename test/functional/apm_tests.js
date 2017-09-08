@@ -1,10 +1,15 @@
 'use strict';
 
-var f = require('util').format,
+var path = require('path'),
   fs = require('fs'),
-  expect = require('chai').expect;
+  expect = require('chai').expect,
+  setupDatabase = require('./shared').setupDatabase;
 
 describe('APM', function() {
+  before(function() {
+    return setupDatabase(this.configuration);
+  });
+
   it('should correctly receive the APM events for an insert', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
@@ -287,299 +292,6 @@ describe('APM', function() {
       }
     }
   );
-
-  var validateExpecations = function(expectation, results) {
-    var obj, databaseName, commandName, reply, result;
-    if (expectation.command_started_event) {
-      // Get the command
-      obj = expectation.command_started_event;
-      // Unpack the expectation
-      var command = obj.command;
-      databaseName = obj.database_name;
-      commandName = obj.command_name;
-
-      // Get the result
-      result = results.starts.shift();
-
-      // Validate the test
-      expect(commandName).to.equal(result.commandName);
-      expect(databaseName).to.equal(result.databaseName);
-
-      // Do we have a getMore command or killCursor command
-      if (commandName === 'getMore') {
-        expect(result.command.getMore.isZero()).to.be.false;
-      } else if (commandName === 'killCursors') {
-        // eslint-disable-line
-      } else {
-        expect(command).to.eql(result.command);
-      }
-    } else if (expectation.command_succeeded_event) {
-      obj = expectation.command_succeeded_event;
-      // Unpack the expectation
-      reply = obj.reply;
-      databaseName = obj.database_name;
-      commandName = obj.command_name;
-
-      // Get the result
-      result = results.successes.shift();
-
-      // Validate the test
-      expect(commandName).to.equal(result.commandName);
-      // Do we have a getMore command
-      if (commandName.toLowerCase() === 'getmore' || commandName.toLowerCase() === 'find') {
-        reply.cursor.id = result.reply.cursor.id;
-        expect(reply).to.eql(result.reply);
-      }
-    } else if (expectation.command_failed_event) {
-      obj = expectation.command_failed_event;
-      // Unpack the expectation
-      reply = obj.reply;
-      databaseName = obj.database_name;
-      commandName = obj.command_name;
-
-      // Get the result
-      result = results.failures.shift();
-
-      // Validate the test
-      expect(commandName).to.equal(result.commandName);
-    }
-  };
-
-  var executeOperation = function(client, listener, scenario, test, callback) {
-    var successes = [];
-    var failures = [];
-    var starts = [];
-
-    // Get the operation
-    var operation = test.operation;
-    // Get the command name
-    var commandName = operation.name;
-    // Get the arguments
-    var args = operation.arguments || {};
-    // Get the database instance
-    var db = client.db(scenario.database_name);
-    // Get the collection
-    var collection = db.collection(scenario.collection_name);
-    // Parameters
-    var params = [];
-    // Options
-    var options = null;
-    // Get the data
-    var data = scenario.data;
-
-    // Drop the collection
-    collection.drop(function() {
-      // No need to check for error, in case the collection doesn't exist already
-
-      // Insert the data
-      collection.insertMany(data, function(err, r) {
-        expect(err).to.be.null;
-        expect(data).to.have.length(r.insertedCount);
-
-        // Set up the listeners
-        listener.on('started', function(event) {
-          starts.push(event);
-        });
-
-        listener.on('succeeded', function(event) {
-          successes.push(event);
-        });
-
-        listener.on('failed', function(event) {
-          failures.push(event);
-        });
-
-        // Cleanup the listeners
-        var cleanUpListeners = function(_listener) {
-          _listener.removeAllListeners('started');
-          _listener.removeAllListeners('succeeded');
-          _listener.removeAllListeners('failed');
-        };
-
-        // Unpack the operation
-        if (args.filter) {
-          params.push(args.filter);
-        }
-
-        if (args.deletes) {
-          params.push(args.deletes);
-        }
-
-        if (args.document) {
-          params.push(args.document);
-        }
-
-        if (args.documents) {
-          params.push(args.documents);
-        }
-
-        if (args.update) {
-          params.push(args.update);
-        }
-
-        if (args.requests) {
-          params.push(args.requests);
-        }
-
-        if (args.writeConcern) {
-          if (options == null) {
-            options = args.writeConcern;
-          } else {
-            for (var name in args.writeConcern) {
-              options[name] = args.writeConcern[name];
-            }
-          }
-        }
-
-        if (typeof args.ordered === 'boolean') {
-          if (options == null) {
-            options = { ordered: args.ordered };
-          } else {
-            options.ordered = args.ordered;
-          }
-        }
-
-        if (typeof args.upsert === 'boolean') {
-          if (options == null) {
-            options = { upsert: args.upsert };
-          } else {
-            options.upsert = args.upsert;
-          }
-        }
-
-        // Find command is special needs to executed using toArray
-        if (operation.name === 'find') {
-          var cursor = collection[commandName]();
-
-          // Set the options
-          if (args.filter) cursor = cursor.filter(args.filter);
-          if (args.batchSize) cursor = cursor.batchSize(args.batchSize);
-          if (args.limit) cursor = cursor.limit(args.limit);
-          if (args.skip) cursor = cursor.skip(args.skip);
-          if (args.sort) cursor = cursor.sort(args.sort);
-
-          // Set any modifiers
-          if (args.modifiers) {
-            for (var modifier in args.modifiers) {
-              cursor.addQueryModifier(modifier, args.modifiers[modifier]);
-            }
-          }
-
-          // Execute find
-          cursor.toArray(function() {
-            // Validate the expectations
-            test.expectations.forEach(function(x) {
-              validateExpecations(x, {
-                successes: successes,
-                failures: failures,
-                starts: starts
-              });
-            });
-
-            // Cleanup listeners
-            cleanUpListeners(listener);
-
-            // Finish the operation
-            callback();
-          });
-        } else {
-          // Add options if they exists
-          if (options) params.push(options);
-          // Add callback function
-          params.push(function() {
-            // Validate the expectations
-            test.expectations.forEach(function(x) {
-              validateExpecations(x, {
-                successes: successes,
-                failures: failures,
-                starts: starts
-              });
-            });
-
-            // Cleanup listeners
-            cleanUpListeners(listener);
-
-            // Finish the operation
-            callback();
-          });
-
-          // Execute the operation
-          collection[commandName].apply(collection, params);
-        }
-      });
-    });
-  };
-
-  var executeTests = function(client, listener, scenario, tests, callback) {
-    if (tests.length === 0) return callback();
-    // Get the scenario
-    var test = tests.shift();
-    // Execute the test
-    console.log(f('execute test [%s]', test.description));
-
-    // Setup and execute the operation
-    executeOperation(client, listener, scenario, test, function() {
-      // Execute the next test
-      executeTests(client, listener, scenario, tests, callback);
-    });
-  };
-
-  var executeSuite = function(client, listener, scenarios, callback) {
-    if (scenarios.length === 0) return callback();
-    // Get the scenario
-    var scenario = scenarios.shift();
-    // Execute the tests
-    executeTests(client, listener, scenario, scenario.tests.slice(0), function() {
-      // Execute the next suite
-      executeSuite(client, listener, scenarios, callback);
-    });
-  };
-
-  it('should correctly run all JSON APM Tests', {
-    metadata: { requires: { topology: ['single', 'replicaset'] } },
-
-    // The actual test we wish to run
-    test: function(done) {
-      // Read all the json files for the APM spec
-      var scenarios = fs
-        .readdirSync(__dirname + '/apm')
-        .filter(function(x) {
-          // if(x.indexOf('bulkWrite.json') !== -1) return true;
-          // return false;
-
-          return x.indexOf('.json') !== -1;
-        })
-        .map(function(x) {
-          var r = null;
-
-          try {
-            r = JSON.parse(fs.readFileSync(__dirname + '/apm/' + x));
-          } catch (err) {
-            console.dir(err);
-          }
-
-          return r;
-        });
-
-      // Get the methods
-      var MongoClient = require('../..');
-      var listener = require('../../').instrument();
-
-      // Connect to the db
-      MongoClient.connect(this.configuration.url(), function(err, client) {
-        expect(err).to.be.null;
-
-        // Execute each group of tests
-        executeSuite(client, listener, scenarios.slice(0), function(err) {
-          expect(err).to.not.exist;
-
-          listener.uninstrument();
-          client.close();
-          done();
-        });
-      });
-    }
-  });
 
   it('should correctly receive the APM events for a find with getmore and killcursor', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
@@ -1274,5 +986,272 @@ describe('APM', function() {
         });
       });
     }
+  });
+
+  describe('spec tests', function() {
+    before(function() {
+      return setupDatabase(this.configuration);
+    });
+
+    var validateExpecations = function(expectation, results) {
+      var obj, databaseName, commandName, reply, result;
+      if (expectation.command_started_event) {
+        // Get the command
+        obj = expectation.command_started_event;
+        // Unpack the expectation
+        var command = obj.command;
+        databaseName = obj.database_name;
+        commandName = obj.command_name;
+
+        // Get the result
+        result = results.starts.shift();
+
+        // Validate the test
+        expect(commandName).to.equal(result.commandName);
+        expect(databaseName).to.equal(result.databaseName);
+
+        // Do we have a getMore command or killCursor command
+        if (commandName == 'getMore') {
+          expect(result.command.getMore.isZero()).to.be.false;
+        } else if (commandName == 'killCursors') {
+          // eslint-disable-line
+        } else {
+          expect(command).to.eql(result.command);
+        }
+      } else if (expectation.command_succeeded_event) {
+        obj = expectation.command_succeeded_event;
+        // Unpack the expectation
+        reply = obj.reply;
+        databaseName = obj.database_name;
+        commandName = obj.command_name;
+
+        // Get the result
+        result = results.successes.shift();
+
+        // Validate the test
+        expect(commandName).to.equal(result.commandName);
+        // Do we have a getMore command
+        if (commandName.toLowerCase() == 'getmore' || commandName.toLowerCase() == 'find') {
+          reply.cursor.id = result.reply.cursor.id;
+          expect(reply).to.eql(result.reply);
+        }
+      } else if (expectation.command_failed_event) {
+        obj = expectation.command_failed_event;
+        // Unpack the expectation
+        reply = obj.reply;
+        databaseName = obj.database_name;
+        commandName = obj.command_name;
+
+        // Get the result
+        result = results.failures.shift();
+
+        // Validate the test
+        expect(commandName).to.equal(result.commandName);
+      }
+    };
+
+    var executeOperation = function(client, listener, scenario, test, callback) {
+      var successes = [];
+      var failures = [];
+      var starts = [];
+
+      // Get the operation
+      var operation = test.operation;
+      // Get the command name
+      var commandName = operation.name;
+      // Get the arguments
+      var args = operation.arguments || {};
+      // Get the database instance
+      var db = client.db(scenario.database_name);
+      // Get the collection
+      var collection = db.collection(scenario.collection_name);
+      // Parameters
+      var params = [];
+      // Options
+      var options = null;
+      // Get the data
+      var data = scenario.data;
+
+      // Drop the collection
+      collection.drop(function() {
+        // No need to check for error, in case the collection doesn't exist already
+
+        // Insert the data
+        collection.insertMany(data, function(err, r) {
+          expect(err).to.be.null;
+          expect(data).to.have.length(r.insertedCount);
+
+          // Set up the listeners
+          listener.on('started', function(event) {
+            starts.push(event);
+          });
+
+          listener.on('succeeded', function(event) {
+            successes.push(event);
+          });
+
+          listener.on('failed', function(event) {
+            failures.push(event);
+          });
+
+          // Cleanup the listeners
+          var cleanUpListeners = function(_listener) {
+            _listener.removeAllListeners('started');
+            _listener.removeAllListeners('succeeded');
+            _listener.removeAllListeners('failed');
+          };
+
+          // Unpack the operation
+          if (args.filter) {
+            params.push(args.filter);
+          }
+
+          if (args.deletes) {
+            params.push(args.deletes);
+          }
+
+          if (args.document) {
+            params.push(args.document);
+          }
+
+          if (args.documents) {
+            params.push(args.documents);
+          }
+
+          if (args.update) {
+            params.push(args.update);
+          }
+
+          if (args.requests) {
+            params.push(args.requests);
+          }
+
+          if (args.writeConcern) {
+            if (options == null) {
+              options = args.writeConcern;
+            } else {
+              for (var name in args.writeConcern) {
+                options[name] = args.writeConcern[name];
+              }
+            }
+          }
+
+          if (typeof args.ordered == 'boolean') {
+            if (options == null) {
+              options = { ordered: args.ordered };
+            } else {
+              options.ordered = args.ordered;
+            }
+          }
+
+          if (typeof args.upsert == 'boolean') {
+            if (options == null) {
+              options = { upsert: args.upsert };
+            } else {
+              options.upsert = args.upsert;
+            }
+          }
+
+          // Find command is special needs to executed using toArray
+          if (operation.name == 'find') {
+            var cursor = collection[commandName]();
+
+            // Set the options
+            if (args.filter) cursor = cursor.filter(args.filter);
+            if (args.batchSize) cursor = cursor.batchSize(args.batchSize);
+            if (args.limit) cursor = cursor.limit(args.limit);
+            if (args.skip) cursor = cursor.skip(args.skip);
+            if (args.sort) cursor = cursor.sort(args.sort);
+
+            // Set any modifiers
+            if (args.modifiers) {
+              for (var modifier in args.modifiers) {
+                cursor.addQueryModifier(modifier, args.modifiers[modifier]);
+              }
+            }
+
+            // Execute find
+            cursor.toArray(function() {
+              // Validate the expectations
+              test.expectations.forEach(function(x) {
+                validateExpecations(x, {
+                  successes: successes,
+                  failures: failures,
+                  starts: starts
+                });
+              });
+
+              // Cleanup listeners
+              cleanUpListeners(listener);
+
+              // Finish the operation
+              callback();
+            });
+          } else {
+            // Add options if they exists
+            if (options) params.push(options);
+            // Add callback function
+            params.push(function() {
+              // Validate the expectations
+              test.expectations.forEach(function(x) {
+                validateExpecations(x, {
+                  successes: successes,
+                  failures: failures,
+                  starts: starts
+                });
+              });
+
+              // Cleanup listeners
+              cleanUpListeners(listener);
+
+              // Finish the operation
+              callback();
+            });
+
+            // Execute the operation
+            collection[commandName].apply(collection, params);
+          }
+        });
+      });
+    };
+
+    var scenarios = fs
+      .readdirSync(__dirname + '/apm')
+      .filter(x => x.indexOf('.json') !== -1)
+      .map(function(x) {
+        var r = null;
+
+        try {
+          r = JSON.parse(fs.readFileSync(__dirname + '/apm/' + x));
+        } catch (err) {
+          console.dir(err);
+        }
+
+        r.title = path.basename(x, '.json');
+        return r;
+      });
+
+    scenarios.forEach(scenario => {
+      describe(scenario.title, function() {
+        scenario.tests.forEach(test => {
+          it(test.description, function(done) {
+            var MongoClient = require('../..');
+            var listener = require('../../').instrument();
+
+            MongoClient.connect(this.configuration.url(), function(err, client) {
+              expect(err).to.not.exist;
+              expect(client).to.exist;
+
+              executeOperation(client, listener, scenario, test, err => {
+                expect(err).to.not.exist;
+
+                client.close();
+                done();
+              });
+            });
+          });
+        });
+      });
+    });
   });
 });
