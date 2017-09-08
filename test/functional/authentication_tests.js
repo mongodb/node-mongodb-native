@@ -492,7 +492,7 @@ describe('Authentication', function() {
     var ReplSetManager = require('mongodb-topology-manager').ReplSet;
 
     // Check if we have any options
-    if (typeof options == 'function') (callback = options), (options = null);
+    if (typeof options === 'function') (callback = options), (options = null);
 
     // Override options
     var rsOptions;
@@ -1695,7 +1695,7 @@ describe('Authentication', function() {
     var ShardingManager = require('../topology_test_definitions').Sharded;
 
     // Check if we have any options
-    if (typeof options == 'function') (callback = options), (options = null);
+    if (typeof options === 'function') (callback = options), (options = null);
 
     // Create Replicaset Manager
     var shardedManager = new ShardingManager({

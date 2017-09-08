@@ -4752,7 +4752,7 @@ describe('Operation (Generators)', function() {
         items = yield GridStore.list(db, { id: true });
         found = false;
         items.forEach(function(id) {
-          test.ok(typeof id == 'object');
+          test.ok(typeof id === 'object');
         });
 
         test.ok(items.length >= 1);

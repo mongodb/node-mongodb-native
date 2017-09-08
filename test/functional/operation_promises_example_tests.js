@@ -5225,7 +5225,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(items) {
             items.forEach(function(id) {
-              test.ok(typeof id == 'object');
+              test.ok(typeof id === 'object');
             });
 
             test.ok(items.length >= 1);

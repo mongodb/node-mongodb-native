@@ -9,7 +9,7 @@ var setUp = function(configuration, options, callback) {
   var ReplSetManager = require('mongodb-topology-manager').ReplSet;
 
   // Check if we have any options
-  if (typeof options == 'function') (callback = options), (options = null);
+  if (typeof options === 'function') (callback = options), (options = null);
 
   // Load the cert
   var cert = fs.readFileSync(__dirname + '/ssl/client.pem');

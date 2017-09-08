@@ -20,7 +20,7 @@ var Server = function(port, host, options) {
   options = options || {};
 
   // Do we have an onRead function
-  this.onRead = typeof options.onRead == 'function' ? options.onRead : null;
+  this.onRead = typeof options.onRead === 'function' ? options.onRead : null;
 
   // Create a bson instance
   this.bson = new BSON();
@@ -155,7 +155,7 @@ var dataHandler = function(server, self, connection) {
     // Parse until we are done with the data
     while (data.length > 0) {
       // Call the onRead function
-      if (typeof server.onRead == 'function') {
+      if (typeof server.onRead === 'function') {
         // If onRead returns true, terminate the reading for this connection as
         // it's dead
         if (server.onRead(server, connection, self.buffer, self.bytesRead)) {

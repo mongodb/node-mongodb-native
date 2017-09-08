@@ -431,7 +431,7 @@ describe('APM', function() {
           }
         }
 
-        if (typeof args.ordered == 'boolean') {
+        if (typeof args.ordered === 'boolean') {
           if (options == null) {
             options = { ordered: args.ordered };
           } else {
@@ -439,7 +439,7 @@ describe('APM', function() {
           }
         }
 
-        if (typeof args.upsert == 'boolean') {
+        if (typeof args.upsert === 'boolean') {
           if (options == null) {
             options = { upsert: args.upsert };
           } else {

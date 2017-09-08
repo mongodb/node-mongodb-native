@@ -3041,7 +3041,7 @@ describe('GridFS', function() {
                 collection.find({ filename: 'test_gs_small_write2' }).toArray(function(err, items) {
                   test.equal(1, items.length);
                   var item = items[0];
-                  test.ok(typeof item._id == 'number');
+                  test.ok(typeof item._id === 'number');
 
                   db.collection('fs.chunks', function(err, collection) {
                     collection.find({ files_id: item._id }).toArray(function(err, items) {

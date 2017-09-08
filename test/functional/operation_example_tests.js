@@ -7141,7 +7141,7 @@ describe('Operation Examples', function() {
                   // List the existing files but return only the file ids
                   GridStore.list(db, { id: true }, function(err, items) {
                     items.forEach(function(id) {
-                      test.ok(typeof id == 'object');
+                      test.ok(typeof id === 'object');
                     });
 
                     test.ok(items.length >= 1);
