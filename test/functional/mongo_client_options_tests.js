@@ -77,7 +77,7 @@ describe('MongoClient Options', function() {
           validateOptions: true
         },
         function(err, client) {
-          test.ok(err.message.indexOf('option notlegal is not supported') != -1);
+          test.ok(err.message.indexOf('option notlegal is not supported') !== -1);
           test.equal(undefined, client);
           done();
         }

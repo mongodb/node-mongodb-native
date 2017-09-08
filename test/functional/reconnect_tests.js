@@ -102,7 +102,7 @@ describe('Reconnect', function() {
       var count = 2;
 
       var restartServer = function() {
-        if (count == 0) {
+        if (count === 0) {
           done = true;
           return;
         }

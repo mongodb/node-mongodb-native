@@ -138,7 +138,7 @@ describe('Find', function() {
             var results = [];
             // Check that we have all the results we want
             documents.forEach(function(doc) {
-              if (doc.a == 1 || doc.a == 2) results.push(1);
+              if (doc.a === 1 || doc.a === 2) results.push(1);
             });
             test.equal(2, results.length);
 
@@ -159,7 +159,7 @@ describe('Find', function() {
                   var results = [];
                   // Check that we have all the results we want
                   documents.forEach(function(doc) {
-                    if (doc.a == 1 || doc.a == 2) results.push(1);
+                    if (doc.a === 1 || doc.a === 2) results.push(1);
                   });
                   test.equal(2, results.length);
 
@@ -175,7 +175,7 @@ describe('Find', function() {
                       var results = [];
                       // Check that we have all the results we want
                       documents.forEach(function(doc) {
-                        if (doc.a == 1 || doc.a == 2) results.push(1);
+                        if (doc.a === 1 || doc.a === 2) results.push(1);
                       });
                       test.equal(2, results.length);
 
@@ -188,7 +188,7 @@ describe('Find', function() {
                           var results = [];
                           // Check that we have all the results we want
                           documents.forEach(function(doc) {
-                            if (doc.a == 1 || doc.a == 2) results.push(1);
+                            if (doc.a === 1 || doc.a === 2) results.push(1);
                           });
                           test.equal(2, results.length);
                           // Let's close the db
@@ -1746,7 +1746,7 @@ describe('Find', function() {
               .count(function(err) {
                 test.equal(null, err);
                 numberOfOperations = numberOfOperations + 1;
-                if (numberOfOperations == 2) {
+                if (numberOfOperations === 2) {
                   done();
                   p_client.close();
                 }
@@ -1764,7 +1764,7 @@ describe('Find', function() {
               .count(function(err) {
                 test.equal(null, err);
                 numberOfOperations = numberOfOperations + 1;
-                if (numberOfOperations == 2) {
+                if (numberOfOperations === 2) {
                   done();
                   p_client.close();
                 }
@@ -2503,7 +2503,7 @@ describe('Find', function() {
                   left = left - 1;
 
                   // No more cursors let's ensure we got all results
-                  if (left == 0) {
+                  if (left === 0) {
                     test.equal(docs.length, results.length);
 
                     // Ensure all cursors are closed
@@ -2571,7 +2571,7 @@ describe('Find', function() {
                   // Ensure cursor is closed
                   test.equal(true, _cursor.isClosed());
                   // No more cursors let's ensure we got all results
-                  if (left == 0) {
+                  if (left === 0) {
                     test.equal(docs.length, results.length);
 
                     client.close();

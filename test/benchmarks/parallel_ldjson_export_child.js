@@ -34,7 +34,7 @@ module.exports = function(o, callback) {
         fs.writeFile(f('%s/../../files%s.tmp', __dirname, index++), docsString, function() {
           left = left - 1;
 
-          if (left == 0) {
+          if (left === 0) {
             callback();
           }
         });

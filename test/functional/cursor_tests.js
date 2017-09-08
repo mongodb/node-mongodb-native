@@ -216,7 +216,7 @@ describe('Cursor', function() {
                 collection.insert({ x: i }, configuration.writeConcernMax(), function(e) {
                   test.equal(null, e);
                   total = total - 1;
-                  if (total == 0) callback();
+                  if (total === 0) callback();
                 });
               }
             }
@@ -225,7 +225,7 @@ describe('Cursor', function() {
               collection.find().count(function(err, count) {
                 test.equal(null, err);
                 test.equal(10, count);
-                test.ok(count.constructor == Number);
+                test.ok(count.constructor === Number);
 
                 collection.find({}, { limit: 5 }).count(function(err, count) {
                   test.equal(null, err);
@@ -305,7 +305,7 @@ describe('Cursor', function() {
                 collection.insert({ x: i }, configuration.writeConcernMax(), function(e) {
                   test.equal(null, e);
                   total = total - 1;
-                  if (total == 0) callback();
+                  if (total === 0) callback();
                 });
               }
             }
@@ -314,7 +314,7 @@ describe('Cursor', function() {
               collection.find().count(function(err, count) {
                 test.equal(null, err);
                 test.equal(10, count);
-                test.ok(count.constructor == Number);
+                test.ok(count.constructor === Number);
 
                 collection.find({}, { limit: 5 }).count(function(err, count) {
                   test.equal(null, err);
@@ -390,7 +390,7 @@ describe('Cursor', function() {
               collection.insert({ x: i }, configuration.writeConcernMax(), function(e) {
                 test.equal(null, e);
                 total = total - 1;
-                if (total == 0) callback();
+                if (total === 0) callback();
               });
             }
           }
@@ -399,7 +399,7 @@ describe('Cursor', function() {
             var number_of_functions = 9;
             var finished = function() {
               number_of_functions = number_of_functions - 1;
-              if (number_of_functions == 0) {
+              if (number_of_functions === 0) {
                 client.close();
                 done();
               }
@@ -503,7 +503,7 @@ describe('Cursor', function() {
               collection.insert({ x: i }, configuration.writeConcernMax(), function(e) {
                 test.equal(null, e);
                 total = total - 1;
-                if (total == 0) callback();
+                if (total === 0) callback();
               });
             }
           }
@@ -553,7 +553,7 @@ describe('Cursor', function() {
               collection.insert({ x: i }, configuration.writeConcernMax(), function(e) {
                 test.equal(null, e);
                 total = total - 1;
-                if (total == 0) callback();
+                if (total === 0) callback();
               });
             }
           }
@@ -608,7 +608,7 @@ describe('Cursor', function() {
               collection.insert({ x: i }, configuration.writeConcernMax(), function(e) {
                 test.equal(null, e);
                 total = total - 1;
-                if (total == 0) callback();
+                if (total === 0) callback();
               });
             }
           }
@@ -663,7 +663,7 @@ describe('Cursor', function() {
               collection.insert({ x: i }, configuration.writeConcernMax(), function(e) {
                 test.equal(null, e);
                 total = total - 1;
-                if (total == 0) callback();
+                if (total === 0) callback();
               });
             }
           }
@@ -811,7 +811,7 @@ describe('Cursor', function() {
                 test.equal(null, e);
 
                 total = total - 1;
-                if (total == 0) callback();
+                if (total === 0) callback();
               });
             }
           }
@@ -843,7 +843,7 @@ describe('Cursor', function() {
                     var sliced = items.slice(2, 10);
 
                     for (var i = 0; i < sliced.length; i++) {
-                      if (sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
+                      if (sliced[i].x === items2[i].x) numberEqual = numberEqual + 1;
                     }
 
                     test.equal(8, numberEqual);
@@ -1329,7 +1329,7 @@ describe('Cursor', function() {
             collection.insert({ x: i }, configuration.writeConcernMax(), function(e) {
               test.equal(null, e);
               total = total - 1;
-              if (total == 0) callback();
+              if (total === 0) callback();
             });
           }
         }
@@ -1352,7 +1352,7 @@ describe('Cursor', function() {
                 var sliced = items.slice(3, 8);
 
                 for (var i = 0; i < sliced.length; i++) {
-                  if (sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
+                  if (sliced[i].x === items2[i].x) numberEqual = numberEqual + 1;
                 }
                 test.equal(5, numberEqual);
 
@@ -1399,7 +1399,7 @@ describe('Cursor', function() {
               collection.insert({ x: i }, configuration.writeConcernMax(), function(e) {
                 test.equal(null, e);
                 total = total - 1;
-                if (total == 0) callback();
+                if (total === 0) callback();
               });
             }
           }
@@ -1422,7 +1422,7 @@ describe('Cursor', function() {
                   var sliced = items.slice(3, 8);
 
                   for (var i = 0; i < sliced.length; i++) {
-                    if (sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
+                    if (sliced[i].x === items2[i].x) numberEqual = numberEqual + 1;
                   }
                   test.equal(5, numberEqual);
 
@@ -1975,7 +1975,7 @@ describe('Cursor', function() {
                 return function(err) {
                   ++doneCalled;
 
-                  if (doneCalled == 1) {
+                  if (doneCalled === 1) {
                     test.equal(undefined, err);
                     test.strictEqual(0, i);
                     test.strictEqual(true, stream.isClosed());
@@ -2099,7 +2099,7 @@ describe('Cursor', function() {
               return function() {
                 ++finished;
 
-                if (finished == 2) {
+                if (finished === 2) {
                   setTimeout(function() {
                     test.equal(5, i);
                     test.equal(true, stream.isClosed());
@@ -2170,7 +2170,7 @@ describe('Cursor', function() {
               return function() {
                 ++finished;
 
-                if (finished == 2) {
+                if (finished === 2) {
                   setTimeout(function() {
                     test.equal(5, i);
                     test.equal(2, finished);
@@ -2294,7 +2294,7 @@ describe('Cursor', function() {
               test.equal(null, err);
               count = count - 1;
 
-              if (count == 0) {
+              if (count === 0) {
                 var stream = collection.find({}, { tailable: true, awaitData: true }).stream();
 
                 stream.on('data', function() {
@@ -2897,7 +2897,7 @@ describe('Cursor', function() {
               left = left - 1;
               totalI = totalI + d.length;
 
-              if (left == 0) {
+              if (left === 0) {
                 collection.find({}).each(function(err, item) {
                   test.equal(null, err);
                   if (item == null) {
@@ -2960,7 +2960,7 @@ describe('Cursor', function() {
                 left = left - 1;
                 totalI = totalI + d.length;
 
-                if (left == 0) {
+                if (left === 0) {
                   collection.find({}).toArray(function(err, items) {
                     test.equal(null, err);
 
@@ -4080,7 +4080,7 @@ describe('Cursor', function() {
       });
 
       listener.on('started', function(event) {
-        if (event.commandName == 'count') started.push(event);
+        if (event.commandName === 'count') started.push(event);
       });
 
       var configuration = this.configuration;
@@ -4129,7 +4129,7 @@ describe('Cursor', function() {
       });
 
       listener.on('started', function(event) {
-        if (event.commandName == 'count') started.push(event);
+        if (event.commandName === 'count') started.push(event);
       });
 
       var configuration = this.configuration;

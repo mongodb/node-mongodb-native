@@ -51,7 +51,7 @@ describe('Cursor Streams', function() {
 
               left = left - 1;
 
-              if (left == 0) {
+              if (left === 0) {
                 // Perform a find to get a cursor
                 var stream = collection.find({}).stream();
                 var data = [];
@@ -120,7 +120,7 @@ describe('Cursor Streams', function() {
               expect(err).to.not.exist;
               left = left - 1;
 
-              if (left == 0) {
+              if (left === 0) {
                 // Perform a find to get a cursor
                 var stream = collection.find({}).stream();
                 var data = [];
@@ -243,7 +243,7 @@ describe('Cursor Streams', function() {
             expect(err).to.not.exist;
             left = left - 1;
 
-            if (left == 0) {
+            if (left === 0) {
               var cursor = collection.find({});
               // Execute find on all the documents
               var stream = cursor.stream();

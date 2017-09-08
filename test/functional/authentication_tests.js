@@ -1345,7 +1345,7 @@ describe('Authentication', function() {
 
                     client.topology.on('joined', function(t) {
                       // console.log("-------------------------------------------------- joined 5 :: " + t + " :: " + s.name)
-                      if (t == 'primary') {
+                      if (t === 'primary') {
                         // console.log("-------------------------------------------------- 6")
                         var counter = 10;
                         var errors = 0;
@@ -1364,7 +1364,7 @@ describe('Authentication', function() {
                                 errors = errors + 1;
                               }
 
-                              if (counter == 0) {
+                              if (counter === 0) {
                                 test.equal(0, errors);
 
                                 client.close();
@@ -1474,7 +1474,7 @@ describe('Authentication', function() {
                     replicasetManager.primary().then(function(primary) {
                       primary.stop().then(function() {
                         db_p.serverConfig.on('joined', function(t) {
-                          if (t == 'primary') {
+                          if (t === 'primary') {
                             var counter = 1000;
                             var errors = 0;
 
@@ -1487,7 +1487,7 @@ describe('Authentication', function() {
                                   test.equal(null, err);
                                   counter = counter - 1;
 
-                                  if (counter == 0) {
+                                  if (counter === 0) {
                                     test.equal(0, errors);
 
                                     client.close();

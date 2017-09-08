@@ -23,7 +23,7 @@ describe('Promises (Collection)', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=100')
           : f('%s?%s', url, 'maxPoolSize=100');
 
@@ -247,7 +247,7 @@ describe('Promises (Collection)', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=100')
           : f('%s?%s', url, 'maxPoolSize=100');
 
@@ -281,7 +281,7 @@ describe('Promises (Collection)', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=100')
           : f('%s?%s', url, 'maxPoolSize=100');
 
@@ -315,7 +315,7 @@ describe('Promises (Collection)', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=100')
           : f('%s?%s', url, 'maxPoolSize=100');
 
@@ -348,7 +348,7 @@ describe('Promises (Collection)', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=100')
           : f('%s?%s', url, 'maxPoolSize=100');
 

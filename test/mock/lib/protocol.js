@@ -69,7 +69,7 @@ var Query = function(bson, data) {
   index = index + docSize;
 
   // No field selection
-  if (index == data.length) {
+  if (index === data.length) {
     return;
   }
 

@@ -1589,7 +1589,7 @@ describe('GridFS', function() {
         var originalData = fs.readFileSync(__dirname + '/data/iya_logo_final_bw.jpg');
         // Upload using the mongofiles
         exec(exec_function, function(error, stdout) {
-          test.ok(stdout.match(/added file/) != -1);
+          test.ok(stdout.match(/added file/) !== -1);
 
           GridStore.list(db, function(err) {
             test.equal(null, err);
@@ -1835,7 +1835,7 @@ describe('GridFS', function() {
             gridStore.write(d, false, function() {
               completed = completed - 1;
 
-              if (completed == 0) {
+              if (completed === 0) {
                 gridStore.close(function(err) {
                   test.equal(null, err);
 
@@ -1900,7 +1900,7 @@ describe('GridFS', function() {
             gridStore.write(d, false, function() {
               completed = completed - 1;
 
-              if (completed == 0) {
+              if (completed === 0) {
                 gridStore.close(function(err) {
                   test.equal(null, err);
 
@@ -2083,7 +2083,7 @@ describe('GridFS', function() {
                   test.equal(1, items.length);
                   var item = items[0];
                   test.ok(
-                    item._id._bsontype == 'ObjectID' ||
+                    item._id._bsontype === 'ObjectID' ||
                       Object.prototype.toString.call(item._id) === '[object ObjectID]'
                   );
 
@@ -2996,7 +2996,7 @@ describe('GridFS', function() {
           var numberOfWrites = 1000000 / 5000;
 
           var write = function(left, callback) {
-            if (left == 0) return callback();
+            if (left === 0) return callback();
             gridStore.write(new Buffer(5000), function() {
               left = left - 1;
               write(left, callback);
@@ -3553,11 +3553,11 @@ describe('GridFS', function() {
         });
 
         listener.on('started', function(event) {
-          if (event.commandName == 'delete') started.push(event);
+          if (event.commandName === 'delete') started.push(event);
         });
 
         listener.on('succeeded', function(event) {
-          if (event.commandName == 'delete') succeeded.push(event);
+          if (event.commandName === 'delete') succeeded.push(event);
         });
 
         var gridStore = new GridStore(db, new ObjectID(), 'w', {

@@ -21,11 +21,11 @@ describe('APM', function() {
       });
 
       listener.on('started', function(event) {
-        if (event.commandName == 'insert') started.push(event);
+        if (event.commandName === 'insert') started.push(event);
       });
 
       listener.on('succeeded', function(event) {
-        if (event.commandName == 'insert') succeeded.push(event);
+        if (event.commandName === 'insert') succeeded.push(event);
       });
 
       var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
@@ -68,11 +68,11 @@ describe('APM', function() {
       });
 
       listener.on('started', function(event) {
-        if (event.commandName == 'insert') started.push(event);
+        if (event.commandName === 'insert') started.push(event);
       });
 
       listener.on('succeeded', function(event) {
-        if (event.commandName == 'insert') succeeded.push(event);
+        if (event.commandName === 'insert') succeeded.push(event);
       });
 
       var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
@@ -125,13 +125,13 @@ describe('APM', function() {
             });
 
             listener.on('started', function(event) {
-              if (event.commandName == 'listCollections' || event.commandName == 'find') {
+              if (event.commandName === 'listCollections' || event.commandName === 'find') {
                 started.push(event);
               }
             });
 
             listener.on('succeeded', function(event) {
-              if (event.commandName == 'listCollections' || event.commandName == 'find') {
+              if (event.commandName === 'listCollections' || event.commandName === 'find') {
                 succeeded.push(event);
               }
             });
@@ -183,13 +183,13 @@ describe('APM', function() {
             });
 
             listener.on('started', function(event) {
-              if (event.commandName == 'listIndexes' || event.commandName == 'find') {
+              if (event.commandName === 'listIndexes' || event.commandName === 'find') {
                 started.push(event);
               }
             });
 
             listener.on('succeeded', function(event) {
-              if (event.commandName == 'listIndexes' || event.commandName == 'find') {
+              if (event.commandName === 'listIndexes' || event.commandName === 'find') {
                 succeeded.push(event);
               }
             });
@@ -256,11 +256,11 @@ describe('APM', function() {
         );
 
         listener.on('started', function(event) {
-          if (event.commandName == 'insert') started.push(event);
+          if (event.commandName === 'insert') started.push(event);
         });
 
         listener.on('succeeded', function(event) {
-          if (event.commandName == 'insert') succeeded.push(event);
+          if (event.commandName === 'insert') succeeded.push(event);
         });
 
         var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
@@ -306,9 +306,9 @@ describe('APM', function() {
       expect(databaseName).to.equal(result.databaseName);
 
       // Do we have a getMore command or killCursor command
-      if (commandName == 'getMore') {
+      if (commandName === 'getMore') {
         expect(result.command.getMore.isZero()).to.be.false;
-      } else if (commandName == 'killCursors') {
+      } else if (commandName === 'killCursors') {
         // eslint-disable-line
       } else {
         expect(command).to.eql(result.command);
@@ -326,7 +326,7 @@ describe('APM', function() {
       // Validate the test
       expect(commandName).to.equal(result.commandName);
       // Do we have a getMore command
-      if (commandName.toLowerCase() == 'getmore' || commandName.toLowerCase() == 'find') {
+      if (commandName.toLowerCase() === 'getmore' || commandName.toLowerCase() === 'find') {
         reply.cursor.id = result.reply.cursor.id;
         expect(reply).to.eql(result.reply);
       }
@@ -448,7 +448,7 @@ describe('APM', function() {
         }
 
         // Find command is special needs to executed using toArray
-        if (operation.name == 'find') {
+        if (operation.name === 'find') {
           var cursor = collection[commandName]();
 
           // Set the options
@@ -511,7 +511,7 @@ describe('APM', function() {
   };
 
   var executeTests = function(client, listener, scenario, tests, callback) {
-    if (tests.length == 0) return callback();
+    if (tests.length === 0) return callback();
     // Get the scenario
     var test = tests.shift();
     // Execute the test
@@ -525,7 +525,7 @@ describe('APM', function() {
   };
 
   var executeSuite = function(client, listener, scenarios, callback) {
-    if (scenarios.length == 0) return callback();
+    if (scenarios.length === 0) return callback();
     // Get the scenario
     var scenario = scenarios.shift();
     // Execute the tests
@@ -544,10 +544,10 @@ describe('APM', function() {
       var scenarios = fs
         .readdirSync(__dirname + '/apm')
         .filter(function(x) {
-          // if(x.indexOf('bulkWrite.json') != -1) return true;
+          // if(x.indexOf('bulkWrite.json') !== -1) return true;
           // return false;
 
-          return x.indexOf('.json') != -1;
+          return x.indexOf('.json') !== -1;
         })
         .map(function(x) {
           var r = null;
@@ -595,27 +595,27 @@ describe('APM', function() {
       var listener = require('../..').instrument();
       listener.on('started', function(event) {
         if (
-          event.commandName == 'find' ||
-          event.commandName == 'getMore' ||
-          event.commandName == 'killCursors'
+          event.commandName === 'find' ||
+          event.commandName === 'getMore' ||
+          event.commandName === 'killCursors'
         )
           started.push(event);
       });
 
       listener.on('succeeded', function(event) {
         if (
-          event.commandName == 'find' ||
-          event.commandName == 'getMore' ||
-          event.commandName == 'killCursors'
+          event.commandName === 'find' ||
+          event.commandName === 'getMore' ||
+          event.commandName === 'killCursors'
         )
           succeeded.push(event);
       });
 
       listener.on('failed', function(event) {
         if (
-          event.commandName == 'find' ||
-          event.commandName == 'getMore' ||
-          event.commandName == 'killCursors'
+          event.commandName === 'find' ||
+          event.commandName === 'getMore' ||
+          event.commandName === 'killCursors'
         )
           failed.push(event);
       });
@@ -696,27 +696,27 @@ describe('APM', function() {
       var listener = require('../..').instrument();
       listener.on('started', function(event) {
         if (
-          event.commandName == 'find' ||
-          event.commandName == 'getMore' ||
-          event.commandName == 'killCursors'
+          event.commandName === 'find' ||
+          event.commandName === 'getMore' ||
+          event.commandName === 'killCursors'
         )
           started.push(event);
       });
 
       listener.on('succeeded', function(event) {
         if (
-          event.commandName == 'find' ||
-          event.commandName == 'getMore' ||
-          event.commandName == 'killCursors'
+          event.commandName === 'find' ||
+          event.commandName === 'getMore' ||
+          event.commandName === 'killCursors'
         )
           succeeded.push(event);
       });
 
       listener.on('failed', function(event) {
         if (
-          event.commandName == 'find' ||
-          event.commandName == 'getMore' ||
-          event.commandName == 'killCursors'
+          event.commandName === 'find' ||
+          event.commandName === 'getMore' ||
+          event.commandName === 'killCursors'
         )
           failed.push(event);
       });
@@ -778,18 +778,18 @@ describe('APM', function() {
       var listener = require('../..').instrument();
       listener.on('started', function(event) {
         if (
-          event.commandName == 'insert' ||
-          event.commandName == 'update' ||
-          event.commandName == 'delete'
+          event.commandName === 'insert' ||
+          event.commandName === 'update' ||
+          event.commandName === 'delete'
         )
           started.push(event);
       });
 
       listener.on('succeeded', function(event) {
         if (
-          event.commandName == 'insert' ||
-          event.commandName == 'update' ||
-          event.commandName == 'delete'
+          event.commandName === 'insert' ||
+          event.commandName === 'update' ||
+          event.commandName === 'delete'
         )
           succeeded.push(event);
       });
@@ -839,30 +839,30 @@ describe('APM', function() {
       var listener = require('../..').instrument();
       listener.on('started', function(event) {
         if (
-          event.commandName == 'find' ||
-          event.commandName == 'getMore' ||
-          event.commandName == 'killCursors' ||
-          event.commandName == 'explain'
+          event.commandName === 'find' ||
+          event.commandName === 'getMore' ||
+          event.commandName === 'killCursors' ||
+          event.commandName === 'explain'
         )
           started.push(event);
       });
 
       listener.on('succeeded', function(event) {
         if (
-          event.commandName == 'find' ||
-          event.commandName == 'getMore' ||
-          event.commandName == 'killCursors' ||
-          event.commandName == 'explain'
+          event.commandName === 'find' ||
+          event.commandName === 'getMore' ||
+          event.commandName === 'killCursors' ||
+          event.commandName === 'explain'
         )
           succeeded.push(event);
       });
 
       listener.on('failed', function(event) {
         if (
-          event.commandName == 'find' ||
-          event.commandName == 'getMore' ||
-          event.commandName == 'killCursors' ||
-          event.commandName == 'explain'
+          event.commandName === 'find' ||
+          event.commandName === 'getMore' ||
+          event.commandName === 'killCursors' ||
+          event.commandName === 'explain'
         )
           failed.push(event);
       });
@@ -926,15 +926,15 @@ describe('APM', function() {
 
       var listener = require('../..').instrument();
       listener.on('started', function(event) {
-        if (event.commandName == 'getnonce') started.push(event);
+        if (event.commandName === 'getnonce') started.push(event);
       });
 
       listener.on('succeeded', function(event) {
-        if (event.commandName == 'getnonce') succeeded.push(event);
+        if (event.commandName === 'getnonce') succeeded.push(event);
       });
 
       listener.on('failed', function(event) {
-        if (event.commandName == 'getnonce') failed.push(event);
+        if (event.commandName === 'getnonce') failed.push(event);
       });
 
       var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
@@ -975,11 +975,11 @@ describe('APM', function() {
       });
 
       listener.on('started', function(event) {
-        if (event.commandName == 'update') started.push(event);
+        if (event.commandName === 'update') started.push(event);
       });
 
       listener.on('succeeded', function(event) {
-        if (event.commandName == 'update') succeeded.push(event);
+        if (event.commandName === 'update') succeeded.push(event);
       });
 
       var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
@@ -1019,11 +1019,11 @@ describe('APM', function() {
       });
 
       listener.on('started', function(event) {
-        if (event.commandName == 'update') started.push(event);
+        if (event.commandName === 'update') started.push(event);
       });
 
       listener.on('succeeded', function(event) {
-        if (event.commandName == 'update') succeeded.push(event);
+        if (event.commandName === 'update') succeeded.push(event);
       });
 
       var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
@@ -1063,11 +1063,11 @@ describe('APM', function() {
       });
 
       listener.on('started', function(event) {
-        if (event.commandName == 'delete') started.push(event);
+        if (event.commandName === 'delete') started.push(event);
       });
 
       listener.on('succeeded', function(event) {
-        if (event.commandName == 'delete') succeeded.push(event);
+        if (event.commandName === 'delete') succeeded.push(event);
       });
 
       var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
@@ -1159,11 +1159,12 @@ describe('APM', function() {
       });
 
       listener.on('started', function(event) {
-        if (event.commandName == 'aggregate' || event.commandName == 'getMore') started.push(event);
+        if (event.commandName === 'aggregate' || event.commandName === 'getMore')
+          started.push(event);
       });
 
       listener.on('succeeded', function(event) {
-        if (event.commandName == 'aggregate' || event.commandName == 'getMore')
+        if (event.commandName === 'aggregate' || event.commandName === 'getMore')
           succeeded.push(event);
       });
 
@@ -1228,12 +1229,12 @@ describe('APM', function() {
       });
 
       listener.on('started', function(event) {
-        if (event.commandName == 'listCollections') started.push(event);
+        if (event.commandName === 'listCollections') started.push(event);
       });
 
       listener.on('succeeded', function(event) {
         // console.dir(event.commandName)
-        if (event.commandName == 'listCollections') succeeded.push(event);
+        if (event.commandName === 'listCollections') succeeded.push(event);
       });
 
       var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });

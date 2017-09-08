@@ -33,7 +33,7 @@ var ISODate = function(string) {
       m *= 60000;
 
       var offset = h + m;
-      if (match[15] == '+') offset = -offset;
+      if (match[15] === '+') offset = -offset;
 
       new Date(date.valueOf() + offset);
     }
@@ -101,12 +101,12 @@ describe('Insert', function() {
           test.equal(2, r.ops.length);
           test.equal(2, r.insertedCount);
           test.equal(2, r.insertedIds.length);
-          test.ok(r.insertedIds[0]._bsontype == 'ObjectID');
-          test.ok(r.insertedIds[1]._bsontype == 'ObjectID');
+          test.ok(r.insertedIds[0]._bsontype === 'ObjectID');
+          test.ok(r.insertedIds[1]._bsontype === 'ObjectID');
 
           r.ops.forEach(function(doc) {
             test.ok(
-              doc['_id']._bsontype == 'ObjectID' ||
+              doc['_id']._bsontype === 'ObjectID' ||
                 Object.prototype.toString.call(doc['_id']) === '[object ObjectID]'
             );
           });
@@ -117,7 +117,7 @@ describe('Insert', function() {
             var results = [];
             // Check that we have all the results we want
             docs.forEach(function(doc) {
-              if (doc.a == 1 || doc.a == 2) results.push(1);
+              if (doc.a === 1 || doc.a === 2) results.push(1);
             });
             test.equal(2, results.length);
             // Let's close the db
@@ -569,7 +569,7 @@ describe('Insert', function() {
             test.ok(r);
             // Locate document
             collection.findOne({}, function(err, item) {
-              test.ok(item.i._bsontype == 'Timestamp');
+              test.ok(item.i._bsontype === 'Timestamp');
               test.equal(100, item.i.toInt());
               test.equal(200, item.j);
               client.close();
@@ -1171,7 +1171,7 @@ describe('Insert', function() {
                   { $set: { f: function() {} } },
                   { new: true, safe: true, serializeFunctions: true },
                   function(err, result) {
-                    test.ok(result.value.f._bsontype == 'Code');
+                    test.ok(result.value.f._bsontype === 'Code');
                     client.close();
                     done();
                   }
@@ -1215,7 +1215,7 @@ describe('Insert', function() {
           test.ok(result);
 
           collection.findOne({ str: 'String' }, function(err, item) {
-            test.ok(item.func._bsontype == 'Code');
+            test.ok(item.func._bsontype === 'Code');
             client.close();
             done();
           });
@@ -1803,11 +1803,11 @@ describe('Insert', function() {
 
                   collection.findOne({ minkey: new MinKey() }, function(err, doc) {
                     test.equal(null, err);
-                    test.ok(doc.minkey._bsontype == 'MinKey');
+                    test.ok(doc.minkey._bsontype === 'MinKey');
 
                     collection.findOne({ maxkey: new MaxKey() }, function(err, doc) {
                       test.equal(null, err);
-                      test.ok(doc.maxkey._bsontype == 'MaxKey');
+                      test.ok(doc.maxkey._bsontype === 'MaxKey');
 
                       collection.findOne({ code: new Code('function () {}', { a: 77 }) }, function(
                         err,
@@ -1893,11 +1893,11 @@ describe('Insert', function() {
 
                   collection.findOne({ minkey: new MinKey() }, function(err, doc) {
                     test.equal(null, err);
-                    test.ok(doc.minkey._bsontype == 'MinKey');
+                    test.ok(doc.minkey._bsontype === 'MinKey');
 
                     collection.findOne({ maxkey: new MaxKey() }, function(err, doc) {
                       test.equal(null, err);
-                      test.ok(doc.maxkey._bsontype == 'MaxKey');
+                      test.ok(doc.maxkey._bsontype === 'MaxKey');
 
                       collection.findOne({ code: new Code('function () {}', { a: 55 }) }, function(
                         err,
@@ -2126,8 +2126,8 @@ describe('Insert', function() {
 
           db.collection('shouldCorrectlyHonorPromoteLong').findOne(function(err, doc) {
             test.equal(null, err);
-            test.ok(doc.doc._bsontype == 'Long');
-            test.ok(doc.array[0][0]._bsontype == 'Long');
+            test.ok(doc.doc._bsontype === 'Long');
+            test.ok(doc.array[0][0]._bsontype === 'Long');
             client.close();
             done();
           });
@@ -2197,7 +2197,7 @@ describe('Insert', function() {
                   test.equal(null, err);
                   var doc = docs.pop();
 
-                  test.ok(doc.a._bsontype == 'Long');
+                  test.ok(doc.a._bsontype === 'Long');
                   client.close();
                   done();
                 });
@@ -2272,8 +2272,8 @@ describe('Insert', function() {
           db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').findOne(function(err, doc) {
             test.equal(null, err);
             test.equal(null, err);
-            test.ok(doc.doc._bsontype == 'Long');
-            test.ok(doc.array[0][0]._bsontype == 'Long');
+            test.ok(doc.doc._bsontype === 'Long');
+            test.ok(doc.array[0][0]._bsontype === 'Long');
             client.close();
             done();
           });
@@ -2509,7 +2509,7 @@ describe('Insert', function() {
               { ordered: false },
               function(err, r) {
                 test.ok(err != null);
-                test.ok(err.writeErrors.length == 2);
+                test.ok(err.writeErrors.length === 2);
                 test.ok(r);
 
                 client.close();
@@ -2548,7 +2548,7 @@ describe('Insert', function() {
               { ordered: false },
               function(err, r) {
                 test.ok(err != null);
-                test.ok(err.writeErrors.length == 2);
+                test.ok(err.writeErrors.length === 2);
                 test.ok(r);
 
                 client.close();
@@ -2654,11 +2654,11 @@ describe('Insert', function() {
       });
 
       listener.on('started', function(event) {
-        if (event.commandName == 'insert') started.push(event);
+        if (event.commandName === 'insert') started.push(event);
       });
 
       listener.on('succeeded', function(event) {
-        if (event.commandName == 'insert') succeeded.push(event);
+        if (event.commandName === 'insert') succeeded.push(event);
       });
 
       var configuration = this.configuration;
@@ -2694,11 +2694,11 @@ describe('Insert', function() {
       });
 
       listener.on('started', function(event) {
-        if (event.commandName == 'insert') started.push(event);
+        if (event.commandName === 'insert') started.push(event);
       });
 
       listener.on('succeeded', function(event) {
-        if (event.commandName == 'insert') succeeded.push(event);
+        if (event.commandName === 'insert') succeeded.push(event);
       });
 
       var configuration = this.configuration;
@@ -2734,11 +2734,11 @@ describe('Insert', function() {
       });
 
       listener.on('started', function(event) {
-        if (event.commandName == 'insert') started.push(event);
+        if (event.commandName === 'insert') started.push(event);
       });
 
       listener.on('succeeded', function(event) {
-        if (event.commandName == 'insert') succeeded.push(event);
+        if (event.commandName === 'insert') succeeded.push(event);
       });
 
       var configuration = this.configuration;

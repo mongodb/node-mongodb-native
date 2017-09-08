@@ -85,7 +85,7 @@ Server.prototype.start = function() {
         self.connections = self.connections - 1;
         var index = self.sockets.indexOf(c);
 
-        if (index != -1) {
+        if (index !== -1) {
           self.sockets.splice(index, 1);
         }
       });
@@ -109,7 +109,7 @@ Server.prototype.receive = function() {
 
   return new Promise(function(resolve, reject) {
     var waiting = function() {
-      if (self.state == 'destroyed') return reject();
+      if (self.state === 'destroyed') return reject();
       // If we have a message return it
       if (self.messages.length > 0) {
         var message = self.messages.shift();
@@ -131,7 +131,7 @@ var protocol = function(self, message) {
     (message[index++] << 8) |
     (message[index++] << 16) |
     (message[index++] << 24);
-  if (size != message.length) throw new Error('corrupt wire protocol message');
+  if (size !== message.length) throw new Error('corrupt wire protocol message');
   // Adjust to opcode
   index = 12;
   // Get the opCode for the message
@@ -141,12 +141,12 @@ var protocol = function(self, message) {
     (message[index++] << 16) |
     (message[index++] << 24);
   // Switch on type
-  if (type == 2001) return new Update(self.bson, message);
-  if (type == 2002) return new Insert(self.bson, message);
-  if (type == 2004) return new Query(self.bson, message);
-  if (type == 2005) return new GetMore(self.bson, message);
-  if (type == 2006) return new Delete(self.bson, message);
-  if (type == 2007) return new KillCursor(self.bson, message);
+  if (type === 2001) return new Update(self.bson, message);
+  if (type === 2002) return new Insert(self.bson, message);
+  if (type === 2004) return new Query(self.bson, message);
+  if (type === 2005) return new GetMore(self.bson, message);
+  if (type === 2006) return new Delete(self.bson, message);
+  if (type === 2007) return new KillCursor(self.bson, message);
   throw new Error('unknown wire protocol message type');
 };
 
@@ -276,7 +276,7 @@ var dataHandler = function(server, self, connection) {
             } else if (
               sizeOfMessage > 4 &&
               sizeOfMessage < self.maxBsonMessageSize &&
-              sizeOfMessage == data.length
+              sizeOfMessage === data.length
             ) {
               try {
                 emitBuffer = data;

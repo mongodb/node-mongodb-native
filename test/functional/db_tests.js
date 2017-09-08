@@ -132,7 +132,7 @@ describe('Db', function() {
             r
           ) {
             test.equal(1, r.ops.length);
-            test.ok(r.ops[0]._id.toHexString().length == 24);
+            test.ok(r.ops[0]._id.toHexString().length === 24);
 
             collection.findOne({ name: 'Patty' }, function(err, document) {
               test.equal(r.ops[0]._id.toHexString(), document._id.toHexString());
@@ -171,7 +171,7 @@ describe('Db', function() {
             err
           ) {
             test.ok(err != null);
-            test.ok(err.message.indexOf('0') != -1);
+            test.ok(err.message.indexOf('0') !== -1);
             client.close();
             done();
           });
@@ -234,7 +234,7 @@ describe('Db', function() {
 
             collection.insert({ name: 'parent' }, { safe: true }, function(err, r) {
               test.equal(null, err);
-              test.ok(r.ops.length == 1 && r.ops[0]._id != null);
+              test.ok(r.ops.length === 1 && r.ops[0]._id != null);
               var parent = r.ops[0];
               var child = { name: 'child', parent: new DBRef('test_resave_dbref', parent._id) };
 

@@ -716,11 +716,11 @@ describe('ReplSet (Connection)', function() {
 
         // Setup
         client.topology.on('left', function(t) {
-          if (t == 'primary') {
+          if (t === 'primary') {
             // Attempt an insert
             db.collection('_should_fail_due_to_bufferMaxEntries_0').insert({ a: 1 }, function(err) {
               test.ok(err != null);
-              test.ok(err.message.indexOf('0') != -1);
+              test.ok(err.message.indexOf('0') !== -1);
               client.close();
 
               restartAndDone(configuration, done);
@@ -973,7 +973,7 @@ describe('ReplSet (Connection)', function() {
           // Filter out the secondaries
           var secondaries = [];
           result.hosts.forEach(function(s) {
-            if (result.primary != s && result.arbiters.indexOf(s) == -1) secondaries.push(s);
+            if (result.primary !== s && result.arbiters.indexOf(s) === -1) secondaries.push(s);
           });
 
           // Get the arbiters
@@ -983,7 +983,7 @@ describe('ReplSet (Connection)', function() {
           var finished = false;
 
           client.topology.on('left', function(t) {
-            if (t == 'primary' && !finished) {
+            if (t === 'primary' && !finished) {
               finished = true;
               // Return to working state
               client1.db('admin').command({ replSetMaintenance: 0 }, function(err) {
@@ -1065,7 +1065,7 @@ describe('ReplSet (Connection)', function() {
 
   var waitForPrimary = function(count, config, options, callback) {
     var ReplSet = require('mongodb-core').ReplSet;
-    if (count == 0) return callback(new Error('could not connect'));
+    if (count === 0) return callback(new Error('could not connect'));
     // Attempt to connect
     var server = new ReplSet(config, options);
     server.on('error', function(err) {
@@ -1314,7 +1314,7 @@ describe('ReplSet (Connection)', function() {
             test.ok(
               err.message.indexOf(
                 'no connection available for operation and number of stored operation'
-              ) == -1
+              ) === -1
             );
             done();
           }

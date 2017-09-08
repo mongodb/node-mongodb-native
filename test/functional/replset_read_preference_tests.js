@@ -78,7 +78,7 @@ describe('ReplSet (ReadPreference)', function() {
           var secondaries = [];
           var hosts = result.hosts.concat(result.passives || []);
           hosts.forEach(function(s) {
-            if (result.primary != s && result.arbiters.indexOf(s) == -1) secondaries.push(s);
+            if (result.primary !== s && result.arbiters.indexOf(s) === -1) secondaries.push(s);
           });
 
           // // Last server picked
@@ -99,7 +99,7 @@ describe('ReplSet (ReadPreference)', function() {
 
               // Pick the server
               client.topology.replset.once('pickedServer', function(readPreference, server) {
-                test.ok(secondaries.indexOf(server.name) != -1);
+                test.ok(secondaries.indexOf(server.name) !== -1);
               });
 
               // Attempt to perform a read
@@ -113,7 +113,7 @@ describe('ReplSet (ReadPreference)', function() {
 
                     // Pick the server
                     client.topology.replset.once('pickedServer', function(readPreference, server) {
-                      test.ok(secondaries.indexOf(server.name) != -1);
+                      test.ok(secondaries.indexOf(server.name) !== -1);
                     });
 
                     // Attempt to perform a read
@@ -358,7 +358,7 @@ describe('ReplSet (ReadPreference)', function() {
           var gridStore = new GridStore(db, id, 'w', { w: 4 });
 
           result.hosts.forEach(function(s) {
-            if (result.primary != s && result.arbiters.indexOf(s) == -1) secondaries[s] = s;
+            if (result.primary !== s && result.arbiters.indexOf(s) === -1) secondaries[s] = s;
           });
 
           // Force multiple chunks to be stored
@@ -499,7 +499,7 @@ describe('ReplSet (ReadPreference)', function() {
           // Filter out the secondaries
           var secondaries = {};
           result.hosts.forEach(function(s) {
-            if (result.primary != s && result.arbiters.indexOf(s) == -1) secondaries[s] = s;
+            if (result.primary !== s && result.arbiters.indexOf(s) === -1) secondaries[s] = s;
           });
 
           // Pick the server
@@ -563,7 +563,7 @@ describe('ReplSet (ReadPreference)', function() {
           // Filter out the secondaries
           var secondaries = {};
           result.hosts.forEach(function(s) {
-            if (result.primary != s && result.arbiters.indexOf(s) == -1) secondaries[s] = s;
+            if (result.primary !== s && result.arbiters.indexOf(s) === -1) secondaries[s] = s;
           });
 
           // Grab the collection
@@ -633,7 +633,7 @@ describe('ReplSet (ReadPreference)', function() {
           // Filter out the secondaries
           var secondaries = {};
           result.hosts.forEach(function(s) {
-            if (result.primary != s && result.arbiters.indexOf(s) == -1) secondaries[s] = s;
+            if (result.primary !== s && result.arbiters.indexOf(s) === -1) secondaries[s] = s;
           });
 
           // Grab the collection
@@ -762,7 +762,7 @@ describe('ReplSet (ReadPreference)', function() {
           var secondaries = {};
           var hosts = result.hosts.concat(result.passives || []);
           hosts.forEach(function(s) {
-            if (result.primary != s && result.arbiters.indexOf(s) == -1) secondaries[s] = s;
+            if (result.primary !== s && result.arbiters.indexOf(s) === -1) secondaries[s] = s;
           });
 
           client.topology.replset.once('pickedServer', function(readPreference, server) {
@@ -824,7 +824,7 @@ describe('ReplSet (ReadPreference)', function() {
           // Filter out the secondaries
           var secondaries = {};
           result.hosts.forEach(function(s) {
-            if (result.primary != s && result.arbiters.indexOf(s) == -1) secondaries[s] = s;
+            if (result.primary !== s && result.arbiters.indexOf(s) === -1) secondaries[s] = s;
           });
 
           client.topology.replset.once('pickedServer', function(readPreference, server) {

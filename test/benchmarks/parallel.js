@@ -74,7 +74,7 @@ suite.addTest(
           function() {
             workersleft = workersleft - 1;
 
-            if (workersleft == 0) {
+            if (workersleft === 0) {
               stats.endIteration();
               workerFarm.end(processes);
               callback();
@@ -158,7 +158,7 @@ suite.addTest(
         processes({ s: index, e: index + range }, function() {
           workersleft = workersleft - 1;
 
-          if (workersleft == 0) {
+          if (workersleft === 0) {
             stats.endIteration();
             workerFarm.end(processes);
             callback();
@@ -229,7 +229,7 @@ suite.addTest(
               workersleft = workersleft - 1;
               context.docs += 5000;
 
-              if (workersleft == 0) {
+              if (workersleft === 0) {
                 workerFarm.end(processes);
                 callback();
               }
@@ -308,7 +308,7 @@ suite.addTest(
           function() {
             workersleft = workersleft - 1;
 
-            if (workersleft == 0) {
+            if (workersleft === 0) {
               stats.endIteration();
               workerFarm.end(processes);
               callback();
@@ -392,7 +392,7 @@ suite.addTest(
         processes({ s: index, e: index + range }, function() {
           workersleft = workersleft - 1;
 
-          if (workersleft == 0) {
+          if (workersleft === 0) {
             stats.endIteration();
             workerFarm.end(processes);
             callback();
@@ -453,7 +453,7 @@ suite.addTest(
             function() {
               workersleft = workersleft - 1;
 
-              if (workersleft == 0) {
+              if (workersleft === 0) {
                 workerFarm.end(processes);
                 callback();
               }

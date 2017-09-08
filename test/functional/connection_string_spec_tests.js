@@ -8,7 +8,7 @@ describe('Connection String', function() {
   var testFiles = fs
     .readdirSync(f('%s/connection-string', __dirname))
     .filter(function(x) {
-      return x.indexOf('.json') != -1;
+      return x.indexOf('.json') !== -1;
     })
     .map(function(x) {
       return JSON.parse(fs.readFileSync(f('%s/connection-string/%s', __dirname, x)));
@@ -29,9 +29,9 @@ describe('Connection String', function() {
 
           try {
             parse(test.uri);
-            if (valid == false) done('should not have been able to parse');
+            if (valid === false) done('should not have been able to parse');
           } catch (err) {
-            if (valid == true) done(err);
+            if (valid === true) done(err);
           }
 
           done();

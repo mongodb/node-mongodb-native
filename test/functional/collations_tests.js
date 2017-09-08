@@ -1701,7 +1701,7 @@ describe('Collation', function() {
 
             col.listIndexes().toArray(function(err, r) {
               var indexes = r.filter(function(i) {
-                return i.name == 'collation_test';
+                return i.name === 'collation_test';
               });
 
               test.equal(1, indexes.length);

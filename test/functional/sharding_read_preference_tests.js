@@ -45,9 +45,9 @@ describe('Sharding (Read Preference)', function() {
           // Get the current logger
           Logger.setCurrentLogger(function(message, options) {
             if (
-              options.type == 'debug' &&
-              options.className == 'Cursor' &&
-              options.message.indexOf('"mode":"secondary"') != -1
+              options.type === 'debug' &&
+              options.className === 'Cursor' &&
+              options.message.indexOf('"mode":"secondary"') !== -1
             ) {
               done();
             }
@@ -110,9 +110,9 @@ describe('Sharding (Read Preference)', function() {
           // Get the current logger
           Logger.setCurrentLogger(function(message, options) {
             if (
-              options.type == 'debug' &&
-              options.className == 'Cursor' &&
-              options.message.indexOf('"mode":"notsupported"') != -1
+              options.type === 'debug' &&
+              options.className === 'Cursor' &&
+              options.message.indexOf('"mode":"notsupported"') !== -1
             ) {
               done();
             }
@@ -174,11 +174,11 @@ describe('Sharding (Read Preference)', function() {
           // Get the current logger
           Logger.setCurrentLogger(function(message, options) {
             if (
-              options.type == 'debug' &&
-              options.className == 'Cursor' &&
+              options.type === 'debug' &&
+              options.className === 'Cursor' &&
               options.message.indexOf(
                 '{"mode":"secondary","tags":[{"dc":"sf","s":"1"},{"dc":"ma","s":"2"}]}'
-              ) != -1
+              ) !== -1
             ) {
               done();
             }
@@ -244,8 +244,8 @@ describe('Sharding (Read Preference)', function() {
           // Get the current logger
           Logger.setCurrentLogger(function(message, options) {
             if (
-              options.type == 'debug' &&
-              options.className == 'Cursor' &&
+              options.type === 'debug' &&
+              options.className === 'Cursor' &&
               options.message.indexOf('{"mode":"secondary","tags":[{"loc":"ny"},{"loc":"sf"}]}') !==
                 -1
             ) {

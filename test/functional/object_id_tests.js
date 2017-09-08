@@ -28,7 +28,7 @@ describe('ObjectID', function() {
         // Insert test documents (creates collections and test fetch by query)
         collection.insert({ name: 'Fred', age: 42 }, { w: 1 }, function(err, r) {
           test.equal(1, r.ops.length);
-          test.ok(r.ops[0]['_id'].toHexString().length == 24);
+          test.ok(r.ops[0]['_id'].toHexString().length === 24);
           // Locate the first document inserted
           collection.findOne({ name: 'Fred' }, function(err, document) {
             test.equal(r.ops[0]['_id'].toHexString(), document._id.toHexString());
@@ -39,7 +39,7 @@ describe('ObjectID', function() {
         // Insert another test document and collect using ObjectId
         collection.insert({ name: 'Pat', age: 21 }, { w: 1 }, function(err, r) {
           test.equal(1, r.ops.length);
-          test.ok(r.ops[0]['_id'].toHexString().length == 24);
+          test.ok(r.ops[0]['_id'].toHexString().length === 24);
           // Locate the first document inserted
           collection.findOne(r.ops[0]['_id'], function(err, document) {
             test.equal(r.ops[0]['_id'].toHexString(), document._id.toHexString());
@@ -52,7 +52,7 @@ describe('ObjectID', function() {
         // Insert a manually created document with generated oid
         collection.insert({ _id: objectId, name: 'Donald', age: 95 }, { w: 1 }, function(err, r) {
           test.equal(1, r.ops.length);
-          test.ok(r.ops[0]['_id'].toHexString().length == 24);
+          test.ok(r.ops[0]['_id'].toHexString().length === 24);
           test.equal(objectId.toHexString(), r.ops[0]['_id'].toHexString());
           // Locate the first document inserted
           collection.findOne(r.ops[0]['_id'], function(err, document) {
@@ -63,7 +63,7 @@ describe('ObjectID', function() {
         });
 
         var intervalId = setInterval(function() {
-          if (number_of_tests_done == 3) {
+          if (number_of_tests_done === 3) {
             clearInterval(intervalId);
             client.close();
             done();

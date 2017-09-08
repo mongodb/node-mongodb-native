@@ -8,7 +8,7 @@ function findScenarios(type) {
   return fs
     .readdirSync(path.join(__dirname, 'crud', type))
     .filter(x => {
-      return x.indexOf('json') != -1;
+      return x.indexOf('json') !== -1;
     })
     .map(x => {
       return [x, fs.readFileSync(path.join(__dirname, 'crud', type, x), 'utf8')];
@@ -199,7 +199,7 @@ describe('CRUD spec', function() {
     // Get the results
     return collection[opName](filter, replacement, options).then(function(result) {
       Object.keys(scenarioTest.outcome.result).forEach(function(resultName) {
-        if (resultName == 'upsertedId') {
+        if (resultName === 'upsertedId') {
           test.equal(scenarioTest.outcome.result[resultName], result[resultName]._id);
         } else {
           test.equal(scenarioTest.outcome.result[resultName], result[resultName]);
@@ -227,7 +227,7 @@ describe('CRUD spec', function() {
 
     return collection[scenarioTest.operation.name](filter, update, options).then(function(result) {
       Object.keys(scenarioTest.outcome.result).forEach(function(resultName) {
-        if (resultName == 'upsertedId') {
+        if (resultName === 'upsertedId') {
           test.equal(scenarioTest.outcome.result[resultName], result[resultName]._id);
         } else {
           test.equal(scenarioTest.outcome.result[resultName], result[resultName]);
@@ -251,7 +251,7 @@ describe('CRUD spec', function() {
     var second = args.update || args.replacement;
     var options = assign({}, args);
     if (options.returnDocument) {
-      options.returnOriginal = options.returnDocument == 'After' ? false : true;
+      options.returnOriginal = options.returnDocument === 'After' ? false : true;
     }
 
     delete options.filter;

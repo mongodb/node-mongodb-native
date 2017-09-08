@@ -522,9 +522,9 @@ describe('Indexes', function() {
                 collection.insert({ loc: [200, 200] }, configuration.writeConcernMax(), function(
                   err
                 ) {
-                  test.ok(err.errmsg.indexOf('point not in interval of') != -1);
-                  test.ok(err.errmsg.indexOf('-180') != -1);
-                  test.ok(err.errmsg.indexOf('180') != -1);
+                  test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
+                  test.ok(err.errmsg.indexOf('-180') !== -1);
+                  test.ok(err.errmsg.indexOf('180') !== -1);
                   client.close();
                   done();
                 });
@@ -572,9 +572,9 @@ describe('Indexes', function() {
                     { loc: [-200, -200] },
                     configuration.writeConcernMax(),
                     function(err) {
-                      test.ok(err.errmsg.indexOf('point not in interval of') != -1);
-                      test.ok(err.errmsg.indexOf('0') != -1);
-                      test.ok(err.errmsg.indexOf('1024') != -1);
+                      test.ok(err.errmsg.indexOf('point not in interval of') !== -1);
+                      test.ok(err.errmsg.indexOf('0') !== -1);
+                      test.ok(err.errmsg.indexOf('1024') !== -1);
                       client.close();
                       done();
                     }
@@ -1064,11 +1064,11 @@ describe('Indexes', function() {
         });
 
         listener.on('started', function(event) {
-          if (event.commandName == 'createIndexes') started.push(event);
+          if (event.commandName === 'createIndexes') started.push(event);
         });
 
         listener.on('succeeded', function(event) {
-          if (event.commandName == 'createIndexes') succeeded.push(event);
+          if (event.commandName === 'createIndexes') succeeded.push(event);
         });
 
         db

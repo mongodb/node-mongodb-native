@@ -31,7 +31,7 @@ describe('Collection', function() {
           db.listCollections().toArray(function(err, documents) {
             var found = false;
             documents.forEach(function(document) {
-              if (document.name == 'integration_tests_.test_collection_methods') found = true;
+              if (document.name === 'integration_tests_.test_collection_methods') found = true;
             });
             test.ok(true, found);
 
@@ -102,7 +102,7 @@ describe('Collection', function() {
             test.equal(null, err);
             var found = false;
             documents.forEach(function(x) {
-              if (x.name == 'test.game') found = true;
+              if (x.name === 'test.game') found = true;
             });
 
             test.ok(found);
@@ -154,10 +154,10 @@ describe('Collection', function() {
                           var found_does_not_exist = false;
 
                           collections.forEach(function(collection) {
-                            if (collection.collectionName == 'test.spiderman')
+                            if (collection.collectionName === 'test.spiderman')
                               found_spiderman = true;
-                            if (collection.collectionName == 'test.mario') found_mario = true;
-                            if (collection.collectionName == 'does_not_exist')
+                            if (collection.collectionName === 'test.mario') found_mario = true;
+                            if (collection.collectionName === 'does_not_exist')
                               found_does_not_exist = true;
                           });
 
@@ -206,8 +206,8 @@ describe('Collection', function() {
 
             documents.forEach(function(document) {
               if (
-                document.name == self.configuration.db + '.test_collection_names' ||
-                document.name == 'test_collection_names'
+                document.name === self.configuration.db + '.test_collection_names' ||
+                document.name === 'test_collection_names'
               )
                 found = true;
             });
@@ -221,13 +221,13 @@ describe('Collection', function() {
               db.listCollections().toArray(function(err, documents) {
                 documents.forEach(function(document) {
                   if (
-                    document.name == self.configuration.db + '.test_collection_names2' ||
-                    document.name == 'test_collection_names2'
+                    document.name === self.configuration.db + '.test_collection_names2' ||
+                    document.name === 'test_collection_names2'
                   )
                     found = true;
                   if (
-                    document.name == self.configuration.db + '.test_collection_names' ||
-                    document.name == 'test_collection_names'
+                    document.name === self.configuration.db + '.test_collection_names' ||
+                    document.name === 'test_collection_names'
                   )
                     found2 = true;
                 });
@@ -755,7 +755,7 @@ describe('Collection', function() {
 
           collection.insert({ i: 1 }, self.configuration.writeConcernMax(), function(err, r) {
             test.equal(1, r.ops.length);
-            test.ok(r.ops[0]._id.toHexString().length == 24);
+            test.ok(r.ops[0]._id.toHexString().length === 24);
 
             // Update the record
             collection.update(
@@ -996,7 +996,7 @@ describe('Collection', function() {
                   test.equal(null, err);
 
                   for (var i = 0; i < indexes.length; i++) {
-                    if (indexes[i].name == 'createdAt_1') {
+                    if (indexes[i].name === 'createdAt_1') {
                       test.equal(1, indexes[i].expireAfterSeconds);
                       break;
                     }
@@ -1052,7 +1052,7 @@ describe('Collection', function() {
                   test.equal(null, err);
 
                   for (var i = 0; i < indexes.length; i++) {
-                    if (indexes[i].name == 'createdAt_1') {
+                    if (indexes[i].name === 'createdAt_1') {
                       test.equal(1, indexes[i].expireAfterSeconds);
                       break;
                     }
@@ -1300,7 +1300,7 @@ describe('Collection', function() {
             test.equal(documents.length, 1);
             var found = false;
             documents.forEach(function(document) {
-              if (document.name == testCollection) found = true;
+              if (document.name === testCollection) found = true;
             });
             test.ok(found);
             client.close();
@@ -1345,7 +1345,7 @@ describe('Collection', function() {
               var found = false;
 
               documents.forEach(function(document) {
-                if (document.name == testCollection) found = true;
+                if (document.name === testCollection) found = true;
               });
 
               test.ok(found);
@@ -1499,8 +1499,8 @@ describe('Collection', function() {
                 var foundCollection = false;
                 collections.forEach(function(x) {
                   if (
-                    x.namespace == 'listCollectionsDb2.test.test' &&
-                    x.collectionName == 'test.test'
+                    x.namespace === 'listCollectionsDb2.test.test' &&
+                    x.collectionName === 'test.test'
                   ) {
                     foundCollection = true;
                   }

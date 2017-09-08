@@ -25,11 +25,11 @@ describe('Find and Modify', function() {
       });
 
       listener.on('started', function(event) {
-        if (event.commandName == 'findandmodify') started.push(event);
+        if (event.commandName === 'findandmodify') started.push(event);
       });
 
       listener.on('succeeded', function(event) {
-        if (event.commandName == 'findandmodify') succeeded.push(event);
+        if (event.commandName === 'findandmodify') succeeded.push(event);
       });
 
       var configuration = this.configuration;
@@ -89,11 +89,11 @@ describe('Find and Modify', function() {
       });
 
       listener.on('started', function(event) {
-        if (event.commandName == 'findandmodify') started.push(event);
+        if (event.commandName === 'findandmodify') started.push(event);
       });
 
       listener.on('succeeded', function(event) {
-        if (event.commandName == 'findandmodify') succeeded.push(event);
+        if (event.commandName === 'findandmodify') succeeded.push(event);
       });
 
       var configuration = this.configuration;
@@ -155,15 +155,15 @@ describe('Find and Modify', function() {
       });
 
       listener.on('started', function(event) {
-        if (event.commandName == 'findandmodify') started.push(event);
+        if (event.commandName === 'findandmodify') started.push(event);
       });
 
       listener.on('succeeded', function(event) {
-        if (event.commandName == 'findandmodify') succeeded.push(event);
+        if (event.commandName === 'findandmodify') succeeded.push(event);
       });
 
       var url = configuration.url();
-      url = url.indexOf('?') != -1 ? f('%s&%s', url, 'fsync=true') : f('%s?%s', url, 'fsync=true');
+      url = url.indexOf('?') !== -1 ? f('%s&%s', url, 'fsync=true') : f('%s?%s', url, 'fsync=true');
 
       // Establish connection to db
       MongoClient.connect(url, { server: { sslValidate: false } }, function(err, client) {

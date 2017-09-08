@@ -15,7 +15,7 @@ module.exports = function(o, callback) {
       stream.on('close', function() {
         left = left - 1;
 
-        if (left == 0) {
+        if (left === 0) {
           callback();
         }
       });

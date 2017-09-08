@@ -96,7 +96,7 @@ describe('URI', function() {
     test: function(done) {
       var MongoClient = this.configuration.require.MongoClient;
 
-      if (process.platform != 'win32') {
+      if (process.platform !== 'win32') {
         MongoClient.connect('mongodb://%2Ftmp%2Fmongodb-27017.sock?safe=false', function(
           err,
           client

@@ -37,9 +37,9 @@ describe('ReplSet (Failover)', function() {
 
           client.topology.on('joined', function(t, d, s) {
             if (
-              t == 'secondary' &&
+              t === 'secondary' &&
               secondaryServerManager &&
-              s.name == f('%s:%s', secondaryServerManager.host, secondaryServerManager.port)
+              s.name === f('%s:%s', secondaryServerManager.host, secondaryServerManager.port)
             ) {
               client.close();
               restartAndDone(configuration, done);
@@ -90,16 +90,16 @@ describe('ReplSet (Failover)', function() {
       client.connect(function(err, client) {
         // Wait for close event due to primary stepdown
         client.topology.on('joined', function(t) {
-          if (t == 'primary') state++;
+          if (t === 'primary') state++;
         });
 
         client.topology.on('left', function(t) {
-          if (t == 'primary') state++;
+          if (t === 'primary') state++;
         });
 
         // Wait fo rthe test to be done
         var interval = setInterval(function() {
-          if (state == 2) {
+          if (state === 2) {
             clearInterval(interval);
             client.close();
             restartAndDone(configuration, done);
@@ -160,11 +160,11 @@ describe('ReplSet (Failover)', function() {
           left[s.name] = { type: t, server: s };
 
           // Restart the servers
-          if (Object.keys(left).length == 2) {
+          if (Object.keys(left).length === 2) {
             client.topology.removeAllListeners('left');
             // Wait for close event due to primary stepdown
             client.topology.on('joined', function(t, d, s) {
-              if ('secondary' == t && left[s.name]) {
+              if ('secondary' === t && left[s.name]) {
                 joined++;
               }
 
@@ -207,9 +207,9 @@ describe('ReplSet (Failover)', function() {
           // Add event listeners
           client.topology.on('joined', function(t, d, s) {
             if (
-              t == 'primary' &&
+              t === 'primary' &&
               leftServer &&
-              s.name == f('%s:%s', leftServer.host, leftServer.port)
+              s.name === f('%s:%s', leftServer.host, leftServer.port)
             ) {
               client.close();
               restartAndDone(configuration, done);
@@ -233,7 +233,7 @@ describe('ReplSet (Failover)', function() {
                   var members = config.members;
                   // Update the right configuration
                   for (var i = 0; i < members.length; i++) {
-                    if (members[i].host == f('%s:%s', managers[0].host, managers[0].port)) {
+                    if (members[i].host === f('%s:%s', managers[0].host, managers[0].port)) {
                       members[i].priority = 10;
                       break;
                     }
@@ -314,7 +314,7 @@ describe('ReplSet (Failover)', function() {
                         test.equal(null, err);
                         totalCount = totalCount - 1;
 
-                        if (totalCount == 0) {
+                        if (totalCount === 0) {
                           callback();
                         }
                       });
@@ -337,7 +337,7 @@ describe('ReplSet (Failover)', function() {
                             test.equal(
                               1,
                               results.filter(function(element) {
-                                return element.a == a;
+                                return element.a === a;
                               }).length
                             );
                           });
@@ -575,7 +575,7 @@ describe('ReplSet (Failover)', function() {
             primary.stop().then(function() {
               db.collection('notempty_does_not_exist', { strict: true }, function(err) {
                 test.ok(err != null);
-                test.ok(err.message.indexOf('Currently in strict mode') != -1);
+                test.ok(err.message.indexOf('Currently in strict mode') !== -1);
 
                 client.close();
                 restartAndDone(configuration, done);

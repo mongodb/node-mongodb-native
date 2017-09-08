@@ -1166,7 +1166,7 @@ describe('GridFS Stream', function() {
       } else if (specDoc[key] === '*result') {
         test.equal(resDoc[key].toString(), result.toString());
       } else if (specDoc[key].$hex) {
-        test.ok(resDoc[key]._bsontype == 'Binary');
+        test.ok(resDoc[key]._bsontype === 'Binary');
         test.equal(resDoc[key].toString('hex'), specDoc[key].$hex);
       } else {
         if (typeof specDoc[key] === 'object') {

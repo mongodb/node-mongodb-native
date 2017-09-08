@@ -49,7 +49,7 @@ describe('ReadConcern', function() {
         test.deepEqual({ level: 'local' }, collection.s.readConcern);
         // Perform a find using the readConcern
         listener.on('started', function(event) {
-          if (event.commandName == 'find') started.push(event);
+          if (event.commandName === 'find') started.push(event);
         });
 
         // Execute find
@@ -94,7 +94,7 @@ describe('ReadConcern', function() {
         test.deepEqual({ level: 'majority' }, collection.s.readConcern);
         // Perform a find using the readConcern
         listener.on('started', function(event) {
-          if (event.commandName == 'find') started.push(event);
+          if (event.commandName === 'find') started.push(event);
         });
 
         // Execute find
@@ -136,7 +136,7 @@ describe('ReadConcern', function() {
         test.deepEqual({ level: 'local' }, collection.s.readConcern);
         // Perform a find using the readConcern
         listener.on('started', function(event) {
-          if (event.commandName == 'find') started.push(event);
+          if (event.commandName === 'find') started.push(event);
         });
 
         // Execute find
@@ -181,7 +181,7 @@ describe('ReadConcern', function() {
         test.deepEqual({ level: 'majority' }, collection.s.readConcern);
         // Perform a find using the readConcern
         listener.on('started', function(event) {
-          if (event.commandName == 'find') started.push(event);
+          if (event.commandName === 'find') started.push(event);
         });
 
         // Execute find
@@ -212,7 +212,7 @@ describe('ReadConcern', function() {
       var started = [];
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'readConcernLevel=local')
           : f('%s?%s', url, 'readConcernLevel=local');
 
@@ -228,7 +228,7 @@ describe('ReadConcern', function() {
         test.deepEqual({ level: 'local' }, collection.s.readConcern);
         // Perform a find using the readConcern
         listener.on('started', function(event) {
-          if (event.commandName == 'find') started.push(event);
+          if (event.commandName === 'find') started.push(event);
         });
 
         // Execute find
@@ -259,7 +259,7 @@ describe('ReadConcern', function() {
       var started = [];
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'readConcernLevel=majority')
           : f('%s?%s', url, 'readConcernLevel=majority');
 
@@ -275,7 +275,7 @@ describe('ReadConcern', function() {
         test.deepEqual({ level: 'majority' }, collection.s.readConcern);
         // Perform a find using the readConcern
         listener.on('started', function(event) {
-          if (event.commandName == 'find') started.push(event);
+          if (event.commandName === 'find') started.push(event);
         });
 
         // Execute find
@@ -323,7 +323,7 @@ describe('ReadConcern', function() {
         test.deepEqual({ level: 'majority' }, collection.s.readConcern);
         // Perform a find using the readConcern
         listener.on('started', function(event) {
-          if (event.commandName == 'find') started.push(event);
+          if (event.commandName === 'find') started.push(event);
         });
 
         // Execute find
@@ -369,7 +369,7 @@ describe('ReadConcern', function() {
         test.deepEqual({ level: 'majority' }, collection.s.readConcern);
         // Perform a find using the readConcern
         listener.on('started', function(event) {
-          if (event.commandName == 'find') started.push(event);
+          if (event.commandName === 'find') started.push(event);
         });
 
         // Execute find
@@ -415,10 +415,10 @@ describe('ReadConcern', function() {
 
         // Listen to apm events
         listener.on('started', function(event) {
-          if (event.commandName == 'aggregate') started.push(event);
+          if (event.commandName === 'aggregate') started.push(event);
         });
         listener.on('succeeded', function(event) {
-          if (event.commandName == 'aggregate') succeeded.push(event);
+          if (event.commandName === 'aggregate') succeeded.push(event);
         });
 
         // Execute find
@@ -467,10 +467,10 @@ describe('ReadConcern', function() {
 
         // Listen to apm events
         listener.on('started', function(event) {
-          if (event.commandName == 'aggregate') started.push(event);
+          if (event.commandName === 'aggregate') started.push(event);
         });
         listener.on('succeeded', function(event) {
-          if (event.commandName == 'aggregate') succeeded.push(event);
+          if (event.commandName === 'aggregate') succeeded.push(event);
         });
 
         // Execute find
@@ -538,10 +538,10 @@ describe('ReadConcern', function() {
 
             // Listen to apm events
             listener.on('started', function(event) {
-              if (event.commandName == 'mapreduce') started.push(event);
+              if (event.commandName === 'mapreduce') started.push(event);
             });
             listener.on('succeeded', function(event) {
-              if (event.commandName == 'mapreduce') succeeded.push(event);
+              if (event.commandName === 'mapreduce') succeeded.push(event);
             });
 
             // Execute mapReduce
@@ -606,10 +606,10 @@ describe('ReadConcern', function() {
 
             // Listen to apm events
             listener.on('started', function(event) {
-              if (event.commandName == 'distinct') started.push(event);
+              if (event.commandName === 'distinct') started.push(event);
             });
             listener.on('succeeded', function(event) {
-              if (event.commandName == 'distinct') succeeded.push(event);
+              if (event.commandName === 'distinct') succeeded.push(event);
             });
 
             // Perform a distinct query against the a field
@@ -672,10 +672,10 @@ describe('ReadConcern', function() {
 
             // Listen to apm events
             listener.on('started', function(event) {
-              if (event.commandName == 'count') started.push(event);
+              if (event.commandName === 'count') started.push(event);
             });
             listener.on('succeeded', function(event) {
-              if (event.commandName == 'count') succeeded.push(event);
+              if (event.commandName === 'count') succeeded.push(event);
             });
 
             // Perform a distinct query against the a field
@@ -737,10 +737,10 @@ describe('ReadConcern', function() {
 
             // Listen to apm events
             listener.on('started', function(event) {
-              if (event.commandName == 'group') started.push(event);
+              if (event.commandName === 'group') started.push(event);
             });
             listener.on('succeeded', function(event) {
-              if (event.commandName == 'group') succeeded.push(event);
+              if (event.commandName === 'group') succeeded.push(event);
             });
 
             // Execute group command
@@ -809,10 +809,10 @@ describe('ReadConcern', function() {
 
             // Listen to apm events
             listener.on('started', function(event) {
-              if (event.commandName == 'parallelCollectionScan') started.push(event);
+              if (event.commandName === 'parallelCollectionScan') started.push(event);
             });
             listener.on('succeeded', function(event) {
-              if (event.commandName == 'parallelCollectionScan') succeeded.push(event);
+              if (event.commandName === 'parallelCollectionScan') succeeded.push(event);
             });
 
             // Execute parallelCollectionScan command
@@ -861,10 +861,10 @@ describe('ReadConcern', function() {
 
         // Listen to apm events
         listener.on('started', function(event) {
-          if (event.commandName == 'geoNear') started.push(event);
+          if (event.commandName === 'geoNear') started.push(event);
         });
         listener.on('succeeded', function(event) {
-          if (event.commandName == 'geoNear') succeeded.push(event);
+          if (event.commandName === 'geoNear') succeeded.push(event);
         });
 
         // Add a location based index
@@ -925,10 +925,10 @@ describe('ReadConcern', function() {
 
         // Listen to apm events
         listener.on('started', function(event) {
-          if (event.commandName == 'geoSearch') started.push(event);
+          if (event.commandName === 'geoSearch') started.push(event);
         });
         listener.on('succeeded', function(event) {
-          if (event.commandName == 'geoSearch') succeeded.push(event);
+          if (event.commandName === 'geoSearch') succeeded.push(event);
         });
 
         // Add a location based index

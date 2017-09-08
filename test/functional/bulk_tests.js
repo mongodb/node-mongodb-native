@@ -300,7 +300,7 @@ describe('Bulk', function() {
               // Test basic settings
               test.equal(1, result.nInserted);
               test.equal(1, result.nMatched);
-              test.ok(1 == result.nModified || result.nModified == null);
+              test.ok(1 === result.nModified || result.nModified == null);
               test.equal(true, result.hasWriteErrors());
               test.ok(1, result.getWriteErrorCount());
 
@@ -360,7 +360,7 @@ describe('Bulk', function() {
               test.equal(1, result.nInserted);
               test.equal(2, result.nUpserted);
               test.equal(1, result.nMatched);
-              test.ok(1 == result.nModified || result.nModified == null);
+              test.ok(1 === result.nModified || result.nModified == null);
               test.equal(true, result.hasWriteErrors());
               test.ok(1, result.getWriteErrorCount());
 
@@ -416,7 +416,7 @@ describe('Bulk', function() {
           test.equal(1, result.nUpserted);
           test.equal(0, result.nInserted);
           test.equal(0, result.nMatched);
-          test.ok(0 == result.nModified || result.nModified == null);
+          test.ok(0 === result.nModified || result.nModified == null);
           test.equal(0, result.nRemoved);
 
           var upserts = result.getUpsertedIds();
@@ -487,7 +487,7 @@ describe('Bulk', function() {
           test.equal(0, result.nUpserted);
           test.equal(0, result.nInserted);
           test.equal(0, result.nMatched);
-          test.ok(0 == result.nModified || result.nModified == null);
+          test.ok(0 === result.nModified || result.nModified == null);
           test.equal(0, result.nRemoved);
           test.equal(false, result.hasWriteErrors());
 
@@ -533,7 +533,7 @@ describe('Bulk', function() {
             test.equal(2, result.nInserted);
             test.equal(0, result.nUpserted);
             test.equal(0, result.nMatched);
-            test.ok(0 == result.nModified || result.nModified == null);
+            test.ok(0 === result.nModified || result.nModified == null);
             test.equal(true, result.hasWriteErrors());
             test.equal(1, result.getWriteErrorCount());
 
@@ -832,11 +832,11 @@ describe('Bulk', function() {
             // Test basic settings
             test.equal(2, result.nInserted);
             test.equal(true, result.hasWriteErrors());
-            test.ok(result.getWriteErrorCount() == 4 || result.getWriteErrorCount() == 3);
+            test.ok(result.getWriteErrorCount() === 4 || result.getWriteErrorCount() === 3);
 
             // Individual error checking
             var error = result.getWriteErrorAt(0);
-            test.ok(error.code == 11000 || error.code == 11001);
+            test.ok(error.code === 11000 || error.code === 11001);
             test.ok(error.errmsg != null);
 
             client.close();
@@ -888,14 +888,14 @@ describe('Bulk', function() {
               // Test basic settings
               test.equal(2, result.nInserted);
               test.equal(2, result.nUpserted);
-              test.ok(0 == result.nModified || result.nModified == null);
+              test.ok(0 === result.nModified || result.nModified == null);
               test.equal(0, result.nRemoved);
               test.equal(true, result.hasWriteErrors());
               test.ok(1, result.getWriteErrorCount());
 
               // Individual error checking
               var error = result.getWriteErrorAt(0);
-              test.ok(error.code == 11000 || error.code == 11001);
+              test.ok(error.code === 11000 || error.code === 11001);
               test.ok(error.errmsg != null);
               test.equal(1, error.getOperation().u['$set'].b);
 
@@ -942,7 +942,7 @@ describe('Bulk', function() {
           test.equal(1, result.nUpserted);
           test.equal(0, result.nInserted);
           test.equal(0, result.nMatched);
-          test.ok(0 == result.nModified || result.nModified == null);
+          test.ok(0 === result.nModified || result.nModified == null);
           test.equal(0, result.nRemoved);
 
           var upserts = result.getUpsertedIds();
@@ -1046,7 +1046,7 @@ describe('Bulk', function() {
           test.equal(0, result.nUpserted);
           test.equal(0, result.nInserted);
           test.equal(0, result.nMatched);
-          test.ok(0 == result.nModified || result.nModified == null);
+          test.ok(0 === result.nModified || result.nModified == null);
           test.equal(0, result.nRemoved);
           test.equal(false, result.hasWriteErrors());
 

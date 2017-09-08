@@ -39,7 +39,7 @@ describe('MongoClient', function() {
 
             collection.insert(docs, configuration.writeConcern(), function(err) {
               test.ok(err != null);
-              test.ok(err.message.indexOf('0') != -1);
+              test.ok(err.message.indexOf('0') !== -1);
 
               // Let's close the db
               client.close();
@@ -89,7 +89,7 @@ describe('MongoClient', function() {
             // Execute insert
             collection.insert(docs, opts, function(err) {
               test.ok(err != null);
-              test.ok(err.message.indexOf('0') != -1);
+              test.ok(err.message.indexOf('0') !== -1);
 
               // Let's close the db
               client.close();
@@ -325,7 +325,7 @@ describe('MongoClient', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=100')
           : f('%s?%s', url, 'maxPoolSize=100');
 
@@ -353,7 +353,7 @@ describe('MongoClient', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=100')
           : f('%s?%s', url, 'maxPoolSize=100');
 
@@ -407,7 +407,7 @@ describe('MongoClient', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=100')
           : f('%s?%s', url, 'maxPoolSize=100');
 
@@ -625,7 +625,7 @@ describe('MongoClient', function() {
       var configuration = this.configuration;
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
-      if (url.indexOf('rs_name') != -1) {
+      if (url.indexOf('rs_name') !== -1) {
         url = f('%s&appname=hello%20world', configuration.url());
       } else {
         url = f('%s?appname=hello%20world', configuration.url());

@@ -23,7 +23,7 @@ describe('Promises (Db)', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=100')
           : f('%s?%s', url, 'maxPoolSize=100');
 
@@ -71,7 +71,7 @@ describe('Promises (Db)', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
@@ -81,7 +81,7 @@ describe('Promises (Db)', function() {
           .db(configuration.db)
           .command({ ismaster: true })
           .then(function(result) {
-            test.ok(result != null);
+            test.ok(result !== null);
 
             client.close();
             done();
@@ -105,7 +105,7 @@ describe('Promises (Db)', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
@@ -140,7 +140,7 @@ describe('Promises (Db)', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
@@ -176,7 +176,7 @@ describe('Promises (Db)', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
@@ -209,7 +209,7 @@ describe('Promises (Db)', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
@@ -242,7 +242,7 @@ describe('Promises (Db)', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
@@ -286,7 +286,7 @@ describe('Promises (Db)', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
@@ -322,7 +322,7 @@ describe('Promises (Db)', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
@@ -362,7 +362,7 @@ describe('Promises (Db)', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
@@ -395,7 +395,7 @@ describe('Promises (Db)', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
@@ -429,7 +429,7 @@ describe('Promises (Db)', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
-        url.indexOf('?') != -1
+        url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 

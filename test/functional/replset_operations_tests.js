@@ -74,7 +74,7 @@ describe('ReplSet (Operations)', function() {
               test.equal(0, result.nMatched);
               test.equal(0, result.nUpserted);
               test.equal(0, result.nRemoved);
-              test.ok(result.nModified == null || result.nModified == 0);
+              test.ok(result.nModified == null || result.nModified === 0);
 
               var writeConcernError = result.getWriteConcernError();
               test.ok(writeConcernError != null);
@@ -161,7 +161,7 @@ describe('ReplSet (Operations)', function() {
                 test.equal(0, result.nMatched);
                 test.equal(1, result.nUpserted);
                 test.equal(0, result.nRemoved);
-                test.ok(result.nModified == null || result.nModified == 0);
+                test.ok(result.nModified == null || result.nModified === 0);
 
                 var writeConcernError = result.getWriteConcernError();
                 test.ok(writeConcernError != null);
@@ -259,7 +259,7 @@ describe('ReplSet (Operations)', function() {
               test.equal(0, result.nMatched);
               test.equal(1, result.nUpserted);
               test.equal(0, result.nRemoved);
-              test.ok(result.nModified == null || result.nModified == 0);
+              test.ok(result.nModified == null || result.nModified === 0);
 
               var writeConcernError = result.getWriteConcernError();
               test.ok(writeConcernError != null);
@@ -346,7 +346,7 @@ describe('ReplSet (Operations)', function() {
                 test.equal(0, result.nMatched);
                 test.equal(1, result.nUpserted);
                 test.equal(0, result.nRemoved);
-                test.ok(result.nModified == null || result.nModified == 0);
+                test.ok(result.nModified == null || result.nModified === 0);
 
                 var writeConcernError = result.getWriteConcernError();
                 test.ok(writeConcernError != null);
@@ -355,12 +355,12 @@ describe('ReplSet (Operations)', function() {
 
                 // Might or might not have a write error depending on
                 // Unordered execution order
-                test.ok(result.getWriteErrorCount() == 0 || result.getWriteErrorCount() == 1);
+                test.ok(result.getWriteErrorCount() === 0 || result.getWriteErrorCount() === 1);
 
                 // If we have an error it should be a duplicate key error
-                if (result.getWriteErrorCount() == 1) {
+                if (result.getWriteErrorCount() === 1) {
                   var error = result.getWriteErrorAt(0);
-                  test.ok(error.index == 0 || error.index == 2);
+                  test.ok(error.index === 0 || error.index === 2);
                   test.equal(11000, error.code);
                   test.ok(error.errmsg != null);
                   test.equal(1, error.getOperation().a);

@@ -45,7 +45,7 @@ describe('Sharding (Failover)', function() {
 
               db.collection('replicaset_mongo_client_collection').findOne(function(err) {
                 test.equal(null, err);
-                if (numberOfTicks == 0) {
+                if (numberOfTicks === 0) {
                   mongos.start().then(function() {
                     client.close();
                     done();

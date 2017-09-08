@@ -105,7 +105,7 @@ describe.skip('SSL (MongoClient)', function() {
             },
             function(err) {
               test.ok(err);
-              test.ok(err.message.indexOf('CRL has expired') != -1);
+              test.ok(err.message.indexOf('CRL has expired') !== -1);
 
               serverManager.stop().then(function() {
                 done();

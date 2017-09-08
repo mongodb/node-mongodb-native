@@ -1062,7 +1062,7 @@ describe('Operation Examples', function() {
             // For each collection in the list of collection names in this db look for the
             // dropped collection
             replies.forEach(function(document) {
-              if (document.name == 'test_other_drop') {
+              if (document.name === 'test_other_drop') {
                 found = true;
                 return;
               }
@@ -2164,9 +2164,8 @@ describe('Operation Examples', function() {
           };
 
           // Reduce function
+          // eslint-disable-next-line
           var reduce = function(k, vals) {
-            // eslint-disable-line
-            // eslint-disable-line
             return 1;
           };
 
@@ -3038,7 +3037,7 @@ describe('Operation Examples', function() {
                 left = left - 1;
 
                 // No more cursors let's ensure we got all results
-                if (left == 0) {
+                if (left === 0) {
                   test.equal(docs.length, results.length);
 
                   client.close();
@@ -3875,7 +3874,7 @@ describe('Operation Examples', function() {
         var tests_done = function() {
           numberOfTests = numberOfTests - 1;
 
-          if (numberOfTests == 0) {
+          if (numberOfTests === 0) {
             client.close();
             done();
           }
@@ -4867,7 +4866,7 @@ describe('Operation Examples', function() {
 
                   // Check if we have the db in the list
                   for (var i = 0; i < dbs.length; i++) {
-                    if (dbs[i].name == 'integration_tests_to_drop') found = true;
+                    if (dbs[i].name === 'integration_tests_to_drop') found = true;
                   }
 
                   // We should not find the databases
@@ -5232,10 +5231,10 @@ describe('Operation Examples', function() {
                 // Retrive the profiling information
                 db.profilingInfo(function(err, infos) {
                   test.equal(null, err);
-                  test.ok(infos.constructor == Array);
+                  test.ok(infos.constructor === Array);
                   test.ok(infos.length >= 1);
-                  test.ok(infos[0].ts.constructor == Date);
-                  test.ok(infos[0].millis.constructor == Number);
+                  test.ok(infos[0].ts.constructor === Date);
+                  test.ok(infos[0].millis.constructor === Number);
 
                   client.close();
                   done();
@@ -7131,7 +7130,7 @@ describe('Operation Examples', function() {
                   GridStore.list(db, function(err, items) {
                     var found = false;
                     items.forEach(function(filename) {
-                      if (filename == 'foobar2') found = true;
+                      if (filename === 'foobar2') found = true;
                     });
 
                     test.ok(items.length >= 1);
@@ -7151,7 +7150,7 @@ describe('Operation Examples', function() {
                   GridStore.list(db, 'fs', function(err, items) {
                     var found = false;
                     items.forEach(function(filename) {
-                      if (filename == 'foobar2') found = true;
+                      if (filename === 'foobar2') found = true;
                     });
 
                     test.ok(items.length >= 1);
@@ -7162,7 +7161,7 @@ describe('Operation Examples', function() {
                   GridStore.list(db, 'my_fs', function(err, items) {
                     var found = false;
                     items.forEach(function(filename) {
-                      if (filename == 'foobar2') found = true;
+                      if (filename === 'foobar2') found = true;
                     });
 
                     test.ok(items.length >= 0);
@@ -7192,8 +7191,8 @@ describe('Operation Examples', function() {
                             var found2 = false;
 
                             items.forEach(function(filename) {
-                              if (filename == 'foobar2') found = true;
-                              if (filename == 'foobar3') found2 = true;
+                              if (filename === 'foobar2') found = true;
+                              if (filename === 'foobar3') found2 = true;
                             });
 
                             test.ok(items.length >= 2);
@@ -9094,7 +9093,7 @@ describe('Operation Examples', function() {
           test.equal(2, result.nInserted);
           test.equal(1, result.nUpserted);
           test.equal(1, result.nMatched);
-          test.ok(1 == result.nModified || result.nModified == null);
+          test.ok(1 === result.nModified || result.nModified == null);
           test.equal(1, result.nRemoved);
 
           var upserts = result.getUpsertedIds();
@@ -9162,7 +9161,7 @@ describe('Operation Examples', function() {
           test.equal(2, result.nInserted);
           test.equal(1, result.nUpserted);
           test.equal(1, result.nMatched);
-          test.ok(1 == result.nModified || result.nModified == null);
+          test.ok(1 === result.nModified || result.nModified == null);
           test.equal(1, result.nRemoved);
 
           var upserts = result.getUpsertedIds();
@@ -9505,7 +9504,7 @@ describe('Operation Examples', function() {
             test.equal(1, r.insertedCount);
             test.equal(1, Object.keys(r.insertedIds).length);
             test.equal(1, r.matchedCount);
-            test.ok(r.modifiedCount == 0 || r.modifiedCount == 1);
+            test.ok(r.modifiedCount === 0 || r.modifiedCount === 1);
             test.equal(0, r.deletedCount);
             test.equal(2, r.upsertedCount);
             test.equal(2, Object.keys(r.upsertedIds).length);
@@ -9741,7 +9740,7 @@ describe('Operation Examples', function() {
               cursor.on('data', function() {
                 total = total + 1;
 
-                if (total == 1000) {
+                if (total === 1000) {
                   cursor.kill();
                 }
               });
