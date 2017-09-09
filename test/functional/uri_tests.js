@@ -21,14 +21,9 @@ describe('URI', function() {
         MongoClient.connect(
           'mongodb://localhost:27017/integration_tests',
           {
-            db: {
-              native_parser: false
-            },
-
-            server: {
-              socketOptions: {
-                connectTimeoutMS: 500
-              }
+            native_parser: false,
+            socketOptions: {
+              connectTimeoutMS: 500
             }
           },
           function(err, client) {

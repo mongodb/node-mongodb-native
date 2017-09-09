@@ -280,7 +280,7 @@ describe('Connection', function() {
 
       connect(
         configuration.url(),
-        { server: { auto_reconnect: true, poolSize: 4 } },
+        { auto_reconnect: true, poolSize: 4 },
         connectionTester(configuration, 'testConnectServerOptions', function(client) {
           test.equal(1, client.topology.poolSize);
           test.equal(4, client.topology.s.server.s.pool.size);
@@ -306,8 +306,9 @@ describe('Connection', function() {
       connect(
         configuration.url(),
         {
-          server: { auto_reconnect: true, poolSize: 4 },
-          db: { native_parser: process.env['TEST_NATIVE'] != null }
+          auto_reconnect: true,
+          poolSize: 4,
+          native_parser: process.env['TEST_NATIVE'] != null
         },
         connectionTester(configuration, 'testConnectAllOptions', function(client) {
           test.ok(client.topology.poolSize >= 1);

@@ -3286,10 +3286,7 @@ describe('GridFS', function() {
         assert = require('assert');
 
       // Use connect method to connect to the Server
-      MongoClient.connect(configuration.url(), { server: { sslValidate: false } }, function(
-        err,
-        client
-      ) {
+      MongoClient.connect(configuration.url(), { sslValidate: false }, function(err, client) {
         assert.equal(null, err);
         var db = client.db(configuration.db);
 
@@ -3334,10 +3331,7 @@ describe('GridFS', function() {
         assert = require('assert');
 
       // Use connect method to connect to the Server
-      MongoClient.connect(configuration.url(), { server: { sslValidate: false } }, function(
-        err,
-        client
-      ) {
+      MongoClient.connect(configuration.url(), { sslValidate: false }, function(err, client) {
         assert.equal(null, err);
         var db = client.db(configuration.db);
 
@@ -3408,10 +3402,7 @@ describe('GridFS', function() {
           assert = require('assert');
 
         var id = new ObjectID();
-        MongoClient.connect(configuration.url(), { server: { sslValidate: false } }, function(
-          err,
-          client
-        ) {
+        MongoClient.connect(configuration.url(), { sslValidate: false }, function(err, client) {
           assert.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -3497,10 +3488,7 @@ describe('GridFS', function() {
       var buffer = new Buffer(200033);
 
       // Use connect method to connect to the Server
-      MongoClient.connect(configuration.url(), { server: { sslValidate: false } }, function(
-        err,
-        client
-      ) {
+      MongoClient.connect(configuration.url(), { sslValidate: false }, function(err, client) {
         assert.equal(null, err);
         var db = client.db(configuration.db);
 

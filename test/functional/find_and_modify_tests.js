@@ -166,7 +166,7 @@ describe('Find and Modify', function() {
       url = url.indexOf('?') !== -1 ? f('%s&%s', url, 'fsync=true') : f('%s?%s', url, 'fsync=true');
 
       // Establish connection to db
-      MongoClient.connect(url, { server: { sslValidate: false } }, function(err, client) {
+      MongoClient.connect(url, { sslValidate: false }, function(err, client) {
         test.equal(null, err);
         var db = client.db(configuration.db);
         var collection = db.collection('findAndModifyTEST');

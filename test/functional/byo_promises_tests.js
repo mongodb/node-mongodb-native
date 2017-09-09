@@ -1,7 +1,7 @@
 'use strict';
 var expect = require('chai').expect;
 
-describe('Promises', function() {
+describe('BYO Promises', function() {
   it('should Correctly Use Blurbird promises library', {
     metadata: {
       requires: {
@@ -17,7 +17,7 @@ describe('Promises', function() {
 
       MongoClient.connect(self.configuration.url(), {
         promiseLibrary: Promise,
-        server: { sslValidate: false }
+        sslValidate: false
       }).then(function(client) {
         var db = client.db(self.configuration.db);
         var promise = db.collection('test').insert({ a: 1 });

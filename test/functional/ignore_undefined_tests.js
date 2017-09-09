@@ -58,8 +58,9 @@ describe('Ignore Undefined', function() {
         MongoClient.connect(
           configuration.url(),
           {
-            db: { bufferMaxEntries: 0, ignoreUndefined: true },
-            server: { sslValidate: false }
+            bufferMaxEntries: 0,
+            ignoreUndefined: true,
+            sslValidate: false
           },
           function(err, client) {
             var db = client.db(configuration.db);

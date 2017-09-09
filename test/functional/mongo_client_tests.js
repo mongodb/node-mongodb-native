@@ -134,7 +134,6 @@ describe('MongoClient', function() {
           },
           serializeFunctions: true,
           raw: true,
-          retryMiliSeconds: 1000,
           numberOfRetries: 10,
           bufferMaxEntries: 0
         },
@@ -154,7 +153,6 @@ describe('MongoClient', function() {
           test.equal(1, db.s.pkFactory());
           test.equal(true, db.s.options.serializeFunctions);
           test.equal(true, db.s.options.raw);
-          test.equal(1000, db.s.options.retryMiliSeconds);
           test.equal(10, db.s.options.numberOfRetries);
           test.equal(0, db.s.options.bufferMaxEntries);
 
@@ -165,7 +163,7 @@ describe('MongoClient', function() {
     }
   });
 
-  it.only('Should correctly pass through extra server options', {
+  it('Should correctly pass through extra server options', {
     metadata: {
       requires: {
         node: '>0.8.0',
@@ -644,7 +642,6 @@ describe('MongoClient', function() {
       var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
 
-      // console.dir(url)
       MongoClient.connect(url, { appname: 'hello world' }, function(err, db) {
         test.equal(null, err);
         test.equal('hello world', db.topology.clientInfo.application.name);
