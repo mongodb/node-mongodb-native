@@ -2,6 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 var fs = require('fs');
+var expect = require('chai').expect;
 
 describe('Cursor', function() {
   before(function() {
@@ -2285,7 +2286,9 @@ describe('Cursor', function() {
           collection
         ) {
           test.equal(null, err);
-          var closed = false;
+
+          var closeCount = 0;
+          var errorOccurred = false;
 
           var count = 100;
           // Just hammer the server
@@ -2302,16 +2305,20 @@ describe('Cursor', function() {
                 });
 
                 stream.on('error', function(err) {
-                  test.ok(err != null);
+                  expect(err).to.exist;
+                  errorOccurred = true;
                 });
 
-                stream.on('end', function() {
-                  closed = true;
-                });
+                var validator = () => {
+                  closeCount++;
+                  if (closeCount === 2) {
+                    expect(errorOccurred).to.equal(true);
+                    done();
+                  }
+                };
 
-                stream.on('close', function() {
-                  closed = true;
-                });
+                stream.on('end', validator);
+                stream.on('close', validator);
 
                 // Just hammer the server
                 for (var i = 0; i < 100; i++) {
@@ -2322,14 +2329,7 @@ describe('Cursor', function() {
                   });
                 }
 
-                setTimeout(function() {
-                  client.close();
-
-                  setTimeout(function() {
-                    test.equal(true, closed);
-                    done();
-                  }, 5000);
-                }, 800);
+                setTimeout(() => client.close(), 800);
               }
             });
           }
