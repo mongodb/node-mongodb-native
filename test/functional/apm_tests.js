@@ -1011,9 +1011,9 @@ describe('APM', function() {
         expect(databaseName).to.equal(result.databaseName);
 
         // Do we have a getMore command or killCursor command
-        if (commandName == 'getMore') {
+        if (commandName === 'getMore') {
           expect(result.command.getMore.isZero()).to.be.false;
-        } else if (commandName == 'killCursors') {
+        } else if (commandName === 'killCursors') {
           // eslint-disable-line
         } else {
           expect(command).to.eql(result.command);
@@ -1031,7 +1031,7 @@ describe('APM', function() {
         // Validate the test
         expect(commandName).to.equal(result.commandName);
         // Do we have a getMore command
-        if (commandName.toLowerCase() == 'getmore' || commandName.toLowerCase() == 'find') {
+        if (commandName.toLowerCase() === 'getmore' || commandName.toLowerCase() === 'find') {
           reply.cursor.id = result.reply.cursor.id;
           expect(reply).to.eql(result.reply);
         }
@@ -1136,7 +1136,7 @@ describe('APM', function() {
             }
           }
 
-          if (typeof args.ordered == 'boolean') {
+          if (typeof args.ordered === 'boolean') {
             if (options == null) {
               options = { ordered: args.ordered };
             } else {
@@ -1144,7 +1144,7 @@ describe('APM', function() {
             }
           }
 
-          if (typeof args.upsert == 'boolean') {
+          if (typeof args.upsert === 'boolean') {
             if (options == null) {
               options = { upsert: args.upsert };
             } else {
@@ -1153,7 +1153,7 @@ describe('APM', function() {
           }
 
           // Find command is special needs to executed using toArray
-          if (operation.name == 'find') {
+          if (operation.name === 'find') {
             var cursor = collection[commandName]();
 
             // Set the options
@@ -1245,6 +1245,7 @@ describe('APM', function() {
               executeOperation(client, listener, scenario, test, err => {
                 expect(err).to.not.exist;
 
+                listener.uninstrument();
                 client.close();
                 done();
               });
