@@ -1,6 +1,7 @@
 'use strict';
 
-var expect = require('chai').expect,
+const expect = require('chai').expect,
+  p = require('path'),
   f = require('util').format,
   fs = require('fs'),
   ReplSetState = require('../../../lib/topologies/replset_state'),
@@ -8,50 +9,31 @@ var expect = require('chai').expect,
   ReadPreference = require('../../../lib/topologies/read_preference'),
   Server = require('../../../lib/topologies/server');
 
-describe('Replica set with no primary', function() {
-  it('should correctly execute max staleness tests', {
-    metadata: { requires: { topology: 'single' } },
+const rsWithPrimaryPath = f('%s/../max-staleness/ReplicaSetWithPrimary', __dirname);
+const rsWithoutPrimaryPath = f('%s/../max-staleness/ReplicaSetNoPrimary', __dirname);
 
-    test: function(done) {
-      var path = f('%s/../max-staleness/ReplicaSetNoPrimary', __dirname);
-      console.dir(path);
-      var entries = fs.readdirSync(path).filter(function(x) {
-        return x.indexOf('.json') !== -1;
-      });
-
-      // Execute each of the entries
-      entries.forEach(function(x) {
-        executeEntry(x, f('%s/%s', path, x));
-      });
-
-      done();
-    }
-  });
-});
-
-describe('Replica set with primary', function() {
-  it('should correctly execute max staleness tests', {
-    metadata: { requires: { topology: 'single' } },
-
-    test: function(done) {
-      var path = f('%s/../max-staleness/ReplicaSetWithPrimary', __dirname);
-      console.dir(path);
-      var entries = fs
-        .readdirSync(path)
-        .filter(function(x) {
-          return x.indexOf('.json') !== -1;
-        })
-        .filter(function(x) {
-          return x.indexOf('LongHeartbeat2.json') === -1;
+describe('Max Staleness', function() {
+  describe('ReplicaSet without primary', function() {
+    fs
+      .readdirSync(rsWithoutPrimaryPath)
+      .filter(x => x.indexOf('.json') !== -1)
+      .forEach(x => {
+        it(p.basename(x, '.json'), function(done) {
+          executeEntry(x, f('%s/%s', rsWithoutPrimaryPath, x), done);
         });
-
-      // Execute each of the entries
-      entries.forEach(function(x) {
-        executeEntry(x, f('%s/%s', path, x));
       });
+  });
 
-      done();
-    }
+  describe('ReplicaSet with primary', function() {
+    fs
+      .readdirSync(rsWithPrimaryPath)
+      .filter(x => x.indexOf('.json') !== -1)
+      .filter(x => x.indexOf('LongHeartbeat2.json') === -1)
+      .forEach(x => {
+        it(p.basename(x, '.json'), function(done) {
+          executeEntry(x, f('%s/%s', rsWithPrimaryPath, x), done);
+        });
+      });
   });
 });
 
@@ -62,8 +44,7 @@ function convert(mode) {
   return mode.toLowerCase();
 }
 
-function executeEntry(entry, path) {
-  console.log('= file :: ' + entry);
+function executeEntry(entry, path, callback) {
   // Read and parse the json file
   var file = require(path);
 
@@ -79,6 +60,7 @@ function executeEntry(entry, path) {
     var replset = new ReplSetState({
       heartbeatFrequencyMS: heartbeatFrequencyMS
     });
+
     replset.topologyType = topologyDescription.type;
     // For each server add them to the state
     topologyDescription.servers.forEach(function(s) {
@@ -130,11 +112,9 @@ function executeEntry(entry, path) {
     // We expect an error
     if (error) {
       expect(server).to.be.an.instanceof(MongoError);
-      return;
+      return callback(null, null);
     }
 
-    // console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-    // console.dir(server)
     // server should be in the latency window
     for (var i = 0; i < inLatencyWindow.length; i++) {
       var w = inLatencyWindow[i];
@@ -145,10 +125,6 @@ function executeEntry(entry, path) {
       }
     }
 
-    // console.log('========================== picked server  :: ' + server.name)
-    // console.dir(server)
-    // console.dir(found_window)
-
     if (
       ['ReplicaSetNoPrimary', 'Primary', 'ReplicaSetWithPrimary'].indexOf(
         topologyDescription.type
@@ -156,20 +132,16 @@ function executeEntry(entry, path) {
       inLatencyWindow.length === 0
     ) {
       if (server instanceof MongoError) {
-        // console.dir(server)
         expect(server.message).to.equal('maxStalenessSeconds must be set to at least 90 seconds');
       } else {
         expect(server).to.be.null;
       }
     } else {
-      // console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0')
-      // console.dir(server)
-      // console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 1')
-      // console.dir(found_window)
       expect(foundWindow).to.not.be.null;
     }
   } catch (err) {
-    console.log(err.stack);
-    process.exit(0);
+    callback(err, null);
   }
+
+  callback(null, null);
 }
