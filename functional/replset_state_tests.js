@@ -1,40 +1,30 @@
 'use strict';
 
-var expect = require('chai').expect,
+const expect = require('chai').expect,
+  p = require('path'),
   f = require('util').format,
   fs = require('fs'),
   ObjectId = require('bson').ObjectId,
   ReplSetState = require('../../../lib/topologies/replset_state');
 
-describe('A replica set state', function() {
-  it('should correctly execute state machine tests', {
-    metadata: { requires: { topology: 'single' } },
+describe('ReplicaSet state', function() {
+  const path = f('%s/../topology_test_descriptions/rs', __dirname);
 
-    test: function(done) {
-      var path = f('%s/../topology_test_descriptions/rs', __dirname);
-      var entries = fs.readdirSync(path).filter(function(x) {
-        return x.indexOf('.json') !== -1;
+  fs
+    .readdirSync(path)
+    .filter(x => x.indexOf('.json') !== -1)
+    .forEach(x => {
+      var testData = require(f('%s/%s', path, x));
+
+      it(testData.description, function(done) {
+        executeEntry(testData, done);
       });
-
-      // Execute each of the entries
-      entries.forEach(function(x) {
-        executeEntry(f('%s/%s', path, x));
-      });
-
-      done();
-    }
-  });
+    });
 });
 
-function executeEntry(path) {
-  // Read and parse the json file
-  var file = require(path);
-  // Unpack entry
-  var description = file.description;
-  var uri = file.uri;
-  var phases = file.phases;
-
-  console.log(f('+ Starting: %s [%s]', description, path.split(/\//).pop()));
+function executeEntry(testData, callback) {
+  var uri = testData.uri;
+  var phases = testData.phases;
 
   // Get replicaset name if any
   var match = uri.match(/replicaSet=[a-z|A-Z|0-9]*/);
@@ -49,6 +39,7 @@ function executeEntry(path) {
     .split('mongodb://')[1]
     .split('/')[0]
     .split(',');
+
   // For each of the servers
   parts.forEach(function(x) {
     var params = x.split(':');
@@ -66,12 +57,21 @@ function executeEntry(path) {
   });
 
   // Run each phase
-  phases.forEach(function(x) {
-    executePhase(state, x);
+  executePhases(phases, state, callback);
+}
+
+function executePhases(phases, state, callback) {
+  if (phases.length === 0) {
+    return callback(null, null);
+  }
+
+  executePhase(phases.shift(), state, err => {
+    if (err) return callback(err, null);
+    return executePhases(phases, state, callback);
   });
 }
 
-function executePhase(state, phase) {
+function executePhase(phase, state, callback) {
   var responses = phase.responses;
   var outcome = phase.outcome;
 
@@ -121,15 +121,12 @@ function executePhase(state, phase) {
         }
       }
     } catch (e) {
-      console.log('========================== 0');
-      console.dir(outcome.servers);
-      console.log('========================== 1');
-      console.dir(state.set);
-      process.exit(0);
+      return callback(e);
     }
   }
 
   // // Check the topology type
   expect(outcome.topologyType).to.equal(state.topologyType);
   expect(outcome.setName).to.equal(state.setName);
+  callback(null, null);
 }
