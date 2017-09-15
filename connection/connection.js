@@ -36,6 +36,8 @@ var debugFields = [
   'promoteBuffers',
   'checkServerIdentity'
 ];
+
+var connectionAccountingSpy = undefined;
 var connectionAccounting = false;
 var connections = {};
 
@@ -185,13 +187,18 @@ Connection.prototype.resetSocketTimeout = function() {
   }
 };
 
-Connection.enableConnectionAccounting = function() {
+Connection.enableConnectionAccounting = function(spy) {
+  if (spy) {
+    connectionAccountingSpy = spy;
+  }
+
   connectionAccounting = true;
   connections = {};
 };
 
 Connection.disableConnectionAccounting = function() {
   connectionAccounting = false;
+  connectionAccountingSpy = undefined;
 };
 
 Connection.connections = function() {
@@ -201,11 +208,19 @@ Connection.connections = function() {
 function deleteConnection(id) {
   // console.log("=== deleted connection " + id + " :: " + (connections[id] ? connections[id].port : ''))
   delete connections[id];
+
+  if (connectionAccountingSpy) {
+    connectionAccountingSpy.deleteConnection(id);
+  }
 }
 
 function addConnection(id, connection) {
   // console.log("=== added connection " + id + " :: " + connection.port)
   connections[id] = connection;
+
+  if (connectionAccountingSpy) {
+    connectionAccountingSpy.addConnection(id, connection);
+  }
 }
 
 //
