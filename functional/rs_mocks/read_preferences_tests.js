@@ -24,7 +24,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var primaryServer = null;
       var firstSecondaryServer = null;
       var secondSecondaryServer = null;
-      var running = true;
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
@@ -81,114 +80,96 @@ describe('ReplSet Read Preferences (mocks)', function() {
         firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
         secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(primary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
+        primaryServer.setMessageHandler(request => {
+          // Get the document
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(primary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        }).catch(function() {});
-
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(firstSecondary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
-          }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield secondSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(secondSecondary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(firstSecondary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        Connection.enableConnectionAccounting();
-        // Attempt to connect
-        var server = new ReplSet(
-          [
-            { host: 'localhost', port: 32000 },
-            { host: 'localhost', port: 32001 },
-            { host: 'localhost', port: 32002 }
-          ],
-          {
-            setName: 'rs',
-            connectionTimeout: 3000,
-            socketTimeout: 0,
-            haInterval: 2000,
-            size: 1
+        secondSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(secondSecondary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        );
+        });
+      });
 
-        // Add event listeners
-        server.on('connect', function(_server) {
-          // Set up a write
-          function schedule() {
-            // Perform a find
-            _server.command(
-              'test.test',
-              {
-                count: 'test.test',
-                batchSize: 2
-              },
-              {
-                readPreference: new ReadPreference('secondary', { loc: 'dc' })
-              },
-              function(err, r) {
-                expect(err).to.be.null;
-                expect(r.connection.port).to.equal(32002);
+      Connection.enableConnectionAccounting();
+      // Attempt to connect
+      var server = new ReplSet(
+        [
+          { host: 'localhost', port: 32000 },
+          { host: 'localhost', port: 32001 },
+          { host: 'localhost', port: 32002 }
+        ],
+        {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 2000,
+          size: 1
+        }
+      );
 
-                primaryServer.destroy();
-                firstSecondaryServer.destroy();
-                secondSecondaryServer.destroy();
-                server.destroy();
-                running = false;
+      // Add event listeners
+      server.on('connect', function(_server) {
+        // Set up a write
+        function schedule() {
+          // Perform a find
+          _server.command(
+            'test.test',
+            {
+              count: 'test.test',
+              batchSize: 2
+            },
+            {
+              readPreference: new ReadPreference('secondary', { loc: 'dc' })
+            },
+            function(err, r) {
+              expect(err).to.be.null;
+              expect(r.connection.port).to.equal(32002);
 
+              Promise.all([
+                primaryServer.destroy(),
+                firstSecondaryServer.destroy(),
+                secondSecondaryServer.destroy(),
+                server.destroy()
+              ]).then(() => {
                 setTimeout(function() {
                   expect(Object.keys(Connection.connections())).to.have.length(0);
                   Connection.disableConnectionAccounting();
                   done();
                 }, 1000);
-                return;
-              }
-            );
-          }
+              });
+            }
+          );
+        }
 
-          // Schedule an insert
-          setTimeout(function() {
-            schedule();
-          }, 2000);
-        });
-
-        // Gives proxies a chance to boot up
+        // Schedule an insert
         setTimeout(function() {
-          server.connect();
-        }, 100);
-      }).catch(function() {});
+          schedule();
+        }, 2000);
+      });
+
+      // Gives proxies a chance to boot up
+      setTimeout(function() {
+        server.connect();
+      }, 100);
     }
   });
 
@@ -210,7 +191,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var primaryServer = null;
       var firstSecondaryServer = null;
       var secondSecondaryServer = null;
-      var running = true;
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
@@ -267,114 +247,95 @@ describe('ReplSet Read Preferences (mocks)', function() {
         firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
         secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(primary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(primary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        }).catch(function() {});
-
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(firstSecondary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
-          }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield secondSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(secondSecondary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(firstSecondary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        Connection.enableConnectionAccounting();
-        // Attempt to connect
-        var server = new ReplSet(
-          [
-            { host: 'localhost', port: 32000 },
-            { host: 'localhost', port: 32001 },
-            { host: 'localhost', port: 32002 }
-          ],
-          {
-            setName: 'rs',
-            connectionTimeout: 3000,
-            socketTimeout: 0,
-            haInterval: 2000,
-            size: 1
+        secondSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(secondSecondary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        );
+        });
+      });
 
-        // Add event listeners
-        server.on('connect', function(_server) {
-          // Set up a write
-          function schedule() {
-            setTimeout(function() {
-              // Perform a find
-              _server.command(
-                'test.test',
-                {
-                  count: 'test.test',
-                  batchSize: 2
-                },
-                {
-                  readPreference: new ReadPreference('primaryPreferred')
-                },
-                function(err, r) {
-                  expect(err).to.be.null;
-                  expect(r.connection.port).to.equal(32000);
+      Connection.enableConnectionAccounting();
+      // Attempt to connect
+      var server = new ReplSet(
+        [
+          { host: 'localhost', port: 32000 },
+          { host: 'localhost', port: 32001 },
+          { host: 'localhost', port: 32002 }
+        ],
+        {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 2000,
+          size: 1
+        }
+      );
 
-                  primaryServer.destroy();
-                  firstSecondaryServer.destroy();
-                  secondSecondaryServer.destroy();
-                  server.destroy();
-                  running = false;
+      // Add event listeners
+      server.on('connect', function(_server) {
+        // Set up a write
+        function schedule() {
+          setTimeout(function() {
+            // Perform a find
+            _server.command(
+              'test.test',
+              {
+                count: 'test.test',
+                batchSize: 2
+              },
+              {
+                readPreference: new ReadPreference('primaryPreferred')
+              },
+              function(err, r) {
+                expect(err).to.be.null;
+                expect(r.connection.port).to.equal(32000);
 
+                Promise.all([
+                  primaryServer.destroy(),
+                  firstSecondaryServer.destroy(),
+                  secondSecondaryServer.destroy(),
+                  server.destroy()
+                ]).then(() => {
                   setTimeout(function() {
                     expect(Object.keys(Connection.connections())).to.have.length(0);
                     Connection.disableConnectionAccounting();
                     done();
                   }, 1000);
-                  return;
-                }
-              );
-            }, 500);
-          }
+                });
+              }
+            );
+          }, 500);
+        }
 
-          // Schedule an insert
-          schedule();
-        });
+        // Schedule an insert
+        schedule();
+      });
 
-        // Gives proxies a chance to boot up
-        setTimeout(function() {
-          server.connect();
-        }, 100);
-      }).catch(function() {});
+      // Gives proxies a chance to boot up
+      setTimeout(function() {
+        server.connect();
+      }, 100);
     }
   });
 
@@ -396,7 +357,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var primaryServer = null;
       var firstSecondaryServer = null;
       var secondSecondaryServer = null;
-      var running = true;
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
@@ -453,148 +413,129 @@ describe('ReplSet Read Preferences (mocks)', function() {
         firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
         secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(primary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(primary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        }).catch(function() {});
-
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(firstSecondary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
-          }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield secondSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(secondSecondary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(firstSecondary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        Connection.enableConnectionAccounting();
-        // Attempt to connect
-        var server = new ReplSet(
-          [
-            { host: 'localhost', port: 32000 },
-            { host: 'localhost', port: 32001 },
-            { host: 'localhost', port: 32002 }
-          ],
-          {
-            setName: 'rs',
-            connectionTimeout: 3000,
-            socketTimeout: 0,
-            haInterval: 2000,
-            size: 1
+        secondSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(secondSecondary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        );
+        });
+      });
 
-        // Add event listeners
-        var port = 0;
-        server.on('connect', function(_server) {
-          // Set up a write
-          function schedule() {
-            setTimeout(function() {
-              // Perform a find
-              _server.command(
-                'test.test',
-                {
-                  count: 'test.test',
-                  batchSize: 2
-                },
-                {
-                  readPreference: new ReadPreference('secondary')
-                },
-                function(err, r) {
-                  expect(err).to.be.null;
-                  port = r.connection.port;
+      Connection.enableConnectionAccounting();
+      // Attempt to connect
+      var server = new ReplSet(
+        [
+          { host: 'localhost', port: 32000 },
+          { host: 'localhost', port: 32001 },
+          { host: 'localhost', port: 32002 }
+        ],
+        {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 2000,
+          size: 1
+        }
+      );
 
-                  // Perform a find
-                  _server.command(
-                    'test.test',
-                    {
-                      count: 'test.test',
-                      batchSize: 2
-                    },
-                    {
-                      readPreference: new ReadPreference('secondary')
-                    },
-                    function(_err, _r) {
-                      expect(_err).to.be.null;
-                      expect(_r.connection.port).to.not.equal(port);
-                      port = _r.connection.port;
+      // Add event listeners
+      var port = 0;
+      server.on('connect', function(_server) {
+        // Set up a write
+        function schedule() {
+          setTimeout(function() {
+            // Perform a find
+            _server.command(
+              'test.test',
+              {
+                count: 'test.test',
+                batchSize: 2
+              },
+              {
+                readPreference: new ReadPreference('secondary')
+              },
+              function(err, r) {
+                expect(err).to.be.null;
+                port = r.connection.port;
 
-                      // Perform a find
-                      _server.command(
-                        'test.test',
-                        {
-                          count: 'test.test',
-                          batchSize: 2
-                        },
-                        {
-                          readPreference: new ReadPreference('secondary')
-                        },
-                        function(__err, __r) {
-                          expect(__err).to.be.null;
-                          expect(__r.connection.port).to.not.equal(port);
+                // Perform a find
+                _server.command(
+                  'test.test',
+                  {
+                    count: 'test.test',
+                    batchSize: 2
+                  },
+                  {
+                    readPreference: new ReadPreference('secondary')
+                  },
+                  function(_err, _r) {
+                    expect(_err).to.be.null;
+                    expect(_r.connection.port).to.not.equal(port);
+                    port = _r.connection.port;
 
-                          primaryServer.destroy();
-                          firstSecondaryServer.destroy();
-                          secondSecondaryServer.destroy();
-                          server.destroy();
-                          running = false;
+                    // Perform a find
+                    _server.command(
+                      'test.test',
+                      {
+                        count: 'test.test',
+                        batchSize: 2
+                      },
+                      {
+                        readPreference: new ReadPreference('secondary')
+                      },
+                      function(__err, __r) {
+                        expect(__err).to.be.null;
+                        expect(__r.connection.port).to.not.equal(port);
 
+                        Promise.all([
+                          primaryServer.destroy(),
+                          firstSecondaryServer.destroy(),
+                          secondSecondaryServer.destroy(),
+                          server.destroy()
+                        ]).then(() => {
                           setTimeout(function() {
                             expect(Object.keys(Connection.connections())).to.have.length(0);
                             Connection.disableConnectionAccounting();
                             done();
                           }, 1000);
-                          return;
-                        }
-                      );
-                    }
-                  );
-                }
-              );
-            }, 500);
-          }
+                        });
+                      }
+                    );
+                  }
+                );
+              }
+            );
+          }, 500);
+        }
 
-          // Schedule an insert
-          schedule();
-        });
+        // Schedule an insert
+        schedule();
+      });
 
-        // Gives proxies a chance to boot up
-        setTimeout(function() {
-          server.connect();
-        }, 100);
-      }).catch(function() {});
+      // Gives proxies a chance to boot up
+      setTimeout(function() {
+        server.connect();
+      }, 100);
     }
   });
 
@@ -616,7 +557,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
       // Contain mock server
       var primaryServer = null;
       var firstSecondaryServer = null;
-      var running = true;
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
@@ -659,139 +599,127 @@ describe('ReplSet Read Preferences (mocks)', function() {
         primaryServer = yield mockupdb.createServer(32000, 'localhost');
         firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(primary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(primary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        }).catch(function() {});
-
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(firstSecondary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
-          }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // mock ops store from node-mongodb-native for handling repl set disconnects
-        var mockDisconnectHandler = {
-          add: function(opType, ns, ops, options, callback) {
-            // Command issued to replSet will fail immediately if !server.isConnected()
-            return callback(new MongoError({ message: 'no connection available', driver: true }));
-          },
-          execute: function() {
-            // method needs to be called, so provide a dummy version
-            return;
-          },
-          flush: function() {
-            // method needs to be called, so provide a dummy version
-            return;
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(firstSecondary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        };
+        });
+      });
 
-        Connection.enableConnectionAccounting();
-        // Attempt to connect
-        var server = new ReplSet(
-          [
-            {
-              host: 'localhost',
-              port: 32000,
-              socketTimeout: 3000,
-              connectionTimeout: 3000
-            },
-            { host: 'localhost', port: 32001 }
-          ],
+      // mock ops store from node-mongodb-native for handling repl set disconnects
+      var mockDisconnectHandler = {
+        add: function(opType, ns, ops, options, callback) {
+          // Command issued to replSet will fail immediately if !server.isConnected()
+          return callback(new MongoError({ message: 'no connection available', driver: true }));
+        },
+        execute: function() {
+          // method needs to be called, so provide a dummy version
+          return;
+        },
+        flush: function() {
+          // method needs to be called, so provide a dummy version
+          return;
+        }
+      };
+
+      Connection.enableConnectionAccounting();
+      // Attempt to connect
+      var server = new ReplSet(
+        [
           {
-            setName: 'rs',
-            // connectionTimeout: 10000,
-            // socketTimeout: 10000,
-            haInterval: 10000,
-            disconnectHandler: mockDisconnectHandler,
-            size: 1
-          }
-        );
+            host: 'localhost',
+            port: 32000,
+            socketTimeout: 3000,
+            connectionTimeout: 3000
+          },
+          { host: 'localhost', port: 32001 }
+        ],
+        {
+          setName: 'rs',
+          // connectionTimeout: 10000,
+          // socketTimeout: 10000,
+          haInterval: 10000,
+          disconnectHandler: mockDisconnectHandler,
+          size: 1
+        }
+      );
 
-        // Add event listeners
-        server.on('connect', function(_server) {
-          function schedule() {
-            setTimeout(function() {
-              // Perform a find
-              _server.command(
-                'test.test',
-                {
-                  count: 'test.test',
-                  batchSize: 2
-                },
-                {
-                  readPreference: new ReadPreference('primaryPreferred')
-                },
-                function(err, r) {
-                  expect(err).to.be.null;
-                  expect(r.connection.port).to.equal(32000);
-                  primaryServer.destroy();
+      // Add event listeners
+      server.on('connect', function(_server) {
+        function schedule() {
+          setTimeout(function() {
+            // Perform a find
+            _server.command(
+              'test.test',
+              {
+                count: 'test.test',
+                batchSize: 2
+              },
+              {
+                readPreference: new ReadPreference('primaryPreferred')
+              },
+              function(err, r) {
+                expect(err).to.be.null;
+                expect(r.connection.port).to.equal(32000);
+                primaryServer.destroy();
 
-                  _server.on(
-                    'left',
-                    function() {
-                      // Perform another find, after primary is gone
-                      _server.command(
-                        'test.test',
-                        {
-                          count: 'test.test',
-                          batchSize: 2
-                        },
-                        {
-                          readPreference: new ReadPreference('primaryPreferred')
-                        },
-                        function(_err, _r) {
-                          expect(_err).to.be.null;
-                          expect(_r.connection.port).to.equal(32001); // reads from secondary while primary down
+                _server.on(
+                  'left',
+                  function() {
+                    // Perform another find, after primary is gone
+                    _server.command(
+                      'test.test',
+                      {
+                        count: 'test.test',
+                        batchSize: 2
+                      },
+                      {
+                        readPreference: new ReadPreference('primaryPreferred')
+                      },
+                      function(_err, _r) {
+                        expect(_err).to.be.null;
+                        expect(_r.connection.port).to.equal(32001); // reads from secondary while primary down
 
-                          firstSecondaryServer.destroy();
-                          _server.destroy();
-                          running = false;
-
+                        Promise.all([
+                          firstSecondaryServer.destroy(),
+                          _server.destroy()
+                        ]).then(() => {
                           setTimeout(function() {
                             expect(Object.keys(Connection.connections())).to.have.length(0);
                             Connection.disableConnectionAccounting();
                             done();
                           }, 1000);
-                          return;
-                        }
-                      );
-                    },
-                    2500
-                  );
-                }
-              );
-            }, 500);
-          }
+                        });
+                      }
+                    );
+                  },
+                  2500
+                );
+              }
+            );
+          }, 500);
+        }
 
-          // Schedule a commands
-          schedule();
-        });
+        // Schedule a commands
+        schedule();
+      });
 
-        // Gives proxies a chance to boot up
-        setTimeout(function() {
-          server.connect();
-        }, 100);
-      }).catch(function() {});
+      // Gives proxies a chance to boot up
+      setTimeout(function() {
+        server.connect();
+      }, 100);
     }
   });
 
@@ -813,7 +741,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var primaryServer = null;
       var firstSecondaryServer = null;
       var secondSecondaryServer = null;
-      var running = true;
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
@@ -870,146 +797,127 @@ describe('ReplSet Read Preferences (mocks)', function() {
         firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
         secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(primary[0]);
-            } else if (doc.count) {
-              request.connection.destroy();
-              break;
-            }
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(primary[0]);
+          } else if (doc.count) {
+            request.connection.destroy();
           }
-        }).catch(function() {});
-
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(firstSecondary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
-          }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield secondSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(secondSecondary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(firstSecondary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        Connection.enableConnectionAccounting();
-        // Attempt to connect
-        var server = new ReplSet(
-          [
-            { host: 'localhost', port: 32000 },
-            { host: 'localhost', port: 32001 },
-            { host: 'localhost', port: 32002 }
-          ],
-          {
-            setName: 'rs',
-            connectionTimeout: 3000,
-            socketTimeout: 0,
-            haInterval: 2000,
-            size: 1
+        secondSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(secondSecondary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        );
+        });
+      });
 
-        // Add event listeners
-        server.on('connect', function(_server) {
-          // Set up a write
-          function schedule() {
-            // Perform a find
-            _server.command(
-              'test.test',
-              {
-                count: 'test.test',
-                batchSize: 2
-              },
-              {
-                readPreference: new ReadPreference('primaryPreferred')
-              },
-              function(err) {
-                expect(err).to.exist;
+      Connection.enableConnectionAccounting();
+      // Attempt to connect
+      var server = new ReplSet(
+        [
+          { host: 'localhost', port: 32000 },
+          { host: 'localhost', port: 32001 },
+          { host: 'localhost', port: 32002 }
+        ],
+        {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 2000,
+          size: 1
+        }
+      );
 
-                // Let all sockets properly close
-                process.nextTick(function() {
-                  // Test primaryPreferred
-                  _server.command(
-                    'test.test',
-                    {
-                      count: 'test.test',
-                      batchSize: 2
-                    },
-                    {
-                      readPreference: new ReadPreference('primaryPreferred')
-                    },
-                    function(_err, _r) {
-                      expect(_err).to.be.null;
-                      expect(_r.connection.port).to.not.equal(32000);
+      // Add event listeners
+      server.on('connect', function(_server) {
+        // Set up a write
+        function schedule() {
+          // Perform a find
+          _server.command(
+            'test.test',
+            {
+              count: 'test.test',
+              batchSize: 2
+            },
+            {
+              readPreference: new ReadPreference('primaryPreferred')
+            },
+            function(err) {
+              expect(err).to.exist;
 
-                      // Test secondaryPreferred
-                      _server.command(
-                        'test.test',
-                        {
-                          count: 'test.test',
-                          batchSize: 2
-                        },
-                        {
-                          readPreference: new ReadPreference('secondaryPreferred')
-                        },
-                        function(__err, __r) {
-                          expect(__err).to.be.null;
-                          expect(__r.connection.port).to.not.equal(32000);
+              // Let all sockets properly close
+              process.nextTick(function() {
+                // Test primaryPreferred
+                _server.command(
+                  'test.test',
+                  {
+                    count: 'test.test',
+                    batchSize: 2
+                  },
+                  {
+                    readPreference: new ReadPreference('primaryPreferred')
+                  },
+                  function(_err, _r) {
+                    expect(_err).to.be.null;
+                    expect(_r.connection.port).to.not.equal(32000);
 
-                          primaryServer.destroy();
-                          firstSecondaryServer.destroy();
-                          secondSecondaryServer.destroy();
-                          server.destroy();
-                          running = false;
+                    // Test secondaryPreferred
+                    _server.command(
+                      'test.test',
+                      {
+                        count: 'test.test',
+                        batchSize: 2
+                      },
+                      {
+                        readPreference: new ReadPreference('secondaryPreferred')
+                      },
+                      function(__err, __r) {
+                        expect(__err).to.be.null;
+                        expect(__r.connection.port).to.not.equal(32000);
 
+                        Promise.all([
+                          primaryServer.destroy(),
+                          firstSecondaryServer.destroy(),
+                          secondSecondaryServer.destroy(),
+                          server.destroy()
+                        ]).then(() => {
                           setTimeout(function() {
                             expect(Object.keys(Connection.connections())).to.have.length(0);
                             Connection.disableConnectionAccounting();
                             done();
                           }, 1000);
-                        }
-                      );
-                    }
-                  );
-                });
-              }
-            );
-          }
+                        });
+                      }
+                    );
+                  }
+                );
+              });
+            }
+          );
+        }
 
-          // Schedule an insert
-          schedule();
-        });
+        // Schedule an insert
+        schedule();
+      });
 
-        // Gives proxies a chance to boot up
-        setTimeout(function() {
-          server.connect();
-        }, 100);
-      }).catch(function() {});
+      // Gives proxies a chance to boot up
+      setTimeout(function() {
+        server.connect();
+      }, 100);
     }
   });
 
@@ -1031,7 +939,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var primaryServer = null;
       var firstSecondaryServer = null;
       var secondSecondaryServer = null;
-      var running = true;
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
@@ -1088,121 +995,102 @@ describe('ReplSet Read Preferences (mocks)', function() {
         firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
         secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(primary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(primary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        }).catch(function() {});
-
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(firstSecondary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
-          }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield secondSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(secondSecondary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(firstSecondary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        Connection.enableConnectionAccounting();
-        // Attempt to connect
-        var server = new ReplSet(
-          [
-            { host: 'localhost', port: 32000 },
-            { host: 'localhost', port: 32001 },
-            { host: 'localhost', port: 32002 }
-          ],
-          {
-            setName: 'rs',
-            connectionTimeout: 3000,
-            socketTimeout: 0,
-            haInterval: 1000,
-            size: 1
+        secondSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(secondSecondary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        );
+        });
+      });
 
-        // Add event listeners
-        server.on('connect', function(_server) {
-          // Set up a write
-          function schedule() {
-            _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries.map(
-              function(x, i) {
-                x.lastIsMasterMS = i * 20;
-                return x;
-              }
-            );
+      Connection.enableConnectionAccounting();
+      // Attempt to connect
+      var server = new ReplSet(
+        [
+          { host: 'localhost', port: 32000 },
+          { host: 'localhost', port: 32001 },
+          { host: 'localhost', port: 32002 }
+        ],
+        {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 1000,
+          size: 1
+        }
+      );
 
-            // Perform a find
-            _server.command(
-              'test.test',
-              {
-                count: 'test.test',
-                batchSize: 2
-              },
-              {
-                readPreference: new ReadPreference('nearest')
-              },
-              function(err, r) {
-                expect(err).to.be.null;
-                expect(r.connection.port).to.be.oneOf([32000, 32001]);
+      // Add event listeners
+      server.on('connect', function(_server) {
+        // Set up a write
+        function schedule() {
+          _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries.map(
+            function(x, i) {
+              x.lastIsMasterMS = i * 20;
+              return x;
+            }
+          );
 
-                primaryServer.destroy();
-                firstSecondaryServer.destroy();
-                secondSecondaryServer.destroy();
-                server.destroy();
-                running = false;
+          // Perform a find
+          _server.command(
+            'test.test',
+            {
+              count: 'test.test',
+              batchSize: 2
+            },
+            {
+              readPreference: new ReadPreference('nearest')
+            },
+            function(err, r) {
+              expect(err).to.be.null;
+              expect(r.connection.port).to.be.oneOf([32000, 32001]);
 
+              Promise.all([
+                primaryServer.destroy(),
+                firstSecondaryServer.destroy(),
+                secondSecondaryServer.destroy(),
+                server.destroy()
+              ]).then(() => {
                 setTimeout(function() {
                   expect(Object.keys(Connection.connections())).to.have.length(0);
                   Connection.disableConnectionAccounting();
                   done();
                 }, 1000);
-                return;
-              }
-            );
-          }
+              });
+            }
+          );
+        }
 
-          // Schedule an insert
-          setTimeout(function() {
-            schedule();
-          }, 2000);
-        });
-
-        // Gives proxies a chance to boot up
+        // Schedule an insert
         setTimeout(function() {
-          server.connect();
-        }, 100);
-      }).catch(function() {});
+          schedule();
+        }, 2000);
+      });
+
+      // Gives proxies a chance to boot up
+      setTimeout(function() {
+        server.connect();
+      }, 100);
     }
   });
 
@@ -1224,7 +1112,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var primaryServer = null;
       var firstSecondaryServer = null;
       var secondSecondaryServer = null;
-      var running = true;
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
@@ -1281,122 +1168,102 @@ describe('ReplSet Read Preferences (mocks)', function() {
         firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
         secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(primary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(primary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        }).catch(function() {});
-
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(firstSecondary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
-          }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield secondSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(secondSecondary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(firstSecondary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // console.log('--------------------------------------------- -2')
-        Connection.enableConnectionAccounting();
-        // Attempt to connect
-        var server = new ReplSet(
-          [
-            { host: 'localhost', port: 32000 },
-            { host: 'localhost', port: 32001 },
-            { host: 'localhost', port: 32002 }
-          ],
-          {
-            setName: 'rs',
-            connectionTimeout: 3000,
-            socketTimeout: 0,
-            haInterval: 1000,
-            size: 1
+        secondSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(secondSecondary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        );
+        });
+      });
 
-        // Add event listeners
-        server.on('connect', function(_server) {
-          // Set up a write
-          function schedule() {
-            _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries.map(
-              function(x, i) {
-                x.lastIsMasterMS = i * 20;
-                return x;
-              }
-            );
+      Connection.enableConnectionAccounting();
+      // Attempt to connect
+      var server = new ReplSet(
+        [
+          { host: 'localhost', port: 32000 },
+          { host: 'localhost', port: 32001 },
+          { host: 'localhost', port: 32002 }
+        ],
+        {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 1000,
+          size: 1
+        }
+      );
 
-            // Perform a find
-            _server.command(
-              'test.test',
-              {
-                count: 'test.test',
-                batchSize: 2
-              },
-              {
-                readPreference: new ReadPreference('nearest', { loc: 'dc' })
-              },
-              function(err, r) {
-                expect(err).to.be.null;
-                expect(r.connection.port).to.be.oneOf([32001, 32002]);
+      // Add event listeners
+      server.on('connect', function(_server) {
+        // Set up a write
+        function schedule() {
+          _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries.map(
+            function(x, i) {
+              x.lastIsMasterMS = i * 20;
+              return x;
+            }
+          );
 
-                primaryServer.destroy();
-                firstSecondaryServer.destroy();
-                secondSecondaryServer.destroy();
-                server.destroy();
-                running = false;
+          // Perform a find
+          _server.command(
+            'test.test',
+            {
+              count: 'test.test',
+              batchSize: 2
+            },
+            {
+              readPreference: new ReadPreference('nearest', { loc: 'dc' })
+            },
+            function(err, r) {
+              expect(err).to.be.null;
+              expect(r.connection.port).to.be.oneOf([32001, 32002]);
 
+              Promise.all([
+                primaryServer.destroy(),
+                firstSecondaryServer.destroy(),
+                secondSecondaryServer.destroy(),
+                server.destroy()
+              ]).then(() => {
                 setTimeout(function() {
                   expect(Object.keys(Connection.connections())).to.have.length(0);
                   Connection.disableConnectionAccounting();
                   done();
                 }, 1000);
-                return;
-              }
-            );
-          }
+              });
+            }
+          );
+        }
 
-          // Schedule an insert
-          setTimeout(function() {
-            schedule();
-          }, 2000);
-        });
-
-        // Gives proxies a chance to boot up
+        // Schedule an insert
         setTimeout(function() {
-          server.connect();
-        }, 100);
-      }).catch(function() {});
+          schedule();
+        }, 2000);
+      });
+
+      // Gives proxies a chance to boot up
+      setTimeout(function() {
+        server.connect();
+      }, 100);
     }
   });
 
@@ -1418,7 +1285,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
         // Contain mock server
         var primaryServer = null;
-        var running = true;
         var electionIds = [new ObjectId(), new ObjectId()];
 
         // Default message fields
@@ -1451,73 +1317,65 @@ describe('ReplSet Read Preferences (mocks)', function() {
         co(function*() {
           primaryServer = yield mockupdb.createServer(32000, 'localhost');
 
-          // Primary state machine
-          co(function*() {
-            while (running) {
-              var request = yield primaryServer.receive();
-              // Get the document
-              var doc = request.document;
-              if (doc.ismaster) {
-                request.reply(primary[0]);
-              } else if (doc.count) {
-                request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-              }
+          primaryServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(primary[0]);
+            } else if (doc.count) {
+              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
             }
-          }).catch(function() {});
-
-          Connection.enableConnectionAccounting();
-          // Attempt to connect
-          var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
-            setName: 'rs',
-            connectionTimeout: 3000,
-            socketTimeout: 0,
-            haInterval: 2000,
-            size: 1
           });
+        });
 
-          // Add event listeners
-          server.on('connect', function(_server) {
-            // Set up a write
-            function schedule() {
-              setTimeout(function() {
-                // Perform a find
-                _server.command(
-                  'test.test',
-                  {
-                    count: 'test.test',
-                    batchSize: 2
-                  },
-                  {
-                    readPreference: new ReadPreference('secondaryPreferred')
-                  },
-                  function(err, r) {
-                    expect(err).to.be.null;
-                    expect(r.connection.port).to.equal(32000);
+        Connection.enableConnectionAccounting();
+        // Attempt to connect
+        var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 2000,
+          size: 1
+        });
 
-                    primaryServer.destroy();
-                    server.destroy();
-                    running = false;
+        // Add event listeners
+        server.on('connect', function(_server) {
+          // Set up a write
+          function schedule() {
+            setTimeout(function() {
+              // Perform a find
+              _server.command(
+                'test.test',
+                {
+                  count: 'test.test',
+                  batchSize: 2
+                },
+                {
+                  readPreference: new ReadPreference('secondaryPreferred')
+                },
+                function(err, r) {
+                  expect(err).to.be.null;
+                  expect(r.connection.port).to.equal(32000);
 
+                  Promise.all([primaryServer.destroy(), server.destroy()]).then(() => {
                     setTimeout(function() {
                       expect(Object.keys(Connection.connections())).to.have.length(0);
                       Connection.disableConnectionAccounting();
                       done();
                     }, 1000);
-                    return;
-                  }
-                );
-              }, 500);
-            }
+                  });
+                }
+              );
+            }, 500);
+          }
 
-            // Schedule an insert
-            schedule();
-          });
+          // Schedule an insert
+          schedule();
+        });
 
-          // Gives proxies a chance to boot up
-          setTimeout(function() {
-            server.connect();
-          }, 100);
-        }).catch(function() {});
+        // Gives proxies a chance to boot up
+        setTimeout(function() {
+          server.connect();
+        }, 100);
       }
     }
   );
@@ -1540,7 +1398,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var primaryServer = null;
       var firstSecondaryServer = null;
       var secondSecondaryServer = null;
-      var running = true;
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
@@ -1597,123 +1454,101 @@ describe('ReplSet Read Preferences (mocks)', function() {
         firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
         secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(primary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(primary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        }).catch(function() {});
-
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(firstSecondary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
-          }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield secondSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(secondSecondary[0]);
-            } else if (doc.count) {
-              request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
-            }
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(firstSecondary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        Connection.enableConnectionAccounting();
-        // Attempt to connect
-        var server = new ReplSet(
-          [
-            { host: 'localhost', port: 32000 },
-            { host: 'localhost', port: 32001 },
-            { host: 'localhost', port: 32002 }
-          ],
-          {
-            setName: 'rs',
-            connectionTimeout: 3000,
-            socketTimeout: 0,
-            haInterval: 2000,
-            size: 1
+        secondSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(secondSecondary[0]);
+          } else if (doc.count) {
+            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
-        );
-
-        // Add event listeners
-        server.on('all', function(_server) {
-          // Execute more operations than there is servers connected
-          setTimeout(function() {
-            var count = 50;
-            var portsSeen = {};
-
-            var checkHandler = function(err, r) {
-              count = count - 1;
-              expect(err).to.be.null;
-
-              // Add the port to the portsSeen
-              portsSeen[r.connection.port] = true;
-
-              // Finished up
-              if (count === 0) {
-                // Should not contain the primary
-                expect(portsSeen).to.not.have.key('32000');
-
-                // Shut down mocks
-                primaryServer.destroy();
-                firstSecondaryServer.destroy();
-                secondSecondaryServer.destroy();
-                server.destroy();
-                running = false;
-
-                setTimeout(function() {
-                  done();
-                }, 500);
-              }
-            };
-
-            for (var i = 0; i < 50; i++) {
-              // Perform a find
-              _server.command(
-                'test.test',
-                {
-                  count: 'test.test',
-                  batchSize: 2
-                },
-                {
-                  readPreference: new ReadPreference('secondaryPreferred')
-                },
-                checkHandler
-              );
-            }
-          }, 1000);
         });
+      });
 
-        // Gives proxies a chance to boot up
+      Connection.enableConnectionAccounting();
+      // Attempt to connect
+      var server = new ReplSet(
+        [
+          { host: 'localhost', port: 32000 },
+          { host: 'localhost', port: 32001 },
+          { host: 'localhost', port: 32002 }
+        ],
+        {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 2000,
+          size: 1
+        }
+      );
+
+      // Add event listeners
+      server.on('all', function(_server) {
+        // Execute more operations than there is servers connected
         setTimeout(function() {
-          server.connect();
-        }, 100);
-      }).catch(function() {});
+          var count = 50;
+          var portsSeen = {};
+
+          var checkHandler = function(err, r) {
+            count = count - 1;
+            expect(err).to.be.null;
+
+            // Add the port to the portsSeen
+            portsSeen[r.connection.port] = true;
+
+            // Finished up
+            if (count === 0) {
+              // Should not contain the primary
+              expect(portsSeen).to.not.have.key('32000');
+
+              // Shut down mocks
+              Promise.all([
+                primaryServer.destroy(),
+                firstSecondaryServer.destroy(),
+                secondSecondaryServer.destroy(),
+                server.destroy()
+              ]).then(() => done());
+            }
+          };
+
+          for (var i = 0; i < 50; i++) {
+            // Perform a find
+            _server.command(
+              'test.test',
+              {
+                count: 'test.test',
+                batchSize: 2
+              },
+              {
+                readPreference: new ReadPreference('secondaryPreferred')
+              },
+              checkHandler
+            );
+          }
+        }, 1000);
+      });
+
+      // Gives proxies a chance to boot up
+      setTimeout(function() {
+        server.connect();
+      }, 100);
     }
   });
 });

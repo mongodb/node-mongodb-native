@@ -22,7 +22,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
       var primaryServer = null;
       var firstSecondaryServer = null;
       var arbiterServer = null;
-      var running = true;
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
@@ -80,46 +79,25 @@ describe('ReplSet Connection Tests (mocks)', function() {
         firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
         arbiterServer = yield mockupdb.createServer(32002, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(primary[0]);
-            }
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(primary[0]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(firstSecondary[0]);
-            }
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(firstSecondary[0]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield arbiterServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(arbiter[0]);
-            }
+        arbiterServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(arbiter[0]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
       });
 
@@ -156,17 +134,16 @@ describe('ReplSet Connection Tests (mocks)', function() {
             expect(server.s.replicaSetState.primary).to.not.be.null;
             expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-            primaryServer.destroy();
-            firstSecondaryServer.destroy();
-            arbiterServer.destroy();
-            server.destroy();
-            running = false;
-
-            setTimeout(function() {
+            Promise.all([
+              primaryServer.destroy(),
+              firstSecondaryServer.destroy(),
+              arbiterServer.destroy(),
+              server.destroy()
+            ]).then(() => {
               expect(Object.keys(Connection.connections())).to.have.length(0);
               Connection.disableConnectionAccounting();
               done();
-            }, 1000);
+            });
           }
         }
       });
@@ -200,7 +177,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
         var primaryServer = null;
         var firstSecondaryServer = null;
         var arbiterServer = null;
-        var running = true;
         var electionIds = [new ObjectId(), new ObjectId()];
 
         // Default message fields
@@ -258,46 +234,25 @@ describe('ReplSet Connection Tests (mocks)', function() {
           firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
           arbiterServer = yield mockupdb.createServer(32002, 'localhost');
 
-          // Primary state machine
-          co(function*() {
-            while (running) {
-              var request = yield primaryServer.receive();
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(primary[0]);
-              }
+          primaryServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(primary[0]);
             }
-          }).catch(function() {
-            // console.log(err.stack);
           });
 
-          // First secondary state machine
-          co(function*() {
-            while (running) {
-              var request = yield firstSecondaryServer.receive();
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(firstSecondary[0]);
-              }
+          firstSecondaryServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(firstSecondary[0]);
             }
-          }).catch(function() {
-            // console.log(err.stack);
           });
 
-          // Second secondary state machine
-          co(function*() {
-            while (running) {
-              var request = yield arbiterServer.receive();
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(arbiter[0]);
-              }
+          arbiterServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(arbiter[0]);
             }
-          }).catch(function() {
-            // console.log(err.stack);
           });
         });
 
@@ -327,17 +282,16 @@ describe('ReplSet Connection Tests (mocks)', function() {
               expect(server.s.replicaSetState.primary).to.not.be.null;
               expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-              primaryServer.destroy();
-              firstSecondaryServer.destroy();
-              arbiterServer.destroy();
-              server.destroy();
-              running = false;
-
-              setTimeout(function() {
+              Promise.all([
+                primaryServer.destroy(),
+                firstSecondaryServer.destroy(),
+                arbiterServer.destroy(),
+                server.destroy()
+              ]).then(() => {
                 expect(Object.keys(Connection.connections())).to.have.length(0);
                 Connection.disableConnectionAccounting();
                 done();
-              }, 1000);
+              });
             }
           }
         });
@@ -369,7 +323,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
       // Contain mock server
       var primaryServer = null;
       var firstSecondaryServer = null;
-      var running = true;
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
@@ -415,32 +368,18 @@ describe('ReplSet Connection Tests (mocks)', function() {
         primaryServer = yield mockupdb.createServer(32000, 'localhost');
         firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(primary[0]);
-            }
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(primary[0]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(firstSecondary[0]);
-            }
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(firstSecondary[0]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
       });
 
@@ -474,15 +413,15 @@ describe('ReplSet Connection Tests (mocks)', function() {
         expect(server.s.replicaSetState.primary).to.not.be.null;
         expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-        primaryServer.destroy();
-        firstSecondaryServer.destroy();
-        server.destroy();
-
-        setTimeout(function() {
+        Promise.all([
+          primaryServer.destroy(),
+          firstSecondaryServer.destroy(),
+          server.destroy()
+        ]).then(() => {
           expect(Object.keys(Connection.connections())).to.have.length(0);
           Connection.disableConnectionAccounting();
           done();
-        }, 1000);
+        });
       }
 
       // Joined
@@ -518,7 +457,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
       // Contain mock server
       var firstSecondaryServer = null;
-      var running = true;
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
@@ -552,18 +490,11 @@ describe('ReplSet Connection Tests (mocks)', function() {
       co(function*() {
         firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
 
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(firstSecondary[0]);
-            }
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(firstSecondary[0]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
       });
 
@@ -584,22 +515,16 @@ describe('ReplSet Connection Tests (mocks)', function() {
         }
       );
 
-      server.on('connect', function() {});
       server.on('error', function() {
-        server.destroy();
-        firstSecondaryServer.destroy();
-        running = false;
-
-        setTimeout(function() {
+        Promise.all([server.destroy(), firstSecondaryServer.destroy()]).then(() => {
           expect(Object.keys(Connection.connections())).to.have.length(0);
           Connection.disableConnectionAccounting();
           done();
-        }, 1000);
+        });
       });
 
       // Gives proxies a chance to boot up
       setTimeout(function() {
-        // console.log('--------------- connect 1')
         server.connect();
       }, 100);
     }
@@ -622,7 +547,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
         // Contain mock server
         var firstSecondaryServer = null;
         var arbiterServer = null;
-        var running = true;
         var electionIds = [new ObjectId(), new ObjectId()];
 
         // Default message fields
@@ -668,32 +592,18 @@ describe('ReplSet Connection Tests (mocks)', function() {
           firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
           arbiterServer = yield mockupdb.createServer(32002, 'localhost');
 
-          // First secondary state machine
-          co(function*() {
-            while (running) {
-              var request = yield firstSecondaryServer.receive();
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(firstSecondary[0]);
-              }
+          firstSecondaryServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(firstSecondary[0]);
             }
-          }).catch(function() {
-            // console.log(err.stack);
           });
 
-          // Second secondary state machine
-          co(function*() {
-            while (running) {
-              var request = yield arbiterServer.receive();
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(arbiter[0]);
-              }
+          arbiterServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(arbiter[0]);
             }
-          }).catch(function() {
-            // console.log(err.stack);
           });
         });
 
@@ -728,16 +638,15 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
             expect(server.s.replicaSetState.primary).to.be.null;
 
-            firstSecondaryServer.destroy();
-            arbiterServer.destroy();
-            server.destroy();
-            running = false;
-
-            setTimeout(function() {
+            Promise.all([
+              firstSecondaryServer.destroy(),
+              arbiterServer.destroy(),
+              server.destroy()
+            ]).then(() => {
               expect(Object.keys(Connection.connections())).to.have.length(0);
               Connection.disableConnectionAccounting();
               done();
-            }, 1000);
+            });
           }
         });
 
@@ -771,7 +680,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
         var primaryServer = null;
         var firstSecondaryServer = null;
         var arbiterServer = null;
-        var running = true;
         var electionIds = [new ObjectId(), new ObjectId()];
 
         // Default message fields
@@ -829,46 +737,25 @@ describe('ReplSet Connection Tests (mocks)', function() {
           firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
           arbiterServer = yield mockupdb.createServer(32002, 'localhost');
 
-          // Primary state machine
-          co(function*() {
-            while (running) {
-              var request = yield primaryServer.receive();
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(primary[0]);
-              }
+          primaryServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(primary[0]);
             }
-          }).catch(function() {
-            // console.log(err.stack);
           });
 
-          // First secondary state machine
-          co(function*() {
-            while (running) {
-              var request = yield firstSecondaryServer.receive();
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(firstSecondary[0]);
-              }
+          firstSecondaryServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(firstSecondary[0]);
             }
-          }).catch(function() {
-            // console.log(err.stack);
           });
 
-          // Second secondary state machine
-          co(function*() {
-            while (running) {
-              var request = yield arbiterServer.receive();
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(arbiter[0]);
-              }
+          arbiterServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(arbiter[0]);
             }
-          }).catch(function() {
-            // console.log(err.stack);
           });
         });
 
@@ -906,17 +793,16 @@ describe('ReplSet Connection Tests (mocks)', function() {
               expect(server.s.replicaSetState.primary).to.not.be.null;
               expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-              primaryServer.destroy();
-              firstSecondaryServer.destroy();
-              arbiterServer.destroy();
-              server.destroy();
-              running = false;
-
-              setTimeout(function() {
+              Promise.all([
+                primaryServer.destroy(),
+                firstSecondaryServer.destroy(),
+                arbiterServer.destroy(),
+                server.destroy()
+              ]).then(() => {
                 expect(Object.keys(Connection.connections())).to.have.length(0);
                 Connection.disableConnectionAccounting();
                 done();
-              }, 1000);
+              });
             }
           }
         });
@@ -949,7 +835,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
       var primaryServer = null;
       var firstSecondaryServer = null;
       var arbiterServer = null;
-      var running = true;
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
@@ -1007,46 +892,25 @@ describe('ReplSet Connection Tests (mocks)', function() {
         firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
         arbiterServer = yield mockupdb.createServer(32002, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(primary[0]);
-            }
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(primary[0]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(firstSecondary[0]);
-            }
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(firstSecondary[0]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield arbiterServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(arbiter[0]);
-            }
+        arbiterServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(arbiter[0]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
       });
 
@@ -1068,17 +932,16 @@ describe('ReplSet Connection Tests (mocks)', function() {
       );
 
       server.on('error', function() {
-        primaryServer.destroy();
-        firstSecondaryServer.destroy();
-        arbiterServer.destroy();
-        server.destroy();
-        running = false;
-
-        setTimeout(function() {
+        Promise.all([
+          primaryServer.destroy(),
+          firstSecondaryServer.destroy(),
+          arbiterServer.destroy(),
+          server.destroy()
+        ]).then(() => {
           expect(Object.keys(Connection.connections())).to.have.length(0);
           Connection.disableConnectionAccounting();
           done();
-        }, 1000);
+        });
       });
 
       // Gives proxies a chance to boot up
@@ -1103,7 +966,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
       // Contain mock server
       var primaryServer = null;
       var firstSecondaryServer = null;
-      var running = true;
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
@@ -1149,32 +1011,18 @@ describe('ReplSet Connection Tests (mocks)', function() {
         primaryServer = yield mockupdb.createServer(32000, 'localhost');
         firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(primary[0]);
-            }
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(primary[0]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(firstSecondary[0]);
-            }
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(firstSecondary[0]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
       });
 
@@ -1203,16 +1051,15 @@ describe('ReplSet Connection Tests (mocks)', function() {
             expect(server.s.replicaSetState.primary).to.not.be.null;
             expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-            primaryServer.destroy();
-            firstSecondaryServer.destroy();
-            server.destroy();
-            running = false;
-
-            setTimeout(function() {
+            Promise.all([
+              primaryServer.destroy(),
+              firstSecondaryServer.destroy(),
+              server.destroy()
+            ]).then(() => {
               expect(Object.keys(Connection.connections())).to.have.length(0);
               Connection.disableConnectionAccounting();
               done();
-            }, 1000);
+            });
           }
         }
       });
@@ -1246,7 +1093,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
         var primaryServer = null;
         var firstSecondaryServer = null;
         var arbiterServer = null;
-        var running = true;
         var electionIds = [new ObjectId(), new ObjectId()];
 
         // Default message fields
@@ -1304,46 +1150,25 @@ describe('ReplSet Connection Tests (mocks)', function() {
           firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
           arbiterServer = yield mockupdb.createServer(32002, 'localhost');
 
-          // Primary state machine
-          co(function*() {
-            while (running) {
-              var request = yield primaryServer.receive();
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(primary[0]);
-              }
+          primaryServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(primary[0]);
             }
-          }).catch(function() {
-            // console.log(err.stack);
           });
 
-          // First secondary state machine
-          co(function*() {
-            while (running) {
-              var request = yield firstSecondaryServer.receive();
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(firstSecondary[0]);
-              }
+          firstSecondaryServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(firstSecondary[0]);
             }
-          }).catch(function() {
-            // console.log(err.stack);
           });
 
-          // Second secondary state machine
-          co(function*() {
-            while (running) {
-              var request = yield arbiterServer.receive();
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(arbiter[0]);
-              }
+          arbiterServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(arbiter[0]);
             }
-          }).catch(function() {
-            // console.log(err.stack);
           });
         });
 
@@ -1376,17 +1201,16 @@ describe('ReplSet Connection Tests (mocks)', function() {
               expect(server.s.replicaSetState.primary).to.not.be.null;
               expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-              primaryServer.destroy();
-              firstSecondaryServer.destroy();
-              arbiterServer.destroy();
-              server.destroy();
-              running = false;
-
-              setTimeout(function() {
+              Promise.all([
+                primaryServer.destroy(),
+                firstSecondaryServer.destroy(),
+                arbiterServer.destroy(),
+                server.destroy()
+              ]).then(() => {
                 expect(Object.keys(Connection.connections())).to.have.length(0);
                 Connection.disableConnectionAccounting();
                 done();
-              }, 1000);
+              });
             }
           }
         });
@@ -1418,7 +1242,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
       // Contain mock server
       var primaryServer = null;
       var arbiterServer = null;
-      var running = true;
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
@@ -1462,32 +1285,18 @@ describe('ReplSet Connection Tests (mocks)', function() {
         primaryServer = yield mockupdb.createServer(32000, 'localhost');
         arbiterServer = yield mockupdb.createServer(32002, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(primary[0]);
-            }
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(primary[0]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield arbiterServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(arbiter[0]);
-            }
+        arbiterServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(arbiter[0]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
       });
 
@@ -1510,16 +1319,15 @@ describe('ReplSet Connection Tests (mocks)', function() {
             expect(server.s.replicaSetState.primary).to.not.be.null;
             expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-            primaryServer.destroy();
-            arbiterServer.destroy();
-            server.destroy();
-            running = false;
-
-            setTimeout(function() {
+            Promise.all([
+              primaryServer.destroy(),
+              arbiterServer.destroy(),
+              server.destroy()
+            ]).then(() => {
               expect(Object.keys(Connection.connections())).to.have.length(0);
               Connection.disableConnectionAccounting();
               done();
-            }, 1000);
+            });
           }
         }
       });
@@ -1554,7 +1362,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
         var primaryServer = null;
         var firstSecondaryServer = null;
         var arbiterServer = null;
-        var running = true;
         var electionIds = [new ObjectId(), new ObjectId()];
 
         // Default message fields
@@ -1612,46 +1419,25 @@ describe('ReplSet Connection Tests (mocks)', function() {
           firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
           arbiterServer = yield mockupdb.createServer(32002, 'localhost');
 
-          // Primary state machine
-          co(function*() {
-            while (running) {
-              var request = yield primaryServer.receive();
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(primary[0]);
-              }
+          primaryServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(primary[0]);
             }
-          }).catch(function() {
-            // console.log(err.stack);
           });
 
-          // First secondary state machine
-          co(function*() {
-            while (running) {
-              var request = yield firstSecondaryServer.receive();
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(firstSecondary[0]);
-              }
+          firstSecondaryServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(firstSecondary[0]);
             }
-          }).catch(function() {
-            // console.log(err.stack);
           });
 
-          // Second secondary state machine
-          co(function*() {
-            while (running) {
-              var request = yield arbiterServer.receive();
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(arbiter[0]);
-              }
+          arbiterServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(arbiter[0]);
             }
-          }).catch(function() {
-            // console.log(err.stack);
           });
         });
 
@@ -1673,17 +1459,15 @@ describe('ReplSet Connection Tests (mocks)', function() {
           expect(server.__connected).to.be.true;
           expect(server.__fullsetup).to.be.true;
 
-          primaryServer.destroy();
-          firstSecondaryServer.destroy();
-          arbiterServer.destroy();
-          server.destroy();
-          running = false;
-          done();
-          // server.__c = true;
+          Promise.all([
+            primaryServer.destroy(),
+            firstSecondaryServer.destroy(),
+            arbiterServer.destroy(),
+            server.destroy()
+          ]).then(() => done());
         });
 
         server.on('connect', function() {
-          // console.log('============= connect')
           server.__connected = true;
         });
 
@@ -1712,7 +1496,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
         // Contain mock server
         var firstSecondaryServer = null;
         var arbiterServer = null;
-        var running = true;
         var electionIds = [new ObjectId(), new ObjectId()];
 
         // Default message fields
@@ -1758,32 +1541,18 @@ describe('ReplSet Connection Tests (mocks)', function() {
           firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
           arbiterServer = yield mockupdb.createServer(32002, 'localhost');
 
-          // First secondary state machine
-          co(function*() {
-            while (running) {
-              var request = yield firstSecondaryServer.receive();
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(firstSecondary[0]);
-              }
+          firstSecondaryServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(firstSecondary[0]);
             }
-          }).catch(function() {
-            // console.log(err.stack);
           });
 
-          // Second secondary state machine
-          co(function*() {
-            while (running) {
-              var request = yield arbiterServer.receive();
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(arbiter[0]);
-              }
+          arbiterServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(arbiter[0]);
             }
-          }).catch(function() {
-            // console.log(err.stack);
           });
         });
 
@@ -1811,11 +1580,11 @@ describe('ReplSet Connection Tests (mocks)', function() {
           var result = server.lastIsMaster();
           expect(result).to.exist;
 
-          firstSecondaryServer.destroy();
-          arbiterServer.destroy();
-          server.destroy();
-          running = false;
-          done();
+          Promise.all([
+            firstSecondaryServer.destroy(),
+            arbiterServer.destroy(),
+            server.destroy()
+          ]).then(() => done());
         });
 
         // Gives proxies a chance to boot up

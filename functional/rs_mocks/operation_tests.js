@@ -19,7 +19,6 @@ describe('ReplSet Operations (mocks)', function() {
 
       // Contain mock server
       var primaryServer = null;
-      var running = true;
       var currentIsMasterIndex = 0;
 
       // Default message fields
@@ -52,22 +51,13 @@ describe('ReplSet Operations (mocks)', function() {
       co(function*() {
         primaryServer = yield mockupdb.createServer(32000, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            var doc = request.document;
-            // console.log('======== doc')
-            // console.dir(doc)
-
-            if (doc.ismaster) {
-              request.reply(primary[currentIsMasterIndex]);
-            } else if (doc.count) {
-              request.reply({ ok: 1, n: 1 });
-            }
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(primary[currentIsMasterIndex]);
+          } else if (doc.count) {
+            request.reply({ ok: 1, n: 1 });
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
       });
 
@@ -87,10 +77,7 @@ describe('ReplSet Operations (mocks)', function() {
 
       server.on('connect', function(_server) {
         _server.command('test.test', { count: 'test' }, function() {
-          primaryServer.destroy();
-          _server.destroy();
-          running = false;
-          done();
+          Promise.all([primaryServer.destroy(), _server.destroy()]).then(() => done());
         });
       });
 
@@ -118,7 +105,6 @@ describe('ReplSet Operations (mocks)', function() {
 
         // Contain mock server
         var primaryServer = null;
-        var running = true;
         var currentIsMasterIndex = 0;
 
         // Default message fields
@@ -151,20 +137,13 @@ describe('ReplSet Operations (mocks)', function() {
         co(function*() {
           primaryServer = yield mockupdb.createServer(32000, 'localhost');
 
-          // Primary state machine
-          co(function*() {
-            while (running) {
-              var request = yield primaryServer.receive();
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(primary[currentIsMasterIndex]);
-              } else if (doc.count) {
-                request.reply({ ok: 1, n: 1 });
-              }
+          primaryServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(primary[currentIsMasterIndex]);
+            } else if (doc.count) {
+              request.reply({ ok: 1, n: 1 });
             }
-          }).catch(function(err) {
-            console.log(err.stack);
           });
         });
 
@@ -188,10 +167,7 @@ describe('ReplSet Operations (mocks)', function() {
             { count: 'test' },
             { readPreference: ReadPreference.secondaryPreferred },
             function() {
-              primaryServer.destroy();
-              _server.destroy();
-              running = false;
-              done();
+              Promise.all([primaryServer.destroy(), _server.destroy()]).then(() => done());
             }
           );
         });

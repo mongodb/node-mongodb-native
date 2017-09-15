@@ -20,7 +20,6 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
 
       // Contain mock server
       var mongos1 = null;
-      var running = true;
 
       // Default message fields
       var defaultFields = {
@@ -43,31 +42,25 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
       co(function*() {
         mongos1 = yield mockupdb.createServer(52013, 'localhost');
 
-        // Mongos
-        return co(function*() {
-          while (running) {
-            var request = yield mongos1.receive();
+        mongos1.setMessageHandler(request => {
+          var doc = request.document;
 
-            // Get the document
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.$query && doc.$readPreference) {
-              command = doc;
-              request.reply({
-                waitedMS: Long.ZERO,
-                cursor: {
-                  id: Long.ZERO,
-                  ns: 'test.t',
-                  firstBatch: []
-                },
-                ok: 1
-              });
-            }
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.$query && doc.$readPreference) {
+            command = doc;
+            request.reply({
+              waitedMS: Long.ZERO,
+              cursor: {
+                id: Long.ZERO,
+                ns: 'test.t',
+                firstBatch: []
+              },
+              ok: 1
+            });
           }
         });
-      }).catch(function() {});
+      });
 
       // Attempt to connect
       var server = new Mongos([{ host: 'localhost', port: 52013 }], {
@@ -94,10 +87,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
           expect(command).to.have.keys(['$query', '$readPreference']);
           expect(command.$readPreference.mode).to.equal('secondary');
 
-          server.destroy();
-          mongos1.destroy();
-          running = false;
-          done();
+          Promise.all([server.destroy(), mongos1.destroy()]).then(() => done());
         });
       });
 
@@ -123,7 +113,6 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
 
       // Contain mock server
       var mongos1 = null;
-      var running = true;
 
       // Default message fields
       var defaultFields = {
@@ -146,31 +135,24 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
       co(function*() {
         mongos1 = yield mockupdb.createServer(52014, 'localhost');
 
-        // Mongos
-        return co(function*() {
-          while (running) {
-            var request = yield mongos1.receive();
-
-            // Get the document
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.$query && doc.$readPreference) {
-              command = doc;
-              request.reply({
-                waitedMS: Long.ZERO,
-                cursor: {
-                  id: Long.ZERO,
-                  ns: 'test.t',
-                  firstBatch: []
-                },
-                ok: 1
-              });
-            }
+        mongos1.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.$query && doc.$readPreference) {
+            command = doc;
+            request.reply({
+              waitedMS: Long.ZERO,
+              cursor: {
+                id: Long.ZERO,
+                ns: 'test.t',
+                firstBatch: []
+              },
+              ok: 1
+            });
           }
         });
-      }).catch(function() {});
+      });
 
       // Attempt to connect
       var server = new Mongos([{ host: 'localhost', port: 52014 }], {
@@ -198,10 +180,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
           expect(command.$readPreference.mode).to.equal('nearest');
           expect(command.$readPreference.tags).to.eql([{ db: 'sf' }]);
 
-          server.destroy();
-          mongos1.destroy();
-          running = false;
-          done();
+          Promise.all([server.destroy(), mongos1.destroy()]).then(() => done());
         });
       });
 
@@ -226,7 +205,6 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
 
       // Contain mock server
       var mongos1 = null;
-      var running = true;
 
       // Default message fields
       var defaultFields = {
@@ -249,23 +227,16 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
       co(function*() {
         mongos1 = yield mockupdb.createServer(52015, 'localhost');
 
-        // Mongos
-        return co(function*() {
-          while (running) {
-            var request = yield mongos1.receive();
-
-            // Get the document
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.$query && doc.$readPreference) {
-              command = doc;
-              request.reply([]);
-            }
+        mongos1.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.$query && doc.$readPreference) {
+            command = doc;
+            request.reply([]);
           }
         });
-      }).catch(function() {});
+      });
 
       // Attempt to connect
       var server = new Mongos([{ host: 'localhost', port: 52015 }], {
@@ -292,10 +263,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
           expect(command).to.have.keys(['$query', '$readPreference']);
           expect(command.$readPreference.mode, 'secondary');
 
-          server.destroy();
-          mongos1.destroy();
-          running = false;
-          done();
+          Promise.all([server.destroy(), mongos1.destroy()]).then(() => done());
         });
       });
 

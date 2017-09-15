@@ -5,12 +5,8 @@ var expect = require('chai').expect,
   Connection = require('../../../../lib/connection/connection'),
   mockupdb = require('../../../mock');
 
-var timeoutPromise = function(timeout) {
-  return new Promise(function(resolve) {
-    setTimeout(function() {
-      resolve();
-    }, timeout);
-  });
+var delay = function(timeout) {
+  return new Promise(resolve => setTimeout(() => resolve(), timeout));
 };
 
 describe('ReplSet Monitoring (mocks)', function() {
@@ -32,7 +28,6 @@ describe('ReplSet Monitoring (mocks)', function() {
         var primaryServer = null;
         var firstSecondaryServer = null;
         var secondSecondaryServer = null;
-        var running = true;
         var electionIds = [new ObjectId(), new ObjectId()];
         // Current index for the ismaster
         var currentIsMasterState = 0;
@@ -113,19 +108,17 @@ describe('ReplSet Monitoring (mocks)', function() {
           firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
           secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
 
-          // Primary state machine
-          co(function*() {
-            while (running) {
-              var request = yield primaryServer.receive();
+          primaryServer.setMessageHandler(request => {
+            var doc = request.document;
 
-              // Stop responding to any calls (emulate dropping packets on the floor)
-              if (stopRespondingPrimary) {
-                yield timeoutPromise(10000);
-                continue;
-              }
+            // Stop responding to any calls (emulate dropping packets on the floor)
+            if (stopRespondingPrimary) {
+              delay(10000).then(() => handleMessage(doc));
+            } else {
+              handleMessage(doc);
+            }
 
-              // Get the document
-              var doc = request.document;
+            function handleMessage(doc) {
               if (doc.ismaster && currentIsMasterState === 0) {
                 request.reply(primary[currentIsMasterState]);
               } else if (doc.insert && currentIsMasterState === 0) {
@@ -141,38 +134,28 @@ describe('ReplSet Monitoring (mocks)', function() {
             }
           });
 
-          // First secondary state machine
-          co(function*() {
-            while (running) {
-              var request = yield firstSecondaryServer.receive();
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(firstSecondary[currentIsMasterState]);
-              } else if (doc.insert && currentIsMasterState === 1) {
-                request.reply({
-                  ok: 1,
-                  n: doc.documents,
-                  lastOp: new Date(),
-                  electionId: electionIds[currentIsMasterState]
-                });
-              } else if (doc.insert && currentIsMasterState === 0) {
-                request.reply({ note: 'from execCommand', ok: 0, errmsg: 'not master' });
-              }
+          firstSecondaryServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(firstSecondary[currentIsMasterState]);
+            } else if (doc.insert && currentIsMasterState === 1) {
+              request.reply({
+                ok: 1,
+                n: doc.documents,
+                lastOp: new Date(),
+                electionId: electionIds[currentIsMasterState]
+              });
+            } else if (doc.insert && currentIsMasterState === 0) {
+              request.reply({ note: 'from execCommand', ok: 0, errmsg: 'not master' });
             }
           });
 
-          // Second secondary state machine
-          co(function*() {
-            while (running) {
-              var request = yield secondSecondaryServer.receive();
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(secondSecondary[currentIsMasterState]);
-              } else if (doc.insert && currentIsMasterState === 0) {
-                request.reply({ note: 'from execCommand', ok: 0, errmsg: 'not master' });
-              }
+          secondSecondaryServer.setMessageHandler(request => {
+            var doc = request.document;
+            if (doc.ismaster) {
+              request.reply(secondSecondary[currentIsMasterState]);
+            } else if (doc.insert && currentIsMasterState === 0) {
+              request.reply({ note: 'from execCommand', ok: 0, errmsg: 'not master' });
             }
           });
 
@@ -216,17 +199,19 @@ describe('ReplSet Monitoring (mocks)', function() {
                   expect(joinedSecondaries).to.eql({ 'localhost:32001': 1, 'localhost:32002': 1 });
 
                   // Destroy mock
-                  primaryServer.destroy();
-                  firstSecondaryServer.destroy();
-                  secondSecondaryServer.destroy();
-                  server.destroy();
-                  running = false;
+                  Promise.all([
+                    primaryServer.destroy(),
+                    firstSecondaryServer.destroy(),
+                    secondSecondaryServer.destroy(),
+                    server.destroy()
+                  ]).then(() => {
+                    setTimeout(function() {
+                      expect(Object.keys(Connection.connections())).to.have.length(0);
+                      Connection.disableConnectionAccounting();
+                      done();
+                    }, 1000);
+                  });
 
-                  setTimeout(function() {
-                    expect(Object.keys(Connection.connections())).to.have.length(0);
-                    Connection.disableConnectionAccounting();
-                    done();
-                  }, 1000);
                   return;
                 }
 
@@ -273,7 +258,6 @@ describe('ReplSet Monitoring (mocks)', function() {
       var primaryServer = null;
       var firstSecondaryServer = null;
       var secondSecondaryServer = null;
-      var running = true;
       var electionIds = [new ObjectId(), new ObjectId()];
       // Current index for the ismaster
       var currentIsMasterState = 0;
@@ -347,40 +331,24 @@ describe('ReplSet Monitoring (mocks)', function() {
         firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
         secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster && currentIsMasterState == 0) {
-              request.reply(primary[currentIsMasterState]);
-            }
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster && currentIsMasterState == 0) {
+            request.reply(primary[currentIsMasterState]);
           }
         });
 
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(firstSecondary[currentIsMasterState]);
-            }
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(firstSecondary[currentIsMasterState]);
           }
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield secondSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(secondSecondary[currentIsMasterState]);
-            }
+        secondSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(secondSecondary[currentIsMasterState]);
           }
         });
       });
@@ -406,15 +374,15 @@ describe('ReplSet Monitoring (mocks)', function() {
         setTimeout(function() {
           expect(_server.intervalIds.length).to.be.greaterThan(1);
 
-          // Destroy mock
-          primaryServer.destroy();
-          firstSecondaryServer.destroy();
-          secondSecondaryServer.destroy();
-          server.destroy();
-          running = false;
-
-          expect(_server.intervalIds.length).to.equal(0);
-          done();
+          Promise.all([
+            primaryServer.destroy(),
+            firstSecondaryServer.destroy(),
+            secondSecondaryServer.destroy(),
+            server.destroy()
+          ]).then(() => {
+            expect(_server.intervalIds.length).to.equal(0);
+            done();
+          });
         }, 1000);
       });
 

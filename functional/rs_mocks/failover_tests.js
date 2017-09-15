@@ -23,7 +23,6 @@ describe('ReplSet Failover (mocks)', function() {
       var primaryServer = null;
       var firstSecondaryServer = null;
       var secondSecondaryServer = null;
-      var running = true;
       var currentIsMasterIndex = 0;
 
       // Election Ids
@@ -131,58 +130,37 @@ describe('ReplSet Failover (mocks)', function() {
         firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
         secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            var doc = request.document;
-
-            if (die) {
-              request.connection.destroy();
-            } else {
-              if (doc.ismaster) {
-                request.reply(primary[currentIsMasterIndex]);
-              }
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (die) {
+            request.connection.destroy();
+          } else {
+            if (doc.ismaster) {
+              request.reply(primary[currentIsMasterIndex]);
             }
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (die) {
-              request.connection.destroy();
-            } else {
-              if (doc.ismaster) {
-                request.reply(firstSecondary[currentIsMasterIndex]);
-              }
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (die) {
+            request.connection.destroy();
+          } else {
+            if (doc.ismaster) {
+              request.reply(firstSecondary[currentIsMasterIndex]);
             }
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield secondSecondaryServer.receive();
-            var doc = request.document;
-
-            if (die) {
-              request.connection.destroy();
-            } else {
-              if (doc.ismaster) {
-                request.reply(secondSecondary[currentIsMasterIndex]);
-              }
+        secondSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (die) {
+            request.connection.destroy();
+          } else {
+            if (doc.ismaster) {
+              request.reply(secondSecondary[currentIsMasterIndex]);
             }
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
       });
 
@@ -236,18 +214,19 @@ describe('ReplSet Failover (mocks)', function() {
               expect(server.s.replicaSetState.primary).to.not.be.null;
               expect(server.s.replicaSetState.primary.name).to.equal('localhost:32001');
 
-              primaryServer.destroy();
-              firstSecondaryServer.destroy();
-              secondSecondaryServer.destroy();
-              server.destroy();
-              running = false;
-
-              Server.disableServerAccounting();
-              setTimeout(function() {
-                expect(Object.keys(Connection.connections())).to.have.length(0);
-                Connection.disableConnectionAccounting();
-                done();
-              }, 1000);
+              Promise.all([
+                primaryServer.destroy(),
+                firstSecondaryServer.destroy(),
+                secondSecondaryServer.destroy(),
+                server.destroy()
+              ]).then(() => {
+                Server.disableServerAccounting();
+                setTimeout(function() {
+                  expect(Object.keys(Connection.connections())).to.have.length(0);
+                  Connection.disableConnectionAccounting();
+                  done();
+                }, 1000);
+              });
             }
           });
 
@@ -283,7 +262,6 @@ describe('ReplSet Failover (mocks)', function() {
       var primaryServer = null;
       var firstSecondaryServer = null;
       var secondSecondaryServer = null;
-      var running = true;
       var currentIsMasterIndex = 0;
 
       // Election Ids
@@ -391,58 +369,37 @@ describe('ReplSet Failover (mocks)', function() {
         firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
         secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            var doc = request.document;
-
-            if (die) {
-              request.connection.destroy();
-            } else {
-              if (doc.ismaster) {
-                request.reply(primary[currentIsMasterIndex]);
-              }
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (die) {
+            request.connection.destroy();
+          } else {
+            if (doc.ismaster) {
+              request.reply(primary[currentIsMasterIndex]);
             }
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (die) {
-              request.connection.destroy();
-            } else {
-              if (doc.ismaster) {
-                request.reply(firstSecondary[currentIsMasterIndex]);
-              }
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (die) {
+            request.connection.destroy();
+          } else {
+            if (doc.ismaster) {
+              request.reply(firstSecondary[currentIsMasterIndex]);
             }
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield secondSecondaryServer.receive();
-            var doc = request.document;
-
-            if (die) {
-              request.connection.destroy();
-            } else {
-              if (doc.ismaster) {
-                request.reply(secondSecondary[currentIsMasterIndex]);
-              }
+        secondSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (die) {
+            request.connection.destroy();
+          } else {
+            if (doc.ismaster) {
+              request.reply(secondSecondary[currentIsMasterIndex]);
             }
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
       });
 
@@ -474,19 +431,20 @@ describe('ReplSet Failover (mocks)', function() {
           currentIsMasterIndex = currentIsMasterIndex + 1;
 
           server.on('reconnect', function() {
-            primaryServer.destroy();
-            firstSecondaryServer.destroy();
-            secondSecondaryServer.destroy();
-            server.destroy();
-            running = false;
+            Promise.all([
+              primaryServer.destroy(),
+              firstSecondaryServer.destroy(),
+              secondSecondaryServer.destroy(),
+              server.destroy()
+            ]).then(() => {
+              Server.disableServerAccounting();
 
-            Server.disableServerAccounting();
-
-            setTimeout(function() {
-              expect(Object.keys(Connection.connections())).to.have.length(0);
-              Connection.disableConnectionAccounting();
-              done();
-            }, 1000);
+              setTimeout(function() {
+                expect(Object.keys(Connection.connections())).to.have.length(0);
+                Connection.disableConnectionAccounting();
+                done();
+              }, 1000);
+            });
           });
 
           setTimeout(function() {

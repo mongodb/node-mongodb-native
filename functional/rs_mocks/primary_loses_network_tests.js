@@ -21,7 +21,6 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
       var primaryServer = null;
       var firstSecondaryServer = null;
       var secondSecondaryServer = null;
-      var running = true;
       var currentIsMasterIndex = 0;
       var step = 0;
 
@@ -100,49 +99,28 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
         firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
         secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            var doc = request.document;
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          // Fail primary
+          if (step >= 1) return;
 
-            // Fail primary
-            if (step >= 1) return;
-
-            if (doc.ismaster) {
-              request.reply(primary[currentIsMasterIndex]);
-            }
+          if (doc.ismaster) {
+            request.reply(primary[currentIsMasterIndex]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(firstSecondary[currentIsMasterIndex]);
-            }
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(firstSecondary[currentIsMasterIndex]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield secondSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(secondSecondary[currentIsMasterIndex]);
-            }
+        secondSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(secondSecondary[currentIsMasterIndex]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
       });
 
@@ -169,13 +147,14 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
         if (_type === 'primary') {
           server.on('joined', function(__type, __server) {
             if (__type === 'primary' && __server.name === 'localhost:32002') {
-              primaryServer.destroy();
-              firstSecondaryServer.destroy();
-              secondSecondaryServer.destroy();
-
-              running = false;
-              __server.destroy();
-              done();
+              Promise.all([
+                primaryServer.destroy(),
+                firstSecondaryServer.destroy(),
+                secondSecondaryServer.destroy(),
+                __server.destroy()
+              ]).then(() => {
+                done();
+              });
             }
           });
         }

@@ -4,14 +4,6 @@ var expect = require('chai').expect,
   co = require('co'),
   mockupdb = require('../../../mock');
 
-var timeoutPromise = function(timeout) {
-  return new Promise(function(resolve) {
-    setTimeout(function() {
-      resolve();
-    }, timeout);
-  });
-};
-
 describe('Single Timeout (mocks)', function() {
   it('Should correctly timeout socket operation and then correctly re-execute', {
     metadata: {
@@ -26,7 +18,6 @@ describe('Single Timeout (mocks)', function() {
 
       // Contain mock server
       var server = null;
-      var running = true;
       // Current index for the ismaster
       var currentStep = 0;
       // Primary stop responding
@@ -51,29 +42,24 @@ describe('Single Timeout (mocks)', function() {
       co(function*() {
         server = yield mockupdb.createServer(37019, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield server.receive();
-
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster && currentStep === 0) {
-              request.reply(serverIsMaster[0]);
-              currentStep += 1;
-            } else if (doc.insert && currentStep === 1) {
-              // Stop responding to any calls (emulate dropping packets on the floor)
-              if (stopRespondingPrimary) {
-                yield timeoutPromise(3000);
-                continue;
-              }
-
-              currentStep += 1;
-            } else if (doc.ismaster && currentStep === 2) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.insert && currentStep === 2) {
-              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
+        server.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster && currentStep === 0) {
+            request.reply(serverIsMaster[0]);
+            currentStep += 1;
+          } else if (doc.insert && currentStep === 1) {
+            // Stop responding to any calls (emulate dropping packets on the floor)
+            if (stopRespondingPrimary) {
+              // yield timeoutPromise(3000);
+              // continue;
+              return;
             }
+
+            currentStep += 1;
+          } else if (doc.ismaster && currentStep === 2) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.insert && currentStep === 2) {
+            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
           }
         });
 
@@ -108,7 +94,6 @@ describe('Single Timeout (mocks)', function() {
                   finished = true;
                   expect(_r.connection.port).to.equal('37019');
                   replset.destroy({ force: true });
-                  running = false;
                   done();
                 } else {
                   wait();
@@ -141,7 +126,6 @@ describe('Single Timeout (mocks)', function() {
 
       // Contain mock server
       var server = null;
-      var running = true;
       // Current index for the ismaster
       var currentStep = 0;
       // Should fail due to broken pipe
@@ -181,21 +165,16 @@ describe('Single Timeout (mocks)', function() {
           }
         });
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield __server.receive();
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster && currentStep === 0) {
-              currentStep += 1;
-              request.reply(serverIsMaster[0]);
-            } else if (doc.insert && currentStep === 2) {
-              currentStep += 1;
-              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
-            } else if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            }
+        __server.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster && currentStep === 0) {
+            currentStep += 1;
+            request.reply(serverIsMaster[0]);
+          } else if (doc.insert && currentStep === 2) {
+            currentStep += 1;
+            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
+          } else if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
           }
         });
       });
@@ -209,7 +188,6 @@ describe('Single Timeout (mocks)', function() {
         size: 1
       });
 
-      // console.log('!!!! server connect')
       var docs = [];
       // Create big insert message
       for (var i = 0; i < 1000; i++) {
@@ -290,7 +268,6 @@ describe('Single Timeout (mocks)', function() {
           expect(r).to.exist;
           expect(brokenPipe).to.equal(true);
           _server.destroy();
-          running = false;
           __server.destroy();
           done();
         });
@@ -303,101 +280,97 @@ describe('Single Timeout (mocks)', function() {
     }
   });
 
-  /* change to `it.skip` when it's supported in metamocha
-  it('Should not start double reconnect timeouts due to socket timeout during attemptReconnect', {
-    metadata: {
-      requires: {
-        generators: true,
-        topology: 'single'
-      }
-    },
+  it.skip(
+    'Should not start double reconnect timeouts due to socket timeout during attemptReconnect',
+    {
+      metadata: {
+        requires: {
+          generators: true,
+          topology: 'single'
+        }
+      },
 
-    test: function(done) {
-      var Server = this.configuration.mongo.Server;
+      test: function(done) {
+        var Server = this.configuration.mongo.Server;
 
-      // Contain mock server
-      var server = null;
-      var running = true;
-      // Current index for the ismaster
-      var currentStep = 0;
+        // Contain mock server
+        var server = null;
+        var running = true;
+        // Current index for the ismaster
+        var currentStep = 0;
 
-      // Default message fields
-      var defaultFields = {
-        'ismaster': true,
-        'maxBsonObjectSize': 16777216,
-        'maxMessageSizeBytes': 48000000,
-        'maxWriteBatchSize': 1000,
-        'localTime': new Date(),
-        'maxWireVersion': 3,
-        'minWireVersion': 0,
-        'ok': 1
-      };
+        // Default message fields
+        var defaultFields = {
+          ismaster: true,
+          maxBsonObjectSize: 16777216,
+          maxMessageSizeBytes: 48000000,
+          maxWriteBatchSize: 1000,
+          localTime: new Date(),
+          maxWireVersion: 3,
+          minWireVersion: 0,
+          ok: 1
+        };
 
-      // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
+        // Primary server states
+        var serverIsMaster = [assign({}, defaultFields)];
 
-      // Boot the mock
-      co(function*() {
-        server = yield mockupdb.createServer(37019, 'localhost');
-
-        // Primary state machine
+        // Boot the mock
         co(function*() {
-          while (running) {
+          server = yield mockupdb.createServer(37019, 'localhost');
+
+          server.setMessageHandler(request => {
             if (currentStep === 1) {
-              yield timeoutPromise(5000);
-              continue;
+              // yield timeoutPromise(5000);
+              // continue;
+              return;
             }
 
-            var request = yield server.receive();
-
-            // Get the document
             var doc = request.document;
             if (doc.ismaster && currentStep === 0) {
               request.reply(serverIsMaster[0]);
               currentStep += 1;
             }
-          }
+          });
         });
-      });
 
-      // Attempt to connect
-      server = new Server({
-        host: 'localhost',
-        port: 37019,
-        connectionTimeout: 2000,
-        socketTimeout: 1000,
-        size: 1
-      });
+        // Attempt to connect
+        server = new Server({
+          host: 'localhost',
+          port: 37019,
+          connectionTimeout: 2000,
+          socketTimeout: 1000,
+          size: 1
+        });
 
-      // Add event listeners
-      server.once('connect', function(_server) {
-        // _server.insert('test.test', [{created:new Date()}], function(err, r) {
-        //   test.ok(err != null);
-        //   // console.dir(err)
-        //
-        //   function wait() {
-        //     setTimeout(function() {
-        //       _server.insert('test.test', [{created:new Date()}], function(err, r) {
-        //         if (r && !done) {
-        //           done = true;
-        //           test.equal(37019, r.connection.port);
-        //           replset.destroy();
-        //           running = false;
-        //           test.done();
-        //         } else {
-        //           wait();
-        //         }
-        //       });
-        //     }, 500);
-        //   }
-        //
-        //   wait();
-        // });
-      });
+        // Add event listeners
+        server.once('connect', function() {
+          // _server.insert('test.test', [{created:new Date()}], function(err, r) {
+          //   test.ok(err != null);
+          //   // console.dir(err)
+          //
+          //   function wait() {
+          //     setTimeout(function() {
+          //       _server.insert('test.test', [{created:new Date()}], function(err, r) {
+          //         if (r && !done) {
+          //           done = true;
+          //           test.equal(37019, r.connection.port);
+          //           replset.destroy();
+          //           running = false;
+          //           test.done();
+          //         } else {
+          //           wait();
+          //         }
+          //       });
+          //     }, 500);
+          //   }
+          //
+          //   wait();
+          // });
+        });
 
-      server.on('error', done);
-      server.connect();
+        server.on('error', done);
+        server.connect();
+      }
     }
-  });
-  */
+  );
 });

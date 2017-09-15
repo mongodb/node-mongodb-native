@@ -4,14 +4,6 @@ var expect = require('chai').expect,
   co = require('co'),
   mockupdb = require('../../../mock');
 
-var timeoutPromise = function(timeout) {
-  return new Promise(function(resolve) {
-    setTimeout(function() {
-      resolve();
-    }, timeout);
-  });
-};
-
 describe('Mongos Multiple Proxies (mocks)', function() {
   it('Should correctly load-balance the operations', {
     metadata: {
@@ -27,7 +19,6 @@ describe('Mongos Multiple Proxies (mocks)', function() {
       // Contain mock server
       var mongos1 = null;
       var mongos2 = null;
-      var running = true;
 
       // Default message fields
       var defaultFields = {
@@ -49,77 +40,63 @@ describe('Mongos Multiple Proxies (mocks)', function() {
         mongos1 = yield mockupdb.createServer(11000, 'localhost');
         mongos2 = yield mockupdb.createServer(11001, 'localhost');
 
-        // Mongos
-        co(function*() {
-          while (running) {
-            var request = yield mongos1.receive();
-
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.insert) {
-              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
-            }
+        mongos1.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.insert) {
+            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
           }
-        }).catch(function() {});
+        });
 
-        // Mongos
-        co(function*() {
-          while (running) {
-            var request = yield mongos2.receive();
-
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.insert) {
-              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
-            }
+        mongos2.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.insert) {
+            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
           }
-        }).catch(function() {});
+        });
+      });
 
-        // Attempt to connect
-        var server = new Mongos(
-          [{ host: 'localhost', port: 11000 }, { host: 'localhost', port: 11001 }],
-          {
-            connectionTimeout: 3000,
-            socketTimeout: 1000,
-            haInterval: 1000,
-            localThresholdMS: 500,
-            size: 1
-          }
-        );
+      // Attempt to connect
+      var server = new Mongos(
+        [{ host: 'localhost', port: 11000 }, { host: 'localhost', port: 11001 }],
+        {
+          connectionTimeout: 3000,
+          socketTimeout: 1000,
+          haInterval: 1000,
+          localThresholdMS: 500,
+          size: 1
+        }
+      );
 
-        // Add event listeners
-        server.once('connect', function(_server) {
-          _server.insert('test.test', [{ created: new Date() }], function(err, r) {
-            expect(err).to.be.null;
-            expect(r.connection.port).to.be.oneOf([11000, 1001]);
-            global.port = r.connection.port === 11000 ? 11001 : 11000;
+      // Add event listeners
+      server.once('connect', function(_server) {
+        _server.insert('test.test', [{ created: new Date() }], function(err, r) {
+          expect(err).to.be.null;
+          expect(r.connection.port).to.be.oneOf([11000, 1001]);
+          global.port = r.connection.port === 11000 ? 11001 : 11000;
 
-            _server.insert('test.test', [{ created: new Date() }], function(_err, _r) {
-              expect(_err).to.be.null;
-              expect(_r.connection.port).to.equal(global.port);
-              global.port = _r.connection.port === 11000 ? 11001 : 11000;
+          _server.insert('test.test', [{ created: new Date() }], function(_err, _r) {
+            expect(_err).to.be.null;
+            expect(_r.connection.port).to.equal(global.port);
+            global.port = _r.connection.port === 11000 ? 11001 : 11000;
 
-              _server.insert('test.test', [{ created: new Date() }], function(__err, __r) {
-                expect(__err).to.be.null;
-                expect(__r.connection.port).to.equal(global.port);
+            _server.insert('test.test', [{ created: new Date() }], function(__err, __r) {
+              expect(__err).to.be.null;
+              expect(__r.connection.port).to.equal(global.port);
 
-                running = false;
-                server.destroy();
-                mongos1.destroy();
-                mongos2.destroy();
-                done();
-              });
+              Promise.all([server.destroy(), mongos1.destroy(), mongos2.destroy()]).then(() =>
+                done()
+              );
             });
           });
         });
+      });
 
-        server.on('error', done);
-        server.connect();
-      }).catch(function() {});
+      server.on('error', done);
+      server.connect();
     }
   });
 
@@ -137,7 +114,6 @@ describe('Mongos Multiple Proxies (mocks)', function() {
       // Contain mock server
       var mongos1 = null;
       var mongos2 = null;
-      var running = true;
 
       // Default message fields
       var defaultFields = {
@@ -159,35 +135,24 @@ describe('Mongos Multiple Proxies (mocks)', function() {
         mongos1 = yield mockupdb.createServer(11002, 'localhost');
         mongos2 = yield mockupdb.createServer(11003, 'localhost');
 
-        // Mongos
-        co(function*() {
-          while (running) {
-            var request = yield mongos1.receive();
-
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.insert) {
-              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
-            }
+        mongos1.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.insert) {
+            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
           }
         });
 
-        // Mongos
-        co(function*() {
-          while (running) {
-            var request = yield mongos2.receive();
-            // Delay all the operations by 500 ms
-            yield timeoutPromise(500);
-            // Get the document
+        mongos2.setMessageHandler(request => {
+          setTimeout(() => {
             var doc = request.document;
             if (doc.ismaster) {
               request.reply(serverIsMaster[0]);
             } else if (doc.insert) {
               request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
             }
-          }
+          }, 500);
         });
       });
 
@@ -236,11 +201,9 @@ describe('Mongos Multiple Proxies (mocks)', function() {
                   expect(___err).to.be.null;
                   expect(___r.connection.port).to.equal(11003);
 
-                  server2.destroy();
-                  mongos1.destroy();
-                  mongos2.destroy();
-                  running = false;
-                  done();
+                  Promise.all([server2.destroy(), mongos1.destroy(), mongos2.destroy()]).then(() =>
+                    done()
+                  );
                 });
               });
             });

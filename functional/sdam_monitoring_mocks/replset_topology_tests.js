@@ -21,7 +21,6 @@ describe.skip('ReplSet SDAM Monitoring (mocks)', function() {
       var primaryServer = null;
       var firstSecondaryServer = null;
       var arbiterServer = null;
-      var running = true;
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
@@ -121,46 +120,25 @@ describe.skip('ReplSet SDAM Monitoring (mocks)', function() {
         firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
         arbiterServer = yield mockupdb.createServer(32002, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(primary[step]);
-            }
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(primary[step]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(firstSecondary[step]);
-            }
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(firstSecondary[step]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield arbiterServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(arbiter[step]);
-            }
+        arbiterServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(arbiter[step]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
       });
 
@@ -259,11 +237,11 @@ describe.skip('ReplSet SDAM Monitoring (mocks)', function() {
                   }
                 }
 
-                running = false;
-                primaryServer.destroy();
-                firstSecondaryServer.destroy();
-                arbiterServer.destroy();
-                done();
+                Promise.all([
+                  primaryServer.destroy(),
+                  firstSecondaryServer.destroy(),
+                  arbiterServer.destroy()
+                ]).then(() => done());
               }, 1000);
             }, 2000);
           });

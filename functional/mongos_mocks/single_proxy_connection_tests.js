@@ -5,14 +5,6 @@ var expect = require('chai').expect,
   assign = require('../../../../lib/utils').assign,
   mockupdb = require('../../../mock');
 
-var timeoutPromise = function(timeout) {
-  return new Promise(function(resolve) {
-    setTimeout(function() {
-      resolve();
-    }, timeout);
-  });
-};
-
 describe('Mongos Single Proxy Connection (mocks)', function() {
   it('Should correctly timeout mongos socket operation and then correctly re-execute', {
     metadata: {
@@ -27,7 +19,6 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
 
       // Contain mock server
       var server = null;
-      var running = true;
       // Current index for the ismaster
       var currentStep = 0;
       // Primary stop responding
@@ -53,39 +44,31 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
       co(function*() {
         server = yield mockupdb.createServer(52017, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield server.receive();
+        server.setMessageHandler(request => {
+          var doc = request.document;
 
-            // Get the document
-            var doc = request.document;
-
-            if (doc.ismaster && currentStep === 0) {
-              request.reply(serverIsMaster[0]);
+          if (doc.ismaster && currentStep === 0) {
+            request.reply(serverIsMaster[0]);
+            currentStep += 1;
+          } else if (doc.insert && currentStep === 1) {
+            // Stop responding to any calls (emulate dropping packets on the floor)
+            if (stopRespondingPrimary) {
               currentStep += 1;
-            } else if (doc.insert && currentStep === 1) {
-              // Stop responding to any calls (emulate dropping packets on the floor)
-              if (stopRespondingPrimary) {
-                currentStep += 1;
-                stopRespondingPrimary = false;
-                // Timeout after 1500 ms
-                yield timeoutPromise(1500);
-                request.connection.destroy();
-              }
-            } else if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.insert && currentStep === 2) {
-              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
+              stopRespondingPrimary = false;
+              setTimeout(() => request.connection.destroy(), 1500);
             }
+          } else if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.insert && currentStep === 2) {
+            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
           }
-        }).catch(function() {});
+        });
 
         // Start dropping the packets
         setTimeout(function() {
           stopRespondingPrimary = true;
         }, 500);
-      }).catch(function() {});
+      });
 
       // Attempt to connect
       var _server = new Mongos([{ host: 'localhost', port: 52017 }], {
@@ -107,7 +90,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
               finished = true;
               clearInterval(intervalId);
               expect(r.connection.port).to.equal(52017);
-              running = false;
+
               server.destroy();
               done();
             }
@@ -135,7 +118,6 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
 
       // Contain mock server
       var server = null;
-      var running = true;
 
       // Default message fields
       var defaultFields = {
@@ -157,18 +139,13 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
       co(function*() {
         server = yield mockupdb.createServer(52018, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield server.receive();
+        server.setMessageHandler(request => {
+          var doc = request.document;
 
-            // Get the document
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.find) {
-              yield timeoutPromise(600);
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.find) {
+            setTimeout(() => {
               // Reply with first batch
               request.reply({
                 cursor: {
@@ -178,20 +155,20 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
                 },
                 ok: 1
               });
-            } else if (doc.getMore) {
-              // Reply with first batch
-              request.reply({
-                cursor: {
-                  id: Long.fromNumber(1),
-                  ns: f('%s.cursor1', 'test'),
-                  nextBatch: [{ _id: new ObjectId(), a: 1 }]
-                },
-                ok: 1
-              });
-            }
+            }, 600);
+          } else if (doc.getMore) {
+            // Reply with first batch
+            request.reply({
+              cursor: {
+                id: Long.fromNumber(1),
+                ns: f('%s.cursor1', 'test'),
+                nextBatch: [{ _id: new ObjectId(), a: 1 }]
+              },
+              ok: 1
+            });
           }
-        }).catch(function() {});
-      }).catch(function() {});
+        });
+      });
 
       // Attempt to connect
       var _server = new Mongos([{ host: 'localhost', port: 52018 }], {
@@ -219,7 +196,6 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
             expect(_err).to.not.exist;
             expect(_d).to.exist;
 
-            running = false;
             server.destroy();
             done();
           });

@@ -30,7 +30,6 @@ describe('ReplSet No Primary Found (mocks)', function() {
       var firstSecondaryServer = null;
       var secondSecondaryServer = null;
       var arbiterServer = null;
-      var running = true;
 
       // Default message fields
       var defaultFields = {
@@ -96,56 +95,36 @@ describe('ReplSet No Primary Found (mocks)', function() {
         secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
         arbiterServer = yield mockupdb.createServer(32003, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(primary[0]);
-            }
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(primary[0]);
           }
         });
 
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            yield timeoutPromise(9000000);
-            var request = yield firstSecondaryServer.receive();
+        firstSecondaryServer.setMessageHandler(request => {
+          setTimeout(() => {
             var doc = request.document;
-
             if (doc.ismaster) {
               request.reply(firstSecondary[0]);
             }
+          }, 9000000); // never respond?
+        });
+
+        secondSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(secondSecondary[0]);
           }
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield secondSecondaryServer.receive();
+        arbiterServer.setMessageHandler(request => {
+          setTimeout(() => {
             var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(secondSecondary[0]);
-            }
-          }
-        });
-
-        // Arbiter state machine
-        co(function*() {
-          while (running) {
-            yield timeoutPromise(9000000);
-            var request = yield arbiterServer.receive();
-            var doc = request.document;
-
             if (doc.ismaster) {
               request.reply(arbiter[0]);
             }
-          }
-        }).catch(function() {
-          // console.log(err.stack);
+          }, 9000000); // never respond?
         });
       });
 
@@ -162,15 +141,16 @@ describe('ReplSet No Primary Found (mocks)', function() {
       // Add event listeners
       server.on('connect', function() {
         // Destroy mock
-        primaryServer.destroy();
-        firstSecondaryServer.destroy();
-        secondSecondaryServer.destroy();
-        arbiterServer.destroy();
-        server.destroy();
-        running = false;
-
-        Connection.disableConnectionAccounting();
-        done();
+        Promise.all([
+          primaryServer.destroy(),
+          firstSecondaryServer.destroy(),
+          secondSecondaryServer.destroy(),
+          arbiterServer.destroy(),
+          server.destroy()
+        ]).then(() => {
+          Connection.disableConnectionAccounting();
+          done();
+        });
       });
 
       server.on('error', done);

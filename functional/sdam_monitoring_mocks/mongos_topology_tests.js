@@ -4,14 +4,6 @@ var expect = require('chai').expect,
   co = require('co'),
   mockupdb = require('../../../mock');
 
-var timeoutPromise = function(timeout) {
-  return new Promise(function(resolve) {
-    setTimeout(function() {
-      resolve();
-    }, timeout);
-  });
-};
-
 describe.skip('Mongos SDAM Monitoring (mocks)', function() {
   it('SDAM Monitoring Should correctly connect to two proxies', {
     metadata: {
@@ -27,7 +19,6 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       // Contain mock server
       var mongos1 = null;
       var mongos2 = null;
-      var running = true;
       // Current index for the ismaster
       var currentStep = 0;
 
@@ -51,35 +42,23 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
         mongos1 = yield mockupdb.createServer(62000, 'localhost');
         mongos2 = yield mockupdb.createServer(62001, 'localhost');
 
-        // Mongos
-        co(function*() {
-          while (running) {
-            var request = yield mongos1.receive();
-
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.insert && currentStep === 1) {
-              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
-            }
+        mongos1.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.insert && currentStep === 1) {
+            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
           }
-        }).catch(function() {});
+        });
 
-        // Mongos
-        co(function*() {
-          while (running) {
-            var request = yield mongos2.receive();
-
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.insert) {
-              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
-            }
+        mongos2.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.insert) {
+            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
           }
-        }).catch(function() {});
+        });
       });
 
       // Attempt to connect
@@ -120,70 +99,68 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
                   // Do we have both proxies answering
                   if (Object.keys(proxies).length === 2) {
                     clearInterval(intervalId2);
-                    server.destroy();
-                    mongos1.destroy();
-                    mongos2.destroy();
+                    Promise.all([server.destroy(), mongos1.destroy(), mongos2.destroy()]).then(() => {
 
-                    setTimeout(function() {
-                      var results = [
-                        {
-                          topologyId: _server.s.id,
-                          previousDescription: {
-                            topologyType: 'Sharded',
-                            servers: []
+                      setTimeout(function() {
+                        var results = [
+                          {
+                            topologyId: _server.s.id,
+                            previousDescription: {
+                              topologyType: 'Sharded',
+                              servers: []
+                            },
+                            newDescription: {
+                              topologyType: 'Sharded',
+                              servers: [
+                                {
+                                  type: 'Mongos',
+                                  address: 'localhost:62000'
+                                },
+                                {
+                                  type: 'Unknown',
+                                  address: 'localhost:62001'
+                                }
+                              ]
+                            }
                           },
-                          newDescription: {
-                            topologyType: 'Sharded',
-                            servers: [
-                              {
-                                type: 'Mongos',
-                                address: 'localhost:62000'
-                              },
-                              {
-                                type: 'Unknown',
-                                address: 'localhost:62001'
-                              }
-                            ]
+                          {
+                            topologyId: _server.s.id,
+                            previousDescription: {
+                              topologyType: 'Sharded',
+                              servers: [
+                                {
+                                  type: 'Mongos',
+                                  address: 'localhost:62000'
+                                },
+                                {
+                                  type: 'Unknown',
+                                  address: 'localhost:62001'
+                                }
+                              ]
+                            },
+                            newDescription: {
+                              topologyType: 'Sharded',
+                              servers: [
+                                {
+                                  type: 'Mongos',
+                                  address: 'localhost:62000'
+                                },
+                                {
+                                  type: 'Mongos',
+                                  address: 'localhost:62001'
+                                }
+                              ]
+                            }
                           }
-                        },
-                        {
-                          topologyId: _server.s.id,
-                          previousDescription: {
-                            topologyType: 'Sharded',
-                            servers: [
-                              {
-                                type: 'Mongos',
-                                address: 'localhost:62000'
-                              },
-                              {
-                                type: 'Unknown',
-                                address: 'localhost:62001'
-                              }
-                            ]
-                          },
-                          newDescription: {
-                            topologyType: 'Sharded',
-                            servers: [
-                              {
-                                type: 'Mongos',
-                                address: 'localhost:62000'
-                              },
-                              {
-                                type: 'Mongos',
-                                address: 'localhost:62001'
-                              }
-                            ]
-                          }
+                        ];
+
+                        for (var i = 0; i < responses.topologyDescriptionChanged.length; i++) {
+                          expect(results[i]).to.eql(responses.topologyDescriptionChanged[i]);
                         }
-                      ];
 
-                      for (var i = 0; i < responses.topologyDescriptionChanged.length; i++) {
-                        expect(results[i]).to.eql(responses.topologyDescriptionChanged[i]);
-                      }
-
-                      running = false;
-                      done();
-                    }, 1000);
+                        done();
+                      }, 1000);
+                    });
                   }
                 });
               }, 500);
@@ -255,7 +232,6 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       // Contain mock server
       var mongos1 = null;
       var mongos2 = null;
-      var running = true;
 
       // Default message fields
       var defaultFields = {
@@ -277,35 +253,23 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
         mongos1 = yield mockupdb.createServer(62002, 'localhost');
         mongos2 = yield mockupdb.createServer(62003, 'localhost');
 
-        // Mongos
-        co(function*() {
-          while (running) {
-            var request = yield mongos1.receive();
-
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.insert) {
-              mongos1.destroy();
-              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
-              return;
-            }
+        mongos1.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.insert) {
+            mongos1.destroy();
+            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
+            return;
           }
         });
 
-        // Mongos
-        co(function*() {
-          while (running) {
-            var request = yield mongos2.receive();
-
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.insert) {
-              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
-            }
+        mongos2.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.insert) {
+            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
           }
         });
       });
@@ -332,78 +296,75 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
               // Wait to allow at least one heartbeat to pass
               setTimeout(function() {
                 expect(r.connection.port).to.equal(62003);
-                server.destroy();
-                mongos1.destroy();
-                mongos2.destroy();
+                Promise.all([server.destroy(), mongos1.destroy(), mongos2.destroy()]).then(() => {
+                  // Wait for a little bit to let all events fire
+                  setTimeout(function() {
+                    expect(responses.serverOpening.length).to.be.at.least(2);
+                    expect(responses.serverClosed.length).to.be.at.least(2);
+                    expect(responses.topologyOpening).to.have.length(1);
+                    expect(responses.topologyClosed).to.have.length(1);
+                    expect(responses.serverHeartbeatStarted.length).to.be.greaterThan(0);
+                    expect(responses.serverHeartbeatSucceeded.length).to.be.greaterThan(0);
+                    expect(responses.serverDescriptionChanged.length).to.be.greaterThan(0);
+                    expect(responses.topologyDescriptionChanged).to.have.length(2);
 
-                // Wait for a little bit to let all events fire
-                setTimeout(function() {
-                  expect(responses.serverOpening.length).to.be.at.least(2);
-                  expect(responses.serverClosed.length).to.be.at.least(2);
-                  expect(responses.topologyOpening).to.have.length(1);
-                  expect(responses.topologyClosed).to.have.length(1);
-                  expect(responses.serverHeartbeatStarted.length).to.be.greaterThan(0);
-                  expect(responses.serverHeartbeatSucceeded.length).to.be.greaterThan(0);
-                  expect(responses.serverDescriptionChanged.length).to.be.greaterThan(0);
-                  expect(responses.topologyDescriptionChanged).to.have.length(2);
-
-                  var results = [
-                    {
-                      topologyId: _server.s.id,
-                      previousDescription: {
-                        topologyType: 'Sharded',
-                        servers: []
+                    var results = [
+                      {
+                        topologyId: _server.s.id,
+                        previousDescription: {
+                          topologyType: 'Sharded',
+                          servers: []
+                        },
+                        newDescription: {
+                          topologyType: 'Sharded',
+                          servers: [
+                            {
+                              type: 'Mongos',
+                              address: 'localhost:62002'
+                            },
+                            {
+                              type: 'Unknown',
+                              address: 'localhost:62003'
+                            }
+                          ]
+                        }
                       },
-                      newDescription: {
-                        topologyType: 'Sharded',
-                        servers: [
-                          {
-                            type: 'Mongos',
-                            address: 'localhost:62002'
-                          },
-                          {
-                            type: 'Unknown',
-                            address: 'localhost:62003'
-                          }
-                        ]
+                      {
+                        topologyId: _server.s.id,
+                        previousDescription: {
+                          topologyType: 'Sharded',
+                          servers: [
+                            {
+                              type: 'Mongos',
+                              address: 'localhost:62002'
+                            },
+                            {
+                              type: 'Unknown',
+                              address: 'localhost:62003'
+                            }
+                          ]
+                        },
+                        newDescription: {
+                          topologyType: 'Sharded',
+                          servers: [
+                            {
+                              type: 'Mongos',
+                              address: 'localhost:62002'
+                            },
+                            {
+                              type: 'Mongos',
+                              address: 'localhost:62003'
+                            }
+                          ]
+                        }
                       }
-                    },
-                    {
-                      topologyId: _server.s.id,
-                      previousDescription: {
-                        topologyType: 'Sharded',
-                        servers: [
-                          {
-                            type: 'Mongos',
-                            address: 'localhost:62002'
-                          },
-                          {
-                            type: 'Unknown',
-                            address: 'localhost:62003'
-                          }
-                        ]
-                      },
-                      newDescription: {
-                        topologyType: 'Sharded',
-                        servers: [
-                          {
-                            type: 'Mongos',
-                            address: 'localhost:62002'
-                          },
-                          {
-                            type: 'Mongos',
-                            address: 'localhost:62003'
-                          }
-                        ]
-                      }
-                    }
-                  ];
+                    ];
 
-                  expect(results).to.eql(responses.topologyDescriptionChanged);
-                  running = false;
-                  done();
-                }, 100);
-              }, 1100);
+                    expect(results).to.eql(responses.topologyDescriptionChanged);
+                    done();
+                  }, 100);
+                }, 1100);
+              });
             }
           });
         }, 500);
@@ -470,7 +431,6 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       // Contain mock server
       var mongos1 = null;
       var mongos2 = null;
-      var running = true;
       // Current index for the ismaster
       var currentStep = 0;
 
@@ -494,32 +454,19 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
         mongos1 = yield mockupdb.createServer(62004, 'localhost');
         mongos2 = yield mockupdb.createServer(62005, 'localhost');
 
-        // Mongos
-        co(function*() {
-          while (running) {
-            var request = yield mongos1.receive();
-
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster && currentStep === 0) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.ismaster && currentStep === 1) {
-              yield timeoutPromise(1600);
-              request.connection.destroy();
-            }
+        mongos1.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster && currentStep === 0) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.ismaster && currentStep === 1) {
+            setTimeout(() => request.connection.destroy(), 1600);
           }
         });
 
-        // Mongos
-        co(function*() {
-          while (running) {
-            var request = yield mongos2.receive();
-
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            }
+        mongos2.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
           }
         });
 
@@ -532,10 +479,9 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
 
             setTimeout(function() {
               expect(responses.topologyDescriptionChanged.length).to.be.greaterThan(0);
-              server.destroy();
-              mongos1.destroy();
-              mongos2.destroy();
-              done();
+              Promise.all([server.destroy(), mongos1.destroy(), mongos2.destroy()]).then(() =>
+                done()
+              );
             }, 2000);
           }, 2000);
         }, 2000);

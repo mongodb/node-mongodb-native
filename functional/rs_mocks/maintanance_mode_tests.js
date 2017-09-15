@@ -23,7 +23,6 @@ describe('ReplSet Maintenance Mode (mocks)', function() {
       var firstSecondaryServer = null;
       var secondSecondaryServer = null;
       var arbiterServer = null;
-      var running = true;
       var currentIsMasterIndex = 0;
 
       // Default message fields
@@ -122,60 +121,32 @@ describe('ReplSet Maintenance Mode (mocks)', function() {
         secondSecondaryServer = yield mockupdb.createServer(32003, 'localhost');
         arbiterServer = yield mockupdb.createServer(32002, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(primary[currentIsMasterIndex]);
-            }
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(primary[currentIsMasterIndex]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(firstSecondary[currentIsMasterIndex]);
-            }
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(firstSecondary[currentIsMasterIndex]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield secondSecondaryServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(secondSecondary[currentIsMasterIndex]);
-            }
+        secondSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(secondSecondary[currentIsMasterIndex]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Arbiter state machine
-        co(function*() {
-          while (running) {
-            var request = yield arbiterServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(arbiter[currentIsMasterIndex]);
-            }
+        arbiterServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(arbiter[currentIsMasterIndex]);
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
       });
 
@@ -221,24 +192,20 @@ describe('ReplSet Maintenance Mode (mocks)', function() {
 
       server.on('left', function(_type, _server) {
         if (_type === 'secondary' && _server.name === 'localhost:32003') {
-          primaryServer.destroy();
-          firstSecondaryServer.destroy();
-          secondSecondaryServer.destroy();
-          arbiterServer.destroy();
-          server.destroy();
-          running = false;
-
-          setTimeout(function() {
-            expect(Object.keys(Connection.connections())).to.have.length(0);
-            Connection.disableConnectionAccounting();
-            done();
-          }, 2000);
+          Promise.all([
+            primaryServer.destroy(),
+            firstSecondaryServer.destroy(),
+            secondSecondaryServer.destroy(),
+            arbiterServer.destroy(),
+            server.destroy()
+          ]).then(() => {
+            setTimeout(function() {
+              expect(Object.keys(Connection.connections())).to.have.length(0);
+              Connection.disableConnectionAccounting();
+              done();
+            }, 2000);
+          });
         }
-      });
-
-      server.on('error', done);
-      server.on('connect', function() {
-        server.__connected = true;
       });
 
       // Gives proxies a chance to boot up

@@ -18,7 +18,6 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
 
       // Contain mock server
       var server = null;
-      var running = true;
 
       // Default message fields
       var defaultFields = {
@@ -40,18 +39,12 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       co(function*() {
         mockServer = yield mockupdb.createServer(37018, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield mockServer.receive();
-
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            }
+        mockServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
           }
-        }).catch(function() {});
+        });
       });
 
       // Attempt to connect
@@ -151,7 +144,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
               ]
             }
           }).to.eql(flags[5]);
-          running = false;
+
           mockServer.destroy();
           done();
         }, 100);
@@ -171,7 +164,6 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
 
       // Contain mock server
       var server = null;
-      var running = true;
 
       // Default message fields
       var defaultFields = {
@@ -194,18 +186,12 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       co(function*() {
         mockServer = yield mockupdb.createServer(37008, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield mockServer.receive();
-
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            }
+        mockServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
           }
-        }).catch(function() {});
+        });
       });
 
       // Attempt to connect

@@ -96,5 +96,14 @@ function locateAuthMethod(configuration, cb) {
   pool.connect.apply(pool);
 }
 
+const delay = function(timeout) {
+  return new Promise(function(resolve) {
+    setTimeout(function() {
+      resolve();
+    }, timeout);
+  });
+};
+
 module.exports.executeCommand = executeCommand;
 module.exports.locateAuthMethod = locateAuthMethod;
+module.exports.delay = delay;

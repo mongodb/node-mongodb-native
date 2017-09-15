@@ -27,7 +27,6 @@ describe('Mongos Proxy Failover (mocks)', function() {
       // Contain mock server
       var mongos1 = null;
       var mongos2 = null;
-      var running = true;
 
       // Default message fields
       var defaultFields = {
@@ -49,37 +48,25 @@ describe('Mongos Proxy Failover (mocks)', function() {
         mongos1 = yield mockupdb.createServer(52007, 'localhost');
         mongos2 = yield mockupdb.createServer(52008, 'localhost');
 
-        // Mongos
-        co(function*() {
-          while (running) {
-            var request = yield mongos1.receive();
-
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.insert) {
-              mongos1.destroy();
-              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
-            }
+        mongos1.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.insert) {
+            mongos1.destroy();
+            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
           }
-        }).catch(function() {});
+        });
 
-        // Mongos
-        co(function*() {
-          while (running) {
-            var request = yield mongos2.receive();
-
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.insert) {
-              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
-            }
+        mongos2.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.insert) {
+            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
           }
-        }).catch(function() {});
-      }).catch(function() {});
+        });
+      });
 
       // Attempt to connect
       var server = new Mongos(
@@ -101,11 +88,9 @@ describe('Mongos Proxy Failover (mocks)', function() {
             if (r) {
               clearInterval(intervalId);
               expect(r.connection.port).to.equal(52008);
-              server.destroy();
-              mongos1.destroy();
-              mongos2.destroy();
-              running = false;
-              done();
+              Promise.all([server.destroy(), mongos1.destroy(), mongos2.destroy()]).then(() =>
+                done()
+              );
             }
           });
         }, 500);
@@ -132,7 +117,6 @@ describe('Mongos Proxy Failover (mocks)', function() {
       // Contain mock server
       var mongos1 = null;
       var mongos2 = null;
-      var running = true;
       // Current index for the ismaster
       var currentStep = 0;
 
@@ -156,39 +140,26 @@ describe('Mongos Proxy Failover (mocks)', function() {
         mongos1 = yield mockupdb.createServer(52009, 'localhost');
         mongos2 = yield mockupdb.createServer(52010, 'localhost');
 
-        // Mongos
-        co(function*() {
-          while (running) {
-            var request = yield mongos1.receive();
-
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.insert && currentStep === 0) {
-              yield timeoutPromise(1600);
-              request.connection.destroy();
-            } else if (doc.insert && currentStep === 1) {
-              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
-            }
+        mongos1.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.insert && currentStep === 0) {
+            setTimeout(() => request.connection.destroy(), 1600);
+          } else if (doc.insert && currentStep === 1) {
+            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
           }
-        }).catch(function() {});
+        });
 
-        // Mongos
-        co(function*() {
-          while (running) {
-            var request = yield mongos2.receive();
-
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.insert) {
-              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
-            }
+        mongos2.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.insert) {
+            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
           }
-        }).catch(function() {});
-      }).catch(function() {});
+        });
+      });
 
       // Attempt to connect
       var server = new Mongos(
@@ -227,12 +198,9 @@ describe('Mongos Proxy Failover (mocks)', function() {
                   // Do we have both proxies answering
                   if (Object.keys(proxies).length === 2) {
                     clearInterval(intervalId2);
-
-                    server.destroy();
-                    mongos1.destroy();
-                    mongos2.destroy();
-                    running = false;
-                    done();
+                    Promise.all([server.destroy(), mongos1.destroy(), mongos2.destroy()]).then(() =>
+                      done()
+                    );
                   }
                 });
               }, 500);
@@ -262,7 +230,6 @@ describe('Mongos Proxy Failover (mocks)', function() {
       // Contain mock server
       var mongos1 = null;
       var mongos2 = null;
-      var running = true;
       // Current index for the ismaster
       var currentStep = 0;
 
@@ -286,42 +253,28 @@ describe('Mongos Proxy Failover (mocks)', function() {
         mongos1 = yield mockupdb.createServer(52011, 'localhost');
         mongos2 = yield mockupdb.createServer(52012, 'localhost');
 
-        // Mongos
-        co(function*() {
-          while (running) {
-            var request = yield mongos1.receive();
-
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.insert && currentStep === 0) {
-              yield timeoutPromise(1600);
-              request.connection.destroy();
-            } else if (doc.insert && currentStep === 1) {
-              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
-            }
+        mongos1.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.insert && currentStep === 0) {
+            setTimeout(() => request.connection.destroy(), 1600);
+          } else if (doc.insert && currentStep === 1) {
+            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
           }
-        }).catch(function() {});
+        });
 
-        // Mongos
-        co(function*() {
-          while (running) {
-            var request = yield mongos2.receive();
-
-            // Get the document
-            var doc = request.document;
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc.insert && currentStep === 0) {
-              yield timeoutPromise(1600);
-              request.connection.destroy();
-            } else if (doc.insert && currentStep === 1) {
-              request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
-            }
+        mongos2.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc.insert && currentStep === 0) {
+            setTimeout(() => request.connection.destroy(), 1600);
+          } else if (doc.insert && currentStep === 1) {
+            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
           }
-        }).catch(function() {});
-      }).catch(function() {});
+        });
+      });
 
       // Attempt to connect
       var server = new Mongos(
@@ -362,11 +315,9 @@ describe('Mongos Proxy Failover (mocks)', function() {
                   clearInterval(intervalId2);
                   intervalId2 = null;
 
-                  running = false;
-                  server.destroy();
-                  mongos1.destroy();
-                  mongos2.destroy();
-                  done();
+                  Promise.all([server.destroy(), mongos1.destroy(), mongos2.destroy()]).then(() =>
+                    done()
+                  );
                 }
               });
             }, 100);
