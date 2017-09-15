@@ -2,7 +2,7 @@
 var expect = require('chai').expect,
   assign = require('../../../../lib/utils').assign,
   co = require('co'),
-  mockupdb = require('../../../mock');
+  mock = require('../../../mock');
 
 describe('Mongos Multiple Proxies (mocks)', function() {
   it('Should correctly load-balance the operations', {
@@ -37,8 +37,8 @@ describe('Mongos Multiple Proxies (mocks)', function() {
       var serverIsMaster = [assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
-        mongos1 = yield mockupdb.createServer(11000, 'localhost');
-        mongos2 = yield mockupdb.createServer(11001, 'localhost');
+        mongos1 = yield mock.createServer(11000, 'localhost');
+        mongos2 = yield mock.createServer(11001, 'localhost');
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -71,25 +71,25 @@ describe('Mongos Multiple Proxies (mocks)', function() {
         }
       );
 
+      var lastPort;
+
       // Add event listeners
       server.once('connect', function(_server) {
         _server.insert('test.test', [{ created: new Date() }], function(err, r) {
           expect(err).to.be.null;
-          expect(r.connection.port).to.be.oneOf([11000, 1001]);
-          global.port = r.connection.port === 11000 ? 11001 : 11000;
+          expect(r.connection.port).to.be.oneOf([11000, 11001]);
+          lastPort = r.connection.port === 11000 ? 11001 : 11000;
 
           _server.insert('test.test', [{ created: new Date() }], function(_err, _r) {
             expect(_err).to.be.null;
-            expect(_r.connection.port).to.equal(global.port);
-            global.port = _r.connection.port === 11000 ? 11001 : 11000;
+            expect(_r.connection.port).to.equal(lastPort);
+            lastPort = _r.connection.port === 11000 ? 11001 : 11000;
 
             _server.insert('test.test', [{ created: new Date() }], function(__err, __r) {
               expect(__err).to.be.null;
-              expect(__r.connection.port).to.equal(global.port);
+              expect(__r.connection.port).to.equal(lastPort);
 
-              Promise.all([server.destroy(), mongos1.destroy(), mongos2.destroy()]).then(() =>
-                done()
-              );
+              mock.cleanup([server, mongos1, mongos2], () => done());
             });
           });
         });
@@ -132,8 +132,8 @@ describe('Mongos Multiple Proxies (mocks)', function() {
       var serverIsMaster = [assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
-        mongos1 = yield mockupdb.createServer(11002, 'localhost');
-        mongos2 = yield mockupdb.createServer(11003, 'localhost');
+        mongos1 = yield mock.createServer(11002, 'localhost');
+        mongos2 = yield mock.createServer(11003, 'localhost');
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -201,9 +201,7 @@ describe('Mongos Multiple Proxies (mocks)', function() {
                   expect(___err).to.be.null;
                   expect(___r.connection.port).to.equal(11003);
 
-                  Promise.all([server2.destroy(), mongos1.destroy(), mongos2.destroy()]).then(() =>
-                    done()
-                  );
+                  mock.cleanup([server2, mongos1, mongos2], () => done());
                 });
               });
             });

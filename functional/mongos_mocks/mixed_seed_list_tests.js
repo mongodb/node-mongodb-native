@@ -2,7 +2,7 @@
 var expect = require('chai').expect,
   assign = require('../../../../lib/utils').assign,
   co = require('co'),
-  mockupdb = require('../../../mock');
+  mock = require('../../../mock');
 
 describe('Mongos Mixed Seed List (mocks)', function() {
   it('Should correctly print warning when non mongos proxy passed in seed list', {
@@ -56,8 +56,8 @@ describe('Mongos Mixed Seed List (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        mongos1 = yield mockupdb.createServer(52005, 'localhost');
-        mongos2 = yield mockupdb.createServer(52006, 'localhost');
+        mongos1 = yield mock.createServer(52005, 'localhost');
+        mongos2 = yield mock.createServer(52006, 'localhost');
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -102,7 +102,7 @@ describe('Mongos Mixed Seed List (mocks)', function() {
       server.once('connect', function() {
         Logger.setCurrentLogger(logger);
 
-        Promise.all([server.destroy(), mongos1.destroy(), mongos2.destroy()]).then(() => done());
+        mock.cleanup([server, mongos1, mongos2], () => done());
       });
 
       server.on('error', done);
@@ -150,8 +150,8 @@ describe('Mongos Mixed Seed List (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        mongos1 = yield mockupdb.createServer(52002, 'localhost');
-        mongos2 = yield mockupdb.createServer(52003, 'localhost');
+        mongos1 = yield mock.createServer(52002, 'localhost');
+        mongos2 = yield mock.createServer(52003, 'localhost');
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;

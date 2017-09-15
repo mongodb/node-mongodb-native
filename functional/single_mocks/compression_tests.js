@@ -2,7 +2,7 @@
 var Server = require('../../../../lib/topologies/server'),
   expect = require('chai').expect,
   co = require('co'),
-  mockupdb = require('../../../mock');
+  mock = require('../../../mock');
 
 // NOTE: eventually use `this.configuration.mongo.Server` instead of direct import when
 // https://github.com/malexandert/mongodb-test-runner/issues/3 is fixed
@@ -34,7 +34,7 @@ describe('Single Compression (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        server = yield mockupdb.createServer(37046, 'localhost');
+        server = yield mock.createServer(37046, 'localhost');
 
         server.setMessageHandler(request => {
           expect(request.response.documents[0].compression).to.have.members(['snappy', 'zlib']);
@@ -53,8 +53,7 @@ describe('Single Compression (mocks)', function() {
       });
 
       client.on('connect', function() {
-        client.destroy();
-        setTimeout(done, 1000);
+        mock.cleanup([client, server], () => done());
       });
 
       setTimeout(function() {
@@ -92,7 +91,7 @@ describe('Single Compression (mocks)', function() {
 
         // Boot the mock
         co(function*() {
-          server = yield mockupdb.createServer(37047, 'localhost');
+          server = yield mock.createServer(37047, 'localhost');
 
           server.setMessageHandler(request => {
             var doc = request.document;
@@ -151,10 +150,7 @@ describe('Single Compression (mocks)', function() {
                   expect(___err).to.be.null;
                   expect(___r.result.ok).to.equal(1);
 
-                  client.destroy();
-                  setTimeout(function() {
-                    done();
-                  }, 500);
+                  mock.cleanup([client, server], () => done());
                 });
               });
             });
@@ -198,7 +194,7 @@ describe('Single Compression (mocks)', function() {
 
         // Boot the mock
         co(function*() {
-          server = yield mockupdb.createServer(37048, 'localhost');
+          server = yield mock.createServer(37048, 'localhost');
 
           server.setMessageHandler(request => {
             var doc = request.document;
@@ -256,10 +252,7 @@ describe('Single Compression (mocks)', function() {
                   expect(___err).to.be.null;
                   expect(___r.result.ok).to.equal(1);
 
-                  client.destroy();
-                  setTimeout(function() {
-                    done();
-                  }, 500);
+                  mock.cleanup([client, server], () => done());
                 });
               });
             });
@@ -303,7 +296,7 @@ describe('Single Compression (mocks)', function() {
 
         // Boot the mock
         co(function*() {
-          server = yield mockupdb.createServer(37049, 'localhost');
+          server = yield mock.createServer(37049, 'localhost');
 
           server.setMessageHandler(request => {
             var doc = request.document;
@@ -361,10 +354,7 @@ describe('Single Compression (mocks)', function() {
                   expect(___err).to.be.null;
                   expect(___r.result.ok).to.equal(1);
 
-                  client.destroy();
-                  setTimeout(function() {
-                    done();
-                  }, 500);
+                  mock.cleanup([client, server], () => done());
                 });
               });
             });
@@ -406,7 +396,7 @@ describe('Single Compression (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        server = yield mockupdb.createServer(37050, 'localhost');
+        server = yield mock.createServer(37050, 'localhost');
 
         server.setMessageHandler(request => {
           if (currentStep === 0) {
@@ -455,10 +445,7 @@ describe('Single Compression (mocks)', function() {
                 expect(___err).to.be.null;
                 expect(___r.result.ok).to.equal(1);
 
-                client.destroy();
-                setTimeout(function() {
-                  done();
-                }, 500);
+                mock.cleanup([client, server], () => done());
               });
             });
           });

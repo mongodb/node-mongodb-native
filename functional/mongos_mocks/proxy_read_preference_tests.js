@@ -2,7 +2,7 @@
 var expect = require('chai').expect,
   assign = require('../../../../lib/utils').assign,
   co = require('co'),
-  mockupdb = require('../../../mock');
+  mock = require('../../../mock');
 
 describe('Mongos Proxy Read Preference (mocks)', function() {
   it('Should correctly set query and readpreference field on wire protocol for 3.2', {
@@ -40,7 +40,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
       var command = null;
       // Boot the mock
       co(function*() {
-        mongos1 = yield mockupdb.createServer(52013, 'localhost');
+        mongos1 = yield mock.createServer(52013, 'localhost');
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -87,7 +87,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
           expect(command).to.have.keys(['$query', '$readPreference']);
           expect(command.$readPreference.mode).to.equal('secondary');
 
-          Promise.all([server.destroy(), mongos1.destroy()]).then(() => done());
+          mock.cleanup([server, mongos1], () => done());
         });
       });
 
@@ -133,7 +133,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
       var command = null;
       // Boot the mock
       co(function*() {
-        mongos1 = yield mockupdb.createServer(52014, 'localhost');
+        mongos1 = yield mock.createServer(52014, 'localhost');
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -180,7 +180,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
           expect(command.$readPreference.mode).to.equal('nearest');
           expect(command.$readPreference.tags).to.eql([{ db: 'sf' }]);
 
-          Promise.all([server.destroy(), mongos1.destroy()]).then(() => done());
+          mock.cleanup([server, mongos1], () => done());
         });
       });
 
@@ -225,7 +225,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
       var command = null;
       // Boot the mock
       co(function*() {
-        mongos1 = yield mockupdb.createServer(52015, 'localhost');
+        mongos1 = yield mock.createServer(52015, 'localhost');
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -263,7 +263,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
           expect(command).to.have.keys(['$query', '$readPreference']);
           expect(command.$readPreference.mode, 'secondary');
 
-          Promise.all([server.destroy(), mongos1.destroy()]).then(() => done());
+          mock.cleanup([server, mongos1], () => done());
         });
       });
 

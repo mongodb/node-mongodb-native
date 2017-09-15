@@ -2,15 +2,8 @@
 var assign = require('../../../../lib/utils').assign,
   co = require('co'),
   Connection = require('../../../../lib/connection/connection'),
-  mockupdb = require('../../../mock');
-
-var timeoutPromise = function(timeout) {
-  return new Promise(function(resolve) {
-    setTimeout(function() {
-      resolve();
-    }, timeout);
-  });
-};
+  mock = require('../../../mock'),
+  ConnectionSpy = require('../shared').ConnectionSpy;
 
 describe('ReplSet No Primary Found (mocks)', function() {
   it('Should correctly connect to a replicaset where the arbiter hangs no primary found error', {
@@ -90,10 +83,10 @@ describe('ReplSet No Primary Found (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mockupdb.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
-        arbiterServer = yield mockupdb.createServer(32003, 'localhost');
+        primaryServer = yield mock.createServer(32000, 'localhost');
+        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        secondSecondaryServer = yield mock.createServer(32002, 'localhost');
+        arbiterServer = yield mock.createServer(32003, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -128,7 +121,9 @@ describe('ReplSet No Primary Found (mocks)', function() {
         });
       });
 
-      Connection.enableConnectionAccounting();
+      const spy = new ConnectionSpy();
+      Connection.enableConnectionAccounting(spy);
+
       // Attempt to connect
       var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
         setName: 'rs',
@@ -141,16 +136,14 @@ describe('ReplSet No Primary Found (mocks)', function() {
       // Add event listeners
       server.on('connect', function() {
         // Destroy mock
-        Promise.all([
-          primaryServer.destroy(),
-          firstSecondaryServer.destroy(),
-          secondSecondaryServer.destroy(),
-          arbiterServer.destroy(),
-          server.destroy()
-        ]).then(() => {
-          Connection.disableConnectionAccounting();
-          done();
-        });
+        mock.cleanup(
+          [primaryServer, firstSecondaryServer, secondSecondaryServer, arbiterServer, server],
+          spy,
+          () => {
+            Connection.disableConnectionAccounting();
+            done();
+          }
+        );
       });
 
       server.on('error', done);

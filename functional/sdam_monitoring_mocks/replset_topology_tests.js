@@ -2,7 +2,7 @@
 var expect = require('chai').expect,
   assign = require('../../../../lib/utils').assign,
   co = require('co'),
-  mockupdb = require('../../../mock');
+  mock = require('../../../mock');
 
 describe.skip('ReplSet SDAM Monitoring (mocks)', function() {
   it('Successful emit SDAM monitoring events for replicaset', {
@@ -116,9 +116,9 @@ describe.skip('ReplSet SDAM Monitoring (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mockupdb.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
-        arbiterServer = yield mockupdb.createServer(32002, 'localhost');
+        primaryServer = yield mock.createServer(32000, 'localhost');
+        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        arbiterServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -233,15 +233,11 @@ describe.skip('ReplSet SDAM Monitoring (mocks)', function() {
                     console.log(JSON.stringify(expectedResults[i], null, 2));
                     console.log('----------------------------- got ');
                     console.log(JSON.stringify(responses.topologyDescriptionChanged[i], null, 2));
-                    process.exit(0);
+                    done(e);
                   }
                 }
 
-                Promise.all([
-                  primaryServer.destroy(),
-                  firstSecondaryServer.destroy(),
-                  arbiterServer.destroy()
-                ]).then(() => done());
+                mock.cleanup([primaryServer, firstSecondaryServer, arbiterServer], () => done());
               }, 1000);
             }, 2000);
           });

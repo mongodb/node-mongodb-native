@@ -295,7 +295,6 @@ describe('Single Timeout (mocks)', function() {
 
         // Contain mock server
         var server = null;
-        var running = true;
         // Current index for the ismaster
         var currentStep = 0;
 

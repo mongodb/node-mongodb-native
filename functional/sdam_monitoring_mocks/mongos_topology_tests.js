@@ -2,7 +2,7 @@
 var expect = require('chai').expect,
   assign = require('../../../../lib/utils').assign,
   co = require('co'),
-  mockupdb = require('../../../mock');
+  mock = require('../../../mock');
 
 describe.skip('Mongos SDAM Monitoring (mocks)', function() {
   it('SDAM Monitoring Should correctly connect to two proxies', {
@@ -39,8 +39,8 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       var serverIsMaster = [assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
-        mongos1 = yield mockupdb.createServer(62000, 'localhost');
-        mongos2 = yield mockupdb.createServer(62001, 'localhost');
+        mongos1 = yield mock.createServer(62000, 'localhost');
+        mongos2 = yield mock.createServer(62001, 'localhost');
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -99,7 +99,7 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
                   // Do we have both proxies answering
                   if (Object.keys(proxies).length === 2) {
                     clearInterval(intervalId2);
-                    Promise.all([server.destroy(), mongos1.destroy(), mongos2.destroy()]).then(() => {
+                    mock.cleanup([server, mongos1, mongos2], () => {
 
                       setTimeout(function() {
                         var results = [
@@ -250,8 +250,8 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       var serverIsMaster = [assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
-        mongos1 = yield mockupdb.createServer(62002, 'localhost');
-        mongos2 = yield mockupdb.createServer(62003, 'localhost');
+        mongos1 = yield mock.createServer(62002, 'localhost');
+        mongos2 = yield mock.createServer(62003, 'localhost');
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -296,7 +296,7 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
               // Wait to allow at least one heartbeat to pass
               setTimeout(function() {
                 expect(r.connection.port).to.equal(62003);
-                Promise.all([server.destroy(), mongos1.destroy(), mongos2.destroy()]).then(() => {
+                mock.cleanup([server, mongos1, mongos2], () => {
                   // Wait for a little bit to let all events fire
                   setTimeout(function() {
                     expect(responses.serverOpening.length).to.be.at.least(2);
@@ -363,7 +363,7 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
                     expect(results).to.eql(responses.topologyDescriptionChanged);
                     done();
                   }, 100);
-                }, 1100);
+                });
               });
             }
           });
@@ -451,8 +451,8 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       var serverIsMaster = [assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
-        mongos1 = yield mockupdb.createServer(62004, 'localhost');
-        mongos2 = yield mockupdb.createServer(62005, 'localhost');
+        mongos1 = yield mock.createServer(62004, 'localhost');
+        mongos2 = yield mock.createServer(62005, 'localhost');
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -479,9 +479,7 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
 
             setTimeout(function() {
               expect(responses.topologyDescriptionChanged.length).to.be.greaterThan(0);
-              Promise.all([server.destroy(), mongos1.destroy(), mongos2.destroy()]).then(() =>
-                done()
-              );
+              mock.cleanup([server, mongos1, mongos2], () => done());
             }, 2000);
           }, 2000);
         }, 2000);

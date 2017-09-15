@@ -2,15 +2,7 @@
 var expect = require('chai').expect,
   assign = require('../../../../lib/utils').assign,
   co = require('co'),
-  mockupdb = require('../../../mock');
-
-var timeoutPromise = function(timeout) {
-  return new Promise(function(resolve) {
-    setTimeout(function() {
-      resolve();
-    }, timeout);
-  });
-};
+  mock = require('../../../mock');
 
 describe('Mongos Proxy Failover (mocks)', function() {
   it('Should correctly failover due to proxy going away causing timeout', {
@@ -45,8 +37,8 @@ describe('Mongos Proxy Failover (mocks)', function() {
       var serverIsMaster = [assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
-        mongos1 = yield mockupdb.createServer(52007, 'localhost');
-        mongos2 = yield mockupdb.createServer(52008, 'localhost');
+        mongos1 = yield mock.createServer(52007, 'localhost');
+        mongos2 = yield mock.createServer(52008, 'localhost');
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -88,9 +80,7 @@ describe('Mongos Proxy Failover (mocks)', function() {
             if (r) {
               clearInterval(intervalId);
               expect(r.connection.port).to.equal(52008);
-              Promise.all([server.destroy(), mongos1.destroy(), mongos2.destroy()]).then(() =>
-                done()
-              );
+              mock.cleanup([server, mongos1, mongos2], () => done());
             }
           });
         }, 500);
@@ -137,8 +127,8 @@ describe('Mongos Proxy Failover (mocks)', function() {
       var serverIsMaster = [assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
-        mongos1 = yield mockupdb.createServer(52009, 'localhost');
-        mongos2 = yield mockupdb.createServer(52010, 'localhost');
+        mongos1 = yield mock.createServer(52009, 'localhost');
+        mongos2 = yield mock.createServer(52010, 'localhost');
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -198,9 +188,7 @@ describe('Mongos Proxy Failover (mocks)', function() {
                   // Do we have both proxies answering
                   if (Object.keys(proxies).length === 2) {
                     clearInterval(intervalId2);
-                    Promise.all([server.destroy(), mongos1.destroy(), mongos2.destroy()]).then(() =>
-                      done()
-                    );
+                    mock.cleanup([server, mongos1, mongos2], () => done());
                   }
                 });
               }, 500);
@@ -250,8 +238,8 @@ describe('Mongos Proxy Failover (mocks)', function() {
       var serverIsMaster = [assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
-        mongos1 = yield mockupdb.createServer(52011, 'localhost');
-        mongos2 = yield mockupdb.createServer(52012, 'localhost');
+        mongos1 = yield mock.createServer(52011, 'localhost');
+        mongos2 = yield mock.createServer(52012, 'localhost');
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -315,9 +303,7 @@ describe('Mongos Proxy Failover (mocks)', function() {
                   clearInterval(intervalId2);
                   intervalId2 = null;
 
-                  Promise.all([server.destroy(), mongos1.destroy(), mongos2.destroy()]).then(() =>
-                    done()
-                  );
+                  mock.cleanup([server, mongos1, mongos2], () => done());
                 }
               });
             }, 100);

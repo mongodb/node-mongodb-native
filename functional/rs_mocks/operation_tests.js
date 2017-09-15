@@ -2,7 +2,8 @@
 var assign = require('../../../../lib/utils').assign,
   co = require('co'),
   Connection = require('../../../../lib/connection/connection'),
-  mockupdb = require('../../../mock');
+  mock = require('../../../mock'),
+  ConnectionSpy = require('../shared').ConnectionSpy;
 
 describe('ReplSet Operations (mocks)', function() {
   it('Correctly execute count command against replicaset with a single member', {
@@ -49,7 +50,7 @@ describe('ReplSet Operations (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mockupdb.createServer(32000, 'localhost');
+        primaryServer = yield mock.createServer(32000, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -61,7 +62,9 @@ describe('ReplSet Operations (mocks)', function() {
         });
       });
 
-      Connection.enableConnectionAccounting();
+      const spy = new ConnectionSpy();
+      Connection.enableConnectionAccounting(spy);
+
       // Attempt to connect
       var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
         setName: 'rs',
@@ -77,7 +80,7 @@ describe('ReplSet Operations (mocks)', function() {
 
       server.on('connect', function(_server) {
         _server.command('test.test', { count: 'test' }, function() {
-          Promise.all([primaryServer.destroy(), _server.destroy()]).then(() => done());
+          mock.cleanup([primaryServer, server], spy, () => done());
         });
       });
 
@@ -135,7 +138,7 @@ describe('ReplSet Operations (mocks)', function() {
 
         // Boot the mock
         co(function*() {
-          primaryServer = yield mockupdb.createServer(32000, 'localhost');
+          primaryServer = yield mock.createServer(32000, 'localhost');
 
           primaryServer.setMessageHandler(request => {
             var doc = request.document;
@@ -147,7 +150,9 @@ describe('ReplSet Operations (mocks)', function() {
           });
         });
 
-        Connection.enableConnectionAccounting();
+        const spy = new ConnectionSpy();
+        Connection.enableConnectionAccounting(spy);
+
         // Attempt to connect
         var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
           setName: 'rs',
@@ -167,7 +172,7 @@ describe('ReplSet Operations (mocks)', function() {
             { count: 'test' },
             { readPreference: ReadPreference.secondaryPreferred },
             function() {
-              Promise.all([primaryServer.destroy(), _server.destroy()]).then(() => done());
+              mock.cleanup([primaryServer, _server], spy, () => done());
             }
           );
         });

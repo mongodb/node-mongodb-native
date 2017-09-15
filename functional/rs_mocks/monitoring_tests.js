@@ -3,7 +3,8 @@ var expect = require('chai').expect,
   assign = require('../../../../lib/utils').assign,
   co = require('co'),
   Connection = require('../../../../lib/connection/connection'),
-  mockupdb = require('../../../mock');
+  mock = require('../../../mock'),
+  ConnectionSpy = require('../shared').ConnectionSpy;
 
 var delay = function(timeout) {
   return new Promise(resolve => setTimeout(() => resolve(), timeout));
@@ -104,9 +105,9 @@ describe('ReplSet Monitoring (mocks)', function() {
 
         // Boot the mock
         co(function*() {
-          primaryServer = yield mockupdb.createServer(32000, 'localhost');
-          firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
-          secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
+          primaryServer = yield mock.createServer(32000, 'localhost');
+          firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+          secondSecondaryServer = yield mock.createServer(32002, 'localhost');
 
           primaryServer.setMessageHandler(request => {
             var doc = request.document;
@@ -166,7 +167,9 @@ describe('ReplSet Monitoring (mocks)', function() {
           }, 5000);
         });
 
-        Connection.enableConnectionAccounting();
+        const spy = new ConnectionSpy();
+        Connection.enableConnectionAccounting(spy);
+
         // Attempt to connect
         var server = new ReplSet(
           [
@@ -199,18 +202,14 @@ describe('ReplSet Monitoring (mocks)', function() {
                   expect(joinedSecondaries).to.eql({ 'localhost:32001': 1, 'localhost:32002': 1 });
 
                   // Destroy mock
-                  Promise.all([
-                    primaryServer.destroy(),
-                    firstSecondaryServer.destroy(),
-                    secondSecondaryServer.destroy(),
-                    server.destroy()
-                  ]).then(() => {
-                    setTimeout(function() {
-                      expect(Object.keys(Connection.connections())).to.have.length(0);
+                  mock.cleanup(
+                    [primaryServer, firstSecondaryServer, secondSecondaryServer, server],
+                    spy,
+                    () => {
                       Connection.disableConnectionAccounting();
                       done();
-                    }, 1000);
-                  });
+                    }
+                  );
 
                   return;
                 }
@@ -327,9 +326,9 @@ describe('ReplSet Monitoring (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mockupdb.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
+        primaryServer = yield mock.createServer(32000, 'localhost');
+        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        secondSecondaryServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -374,12 +373,7 @@ describe('ReplSet Monitoring (mocks)', function() {
         setTimeout(function() {
           expect(_server.intervalIds.length).to.be.greaterThan(1);
 
-          Promise.all([
-            primaryServer.destroy(),
-            firstSecondaryServer.destroy(),
-            secondSecondaryServer.destroy(),
-            server.destroy()
-          ]).then(() => {
+          mock.cleanup([primaryServer, firstSecondaryServer, secondSecondaryServer, server], () => {
             expect(_server.intervalIds.length).to.equal(0);
             done();
           });

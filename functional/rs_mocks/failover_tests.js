@@ -3,7 +3,8 @@ var expect = require('chai').expect,
   assign = require('../../../../lib/utils').assign,
   co = require('co'),
   Connection = require('../../../../lib/connection/connection'),
-  mockupdb = require('../../../mock');
+  mock = require('../../../mock'),
+  ConnectionSpy = require('../shared').ConnectionSpy;
 
 describe('ReplSet Failover (mocks)', function() {
   it('Successfully failover to new primary', {
@@ -126,9 +127,9 @@ describe('ReplSet Failover (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mockupdb.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
+        primaryServer = yield mock.createServer(32000, 'localhost');
+        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        secondSecondaryServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -164,7 +165,9 @@ describe('ReplSet Failover (mocks)', function() {
         });
       });
 
-      Connection.enableConnectionAccounting();
+      const spy = new ConnectionSpy();
+      Connection.enableConnectionAccounting(spy);
+
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -214,19 +217,15 @@ describe('ReplSet Failover (mocks)', function() {
               expect(server.s.replicaSetState.primary).to.not.be.null;
               expect(server.s.replicaSetState.primary.name).to.equal('localhost:32001');
 
-              Promise.all([
-                primaryServer.destroy(),
-                firstSecondaryServer.destroy(),
-                secondSecondaryServer.destroy(),
-                server.destroy()
-              ]).then(() => {
-                Server.disableServerAccounting();
-                setTimeout(function() {
-                  expect(Object.keys(Connection.connections())).to.have.length(0);
+              mock.cleanup(
+                [primaryServer, firstSecondaryServer, secondSecondaryServer, server],
+                spy,
+                () => {
+                  Server.disableServerAccounting();
                   Connection.disableConnectionAccounting();
                   done();
-                }, 1000);
-              });
+                }
+              );
             }
           });
 
@@ -365,9 +364,9 @@ describe('ReplSet Failover (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mockupdb.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
+        primaryServer = yield mock.createServer(32000, 'localhost');
+        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        secondSecondaryServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -403,7 +402,9 @@ describe('ReplSet Failover (mocks)', function() {
         });
       });
 
-      Connection.enableConnectionAccounting();
+      const spy = new ConnectionSpy();
+      Connection.enableConnectionAccounting(spy);
+
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -431,20 +432,15 @@ describe('ReplSet Failover (mocks)', function() {
           currentIsMasterIndex = currentIsMasterIndex + 1;
 
           server.on('reconnect', function() {
-            Promise.all([
-              primaryServer.destroy(),
-              firstSecondaryServer.destroy(),
-              secondSecondaryServer.destroy(),
-              server.destroy()
-            ]).then(() => {
-              Server.disableServerAccounting();
-
-              setTimeout(function() {
-                expect(Object.keys(Connection.connections())).to.have.length(0);
+            mock.cleanup(
+              [primaryServer, firstSecondaryServer, secondSecondaryServer, server],
+              spy,
+              () => {
+                Server.disableServerAccounting();
                 Connection.disableConnectionAccounting();
                 done();
-              }, 1000);
-            });
+              }
+            );
           });
 
           setTimeout(function() {

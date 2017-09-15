@@ -3,7 +3,7 @@ var expect = require('chai').expect,
   f = require('util').format,
   co = require('co'),
   assign = require('../../../../lib/utils').assign,
-  mockupdb = require('../../../mock');
+  mock = require('../../../mock');
 
 describe('Mongos Single Proxy Connection (mocks)', function() {
   it('Should correctly timeout mongos socket operation and then correctly re-execute', {
@@ -42,7 +42,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        server = yield mockupdb.createServer(52017, 'localhost');
+        server = yield mock.createServer(52017, 'localhost');
 
         server.setMessageHandler(request => {
           var doc = request.document;
@@ -91,8 +91,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
               clearInterval(intervalId);
               expect(r.connection.port).to.equal(52017);
 
-              server.destroy();
-              done();
+              mock.cleanup([server], () => done());
             }
           });
         }, 500);
@@ -137,7 +136,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        server = yield mockupdb.createServer(52018, 'localhost');
+        server = yield mock.createServer(52018, 'localhost');
 
         server.setMessageHandler(request => {
           var doc = request.document;
@@ -196,8 +195,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
             expect(_err).to.not.exist;
             expect(_d).to.exist;
 
-            server.destroy();
-            done();
+            mock.cleanup([server], () => done());
           });
         });
       });

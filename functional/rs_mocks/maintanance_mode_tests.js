@@ -3,7 +3,8 @@ var expect = require('chai').expect,
   assign = require('../../../../lib/utils').assign,
   co = require('co'),
   Connection = require('../../../../lib/connection/connection'),
-  mockupdb = require('../../../mock');
+  mock = require('../../../mock'),
+  ConnectionSpy = require('../shared').ConnectionSpy;
 
 describe('ReplSet Maintenance Mode (mocks)', function() {
   it('Successfully detect server in maintanance mode', {
@@ -116,10 +117,10 @@ describe('ReplSet Maintenance Mode (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mockupdb.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mockupdb.createServer(32003, 'localhost');
-        arbiterServer = yield mockupdb.createServer(32002, 'localhost');
+        primaryServer = yield mock.createServer(32000, 'localhost');
+        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        secondSecondaryServer = yield mock.createServer(32003, 'localhost');
+        arbiterServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -150,7 +151,9 @@ describe('ReplSet Maintenance Mode (mocks)', function() {
         });
       });
 
-      Connection.enableConnectionAccounting();
+      const spy = new ConnectionSpy();
+      Connection.enableConnectionAccounting(spy);
+
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -192,19 +195,14 @@ describe('ReplSet Maintenance Mode (mocks)', function() {
 
       server.on('left', function(_type, _server) {
         if (_type === 'secondary' && _server.name === 'localhost:32003') {
-          Promise.all([
-            primaryServer.destroy(),
-            firstSecondaryServer.destroy(),
-            secondSecondaryServer.destroy(),
-            arbiterServer.destroy(),
-            server.destroy()
-          ]).then(() => {
-            setTimeout(function() {
-              expect(Object.keys(Connection.connections())).to.have.length(0);
+          mock.cleanup(
+            [primaryServer, firstSecondaryServer, secondSecondaryServer, arbiterServer, server],
+            spy,
+            () => {
               Connection.disableConnectionAccounting();
               done();
-            }, 2000);
-          });
+            }
+          );
         }
       });
 

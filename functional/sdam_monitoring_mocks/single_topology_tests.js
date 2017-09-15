@@ -2,7 +2,7 @@
 var expect = require('chai').expect,
   assign = require('../../../../lib/utils').assign,
   co = require('co'),
-  mockupdb = require('../../../mock');
+  mock = require('../../../mock');
 
 describe.skip('Single SDAM Monitoring (mocks)', function() {
   it('Should correctly emit sdam monitoring events for single server', {
@@ -37,7 +37,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       // Boot the mock
       var mockServer;
       co(function*() {
-        mockServer = yield mockupdb.createServer(37018, 'localhost');
+        mockServer = yield mock.createServer(37018, 'localhost');
 
         mockServer.setMessageHandler(request => {
           var doc = request.document;
@@ -145,8 +145,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
             }
           }).to.eql(flags[5]);
 
-          mockServer.destroy();
-          done();
+          mock.cleanup([mockServer], () => done());
         }, 100);
       });
 
@@ -184,7 +183,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       // Boot the mock
       var mockServer;
       co(function*() {
-        mockServer = yield mockupdb.createServer(37008, 'localhost');
+        mockServer = yield mock.createServer(37008, 'localhost');
 
         mockServer.setMessageHandler(request => {
           var doc = request.document;
@@ -291,8 +290,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
             }
           }).to.eql(flags[5]);
 
-          mockServer.destroy();
-          done();
+          mock.cleanup([mockServer], () => done());
         }, 100);
       });
 

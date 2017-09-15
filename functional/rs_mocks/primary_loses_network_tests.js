@@ -2,7 +2,8 @@
 var assign = require('../../../../lib/utils').assign,
   co = require('co'),
   Connection = require('../../../../lib/connection/connection'),
-  mockupdb = require('../../../mock');
+  mock = require('../../../mock'),
+  ConnectionSpy = require('../shared').ConnectionSpy;
 
 describe('ReplSet Primary Loses Network (mocks)', function() {
   it('Recover from Primary loosing network connectivity', {
@@ -95,9 +96,9 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mockupdb.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
+        primaryServer = yield mock.createServer(32000, 'localhost');
+        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        secondSecondaryServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -124,7 +125,8 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
         });
       });
 
-      Connection.enableConnectionAccounting();
+      const spy = new ConnectionSpy();
+      Connection.enableConnectionAccounting(spy);
 
       // Attempt to connect
       var server = new ReplSet(
@@ -147,14 +149,11 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
         if (_type === 'primary') {
           server.on('joined', function(__type, __server) {
             if (__type === 'primary' && __server.name === 'localhost:32002') {
-              Promise.all([
-                primaryServer.destroy(),
-                firstSecondaryServer.destroy(),
-                secondSecondaryServer.destroy(),
-                __server.destroy()
-              ]).then(() => {
-                done();
-              });
+              mock.cleanup(
+                [primaryServer, firstSecondaryServer, secondSecondaryServer, __server],
+                spy,
+                () => done()
+              );
             }
           });
         }
