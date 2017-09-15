@@ -1,4 +1,5 @@
 'use strict';
+const EventEmitter = require('events');
 
 function executeCommand(configuration, db, cmd, options, cb) {
   var Pool = require('../../../lib/connection/pool'),
@@ -104,6 +105,38 @@ const delay = function(timeout) {
   });
 };
 
+class ConnectionSpy extends EventEmitter {
+  constructor() {
+    super();
+    this.connections = {};
+  }
+
+  addConnection(id, connection) {
+    // console.log(`=== added connection ${id} :: ${connection.port}`);
+
+    this.connections[id] = connection;
+    this.emit('connectionAdded');
+  }
+
+  deleteConnection(id) {
+    // console.log(
+    //   `=== deleted connection ${id} :: ${this.connections[id] ? this.connections[id].port : ''}`
+    // );
+
+    delete this.connections[id];
+    this.emit('connectionRemoved');
+
+    if (this.connectionCount() === 0) {
+      this.emit('drained');
+    }
+  }
+
+  connectionCount() {
+    return Object.keys(this.connections).length;
+  }
+}
+
 module.exports.executeCommand = executeCommand;
 module.exports.locateAuthMethod = locateAuthMethod;
 module.exports.delay = delay;
+module.exports.ConnectionSpy = ConnectionSpy;
