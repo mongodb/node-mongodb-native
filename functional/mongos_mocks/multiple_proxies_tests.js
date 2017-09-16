@@ -201,7 +201,7 @@ describe('Mongos Multiple Proxies (mocks)', function() {
                   expect(___err).to.be.null;
                   expect(___r.connection.port).to.equal(11003);
 
-                  mock.cleanup([server2, mongos1, mongos2], () => done());
+                  mock.cleanup([server, server2, mongos1, mongos2], () => done());
                 });
               });
             });

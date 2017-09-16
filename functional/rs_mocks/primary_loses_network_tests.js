@@ -6,7 +6,7 @@ var assign = require('../../../../lib/utils').assign,
   ConnectionSpy = require('../shared').ConnectionSpy;
 
 describe('ReplSet Primary Loses Network (mocks)', function() {
-  it('Recover from Primary loosing network connectivity', {
+  it('Recover from Primary losing network connectivity', {
     metadata: {
       requires: {
         generators: true,
@@ -150,7 +150,7 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
           server.on('joined', function(__type, __server) {
             if (__type === 'primary' && __server.name === 'localhost:32002') {
               mock.cleanup(
-                [primaryServer, firstSecondaryServer, secondSecondaryServer, __server],
+                [server, primaryServer, firstSecondaryServer, secondSecondaryServer],
                 spy,
                 () => done()
               );

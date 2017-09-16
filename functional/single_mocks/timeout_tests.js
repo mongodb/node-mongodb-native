@@ -2,7 +2,7 @@
 var expect = require('chai').expect,
   assign = require('../../../../lib/utils').assign,
   co = require('co'),
-  mockupdb = require('../../../mock');
+  mock = require('../../../mock');
 
 describe('Single Timeout (mocks)', function() {
   it('Should correctly timeout socket operation and then correctly re-execute', {
@@ -40,7 +40,7 @@ describe('Single Timeout (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        server = yield mockupdb.createServer(37019, 'localhost');
+        server = yield mock.createServer(37019, 'localhost');
 
         server.setMessageHandler(request => {
           var doc = request.document;
@@ -94,7 +94,7 @@ describe('Single Timeout (mocks)', function() {
                   finished = true;
                   expect(_r.connection.port).to.equal('37019');
                   replset.destroy({ force: true });
-                  done();
+                  mock.cleanup([server], () => done());
                 } else {
                   wait();
                 }
@@ -149,7 +149,7 @@ describe('Single Timeout (mocks)', function() {
       // Boot the mock
       var __server;
       co(function*() {
-        __server = yield mockupdb.createServer(37017, 'localhost', {
+        __server = yield mock.createServer(37017, 'localhost', {
           onRead: function(_server, connection) {
             // Force EPIPE error
             if (currentStep === 1) {
@@ -268,8 +268,7 @@ describe('Single Timeout (mocks)', function() {
           expect(r).to.exist;
           expect(brokenPipe).to.equal(true);
           _server.destroy();
-          __server.destroy();
-          done();
+          mock.cleanup([__server, _server], () => done());
         });
       });
 
@@ -315,7 +314,7 @@ describe('Single Timeout (mocks)', function() {
 
         // Boot the mock
         co(function*() {
-          server = yield mockupdb.createServer(37019, 'localhost');
+          server = yield mock.createServer(37019, 'localhost');
 
           server.setMessageHandler(request => {
             if (currentStep === 1) {

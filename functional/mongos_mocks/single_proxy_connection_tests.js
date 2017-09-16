@@ -71,7 +71,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
       });
 
       // Attempt to connect
-      var _server = new Mongos([{ host: 'localhost', port: 52017 }], {
+      var mongos = new Mongos([{ host: 'localhost', port: 52017 }], {
         connectionTimeout: 3000,
         socketTimeout: 1000,
         haInterval: 500,
@@ -82,23 +82,23 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
       var finished = false;
 
       // Add event listeners
-      _server.once('connect', function() {
+      mongos.once('connect', function() {
         // Run an interval
         var intervalId = setInterval(function() {
-          _server.insert('test.test', [{ created: new Date() }], function(err, r) {
+          mongos.insert('test.test', [{ created: new Date() }], function(err, r) {
             if (r && !finished) {
               finished = true;
               clearInterval(intervalId);
               expect(r.connection.port).to.equal(52017);
 
-              mock.cleanup([server], () => done());
+              mock.cleanup([mongos, server], () => done());
             }
           });
         }, 500);
       });
 
-      _server.on('error', done);
-      _server.connect();
+      mongos.on('error', done);
+      mongos.connect();
     }
   });
 
@@ -170,7 +170,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
       });
 
       // Attempt to connect
-      var _server = new Mongos([{ host: 'localhost', port: 52018 }], {
+      var mongos = new Mongos([{ host: 'localhost', port: 52018 }], {
         connectionTimeout: 30000,
         socketTimeout: 30000,
         haInterval: 500,
@@ -178,9 +178,9 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
       });
 
       // Add event listeners
-      _server.once('connect', function() {
+      mongos.once('connect', function() {
         // Execute find
-        var cursor = _server.cursor('test.test', {
+        var cursor = mongos.cursor('test.test', {
           find: 'test',
           query: {},
           batchSize: 2
@@ -195,14 +195,14 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
             expect(_err).to.not.exist;
             expect(_d).to.exist;
 
-            mock.cleanup([server], () => done());
+            mock.cleanup([mongos, server], () => done());
           });
         });
       });
 
-      _server.on('error', done);
+      mongos.on('error', done);
       setTimeout(function() {
-        _server.connect();
+        mongos.connect();
       }, 100);
     }
   });
