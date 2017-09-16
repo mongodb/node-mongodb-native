@@ -144,11 +144,17 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
         }
       );
 
+      let cleaningUp = false;
       server.on('error', done);
       server.on('left', function(_type) {
         if (_type === 'primary') {
           server.on('joined', function(__type, __server) {
             if (__type === 'primary' && __server.name === 'localhost:32002') {
+              if (cleaningUp) {
+                return;
+              }
+
+              cleaningUp = true;
               mock.cleanup(
                 [server, primaryServer, firstSecondaryServer, secondSecondaryServer],
                 spy,
