@@ -1001,13 +1001,11 @@ describe('Server tests', function() {
   );
 
   it(
-    'should correctly connect server to single instance and execute insert with snappy compression if supported by the server',
+    'should correctly connect server to single instance and execute insert with snappy compression',
     {
-      metadata: { requires: { topology: ['single', 'snappyCompression'] } },
+      metadata: { requires: { topology: ['single'], mongodb: '>=3.5.x' } },
 
       test: function(done) {
-        var self = this;
-
         // Attempt to connect to server
         var server = new Server({
           host: this.configuration.host,
@@ -1020,23 +1018,13 @@ describe('Server tests', function() {
 
         // Add event listeners
         server.on('connect', function() {
-          var envShouldSupportCompression =
-            self.configuration.manager.options.networkMessageCompressors === 'snappy' &&
-            server.ismaster.maxWireVersion >= WIRE_PROTOCOL_COMPRESSION_SUPPORT_MIN_VERSION;
-
           // Check compression has been negotiated
-          if (envShouldSupportCompression) {
-            expect(server.s.pool.options.agreedCompressor).to.equal('snappy');
-          }
+          expect(server.s.pool.options.agreedCompressor).to.equal('snappy');
 
           server.insert('integration_tests.inserts', { a: 1 }, function(insertOneErr, insertOneR) {
             expect(insertOneErr).to.be.null;
             expect(insertOneR.result.n).to.equal(1);
-            if (envShouldSupportCompression) {
-              expect(insertOneR.message.fromCompressed).to.be.true;
-            } else {
-              expect(insertOneR.message.fromCompressed).to.not.exist;
-            }
+            expect(insertOneR.message.fromCompressed).to.be.true;
 
             server.insert('integration_tests.inserts', { a: 2 }, { ordered: false }, function(
               err,
@@ -1044,11 +1032,7 @@ describe('Server tests', function() {
             ) {
               expect(err).to.be.null;
               expect(r.result.n).to.equal(1);
-              if (envShouldSupportCompression) {
-                expect(r.message.fromCompressed).to.be.true;
-              } else {
-                expect(r.message.fromCompressed).to.not.exist;
-              }
+              expect(r.message.fromCompressed).to.be.true;
 
               server.destroy();
               done();
