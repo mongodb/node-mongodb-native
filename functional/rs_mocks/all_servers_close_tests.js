@@ -133,7 +133,7 @@ describe('ReplSet All Servers Close (mocks)', function() {
           setName: 'rs',
           connectionTimeout: 2000,
           socketTimeout: 2000,
-          haInterval: 500,
+          haInterval: 100,
           size: 500
         }
       );
@@ -162,9 +162,9 @@ describe('ReplSet All Servers Close (mocks)', function() {
                   }
                 );
               });
-            }, 12000);
-          }, 2500);
-        }, 2500);
+            }, 1500);
+          }, 1000);
+        }, 500);
       });
 
       // Gives proxies a chance to boot up
@@ -298,7 +298,7 @@ describe('ReplSet All Servers Close (mocks)', function() {
           setName: 'rs',
           connectionTimeout: 5000,
           socketTimeout: 5000,
-          haInterval: 1000,
+          haInterval: 100,
           size: 1
         }
       );
@@ -309,7 +309,7 @@ describe('ReplSet All Servers Close (mocks)', function() {
 
           var intervalId = setInterval(function() {
             server.command('admin.$cmd', { ismaster: true }, function() {});
-          }, 2000);
+          }, 500);
 
           setTimeout(function() {
             die = false;
@@ -332,9 +332,9 @@ describe('ReplSet All Servers Close (mocks)', function() {
                   }
                 );
               });
-            }, 5000);
-          }, 25000);
-        }, 2500);
+            }, 1500);
+          }, 1000);
+        }, 500);
       });
 
       // Gives proxies a chance to boot up

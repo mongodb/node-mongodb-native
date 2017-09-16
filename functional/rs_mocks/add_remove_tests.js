@@ -166,7 +166,7 @@ describe('ReplSet Add Remove (mocks)', function() {
           setName: 'rs',
           connectionTimeout: 3000,
           socketTimeout: 0,
-          haInterval: 2000,
+          haInterval: 100,
           size: 1
         }
       );
@@ -370,7 +370,7 @@ describe('ReplSet Add Remove (mocks)', function() {
           setName: 'rs',
           connectionTimeout: 3000,
           socketTimeout: 0,
-          haInterval: 2000,
+          haInterval: 100,
           size: 1
         }
       );
@@ -619,7 +619,7 @@ describe('ReplSet Add Remove (mocks)', function() {
           setName: 'rs',
           connectionTimeout: 3000,
           socketTimeout: 0,
-          haInterval: 2000,
+          haInterval: 100,
           size: 1
         }
       );
@@ -664,8 +664,8 @@ describe('ReplSet Add Remove (mocks)', function() {
               done();
             }
           );
-        }, 6000);
-      }, 3000);
+        }, 1000);
+      }, 500);
 
       server.on('left', function(_type, _server) {
         if (_type === 'secondary' && _server.name === 'localhost:32003') {
@@ -848,7 +848,7 @@ describe('ReplSet Add Remove (mocks)', function() {
           setName: 'rs',
           connectionTimeout: 3000,
           socketTimeout: 0,
-          haInterval: 2000,
+          haInterval: 100,
           size: 1
         }
       );

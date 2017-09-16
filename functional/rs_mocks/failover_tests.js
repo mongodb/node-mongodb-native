@@ -179,7 +179,7 @@ describe('ReplSet Failover (mocks)', function() {
           setName: 'rs',
           connectionTimeout: 3000,
           socketTimeout: 0,
-          haInterval: 2000,
+          haInterval: 100,
           size: 1
         }
       );
@@ -232,7 +232,7 @@ describe('ReplSet Failover (mocks)', function() {
           setTimeout(function() {
             die = false;
             currentIsMasterIndex = currentIsMasterIndex + 1;
-          }, 2500);
+          }, 500);
         }, 100);
       });
 
@@ -416,7 +416,7 @@ describe('ReplSet Failover (mocks)', function() {
           setName: 'rs',
           connectionTimeout: 3000,
           socketTimeout: 0,
-          haInterval: 2000,
+          haInterval: 100,
           size: 1
         }
       );
@@ -446,7 +446,7 @@ describe('ReplSet Failover (mocks)', function() {
           setTimeout(function() {
             die = false;
             currentIsMasterIndex = currentIsMasterIndex + 1;
-          }, 2500);
+          }, 500);
         }, 100);
       });
 

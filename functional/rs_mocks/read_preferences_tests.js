@@ -148,7 +148,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
               expect(r.connection.port).to.equal(32002);
 
               mock.cleanup(
-                [primaryServer, firstSecondaryServer, secondSecondaryServer, server],
+                [server, primaryServer, firstSecondaryServer, secondSecondaryServer],
                 spy,
                 () => {
                   Connection.disableConnectionAccounting();
@@ -313,7 +313,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
                 expect(r.connection.port).to.equal(32000);
 
                 mock.cleanup(
-                  [primaryServer, firstSecondaryServer, secondSecondaryServer, server],
+                  [server, primaryServer, firstSecondaryServer, secondSecondaryServer],
                   spy,
                   () => {
                     Connection.disableConnectionAccounting();
@@ -507,7 +507,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
                         expect(__r.connection.port).to.not.equal(port);
 
                         mock.cleanup(
-                          [primaryServer, firstSecondaryServer, secondSecondaryServer, server],
+                          [server, primaryServer, firstSecondaryServer, secondSecondaryServer],
                           spy,
                           () => {
                             Connection.disableConnectionAccounting();
@@ -689,7 +689,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
                         expect(_err).to.be.null;
                         expect(_r.connection.port).to.equal(32001); // reads from secondary while primary down
 
-                        mock.cleanup([primaryServer, firstSecondaryServer], spy, () => {
+                        mock.cleanup([server, primaryServer, firstSecondaryServer], spy, () => {
                           Connection.disableConnectionAccounting();
                           done();
                         });
@@ -883,7 +883,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
                         expect(__r.connection.port).to.not.equal(32000);
 
                         mock.cleanup(
-                          [primaryServer, firstSecondaryServer, secondSecondaryServer, server],
+                          [server, primaryServer, firstSecondaryServer, secondSecondaryServer],
                           spy,
                           () => {
                             Connection.disableConnectionAccounting();
@@ -1057,7 +1057,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
               expect(r.connection.port).to.be.oneOf([32000, 32001]);
 
               mock.cleanup(
-                [primaryServer, firstSecondaryServer, secondSecondaryServer, server],
+                [server, primaryServer, firstSecondaryServer, secondSecondaryServer],
                 spy,
                 () => {
                   Connection.disableConnectionAccounting();
@@ -1228,7 +1228,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
               expect(r.connection.port).to.be.oneOf([32001, 32002]);
 
               mock.cleanup(
-                [primaryServer, firstSecondaryServer, secondSecondaryServer, server],
+                [server, primaryServer, firstSecondaryServer, secondSecondaryServer],
                 spy,
                 () => {
                   Connection.disableConnectionAccounting();
@@ -1343,7 +1343,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
                   expect(err).to.be.null;
                   expect(r.connection.port).to.equal(32000);
 
-                  mock.cleanup([primaryServer, server], spy, () => {
+                  mock.cleanup([server, primaryServer], spy, () => {
                     Connection.disableConnectionAccounting();
                     done();
                   });
@@ -1506,7 +1506,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
               // Shut down mocks
               mock.cleanup(
-                [primaryServer, firstSecondaryServer, secondSecondaryServer, server],
+                [server, primaryServer, firstSecondaryServer, secondSecondaryServer],
                 spy,
                 () => done()
               );

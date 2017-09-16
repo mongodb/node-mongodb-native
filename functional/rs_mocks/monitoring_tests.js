@@ -114,7 +114,7 @@ describe('ReplSet Monitoring (mocks)', function() {
 
             // Stop responding to any calls (emulate dropping packets on the floor)
             if (stopRespondingPrimary) {
-              delay(10000).then(() => handleMessage(doc));
+              delay(3000).then(() => handleMessage(doc));
             } else {
               handleMessage(doc);
             }
@@ -164,7 +164,7 @@ describe('ReplSet Monitoring (mocks)', function() {
           setTimeout(function() {
             stopRespondingPrimary = true;
             currentIsMasterState = 1;
-          }, 5000);
+          }, 500);
         });
 
         const spy = new ConnectionSpy();
@@ -181,7 +181,7 @@ describe('ReplSet Monitoring (mocks)', function() {
             setName: 'rs',
             connectionTimeout: 5000,
             socketTimeout: 3000,
-            haInterval: 2000,
+            haInterval: 100,
             size: 1
           }
         );
@@ -332,7 +332,7 @@ describe('ReplSet Monitoring (mocks)', function() {
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
-          if (doc.ismaster && currentIsMasterState == 0) {
+          if (doc.ismaster && currentIsMasterState === 0) {
             request.reply(primary[currentIsMasterState]);
           }
         });
@@ -363,7 +363,7 @@ describe('ReplSet Monitoring (mocks)', function() {
           setName: 'rs',
           connectionTimeout: 5000,
           socketTimeout: 60000,
-          haInterval: 200,
+          haInterval: 100,
           size: 1
         }
       );
@@ -377,7 +377,7 @@ describe('ReplSet Monitoring (mocks)', function() {
             expect(_server.intervalIds.length).to.equal(0);
             done();
           });
-        }, 1000);
+        }, 100);
       });
 
       // Gives proxies a chance to boot up
