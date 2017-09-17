@@ -222,8 +222,8 @@ ReplSetState.prototype.update = function(server) {
     for (var i = 0; i < hosts.length; i++) {
       // Add to the list of unknown server
       if (
-        this.unknownServers.indexOf(hosts[i]) == -1 &&
-        (!this.set[hosts[i]] || this.set[hosts[i]].type == ServerType.Unknown)
+        this.unknownServers.indexOf(hosts[i]) === -1 &&
+        (!this.set[hosts[i]] || this.set[hosts[i]].type === ServerType.Unknown)
       ) {
         this.unknownServers.push(hosts[i].toLowerCase());
       }
@@ -255,7 +255,7 @@ ReplSetState.prototype.update = function(server) {
     self.set[serverName].setName = ismaster ? ismaster.setName : ismaster;
     self.set[serverName].setVersion = ismaster ? ismaster.setVersion : ismaster;
 
-    if (self.unknownServers.indexOf(server.name) == -1) {
+    if (self.unknownServers.indexOf(server.name) === -1) {
       self.unknownServers.push(serverName);
     }
 
@@ -266,7 +266,7 @@ ReplSetState.prototype.update = function(server) {
   //
   // Is this a mongos
   //
-  if (ismaster && ismaster.msg == 'isdbgrid') {
+  if (ismaster && ismaster.msg === 'isdbgrid') {
     return false;
   }
 
@@ -332,7 +332,7 @@ ReplSetState.prototype.update = function(server) {
   //
   // If the .me field does not match the passed in server
   //
-  if (ismaster.me && ismaster.me.toLowerCase() != serverName) {
+  if (ismaster.me && ismaster.me.toLowerCase() !== serverName) {
     if (this.logger.isWarn()) {
       this.logger.warn(
         f(
@@ -378,7 +378,7 @@ ReplSetState.prototype.update = function(server) {
   //
   if (!this.primary && ismaster.ismaster && ismaster.setName) {
     var ismasterElectionId = server.lastIsMaster().electionId;
-    if (this.setName && this.setName != ismaster.setName) {
+    if (this.setName && this.setName !== ismaster.setName) {
       this.topologyType = TopologyType.ReplicaSetNoPrimary;
       return new MongoError(
         f(
@@ -396,10 +396,10 @@ ReplSetState.prototype.update = function(server) {
       // Get the electionIds
       var ismasterSetVersion = server.lastIsMaster().setVersion;
 
-      if (result == 1) {
+      if (result === 1) {
         this.topologyType = TopologyType.ReplicaSetNoPrimary;
         return false;
-      } else if (result == 0 && ismasterSetVersion) {
+      } else if (result === 0 && ismasterSetVersion) {
         if (ismasterSetVersion < this.maxSetVersion) {
           this.topologyType = TopologyType.ReplicaSetNoPrimary;
           return false;
@@ -417,7 +417,7 @@ ReplSetState.prototype.update = function(server) {
     var locationIndex = normalizedHosts.indexOf(serverName);
 
     // Validate that the server exists in the host list
-    if (locationIndex != -1) {
+    if (locationIndex !== -1) {
       self.primary = server;
       self.set[serverName] = {
         type: ServerType.RSPrimary,
@@ -449,12 +449,12 @@ ReplSetState.prototype.update = function(server) {
     var ismasterSetName = server.lastIsMaster().setName;
 
     // Is it the same server instance
-    if (this.primary.equals(server) && currentSetName == ismasterSetName) {
+    if (this.primary.equals(server) && currentSetName === ismasterSetName) {
       return false;
     }
 
     // If we do not have the same rs name
-    if (currentSetName && currentSetName != ismasterSetName) {
+    if (currentSetName && currentSetName !== ismasterSetName) {
       if (!this.primary.equals(server)) {
         this.topologyType = TopologyType.ReplicaSetWithPrimary;
       } else {
@@ -468,9 +468,9 @@ ReplSetState.prototype.update = function(server) {
     if (currentElectionId && ismasterElectionId) {
       result = compareObjectIds(currentElectionId, ismasterElectionId);
 
-      if (result == 1) {
+      if (result === 1) {
         return false;
-      } else if (result == 0 && currentSetVersion > ismasterSetVersion) {
+      } else if (result === 0 && currentSetVersion > ismasterSetVersion) {
         return false;
       }
     } else if (!currentElectionId && ismasterElectionId && ismasterSetVersion) {
@@ -484,9 +484,9 @@ ReplSetState.prototype.update = function(server) {
     } else if (this.maxElectionId && ismasterElectionId) {
       result = compareObjectIds(this.maxElectionId, ismasterElectionId);
 
-      if (result == 1) {
+      if (result === 1) {
         return false;
-      } else if (result == 0 && currentSetVersion && ismasterSetVersion) {
+      } else if (result === 0 && currentSetVersion && ismasterSetVersion) {
         if (ismasterSetVersion < this.maxSetVersion) {
           return false;
         }
@@ -553,7 +553,7 @@ ReplSetState.prototype.update = function(server) {
     ismaster.setName &&
     !inList(ismaster, server, this.secondaries) &&
     this.setName &&
-    this.setName == ismaster.setName
+    this.setName === ismaster.setName
   ) {
     addToList(self, ServerType.RSSecondary, ismaster, server, this.secondaries);
     // Set the topology
@@ -564,7 +564,7 @@ ReplSetState.prototype.update = function(server) {
     removeFrom(server, self.unknownServers);
 
     // Remove primary
-    if (this.primary && this.primary.name.toLowerCase() == serverName) {
+    if (this.primary && this.primary.name.toLowerCase() === serverName) {
       server.destroy();
       this.primary = null;
       self.emit('left', 'primary', server);
@@ -584,7 +584,7 @@ ReplSetState.prototype.update = function(server) {
     ismaster.setName &&
     !inList(ismaster, server, this.arbiters) &&
     this.setName &&
-    this.setName == ismaster.setName
+    this.setName === ismaster.setName
   ) {
     addToList(self, ServerType.RSArbiter, ismaster, server, this.arbiters);
     // Set the topology
@@ -606,7 +606,7 @@ ReplSetState.prototype.update = function(server) {
     ismaster.setName &&
     !inList(ismaster, server, this.passives) &&
     this.setName &&
-    this.setName == ismaster.setName
+    this.setName === ismaster.setName
   ) {
     addToList(self, ServerType.RSSecondary, ismaster, server, this.passives);
     // Set the topology
@@ -617,7 +617,7 @@ ReplSetState.prototype.update = function(server) {
     removeFrom(server, self.unknownServers);
 
     // Remove primary
-    if (this.primary && this.primary.name.toLowerCase() == serverName) {
+    if (this.primary && this.primary.name.toLowerCase() === serverName) {
       server.destroy();
       this.primary = null;
       self.emit('left', 'primary', server);
@@ -631,7 +631,7 @@ ReplSetState.prototype.update = function(server) {
   //
   // Remove the primary
   //
-  if (this.set[serverName] && this.set[serverName].type == ServerType.RSPrimary) {
+  if (this.set[serverName] && this.set[serverName].type === ServerType.RSPrimary) {
     self.emit('left', 'primary', this.primary);
     this.primary.destroy();
     this.primary = null;
@@ -689,7 +689,7 @@ ReplSetState.prototype.pickServer = function(readPreference) {
   readPreference = readPreference || ReadPreference.primary;
 
   // maxStalenessSeconds is not allowed with a primary read
-  if (readPreference.preference == 'primary' && readPreference.maxStalenessSeconds != null) {
+  if (readPreference.preference === 'primary' && readPreference.maxStalenessSeconds != null) {
     return new MongoError('primary readPreference incompatible with maxStalenessSeconds');
   }
 
@@ -710,9 +710,12 @@ ReplSetState.prototype.pickServer = function(readPreference) {
   }
 
   // Do we have the nearest readPreference
-  if (readPreference.preference == 'nearest' && readPreference.maxStalenessSeconds == null) {
+  if (readPreference.preference === 'nearest' && readPreference.maxStalenessSeconds == null) {
     return pickNearest(this, readPreference);
-  } else if (readPreference.preference == 'nearest' && readPreference.maxStalenessSeconds != null) {
+  } else if (
+    readPreference.preference === 'nearest' &&
+    readPreference.maxStalenessSeconds != null
+  ) {
     return pickNearestMaxStalenessSeconds(this, readPreference);
   }
 
@@ -720,13 +723,13 @@ ReplSetState.prototype.pickServer = function(readPreference) {
   var secondaries = this.secondaries;
 
   // Check if we can satisfy and of the basic read Preferences
-  if (readPreference.equals(ReadPreference.secondary) && secondaries.length == 0) {
+  if (readPreference.equals(ReadPreference.secondary) && secondaries.length === 0) {
     return new MongoError('no secondary server available');
   }
 
   if (
     readPreference.equals(ReadPreference.secondaryPreferred) &&
-    secondaries.length == 0 &&
+    secondaries.length === 0 &&
     this.primary == null
   ) {
     return new MongoError('no secondary or primary server available');
@@ -807,7 +810,7 @@ var filterByTags = function(readPreference, servers) {
       var found = true;
       // Check if the server is valid
       for (var name in tags) {
-        if (serverTag[name] != tags[name]) {
+        if (serverTag[name] !== tags[name]) {
           found = false;
         }
       }
@@ -838,8 +841,8 @@ function pickNearestMaxStalenessSeconds(self, readPreference) {
   // Add primary to list if not a secondary read preference
   if (
     self.primary &&
-    readPreference.preference != 'secondary' &&
-    readPreference.preference != 'secondaryPreferred'
+    readPreference.preference !== 'secondary' &&
+    readPreference.preference !== 'secondaryPreferred'
   ) {
     servers.push(self.primary);
   }
@@ -850,7 +853,7 @@ function pickNearestMaxStalenessSeconds(self, readPreference) {
   }
 
   // If we have a secondaryPreferred readPreference and no server add the primary
-  if (self.primary && servers.length == 0 && readPreference.preference != 'secondaryPreferred') {
+  if (self.primary && servers.length === 0 && readPreference.preference !== 'secondaryPreferred') {
     servers.push(self.primary);
   }
 
@@ -873,7 +876,7 @@ function pickNearestMaxStalenessSeconds(self, readPreference) {
   });
 
   // No servers, default to primary
-  if (servers.length == 0) {
+  if (servers.length === 0) {
     return null;
   }
 
@@ -895,8 +898,8 @@ function pickNearest(self, readPreference) {
   // Add primary to list if not a secondary read preference
   if (
     self.primary &&
-    readPreference.preference != 'secondary' &&
-    readPreference.preference != 'secondaryPreferred'
+    readPreference.preference !== 'secondary' &&
+    readPreference.preference !== 'secondaryPreferred'
   ) {
     servers.push(self.primary);
   }
@@ -907,7 +910,7 @@ function pickNearest(self, readPreference) {
   }
 
   // If we have a secondaryPreferred readPreference and no server add the primary
-  if (servers.length == 0 && self.primary && readPreference.preference != 'secondaryPreferred') {
+  if (servers.length === 0 && self.primary && readPreference.preference !== 'secondaryPreferred') {
     servers.push(self.primary);
   }
 
@@ -929,7 +932,7 @@ function pickNearest(self, readPreference) {
   });
 
   // No servers, default to primary
-  if (servers.length == 0) {
+  if (servers.length === 0) {
     return null;
   }
 
@@ -945,7 +948,7 @@ function pickNearest(self, readPreference) {
 
 function inList(ismaster, server, list) {
   for (var i = 0; i < list.length; i++) {
-    if (list[i] && list[i].name && list[i].name.toLowerCase() == server.name.toLowerCase())
+    if (list[i] && list[i].name && list[i].name.toLowerCase() === server.name.toLowerCase())
       return true;
   }
 
@@ -998,7 +1001,7 @@ function removeFrom(server, list) {
     if (list[i].equals && list[i].equals(server)) {
       list.splice(i, 1);
       return true;
-    } else if (typeof list[i] == 'string' && list[i].toLowerCase() == server.name.toLowerCase()) {
+    } else if (typeof list[i] === 'string' && list[i].toLowerCase() === server.name.toLowerCase()) {
       list.splice(i, 1);
       return true;
     }

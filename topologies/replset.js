@@ -44,7 +44,7 @@ function stateTransition(self, newState) {
 
   // Get current state
   var legalStates = legalTransitions[self.state];
-  if (legalStates && legalStates.indexOf(newState) != -1) {
+  if (legalStates && legalStates.indexOf(newState) !== -1) {
     self.state = newState;
   } else {
     self.s.logger.error(
@@ -120,10 +120,10 @@ var ReplSet = function(seedlist, options) {
   // Validate seedlist
   if (!Array.isArray(seedlist)) throw new MongoError('seedlist must be an array');
   // Validate list
-  if (seedlist.length == 0) throw new MongoError('seedlist must contain at least one entry');
+  if (seedlist.length === 0) throw new MongoError('seedlist must contain at least one entry');
   // Validate entries
   seedlist.forEach(function(e) {
-    if (typeof e.host != 'string' || typeof e.port != 'number')
+    if (typeof e.host !== 'string' || typeof e.port !== 'number')
       throw new MongoError('seedlist entry must contain a host and port');
   });
 
@@ -190,7 +190,7 @@ var ReplSet = function(seedlist, options) {
     // Connect function options passed in
     connectOptions: {},
     // Are we running in debug mode
-    debug: typeof options.debug == 'boolean' ? options.debug : false,
+    debug: typeof options.debug === 'boolean' ? options.debug : false,
     // Client info
     clientInfo: createClientInfo(options),
     // Authentication context
@@ -206,7 +206,7 @@ var ReplSet = function(seedlist, options) {
   // a lot of recycled connections to happen.
   if (
     this.s.logger.isWarn() &&
-    this.s.options.socketTimeout != 0 &&
+    this.s.options.socketTimeout !== 0 &&
     this.s.options.socketTimeout < this.s.haInterval
   ) {
     this.s.logger.warn(
@@ -294,20 +294,20 @@ function connectNewServers(self, servers, callback) {
       count = count - 1;
 
       // Destroyed
-      if (self.state == DESTROYED || self.state == UNREFERENCED) {
+      if (self.state === DESTROYED || self.state === UNREFERENCED) {
         return this.destroy({ force: true });
       }
 
-      if (event == 'connect' && !self.authenticating) {
+      if (event === 'connect' && !self.authenticating) {
         // Destroyed
-        if (self.state == DESTROYED || self.state == UNREFERENCED) {
+        if (self.state === DESTROYED || self.state === UNREFERENCED) {
           return _self.destroy({ force: true });
         }
 
         // Do we have authentication contexts that need to be applied
         applyAuthenticationContexts(self, _self, function() {
           // Destroy the instance
-          if (self.state == DESTROYED || self.state == UNREFERENCED) {
+          if (self.state === DESTROYED || self.state === UNREFERENCED) {
             return _self.destroy({ force: true });
           }
 
@@ -340,9 +340,9 @@ function connectNewServers(self, servers, callback) {
             _self.destroy({ force: true });
           }
         });
-      } else if (event == 'connect' && self.authenticating) {
+      } else if (event === 'connect' && self.authenticating) {
         this.destroy({ force: true });
-      } else if (event == 'error') {
+      } else if (event === 'error') {
         error = err;
       }
 
@@ -350,20 +350,20 @@ function connectNewServers(self, servers, callback) {
       rexecuteOperations(self);
 
       // Are we done finish up callback
-      if (count == 0) {
+      if (count === 0) {
         callback(error);
       }
     };
   };
 
   // No new servers
-  if (count == 0) return callback();
+  if (count === 0) return callback();
 
   // Execute method
   function execute(_server, i) {
     setTimeout(function() {
       // Destroyed
-      if (self.state == DESTROYED || self.state == UNREFERENCED) {
+      if (self.state === DESTROYED || self.state === UNREFERENCED) {
         return;
       }
 
@@ -436,7 +436,7 @@ var pingServer = function(self, server, cb) {
       socketTimeout: self.s.options.connectionTimeout || 2000
     },
     function(err, r) {
-      if (self.state == DESTROYED || self.state == UNREFERENCED) {
+      if (self.state === DESTROYED || self.state === UNREFERENCED) {
         server.destroy({ force: true });
         return cb(err, r);
       }
@@ -470,7 +470,7 @@ var pingServer = function(self, server, cb) {
         }
 
         // Do we have a brand new server
-        if (server.lastIsMasterMS == -1) {
+        if (server.lastIsMasterMS === -1) {
           server.lastIsMasterMS = latencyMS;
         } else if (server.lastIsMasterMS) {
           // After the first measurement, average RTT MUST be computed using an
@@ -524,7 +524,7 @@ var monitorServer = function(host, self, options) {
 
   // Create the interval
   var intervalId = new _process(function() {
-    if (self.state == DESTROYED || self.state == UNREFERENCED) {
+    if (self.state === DESTROYED || self.state === UNREFERENCED) {
       // clearInterval(intervalId);
       intervalId.stop();
       return;
@@ -542,7 +542,7 @@ var monitorServer = function(host, self, options) {
           return;
         }
 
-        if (self.state == DESTROYED || self.state == UNREFERENCED) {
+        if (self.state === DESTROYED || self.state === UNREFERENCED) {
           intervalId.stop();
           return;
         }
@@ -555,7 +555,7 @@ var monitorServer = function(host, self, options) {
         // Initial sweep
         if (_process === Timeout) {
           if (
-            self.state == CONNECTING &&
+            self.state === CONNECTING &&
             ((self.s.replicaSetState.hasSecondary() &&
               self.s.options.secondaryOnlyConnectionAllowed) ||
               self.s.replicaSetState.hasPrimary())
@@ -572,7 +572,7 @@ var monitorServer = function(host, self, options) {
           }
         } else {
           if (
-            self.state == DISCONNECTED &&
+            self.state === DISCONNECTED &&
             ((self.s.replicaSetState.hasSecondary() &&
               self.s.options.secondaryOnlyConnectionAllowed) ||
               self.s.replicaSetState.hasPrimary())
@@ -616,7 +616,7 @@ var monitorServer = function(host, self, options) {
 };
 
 function topologyMonitor(self, options) {
-  if (self.state == DESTROYED || self.state == UNREFERENCED) return;
+  if (self.state === DESTROYED || self.state === UNREFERENCED) return;
   options = options || {};
 
   // Get the servers
@@ -659,7 +659,7 @@ function topologyMonitor(self, options) {
   // Run the reconnect process
   function executeReconnect(self) {
     return function() {
-      if (self.state == DESTROYED || self.state == UNREFERENCED) {
+      if (self.state === DESTROYED || self.state === UNREFERENCED) {
         return;
       }
 
@@ -692,7 +692,7 @@ function addServerToList(list, server) {
 
 function handleEvent(self, event) {
   return function() {
-    if (self.state == DESTROYED || self.state == UNREFERENCED) return;
+    if (self.state === DESTROYED || self.state === UNREFERENCED) return;
     // Debug log
     if (self.s.logger.isDebug()) {
       self.s.logger.debug(
@@ -704,7 +704,7 @@ function handleEvent(self, event) {
     self.s.replicaSetState.remove(this);
 
     // Are we in a destroyed state return
-    if (self.state == DESTROYED || self.state == UNREFERENCED) return;
+    if (self.state === DESTROYED || self.state === UNREFERENCED) return;
 
     // If no primary and secondary available
     if (
@@ -722,7 +722,7 @@ function handleEvent(self, event) {
 }
 
 function applyAuthenticationContexts(self, server, callback) {
-  if (self.s.authenticationContexts.length == 0) {
+  if (self.s.authenticationContexts.length === 0) {
     return callback();
   }
 
@@ -737,17 +737,15 @@ function applyAuthenticationContexts(self, server, callback) {
 
   // Apply one of the contexts
   function applyAuth(authContexts, server, callback) {
-    if (authContexts.length == 0) return callback();
+    if (authContexts.length === 0) return callback();
     // Get the first auth context
     var authContext = authContexts.shift();
     // Copy the params
     var customAuthContext = authContext.slice(0);
     // Push our callback handler
-    customAuthContext.push(
-      function(/* err */) {
-        applyAuth(authContexts, server, callback);
-      }
-    );
+    customAuthContext.push(function(/* err */) {
+      applyAuth(authContexts, server, callback);
+    });
 
     // Attempt authentication
     server.auth.apply(server, customAuthContext);
@@ -773,22 +771,22 @@ function handleInitialConnectEvent(self, event) {
     }
 
     // Destroy the instance
-    if (self.state == DESTROYED || self.state == UNREFERENCED) {
+    if (self.state === DESTROYED || self.state === UNREFERENCED) {
       return this.destroy({ force: true });
     }
 
     // Check the type of server
-    if (event == 'connect') {
+    if (event === 'connect') {
       // Do we have authentication contexts that need to be applied
       applyAuthenticationContexts(self, _this, function() {
         // Destroy the instance
-        if (self.state == DESTROYED || self.state == UNREFERENCED) {
+        if (self.state === DESTROYED || self.state === UNREFERENCED) {
           return _this.destroy({ force: true });
         }
 
         // Update the state
         var result = self.s.replicaSetState.update(_this);
-        if (result == true) {
+        if (result === true) {
           // Primary lastIsMaster store it
           if (_this.lastIsMaster() && _this.lastIsMaster().ismaster) {
             self.ismaster = _this.lastIsMaster();
@@ -875,7 +873,7 @@ function handleInitialConnectEvent(self, event) {
     }
 
     // Trigger topologyMonitor
-    if (self.s.connectingServers.length == 0 && self.state == CONNECTING) {
+    if (self.s.connectingServers.length === 0 && self.state === CONNECTING) {
       topologyMonitor(self, { haInterval: 1 });
     }
   };
@@ -1119,7 +1117,7 @@ ReplSet.prototype.isConnected = function(options) {
  * @return {boolean}
  */
 ReplSet.prototype.isDestroyed = function() {
-  return this.state == DESTROYED;
+  return this.state === DESTROYED;
 };
 
 /**
@@ -1160,7 +1158,10 @@ ReplSet.prototype.getServers = function() {
 //
 // Execute write operation
 var executeWriteOperation = function(self, op, ns, ops, options, callback) {
-  if (typeof options == 'function') (callback = options), (options = {}), (options = options || {});
+  if (typeof options === 'function') {
+    (callback = options), (options = {}), (options = options || {});
+  }
+
   // Ensure we have no options
   options = options || {};
 
@@ -1185,8 +1186,11 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
  * @param {opResultCallback} callback A callback function
  */
 ReplSet.prototype.insert = function(ns, ops, options, callback) {
-  if (typeof options == 'function') (callback = options), (options = {}), (options = options || {});
-  if (this.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
+  if (typeof options === 'function') {
+    (callback = options), (options = {}), (options = options || {});
+  }
+
+  if (this.state === DESTROYED) return callback(new MongoError(f('topology was destroyed')));
 
   // Not connected but we have a disconnecthandler
   if (!this.s.replicaSetState.hasPrimary() && this.s.disconnectHandler != null) {
@@ -1209,8 +1213,11 @@ ReplSet.prototype.insert = function(ns, ops, options, callback) {
  * @param {opResultCallback} callback A callback function
  */
 ReplSet.prototype.update = function(ns, ops, options, callback) {
-  if (typeof options == 'function') (callback = options), (options = {}), (options = options || {});
-  if (this.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
+  if (typeof options === 'function') {
+    (callback = options), (options = {}), (options = options || {});
+  }
+
+  if (this.state === DESTROYED) return callback(new MongoError(f('topology was destroyed')));
 
   // Not connected but we have a disconnecthandler
   if (!this.s.replicaSetState.hasPrimary() && this.s.disconnectHandler != null) {
@@ -1233,8 +1240,11 @@ ReplSet.prototype.update = function(ns, ops, options, callback) {
  * @param {opResultCallback} callback A callback function
  */
 ReplSet.prototype.remove = function(ns, ops, options, callback) {
-  if (typeof options == 'function') (callback = options), (options = {}), (options = options || {});
-  if (this.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
+  if (typeof options === 'function') {
+    (callback = options), (options = {}), (options = options || {});
+  }
+
+  if (this.state === DESTROYED) return callback(new MongoError(f('topology was destroyed')));
 
   // Not connected but we have a disconnecthandler
   if (!this.s.replicaSetState.hasPrimary() && this.s.disconnectHandler != null) {
@@ -1257,8 +1267,11 @@ ReplSet.prototype.remove = function(ns, ops, options, callback) {
  * @param {opResultCallback} callback A callback function
  */
 ReplSet.prototype.command = function(ns, cmd, options, callback) {
-  if (typeof options == 'function') (callback = options), (options = {}), (options = options || {});
-  if (this.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
+  if (typeof options === 'function') {
+    (callback = options), (options = {}), (options = options || {});
+  }
+
+  if (this.state === DESTROYED) return callback(new MongoError(f('topology was destroyed')));
   var self = this;
 
   // Establish readPreference
@@ -1266,19 +1279,19 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
 
   // If the readPreference is primary and we have no primary, store it
   if (
-    readPreference.preference == 'primary' &&
+    readPreference.preference === 'primary' &&
     !this.s.replicaSetState.hasPrimary() &&
     this.s.disconnectHandler != null
   ) {
     return this.s.disconnectHandler.add('command', ns, cmd, options, callback);
   } else if (
-    readPreference.preference == 'secondary' &&
+    readPreference.preference === 'secondary' &&
     !this.s.replicaSetState.hasSecondary() &&
     this.s.disconnectHandler != null
   ) {
     return this.s.disconnectHandler.add('command', ns, cmd, options, callback);
   } else if (
-    readPreference.preference != 'primary' &&
+    readPreference.preference !== 'primary' &&
     !this.s.replicaSetState.hasSecondary() &&
     !this.s.replicaSetState.hasPrimary() &&
     this.s.disconnectHandler != null
@@ -1322,7 +1335,7 @@ ReplSet.prototype.auth = function(mechanism, db) {
   var currentContextIndex = 0;
 
   // If we don't have the mechanism fail
-  if (this.authProviders[mechanism] == null && mechanism != 'default') {
+  if (this.authProviders[mechanism] == null && mechanism !== 'default') {
     return callback(new MongoError(f('auth provider %s does not exist', mechanism)));
   }
 
@@ -1352,7 +1365,7 @@ ReplSet.prototype.auth = function(mechanism, db) {
   // Get all the servers
   var servers = this.s.replicaSetState.allServers();
   // No servers return
-  if (servers.length == 0) {
+  if (servers.length === 0) {
     this.authenticating = false;
     callback(null, true);
   }
@@ -1368,7 +1381,7 @@ ReplSet.prototype.auth = function(mechanism, db) {
         // Save all the errors
         if (err) errors.push({ name: server.name, err: err });
         // We are done
-        if (count == 0) {
+        if (count === 0) {
           // Auth is done
           self.authenticating = false;
 
@@ -1446,7 +1459,7 @@ ReplSet.prototype.logout = function(dbName, callback) {
   // Now logout all the servers
   var servers = this.s.replicaSetState.allServers();
   var count = servers.length;
-  if (count == 0) return callback();
+  if (count === 0) return callback();
   var errors = [];
 
   function logoutServer(_server, cb) {
@@ -1461,7 +1474,7 @@ ReplSet.prototype.logout = function(dbName, callback) {
     logoutServer(servers[i], function() {
       count = count - 1;
 
-      if (count == 0) {
+      if (count === 0) {
         // Do not block new operations
         self.authenticating = false;
         // If we have one or more errors

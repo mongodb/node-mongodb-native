@@ -17,8 +17,8 @@ var WireProtocol = function(legacyWireProtocol) {
 //
 // Execute a write operation
 var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callback) {
-  if (ops.length == 0) throw new MongoError('insert must contain at least one document');
-  if (typeof options == 'function') {
+  if (ops.length === 0) throw new MongoError('insert must contain at least one document');
+  if (typeof options === 'function') {
     callback = options;
     options = {};
     options = options || {};
@@ -28,7 +28,7 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
   var p = ns.split('.');
   var d = p.shift();
   // Options
-  var ordered = typeof options.ordered == 'boolean' ? options.ordered : true;
+  var ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
   var writeConcern = options.writeConcern;
 
   // return skeleton
@@ -52,15 +52,15 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
   }
 
   // Do we have bypassDocumentValidation set, then enable it on the write command
-  if (typeof options.bypassDocumentValidation == 'boolean') {
+  if (typeof options.bypassDocumentValidation === 'boolean') {
     writeCommand.bypassDocumentValidation = options.bypassDocumentValidation;
   }
 
   // Options object
   var opts = { command: true };
   var queryOptions = { checkKeys: false, numberToSkip: 0, numberToReturn: 1 };
-  if (type == 'insert') queryOptions.checkKeys = true;
-  if (typeof options.checkKeys == 'boolean') queryOptions.checkKeys = options.checkKeys;
+  if (type === 'insert') queryOptions.checkKeys = true;
+  if (typeof options.checkKeys === 'boolean') queryOptions.checkKeys = options.checkKeys;
 
   // Ensure we support serialization of functions
   if (options.serializeFunctions) queryOptions.serializeFunctions = options.serializeFunctions;
@@ -118,27 +118,27 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callback)
   // Kill cursor callback
   var killCursorCallback = function(err, result) {
     if (err) {
-      if (typeof callback != 'function') return;
+      if (typeof callback !== 'function') return;
       return callback(err);
     }
 
     // Result
     var r = result.message;
     // If we have a timed out query or a cursor that was killed
-    if ((r.responseFlags & (1 << 0)) != 0) {
-      if (typeof callback != 'function') return;
+    if ((r.responseFlags & (1 << 0)) !== 0) {
+      if (typeof callback !== 'function') return;
       return callback(new MongoNetworkError('cursor killed or timed out'), null);
     }
 
-    if (!Array.isArray(r.documents) || r.documents.length == 0) {
-      if (typeof callback != 'function') return;
+    if (!Array.isArray(r.documents) || r.documents.length === 0) {
+      if (typeof callback !== 'function') return;
       return callback(
         new MongoError(f('invalid killCursors result returned for cursor id %s', cursorId))
       );
     }
 
     // Return the result
-    if (typeof callback == 'function') {
+    if (typeof callback === 'function') {
       callback(null, r.documents[0]);
     }
   };
@@ -178,7 +178,7 @@ WireProtocol.prototype.getMore = function(
     batchSize: Math.abs(batchSize)
   };
 
-  if (cursorState.cmd.tailable && typeof cursorState.cmd.maxAwaitTimeMS == 'number') {
+  if (cursorState.cmd.tailable && typeof cursorState.cmd.maxAwaitTimeMS === 'number') {
     getMoreCmd.maxTimeMS = cursorState.cmd.maxAwaitTimeMS;
   }
 
@@ -200,7 +200,7 @@ WireProtocol.prototype.getMore = function(
     var r = result.message;
 
     // If we have a timed out query or a cursor that was killed
-    if ((r.responseFlags & (1 << 0)) != 0) {
+    if ((r.responseFlags & (1 << 0)) !== 0) {
       return callback(new MongoNetworkError('cursor killed or timed out'), null);
     }
 
@@ -212,13 +212,13 @@ WireProtocol.prototype.getMore = function(
     }
 
     // We have an error detected
-    if (r.documents[0].ok == 0) {
+    if (r.documents[0].ok === 0) {
       return callback(new MongoError(r.documents[0]));
     }
 
     // Ensure we have a Long valid cursor id
     var cursorId =
-      typeof r.documents[0].cursor.id == 'number'
+      typeof r.documents[0].cursor.id === 'number'
         ? Long.fromNumber(r.documents[0].cursor.id)
         : r.documents[0].cursor.id;
 
@@ -242,15 +242,15 @@ WireProtocol.prototype.getMore = function(
   queryOptions.documentsReturnedIn = 'nextBatch';
 
   // Check if we need to promote longs
-  if (typeof cursorState.promoteLongs == 'boolean') {
+  if (typeof cursorState.promoteLongs === 'boolean') {
     queryOptions.promoteLongs = cursorState.promoteLongs;
   }
 
-  if (typeof cursorState.promoteValues == 'boolean') {
+  if (typeof cursorState.promoteValues === 'boolean') {
     queryOptions.promoteValues = cursorState.promoteValues;
   }
 
-  if (typeof cursorState.promoteBuffers == 'boolean') {
+  if (typeof cursorState.promoteBuffers === 'boolean') {
     queryOptions.promoteBuffers = cursorState.promoteBuffers;
   }
 
@@ -262,7 +262,7 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
   options = options || {};
   // Check if this is a wire protocol command or not
   var wireProtocolCommand =
-    typeof options.wireProtocolCommand == 'boolean' ? options.wireProtocolCommand : true;
+    typeof options.wireProtocolCommand === 'boolean' ? options.wireProtocolCommand : true;
 
   // Establish type of command
   if (cmd.find && wireProtocolCommand) {
@@ -378,9 +378,9 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
     if (sortValue.length > 0 && !Array.isArray(sortValue[0])) {
       var sortDirection = sortValue[1];
       // Translate the sort order text
-      if (sortDirection == 'asc') {
+      if (sortDirection === 'asc') {
         sortDirection = 1;
-      } else if (sortDirection == 'desc') {
+      } else if (sortDirection === 'desc') {
         sortDirection = -1;
       }
 
@@ -390,9 +390,9 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
       for (var i = 0; i < sortValue.length; i++) {
         sortDirection = sortValue[i][1];
         // Translate the sort order text
-        if (sortDirection == 'asc') {
+        if (sortDirection === 'asc') {
           sortDirection = 1;
-        } else if (sortDirection == 'desc') {
+        } else if (sortDirection === 'desc') {
           sortDirection = -1;
         }
 
@@ -422,9 +422,9 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
   }
 
   // Add a batchSize
-  if (typeof cmd.batchSize == 'number') {
+  if (typeof cmd.batchSize === 'number') {
     if (cmd.batchSize < 0) {
-      if (cmd.limit != 0 && Math.abs(cmd.batchSize) < Math.abs(cmd.limit)) {
+      if (cmd.limit !== 0 && Math.abs(cmd.batchSize) < Math.abs(cmd.limit)) {
         findCmd.limit = Math.abs(cmd.batchSize);
       }
 
@@ -490,12 +490,12 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
 
   // Set up the serialize and ignoreUndefined fields
   var serializeFunctions =
-    typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
+    typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
   var ignoreUndefined =
-    typeof options.ignoreUndefined == 'boolean' ? options.ignoreUndefined : false;
+    typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
 
   // We have a Mongos topology, check if we need to add a readPreference
-  if (topology.type == 'mongos' && readPreference && readPreference.preference != 'primary') {
+  if (topology.type === 'mongos' && readPreference && readPreference.preference !== 'primary') {
     findCmd = {
       $query: findCmd,
       $readPreference: readPreference.toJSON()
@@ -538,14 +538,14 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
 
   // Serialize functions
   var serializeFunctions =
-    typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
+    typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
 
   // Set up the serialize and ignoreUndefined fields
   var ignoreUndefined =
-    typeof options.ignoreUndefined == 'boolean' ? options.ignoreUndefined : false;
+    typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
 
   // We have a Mongos topology, check if we need to add a readPreference
-  if (topology.type == 'mongos' && readPreference && readPreference.preference != 'primary') {
+  if (topology.type === 'mongos' && readPreference && readPreference.preference !== 'primary') {
     finalCmd = {
       $query: finalCmd,
       $readPreference: readPreference.toJSON()

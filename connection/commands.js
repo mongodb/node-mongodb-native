@@ -55,16 +55,16 @@ var Query = function(bson, ns, query, options) {
 
   // Serialization option
   this.serializeFunctions =
-    typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
+    typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
   this.ignoreUndefined =
-    typeof options.ignoreUndefined == 'boolean' ? options.ignoreUndefined : false;
+    typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
   this.maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
-  this.checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys : true;
+  this.checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : true;
   this.batchSize = self.numberToReturn;
 
   // Flags
   this.tailable = false;
-  this.slaveOk = typeof options.slaveOk == 'boolean' ? options.slaveOk : false;
+  this.slaveOk = typeof options.slaveOk === 'boolean' ? options.slaveOk : false;
   this.oplogReplay = false;
   this.noCursorTimeout = false;
   this.awaitData = false;
@@ -122,7 +122,7 @@ Query.prototype.toBin = function() {
   }
 
   // If batchSize is different to self.numberToReturn
-  if (self.batchSize != self.numberToReturn) self.numberToReturn = self.batchSize;
+  if (self.batchSize !== self.numberToReturn) self.numberToReturn = self.batchSize;
 
   // Allocate write protocol header buffer
   var header = new Buffer(
@@ -420,13 +420,13 @@ var Response = function(bson, message, msgHeader, msgBody, opts) {
   this.documents = new Array(this.numberReturned);
 
   // Flag values
-  this.cursorNotFound = (this.responseFlags & CURSOR_NOT_FOUND) != 0;
-  this.queryFailure = (this.responseFlags & QUERY_FAILURE) != 0;
-  this.shardConfigStale = (this.responseFlags & SHARD_CONFIG_STALE) != 0;
-  this.awaitCapable = (this.responseFlags & AWAIT_CAPABLE) != 0;
-  this.promoteLongs = typeof opts.promoteLongs == 'boolean' ? opts.promoteLongs : true;
-  this.promoteValues = typeof opts.promoteValues == 'boolean' ? opts.promoteValues : true;
-  this.promoteBuffers = typeof opts.promoteBuffers == 'boolean' ? opts.promoteBuffers : false;
+  this.cursorNotFound = (this.responseFlags & CURSOR_NOT_FOUND) !== 0;
+  this.queryFailure = (this.responseFlags & QUERY_FAILURE) !== 0;
+  this.shardConfigStale = (this.responseFlags & SHARD_CONFIG_STALE) !== 0;
+  this.awaitCapable = (this.responseFlags & AWAIT_CAPABLE) !== 0;
+  this.promoteLongs = typeof opts.promoteLongs === 'boolean' ? opts.promoteLongs : true;
+  this.promoteValues = typeof opts.promoteValues === 'boolean' ? opts.promoteValues : true;
+  this.promoteBuffers = typeof opts.promoteBuffers === 'boolean' ? opts.promoteBuffers : false;
 };
 
 Response.prototype.isParsed = function() {
@@ -442,11 +442,11 @@ Response.prototype.parse = function(options) {
   var raw = options.raw || false;
   var documentsReturnedIn = options.documentsReturnedIn || null;
   var promoteLongs =
-    typeof options.promoteLongs == 'boolean' ? options.promoteLongs : this.opts.promoteLongs;
+    typeof options.promoteLongs === 'boolean' ? options.promoteLongs : this.opts.promoteLongs;
   var promoteValues =
-    typeof options.promoteValues == 'boolean' ? options.promoteValues : this.opts.promoteValues;
+    typeof options.promoteValues === 'boolean' ? options.promoteValues : this.opts.promoteValues;
   var promoteBuffers =
-    typeof options.promoteBuffers == 'boolean' ? options.promoteBuffers : this.opts.promoteBuffers;
+    typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : this.opts.promoteBuffers;
   var bsonSize, _options;
 
   // Set up the options
@@ -463,7 +463,7 @@ Response.prototype.parse = function(options) {
   //
   // Single document and documentsReturnedIn set
   //
-  if (this.numberReturned == 1 && documentsReturnedIn != null && raw) {
+  if (this.numberReturned === 1 && documentsReturnedIn != null && raw) {
     // Calculate the bson size
     bsonSize =
       this.data[this.index] |
@@ -485,7 +485,7 @@ Response.prototype.parse = function(options) {
     this.numberReturned = this.documents.length;
     // Ensure we have a Long valie cursor id
     this.cursorId =
-      typeof doc.cursor.id == 'number' ? Long.fromNumber(doc.cursor.id) : doc.cursor.id;
+      typeof doc.cursor.id === 'number' ? Long.fromNumber(doc.cursor.id) : doc.cursor.id;
 
     // Adjust the index
     this.index = this.index + bsonSize;

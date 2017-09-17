@@ -104,14 +104,14 @@ var Connection = function(messageHandler, options) {
   // Default options
   this.port = options.port || 27017;
   this.host = options.host || 'localhost';
-  this.family = typeof options.family == 'number' ? options.family : 4;
-  this.keepAlive = typeof options.keepAlive == 'boolean' ? options.keepAlive : true;
+  this.family = typeof options.family === 'number' ? options.family : 4;
+  this.keepAlive = typeof options.keepAlive === 'boolean' ? options.keepAlive : true;
   this.keepAliveInitialDelay =
-    typeof options.keepAliveInitialDelay == 'number' ? options.keepAliveInitialDelay : 300000;
-  this.noDelay = typeof options.noDelay == 'boolean' ? options.noDelay : true;
+    typeof options.keepAliveInitialDelay === 'number' ? options.keepAliveInitialDelay : 300000;
+  this.noDelay = typeof options.noDelay === 'boolean' ? options.noDelay : true;
   this.connectionTimeout =
-    typeof options.connectionTimeout == 'number' ? options.connectionTimeout : 30000;
-  this.socketTimeout = typeof options.socketTimeout == 'number' ? options.socketTimeout : 360000;
+    typeof options.connectionTimeout === 'number' ? options.connectionTimeout : 30000;
+  this.socketTimeout = typeof options.socketTimeout === 'number' ? options.socketTimeout : 360000;
 
   // Is the keepAliveInitialDelay > socketTimeout set it to half of socketTimeout
   if (this.keepAliveInitialDelay > this.socketTimeout) {
@@ -122,11 +122,11 @@ var Connection = function(messageHandler, options) {
   this.destroyed = false;
 
   // Check if we have a domain socket
-  this.domainSocket = this.host.indexOf('/') != -1;
+  this.domainSocket = this.host.indexOf('/') !== -1;
 
   // Serialize commands using function
   this.singleBufferSerializtion =
-    typeof options.singleBufferSerializtion == 'boolean' ? options.singleBufferSerializtion : true;
+    typeof options.singleBufferSerializtion === 'boolean' ? options.singleBufferSerializtion : true;
   this.serializationFunction = this.singleBufferSerializtion ? 'toBinUnified' : 'toBin';
 
   // SSL options
@@ -135,12 +135,12 @@ var Connection = function(messageHandler, options) {
   this.cert = options.cert || null;
   this.key = options.key || null;
   this.passphrase = options.passphrase || null;
-  this.ssl = typeof options.ssl == 'boolean' ? options.ssl : false;
+  this.ssl = typeof options.ssl === 'boolean' ? options.ssl : false;
   this.rejectUnauthorized =
-    typeof options.rejectUnauthorized == 'boolean' ? options.rejectUnauthorized : true;
+    typeof options.rejectUnauthorized === 'boolean' ? options.rejectUnauthorized : true;
   this.checkServerIdentity =
-    typeof options.checkServerIdentity == 'boolean' ||
-    typeof options.checkServerIdentity == 'function'
+    typeof options.checkServerIdentity === 'boolean' ||
+    typeof options.checkServerIdentity === 'function'
       ? options.checkServerIdentity
       : true;
 
@@ -149,9 +149,9 @@ var Connection = function(messageHandler, options) {
 
   // Response options
   this.responseOptions = {
-    promoteLongs: typeof options.promoteLongs == 'boolean' ? options.promoteLongs : true,
-    promoteValues: typeof options.promoteValues == 'boolean' ? options.promoteValues : true,
-    promoteBuffers: typeof options.promoteBuffers == 'boolean' ? options.promoteBuffers : false
+    promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
+    promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
+    promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false
   };
 
   // Flushing
@@ -280,7 +280,7 @@ var closeHandler = function(self) {
 // Handle a message once it is recieved
 var emitMessageHandler = function(self, message) {
   var msgHeader = parseHeader(message);
-  if (msgHeader.opCode == OP_COMPRESSED) {
+  if (msgHeader.opCode === OP_COMPRESSED) {
     msgHeader.fromCompressed = true;
     var index = MESSAGE_HEADER_SIZE;
     msgHeader.opCode = message.readInt32LE(index);
@@ -435,7 +435,7 @@ var dataHandler = function(self) {
             } else if (
               sizeOfMessage > 4 &&
               sizeOfMessage < self.maxBsonMessageSize &&
-              sizeOfMessage == data.length
+              sizeOfMessage === data.length
             ) {
               try {
                 emitBuffer = data;
@@ -519,7 +519,7 @@ var legalSslSocketOptions = [
 function merge(options1, options2) {
   // Merge in any allowed ssl options
   for (var name in options2) {
-    if (options2[name] != null && legalSslSocketOptions.indexOf(name) != -1) {
+    if (options2[name] != null && legalSslSocketOptions.indexOf(name) !== -1) {
       options1[name] = options2[name];
     }
   }
@@ -535,7 +535,7 @@ Connection.prototype.connect = function(_options) {
   // Set the connections
   if (connectionAccounting) addConnection(this.id, this);
   // Check if we are overriding the promoteLongs
-  if (typeof _options.promoteLongs == 'boolean') {
+  if (typeof _options.promoteLongs === 'boolean') {
     self.responseOptions.promoteLongs = _options.promoteLongs;
     self.responseOptions.promoteValues = _options.promoteValues;
     self.responseOptions.promoteBuffers = _options.promoteBuffers;
@@ -571,13 +571,13 @@ Connection.prototype.connect = function(_options) {
     if (self.passphrase) sslOptions.passphrase = self.passphrase;
 
     // Override checkServerIdentity behavior
-    if (self.checkServerIdentity == false) {
+    if (self.checkServerIdentity === false) {
       // Skip the identiy check by retuning undefined as per node documents
       // https://nodejs.org/api/tls.html#tls_tls_connect_options_callback
       sslOptions.checkServerIdentity = function() {
         return undefined;
       };
-    } else if (typeof self.checkServerIdentity == 'function') {
+    } else if (typeof self.checkServerIdentity === 'function') {
       sslOptions.checkServerIdentity = self.checkServerIdentity;
     }
 

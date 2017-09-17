@@ -17,7 +17,9 @@ var AuthSession = function(db, username, password) {
 
 AuthSession.prototype.equal = function(session) {
   return (
-    session.db == this.db && session.username == this.username && session.password == this.password
+    session.db === this.db &&
+    session.username === this.username &&
+    session.password === this.password
   );
 };
 
@@ -47,9 +49,9 @@ var parsePayload = function(payload) {
 };
 
 var passwordDigest = function(username, password) {
-  if (typeof username != 'string') throw new MongoError('username must be a string');
-  if (typeof password != 'string') throw new MongoError('password must be a string');
-  if (password.length == 0) throw new MongoError('password cannot be empty');
+  if (typeof username !== 'string') throw new MongoError('username must be a string');
+  if (typeof password !== 'string') throw new MongoError('password must be a string');
+  if (password.length === 0) throw new MongoError('password cannot be empty');
   // Use node md5 generator
   var md5 = crypto.createHash('md5');
   // Generate keys used for authentication
@@ -106,7 +108,7 @@ ScramSHA1.prototype.auth = function(server, connections, db, username, password,
   var self = this;
   // Total connections
   var count = connections.length;
-  if (count == 0) return callback(null, null);
+  if (count === 0) return callback(null, null);
 
   // Valid connections
   var numberOfValidConnections = 0;
@@ -151,12 +153,12 @@ ScramSHA1.prototype.auth = function(server, connections, db, username, password,
 
     // Finish up
     var finish = function(_count, _numberOfValidConnections) {
-      if (_count == 0 && _numberOfValidConnections > 0) {
+      if (_count === 0 && _numberOfValidConnections > 0) {
         // Store the auth details
         addAuthSession(self.authStore, new AuthSession(db, username, password));
         // Return correct authentication
         return callback(null, true);
-      } else if (_count == 0) {
+      } else if (_count === 0) {
         if (errorObject == null)
           errorObject = new MongoError(f('failed to authenticate using scram'));
         return callback(errorObject, false);
@@ -181,15 +183,15 @@ ScramSHA1.prototype.auth = function(server, connections, db, username, password,
       }),
       function(err, r) {
         // Do we have an error, handle it
-        if (handleError(err, r) == false) {
+        if (handleError(err, r) === false) {
           count = count - 1;
 
-          if (count == 0 && numberOfValidConnections > 0) {
+          if (count === 0 && numberOfValidConnections > 0) {
             // Store the auth details
             addAuthSession(self.authStore, new AuthSession(db, username, password));
             // Return correct authentication
             return callback(null, true);
-          } else if (count == 0) {
+          } else if (count === 0) {
             if (errorObject == null)
               errorObject = new MongoError(f('failed to authenticate using scram'));
             return callback(errorObject, false);
@@ -255,7 +257,7 @@ ScramSHA1.prototype.auth = function(server, connections, db, username, password,
             numberToReturn: 1
           }),
           function(err, r) {
-            if (r && r.result.done == false) {
+            if (r && r.result.done === false) {
               var cmd = {
                 saslContinue: 1,
                 conversationId: r.result.conversationId,
@@ -316,7 +318,7 @@ var addAuthSession = function(authStore, session) {
  */
 ScramSHA1.prototype.logout = function(dbName) {
   this.authStore = this.authStore.filter(function(x) {
-    return x.db != dbName;
+    return x.db !== dbName;
   });
 };
 
@@ -332,7 +334,7 @@ ScramSHA1.prototype.reauthenticate = function(server, connections, callback) {
   var authStore = this.authStore.slice(0);
   var count = authStore.length;
   // No connections
-  if (count == 0) return callback(null, null);
+  if (count === 0) return callback(null, null);
   // Iterate over all the auth details stored
   for (var i = 0; i < authStore.length; i++) {
     this.auth(
@@ -344,7 +346,7 @@ ScramSHA1.prototype.reauthenticate = function(server, connections, callback) {
       function(err) {
         count = count - 1;
         // Done re-authenticating
-        if (count == 0) {
+        if (count === 0) {
           callback(err, null);
         }
       }

@@ -49,7 +49,7 @@ var ReadPreference = function(preference, tags, options) {
     this.options = options;
     this.maxStalenessSeconds =
       this.options.maxStalenessSeconds >= 0 ? this.options.maxStalenessSeconds : null;
-  } else if (tags && typeof tags == 'object') {
+  } else if (tags && typeof tags === 'object') {
     (this.options = tags), (tags = null);
   }
 };
@@ -60,7 +60,7 @@ var ReadPreference = function(preference, tags, options) {
  * @return {boolean}
  */
 ReadPreference.prototype.slaveOk = function() {
-  return needSlaveOk.indexOf(this.preference) != -1;
+  return needSlaveOk.indexOf(this.preference) !== -1;
 };
 
 /**
@@ -69,7 +69,7 @@ ReadPreference.prototype.slaveOk = function() {
  * @return {boolean}
  */
 ReadPreference.prototype.equals = function(readPreference) {
-  return readPreference.preference == this.preference;
+  return readPreference.preference === this.preference;
 };
 
 /**

@@ -8,11 +8,11 @@ var setProperty = function(obj, prop, flag, values) {
   Object.defineProperty(obj, prop.name, {
     enumerable: true,
     set: function(value) {
-      if (typeof value != 'boolean') throw new Error(f('%s required a boolean', prop.name));
+      if (typeof value !== 'boolean') throw new Error(f('%s required a boolean', prop.name));
       // Flip the bit to 1
-      if (value == true) values.flags |= flag;
+      if (value === true) values.flags |= flag;
       // Flip the bit to 0 if it's set, otherwise ignore
-      if (value == false && (values.flags & flag) == flag) values.flags ^= flag;
+      if (value === false && (values.flags & flag) === flag) values.flags ^= flag;
       prop.value = value;
     },
     get: function() {
@@ -32,7 +32,7 @@ var getProperty = function(obj, propName, fieldName, values, func) {
       }
 
       // Do we have a post processing function
-      if (typeof func == 'function') return func(values[fieldName]);
+      if (typeof func === 'function') return func(values[fieldName]);
       // Return raw value
       return values[fieldName];
     }

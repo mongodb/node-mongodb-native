@@ -143,12 +143,12 @@ var Server = function(options) {
     // Disconnect handler
     disconnectHandler: options.disconnectHandler,
     // Monitor thread (keeps the connection alive)
-    monitoring: typeof options.monitoring == 'boolean' ? options.monitoring : true,
+    monitoring: typeof options.monitoring === 'boolean' ? options.monitoring : true,
     // Is the server in a topology
-    inTopology: typeof options.inTopology == 'boolean' ? options.inTopology : false,
+    inTopology: typeof options.inTopology === 'boolean' ? options.inTopology : false,
     // Monitoring timeout
     monitoringInterval:
-      typeof options.monitoringInterval == 'number' ? options.monitoringInterval : 5000,
+      typeof options.monitoringInterval === 'number' ? options.monitoringInterval : 5000,
     // Topology id
     topologyId: -1,
     compression: { compressors: createCompressionInfo(options) }
@@ -294,7 +294,7 @@ var eventHandler = function(self, event) {
     }
 
     // Handle connect event
-    if (event == 'connect') {
+    if (event === 'connect') {
       // Issue an ismaster command at connect
       // Query options
       var queryOptions = { numberToSkip: 0, numberToReturn: -1, checkKeys: false, slaveOk: true };
@@ -349,7 +349,7 @@ var eventHandler = function(self, event) {
 
           // It's a proxy change the type so
           // the wireprotocol will send $readPreference
-          if (self.ismaster.msg == 'isdbgrid') {
+          if (self.ismaster.msg === 'isdbgrid') {
             self._type = 'mongos';
           }
           // Add the correct wire protocol handler
@@ -399,18 +399,18 @@ var eventHandler = function(self, event) {
         }
       );
     } else if (
-      event == 'error' ||
-      event == 'parseError' ||
-      event == 'close' ||
-      event == 'timeout' ||
-      event == 'reconnect' ||
-      event == 'attemptReconnect' ||
+      event === 'error' ||
+      event === 'parseError' ||
+      event === 'close' ||
+      event === 'timeout' ||
+      event === 'reconnect' ||
+      event === 'attemptReconnect' ||
       'reconnectFailed'
     ) {
       // Remove server instance from accounting
       if (
         serverAccounting &&
-        ['close', 'timeout', 'error', 'parseError', 'reconnectFailed'].indexOf(event) != -1
+        ['close', 'timeout', 'error', 'parseError', 'reconnectFailed'].indexOf(event) !== -1
       ) {
         // Emit toplogy opening event if not in topology
         if (!self.s.inTopology) {
@@ -432,7 +432,7 @@ var eventHandler = function(self, event) {
       }
 
       // Reconnect failed return error
-      if (event == 'reconnectFailed') {
+      if (event === 'reconnectFailed') {
         self.emit('reconnectFailed', err);
         // Emit error if any listeners
         if (self.listeners('error').length > 0) {
@@ -444,9 +444,9 @@ var eventHandler = function(self, event) {
 
       // On first connect fail
       if (
-        self.s.pool.state == 'disconnected' &&
+        self.s.pool.state === 'disconnected' &&
         self.initalConnect &&
-        ['close', 'timeout', 'error', 'parseError'].indexOf(event) != -1
+        ['close', 'timeout', 'error', 'parseError'].indexOf(event) !== -1
       ) {
         self.initalConnect = false;
         return self.emit(
@@ -458,7 +458,7 @@ var eventHandler = function(self, event) {
       }
 
       // Reconnect event, emit the server
-      if (event == 'reconnect') {
+      if (event === 'reconnect') {
         // Reconnecting emits a server description changed event going from unknown to the
         // current server type.
         sdam.emitServerDescriptionChanged(self, {
@@ -513,7 +513,7 @@ Server.prototype.connect = function(options) {
 
   // Emit opening server event
   self.emit('serverOpening', {
-    topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.id,
+    topologyId: self.s.topologyId !== -1 ? self.s.topologyId : self.id,
     address: self.name
   });
 
@@ -609,7 +609,10 @@ function basicReadValidations(self, options) {
  */
 Server.prototype.command = function(ns, cmd, options, callback) {
   var self = this;
-  if (typeof options == 'function') (callback = options), (options = {}), (options = options || {});
+  if (typeof options === 'function') {
+    (callback = options), (options = {}), (options = options || {});
+  }
+
   var result = basicReadValidations(self, options);
   if (result) return callback(result);
 
@@ -647,15 +650,15 @@ Server.prototype.command = function(ns, cmd, options, callback) {
 
   // Write options
   var writeOptions = {
-    raw: typeof options.raw == 'boolean' ? options.raw : false,
-    promoteLongs: typeof options.promoteLongs == 'boolean' ? options.promoteLongs : true,
-    promoteValues: typeof options.promoteValues == 'boolean' ? options.promoteValues : true,
-    promoteBuffers: typeof options.promoteBuffers == 'boolean' ? options.promoteBuffers : false,
+    raw: typeof options.raw === 'boolean' ? options.raw : false,
+    promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
+    promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
+    promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false,
     command: true,
-    monitoring: typeof options.monitoring == 'boolean' ? options.monitoring : false,
-    fullResult: typeof options.fullResult == 'boolean' ? options.fullResult : false,
+    monitoring: typeof options.monitoring === 'boolean' ? options.monitoring : false,
+    fullResult: typeof options.fullResult === 'boolean' ? options.fullResult : false,
     requestId: query.requestId,
-    socketTimeout: typeof options.socketTimeout == 'number' ? options.socketTimeout : null
+    socketTimeout: typeof options.socketTimeout === 'number' ? options.socketTimeout : null
   };
 
   // Write the operation to the pool
@@ -675,7 +678,10 @@ Server.prototype.command = function(ns, cmd, options, callback) {
  */
 Server.prototype.insert = function(ns, ops, options, callback) {
   var self = this;
-  if (typeof options == 'function') (callback = options), (options = {}), (options = options || {});
+  if (typeof options === 'function') {
+    (callback = options), (options = {}), (options = options || {});
+  }
+
   var result = basicWriteValidations(self, options);
   if (result) return callback(result);
 
@@ -710,7 +716,10 @@ Server.prototype.insert = function(ns, ops, options, callback) {
  */
 Server.prototype.update = function(ns, ops, options, callback) {
   var self = this;
-  if (typeof options == 'function') (callback = options), (options = {}), (options = options || {});
+  if (typeof options === 'function') {
+    (callback = options), (options = {}), (options = options || {});
+  }
+
   var result = basicWriteValidations(self, options);
   if (result) return callback(result);
 
@@ -749,7 +758,10 @@ Server.prototype.update = function(ns, ops, options, callback) {
  */
 Server.prototype.remove = function(ns, ops, options, callback) {
   var self = this;
-  if (typeof options == 'function') (callback = options), (options = {}), (options = options || {});
+  if (typeof options === 'function') {
+    (callback = options), (options = {}), (options = options || {});
+  }
+
   var result = basicWriteValidations(self, options);
   if (result) return callback(result);
 
@@ -820,9 +832,9 @@ Server.prototype.auth = function(mechanism, db) {
 
   // If we have the default mechanism we pick mechanism based on the wire
   // protocol max version. If it's >= 3 then scram-sha1 otherwise mongodb-cr
-  if (mechanism == 'default' && self.ismaster && self.ismaster.maxWireVersion >= 3) {
+  if (mechanism === 'default' && self.ismaster && self.ismaster.maxWireVersion >= 3) {
     mechanism = 'scram-sha-1';
-  } else if (mechanism == 'default') {
+  } else if (mechanism === 'default') {
     mechanism = 'mongocr';
   }
 
@@ -854,8 +866,8 @@ Server.prototype.auth = function(mechanism, db) {
  * @return {boolean}
  */
 Server.prototype.equals = function(server) {
-  if (typeof server == 'string') return this.name.toLowerCase() == server.toLowerCase();
-  if (server.name) return this.name.toLowerCase() == server.name.toLowerCase();
+  if (typeof server === 'string') return this.name.toLowerCase() === server.toLowerCase();
+  if (server.name) return this.name.toLowerCase() === server.name.toLowerCase();
   return false;
 };
 
@@ -928,7 +940,7 @@ Server.prototype.destroy = function(options) {
   // Emit opening server event
   if (self.listeners('serverClosed').length > 0)
     self.emit('serverClosed', {
-      topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.id,
+      topologyId: self.s.topologyId !== -1 ? self.s.topologyId : self.id,
       address: self.name
     });
 

@@ -116,8 +116,8 @@ var Pool = function(options) {
   if (
     !options.bson ||
     (options.bson &&
-      (typeof options.bson.serialize != 'function' ||
-        typeof options.bson.deserialize != 'function'))
+      (typeof options.bson.serialize !== 'function' ||
+        typeof options.bson.deserialize !== 'function'))
   ) {
     throw new Error('must pass in valid bson parser');
   }
@@ -193,7 +193,7 @@ function stateTransition(self, newState) {
 
   // Get current state
   var legalStates = legalTransitions[self.state];
-  if (legalStates && legalStates.indexOf(newState) != -1) {
+  if (legalStates && legalStates.indexOf(newState) !== -1) {
     self.state = newState;
   } else {
     self.logger.error(
@@ -230,7 +230,7 @@ function write(self) {
   return function(connection, command, callback) {
     // Get the raw buffer
     // Ensure we stop auth if pool was destroyed
-    if (self.state == DESTROYED || self.state == DESTROYING) {
+    if (self.state === DESTROYED || self.state === DESTROYING) {
       return callback(new MongoError('pool destroyed'));
     }
 
@@ -250,7 +250,7 @@ function reauthenticate(pool, connection, cb) {
   // Authenticate
   function authenticateAgainstProvider(pool, connection, providers, cb) {
     // Finished re-authenticating against providers
-    if (providers.length == 0) return cb();
+    if (providers.length === 0) return cb();
     // Get the provider name
     var provider = pool.authProviders[providers.pop()];
 
@@ -288,7 +288,7 @@ function connectionFailureHandler(self, event) {
     }
 
     // Did we catch a timeout, increment the numberOfConsecutiveTimeouts
-    if (event == 'timeout') {
+    if (event === 'timeout') {
       self.numberOfConsecutiveTimeouts = self.numberOfConsecutiveTimeouts + 1;
 
       // Have we timed out more than reconnectTries in a row ?
@@ -303,14 +303,14 @@ function connectionFailureHandler(self, event) {
     }
 
     // No more socket available propegate the event
-    if (self.socketCount() == 0) {
-      if (self.state != DESTROYED && self.state != DESTROYING) {
+    if (self.socketCount() === 0) {
+      if (self.state !== DESTROYED && self.state !== DESTROYING) {
         stateTransition(self, DISCONNECTED);
       }
 
       // Do not emit error events, they are always close events
       // do not trigger the low level error handler in node
-      event = event == 'error' ? 'close' : event;
+      event = event === 'error' ? 'close' : event;
       self.emit(event, err);
     }
 
@@ -325,7 +325,7 @@ function attemptReconnect(self) {
   return function() {
     // console.log("========================= attemptReconnect")
     self.emit('attemptReconnect', self);
-    if (self.state == DESTROYED || self.state == DESTROYING) return;
+    if (self.state === DESTROYED || self.state === DESTROYING) return;
 
     // We are connected do not try again
     if (self.isConnected()) {
@@ -343,7 +343,7 @@ function attemptReconnect(self) {
         // Count down the number of reconnects
         self.retriesLeft = self.retriesLeft - 1;
         // How many retries are left
-        if (self.retriesLeft == 0) {
+        if (self.retriesLeft === 0) {
           // Destroy the instance
           self.destroy();
           // Emit close event
@@ -370,7 +370,7 @@ function attemptReconnect(self) {
         var connection = this;
 
         // Pool destroyed stop the connection
-        if (self.state == DESTROYED || self.state == DESTROYING) {
+        if (self.state === DESTROYED || self.state === DESTROYING) {
           return connection.destroy();
         }
 
@@ -421,7 +421,7 @@ function attemptReconnect(self) {
 function moveConnectionBetween(connection, from, to) {
   var index = from.indexOf(connection);
   // Move the connection from connecting to available
-  if (index != -1) {
+  if (index !== -1) {
     from.splice(index, 1);
     to.push(connection);
   }
@@ -434,7 +434,7 @@ function messageHandler(self) {
 
     // Locate the workItem
     for (var i = 0; i < connection.workItems.length; i++) {
-      if (connection.workItems[i].requestId == message.responseTo) {
+      if (connection.workItems[i].requestId === message.responseTo) {
         // Get the callback
         workItem = connection.workItems[i];
         // Remove from list of workItems
@@ -475,17 +475,17 @@ function messageHandler(self) {
       // 1. we were in an authentication process when the operation was executed
       // 2. our current authentication timestamp is from the workItem one, meaning an auth has happened
       if (
-        connection.workItems.length == 1 &&
-        (connection.workItems[0].authenticating == true ||
-          (typeof connection.workItems[0].authenticatingTimestamp == 'number' &&
-            connection.workItems[0].authenticatingTimestamp != self.authenticatingTimestamp))
+        connection.workItems.length === 1 &&
+        (connection.workItems[0].authenticating === true ||
+          (typeof connection.workItems[0].authenticatingTimestamp === 'number' &&
+            connection.workItems[0].authenticatingTimestamp !== self.authenticatingTimestamp))
       ) {
         // Add connection to the list
         connections.push(connection);
       }
 
       // No connections need to be re-authenticated
-      if (connections.length == 0) {
+      if (connections.length === 0) {
         // Release the connection back to the pool
         moveConnectionBetween(connection, self.inUseConnections, self.availableConnections);
         // Finish
@@ -499,7 +499,7 @@ function messageHandler(self) {
         reauthenticate(self, connections[i], function() {
           connectionCount = connectionCount - 1;
 
-          if (connectionCount == 0) {
+          if (connectionCount === 0) {
             // Put non authenticated connections in available connections
             self.availableConnections = self.availableConnections.concat(
               nonAuthenticatedConnections
@@ -546,7 +546,7 @@ function messageHandler(self) {
         if (
           workItem.command &&
           message.documents[0] &&
-          (message.documents[0].ok == 0 ||
+          (message.documents[0].ok === 0 ||
             message.documents[0]['$err'] ||
             message.documents[0]['errmsg'] ||
             message.documents[0]['code'])
@@ -608,7 +608,7 @@ Pool.prototype.get = function() {
  */
 Pool.prototype.isConnected = function() {
   // We are in a destroyed state
-  if (this.state == DESTROYED || this.state == DESTROYING) {
+  if (this.state === DESTROYED || this.state === DESTROYING) {
     return false;
   }
 
@@ -621,7 +621,7 @@ Pool.prototype.isConnected = function() {
   }
 
   // Might be authenticating, but we are still connected
-  if (connections.length == 0 && this.authenticating) {
+  if (connections.length === 0 && this.authenticating) {
     return true;
   }
 
@@ -635,7 +635,7 @@ Pool.prototype.isConnected = function() {
  * @return {boolean}
  */
 Pool.prototype.isDestroyed = function() {
-  return this.state == DESTROYED || this.state == DESTROYING;
+  return this.state === DESTROYED || this.state === DESTROYING;
 };
 
 /**
@@ -644,7 +644,7 @@ Pool.prototype.isDestroyed = function() {
  * @return {boolean}
  */
 Pool.prototype.isDisconnected = function() {
-  return this.state == DISCONNECTED;
+  return this.state === DISCONNECTED;
 };
 
 /**
@@ -652,7 +652,7 @@ Pool.prototype.isDisconnected = function() {
  * @method
  */
 Pool.prototype.connect = function() {
-  if (this.state != DISCONNECTED) {
+  if (this.state !== DISCONNECTED) {
     throw new MongoError('connection in unlawful state ' + this.state);
   }
 
@@ -667,7 +667,7 @@ Pool.prototype.connect = function() {
   this.connectingConnections.push(connection);
   // Add listeners to the connection
   connection.once('connect', function(connection) {
-    if (self.state == DESTROYED || self.state == DESTROYING) return self.destroy();
+    if (self.state === DESTROYED || self.state === DESTROYING) return self.destroy();
 
     // If we are in a topology, delegate the auth to it
     // This is to avoid issues where we would auth against an
@@ -685,7 +685,7 @@ Pool.prototype.connect = function() {
 
     // Apply any store credentials
     reauthenticate(self, connection, function(err) {
-      if (self.state == DESTROYED || self.state == DESTROYING) return self.destroy();
+      if (self.state === DESTROYED || self.state === DESTROYING) return self.destroy();
 
       // We have an error emit it
       if (err) {
@@ -697,7 +697,7 @@ Pool.prototype.connect = function() {
 
       // Authenticate
       authenticate(self, args, connection, function(err) {
-        if (self.state == DESTROYED || self.state == DESTROYING) return self.destroy();
+        if (self.state === DESTROYED || self.state === DESTROYING) return self.destroy();
 
         // We have an error emit it
         if (err) {
@@ -748,7 +748,7 @@ Pool.prototype.auth = function(mechanism) {
   var callback = args.pop();
 
   // If we don't have the mechanism fail
-  if (self.authProviders[mechanism] == null && mechanism != 'default') {
+  if (self.authProviders[mechanism] == null && mechanism !== 'default') {
     throw new MongoError(f('auth provider %s does not exist', mechanism));
   }
 
@@ -766,7 +766,7 @@ Pool.prototype.auth = function(mechanism) {
     var connectionsCount = connections.length;
     var error = null;
     // No connections available, return
-    if (connectionsCount == 0) {
+    if (connectionsCount === 0) {
       self.authenticating = false;
       return callback(null);
     }
@@ -780,7 +780,7 @@ Pool.prototype.auth = function(mechanism) {
         if (err) error = err;
 
         // Processed all connections
-        if (connectionsCount == 0) {
+        if (connectionsCount === 0) {
           // Auth finished
           self.authenticating = false;
           // Add the connections back to available connections
@@ -836,11 +836,11 @@ Pool.prototype.auth = function(mechanism) {
  */
 Pool.prototype.logout = function(dbName, callback) {
   var self = this;
-  if (typeof dbName != 'string') {
+  if (typeof dbName !== 'string') {
     throw new MongoError('logout method requires a db name as first argument');
   }
 
-  if (typeof callback != 'function') {
+  if (typeof callback !== 'function') {
     throw new MongoError('logout method requires a callback');
   }
 
@@ -867,7 +867,7 @@ Pool.prototype.logout = function(dbName, callback) {
         count = count - 1;
         if (err) error = err;
 
-        if (count == 0) {
+        if (count === 0) {
           self.loggingout = false;
           callback(error);
         }
@@ -922,7 +922,7 @@ function destroy(self, connections) {
 Pool.prototype.destroy = function(force) {
   var self = this;
   // Do not try again if the pool is already dead
-  if (this.state == DESTROYED || self.state == DESTROYING) return;
+  if (this.state === DESTROYED || self.state === DESTROYING) return;
   // Set state to destroyed
   stateTransition(this, DESTROYING);
 
@@ -938,7 +938,7 @@ Pool.prototype.destroy = function(force) {
     // an error
     while (self.queue.length > 0) {
       var workItem = self.queue.shift();
-      if (typeof workItem.cb == 'function') {
+      if (typeof workItem.cb === 'function') {
         workItem.cb(null, new Error('force flushing work queue'));
       }
     }
@@ -962,7 +962,7 @@ Pool.prototype.destroy = function(force) {
   function checkStatus() {
     flushMonitoringOperations(self.queue);
 
-    if (self.queue.length == 0) {
+    if (self.queue.length === 0) {
       // Get all the known connections
       var connections = self.availableConnections
         .concat(self.inUseConnections)
@@ -1050,7 +1050,7 @@ var serializeCommands = function(self, commands, result, callback) {
 Pool.prototype.write = function(commands, options, cb) {
   var self = this;
   // Ensure we have a callback
-  if (typeof options == 'function') {
+  if (typeof options === 'function') {
     cb = options;
   }
 
@@ -1058,12 +1058,12 @@ Pool.prototype.write = function(commands, options, cb) {
   options = options || {};
 
   // We need to have a callback function unless the message returns no response
-  if (!(typeof cb == 'function') && !options.noResponse) {
+  if (!(typeof cb === 'function') && !options.noResponse) {
     throw new MongoError('write method must provide a callback');
   }
 
   // Pool was destroyed error out
-  if (this.state == DESTROYED || this.state == DESTROYING) {
+  if (this.state === DESTROYED || this.state === DESTROYING) {
     // Callback with an error
     if (cb) {
       try {
@@ -1105,18 +1105,18 @@ Pool.prototype.write = function(commands, options, cb) {
   };
 
   // Set the options for the parsing
-  operation.promoteLongs = typeof options.promoteLongs == 'boolean' ? options.promoteLongs : true;
+  operation.promoteLongs = typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true;
   operation.promoteValues =
-    typeof options.promoteValues == 'boolean' ? options.promoteValues : true;
+    typeof options.promoteValues === 'boolean' ? options.promoteValues : true;
   operation.promoteBuffers =
-    typeof options.promoteBuffers == 'boolean' ? options.promoteBuffers : false;
-  operation.raw = typeof options.raw == 'boolean' ? options.raw : false;
+    typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false;
+  operation.raw = typeof options.raw === 'boolean' ? options.raw : false;
   operation.immediateRelease =
-    typeof options.immediateRelease == 'boolean' ? options.immediateRelease : false;
+    typeof options.immediateRelease === 'boolean' ? options.immediateRelease : false;
   operation.documentsReturnedIn = options.documentsReturnedIn;
-  operation.command = typeof options.command == 'boolean' ? options.command : false;
-  operation.fullResult = typeof options.fullResult == 'boolean' ? options.fullResult : false;
-  operation.noResponse = typeof options.noResponse == 'boolean' ? options.noResponse : false;
+  operation.command = typeof options.command === 'boolean' ? options.command : false;
+  operation.fullResult = typeof options.fullResult === 'boolean' ? options.fullResult : false;
+  operation.noResponse = typeof options.noResponse === 'boolean' ? options.noResponse : false;
 
   // Optional per operation socketTimeout
   operation.socketTimeout = options.socketTimeout;
@@ -1187,7 +1187,7 @@ function removeConnection(self, connection) {
 var handlers = ['close', 'message', 'error', 'timeout', 'parseError', 'connect'];
 
 function _createConnection(self) {
-  if (self.state == DESTROYED || self.state == DESTROYING) {
+  if (self.state === DESTROYED || self.state === DESTROYING) {
     return;
   }
   var connection = new Connection(messageHandler(self), self.options);
@@ -1213,7 +1213,7 @@ function _createConnection(self) {
   var tempConnectHandler = function(_connection) {
     return function() {
       // Destroyed state return
-      if (self.state == DESTROYED || self.state == DESTROYING) {
+      if (self.state === DESTROYED || self.state === DESTROYING) {
         // Remove the connection from the list
         removeConnection(self, _connection);
         return _connection.destroy();
@@ -1232,7 +1232,7 @@ function _createConnection(self) {
 
       // Signal
       reauthenticate(self, _connection, function(err) {
-        if (self.state == DESTROYED || self.state == DESTROYING) {
+        if (self.state === DESTROYED || self.state === DESTROYING) {
           return _connection.destroy();
         }
         // Remove the connection from the connectingConnections list
@@ -1283,7 +1283,7 @@ function flushMonitoringOperations(queue) {
 
 function _execute(self) {
   return function() {
-    if (self.state == DESTROYED) return;
+    if (self.state === DESTROYED) return;
     // Already executing, skip
     if (self.executing) return;
     // Set pool as executing
@@ -1317,14 +1317,14 @@ function _execute(self) {
           self.inUseConnections.length;
 
         // No available connections available, flush any monitoring ops
-        if (self.availableConnections.length == 0) {
+        if (self.availableConnections.length === 0) {
           // Flush any monitoring operations
           flushMonitoringOperations(self.queue);
           break;
         }
 
         // No queue break
-        if (self.queue.length == 0) {
+        if (self.queue.length === 0) {
           break;
         }
 
@@ -1335,13 +1335,13 @@ function _execute(self) {
         var connections = [];
         // Get a list of all connections
         for (var i = 0; i < self.availableConnections.length; i++) {
-          if (self.availableConnections[i].workItems.length == 0) {
+          if (self.availableConnections[i].workItems.length === 0) {
             connections.push(self.availableConnections[i]);
           }
         }
 
         // No connection found that has no work on it, just pick one for pipelining
-        if (connections.length == 0) {
+        if (connections.length === 0) {
           connection =
             self.availableConnections[self.connectionIndex++ % self.availableConnections.length];
         } else {
@@ -1365,7 +1365,7 @@ function _execute(self) {
               // Then we can safely use it for monitoring.
               if (
                 self.availableConnections[i].isConnected() &&
-                self.availableConnections[i].workItems.length == 0
+                self.availableConnections[i].workItems.length === 0
               ) {
                 foundValidConnection = true;
                 connection = self.availableConnections[i];
@@ -1427,7 +1427,7 @@ function _execute(self) {
           }
 
           // We have a custom socketTimeout
-          if (!workItem.immediateRelease && typeof workItem.socketTimeout == 'number') {
+          if (!workItem.immediateRelease && typeof workItem.socketTimeout === 'number') {
             connection.setSocketTimeout(workItem.socketTimeout);
           }
 

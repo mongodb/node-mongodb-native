@@ -16,7 +16,9 @@ var AuthSession = function(db, username, password) {
 
 AuthSession.prototype.equal = function(session) {
   return (
-    session.db == this.db && session.username == this.username && session.password == this.password
+    session.db === this.db &&
+    session.username === this.username &&
+    session.password === this.password
   );
 };
 
@@ -45,7 +47,7 @@ Plain.prototype.auth = function(server, connections, db, username, password, cal
   var self = this;
   // Total connections
   var count = connections.length;
-  if (count == 0) return callback(null, null);
+  if (count === 0) return callback(null, null);
 
   // Valid connections
   var numberOfValidConnections = 0;
@@ -89,12 +91,12 @@ Plain.prototype.auth = function(server, connections, db, username, password, cal
           }
 
           // We have authenticated all connections
-          if (count == 0 && numberOfValidConnections > 0) {
+          if (count === 0 && numberOfValidConnections > 0) {
             // Store the auth details
             addAuthSession(self.authStore, new AuthSession(db, username, password));
             // Return correct authentication
             callback(null, true);
-          } else if (count == 0) {
+          } else if (count === 0) {
             if (errorObject == null)
               errorObject = new MongoError(f('failed to authenticate using mongocr'));
             callback(errorObject, false);
@@ -135,7 +137,7 @@ var addAuthSession = function(authStore, session) {
  */
 Plain.prototype.logout = function(dbName) {
   this.authStore = this.authStore.filter(function(x) {
-    return x.db != dbName;
+    return x.db !== dbName;
   });
 };
 
@@ -150,7 +152,7 @@ Plain.prototype.logout = function(dbName) {
 Plain.prototype.reauthenticate = function(server, connections, callback) {
   var authStore = this.authStore.slice(0);
   var count = authStore.length;
-  if (count == 0) return callback(null, null);
+  if (count === 0) return callback(null, null);
   // Iterate over all the auth details stored
   for (var i = 0; i < authStore.length; i++) {
     this.auth(
@@ -162,7 +164,7 @@ Plain.prototype.reauthenticate = function(server, connections, callback) {
       function(err) {
         count = count - 1;
         // Done re-authenticating
-        if (count == 0) {
+        if (count === 0) {
           callback(err, null);
         }
       }

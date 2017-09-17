@@ -1,3 +1,5 @@
+'use strict';
+
 var Snappy = require('../connection/utils').retrieveSnappy(),
   zlib = require('zlib');
 

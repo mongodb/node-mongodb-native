@@ -39,7 +39,7 @@ function createClientInfo(options) {
       };
 
   // Is platform specified
-  if (clientInfo.platform && clientInfo.platform.indexOf('mongodb-core') == -1) {
+  if (clientInfo.platform && clientInfo.platform.indexOf('mongodb-core') === -1) {
     clientInfo.platform = f('%s, mongodb-core: %s', clientInfo.platform, driverVersion);
   } else if (!clientInfo.platform) {
     clientInfo.platform = nodejsversion;
@@ -95,7 +95,7 @@ var emitServerDescriptionChanged = function(self, description) {
   if (self.listeners('serverDescriptionChanged').length > 0) {
     // Emit the server description changed events
     self.emit('serverDescriptionChanged', {
-      topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.id,
+      topologyId: self.s.topologyId !== -1 ? self.s.topologyId : self.id,
       address: self.name,
       previousDescription: getPreviousDescription(self),
       newDescription: description
@@ -128,7 +128,7 @@ var emitTopologyDescriptionChanged = function(self, description) {
   if (self.listeners('topologyDescriptionChanged').length > 0) {
     // Emit the server description changed events
     self.emit('topologyDescriptionChanged', {
-      topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.id,
+      topologyId: self.s.topologyId !== -1 ? self.s.topologyId : self.id,
       address: self.name,
       previousDescription: getPreviousTopologyDescription(self),
       newDescription: description
@@ -141,7 +141,7 @@ var emitTopologyDescriptionChanged = function(self, description) {
 var changedIsMaster = function(self, currentIsmaster, ismaster) {
   var currentType = getTopologyType(self, currentIsmaster);
   var newType = getTopologyType(self, ismaster);
-  if (newType != currentType) return true;
+  if (newType !== currentType) return true;
   return false;
 };
 
@@ -151,7 +151,7 @@ var getTopologyType = function(self, ismaster) {
   }
 
   if (!ismaster) return 'Unknown';
-  if (ismaster.ismaster && ismaster.msg == 'isdbgrid') return 'Mongos';
+  if (ismaster.ismaster && ismaster.msg === 'isdbgrid') return 'Mongos';
   if (ismaster.ismaster && !ismaster.hosts) return 'Standalone';
   if (ismaster.ismaster) return 'RSPrimary';
   if (ismaster.secondary) return 'RSSecondary';
@@ -161,7 +161,7 @@ var getTopologyType = function(self, ismaster) {
 
 var inquireServerState = function(self) {
   return function(callback) {
-    if (self.s.state == 'destroyed') return;
+    if (self.s.state === 'destroyed') return;
     // Record response time
     var start = new Date().getTime();
 
@@ -210,7 +210,7 @@ var inquireServerState = function(self) {
       }
 
       // Peforming an ismaster monitoring callback operation
-      if (typeof callback == 'function') {
+      if (typeof callback === 'function') {
         return callback(err, r);
       }
 
@@ -339,7 +339,7 @@ function diff(previous, current) {
       // Matching server
       if (prevServer.address.toLowerCase() === currServer.address.toLowerCase()) {
         // We had a change in state
-        if (prevServer.type != currServer.type) {
+        if (prevServer.type !== currServer.type) {
           diff.servers.push({
             address: prevServer.address,
             from: prevServer.type,

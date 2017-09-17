@@ -107,23 +107,23 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   };
 
   // Add promoteLong to cursor state
-  if (typeof topologyOptions.promoteLongs == 'boolean') {
+  if (typeof topologyOptions.promoteLongs === 'boolean') {
     this.cursorState.promoteLongs = topologyOptions.promoteLongs;
-  } else if (typeof options.promoteLongs == 'boolean') {
+  } else if (typeof options.promoteLongs === 'boolean') {
     this.cursorState.promoteLongs = options.promoteLongs;
   }
 
   // Add promoteValues to cursor state
-  if (typeof topologyOptions.promoteValues == 'boolean') {
+  if (typeof topologyOptions.promoteValues === 'boolean') {
     this.cursorState.promoteValues = topologyOptions.promoteValues;
-  } else if (typeof options.promoteValues == 'boolean') {
+  } else if (typeof options.promoteValues === 'boolean') {
     this.cursorState.promoteValues = options.promoteValues;
   }
 
   // Add promoteBuffers to cursor state
-  if (typeof topologyOptions.promoteBuffers == 'boolean') {
+  if (typeof topologyOptions.promoteBuffers === 'boolean') {
     this.cursorState.promoteBuffers = topologyOptions.promoteBuffers;
-  } else if (typeof options.promoteBuffers == 'boolean') {
+  } else if (typeof options.promoteBuffers === 'boolean') {
     this.cursorState.promoteBuffers = options.promoteBuffers;
   }
 
@@ -132,7 +132,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
 
   //
   // Did we pass in a cursor id
-  if (typeof cmd == 'number') {
+  if (typeof cmd === 'number') {
     this.cursorState.cursorId = Long.fromNumber(cmd);
     this.cursorState.lastCursorId = this.cursorState.cursorId;
   } else if (cmd instanceof Long) {
@@ -205,9 +205,9 @@ Cursor.prototype._find = function(callback) {
     // Check if we have a command cursor
     if (
       Array.isArray(result.documents) &&
-      result.documents.length == 1 &&
-      (!self.cmd.find || (self.cmd.find && self.cmd.virtual == false)) &&
-      (result.documents[0].cursor != 'string' ||
+      result.documents.length === 1 &&
+      (!self.cmd.find || (self.cmd.find && self.cmd.virtual === false)) &&
+      (result.documents[0].cursor !== 'string' ||
         result.documents[0]['$err'] ||
         result.documents[0]['errmsg'] ||
         Array.isArray(result.documents[0].result))
@@ -218,14 +218,14 @@ Cursor.prototype._find = function(callback) {
       }
 
       // We have a cursor document
-      if (result.documents[0].cursor != null && typeof result.documents[0].cursor != 'string') {
+      if (result.documents[0].cursor != null && typeof result.documents[0].cursor !== 'string') {
         var id = result.documents[0].cursor.id;
         // If we have a namespace change set the new namespace for getmores
         if (result.documents[0].cursor.ns) {
           self.ns = result.documents[0].cursor.ns;
         }
         // Promote id to long if needed
-        self.cursorState.cursorId = typeof id == 'number' ? Long.fromNumber(id) : id;
+        self.cursorState.cursorId = typeof id === 'number' ? Long.fromNumber(id) : id;
         self.cursorState.lastCursorId = self.cursorState.cursorId;
         // If we have a firstBatch set it
         if (Array.isArray(result.documents[0].cursor.firstBatch)) {
@@ -249,7 +249,7 @@ Cursor.prototype._find = function(callback) {
     self.cursorState.lastCursorId = result.cursorId;
 
     // Transform the results with passed in transformation method if provided
-    if (self.cursorState.transforms && typeof self.cursorState.transforms.query == 'function') {
+    if (self.cursorState.transforms && typeof self.cursorState.transforms.query === 'function') {
       self.cursorState.documents = self.cursorState.transforms.query(result);
     }
 
@@ -267,23 +267,23 @@ Cursor.prototype._find = function(callback) {
   }
 
   // Do we have documentsReturnedIn set on the query
-  if (typeof self.query.documentsReturnedIn == 'string') {
+  if (typeof self.query.documentsReturnedIn === 'string') {
     // queryCallback.documentsReturnedIn = self.query.documentsReturnedIn;
     queryOptions.documentsReturnedIn = self.query.documentsReturnedIn;
   }
 
   // Add promote Long value if defined
-  if (typeof self.cursorState.promoteLongs == 'boolean') {
+  if (typeof self.cursorState.promoteLongs === 'boolean') {
     queryOptions.promoteLongs = self.cursorState.promoteLongs;
   }
 
   // Add promote values if defined
-  if (typeof self.cursorState.promoteValues == 'boolean') {
+  if (typeof self.cursorState.promoteValues === 'boolean') {
     queryOptions.promoteValues = self.cursorState.promoteValues;
   }
 
   // Add promote values if defined
-  if (typeof self.cursorState.promoteBuffers == 'boolean') {
+  if (typeof self.cursorState.promoteBuffers === 'boolean') {
     queryOptions.promoteBuffers = self.cursorState.promoteBuffers;
   }
   // Write the initial command out
@@ -332,7 +332,7 @@ Cursor.prototype._killcursor = function(callback) {
   if (
     this.cursorState.cursorId == null ||
     this.cursorState.cursorId.isZero() ||
-    this.cursorState.init == false
+    this.cursorState.init === false
   ) {
     if (callback) callback(null, null);
     return;
@@ -365,7 +365,7 @@ Cursor.prototype.clone = function() {
  * @return {boolean} A boolean signifying if the cursor is dead or not
  */
 Cursor.prototype.isDead = function() {
-  return this.cursorState.dead == true;
+  return this.cursorState.dead === true;
 };
 
 /**
@@ -374,7 +374,7 @@ Cursor.prototype.isDead = function() {
  * @return {boolean} A boolean signifying if the cursor was killed by the application
  */
 Cursor.prototype.isKilled = function() {
-  return this.cursorState.killed == true;
+  return this.cursorState.killed === true;
 };
 
 /**
@@ -383,7 +383,7 @@ Cursor.prototype.isKilled = function() {
  * @return {boolean} A boolean signifying if the cursor notified the callback
  */
 Cursor.prototype.isNotified = function() {
-  return this.cursorState.notified == true;
+  return this.cursorState.notified === true;
 };
 
 /**
@@ -409,7 +409,7 @@ Cursor.prototype.readBufferedDocuments = function(number) {
   );
 
   // Transform the doc with passed in transformation method if provided
-  if (this.cursorState.transforms && typeof this.cursorState.transforms.doc == 'function') {
+  if (this.cursorState.transforms && typeof this.cursorState.transforms.doc === 'function') {
     // Transform all the elements
     for (var i = 0; i < elements.length; i++) {
       elements[i] = this.cursorState.transforms.doc(elements[i]);
@@ -640,7 +640,7 @@ var nextFunction = function(self, callback) {
       if (err) return handleCallback(callback, err, null);
 
       if (
-        self.cursorState.documents.length == 0 &&
+        self.cursorState.documents.length === 0 &&
         self.cursorState.cursorId &&
         self.cursorState.cursorId.isZero() &&
         !self.cmd.tailable &&
@@ -660,7 +660,7 @@ var nextFunction = function(self, callback) {
     // Set cursor in dead and notified state
     return setCursorDeadAndNotified(self, callback);
   } else if (
-    self.cursorState.cursorIndex == self.cursorState.documents.length &&
+    self.cursorState.cursorIndex === self.cursorState.documents.length &&
     !Long.ZERO.equals(self.cursorState.cursorId)
   ) {
     // Ensure an empty cursor state
@@ -688,7 +688,7 @@ var nextFunction = function(self, callback) {
       // No attempt is made here to retry, this is left to the user of the
       // core module to handle to keep core simple
       if (
-        self.cursorState.documents.length == 0 &&
+        self.cursorState.documents.length === 0 &&
         self.cmd.tailable &&
         Long.ZERO.equals(self.cursorState.cursorId)
       ) {
@@ -702,7 +702,7 @@ var nextFunction = function(self, callback) {
           })
         );
       } else if (
-        self.cursorState.documents.length == 0 &&
+        self.cursorState.documents.length === 0 &&
         self.cmd.tailable &&
         !Long.ZERO.equals(self.cursorState.cursorId)
       ) {
@@ -716,7 +716,7 @@ var nextFunction = function(self, callback) {
       nextFunction(self, callback);
     });
   } else if (
-    self.cursorState.documents.length == self.cursorState.cursorIndex &&
+    self.cursorState.documents.length === self.cursorState.cursorIndex &&
     self.cmd.tailable &&
     Long.ZERO.equals(self.cursorState.cursorId)
   ) {
@@ -729,7 +729,7 @@ var nextFunction = function(self, callback) {
       })
     );
   } else if (
-    self.cursorState.documents.length == self.cursorState.cursorIndex &&
+    self.cursorState.documents.length === self.cursorState.cursorIndex &&
     Long.ZERO.equals(self.cursorState.cursorId)
   ) {
     setCursorDeadAndNotified(self, callback);
@@ -758,7 +758,7 @@ var nextFunction = function(self, callback) {
     }
 
     // Transform the doc with passed in transformation method if provided
-    if (self.cursorState.transforms && typeof self.cursorState.transforms.doc == 'function') {
+    if (self.cursorState.transforms && typeof self.cursorState.transforms.doc === 'function') {
       doc = self.cursorState.transforms.doc(doc);
     }
 

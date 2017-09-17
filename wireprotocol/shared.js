@@ -26,7 +26,7 @@ var getReadPreference = function(cmd, options) {
     readPreference = options.readPreference;
   }
 
-  if (typeof readPreference == 'string') {
+  if (typeof readPreference === 'string') {
     readPreference = new ReadPreference(readPreference);
   }
 

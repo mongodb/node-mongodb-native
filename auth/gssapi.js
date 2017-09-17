@@ -14,7 +14,9 @@ var AuthSession = function(db, username, password, options) {
 
 AuthSession.prototype.equal = function(session) {
   return (
-    session.db == this.db && session.username == this.username && session.password == this.password
+    session.db === this.db &&
+    session.username === this.username &&
+    session.password === this.password
   );
 };
 
@@ -57,7 +59,7 @@ GSSAPI.prototype.auth = function(server, connections, db, username, password, op
   var gssapiServiceName = options['gssapiServiceName'] || 'mongodb';
   // Total connections
   var count = connections.length;
-  if (count == 0) return callback(null, null);
+  if (count === 0) return callback(null, null);
 
   // Valid connections
   var numberOfValidConnections = 0;
@@ -94,12 +96,12 @@ GSSAPI.prototype.auth = function(server, connections, db, username, password, op
           }
 
           // We have authenticated all connections
-          if (count == 0 && numberOfValidConnections > 0) {
+          if (count === 0 && numberOfValidConnections > 0) {
             // Store the auth details
             addAuthSession(self.authStore, new AuthSession(db, username, password, options));
             // Return correct authentication
             callback(null, true);
-          } else if (count == 0) {
+          } else if (count === 0) {
             if (errorObject == null)
               errorObject = new MongoError(f('failed to authenticate using mongocr'));
             callback(errorObject, false);
@@ -335,7 +337,7 @@ var addAuthSession = function(authStore, session) {
  */
 GSSAPI.prototype.logout = function(dbName) {
   this.authStore = this.authStore.filter(function(x) {
-    return x.db != dbName;
+    return x.db !== dbName;
   });
 };
 
@@ -350,7 +352,7 @@ GSSAPI.prototype.logout = function(dbName) {
 GSSAPI.prototype.reauthenticate = function(server, connections, callback) {
   var authStore = this.authStore.slice(0);
   var count = authStore.length;
-  if (count == 0) return callback(null, null);
+  if (count === 0) return callback(null, null);
   // Iterate over all the auth details stored
   for (var i = 0; i < authStore.length; i++) {
     this.auth(
@@ -363,7 +365,7 @@ GSSAPI.prototype.reauthenticate = function(server, connections, callback) {
       function(err) {
         count = count - 1;
         // Done re-authenticating
-        if (count == 0) {
+        if (count === 0) {
           callback(err, null);
         }
       }

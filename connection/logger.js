@@ -55,7 +55,7 @@ Logger.prototype.debug = function(message, object) {
   if (
     this.isDebug() &&
     ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className]) ||
-      (Object.keys(filteredClasses).length == 0 && classFilters[this.className]))
+      (Object.keys(filteredClasses).length === 0 && classFilters[this.className]))
   ) {
     var dateTime = new Date().getTime();
     var msg = f('[%s-%s:%s] %s %s', 'DEBUG', this.className, pid, dateTime, message);
@@ -82,7 +82,7 @@ Logger.prototype.debug = function(message, object) {
   if (
     this.isWarn() &&
     ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className]) ||
-      (Object.keys(filteredClasses).length == 0 && classFilters[this.className]))
+      (Object.keys(filteredClasses).length === 0 && classFilters[this.className]))
   ) {
     var dateTime = new Date().getTime();
     var msg = f('[%s-%s:%s] %s %s', 'WARN', this.className, pid, dateTime, message);
@@ -108,7 +108,7 @@ Logger.prototype.debug = function(message, object) {
     if (
       this.isInfo() &&
       ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className]) ||
-        (Object.keys(filteredClasses).length == 0 && classFilters[this.className]))
+        (Object.keys(filteredClasses).length === 0 && classFilters[this.className]))
     ) {
       var dateTime = new Date().getTime();
       var msg = f('[%s-%s:%s] %s %s', 'INFO', this.className, pid, dateTime, message);
@@ -134,7 +134,7 @@ Logger.prototype.debug = function(message, object) {
     if (
       this.isError() &&
       ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className]) ||
-        (Object.keys(filteredClasses).length == 0 && classFilters[this.className]))
+        (Object.keys(filteredClasses).length === 0 && classFilters[this.className]))
     ) {
       var dateTime = new Date().getTime();
       var msg = f('[%s-%s:%s] %s %s', 'ERROR', this.className, pid, dateTime, message);
@@ -155,7 +155,7 @@ Logger.prototype.debug = function(message, object) {
  * @return {boolean}
  */
   (Logger.prototype.isInfo = function() {
-    return level == 'info' || level == 'debug';
+    return level === 'info' || level === 'debug';
   }),
   /**
  * Is the logger set at error level
@@ -163,7 +163,7 @@ Logger.prototype.debug = function(message, object) {
  * @return {boolean}
  */
   (Logger.prototype.isError = function() {
-    return level == 'error' || level == 'info' || level == 'debug';
+    return level === 'error' || level === 'info' || level === 'debug';
   }),
   /**
  * Is the logger set at error level
@@ -171,7 +171,7 @@ Logger.prototype.debug = function(message, object) {
  * @return {boolean}
  */
   (Logger.prototype.isWarn = function() {
-    return level == 'error' || level == 'warn' || level == 'info' || level == 'debug';
+    return level === 'error' || level === 'warn' || level === 'info' || level === 'debug';
   }),
   /**
  * Is the logger set at debug level
@@ -179,7 +179,7 @@ Logger.prototype.debug = function(message, object) {
  * @return {boolean}
  */
   (Logger.prototype.isDebug = function() {
-    return level == 'debug';
+    return level === 'debug';
   });
 
 /**
@@ -208,7 +208,7 @@ Logger.currentLogger = function() {
  * @return {null}
  */
 Logger.setCurrentLogger = function(logger) {
-  if (typeof logger != 'function') throw new MongoError('current logger must be a function');
+  if (typeof logger !== 'function') throw new MongoError('current logger must be a function');
   currentLogger = logger;
 };
 
@@ -220,7 +220,7 @@ Logger.setCurrentLogger = function(logger) {
  * @return {null}
  */
 Logger.filter = function(type, values) {
-  if (type == 'class' && Array.isArray(values)) {
+  if (type === 'class' && Array.isArray(values)) {
     filteredClasses = {};
 
     values.forEach(function(x) {
@@ -236,7 +236,7 @@ Logger.filter = function(type, values) {
  * @return {null}
  */
 Logger.setLevel = function(_level) {
-  if (_level != 'info' && _level != 'error' && _level != 'debug' && _level != 'warn') {
+  if (_level !== 'info' && _level !== 'error' && _level !== 'debug' && _level !== 'warn') {
     throw new Error(f('%s is an illegal logging level', _level));
   }
 

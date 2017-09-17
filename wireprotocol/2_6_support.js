@@ -17,8 +17,8 @@ var WireProtocol = function() {};
 //
 // Execute a write operation
 var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callback) {
-  if (ops.length == 0) throw new MongoError('insert must contain at least one document');
-  if (typeof options == 'function') {
+  if (ops.length === 0) throw new MongoError('insert must contain at least one document');
+  if (typeof options === 'function') {
     callback = options;
     options = {};
     options = options || {};
@@ -28,7 +28,7 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
   var p = ns.split('.');
   var d = p.shift();
   // Options
-  var ordered = typeof options.ordered == 'boolean' ? options.ordered : true;
+  var ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
   var writeConcern = options.writeConcern;
 
   // return skeleton
@@ -43,15 +43,15 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
   }
 
   // Do we have bypassDocumentValidation set, then enable it on the write command
-  if (typeof options.bypassDocumentValidation == 'boolean') {
+  if (typeof options.bypassDocumentValidation === 'boolean') {
     writeCommand.bypassDocumentValidation = options.bypassDocumentValidation;
   }
 
   // Options object
   var opts = { command: true };
   var queryOptions = { checkKeys: false, numberToSkip: 0, numberToReturn: 1 };
-  if (type == 'insert') queryOptions.checkKeys = true;
-  if (typeof options.checkKeys == 'boolean') queryOptions.checkKeys = options.checkKeys;
+  if (type === 'insert') queryOptions.checkKeys = true;
+  if (typeof options.checkKeys === 'boolean') queryOptions.checkKeys = options.checkKeys;
   // Ensure we support serialization of functions
   if (options.serializeFunctions) queryOptions.serializeFunctions = options.serializeFunctions;
   // Do not serialize the undefined fields
@@ -95,7 +95,7 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callback)
   }
 
   // Callback
-  if (typeof callback == 'function') callback(null, null);
+  if (typeof callback === 'function') callback(null, null);
 };
 
 WireProtocol.prototype.getMore = function(
@@ -118,12 +118,12 @@ WireProtocol.prototype.getMore = function(
     var r = result.message;
 
     // If we have a timed out query or a cursor that was killed
-    if ((r.responseFlags & (1 << 0)) != 0) {
+    if ((r.responseFlags & (1 << 0)) !== 0) {
       return callback(new MongoError('cursor does not exist, was killed or timed out'), null);
     }
 
     // Ensure we have a Long valie cursor id
-    var cursorId = typeof r.cursorId == 'number' ? Long.fromNumber(r.cursorId) : r.cursorId;
+    var cursorId = typeof r.cursorId === 'number' ? Long.fromNumber(r.cursorId) : r.cursorId;
 
     // Set all the values
     cursorState.documents = r.documents;
@@ -142,15 +142,15 @@ WireProtocol.prototype.getMore = function(
   }
 
   // Check if we need to promote longs
-  if (typeof cursorState.promoteLongs == 'boolean') {
+  if (typeof cursorState.promoteLongs === 'boolean') {
     queryOptions.promoteLongs = cursorState.promoteLongs;
   }
 
-  if (typeof cursorState.promoteValues == 'boolean') {
+  if (typeof cursorState.promoteValues === 'boolean') {
     queryOptions.promoteValues = cursorState.promoteValues;
   }
 
-  if (typeof cursorState.promoteBuffers == 'boolean') {
+  if (typeof cursorState.promoteBuffers === 'boolean') {
     queryOptions.promoteBuffers = cursorState.promoteBuffers;
   }
 
@@ -183,12 +183,12 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   var numberToReturn = 0;
 
   // Unpack the limit and batchSize values
-  if (cursorState.limit == 0) {
+  if (cursorState.limit === 0) {
     numberToReturn = cursorState.batchSize;
   } else if (
     cursorState.limit < 0 ||
     cursorState.limit < cursorState.batchSize ||
-    (cursorState.limit > 0 && cursorState.batchSize == 0)
+    (cursorState.limit > 0 && cursorState.batchSize === 0)
   ) {
     numberToReturn = cursorState.limit;
   } else {
@@ -202,7 +202,7 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   var usesSpecialModifier = false;
 
   // We have a Mongos topology, check if we need to add a readPreference
-  if (topology.type == 'mongos' && readPreference) {
+  if (topology.type === 'mongos' && readPreference) {
     findCmd['$readPreference'] = readPreference.toJSON();
     usesSpecialModifier = true;
   }
@@ -235,7 +235,7 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   }
 
   // Throw on majority readConcern passed in
-  if (cmd.readConcern && cmd.readConcern.level != 'local') {
+  if (cmd.readConcern && cmd.readConcern.level !== 'local') {
     throw new MongoError(
       f('server find command does not support a readConcern level of %s', cmd.readConcern.level)
     );
@@ -249,9 +249,9 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
 
   // Serialize functions
   var serializeFunctions =
-    typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
+    typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
   var ignoreUndefined =
-    typeof options.ignoreUndefined == 'boolean' ? options.ignoreUndefined : false;
+    typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
 
   // Build Query object
   var query = new Query(bson, ns, findCmd, {
@@ -267,23 +267,23 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   query.slaveOk = readPreference.slaveOk();
 
   // Set up the option bits for wire protocol
-  if (typeof cmd.tailable == 'boolean') {
+  if (typeof cmd.tailable === 'boolean') {
     query.tailable = cmd.tailable;
   }
 
-  if (typeof cmd.oplogReplay == 'boolean') {
+  if (typeof cmd.oplogReplay === 'boolean') {
     query.oplogReplay = cmd.oplogReplay;
   }
 
-  if (typeof cmd.noCursorTimeout == 'boolean') {
+  if (typeof cmd.noCursorTimeout === 'boolean') {
     query.noCursorTimeout = cmd.noCursorTimeout;
   }
 
-  if (typeof cmd.awaitData == 'boolean') {
+  if (typeof cmd.awaitData === 'boolean') {
     query.awaitData = cmd.awaitData;
   }
 
-  if (typeof cmd.partial == 'boolean') {
+  if (typeof cmd.partial === 'boolean') {
     query.partial = cmd.partial;
   }
 
@@ -310,13 +310,13 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
 
   // Serialize functions
   var serializeFunctions =
-    typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
+    typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
 
   var ignoreUndefined =
-    typeof options.ignoreUndefined == 'boolean' ? options.ignoreUndefined : false;
+    typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
 
   // Throw on majority readConcern passed in
-  if (cmd.readConcern && cmd.readConcern.level != 'local') {
+  if (cmd.readConcern && cmd.readConcern.level !== 'local') {
     throw new MongoError(
       f(
         'server %s command does not support a readConcern level of %s',
@@ -330,7 +330,7 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
   if (cmd.readConcern) delete cmd['readConcern'];
 
   // We have a Mongos topology, check if we need to add a readPreference
-  if (topology.type == 'mongos' && readPreference && readPreference.preference != 'primary') {
+  if (topology.type === 'mongos' && readPreference && readPreference.preference !== 'primary') {
     finalCmd = {
       $query: finalCmd,
       $readPreference: readPreference.toJSON()
