@@ -49,19 +49,12 @@ describe('ReplSet Monitoring (mocks)', function() {
         var stopRespondingPrimary = false;
 
         // Default message fields
-        var defaultFields = {
+        var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
           setVersion: 1,
           electionId: electionIds[currentIsMasterState],
-          maxBsonObjectSize: 16777216,
-          maxMessageSizeBytes: 48000000,
-          maxWriteBatchSize: 1000,
-          localTime: new Date(),
-          maxWireVersion: 3,
-          minWireVersion: 0,
-          ok: 1,
           hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002']
-        };
+        });
 
         // Primary server states
         var primary = [
@@ -264,19 +257,12 @@ describe('ReplSet Monitoring (mocks)', function() {
       var currentIsMasterState = 0;
 
       // Default message fields
-      var defaultFields = {
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[currentIsMasterState],
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 3,
-        minWireVersion: 0,
-        ok: 1,
         hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002']
-      };
+      });
 
       // Primary server states
       var primary = [

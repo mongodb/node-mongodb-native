@@ -25,33 +25,18 @@ describe('Mongos Mixed Seed List (mocks)', function() {
       var mongos2 = null;
 
       // Default message fields
-      var defaultFields = {
-        ismaster: true,
-        msg: 'isdbgrid',
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 3,
-        minWireVersion: 0,
-        ok: 1
-      };
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+        msg: 'isdbgrid'
+      });
 
       // Default message fields
-      var defaultRSFields = {
+      var defaultRSFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: new ObjectId(),
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 4,
-        minWireVersion: 0,
-        ok: 1,
         hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002'],
         arbiters: ['localhost:32002']
-      };
+      });
 
       // Primary server states
       var serverIsMaster = [assign({}, defaultFields), assign({}, defaultRSFields)];
@@ -133,20 +118,13 @@ describe('Mongos Mixed Seed List (mocks)', function() {
       var mongos2 = null;
 
       // Default message fields
-      var defaultRSFields = {
+      var defaultRSFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: new ObjectId(),
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 4,
-        minWireVersion: 0,
-        ok: 1,
         hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002'],
         arbiters: ['localhost:32002']
-      };
+      });
 
       // Primary server states
       var serverIsMaster = [assign({}, defaultRSFields), assign({}, defaultRSFields)];

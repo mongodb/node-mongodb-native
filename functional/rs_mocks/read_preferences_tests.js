@@ -41,19 +41,12 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
-      var defaultFields = {
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 4,
-        minWireVersion: 0,
-        ok: 1,
         hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002']
-      };
+      });
 
       // Primary server states
       var primary = [
@@ -197,19 +190,12 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
-      var defaultFields = {
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 4,
-        minWireVersion: 0,
-        ok: 1,
         hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002']
-      };
+      });
 
       // Primary server states
       var primary = [
@@ -352,19 +338,12 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
-      var defaultFields = {
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 4,
-        minWireVersion: 0,
-        ok: 1,
         hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002']
-      };
+      });
 
       // Primary server states
       var primary = [
@@ -541,19 +520,12 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
-      var defaultFields = {
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 4,
-        minWireVersion: 0,
-        ok: 1,
         hosts: ['localhost:32000', 'localhost:32001']
-      };
+      });
 
       // Primary server states
       var primary = [
@@ -714,19 +686,12 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
-      var defaultFields = {
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 4,
-        minWireVersion: 0,
-        ok: 1,
         hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002']
-      };
+      });
 
       // Primary server states
       var primary = [
@@ -901,19 +866,12 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
-      var defaultFields = {
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 4,
-        minWireVersion: 0,
-        ok: 1,
         hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002']
-      };
+      });
 
       // Primary server states
       var primary = [
@@ -977,7 +935,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
           if (doc.ismaster) {
             request.reply(secondSecondary[0]);
           } else if (doc.count) {
-            request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
+            request.reply({ waitedMS: Long.fromNumber(3), n: 1, ok: 1 });
           }
         });
       });
@@ -1002,12 +960,14 @@ describe('ReplSet Read Preferences (mocks)', function() {
       server.on('connect', function(_server) {
         // Set up a write
         function schedule() {
-          _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries.map(
-            function(x, i) {
-              x.lastIsMasterMS = i * 20;
+          _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries
+            .sort((a, b) => {
+              Number(a.ismaster.me.split(':')[1]) < Number(b.ismaster.me.split(':')[1]);
+            })
+            .map((x, i) => {
+              x.lastIsMasterMS = i * 50;
               return x;
-            }
-          );
+            });
 
           // Perform a find
           _server.command(
@@ -1063,19 +1023,12 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
-      var defaultFields = {
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 4,
-        minWireVersion: 0,
-        ok: 1,
         hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002']
-      };
+      });
 
       // Primary server states
       var primary = [
@@ -1225,19 +1178,12 @@ describe('ReplSet Read Preferences (mocks)', function() {
         var electionIds = [new ObjectId(), new ObjectId()];
 
         // Default message fields
-        var defaultFields = {
+        var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
           setVersion: 1,
           electionId: electionIds[0],
-          maxBsonObjectSize: 16777216,
-          maxMessageSizeBytes: 48000000,
-          maxWriteBatchSize: 1000,
-          localTime: new Date(),
-          maxWireVersion: 4,
-          minWireVersion: 0,
-          ok: 1,
           hosts: ['localhost:32000']
-        };
+        });
 
         // Primary server states
         var primary = [
@@ -1332,19 +1278,12 @@ describe('ReplSet Read Preferences (mocks)', function() {
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
-      var defaultFields = {
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 4,
-        minWireVersion: 0,
-        ok: 1,
         hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002']
-      };
+      });
 
       // Primary server states
       var primary = [

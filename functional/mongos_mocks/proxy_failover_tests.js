@@ -23,17 +23,9 @@ describe('Mongos Proxy Failover (mocks)', function() {
       var mongos2 = null;
 
       // Default message fields
-      var defaultFields = {
-        ismaster: true,
-        msg: 'isdbgrid',
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 3,
-        minWireVersion: 0,
-        ok: 1
-      };
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+        msg: 'isdbgrid'
+      });
 
       // Primary server states
       var serverIsMaster = [assign({}, defaultFields)];
@@ -115,17 +107,9 @@ describe('Mongos Proxy Failover (mocks)', function() {
       var currentStep = 0;
 
       // Default message fields
-      var defaultFields = {
-        ismaster: true,
-        msg: 'isdbgrid',
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 3,
-        minWireVersion: 0,
-        ok: 1
-      };
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+        msg: 'isdbgrid'
+      });
 
       // Primary server states
       var serverIsMaster = [assign({}, defaultFields)];
@@ -228,17 +212,9 @@ describe('Mongos Proxy Failover (mocks)', function() {
       var currentStep = 0;
 
       // Default message fields
-      var defaultFields = {
-        ismaster: true,
-        msg: 'isdbgrid',
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 3,
-        minWireVersion: 0,
-        ok: 1
-      };
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+        msg: 'isdbgrid'
+      });
 
       // Primary server states
       var serverIsMaster = [assign({}, defaultFields)];
