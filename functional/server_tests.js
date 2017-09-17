@@ -8,8 +8,6 @@ var expect = require('chai').expect,
   Bson = require('bson'),
   Connection = require('../../../lib/connection/connection');
 
-var WIRE_PROTOCOL_COMPRESSION_SUPPORT_MIN_VERSION = 5;
-
 describe('Server tests', function() {
   it('should correctly connect server to single instance', {
     metadata: { requires: { topology: 'single' } },

@@ -1,7 +1,6 @@
 'use strict';
 
 const expect = require('chai').expect,
-  p = require('path'),
   f = require('util').format,
   fs = require('fs'),
   ObjectId = require('bson').ObjectId,

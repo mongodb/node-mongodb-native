@@ -8,7 +8,7 @@ function executeCommand(configuration, db, cmd, options, cb) {
     Query = require('../../../lib/connection/commands').Query;
 
   // Optional options
-  if (typeof options == 'function') (cb = options), (options = {});
+  if (typeof options === 'function') (cb = options), (options = {});
   // Set the default options object if none passed in
   options = options || {};
 
@@ -85,7 +85,7 @@ function locateAuthMethod(configuration, cb) {
         if (err) return cb(err);
 
         // Establish the type of auth method
-        if (!result.result.maxWireVersion || result.result.maxWireVersion == 2) {
+        if (!result.result.maxWireVersion || result.result.maxWireVersion === 2) {
           cb(null, 'mongocr');
         } else {
           cb(null, 'scram-sha-1');
