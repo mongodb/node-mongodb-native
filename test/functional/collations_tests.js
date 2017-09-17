@@ -21,6 +21,8 @@ describe('Collation', function() {
     return setupDatabase(this.configuration);
   });
 
+  afterEach(() => mock.cleanup());
+
   it('Successfully pass through collation to findAndModify command', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
@@ -28,14 +30,11 @@ describe('Collation', function() {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
         singleServer.setMessageHandler(request => {
           var doc = request.document;
 
@@ -46,31 +45,31 @@ describe('Collation', function() {
             request.reply({ ok: 1, result: {} });
           }
         });
-      });
 
-      var commandResult = null;
+        var commandResult = null;
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
 
-        // Simple findAndModify command returning the new document
-        db
-          .collection('test')
-          .findAndModify(
-            { a: 1 },
-            [['a', 1]],
-            { $set: { b1: 1 } },
-            { new: true, collation: { caseLevel: true } },
-            function(err) {
-              test.equal(null, err);
-              test.deepEqual({ caseLevel: true }, commandResult.collation);
+          // Simple findAndModify command returning the new document
+          db
+            .collection('test')
+            .findAndModify(
+              { a: 1 },
+              [['a', 1]],
+              { $set: { b1: 1 } },
+              { new: true, collation: { caseLevel: true } },
+              function(err) {
+                test.equal(null, err);
+                test.deepEqual({ caseLevel: true }, commandResult.collation);
 
-              client.close();
-              mock.cleanup([singleServer], () => done());
-            }
-          );
+                client.close();
+                done();
+              }
+            );
+        });
       });
     }
   });
@@ -82,14 +81,11 @@ describe('Collation', function() {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
         singleServer.setMessageHandler(request => {
           var doc = request.document;
           if (doc.ismaster) {
@@ -99,24 +95,22 @@ describe('Collation', function() {
             request.reply({ ok: 1, result: { n: 1 } });
           }
         });
-      });
 
-      var commandResult = null;
+        var commandResult = null;
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
-
-        // Simple findAndModify command returning the new document
-        db.collection('test').count({}, { collation: { caseLevel: true } }, function(err) {
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
           test.equal(null, err);
-          test.deepEqual({ caseLevel: true }, commandResult.collation);
+          var db = client.db(configuration.db);
 
-          singleServer.destroy();
+          // Simple findAndModify command returning the new document
+          db.collection('test').count({}, { collation: { caseLevel: true } }, function(err) {
+            test.equal(null, err);
+            test.deepEqual({ caseLevel: true }, commandResult.collation);
 
-          client.close();
-          done();
+            client.close();
+            done();
+          });
         });
       });
     }
@@ -129,14 +123,11 @@ describe('Collation', function() {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -148,30 +139,28 @@ describe('Collation', function() {
             request.reply({ ok: 1 });
           }
         });
-      });
 
-      var commandResult = null;
+        var commandResult = null;
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
 
-        // Simple findAndModify command returning the new document
-        db
-          .collection('test')
-          .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }], {
-            collation: { caseLevel: true }
-          })
-          .toArray(function(err) {
-            test.equal(null, err);
-            test.deepEqual({ caseLevel: true }, commandResult.collation);
+          // Simple findAndModify command returning the new document
+          db
+            .collection('test')
+            .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }], {
+              collation: { caseLevel: true }
+            })
+            .toArray(function(err) {
+              test.equal(null, err);
+              test.deepEqual({ caseLevel: true }, commandResult.collation);
 
-            singleServer.destroy();
-
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            });
+        });
       });
     }
   });
@@ -183,14 +172,11 @@ describe('Collation', function() {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -202,24 +188,24 @@ describe('Collation', function() {
             request.reply({ ok: 1 });
           }
         });
-      });
 
-      var commandResult = null;
+        var commandResult = null;
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
-
-        // Simple findAndModify command returning the new document
-        db.collection('test').distinct('a', {}, { collation: { caseLevel: true } }, function(err) {
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
           test.equal(null, err);
-          test.deepEqual({ caseLevel: true }, commandResult.collation);
+          var db = client.db(configuration.db);
 
-          singleServer.destroy();
+          // Simple findAndModify command returning the new document
+          db
+            .collection('test')
+            .distinct('a', {}, { collation: { caseLevel: true } }, function(err) {
+              test.equal(null, err);
+              test.deepEqual({ caseLevel: true }, commandResult.collation);
 
-          client.close();
-          done();
+              client.close();
+              done();
+            });
         });
       });
     }
@@ -232,14 +218,11 @@ describe('Collation', function() {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -251,29 +234,27 @@ describe('Collation', function() {
             request.reply({ ok: 1 });
           }
         });
-      });
 
-      var commandResult = null;
+        var commandResult = null;
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
 
-        // Simple findAndModify command returning the new document
-        db
-          .collection('test')
-          .geoNear(50, 50, { query: { a: 1 }, num: 1, collation: { caseLevel: true } }, function(
-            err
-          ) {
-            test.equal(null, err);
-            test.deepEqual({ caseLevel: true }, commandResult.collation);
+          // Simple findAndModify command returning the new document
+          db
+            .collection('test')
+            .geoNear(50, 50, { query: { a: 1 }, num: 1, collation: { caseLevel: true } }, function(
+              err
+            ) {
+              test.equal(null, err);
+              test.deepEqual({ caseLevel: true }, commandResult.collation);
 
-            singleServer.destroy();
-
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            });
+        });
       });
     }
   });
@@ -285,14 +266,11 @@ describe('Collation', function() {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -304,36 +282,34 @@ describe('Collation', function() {
             request.reply({ ok: 1 });
           }
         });
-      });
 
-      var commandResult = null;
+        var commandResult = null;
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
 
-        // Simple findAndModify command returning the new document
-        db
-          .collection('test')
-          .group(
-            [],
-            { a: { $gt: 1 } },
-            { count: 0 },
-            'function (obj, prev) { prev.count++; }',
-            'function (obj, prev) { prev.count++; }',
-            true,
-            { collation: { caseLevel: true } },
-            function(err) {
-              test.equal(null, err);
-              test.deepEqual({ caseLevel: true }, commandResult.collation);
+          // Simple findAndModify command returning the new document
+          db
+            .collection('test')
+            .group(
+              [],
+              { a: { $gt: 1 } },
+              { count: 0 },
+              'function (obj, prev) { prev.count++; }',
+              'function (obj, prev) { prev.count++; }',
+              true,
+              { collation: { caseLevel: true } },
+              function(err) {
+                test.equal(null, err);
+                test.deepEqual({ caseLevel: true }, commandResult.collation);
 
-              singleServer.destroy();
-
-              client.close();
-              done();
-            }
-          );
+                client.close();
+                done();
+              }
+            );
+        });
       });
     }
   });
@@ -346,14 +322,11 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient,
         Code = configuration.require.Code;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -365,31 +338,29 @@ describe('Collation', function() {
             request.reply({ ok: 1, result: 'tempCollection' });
           }
         });
-      });
 
-      var commandResult = null;
+        var commandResult = null;
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
-
-        // String functions
-        var map = new Code('function() { emit(this.user_id, 1); }');
-        var reduce = new Code('function(k,vals) { return 1; }');
-
-        // db.collection('test').mapReduce({
-        db.collection('test').mapReduce(map, reduce, {
-          out: { replace: 'tempCollection' },
-          collation: { caseLevel: true }
-        }, function(err) {
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
           test.equal(null, err);
-          test.deepEqual({ caseLevel: true }, commandResult.collation);
+          var db = client.db(configuration.db);
 
-          singleServer.destroy();
+          // String functions
+          var map = new Code('function() { emit(this.user_id, 1); }');
+          var reduce = new Code('function(k,vals) { return 1; }');
 
-          client.close();
-          done();
+          // db.collection('test').mapReduce({
+          db.collection('test').mapReduce(map, reduce, {
+            out: { replace: 'tempCollection' },
+            collation: { caseLevel: true }
+          }, function(err) {
+            test.equal(null, err);
+            test.deepEqual({ caseLevel: true }, commandResult.collation);
+
+            client.close();
+            done();
+          });
         });
       });
     }
@@ -402,14 +373,11 @@ describe('Collation', function() {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -421,24 +389,22 @@ describe('Collation', function() {
             request.reply({ ok: 1 });
           }
         });
-      });
 
-      var commandResult = null;
+        var commandResult = null;
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
-
-        // Simple findAndModify command returning the new document
-        db.collection('test').deleteMany({}, { collation: { caseLevel: true } }, function(err) {
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
           test.equal(null, err);
-          test.deepEqual({ caseLevel: true }, commandResult.deletes[0].collation);
+          var db = client.db(configuration.db);
 
-          singleServer.destroy();
+          // Simple findAndModify command returning the new document
+          db.collection('test').deleteMany({}, { collation: { caseLevel: true } }, function(err) {
+            test.equal(null, err);
+            test.deepEqual({ caseLevel: true }, commandResult.deletes[0].collation);
 
-          client.close();
-          done();
+            client.close();
+            done();
+          });
         });
       });
     }
@@ -451,14 +417,11 @@ describe('Collation', function() {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -470,29 +433,27 @@ describe('Collation', function() {
             request.reply({ ok: 1 });
           }
         });
-      });
 
-      var commandResult = null;
+        var commandResult = null;
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
 
-        // Simple findAndModify command returning the new document
-        db
-          .collection('test')
-          .updateOne({ a: 1 }, { $set: { b: 1 } }, { collation: { caseLevel: true } }, function(
-            err
-          ) {
-            test.equal(null, err);
-            test.deepEqual({ caseLevel: true }, commandResult.updates[0].collation);
+          // Simple findAndModify command returning the new document
+          db
+            .collection('test')
+            .updateOne({ a: 1 }, { $set: { b: 1 } }, { collation: { caseLevel: true } }, function(
+              err
+            ) {
+              test.equal(null, err);
+              test.deepEqual({ caseLevel: true }, commandResult.updates[0].collation);
 
-            singleServer.destroy();
-
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            });
+        });
       });
     }
   });
@@ -504,14 +465,11 @@ describe('Collation', function() {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -523,28 +481,26 @@ describe('Collation', function() {
             request.reply({ ok: 1 });
           }
         });
-      });
 
-      var commandResult = null;
+        var commandResult = null;
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
 
-        // Simple findAndModify command returning the new document
-        db
-          .collection('test')
-          .find({ a: 1 }, { collation: { caseLevel: true } })
-          .toArray(function(err) {
-            test.equal(null, err);
-            test.deepEqual({ caseLevel: true }, commandResult.collation);
+          // Simple findAndModify command returning the new document
+          db
+            .collection('test')
+            .find({ a: 1 }, { collation: { caseLevel: true } })
+            .toArray(function(err) {
+              test.equal(null, err);
+              test.deepEqual({ caseLevel: true }, commandResult.collation);
 
-            singleServer.destroy();
-
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            });
+        });
       });
     }
   });
@@ -556,14 +512,11 @@ describe('Collation', function() {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -575,29 +528,27 @@ describe('Collation', function() {
             request.reply({ ok: 1 });
           }
         });
-      });
 
-      var commandResult = null;
+        var commandResult = null;
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
 
-        // Simple findAndModify command returning the new document
-        db
-          .collection('test')
-          .find({ a: 1 })
-          .collation({ caseLevel: true })
-          .toArray(function(err) {
-            test.equal(null, err);
-            test.deepEqual({ caseLevel: true }, commandResult.collation);
+          // Simple findAndModify command returning the new document
+          db
+            .collection('test')
+            .find({ a: 1 })
+            .collation({ caseLevel: true })
+            .toArray(function(err) {
+              test.equal(null, err);
+              test.deepEqual({ caseLevel: true }, commandResult.collation);
 
-            singleServer.destroy();
-
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            });
+        });
       });
     }
   });
@@ -609,14 +560,11 @@ describe('Collation', function() {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -628,24 +576,24 @@ describe('Collation', function() {
             request.reply({ ok: 1 });
           }
         });
-      });
 
-      var commandResult = null;
+        var commandResult = null;
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
-
-        // Simple findAndModify command returning the new document
-        db.collection('test').findOne({ a: 1 }, { collation: { caseLevel: true } }, function(err) {
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
           test.equal(null, err);
-          test.deepEqual({ caseLevel: true }, commandResult.collation);
+          var db = client.db(configuration.db);
 
-          singleServer.destroy();
+          // Simple findAndModify command returning the new document
+          db
+            .collection('test')
+            .findOne({ a: 1 }, { collation: { caseLevel: true } }, function(err) {
+              test.equal(null, err);
+              test.deepEqual({ caseLevel: true }, commandResult.collation);
 
-          client.close();
-          done();
+              client.close();
+              done();
+            });
         });
       });
     }
@@ -659,14 +607,11 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient,
         Long = configuration.require.Long;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -687,24 +632,22 @@ describe('Collation', function() {
             request.reply({ ok: 1 });
           }
         });
-      });
 
-      var commandResult = null;
+        var commandResult = null;
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
-
-        // Simple findAndModify command returning the new document
-        db.createCollection('test', { collation: { caseLevel: true } }, function(err) {
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
           test.equal(null, err);
-          test.deepEqual({ caseLevel: true }, commandResult.collation);
+          var db = client.db(configuration.db);
 
-          singleServer.destroy();
+          // Simple findAndModify command returning the new document
+          db.createCollection('test', { collation: { caseLevel: true } }, function(err) {
+            test.equal(null, err);
+            test.deepEqual({ caseLevel: true }, commandResult.collation);
 
-          client.close();
-          done();
+            client.close();
+            done();
+          });
         });
       });
     }
@@ -717,14 +660,11 @@ describe('Collation', function() {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields, { maxWireVersion: 4 })];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -735,19 +675,21 @@ describe('Collation', function() {
             request.reply({ ok: 1 });
           }
         });
-      });
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
 
-        // Simple findAndModify command returning the new document
-        db.collection('test').findOne({ a: 1 }, { collation: { caseLevel: true } }, function(err) {
-          test.equal('server localhost:32000 does not support collation', err.message);
-          singleServer.destroy();
-          client.close();
-          done();
+          // Simple findAndModify command returning the new document
+          db
+            .collection('test')
+            .findOne({ a: 1 }, { collation: { caseLevel: true } }, function(err) {
+              test.equal('server localhost:32000 does not support collation', err.message);
+              singleServer.destroy();
+              client.close();
+              done();
+            });
         });
       });
     }
@@ -760,14 +702,11 @@ describe('Collation', function() {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields, { maxWireVersion: 4 })];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -778,21 +717,19 @@ describe('Collation', function() {
             request.reply({ ok: 1 });
           }
         });
-      });
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
 
-        // Simple findAndModify command returning the new document
-        db.command({ count: 'test', query: {}, collation: { caseLevel: true } }, function(err) {
-          test.equal('server localhost:32000 does not support collation', err.message);
+          // Simple findAndModify command returning the new document
+          db.command({ count: 'test', query: {}, collation: { caseLevel: true } }, function(err) {
+            test.equal('server localhost:32000 does not support collation', err.message);
 
-          singleServer.destroy();
-
-          client.close();
-          done();
+            client.close();
+            done();
+          });
         });
       });
     }
@@ -805,14 +742,11 @@ describe('Collation', function() {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -826,33 +760,32 @@ describe('Collation', function() {
             request.reply({ ok: 1 });
           }
         });
-      });
 
-      var commandResult = null;
+        var commandResult = null;
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
-
-        db.collection('test').bulkWrite([
-          {
-            updateOne: {
-              q: { a: 2 },
-              u: { $set: { a: 2 } },
-              upsert: true,
-              collation: { caseLevel: true }
-            }
-          },
-          { deleteOne: { q: { c: 1 } } }
-        ], { ordered: true }, function(err) {
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
           test.equal(null, err);
-          test.ok(commandResult);
-          test.deepEqual({ caseLevel: true }, commandResult.updates[0].collation);
-          singleServer.destroy();
+          var db = client.db(configuration.db);
 
-          client.close();
-          done();
+          db.collection('test').bulkWrite([
+            {
+              updateOne: {
+                q: { a: 2 },
+                u: { $set: { a: 2 } },
+                upsert: true,
+                collation: { caseLevel: true }
+              }
+            },
+            { deleteOne: { q: { c: 1 } } }
+          ], { ordered: true }, function(err) {
+            test.equal(null, err);
+            test.ok(commandResult);
+            test.deepEqual({ caseLevel: true }, commandResult.updates[0].collation);
+
+            client.close();
+            done();
+          });
         });
       });
     }
@@ -865,14 +798,11 @@ describe('Collation', function() {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields, { maxWireVersion: 4 })];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -884,30 +814,29 @@ describe('Collation', function() {
             request.reply({ ok: 1 });
           }
         });
-      });
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
 
-        db.collection('test').bulkWrite([
-          {
-            updateOne: {
-              q: { a: 2 },
-              u: { $set: { a: 2 } },
-              upsert: true,
-              collation: { caseLevel: true }
-            }
-          },
-          { deleteOne: { q: { c: 1 } } }
-        ], { ordered: true }, function(err) {
-          test.ok(err);
-          test.equal('server/primary/mongos does not support collation', err.message);
-          singleServer.destroy();
+          db.collection('test').bulkWrite([
+            {
+              updateOne: {
+                q: { a: 2 },
+                u: { $set: { a: 2 } },
+                upsert: true,
+                collation: { caseLevel: true }
+              }
+            },
+            { deleteOne: { q: { c: 1 } } }
+          ], { ordered: true }, function(err) {
+            test.ok(err);
+            test.equal('server/primary/mongos does not support collation', err.message);
 
-          client.close();
-          done();
+            client.close();
+            done();
+          });
         });
       });
     }
@@ -921,17 +850,12 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient,
         ObjectId = configuration.require.ObjectId;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var arbiterServer = null;
       var electionIds = [new ObjectId(), new ObjectId()];
-
-      // Default message fields
       var rsFields = assign({}, defaultFields, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
+        maxWireVersion: 4,
         hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002'],
         arbiters: ['localhost:32002']
       });
@@ -979,9 +903,9 @@ describe('Collation', function() {
       ];
 
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-        arbiterServer = yield mock.createServer(32002, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const arbiterServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -1003,33 +927,35 @@ describe('Collation', function() {
             request.reply(arbiter[0]);
           }
         });
-      });
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000,localhost:32001/test?replicaSet=rs', function(
-        err,
-        client
-      ) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
+        setTimeout(() => {
+          // Connect to the mocks
+          MongoClient.connect(
+            'mongodb://localhost:32000,localhost:32001/test?replicaSet=rs',
+            function(err, client) {
+              test.equal(null, err);
+              var db = client.db(configuration.db);
 
-        db.collection('test').bulkWrite([
-          {
-            updateOne: {
-              q: { a: 2 },
-              u: { $set: { a: 2 } },
-              upsert: true,
-              collation: { caseLevel: true }
+              db.collection('test').bulkWrite([
+                {
+                  updateOne: {
+                    q: { a: 2 },
+                    u: { $set: { a: 2 } },
+                    upsert: true,
+                    collation: { caseLevel: true }
+                  }
+                },
+                { deleteOne: { q: { c: 1 } } }
+              ], { ordered: true }, function(err) {
+                test.ok(err);
+                test.equal('server/primary/mongos does not support collation', err.message);
+
+                client.close();
+                done();
+              });
             }
-          },
-          { deleteOne: { q: { c: 1 } } }
-        ], { ordered: true }, function(err) {
-          test.ok(err);
-          test.equal('server/primary/mongos does not support collation', err.message);
-
-          client.close();
-          mock.cleanup([primaryServer, firstSecondaryServer, arbiterServer], () => done());
-        });
+          );
+        }, 500);
       });
     }
   });
@@ -1041,14 +967,11 @@ describe('Collation', function() {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
         singleServer.setMessageHandler(request => {
           var doc = request.document;
           if (doc.ismaster) {
@@ -1058,33 +981,31 @@ describe('Collation', function() {
             request.reply({ ok: 1 });
           }
         });
-      });
 
-      var commandResult = null;
+        var commandResult = null;
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
 
-        // Simple findAndModify command returning the new document
-        db
-          .collection('test')
-          .createIndex({ a: 1 }, { collation: { caseLevel: true } }, function(err) {
-            test.equal(null, err);
-            test.deepEqual(
-              {
-                createIndexes: 'test',
-                indexes: [{ name: 'a_1', key: { a: 1 }, collation: { caseLevel: true } }]
-              },
-              commandResult
-            );
+          // Simple findAndModify command returning the new document
+          db
+            .collection('test')
+            .createIndex({ a: 1 }, { collation: { caseLevel: true } }, function(err) {
+              test.equal(null, err);
+              test.deepEqual(
+                {
+                  createIndexes: 'test',
+                  indexes: [{ name: 'a_1', key: { a: 1 }, collation: { caseLevel: true } }]
+                },
+                commandResult
+              );
 
-            singleServer.destroy();
-
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            });
+        });
       });
     }
   });
@@ -1096,14 +1017,11 @@ describe('Collation', function() {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields, { maxWireVersion: 4 })];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -1114,25 +1032,23 @@ describe('Collation', function() {
             request.reply({ ok: 1 });
           }
         });
-      });
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
 
-        // Simple findAndModify command returning the new document
-        db
-          .collection('test')
-          .createIndex({ a: 1 }, { collation: { caseLevel: true } }, function(err) {
-            test.ok(err);
-            test.equal('server/primary/mongos does not support collation', err.message);
+          // Simple findAndModify command returning the new document
+          db
+            .collection('test')
+            .createIndex({ a: 1 }, { collation: { caseLevel: true } }, function(err) {
+              test.ok(err);
+              test.equal('server/primary/mongos does not support collation', err.message);
 
-            singleServer.destroy();
-
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            });
+        });
       });
     }
   });
@@ -1144,14 +1060,11 @@ describe('Collation', function() {
       var configuration = this.configuration,
         MongoClient = configuration.require.MongoClient;
 
-      // Contain mock server
-      var singleServer = null;
-
       // Primary server states
       var primary = [assign({}, defaultFields, { maxWireVersion: 4 })];
 
       co(function*() {
-        singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -1162,25 +1075,23 @@ describe('Collation', function() {
             request.reply({ ok: 1 });
           }
         });
-      });
 
-      // Connect to the mocks
-      MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
+        // Connect to the mocks
+        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
 
-        // Simple findAndModify command returning the new document
-        db
-          .collection('test')
-          .createIndexes([{ key: { a: 1 }, collation: { caseLevel: true } }], function(err) {
-            test.ok(err);
-            test.equal('server/primary/mongos does not support collation', err.message);
+          // Simple findAndModify command returning the new document
+          db
+            .collection('test')
+            .createIndexes([{ key: { a: 1 }, collation: { caseLevel: true } }], function(err) {
+              test.ok(err);
+              test.equal('server/primary/mongos does not support collation', err.message);
 
-            singleServer.destroy();
-
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            });
+        });
       });
     }
   });
