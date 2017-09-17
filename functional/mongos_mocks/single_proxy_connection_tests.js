@@ -19,8 +19,6 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
     test: function(done) {
       var Mongos = this.configuration.mongo.Mongos;
 
-      // Contain mock server
-      var server = null;
       // Current index for the ismaster
       var currentStep = 0;
       // Primary stop responding
@@ -36,7 +34,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        server = yield mock.createServer(52017, 'localhost');
+        const server = yield mock.createServer(52017, 'localhost');
 
         server.setMessageHandler(request => {
           var doc = request.document;
@@ -62,38 +60,38 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
         setTimeout(function() {
           stopRespondingPrimary = true;
         }, 500);
+
+        // Attempt to connect
+        var mongos = new Mongos([{ host: 'localhost', port: 52017 }], {
+          connectionTimeout: 3000,
+          socketTimeout: 1000,
+          haInterval: 500,
+          size: 1
+        });
+
+        // Are we done
+        var finished = false;
+
+        // Add event listeners
+        mongos.once('connect', function() {
+          // Run an interval
+          var intervalId = setInterval(function() {
+            mongos.insert('test.test', [{ created: new Date() }], function(err, r) {
+              if (r && !finished) {
+                finished = true;
+                clearInterval(intervalId);
+                expect(r.connection.port).to.equal(52017);
+
+                server.destroy();
+                done();
+              }
+            });
+          }, 500);
+        });
+
+        mongos.on('error', done);
+        mongos.connect();
       });
-
-      // Attempt to connect
-      var mongos = new Mongos([{ host: 'localhost', port: 52017 }], {
-        connectionTimeout: 3000,
-        socketTimeout: 1000,
-        haInterval: 500,
-        size: 1
-      });
-
-      // Are we done
-      var finished = false;
-
-      // Add event listeners
-      mongos.once('connect', function() {
-        // Run an interval
-        var intervalId = setInterval(function() {
-          mongos.insert('test.test', [{ created: new Date() }], function(err, r) {
-            if (r && !finished) {
-              finished = true;
-              clearInterval(intervalId);
-              expect(r.connection.port).to.equal(52017);
-
-              server.destroy();
-              done();
-            }
-          });
-        }, 500);
-      });
-
-      mongos.on('error', done);
-      mongos.connect();
     }
   });
 
@@ -110,9 +108,6 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
         Long = this.configuration.mongo.BSON.Long,
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
-      // Contain mock server
-      var server = null;
-
       // Default message fields
       var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
@@ -123,7 +118,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        server = yield mock.createServer(52018, 'localhost');
+        const server = yield mock.createServer(52018, 'localhost');
 
         server.setMessageHandler(request => {
           var doc = request.document;
@@ -154,44 +149,42 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
             });
           }
         });
-      });
 
-      // Attempt to connect
-      var mongos = new Mongos([{ host: 'localhost', port: 52018 }], {
-        connectionTimeout: 30000,
-        socketTimeout: 30000,
-        haInterval: 500,
-        size: 1
-      });
-
-      // Add event listeners
-      mongos.once('connect', function() {
-        // Execute find
-        var cursor = mongos.cursor('test.test', {
-          find: 'test',
-          query: {},
-          batchSize: 2
+        // Attempt to connect
+        var mongos = new Mongos([{ host: 'localhost', port: 52018 }], {
+          connectionTimeout: 30000,
+          socketTimeout: 30000,
+          haInterval: 500,
+          size: 1
         });
 
-        // Execute next
-        cursor.next(function(err, d) {
-          expect(err).to.not.exist;
-          expect(d).to.exist;
+        // Add event listeners
+        mongos.once('connect', function() {
+          // Execute find
+          var cursor = mongos.cursor('test.test', {
+            find: 'test',
+            query: {},
+            batchSize: 2
+          });
 
-          cursor.next(function(_err, _d) {
-            expect(_err).to.not.exist;
-            expect(_d).to.exist;
+          // Execute next
+          cursor.next(function(err, d) {
+            expect(err).to.not.exist;
+            expect(d).to.exist;
 
-            server.destroy();
-            done();
+            cursor.next(function(_err, _d) {
+              expect(_err).to.not.exist;
+              expect(_d).to.exist;
+
+              server.destroy();
+              done();
+            });
           });
         });
-      });
 
-      mongos.on('error', done);
-      setTimeout(function() {
+        mongos.on('error', done);
         mongos.connect();
-      }, 100);
+      });
     }
   });
 });

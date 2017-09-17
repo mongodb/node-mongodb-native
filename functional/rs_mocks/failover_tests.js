@@ -33,15 +33,8 @@ describe('ReplSet Failover (mocks)', function() {
         Server = this.configuration.mongo.Server,
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var secondSecondaryServer = null;
       var currentIsMasterIndex = 0;
-
-      // Election Ids
       var electionIds = [new ObjectId(0), new ObjectId(1)];
-      // Default message fields
       var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
@@ -133,9 +126,9 @@ describe('ReplSet Failover (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mock.createServer(32002, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -169,75 +162,72 @@ describe('ReplSet Failover (mocks)', function() {
             }
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new ReplSet(
-        [
-          { host: 'localhost', port: 32000 },
-          { host: 'localhost', port: 32001 },
-          { host: 'localhost', port: 32002 }
-        ],
-        {
-          setName: 'rs',
-          connectionTimeout: 3000,
-          socketTimeout: 0,
-          haInterval: 100,
-          size: 1
-        }
-      );
+        // Attempt to connect
+        var server = new ReplSet(
+          [
+            { host: 'localhost', port: 32000 },
+            { host: 'localhost', port: 32001 },
+            { host: 'localhost', port: 32002 }
+          ],
+          {
+            setName: 'rs',
+            connectionTimeout: 3000,
+            socketTimeout: 0,
+            haInterval: 100,
+            size: 1
+          }
+        );
 
-      Server.enableServerAccounting();
+        Server.enableServerAccounting();
 
-      server.on('connect', function() {
-        server.__connected = true;
+        server.on('connect', function() {
+          server.__connected = true;
 
-        // Perform the two steps
-        setTimeout(function() {
-          die = true;
-          currentIsMasterIndex = currentIsMasterIndex + 1;
-
-          // Keep the count of joined events
-          var joinedEvents = 0;
-
-          // Add listener
-          server.on('joined', function(_type, _server) {
-            if (_type === 'secondary' && _server.name === 'localhost:32000') {
-              joinedEvents = joinedEvents + 1;
-            } else if (_type === 'primary' && _server.name === 'localhost:32001') {
-              joinedEvents = joinedEvents + 1;
-            } else if (_type === 'secondary' && _server.name === 'localhost:32002') {
-              joinedEvents = joinedEvents + 1;
-            }
-
-            // Got both events
-            if (joinedEvents === 3) {
-              var expectedServers = ['localhost:32002', 'localhost:32000'];
-              expect(server.s.replicaSetState.secondaries).to.have.length(2);
-              expect(server.s.replicaSetState.secondaries[0].name).to.be.oneOf(expectedServers);
-              expect(server.s.replicaSetState.secondaries[1].name).to.be.oneOf(expectedServers);
-
-              expect(server.s.replicaSetState.primary).to.not.be.null;
-              expect(server.s.replicaSetState.primary.name).to.equal('localhost:32001');
-
-              server.destroy();
-              Server.disableServerAccounting();
-              done();
-            }
-          });
-
+          // Perform the two steps
           setTimeout(function() {
-            die = false;
+            die = true;
             currentIsMasterIndex = currentIsMasterIndex + 1;
-          }, 500);
-        }, 100);
-      });
 
-      server.on('error', done);
-      // Gives proxies a chance to boot up
-      setTimeout(function() {
+            // Keep the count of joined events
+            var joinedEvents = 0;
+
+            // Add listener
+            server.on('joined', function(_type, _server) {
+              if (_type === 'secondary' && _server.name === 'localhost:32000') {
+                joinedEvents = joinedEvents + 1;
+              } else if (_type === 'primary' && _server.name === 'localhost:32001') {
+                joinedEvents = joinedEvents + 1;
+              } else if (_type === 'secondary' && _server.name === 'localhost:32002') {
+                joinedEvents = joinedEvents + 1;
+              }
+
+              // Got both events
+              if (joinedEvents === 3) {
+                var expectedServers = ['localhost:32002', 'localhost:32000'];
+                expect(server.s.replicaSetState.secondaries).to.have.length(2);
+                expect(server.s.replicaSetState.secondaries[0].name).to.be.oneOf(expectedServers);
+                expect(server.s.replicaSetState.secondaries[1].name).to.be.oneOf(expectedServers);
+
+                expect(server.s.replicaSetState.primary).to.not.be.null;
+                expect(server.s.replicaSetState.primary.name).to.equal('localhost:32001');
+
+                server.destroy();
+                Server.disableServerAccounting();
+                done();
+              }
+            });
+
+            setTimeout(function() {
+              die = false;
+              currentIsMasterIndex = currentIsMasterIndex + 1;
+            }, 500);
+          }, 100);
+        });
+
+        server.on('error', done);
         server.connect();
-      }, 100);
+      });
     }
   });
 
@@ -254,15 +244,8 @@ describe('ReplSet Failover (mocks)', function() {
         Server = this.configuration.mongo.Server,
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var secondSecondaryServer = null;
       var currentIsMasterIndex = 0;
-
-      // Election Ids
       var electionIds = [new ObjectId(0), new ObjectId(1)];
-      // Default message fields
       var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
@@ -354,9 +337,9 @@ describe('ReplSet Failover (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mock.createServer(32002, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -390,52 +373,49 @@ describe('ReplSet Failover (mocks)', function() {
             }
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new ReplSet(
-        [
-          { host: 'localhost', port: 32000 },
-          { host: 'localhost', port: 32001 },
-          { host: 'localhost', port: 32002 }
-        ],
-        {
-          setName: 'rs',
-          connectionTimeout: 3000,
-          socketTimeout: 0,
-          haInterval: 100,
-          size: 1
-        }
-      );
+        // Attempt to connect
+        var server = new ReplSet(
+          [
+            { host: 'localhost', port: 32000 },
+            { host: 'localhost', port: 32001 },
+            { host: 'localhost', port: 32002 }
+          ],
+          {
+            setName: 'rs',
+            connectionTimeout: 3000,
+            socketTimeout: 0,
+            haInterval: 100,
+            size: 1
+          }
+        );
 
-      Server.enableServerAccounting();
+        Server.enableServerAccounting();
 
-      server.on('connect', function() {
-        server.__connected = true;
+        server.on('connect', function() {
+          server.__connected = true;
 
-        // Perform the two steps
-        setTimeout(function() {
-          die = true;
-          currentIsMasterIndex = currentIsMasterIndex + 1;
-
-          server.on('reconnect', function() {
-            server.destroy();
-            Server.disableServerAccounting();
-            done();
-          });
-
+          // Perform the two steps
           setTimeout(function() {
-            die = false;
+            die = true;
             currentIsMasterIndex = currentIsMasterIndex + 1;
-          }, 500);
-        }, 100);
-      });
 
-      server.on('error', done);
-      // Gives proxies a chance to boot up
-      setTimeout(function() {
+            server.on('reconnect', function() {
+              server.destroy();
+              Server.disableServerAccounting();
+              done();
+            });
+
+            setTimeout(function() {
+              die = false;
+              currentIsMasterIndex = currentIsMasterIndex + 1;
+            }, 500);
+          }, 100);
+        });
+
+        server.on('error', done);
         server.connect();
-      }, 100);
+      });
     }
   });
 });

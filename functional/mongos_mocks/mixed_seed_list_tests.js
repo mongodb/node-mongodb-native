@@ -63,40 +63,38 @@ describe('Mongos Mixed Seed List (mocks)', function() {
             request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new Mongos(
-        [{ host: 'localhost', port: 52005 }, { host: 'localhost', port: 52006 }],
-        {
-          connectionTimeout: 3000,
-          socketTimeout: 1000,
-          haInterval: 1000,
-          localThresholdMS: 500,
-          size: 1
-        }
-      );
-
-      var logger = Logger.currentLogger();
-      Logger.setCurrentLogger(function(msg, state) {
-        expect(state.type).to.equal('warn');
-        expect(state.message).to.equal(
-          'expected mongos proxy, but found replicaset member mongod for server localhost:52006'
+        // Attempt to connect
+        var server = new Mongos(
+          [{ host: 'localhost', port: 52005 }, { host: 'localhost', port: 52006 }],
+          {
+            connectionTimeout: 3000,
+            socketTimeout: 1000,
+            haInterval: 1000,
+            localThresholdMS: 500,
+            size: 1
+          }
         );
-      });
 
-      // Add event listeners
-      server.once('connect', function() {
-        Logger.setCurrentLogger(logger);
+        var logger = Logger.currentLogger();
+        Logger.setCurrentLogger(function(msg, state) {
+          expect(state.type).to.equal('warn');
+          expect(state.message).to.equal(
+            'expected mongos proxy, but found replicaset member mongod for server localhost:52006'
+          );
+        });
 
-        server.destroy();
-        done();
-      });
+        // Add event listeners
+        server.once('connect', function() {
+          Logger.setCurrentLogger(logger);
 
-      server.on('error', done);
-      setTimeout(function() {
+          server.destroy();
+          done();
+        });
+
+        server.on('error', done);
         server.connect();
-      }, 100);
+      });
     }
   });
 
@@ -151,48 +149,46 @@ describe('Mongos Mixed Seed List (mocks)', function() {
             request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new Mongos(
-        [{ host: 'localhost', port: 52002 }, { host: 'localhost', port: 52003 }],
-        {
-          connectionTimeout: 3000,
-          socketTimeout: 1000,
-          haInterval: 1000,
-          localThresholdMS: 500,
-          size: 1
-        }
-      );
+        // Attempt to connect
+        var server = new Mongos(
+          [{ host: 'localhost', port: 52002 }, { host: 'localhost', port: 52003 }],
+          {
+            connectionTimeout: 3000,
+            socketTimeout: 1000,
+            haInterval: 1000,
+            localThresholdMS: 500,
+            size: 1
+          }
+        );
 
-      var warnings = [];
-      var logger = Logger.currentLogger();
-      Logger.setCurrentLogger(function(msg, state) {
-        console.log('pushed: ', state);
-        expect(state.type).to.equal('warn');
-        warnings.push(state);
-      });
+        var warnings = [];
+        var logger = Logger.currentLogger();
+        Logger.setCurrentLogger(function(msg, state) {
+          console.log('pushed: ', state);
+          expect(state.type).to.equal('warn');
+          warnings.push(state);
+        });
 
-      server.on('error', function() {
-        Logger.setCurrentLogger(logger);
-        var errors = [
-          'expected mongos proxy, but found replicaset member mongod for server localhost:52002',
-          'expected mongos proxy, but found replicaset member mongod for server localhost:52003',
-          'no mongos proxies found in seed list, did you mean to connect to a replicaset'
-        ];
+        server.on('error', function() {
+          Logger.setCurrentLogger(logger);
+          var errors = [
+            'expected mongos proxy, but found replicaset member mongod for server localhost:52002',
+            'expected mongos proxy, but found replicaset member mongod for server localhost:52003',
+            'no mongos proxies found in seed list, did you mean to connect to a replicaset'
+          ];
 
-        expect(warnings).to.have.length(3);
-        expect(warnings[0].message).to.be.oneOf(errors);
-        expect(warnings[1].message).to.be.oneOf(errors);
-        expect(warnings[2].message).to.be.oneOf(errors);
+          expect(warnings).to.have.length(3);
+          expect(warnings[0].message).to.be.oneOf(errors);
+          expect(warnings[1].message).to.be.oneOf(errors);
+          expect(warnings[2].message).to.be.oneOf(errors);
 
-        server.destroy();
-        done();
-      });
+          server.destroy();
+          done();
+        });
 
-      setTimeout(function() {
         server.connect();
-      }, 100);
+      });
     }
   });
 });

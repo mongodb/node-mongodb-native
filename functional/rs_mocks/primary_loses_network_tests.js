@@ -31,14 +31,8 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
       var ReplSet = this.configuration.mongo.ReplSet,
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var secondSecondaryServer = null;
       var currentIsMasterIndex = 0;
       var step = 0;
-
-      // Default message fields
       var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
@@ -102,9 +96,9 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mock.createServer(32002, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -129,71 +123,68 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
             request.reply(secondSecondary[currentIsMasterIndex]);
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new ReplSet(
-        [
-          { host: 'localhost', port: 32000 },
-          { host: 'localhost', port: 32001 },
-          { host: 'localhost', port: 32002 }
-        ],
-        {
-          setName: 'rs',
-          connectionTimeout: 3000,
-          socketTimeout: 0,
-          haInterval: 2000,
-          size: 1
-        }
-      );
+        // Attempt to connect
+        var server = new ReplSet(
+          [
+            { host: 'localhost', port: 32000 },
+            { host: 'localhost', port: 32001 },
+            { host: 'localhost', port: 32002 }
+          ],
+          {
+            setName: 'rs',
+            connectionTimeout: 3000,
+            socketTimeout: 0,
+            haInterval: 2000,
+            size: 1
+          }
+        );
 
-      let cleaningUp = false;
-      server.on('error', done);
-      server.on('left', function(_type) {
-        if (_type === 'primary') {
-          server.on('joined', function(__type, __server) {
-            if (__type === 'primary' && __server.name === 'localhost:32002') {
-              if (cleaningUp) {
-                return;
+        let cleaningUp = false;
+        server.on('error', done);
+        server.on('left', function(_type) {
+          if (_type === 'primary') {
+            server.on('joined', function(__type, __server) {
+              if (__type === 'primary' && __server.name === 'localhost:32002') {
+                if (cleaningUp) {
+                  return;
+                }
+
+                cleaningUp = true;
+                server.destroy();
+                done();
               }
+            });
+          }
+        });
 
-              cleaningUp = true;
-              server.destroy();
-              done();
-            }
-          });
-        }
-      });
+        server.on('connect', function(_server) {
+          server.__connected = true;
 
-      server.on('connect', function(_server) {
-        server.__connected = true;
+          setInterval(function() {
+            _server.command('system.$cmd', { ismaster: 1 }, function(err) {
+              if (err) {
+                // console.error(err);
+              } else {
+                // console.log({ok: true});
+              }
+            });
+          }, 1000);
 
-        setInterval(function() {
-          _server.command('system.$cmd', { ismaster: 1 }, function(err) {
-            if (err) {
-              // console.error(err);
-            } else {
-              // console.log({ok: true});
-            }
-          });
-        }, 1000);
-
-        // Primary dies
-        setTimeout(function() {
-          step = step + 1;
-
-          // Election happened
+          // Primary dies
           setTimeout(function() {
             step = step + 1;
-            currentIsMasterIndex = currentIsMasterIndex + 1;
-          }, 1000);
-        }, 2000);
-      });
 
-      // Gives proxies a chance to boot up
-      setTimeout(function() {
+            // Election happened
+            setTimeout(function() {
+              step = step + 1;
+              currentIsMasterIndex = currentIsMasterIndex + 1;
+            }, 1000);
+          }, 2000);
+        });
+
         server.connect();
-      }, 100);
+      });
     }
   });
 });

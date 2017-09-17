@@ -38,17 +38,9 @@ describe('ReplSet Monitoring (mocks)', function() {
         var ReplSet = this.configuration.mongo.ReplSet,
           ObjectId = this.configuration.mongo.BSON.ObjectId;
 
-        // Contain mock server
-        var primaryServer = null;
-        var firstSecondaryServer = null;
-        var secondSecondaryServer = null;
         var electionIds = [new ObjectId(), new ObjectId()];
-        // Current index for the ismaster
         var currentIsMasterState = 0;
-        // Primary stop responding
         var stopRespondingPrimary = false;
-
-        // Default message fields
         var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
           setVersion: 1,
@@ -111,9 +103,9 @@ describe('ReplSet Monitoring (mocks)', function() {
 
         // Boot the mock
         co(function*() {
-          primaryServer = yield mock.createServer(32000, 'localhost');
-          firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-          secondSecondaryServer = yield mock.createServer(32002, 'localhost');
+          const primaryServer = yield mock.createServer(32000, 'localhost');
+          const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+          const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
 
           primaryServer.setMessageHandler(request => {
             var doc = request.document;
@@ -171,67 +163,64 @@ describe('ReplSet Monitoring (mocks)', function() {
             stopRespondingPrimary = true;
             currentIsMasterState = 1;
           }, 500);
-        });
 
-        // Attempt to connect
-        var server = new ReplSet(
-          [
-            { host: 'localhost', port: 32000 },
-            { host: 'localhost', port: 32001 },
-            { host: 'localhost', port: 32002 }
-          ],
-          {
-            setName: 'rs',
-            connectionTimeout: 5000,
-            socketTimeout: 3000,
-            haInterval: 100,
-            size: 1
-          }
-        );
+          // Attempt to connect
+          var server = new ReplSet(
+            [
+              { host: 'localhost', port: 32000 },
+              { host: 'localhost', port: 32001 },
+              { host: 'localhost', port: 32002 }
+            ],
+            {
+              setName: 'rs',
+              connectionTimeout: 5000,
+              socketTimeout: 3000,
+              haInterval: 100,
+              size: 1
+            }
+          );
 
-        // Add event listeners
-        server.on('connect', function(_server) {
-          // Set up a write
-          function schedule() {
-            setTimeout(function() {
-              _server.insert('test.test', [{ created: new Date() }], function(err, r) {
-                // Did we switch servers
-                if (r && r.connection.port === 32001) {
-                  expect(stopRespondingPrimary).to.be.true;
-                  expect(currentIsMasterState).to.equal(1);
+          // Add event listeners
+          server.on('connect', function(_server) {
+            // Set up a write
+            function schedule() {
+              setTimeout(function() {
+                _server.insert('test.test', [{ created: new Date() }], function(err, r) {
+                  // Did we switch servers
+                  if (r && r.connection.port === 32001) {
+                    expect(stopRespondingPrimary).to.be.true;
+                    expect(currentIsMasterState).to.equal(1);
 
-                  // Ensure the state is correct
-                  expect(joinedPrimaries).to.eql({ 'localhost:32000': 1, 'localhost:32001': 1 });
-                  expect(joinedSecondaries).to.eql({ 'localhost:32001': 1, 'localhost:32002': 1 });
+                    // Ensure the state is correct
+                    expect(joinedPrimaries).to.eql({ 'localhost:32000': 1, 'localhost:32001': 1 });
+                    expect(joinedSecondaries).to.eql({ 'localhost:32001': 1, 'localhost:32002': 1 });
 
-                  server.destroy();
-                  done();
-                  return;
-                }
+                    server.destroy();
+                    done();
+                    return;
+                  }
 
-                schedule();
-              });
-            }, 1);
-          }
+                  schedule();
+                });
+              }, 1);
+            }
 
-          // Schedule an insert
-          schedule();
-        });
+            // Schedule an insert
+            schedule();
+          });
 
-        server.on('error', done);
-        server.on('joined', function(type, _server) {
-          if (type === 'primary') joinedPrimaries[_server.name] = 1;
-          if (type === 'secondary') joinedSecondaries[_server.name] = 1;
-        });
+          server.on('error', done);
+          server.on('joined', function(type, _server) {
+            if (type === 'primary') joinedPrimaries[_server.name] = 1;
+            if (type === 'secondary') joinedSecondaries[_server.name] = 1;
+          });
 
-        server.on('left', function(type, _server) {
-          if (type === 'primary') leftPrimaries[_server.name] = 1;
-        });
+          server.on('left', function(type, _server) {
+            if (type === 'primary') leftPrimaries[_server.name] = 1;
+          });
 
-        // Gives proxies a chance to boot up
-        setTimeout(function() {
           server.connect();
-        }, 100);
+        });
       }
     }
   );
@@ -248,15 +237,8 @@ describe('ReplSet Monitoring (mocks)', function() {
       var ReplSet = this.configuration.mongo.ReplSet,
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var secondSecondaryServer = null;
       var electionIds = [new ObjectId(), new ObjectId()];
-      // Current index for the ismaster
       var currentIsMasterState = 0;
-
-      // Default message fields
       var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
@@ -314,9 +296,9 @@ describe('ReplSet Monitoring (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mock.createServer(32002, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -338,38 +320,35 @@ describe('ReplSet Monitoring (mocks)', function() {
             request.reply(secondSecondary[currentIsMasterState]);
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new ReplSet(
-        [
-          { host: 'localhost', port: 32000 },
-          { host: 'localhost', port: 32001 },
-          { host: 'localhost', port: 32002 }
-        ],
-        {
-          setName: 'rs',
-          connectionTimeout: 5000,
-          socketTimeout: 60000,
-          haInterval: 100,
-          size: 1
-        }
-      );
+        // Attempt to connect
+        var server = new ReplSet(
+          [
+            { host: 'localhost', port: 32000 },
+            { host: 'localhost', port: 32001 },
+            { host: 'localhost', port: 32002 }
+          ],
+          {
+            setName: 'rs',
+            connectionTimeout: 5000,
+            socketTimeout: 60000,
+            haInterval: 100,
+            size: 1
+          }
+        );
 
-      // Add event listeners
-      server.on('connect', function(_server) {
-        setTimeout(function() {
-          expect(_server.intervalIds.length).to.be.greaterThan(1);
+        // Add event listeners
+        server.on('connect', function(_server) {
+          setTimeout(function() {
+            expect(_server.intervalIds.length).to.be.greaterThan(1);
 
-          server.destroy();
-          done();
-        }, 100);
-      });
+            server.destroy();
+            done();
+          }, 100);
+        });
 
-      // Gives proxies a chance to boot up
-      setTimeout(function() {
         server.connect();
-      }, 100);
+      });
     }
   });
 });

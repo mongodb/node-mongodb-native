@@ -31,11 +31,7 @@ describe('ReplSet Operations (mocks)', function() {
       var ReplSet = this.configuration.mongo.ReplSet,
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
-      // Contain mock server
-      var primaryServer = null;
       var currentIsMasterIndex = 0;
-
-      // Default message fields
       var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
@@ -56,7 +52,7 @@ describe('ReplSet Operations (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -66,32 +62,29 @@ describe('ReplSet Operations (mocks)', function() {
             request.reply({ ok: 1, n: 1 });
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
-        setName: 'rs',
-        connectionTimeout: 3000,
-        socketTimeout: 0,
-        haInterval: 2000,
-        size: 1,
-        disconnectHandler: {
-          add: function() {},
-          execute: function() {}
-        }
-      });
-
-      server.on('connect', function(_server) {
-        _server.command('test.test', { count: 'test' }, function() {
-          server.destroy();
-          done();
+        // Attempt to connect
+        var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 2000,
+          size: 1,
+          disconnectHandler: {
+            add: function() {},
+            execute: function() {}
+          }
         });
-      });
 
-      // Gives proxies a chance to boot up
-      setTimeout(function() {
+        server.on('connect', function(_server) {
+          _server.command('test.test', { count: 'test' }, function() {
+            server.destroy();
+            done();
+          });
+        });
+
         server.connect();
-      }, 100);
+      });
     }
   });
 
@@ -110,11 +103,7 @@ describe('ReplSet Operations (mocks)', function() {
           ObjectId = this.configuration.mongo.BSON.ObjectId,
           ReadPreference = this.configuration.mongo.ReadPreference;
 
-        // Contain mock server
-        var primaryServer = null;
         var currentIsMasterIndex = 0;
-
-        // Default message fields
         var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
           setVersion: 1,
@@ -135,7 +124,7 @@ describe('ReplSet Operations (mocks)', function() {
 
         // Boot the mock
         co(function*() {
-          primaryServer = yield mock.createServer(32000, 'localhost');
+          const primaryServer = yield mock.createServer(32000, 'localhost');
 
           primaryServer.setMessageHandler(request => {
             var doc = request.document;
@@ -145,37 +134,34 @@ describe('ReplSet Operations (mocks)', function() {
               request.reply({ ok: 1, n: 1 });
             }
           });
-        });
 
-        // Attempt to connect
-        var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
-          setName: 'rs',
-          connectionTimeout: 3000,
-          socketTimeout: 0,
-          haInterval: 2000,
-          size: 1,
-          disconnectHandler: {
-            add: function() {},
-            execute: function() {}
-          }
-        });
-
-        server.on('connect', function() {
-          server.command(
-            'test.test',
-            { count: 'test' },
-            { readPreference: ReadPreference.secondaryPreferred },
-            function() {
-              server.destroy();
-              done();
+          // Attempt to connect
+          var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
+            setName: 'rs',
+            connectionTimeout: 3000,
+            socketTimeout: 0,
+            haInterval: 2000,
+            size: 1,
+            disconnectHandler: {
+              add: function() {},
+              execute: function() {}
             }
-          );
-        });
+          });
 
-        // Gives proxies a chance to boot up
-        setTimeout(function() {
+          server.on('connect', function() {
+            server.command(
+              'test.test',
+              { count: 'test' },
+              { readPreference: ReadPreference.secondaryPreferred },
+              function() {
+                server.destroy();
+                done();
+              }
+            );
+          });
+
           server.connect();
-        }, 100);
+        });
       }
     }
   );

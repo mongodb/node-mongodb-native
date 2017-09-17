@@ -18,31 +18,20 @@ describe('Single Timeout (mocks)', function() {
     test: function(done) {
       var Server = this.configuration.mongo.Server;
 
-      // Contain mock server
-      var server = null;
       // Current index for the ismaster
       var currentStep = 0;
       // Primary stop responding
       var stopRespondingPrimary = false;
 
       // Default message fields
-      var defaultFields = {
-        ismaster: true,
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 3,
-        minWireVersion: 0,
-        ok: 1
-      };
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER);
 
       // Primary server states
       var serverIsMaster = [assign({}, defaultFields)];
 
       // Boot the mock
       co(function*() {
-        server = yield mock.createServer(37019, 'localhost');
+        const server = yield mock.createServer(37019, 'localhost');
 
         server.setMessageHandler(request => {
           var doc = request.document;
@@ -69,49 +58,47 @@ describe('Single Timeout (mocks)', function() {
         setTimeout(function() {
           stopRespondingPrimary = true;
         }, 5000);
-      });
 
-      // Attempt to connect
-      var replset = new Server({
-        host: 'localhost',
-        port: '37019',
-        connectionTimeout: 5000,
-        socketTimeout: 1000,
-        size: 1
-      });
-
-      // Not done
-      var finished = false;
-
-      // Add event listeners
-      replset.once('connect', function(_server) {
-        _server.insert('test.test', [{ created: new Date() }], function(err, r) {
-          expect(r).to.not.exist;
-          expect(err).to.exist;
-
-          function wait() {
-            setTimeout(function() {
-              _server.insert('test.test', [{ created: new Date() }], function(_err, _r) {
-                if (_r && !finished) {
-                  finished = true;
-                  expect(_r.connection.port).to.equal('37019');
-                  replset.destroy({ force: true });
-                  done();
-                } else {
-                  wait();
-                }
-              });
-            }, 500);
-          }
-
-          wait();
+        // Attempt to connect
+        var replset = new Server({
+          host: 'localhost',
+          port: '37019',
+          connectionTimeout: 5000,
+          socketTimeout: 1000,
+          size: 1
         });
-      });
 
-      replset.on('error', done);
-      setTimeout(function() {
+        // Not done
+        var finished = false;
+
+        // Add event listeners
+        replset.once('connect', function(_server) {
+          _server.insert('test.test', [{ created: new Date() }], function(err, r) {
+            expect(r).to.not.exist;
+            expect(err).to.exist;
+
+            function wait() {
+              setTimeout(function() {
+                _server.insert('test.test', [{ created: new Date() }], function(_err, _r) {
+                  if (_r && !finished) {
+                    finished = true;
+                    expect(_r.connection.port).to.equal('37019');
+                    replset.destroy({ force: true });
+                    done();
+                  } else {
+                    wait();
+                  }
+                });
+              }, 500);
+            }
+
+            wait();
+          });
+        });
+
+        replset.on('error', done);
         replset.connect();
-      }, 100);
+      });
     }
   });
 
@@ -126,32 +113,19 @@ describe('Single Timeout (mocks)', function() {
     test: function(done) {
       var Server = this.configuration.mongo.Server;
 
-      // Contain mock server
-      var server = null;
       // Current index for the ismaster
       var currentStep = 0;
       // Should fail due to broken pipe
       var brokenPipe = false;
 
       // Default message fields
-      var defaultFields = {
-        ismaster: true,
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 3,
-        minWireVersion: 0,
-        ok: 1
-      };
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER);
 
       // Primary server states
       var serverIsMaster = [assign({}, defaultFields)];
 
-      // Boot the mock
-      var mockServer;
       co(function*() {
-        mockServer = yield mock.createServer(37017, 'localhost', {
+        const mockServer = yield mock.createServer(37017, 'localhost', {
           onRead: function(_server, connection) {
             // Force EPIPE error
             if (currentStep === 1) {
@@ -179,105 +153,105 @@ describe('Single Timeout (mocks)', function() {
             request.reply(serverIsMaster[0]);
           }
         });
-      });
 
-      // Attempt to connect
-      server = new Server({
-        host: 'localhost',
-        port: '37017',
-        connectionTimeout: 3000,
-        socketTimeout: 2000,
-        size: 1
-      });
-
-      var docs = [];
-      // Create big insert message
-      for (var i = 0; i < 1000; i++) {
-        docs.push({
-          a: i,
-          string:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string1:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string2:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string3:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string4:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string5:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string6:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string7:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string8:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string9:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string10:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string11:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string12:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string13:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string14:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string15:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string16:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string17:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string18:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string19:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string20:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string21:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string22:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string23:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string24:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string25:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string26:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string27:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
-          string28:
-            'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world'
+        // Attempt to connect
+        const server = new Server({
+          host: 'localhost',
+          port: '37017',
+          connectionTimeout: 3000,
+          socketTimeout: 2000,
+          size: 1
         });
-      }
 
-      // Add event listeners
-      server.once('connect', function(_server) {
-        _server.insert('test.test', docs, function(err, r) {
-          expect(r).to.not.exist;
-          expect(err).to.exist;
-          brokenPipe = true;
+        var docs = [];
+        // Create big insert message
+        for (var i = 0; i < 1000; i++) {
+          docs.push({
+            a: i,
+            string:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string1:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string2:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string3:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string4:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string5:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string6:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string7:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string8:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string9:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string10:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string11:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string12:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string13:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string14:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string15:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string16:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string17:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string18:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string19:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string20:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string21:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string22:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string23:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string24:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string25:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string26:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string27:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+            string28:
+              'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world'
+          });
+        }
+
+        // Add event listeners
+        server.once('connect', function(_server) {
+          _server.insert('test.test', docs, function(err, r) {
+            expect(r).to.not.exist;
+            expect(err).to.exist;
+            brokenPipe = true;
+          });
         });
-      });
 
-      server.once('reconnect', function(_server) {
-        _server.insert('test.test', [{ created: new Date() }], function(err, r) {
-          expect(r).to.exist;
-          expect(brokenPipe).to.equal(true);
-          server.destroy();
-          done();
+        server.once('reconnect', function(_server) {
+          _server.insert('test.test', [{ created: new Date() }], function(err, r) {
+            expect(r).to.exist;
+            expect(brokenPipe).to.equal(true);
+            server.destroy();
+            done();
+          });
         });
-      });
 
-      server.on('error', done);
-      setTimeout(function() {
-        server.connect();
-      }, 100);
+        server.on('error', done);
+        setTimeout(function() {
+          server.connect();
+        }, 100);
+      });
     }
   });
 
@@ -294,31 +268,20 @@ describe('Single Timeout (mocks)', function() {
       test: function(done) {
         var Server = this.configuration.mongo.Server;
 
-        // Contain mock server
-        var server = null;
         // Current index for the ismaster
         var currentStep = 0;
 
         // Default message fields
-        var defaultFields = {
-          ismaster: true,
-          maxBsonObjectSize: 16777216,
-          maxMessageSizeBytes: 48000000,
-          maxWriteBatchSize: 1000,
-          localTime: new Date(),
-          maxWireVersion: 3,
-          minWireVersion: 0,
-          ok: 1
-        };
+        var defaultFields = assign({}, mock.DEFAULT_ISMASTER);
 
         // Primary server states
         var serverIsMaster = [assign({}, defaultFields)];
 
         // Boot the mock
         co(function*() {
-          server = yield mock.createServer(37019, 'localhost');
+          const mockServer = yield mock.createServer(37019, 'localhost');
 
-          server.setMessageHandler(request => {
+          mockServer.setMessageHandler(request => {
             if (currentStep === 1) {
               // yield timeoutPromise(5000);
               // continue;
@@ -331,45 +294,45 @@ describe('Single Timeout (mocks)', function() {
               currentStep += 1;
             }
           });
-        });
 
-        // Attempt to connect
-        server = new Server({
-          host: 'localhost',
-          port: 37019,
-          connectionTimeout: 2000,
-          socketTimeout: 1000,
-          size: 1
-        });
+          // Attempt to connect
+          const server = new Server({
+            host: 'localhost',
+            port: 37019,
+            connectionTimeout: 2000,
+            socketTimeout: 1000,
+            size: 1
+          });
 
-        // Add event listeners
-        server.once('connect', function() {
-          // _server.insert('test.test', [{created:new Date()}], function(err, r) {
-          //   test.ok(err != null);
-          //   // console.dir(err)
-          //
-          //   function wait() {
-          //     setTimeout(function() {
-          //       _server.insert('test.test', [{created:new Date()}], function(err, r) {
-          //         if (r && !done) {
-          //           done = true;
-          //           test.equal(37019, r.connection.port);
-          //           replset.destroy();
-          //           running = false;
-          //           test.done();
-          //         } else {
-          //           wait();
-          //         }
-          //       });
-          //     }, 500);
-          //   }
-          //
-          //   wait();
-          // });
-        });
+          // Add event listeners
+          server.once('connect', function() {
+            // _server.insert('test.test', [{created:new Date()}], function(err, r) {
+            //   test.ok(err != null);
+            //   // console.dir(err)
+            //
+            //   function wait() {
+            //     setTimeout(function() {
+            //       _server.insert('test.test', [{created:new Date()}], function(err, r) {
+            //         if (r && !done) {
+            //           done = true;
+            //           test.equal(37019, r.connection.port);
+            //           replset.destroy();
+            //           running = false;
+            //           test.done();
+            //         } else {
+            //           wait();
+            //         }
+            //       });
+            //     }, 500);
+            //   }
+            //
+            //   wait();
+            // });
+          });
 
-        server.on('error', done);
-        server.connect();
+          server.on('error', done);
+          server.connect();
+        });
       }
     }
   );

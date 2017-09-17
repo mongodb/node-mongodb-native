@@ -33,14 +33,7 @@ describe('ReplSet Add Remove (mocks)', function() {
       var ReplSet = this.configuration.mongo.ReplSet,
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var secondSecondaryServer = null;
-      var arbiterServer = null;
       var currentIsMasterIndex = 0;
-
-      // Default message fields
       var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
@@ -124,10 +117,10 @@ describe('ReplSet Add Remove (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mock.createServer(32003, 'localhost');
-        arbiterServer = yield mock.createServer(32002, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const secondSecondaryServer = yield mock.createServer(32003, 'localhost');
+        const arbiterServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -156,48 +149,46 @@ describe('ReplSet Add Remove (mocks)', function() {
             request.reply(arbiter[currentIsMasterIndex]);
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new ReplSet(
-        [
-          { host: 'localhost', port: 32000 },
-          { host: 'localhost', port: 32001 },
-          { host: 'localhost', port: 32002 }
-        ],
-        {
-          setName: 'rs',
-          connectionTimeout: 3000,
-          socketTimeout: 0,
-          haInterval: 100,
-          size: 1
-        }
-      );
-
-      var secondaries = {};
-      var arbiters = {};
-
-      server.on('joined', function(_type, _server) {
-        if (_type === 'arbiter') {
-          arbiters[_server.name] = _server;
-          // Flip the ismaster message
-          currentIsMasterIndex = currentIsMasterIndex + 1;
-        } else if (_type === 'secondary') {
-          secondaries[_server.name] = _server;
-          if (Object.keys(secondaries).length === 2) {
-            expect(secondaries['localhost:32001']).to.not.be.null;
-            expect(secondaries['localhost:32003']).to.not.be.null;
-            expect(arbiters['localhost:32002']).to.not.be.null;
-
-            server.destroy();
-            done();
+        // Attempt to connect
+        var server = new ReplSet(
+          [
+            { host: 'localhost', port: 32000 },
+            { host: 'localhost', port: 32001 },
+            { host: 'localhost', port: 32002 }
+          ],
+          {
+            setName: 'rs',
+            connectionTimeout: 3000,
+            socketTimeout: 0,
+            haInterval: 100,
+            size: 1
           }
-        }
-      });
+        );
 
-      setTimeout(function() {
+        var secondaries = {};
+        var arbiters = {};
+
+        server.on('joined', function(_type, _server) {
+          if (_type === 'arbiter') {
+            arbiters[_server.name] = _server;
+            // Flip the ismaster message
+            currentIsMasterIndex = currentIsMasterIndex + 1;
+          } else if (_type === 'secondary') {
+            secondaries[_server.name] = _server;
+            if (Object.keys(secondaries).length === 2) {
+              expect(secondaries['localhost:32001']).to.not.be.null;
+              expect(secondaries['localhost:32003']).to.not.be.null;
+              expect(arbiters['localhost:32002']).to.not.be.null;
+
+              server.destroy();
+              done();
+            }
+          }
+        });
+
         server.connect();
-      }, 100);
+      });
     }
   });
 
@@ -213,14 +204,7 @@ describe('ReplSet Add Remove (mocks)', function() {
       var ReplSet = this.configuration.mongo.ReplSet,
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var secondSecondaryServer = null;
-      var arbiterServer = null;
       var currentIsMasterIndex = 0;
-
-      // Default message fields
       var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
@@ -312,10 +296,10 @@ describe('ReplSet Add Remove (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mock.createServer(32003, 'localhost');
-        arbiterServer = yield mock.createServer(32002, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const secondSecondaryServer = yield mock.createServer(32003, 'localhost');
+        const arbiterServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(function(request) {
           var doc = request.document;
@@ -344,65 +328,62 @@ describe('ReplSet Add Remove (mocks)', function() {
             request.reply(arbiter[currentIsMasterIndex]);
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new ReplSet(
-        [
-          { host: 'localhost', port: 32000 },
-          { host: 'localhost', port: 32001 },
-          { host: 'localhost', port: 32002 }
-        ],
-        {
-          setName: 'rs',
-          connectionTimeout: 3000,
-          socketTimeout: 0,
-          haInterval: 100,
-          size: 1
-        }
-      );
+        // Attempt to connect
+        var server = new ReplSet(
+          [
+            { host: 'localhost', port: 32000 },
+            { host: 'localhost', port: 32001 },
+            { host: 'localhost', port: 32002 }
+          ],
+          {
+            setName: 'rs',
+            connectionTimeout: 3000,
+            socketTimeout: 0,
+            haInterval: 100,
+            size: 1
+          }
+        );
 
-      // Joined
-      var joined = 0;
+        // Joined
+        var joined = 0;
 
-      server.on('joined', function() {
-        joined = joined + 1;
+        server.on('joined', function() {
+          joined = joined + 1;
 
-        // primary, secondary and arbiter have joined
-        if (joined === 4) {
-          expect(server.s.replicaSetState.secondaries).to.have.length(2);
-          expect(server.s.replicaSetState.secondaries[0].name).to.equal('localhost:32001');
-          expect(server.s.replicaSetState.secondaries[1].name).to.equal('localhost:32003');
-          expect(server.s.replicaSetState.arbiters).to.have.length(1);
-          expect(server.s.replicaSetState.arbiters[0].name).to.equal('localhost:32002');
-          expect(server.s.replicaSetState.primary).to.not.be.null;
-          expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
+          // primary, secondary and arbiter have joined
+          if (joined === 4) {
+            expect(server.s.replicaSetState.secondaries).to.have.length(2);
+            expect(server.s.replicaSetState.secondaries[0].name).to.equal('localhost:32001');
+            expect(server.s.replicaSetState.secondaries[1].name).to.equal('localhost:32003');
+            expect(server.s.replicaSetState.arbiters).to.have.length(1);
+            expect(server.s.replicaSetState.arbiters[0].name).to.equal('localhost:32002');
+            expect(server.s.replicaSetState.primary).to.not.be.null;
+            expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-          // Flip the ismaster message
-          currentIsMasterIndex = currentIsMasterIndex + 1;
-        }
-      });
+            // Flip the ismaster message
+            currentIsMasterIndex = currentIsMasterIndex + 1;
+          }
+        });
 
-      server.on('left', function(_type, _server) {
-        if (_type === 'secondary' && _server.name === 'localhost:32003') {
-          expect(server.s.replicaSetState.secondaries).to.have.length(1);
-          expect(server.s.replicaSetState.secondaries[0].name).to.equal('localhost:32001');
+        server.on('left', function(_type, _server) {
+          if (_type === 'secondary' && _server.name === 'localhost:32003') {
+            expect(server.s.replicaSetState.secondaries).to.have.length(1);
+            expect(server.s.replicaSetState.secondaries[0].name).to.equal('localhost:32001');
 
-          expect(server.s.replicaSetState.arbiters).to.have.length(1);
-          expect(server.s.replicaSetState.arbiters[0].name).to.equal('localhost:32002');
+            expect(server.s.replicaSetState.arbiters).to.have.length(1);
+            expect(server.s.replicaSetState.arbiters[0].name).to.equal('localhost:32002');
 
-          expect(server.s.replicaSetState.primary).to.not.be.null;
-          expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
+            expect(server.s.replicaSetState.primary).to.not.be.null;
+            expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-          server.destroy();
-          done();
-        }
-      });
+            server.destroy();
+            done();
+          }
+        });
 
-      // Gives proxies a chance to boot up
-      setTimeout(function() {
         server.connect();
-      }, 100);
+      });
     }
   });
 
@@ -418,14 +399,7 @@ describe('ReplSet Add Remove (mocks)', function() {
       var ReplSet = this.configuration.mongo.ReplSet,
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var secondSecondaryServer = null;
-      var arbiterServer = null;
       var currentIsMasterIndex = 0;
-
-      // Default message fields
       var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
@@ -545,10 +519,10 @@ describe('ReplSet Add Remove (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mock.createServer(32003, 'localhost');
-        arbiterServer = yield mock.createServer(32002, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const secondSecondaryServer = yield mock.createServer(32003, 'localhost');
+        const arbiterServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -577,81 +551,78 @@ describe('ReplSet Add Remove (mocks)', function() {
             request.reply(arbiter[currentIsMasterIndex]);
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new ReplSet(
-        [
-          { host: 'localhost', port: 32000 },
-          { host: 'localhost', port: 32001 },
-          { host: 'localhost', port: 32002 }
-        ],
-        {
-          setName: 'rs',
-          connectionTimeout: 3000,
-          socketTimeout: 0,
-          haInterval: 100,
-          size: 1
-        }
-      );
+        // Attempt to connect
+        var server = new ReplSet(
+          [
+            { host: 'localhost', port: 32000 },
+            { host: 'localhost', port: 32001 },
+            { host: 'localhost', port: 32002 }
+          ],
+          {
+            setName: 'rs',
+            connectionTimeout: 3000,
+            socketTimeout: 0,
+            haInterval: 100,
+            size: 1
+          }
+        );
 
-      setTimeout(function() {
-        expect(server.s.replicaSetState.set['localhost:32000'].type).to.equal('RSPrimary');
-        expect(server.s.replicaSetState.set['localhost:32001'].type).to.equal('RSSecondary');
-        expect(server.s.replicaSetState.set['localhost:32002'].type).to.equal('RSArbiter');
-        expect(server.s.replicaSetState.set['localhost:32003'].type).to.equal('RSSecondary');
-        currentIsMasterIndex = currentIsMasterIndex + 1;
-
-        // Wait for another sweep
         setTimeout(function() {
           expect(server.s.replicaSetState.set['localhost:32000'].type).to.equal('RSPrimary');
           expect(server.s.replicaSetState.set['localhost:32001'].type).to.equal('RSSecondary');
           expect(server.s.replicaSetState.set['localhost:32002'].type).to.equal('RSArbiter');
           expect(server.s.replicaSetState.set['localhost:32003'].type).to.equal('RSSecondary');
-          expect(server.s.replicaSetState.secondaries).to.have.length(2);
-          expect(server.s.replicaSetState.arbiters).to.have.length(1);
-          expect(server.s.replicaSetState.primary).to.exist;
-
-          // Ensure we have 4 interval ids and
-          var intervalIds = server.intervalIds.filter(function(x) {
-            return x.__host !== undefined;
-          });
-
-          expect(intervalIds).to.have.length(4);
-          var hosts = intervalIds.map(function(x) {
-            return x.__host;
-          });
-
-          expect(hosts.indexOf('localhost:32000')).to.not.equal(-1);
-          expect(hosts.indexOf('localhost:32001')).to.not.equal(-1);
-          expect(hosts.indexOf('localhost:32002')).to.not.equal(-1);
-          expect(hosts.indexOf('localhost:32003')).to.not.equal(-1);
-
-          server.destroy();
-          done();
-        }, 1000);
-      }, 500);
-
-      server.on('left', function(_type, _server) {
-        if (_type === 'secondary' && _server.name === 'localhost:32003') {
-          expect(server.s.replicaSetState.secondaries).to.have.length(1);
-          expect(server.s.replicaSetState.secondaries[0].name).to.equal('localhost:32001');
-
-          expect(server.s.replicaSetState.arbiters).to.have.length(1);
-          expect(server.s.replicaSetState.arbiters[0].name).to.equal('localhost:32002');
-
-          expect(server.s.replicaSetState.primary).to.not.be.null;
-          expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
-          // Flip the ismaster message
           currentIsMasterIndex = currentIsMasterIndex + 1;
-          // global.debug=true
-        }
-      });
 
-      // Gives proxies a chance to boot up
-      setTimeout(function() {
+          // Wait for another sweep
+          setTimeout(function() {
+            expect(server.s.replicaSetState.set['localhost:32000'].type).to.equal('RSPrimary');
+            expect(server.s.replicaSetState.set['localhost:32001'].type).to.equal('RSSecondary');
+            expect(server.s.replicaSetState.set['localhost:32002'].type).to.equal('RSArbiter');
+            expect(server.s.replicaSetState.set['localhost:32003'].type).to.equal('RSSecondary');
+            expect(server.s.replicaSetState.secondaries).to.have.length(2);
+            expect(server.s.replicaSetState.arbiters).to.have.length(1);
+            expect(server.s.replicaSetState.primary).to.exist;
+
+            // Ensure we have 4 interval ids and
+            var intervalIds = server.intervalIds.filter(function(x) {
+              return x.__host !== undefined;
+            });
+
+            expect(intervalIds).to.have.length(4);
+            var hosts = intervalIds.map(function(x) {
+              return x.__host;
+            });
+
+            expect(hosts.indexOf('localhost:32000')).to.not.equal(-1);
+            expect(hosts.indexOf('localhost:32001')).to.not.equal(-1);
+            expect(hosts.indexOf('localhost:32002')).to.not.equal(-1);
+            expect(hosts.indexOf('localhost:32003')).to.not.equal(-1);
+
+            server.destroy();
+            done();
+          }, 1000);
+        }, 500);
+
+        server.on('left', function(_type, _server) {
+          if (_type === 'secondary' && _server.name === 'localhost:32003') {
+            expect(server.s.replicaSetState.secondaries).to.have.length(1);
+            expect(server.s.replicaSetState.secondaries[0].name).to.equal('localhost:32001');
+
+            expect(server.s.replicaSetState.arbiters).to.have.length(1);
+            expect(server.s.replicaSetState.arbiters[0].name).to.equal('localhost:32002');
+
+            expect(server.s.replicaSetState.primary).to.not.be.null;
+            expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
+            // Flip the ismaster message
+            currentIsMasterIndex = currentIsMasterIndex + 1;
+            // global.debug=true
+          }
+        });
+
         server.connect();
-      }, 100);
+      });
     }
   });
 
@@ -667,14 +638,7 @@ describe('ReplSet Add Remove (mocks)', function() {
       var ReplSet = this.configuration.mongo.ReplSet,
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var secondSecondaryServer = null;
-      var arbiterServer = null;
       var currentIsMasterIndex = 0;
-
-      // Default message fields
       var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
@@ -758,10 +722,10 @@ describe('ReplSet Add Remove (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mock.createServer(32003, 'localhost');
-        arbiterServer = yield mock.createServer(32002, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const secondSecondaryServer = yield mock.createServer(32003, 'localhost');
+        const arbiterServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -790,61 +754,58 @@ describe('ReplSet Add Remove (mocks)', function() {
             request.reply(arbiter[currentIsMasterIndex]);
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new ReplSet(
-        [
-          { host: 'localhost', port: 32000 },
-          { host: 'localhost', port: 32001 },
-          { host: 'localhost', port: 32002 }
-        ],
-        {
-          setName: 'rs',
-          connectionTimeout: 3000,
-          socketTimeout: 0,
-          haInterval: 100,
-          size: 1
-        }
-      );
-
-      var secondaries = {};
-      var arbiters = {};
-      var allservers = {};
-
-      server.on('serverHeartbeatStarted', function(description) {
-        allservers[description.connectionId] = true;
-        if (allservers['localhost:32003']) {
-          server.destroy();
-          done();
-        }
-      });
-
-      server.on('joined', function(_type, _server) {
-        if (_type === 'arbiter') {
-          arbiters[_server.name] = _server;
-          // Flip the ismaster message
-          currentIsMasterIndex = currentIsMasterIndex + 1;
-        } else if (_type === 'secondary') {
-          // expect(server.__connected).to.be.true;
-          secondaries[_server.name] = _server;
-          if (Object.keys(secondaries).length === 2) {
-            expect(secondaries['localhost:32001']).to.not.be.null;
-            expect(secondaries['localhost:32003']).to.not.be.null;
-            expect(arbiters['localhost:32002']).to.not.be.null;
+        // Attempt to connect
+        var server = new ReplSet(
+          [
+            { host: 'localhost', port: 32000 },
+            { host: 'localhost', port: 32001 },
+            { host: 'localhost', port: 32002 }
+          ],
+          {
+            setName: 'rs',
+            connectionTimeout: 3000,
+            socketTimeout: 0,
+            haInterval: 100,
+            size: 1
           }
-        }
-      });
+        );
 
-      server.on('error', function() {});
-      server.on('connect', function() {
-        server.__connected = true;
-      });
+        var secondaries = {};
+        var arbiters = {};
+        var allservers = {};
 
-      // Gives proxies a chance to boot up
-      setTimeout(function() {
+        server.on('serverHeartbeatStarted', function(description) {
+          allservers[description.connectionId] = true;
+          if (allservers['localhost:32003']) {
+            server.destroy();
+            done();
+          }
+        });
+
+        server.on('joined', function(_type, _server) {
+          if (_type === 'arbiter') {
+            arbiters[_server.name] = _server;
+            // Flip the ismaster message
+            currentIsMasterIndex = currentIsMasterIndex + 1;
+          } else if (_type === 'secondary') {
+            // expect(server.__connected).to.be.true;
+            secondaries[_server.name] = _server;
+            if (Object.keys(secondaries).length === 2) {
+              expect(secondaries['localhost:32001']).to.not.be.null;
+              expect(secondaries['localhost:32003']).to.not.be.null;
+              expect(arbiters['localhost:32002']).to.not.be.null;
+            }
+          }
+        });
+
+        server.on('error', function() {});
+        server.on('connect', function() {
+          server.__connected = true;
+        });
+
         server.connect();
-      }, 100);
+      });
     }
   });
 });

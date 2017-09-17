@@ -33,10 +33,6 @@ describe('ReplSet All Servers Close (mocks)', function() {
       var ReplSet = this.configuration.mongo.ReplSet,
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var arbiterServer = null;
       var electionIds = [new ObjectId(), new ObjectId()];
       var die = false;
 
@@ -84,9 +80,9 @@ describe('ReplSet All Servers Close (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-        arbiterServer = yield mock.createServer(32002, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const arbiterServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           if (die) {
@@ -124,51 +120,48 @@ describe('ReplSet All Servers Close (mocks)', function() {
             }
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new ReplSet(
-        [
-          { host: 'localhost', port: 32000 },
-          { host: 'localhost', port: 32001 },
-          { host: 'localhost', port: 32002 }
-        ],
-        {
-          setName: 'rs',
-          connectionTimeout: 2000,
-          socketTimeout: 2000,
-          haInterval: 100,
-          size: 500
-        }
-      );
+        // Attempt to connect
+        var server = new ReplSet(
+          [
+            { host: 'localhost', port: 32000 },
+            { host: 'localhost', port: 32001 },
+            { host: 'localhost', port: 32002 }
+          ],
+          {
+            setName: 'rs',
+            connectionTimeout: 2000,
+            socketTimeout: 2000,
+            haInterval: 100,
+            size: 500
+          }
+        );
 
-      server.on('connect', function(_server) {
-        setTimeout(function() {
-          die = true;
-
+        server.on('connect', function(_server) {
           setTimeout(function() {
-            die = false;
+            die = true;
 
             setTimeout(function() {
-              _server.command('admin.$cmd', { ismaster: true }, function(err, r) {
-                expect(r).to.exist;
-                expect(err).to.be.null;
-                expect(_server.s.replicaSetState.primary).to.not.be.null;
-                expect(_server.s.replicaSetState.secondaries).to.have.length(1);
-                expect(_server.s.replicaSetState.arbiters).to.have.length(1);
+              die = false;
 
-                server.destroy();
-                done();
-              });
-            }, 1500);
-          }, 1000);
-        }, 500);
-      });
+              setTimeout(function() {
+                _server.command('admin.$cmd', { ismaster: true }, function(err, r) {
+                  expect(r).to.exist;
+                  expect(err).to.be.null;
+                  expect(_server.s.replicaSetState.primary).to.not.be.null;
+                  expect(_server.s.replicaSetState.secondaries).to.have.length(1);
+                  expect(_server.s.replicaSetState.arbiters).to.have.length(1);
 
-      // Gives proxies a chance to boot up
-      setTimeout(function() {
+                  server.destroy();
+                  done();
+                });
+              }, 1500);
+            }, 1000);
+          }, 500);
+        });
+
         server.connect();
-      }, 100);
+      });
     }
   });
 
@@ -184,10 +177,6 @@ describe('ReplSet All Servers Close (mocks)', function() {
       var ReplSet = this.configuration.mongo.ReplSet,
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var arbiterServer = null;
       var electionIds = [new ObjectId(), new ObjectId()];
       var die = false;
 
@@ -235,9 +224,9 @@ describe('ReplSet All Servers Close (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(34000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(34001, 'localhost');
-        arbiterServer = yield mock.createServer(34002, 'localhost');
+        const primaryServer = yield mock.createServer(34000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(34001, 'localhost');
+        const arbiterServer = yield mock.createServer(34002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           if (die) {
@@ -271,56 +260,53 @@ describe('ReplSet All Servers Close (mocks)', function() {
             }
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new ReplSet(
-        [
-          { host: 'localhost', port: 34000 },
-          { host: 'localhost', port: 34001 },
-          { host: 'localhost', port: 34002 }
-        ],
-        {
-          setName: 'rs',
-          connectionTimeout: 5000,
-          socketTimeout: 5000,
-          haInterval: 100,
-          size: 1
-        }
-      );
+        // Attempt to connect
+        var server = new ReplSet(
+          [
+            { host: 'localhost', port: 34000 },
+            { host: 'localhost', port: 34001 },
+            { host: 'localhost', port: 34002 }
+          ],
+          {
+            setName: 'rs',
+            connectionTimeout: 5000,
+            socketTimeout: 5000,
+            haInterval: 100,
+            size: 1
+          }
+        );
 
-      server.on('connect', function() {
-        setTimeout(function() {
-          die = true;
-
-          var intervalId = setInterval(function() {
-            server.command('admin.$cmd', { ismaster: true }, function() {});
-          }, 500);
-
+        server.on('connect', function() {
           setTimeout(function() {
-            die = false;
+            die = true;
+
+            var intervalId = setInterval(function() {
+              server.command('admin.$cmd', { ismaster: true }, function() {});
+            }, 500);
+
             setTimeout(function() {
-              clearInterval(intervalId);
+              die = false;
+              setTimeout(function() {
+                clearInterval(intervalId);
 
-              server.command('admin.$cmd', { ismaster: true }, function(err, r) {
-                expect(r).to.exist;
-                expect(err).to.be.null;
-                expect(server.s.replicaSetState.primary).to.not.be.null;
-                expect(server.s.replicaSetState.secondaries).to.have.length(1);
-                expect(server.s.replicaSetState.arbiters).to.have.length(1);
+                server.command('admin.$cmd', { ismaster: true }, function(err, r) {
+                  expect(r).to.exist;
+                  expect(err).to.be.null;
+                  expect(server.s.replicaSetState.primary).to.not.be.null;
+                  expect(server.s.replicaSetState.secondaries).to.have.length(1);
+                  expect(server.s.replicaSetState.arbiters).to.have.length(1);
 
-                server.destroy();
-                done();
-              });
-            }, 1500);
-          }, 1000);
-        }, 500);
-      });
+                  server.destroy();
+                  done();
+                });
+              }, 1500);
+            }, 1000);
+          }, 500);
+        });
 
-      // Gives proxies a chance to boot up
-      setTimeout(function() {
         server.connect();
-      }, 100);
+      });
     }
   });
 });

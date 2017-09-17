@@ -34,13 +34,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         ReadPreference = this.configuration.mongo.ReadPreference,
         Long = this.configuration.mongo.BSON.Long;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var secondSecondaryServer = null;
       var electionIds = [new ObjectId(), new ObjectId()];
-
-      // Default message fields
       var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
@@ -83,9 +77,9 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mock.createServer(32002, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           // Get the document
@@ -114,58 +108,55 @@ describe('ReplSet Read Preferences (mocks)', function() {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new ReplSet(
-        [
-          { host: 'localhost', port: 32000 },
-          { host: 'localhost', port: 32001 },
-          { host: 'localhost', port: 32002 }
-        ],
-        {
-          setName: 'rs',
-          connectionTimeout: 3000,
-          socketTimeout: 0,
-          haInterval: 2000,
-          size: 1
-        }
-      );
+        // Attempt to connect
+        var server = new ReplSet(
+          [
+            { host: 'localhost', port: 32000 },
+            { host: 'localhost', port: 32001 },
+            { host: 'localhost', port: 32002 }
+          ],
+          {
+            setName: 'rs',
+            connectionTimeout: 3000,
+            socketTimeout: 0,
+            haInterval: 2000,
+            size: 1
+          }
+        );
 
-      // Add event listeners
-      server.on('connect', function(_server) {
-        // Set up a write
-        function schedule() {
-          // Perform a find
-          _server.command(
-            'test.test',
-            {
-              count: 'test.test',
-              batchSize: 2
-            },
-            {
-              readPreference: new ReadPreference('secondary', { loc: 'dc' })
-            },
-            function(err, r) {
-              expect(err).to.be.null;
-              expect(r.connection.port).to.equal(32002);
+        // Add event listeners
+        server.on('connect', function(_server) {
+          // Set up a write
+          function schedule() {
+            // Perform a find
+            _server.command(
+              'test.test',
+              {
+                count: 'test.test',
+                batchSize: 2
+              },
+              {
+                readPreference: new ReadPreference('secondary', { loc: 'dc' })
+              },
+              function(err, r) {
+                expect(err).to.be.null;
+                expect(r.connection.port).to.equal(32002);
 
-              server.destroy();
-              done();
-            }
-          );
-        }
+                server.destroy();
+                done();
+              }
+            );
+          }
 
-        // Schedule an insert
-        setTimeout(function() {
-          schedule();
-        }, 2000);
-      });
+          // Schedule an insert
+          setTimeout(function() {
+            schedule();
+          }, 2000);
+        });
 
-      // Gives proxies a chance to boot up
-      setTimeout(function() {
         server.connect();
-      }, 100);
+      });
     }
   });
 
@@ -183,13 +174,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         ReadPreference = this.configuration.mongo.ReadPreference,
         Long = this.configuration.mongo.BSON.Long;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var secondSecondaryServer = null;
       var electionIds = [new ObjectId(), new ObjectId()];
-
-      // Default message fields
       var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
@@ -232,9 +217,9 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mock.createServer(32002, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -262,58 +247,55 @@ describe('ReplSet Read Preferences (mocks)', function() {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new ReplSet(
-        [
-          { host: 'localhost', port: 32000 },
-          { host: 'localhost', port: 32001 },
-          { host: 'localhost', port: 32002 }
-        ],
-        {
-          setName: 'rs',
-          connectionTimeout: 3000,
-          socketTimeout: 0,
-          haInterval: 2000,
-          size: 1
-        }
-      );
+        // Attempt to connect
+        var server = new ReplSet(
+          [
+            { host: 'localhost', port: 32000 },
+            { host: 'localhost', port: 32001 },
+            { host: 'localhost', port: 32002 }
+          ],
+          {
+            setName: 'rs',
+            connectionTimeout: 3000,
+            socketTimeout: 0,
+            haInterval: 2000,
+            size: 1
+          }
+        );
 
-      // Add event listeners
-      server.on('connect', function(_server) {
-        // Set up a write
-        function schedule() {
-          setTimeout(function() {
-            // Perform a find
-            _server.command(
-              'test.test',
-              {
-                count: 'test.test',
-                batchSize: 2
-              },
-              {
-                readPreference: new ReadPreference('primaryPreferred')
-              },
-              function(err, r) {
-                expect(err).to.be.null;
-                expect(r.connection.port).to.equal(32000);
+        // Add event listeners
+        server.on('connect', function(_server) {
+          // Set up a write
+          function schedule() {
+            setTimeout(function() {
+              // Perform a find
+              _server.command(
+                'test.test',
+                {
+                  count: 'test.test',
+                  batchSize: 2
+                },
+                {
+                  readPreference: new ReadPreference('primaryPreferred')
+                },
+                function(err, r) {
+                  expect(err).to.be.null;
+                  expect(r.connection.port).to.equal(32000);
 
-                server.destroy();
-                done();
-              }
-            );
-          }, 500);
-        }
+                  server.destroy();
+                  done();
+                }
+              );
+            }, 500);
+          }
 
-        // Schedule an insert
-        schedule();
-      });
+          // Schedule an insert
+          schedule();
+        });
 
-      // Gives proxies a chance to boot up
-      setTimeout(function() {
         server.connect();
-      }, 100);
+      });
     }
   });
 
@@ -331,13 +313,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         ReadPreference = this.configuration.mongo.ReadPreference,
         Long = this.configuration.mongo.BSON.Long;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var secondSecondaryServer = null;
       var electionIds = [new ObjectId(), new ObjectId()];
-
-      // Default message fields
       var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
@@ -380,9 +356,9 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mock.createServer(32002, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -410,92 +386,89 @@ describe('ReplSet Read Preferences (mocks)', function() {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new ReplSet(
-        [
-          { host: 'localhost', port: 32000 },
-          { host: 'localhost', port: 32001 },
-          { host: 'localhost', port: 32002 }
-        ],
-        {
-          setName: 'rs',
-          connectionTimeout: 3000,
-          socketTimeout: 0,
-          haInterval: 2000,
-          size: 1
-        }
-      );
+        // Attempt to connect
+        var server = new ReplSet(
+          [
+            { host: 'localhost', port: 32000 },
+            { host: 'localhost', port: 32001 },
+            { host: 'localhost', port: 32002 }
+          ],
+          {
+            setName: 'rs',
+            connectionTimeout: 3000,
+            socketTimeout: 0,
+            haInterval: 2000,
+            size: 1
+          }
+        );
 
-      // Add event listeners
-      var port = 0;
-      server.on('connect', function(_server) {
-        // Set up a write
-        function schedule() {
-          setTimeout(function() {
-            // Perform a find
-            _server.command(
-              'test.test',
-              {
-                count: 'test.test',
-                batchSize: 2
-              },
-              {
-                readPreference: new ReadPreference('secondary')
-              },
-              function(err, r) {
-                expect(err).to.be.null;
-                port = r.connection.port;
+        // Add event listeners
+        var port = 0;
+        server.on('connect', function(_server) {
+          // Set up a write
+          function schedule() {
+            setTimeout(function() {
+              // Perform a find
+              _server.command(
+                'test.test',
+                {
+                  count: 'test.test',
+                  batchSize: 2
+                },
+                {
+                  readPreference: new ReadPreference('secondary')
+                },
+                function(err, r) {
+                  expect(err).to.be.null;
+                  port = r.connection.port;
 
-                // Perform a find
-                _server.command(
-                  'test.test',
-                  {
-                    count: 'test.test',
-                    batchSize: 2
-                  },
-                  {
-                    readPreference: new ReadPreference('secondary')
-                  },
-                  function(_err, _r) {
-                    expect(_err).to.be.null;
-                    expect(_r.connection.port).to.not.equal(port);
-                    port = _r.connection.port;
+                  // Perform a find
+                  _server.command(
+                    'test.test',
+                    {
+                      count: 'test.test',
+                      batchSize: 2
+                    },
+                    {
+                      readPreference: new ReadPreference('secondary')
+                    },
+                    function(_err, _r) {
+                      expect(_err).to.be.null;
+                      expect(_r.connection.port).to.not.equal(port);
+                      port = _r.connection.port;
 
-                    // Perform a find
-                    _server.command(
-                      'test.test',
-                      {
-                        count: 'test.test',
-                        batchSize: 2
-                      },
-                      {
-                        readPreference: new ReadPreference('secondary')
-                      },
-                      function(__err, __r) {
-                        expect(__err).to.be.null;
-                        expect(__r.connection.port).to.not.equal(port);
+                      // Perform a find
+                      _server.command(
+                        'test.test',
+                        {
+                          count: 'test.test',
+                          batchSize: 2
+                        },
+                        {
+                          readPreference: new ReadPreference('secondary')
+                        },
+                        function(__err, __r) {
+                          expect(__err).to.be.null;
+                          expect(__r.connection.port).to.not.equal(port);
 
-                        server.destroy();
-                        done();
-                      }
-                    );
-                  }
-                );
-              }
-            );
-          }, 500);
-        }
+                          server.destroy();
+                          done();
+                        }
+                      );
+                    }
+                  );
+                }
+              );
+            }, 500);
+          }
 
-        // Schedule an insert
-        schedule();
-      });
+          // Schedule an insert
+          schedule();
+        });
 
-      // Gives proxies a chance to boot up
-      setTimeout(function() {
         server.connect();
-      }, 100);
+      });
     }
   });
 
@@ -514,12 +487,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         Long = this.configuration.mongo.BSON.Long,
         MongoError = this.configuration.mongo.MongoError;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
       var electionIds = [new ObjectId(), new ObjectId()];
-
-      // Default message fields
       var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
@@ -549,8 +517,8 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -569,99 +537,96 @@ describe('ReplSet Read Preferences (mocks)', function() {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
         });
-      });
 
-      // mock ops store from node-mongodb-native for handling repl set disconnects
-      var mockDisconnectHandler = {
-        add: function(opType, ns, ops, options, callback) {
-          // Command issued to replSet will fail immediately if !server.isConnected()
-          return callback(new MongoError({ message: 'no connection available', driver: true }));
-        },
-        execute: function() {
-          // method needs to be called, so provide a dummy version
-          return;
-        },
-        flush: function() {
-          // method needs to be called, so provide a dummy version
-          return;
-        }
-      };
-
-      // Attempt to connect
-      var server = new ReplSet(
-        [
-          {
-            host: 'localhost',
-            port: 32000,
-            socketTimeout: 3000,
-            connectionTimeout: 3000
+        // mock ops store from node-mongodb-native for handling repl set disconnects
+        var mockDisconnectHandler = {
+          add: function(opType, ns, ops, options, callback) {
+            // Command issued to replSet will fail immediately if !server.isConnected()
+            return callback(new MongoError({ message: 'no connection available', driver: true }));
           },
-          { host: 'localhost', port: 32001 }
-        ],
-        {
-          setName: 'rs',
-          haInterval: 10000,
-          disconnectHandler: mockDisconnectHandler,
-          size: 1
-        }
-      );
+          execute: function() {
+            // method needs to be called, so provide a dummy version
+            return;
+          },
+          flush: function() {
+            // method needs to be called, so provide a dummy version
+            return;
+          }
+        };
 
-      // Add event listeners
-      server.on('connect', function(_server) {
-        function schedule() {
-          setTimeout(function() {
-            // Perform a find
-            _server.command(
-              'test.test',
-              {
-                count: 'test.test',
-                batchSize: 2
-              },
-              {
-                readPreference: new ReadPreference('primaryPreferred')
-              },
-              function(err, r) {
-                expect(err).to.be.null;
-                expect(r.connection.port).to.equal(32000);
-                primaryServer;
+        // Attempt to connect
+        var server = new ReplSet(
+          [
+            {
+              host: 'localhost',
+              port: 32000,
+              socketTimeout: 3000,
+              connectionTimeout: 3000
+            },
+            { host: 'localhost', port: 32001 }
+          ],
+          {
+            setName: 'rs',
+            haInterval: 10000,
+            disconnectHandler: mockDisconnectHandler,
+            size: 1
+          }
+        );
 
-                _server.on(
-                  'left',
-                  function() {
-                    // Perform another find, after primary is gone
-                    _server.command(
-                      'test.test',
-                      {
-                        count: 'test.test',
-                        batchSize: 2
-                      },
-                      {
-                        readPreference: new ReadPreference('primaryPreferred')
-                      },
-                      function(_err, _r) {
-                        expect(_err).to.be.null;
-                        expect(_r.connection.port).to.equal(32001); // reads from secondary while primary down
+        // Add event listeners
+        server.on('connect', function(_server) {
+          function schedule() {
+            setTimeout(function() {
+              // Perform a find
+              _server.command(
+                'test.test',
+                {
+                  count: 'test.test',
+                  batchSize: 2
+                },
+                {
+                  readPreference: new ReadPreference('primaryPreferred')
+                },
+                function(err, r) {
+                  expect(err).to.be.null;
+                  expect(r.connection.port).to.equal(32000);
+                  primaryServer;
 
-                        server.destroy();
-                        done();
-                      }
-                    );
-                  },
-                  2500
-                );
-              }
-            );
-          }, 500);
-        }
+                  _server.on(
+                    'left',
+                    function() {
+                      // Perform another find, after primary is gone
+                      _server.command(
+                        'test.test',
+                        {
+                          count: 'test.test',
+                          batchSize: 2
+                        },
+                        {
+                          readPreference: new ReadPreference('primaryPreferred')
+                        },
+                        function(_err, _r) {
+                          expect(_err).to.be.null;
+                          expect(_r.connection.port).to.equal(32001); // reads from secondary while primary down
 
-        // Schedule a commands
-        schedule();
-      });
+                          server.destroy();
+                          done();
+                        }
+                      );
+                    },
+                    2500
+                  );
+                }
+              );
+            }, 500);
+          }
 
-      // Gives proxies a chance to boot up
-      setTimeout(function() {
+          // Schedule a commands
+          schedule();
+        });
+
         server.connect();
-      }, 100);
+      });
     }
   });
 
@@ -679,13 +644,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         ReadPreference = this.configuration.mongo.ReadPreference,
         Long = this.configuration.mongo.BSON.Long;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var secondSecondaryServer = null;
       var electionIds = [new ObjectId(), new ObjectId()];
-
-      // Default message fields
       var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
@@ -728,9 +687,9 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mock.createServer(32002, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -758,90 +717,87 @@ describe('ReplSet Read Preferences (mocks)', function() {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new ReplSet(
-        [
-          { host: 'localhost', port: 32000 },
-          { host: 'localhost', port: 32001 },
-          { host: 'localhost', port: 32002 }
-        ],
-        {
-          setName: 'rs',
-          connectionTimeout: 3000,
-          socketTimeout: 0,
-          haInterval: 2000,
-          size: 1
-        }
-      );
+        // Attempt to connect
+        var server = new ReplSet(
+          [
+            { host: 'localhost', port: 32000 },
+            { host: 'localhost', port: 32001 },
+            { host: 'localhost', port: 32002 }
+          ],
+          {
+            setName: 'rs',
+            connectionTimeout: 3000,
+            socketTimeout: 0,
+            haInterval: 2000,
+            size: 1
+          }
+        );
 
-      // Add event listeners
-      server.on('connect', function(_server) {
-        // Set up a write
-        function schedule() {
-          // Perform a find
-          _server.command(
-            'test.test',
-            {
-              count: 'test.test',
-              batchSize: 2
-            },
-            {
-              readPreference: new ReadPreference('primaryPreferred')
-            },
-            function(err) {
-              expect(err).to.exist;
+        // Add event listeners
+        server.on('connect', function(_server) {
+          // Set up a write
+          function schedule() {
+            // Perform a find
+            _server.command(
+              'test.test',
+              {
+                count: 'test.test',
+                batchSize: 2
+              },
+              {
+                readPreference: new ReadPreference('primaryPreferred')
+              },
+              function(err) {
+                expect(err).to.exist;
 
-              // Let all sockets properly close
-              process.nextTick(function() {
-                // Test primaryPreferred
-                _server.command(
-                  'test.test',
-                  {
-                    count: 'test.test',
-                    batchSize: 2
-                  },
-                  {
-                    readPreference: new ReadPreference('primaryPreferred')
-                  },
-                  function(_err, _r) {
-                    expect(_err).to.be.null;
-                    expect(_r.connection.port).to.not.equal(32000);
+                // Let all sockets properly close
+                process.nextTick(function() {
+                  // Test primaryPreferred
+                  _server.command(
+                    'test.test',
+                    {
+                      count: 'test.test',
+                      batchSize: 2
+                    },
+                    {
+                      readPreference: new ReadPreference('primaryPreferred')
+                    },
+                    function(_err, _r) {
+                      expect(_err).to.be.null;
+                      expect(_r.connection.port).to.not.equal(32000);
 
-                    // Test secondaryPreferred
-                    _server.command(
-                      'test.test',
-                      {
-                        count: 'test.test',
-                        batchSize: 2
-                      },
-                      {
-                        readPreference: new ReadPreference('secondaryPreferred')
-                      },
-                      function(__err, __r) {
-                        expect(__err).to.be.null;
-                        expect(__r.connection.port).to.not.equal(32000);
+                      // Test secondaryPreferred
+                      _server.command(
+                        'test.test',
+                        {
+                          count: 'test.test',
+                          batchSize: 2
+                        },
+                        {
+                          readPreference: new ReadPreference('secondaryPreferred')
+                        },
+                        function(__err, __r) {
+                          expect(__err).to.be.null;
+                          expect(__r.connection.port).to.not.equal(32000);
 
-                        server.destroy();
-                        done();
-                      }
-                    );
-                  }
-                );
-              });
-            }
-          );
-        }
+                          server.destroy();
+                          done();
+                        }
+                      );
+                    }
+                  );
+                });
+              }
+            );
+          }
 
-        // Schedule an insert
-        schedule();
-      });
+          // Schedule an insert
+          schedule();
+        });
 
-      // Gives proxies a chance to boot up
-      setTimeout(function() {
         server.connect();
-      }, 100);
+      });
     }
   });
 
@@ -859,13 +815,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         ReadPreference = this.configuration.mongo.ReadPreference,
         Long = this.configuration.mongo.BSON.Long;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var secondSecondaryServer = null;
       var electionIds = [new ObjectId(), new ObjectId()];
-
-      // Default message fields
       var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
@@ -908,9 +858,9 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mock.createServer(32002, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -938,67 +888,64 @@ describe('ReplSet Read Preferences (mocks)', function() {
             request.reply({ waitedMS: Long.fromNumber(3), n: 1, ok: 1 });
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new ReplSet(
-        [
-          { host: 'localhost', port: 32000 },
-          { host: 'localhost', port: 32001 },
-          { host: 'localhost', port: 32002 }
-        ],
-        {
-          setName: 'rs',
-          connectionTimeout: 3000,
-          socketTimeout: 0,
-          haInterval: 1000,
-          size: 1
-        }
-      );
+        // Attempt to connect
+        var server = new ReplSet(
+          [
+            { host: 'localhost', port: 32000 },
+            { host: 'localhost', port: 32001 },
+            { host: 'localhost', port: 32002 }
+          ],
+          {
+            setName: 'rs',
+            connectionTimeout: 3000,
+            socketTimeout: 0,
+            haInterval: 1000,
+            size: 1
+          }
+        );
 
-      // Add event listeners
-      server.on('connect', function(_server) {
-        // Set up a write
-        function schedule() {
-          _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries
-            .sort((a, b) => {
-              Number(a.ismaster.me.split(':')[1]) < Number(b.ismaster.me.split(':')[1]);
-            })
-            .map((x, i) => {
-              x.lastIsMasterMS = i * 50;
-              return x;
-            });
+        // Add event listeners
+        server.on('connect', function(_server) {
+          // Set up a write
+          function schedule() {
+            _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries
+              .sort((a, b) => {
+                Number(a.ismaster.me.split(':')[1]) < Number(b.ismaster.me.split(':')[1]);
+              })
+              .map((x, i) => {
+                x.lastIsMasterMS = i * 50;
+                return x;
+              });
 
-          // Perform a find
-          _server.command(
-            'test.test',
-            {
-              count: 'test.test',
-              batchSize: 2
-            },
-            {
-              readPreference: new ReadPreference('nearest')
-            },
-            function(err, r) {
-              expect(err).to.be.null;
-              expect(r.connection.port).to.be.oneOf([32000, 32001]);
+            // Perform a find
+            _server.command(
+              'test.test',
+              {
+                count: 'test.test',
+                batchSize: 2
+              },
+              {
+                readPreference: new ReadPreference('nearest')
+              },
+              function(err, r) {
+                expect(err).to.be.null;
+                expect(r.connection.port).to.be.oneOf([32000, 32001]);
 
-              server.destroy();
-              done();
-            }
-          );
-        }
+                server.destroy();
+                done();
+              }
+            );
+          }
 
-        // Schedule an insert
-        setTimeout(function() {
-          schedule();
-        }, 2000);
-      });
+          // Schedule an insert
+          setTimeout(function() {
+            schedule();
+          }, 2000);
+        });
 
-      // Gives proxies a chance to boot up
-      setTimeout(function() {
         server.connect();
-      }, 100);
+      });
     }
   });
 
@@ -1016,13 +963,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         ReadPreference = this.configuration.mongo.ReadPreference,
         Long = this.configuration.mongo.BSON.Long;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var secondSecondaryServer = null;
       var electionIds = [new ObjectId(), new ObjectId()];
-
-      // Default message fields
       var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
@@ -1065,9 +1006,9 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mock.createServer(32002, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -1095,65 +1036,62 @@ describe('ReplSet Read Preferences (mocks)', function() {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new ReplSet(
-        [
-          { host: 'localhost', port: 32000 },
-          { host: 'localhost', port: 32001 },
-          { host: 'localhost', port: 32002 }
-        ],
-        {
-          setName: 'rs',
-          connectionTimeout: 3000,
-          socketTimeout: 0,
-          haInterval: 1000,
-          size: 1
-        }
-      );
+        // Attempt to connect
+        var server = new ReplSet(
+          [
+            { host: 'localhost', port: 32000 },
+            { host: 'localhost', port: 32001 },
+            { host: 'localhost', port: 32002 }
+          ],
+          {
+            setName: 'rs',
+            connectionTimeout: 3000,
+            socketTimeout: 0,
+            haInterval: 1000,
+            size: 1
+          }
+        );
 
-      // Add event listeners
-      server.on('connect', function(_server) {
-        // Set up a write
-        function schedule() {
-          _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries.map(
-            function(x, i) {
-              x.lastIsMasterMS = i * 20;
-              return x;
-            }
-          );
+        // Add event listeners
+        server.on('connect', function(_server) {
+          // Set up a write
+          function schedule() {
+            _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries.map(
+              function(x, i) {
+                x.lastIsMasterMS = i * 20;
+                return x;
+              }
+            );
 
-          // Perform a find
-          _server.command(
-            'test.test',
-            {
-              count: 'test.test',
-              batchSize: 2
-            },
-            {
-              readPreference: new ReadPreference('nearest', { loc: 'dc' })
-            },
-            function(err, r) {
-              expect(err).to.be.null;
-              expect(r.connection.port).to.be.oneOf([32001, 32002]);
+            // Perform a find
+            _server.command(
+              'test.test',
+              {
+                count: 'test.test',
+                batchSize: 2
+              },
+              {
+                readPreference: new ReadPreference('nearest', { loc: 'dc' })
+              },
+              function(err, r) {
+                expect(err).to.be.null;
+                expect(r.connection.port).to.be.oneOf([32001, 32002]);
 
-              server.destroy();
-              done();
-            }
-          );
-        }
+                server.destroy();
+                done();
+              }
+            );
+          }
 
-        // Schedule an insert
-        setTimeout(function() {
-          schedule();
-        }, 2000);
-      });
+          // Schedule an insert
+          setTimeout(function() {
+            schedule();
+          }, 2000);
+        });
 
-      // Gives proxies a chance to boot up
-      setTimeout(function() {
         server.connect();
-      }, 100);
+      });
     }
   });
 
@@ -1173,11 +1111,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
           ReadPreference = this.configuration.mongo.ReadPreference,
           Long = this.configuration.mongo.BSON.Long;
 
-        // Contain mock server
-        var primaryServer = null;
         var electionIds = [new ObjectId(), new ObjectId()];
-
-        // Default message fields
         var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
           setVersion: 1,
@@ -1198,7 +1132,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
         // Boot the mock
         co(function*() {
-          primaryServer = yield mock.createServer(32000, 'localhost');
+          const primaryServer = yield mock.createServer(32000, 'localhost');
 
           primaryServer.setMessageHandler(request => {
             var doc = request.document;
@@ -1208,51 +1142,48 @@ describe('ReplSet Read Preferences (mocks)', function() {
               request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
             }
           });
-        });
 
-        // Attempt to connect
-        var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
-          setName: 'rs',
-          connectionTimeout: 3000,
-          socketTimeout: 0,
-          haInterval: 2000,
-          size: 1
-        });
+          // Attempt to connect
+          var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
+            setName: 'rs',
+            connectionTimeout: 3000,
+            socketTimeout: 0,
+            haInterval: 2000,
+            size: 1
+          });
 
-        // Add event listeners
-        server.on('connect', function(_server) {
-          // Set up a write
-          function schedule() {
-            setTimeout(function() {
-              // Perform a find
-              _server.command(
-                'test.test',
-                {
-                  count: 'test.test',
-                  batchSize: 2
-                },
-                {
-                  readPreference: new ReadPreference('secondaryPreferred')
-                },
-                function(err, r) {
-                  expect(err).to.be.null;
-                  expect(r.connection.port).to.equal(32000);
+          // Add event listeners
+          server.on('connect', function(_server) {
+            // Set up a write
+            function schedule() {
+              setTimeout(function() {
+                // Perform a find
+                _server.command(
+                  'test.test',
+                  {
+                    count: 'test.test',
+                    batchSize: 2
+                  },
+                  {
+                    readPreference: new ReadPreference('secondaryPreferred')
+                  },
+                  function(err, r) {
+                    expect(err).to.be.null;
+                    expect(r.connection.port).to.equal(32000);
 
-                  server.destroy();
-                  done();
-                }
-              );
-            }, 500);
-          }
+                    server.destroy();
+                    done();
+                  }
+                );
+              }, 500);
+            }
 
-          // Schedule an insert
-          schedule();
-        });
+            // Schedule an insert
+            schedule();
+          });
 
-        // Gives proxies a chance to boot up
-        setTimeout(function() {
           server.connect();
-        }, 100);
+        });
       }
     }
   );
@@ -1271,13 +1202,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         ReadPreference = this.configuration.mongo.ReadPreference,
         Long = this.configuration.mongo.BSON.Long;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var secondSecondaryServer = null;
       var electionIds = [new ObjectId(), new ObjectId()];
-
-      // Default message fields
       var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
@@ -1320,9 +1245,9 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mock.createServer(32002, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -1350,69 +1275,66 @@ describe('ReplSet Read Preferences (mocks)', function() {
             request.reply({ waitedMS: Long.ZERO, n: 1, ok: 1 });
           }
         });
-      });
 
-      // Attempt to connect
-      var server = new ReplSet(
-        [
-          { host: 'localhost', port: 32000 },
-          { host: 'localhost', port: 32001 },
-          { host: 'localhost', port: 32002 }
-        ],
-        {
-          setName: 'rs',
-          connectionTimeout: 3000,
-          socketTimeout: 0,
-          haInterval: 2000,
-          size: 1
-        }
-      );
-
-      // Add event listeners
-      server.on('all', function(_server) {
-        // Execute more operations than there is servers connected
-        setTimeout(function() {
-          var count = 50;
-          var portsSeen = {};
-
-          var checkHandler = function(err, r) {
-            count = count - 1;
-            expect(err).to.be.null;
-
-            // Add the port to the portsSeen
-            portsSeen[r.connection.port] = true;
-
-            // Finished up
-            if (count === 0) {
-              // Should not contain the primary
-              expect(portsSeen).to.not.have.key('32000');
-
-              server.destroy();
-              done();
-            }
-          };
-
-          for (var i = 0; i < 50; i++) {
-            // Perform a find
-            _server.command(
-              'test.test',
-              {
-                count: 'test.test',
-                batchSize: 2
-              },
-              {
-                readPreference: new ReadPreference('secondaryPreferred')
-              },
-              checkHandler
-            );
+        // Attempt to connect
+        var server = new ReplSet(
+          [
+            { host: 'localhost', port: 32000 },
+            { host: 'localhost', port: 32001 },
+            { host: 'localhost', port: 32002 }
+          ],
+          {
+            setName: 'rs',
+            connectionTimeout: 3000,
+            socketTimeout: 0,
+            haInterval: 2000,
+            size: 1
           }
-        }, 1000);
-      });
+        );
 
-      // Gives proxies a chance to boot up
-      setTimeout(function() {
+        // Add event listeners
+        server.on('all', function(_server) {
+          // Execute more operations than there is servers connected
+          setTimeout(function() {
+            var count = 50;
+            var portsSeen = {};
+
+            var checkHandler = function(err, r) {
+              count = count - 1;
+              expect(err).to.be.null;
+
+              // Add the port to the portsSeen
+              portsSeen[r.connection.port] = true;
+
+              // Finished up
+              if (count === 0) {
+                // Should not contain the primary
+                expect(portsSeen).to.not.have.key('32000');
+
+                server.destroy();
+                done();
+              }
+            };
+
+            for (var i = 0; i < 50; i++) {
+              // Perform a find
+              _server.command(
+                'test.test',
+                {
+                  count: 'test.test',
+                  batchSize: 2
+                },
+                {
+                  readPreference: new ReadPreference('secondaryPreferred')
+                },
+                checkHandler
+              );
+            }
+          }, 1000);
+        });
+
         server.connect();
-      }, 100);
+      });
     }
   });
 });

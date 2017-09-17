@@ -2,7 +2,8 @@
 var Server = require('../../../../lib/topologies/server'),
   expect = require('chai').expect,
   co = require('co'),
-  mock = require('../../../mock');
+  mock = require('../../../mock'),
+  assign = require('../../../../lib/utils').assign;
 
 // NOTE: eventually use `this.configuration.mongo.Server` instead of direct import when
 // https://github.com/malexandert/mongodb-test-runner/issues/3 is fixed
@@ -19,49 +20,35 @@ describe('Single Compression (mocks)', function() {
     },
 
     test: function(done) {
-      // Contain mock server
-      var server = null;
-
       // Prepare the server's response
-      var serverResponse = {
-        ismaster: true,
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 3,
-        minWireVersion: 0,
-        ok: 1
-      };
+      var serverResponse = assign({}, mock.DEFAULT_ISMASTER);
 
       // Boot the mock
       co(function*() {
-        server = yield mock.createServer(37046, 'localhost');
+        const server = yield mock.createServer(37046, 'localhost');
 
         server.setMessageHandler(request => {
           expect(request.response.documents[0].compression).to.have.members(['snappy', 'zlib']);
           request.reply(serverResponse);
         });
-      });
 
-      // Attempt to connect
-      var client = new Server({
-        host: 'localhost',
-        port: '37046',
-        connectionTimeout: 5000,
-        socketTimeout: 1000,
-        size: 1,
-        compression: { compressors: ['snappy', 'zlib'], zlibCompressionLevel: -1 }
-      });
+        // Attempt to connect
+        var client = new Server({
+          host: 'localhost',
+          port: '37046',
+          connectionTimeout: 5000,
+          socketTimeout: 1000,
+          size: 1,
+          compression: { compressors: ['snappy', 'zlib'], zlibCompressionLevel: -1 }
+        });
 
-      client.on('connect', function() {
-        client.destroy();
-        done();
-      });
+        client.on('connect', function() {
+          client.destroy();
+          done();
+        });
 
-      setTimeout(function() {
         client.connect();
-      }, 100);
+      });
     }
   });
 
@@ -76,25 +63,14 @@ describe('Single Compression (mocks)', function() {
       },
 
       test: function(done) {
-        // Contain mock server
-        var server = null;
         var currentStep = 0;
 
         // Prepare the server's response
-        let serverResponse = {
-          ismaster: true,
-          maxBsonObjectSize: 16777216,
-          maxMessageSizeBytes: 48000000,
-          maxWriteBatchSize: 1000,
-          localTime: new Date(),
-          maxWireVersion: 3,
-          minWireVersion: 0,
-          ok: 1
-        };
+        let serverResponse = assign({}, mock.DEFAULT_ISMASTER);
 
         // Boot the mock
         co(function*() {
-          server = yield mock.createServer(37047, 'localhost');
+          const server = yield mock.createServer(37047, 'localhost');
 
           server.setMessageHandler(request => {
             var doc = request.document;
@@ -121,49 +97,50 @@ describe('Single Compression (mocks)', function() {
             }
             currentStep++;
           });
-        });
 
-        // Attempt to connect
-        var client = new Server({
-          host: 'localhost',
-          port: '37047',
-          connectionTimeout: 5000,
-          socketTimeout: 1000,
-          size: 1,
-          compression: { compressors: ['snappy', 'zlib'] }
-        });
+          // Attempt to connect
+          var client = new Server({
+            host: 'localhost',
+            port: '37047',
+            connectionTimeout: 5000,
+            socketTimeout: 1000,
+            size: 1,
+            compression: { compressors: ['snappy', 'zlib'] }
+          });
 
-        // Connect and try inserting, updating, and removing
-        // All outbound messages from the driver will be uncompressed
-        // Inbound messages from the server should be OP_COMPRESSED with no compression
-        client.on('connect', function(_server) {
-          _server.insert('test.test', [{ a: 1, created: new Date() }], function(err, r) {
-            expect(err).to.be.null;
-            expect(r.result.n).to.equal(1);
+          // Connect and try inserting, updating, and removing
+          // All outbound messages from the driver will be uncompressed
+          // Inbound messages from the server should be OP_COMPRESSED with no compression
+          client.on('connect', function(_server) {
+            _server.insert('test.test', [{ a: 1, created: new Date() }], function(err, r) {
+              expect(err).to.be.null;
+              expect(r.result.n).to.equal(1);
 
-            _server.update('test.test', { q: { a: 1 }, u: { $set: { b: 1 } } }, function(_err, _r) {
-              expect(_err).to.be.null;
-              expect(_r.result.n).to.equal(1);
+              _server.update('test.test', { q: { a: 1 }, u: { $set: { b: 1 } } }, function(
+                _err,
+                _r
+              ) {
+                expect(_err).to.be.null;
+                expect(_r.result.n).to.equal(1);
 
-              _server.remove('test.test', { q: { a: 1 } }, function(__err, __r) {
-                expect(__err).to.be.null;
-                expect(__r.result.n).to.equal(1);
+                _server.remove('test.test', { q: { a: 1 } }, function(__err, __r) {
+                  expect(__err).to.be.null;
+                  expect(__r.result.n).to.equal(1);
 
-                _server.command('system.$cmd', { ping: 1 }, function(___err, ___r) {
-                  expect(___err).to.be.null;
-                  expect(___r.result.ok).to.equal(1);
+                  _server.command('system.$cmd', { ping: 1 }, function(___err, ___r) {
+                    expect(___err).to.be.null;
+                    expect(___r.result.ok).to.equal(1);
 
-                  client.destroy();
-                  done();
+                    client.destroy();
+                    done();
+                  });
                 });
               });
             });
           });
-        });
 
-        setTimeout(function() {
           client.connect();
-        }, 100);
+        });
       }
     }
   );
@@ -179,26 +156,16 @@ describe('Single Compression (mocks)', function() {
       },
 
       test: function(done) {
-        // Contain mock server
-        var server = null;
         var currentStep = 0;
 
         // Prepare the server's response
-        var serverResponse = {
-          ismaster: true,
-          maxBsonObjectSize: 16777216,
-          maxMessageSizeBytes: 48000000,
-          maxWriteBatchSize: 1000,
-          localTime: new Date(),
-          maxWireVersion: 3,
-          minWireVersion: 0,
-          compression: ['snappy'],
-          ok: 1
-        };
+        var serverResponse = assign({}, mock.DEFAULT_ISMASTER, {
+          compression: ['snappy']
+        });
 
         // Boot the mock
         co(function*() {
-          server = yield mock.createServer(37048, 'localhost');
+          const server = yield mock.createServer(37048, 'localhost');
 
           server.setMessageHandler(request => {
             var doc = request.document;
@@ -224,49 +191,50 @@ describe('Single Compression (mocks)', function() {
             }
             currentStep++;
           });
-        });
 
-        // Attempt to connect
-        var client = new Server({
-          host: 'localhost',
-          port: '37048',
-          connectionTimeout: 5000,
-          socketTimeout: 1000,
-          size: 1,
-          compression: { compressors: ['snappy', 'zlib'] }
-        });
+          // Attempt to connect
+          var client = new Server({
+            host: 'localhost',
+            port: '37048',
+            connectionTimeout: 5000,
+            socketTimeout: 1000,
+            size: 1,
+            compression: { compressors: ['snappy', 'zlib'] }
+          });
 
-        // Connect and try inserting, updating, and removing
-        // All outbound messages from the driver (after initial connection) will be OP_COMPRESSED using snappy
-        // Inbound messages from the server should be OP_COMPRESSED with snappy
-        client.on('connect', function(_server) {
-          _server.insert('test.test', [{ a: 1, created: new Date() }], function(err, r) {
-            expect(err).to.be.null;
-            expect(r.result.n).to.equal(1);
+          // Connect and try inserting, updating, and removing
+          // All outbound messages from the driver (after initial connection) will be OP_COMPRESSED using snappy
+          // Inbound messages from the server should be OP_COMPRESSED with snappy
+          client.on('connect', function(_server) {
+            _server.insert('test.test', [{ a: 1, created: new Date() }], function(err, r) {
+              expect(err).to.be.null;
+              expect(r.result.n).to.equal(1);
 
-            _server.update('test.test', { q: { a: 1 }, u: { $set: { b: 1 } } }, function(_err, _r) {
-              expect(_err).to.be.null;
-              expect(_r.result.n).to.equal(1);
+              _server.update('test.test', { q: { a: 1 }, u: { $set: { b: 1 } } }, function(
+                _err,
+                _r
+              ) {
+                expect(_err).to.be.null;
+                expect(_r.result.n).to.equal(1);
 
-              _server.remove('test.test', { q: { a: 1 } }, function(__err, __r) {
-                expect(__err).to.be.null;
-                expect(__r.result.n).to.equal(1);
+                _server.remove('test.test', { q: { a: 1 } }, function(__err, __r) {
+                  expect(__err).to.be.null;
+                  expect(__r.result.n).to.equal(1);
 
-                _server.command('system.$cmd', { ping: 1 }, function(___err, ___r) {
-                  expect(___err).to.be.null;
-                  expect(___r.result.ok).to.equal(1);
+                  _server.command('system.$cmd', { ping: 1 }, function(___err, ___r) {
+                    expect(___err).to.be.null;
+                    expect(___r.result.ok).to.equal(1);
 
-                  client.destroy();
-                  done();
+                    client.destroy();
+                    done();
+                  });
                 });
               });
             });
           });
-        });
 
-        setTimeout(function() {
           client.connect();
-        }, 100);
+        });
       }
     }
   );
@@ -287,17 +255,9 @@ describe('Single Compression (mocks)', function() {
         var currentStep = 0;
 
         // Prepare the server's response
-        var serverResponse = {
-          ismaster: true,
-          maxBsonObjectSize: 16777216,
-          maxMessageSizeBytes: 48000000,
-          maxWriteBatchSize: 1000,
-          localTime: new Date(),
-          maxWireVersion: 3,
-          minWireVersion: 0,
-          compression: ['zlib'],
-          ok: 1
-        };
+        var serverResponse = assign({}, mock.DEFAULT_ISMASTER, {
+          compression: ['zlib']
+        });
 
         // Boot the mock
         co(function*() {
@@ -327,49 +287,50 @@ describe('Single Compression (mocks)', function() {
             }
             currentStep++;
           });
-        });
 
-        // Attempt to connect
-        var client = new Server({
-          host: 'localhost',
-          port: '37049',
-          connectionTimeout: 5000,
-          socketTimeout: 1000,
-          size: 1,
-          compression: { compressors: ['snappy', 'zlib'] }
-        });
+          // Attempt to connect
+          var client = new Server({
+            host: 'localhost',
+            port: '37049',
+            connectionTimeout: 5000,
+            socketTimeout: 1000,
+            size: 1,
+            compression: { compressors: ['snappy', 'zlib'] }
+          });
 
-        // Connect and try inserting, updating, and removing
-        // All outbound messages from the driver (after initial connection) will be OP_COMPRESSED using zlib
-        // Inbound messages from the server should be OP_COMPRESSED with zlib
-        client.on('connect', function(_server) {
-          _server.insert('test.test', [{ a: 1, created: new Date() }], function(err, r) {
-            expect(err).to.be.null;
-            expect(r.result.n).to.equal(1);
+          // Connect and try inserting, updating, and removing
+          // All outbound messages from the driver (after initial connection) will be OP_COMPRESSED using zlib
+          // Inbound messages from the server should be OP_COMPRESSED with zlib
+          client.on('connect', function(_server) {
+            _server.insert('test.test', [{ a: 1, created: new Date() }], function(err, r) {
+              expect(err).to.be.null;
+              expect(r.result.n).to.equal(1);
 
-            _server.update('test.test', { q: { a: 1 }, u: { $set: { b: 1 } } }, function(_err, _r) {
-              expect(_err).to.be.null;
-              expect(_r.result.n).to.equal(1);
+              _server.update('test.test', { q: { a: 1 }, u: { $set: { b: 1 } } }, function(
+                _err,
+                _r
+              ) {
+                expect(_err).to.be.null;
+                expect(_r.result.n).to.equal(1);
 
-              _server.remove('test.test', { q: { a: 1 } }, function(__err, __r) {
-                expect(__err).to.be.null;
-                expect(__r.result.n).to.equal(1);
+                _server.remove('test.test', { q: { a: 1 } }, function(__err, __r) {
+                  expect(__err).to.be.null;
+                  expect(__r.result.n).to.equal(1);
 
-                _server.command('system.$cmd', { ping: 1 }, function(___err, ___r) {
-                  expect(___err).to.be.null;
-                  expect(___r.result.ok).to.equal(1);
+                  _server.command('system.$cmd', { ping: 1 }, function(___err, ___r) {
+                    expect(___err).to.be.null;
+                    expect(___r.result.ok).to.equal(1);
 
-                  client.destroy();
-                  done();
+                    client.destroy();
+                    done();
+                  });
                 });
               });
             });
           });
-        });
 
-        setTimeout(function() {
           client.connect();
-        }, 100);
+        });
       }
     }
   );
@@ -388,17 +349,9 @@ describe('Single Compression (mocks)', function() {
       var currentStep = 0;
 
       // Prepare the server's response
-      var serverResponse = {
-        ismaster: true,
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 3,
-        minWireVersion: 0,
-        compression: ['snappy'],
-        ok: 1
-      };
+      var serverResponse = assign({}, mock.DEFAULT_ISMASTER, {
+        compression: ['snappy']
+      });
 
       // Boot the mock
       co(function*() {
@@ -421,47 +374,45 @@ describe('Single Compression (mocks)', function() {
           }
           currentStep++;
         });
-      });
 
-      // Attempt to connect
-      var client = new Server({
-        host: 'localhost',
-        port: '37050',
-        connectionTimeout: 5000,
-        socketTimeout: 1000,
-        size: 1,
-        compression: { compressors: ['snappy', 'zlib'] }
-      });
+        // Attempt to connect
+        var client = new Server({
+          host: 'localhost',
+          port: '37050',
+          connectionTimeout: 5000,
+          socketTimeout: 1000,
+          size: 1,
+          compression: { compressors: ['snappy', 'zlib'] }
+        });
 
-      // Connect and try some commands, checking that uncompressible commands are indeed not compressed
-      client.on('connect', function(_server) {
-        _server.command('system.$cmd', { ping: 1 }, function(err, r) {
-          expect(err).to.be.null;
-          expect(r.result.ok).to.equal(1);
+        // Connect and try some commands, checking that uncompressible commands are indeed not compressed
+        client.on('connect', function(_server) {
+          _server.command('system.$cmd', { ping: 1 }, function(err, r) {
+            expect(err).to.be.null;
+            expect(r.result.ok).to.equal(1);
 
-          _server.command('system.$cmd', { ismaster: 1 }, function(_err, _r) {
-            expect(_err).to.be.null;
-            expect(_r.result.ok).to.equal(1);
+            _server.command('system.$cmd', { ismaster: 1 }, function(_err, _r) {
+              expect(_err).to.be.null;
+              expect(_r.result.ok).to.equal(1);
 
-            _server.command('system.$cmd', { getnonce: 1 }, function(__err, __r) {
-              expect(__err).to.be.null;
-              expect(__r.result.ok).to.equal(1);
+              _server.command('system.$cmd', { getnonce: 1 }, function(__err, __r) {
+                expect(__err).to.be.null;
+                expect(__r.result.ok).to.equal(1);
 
-              _server.command('system.$cmd', { ismaster: 1 }, function(___err, ___r) {
-                expect(___err).to.be.null;
-                expect(___r.result.ok).to.equal(1);
+                _server.command('system.$cmd', { ismaster: 1 }, function(___err, ___r) {
+                  expect(___err).to.be.null;
+                  expect(___r.result.ok).to.equal(1);
 
-                client.destroy();
-                done();
+                  client.destroy();
+                  done();
+                });
               });
             });
           });
         });
-      });
 
-      setTimeout(function() {
         client.connect();
-      }, 100);
+      });
     }
   });
 });

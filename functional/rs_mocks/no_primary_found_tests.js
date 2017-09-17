@@ -31,13 +31,6 @@ describe('ReplSet No Primary Found (mocks)', function() {
       var ReplSet = this.configuration.mongo.ReplSet,
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var secondSecondaryServer = null;
-      var arbiterServer = null;
-
-      // Default message fields
       var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
@@ -89,10 +82,10 @@ describe('ReplSet No Primary Found (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mock.createServer(32002, 'localhost');
-        arbiterServer = yield mock.createServer(32003, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
+        const arbiterServer = yield mock.createServer(32003, 'localhost');
 
         primaryServer.setMessageHandler(request => {
           var doc = request.document;
@@ -125,27 +118,25 @@ describe('ReplSet No Primary Found (mocks)', function() {
             }
           }, 9000000); // never respond?
         });
-      });
 
-      // Attempt to connect
-      var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
-        setName: 'rs',
-        connectionTimeout: 2000,
-        socketTimeout: 4000,
-        haInterval: 2000,
-        size: 1
-      });
+        // Attempt to connect
+        var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
+          setName: 'rs',
+          connectionTimeout: 2000,
+          socketTimeout: 4000,
+          haInterval: 2000,
+          size: 1
+        });
 
-      // Add event listeners
-      server.on('connect', function() {
-        server.destroy();
-        done();
-      });
+        // Add event listeners
+        server.on('connect', function() {
+          server.destroy();
+          done();
+        });
 
-      server.on('error', done);
-      setTimeout(function() {
+        server.on('error', done);
         server.connect();
-      }, 100);
+      });
     }
   });
 });
