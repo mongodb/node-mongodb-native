@@ -1,37 +1,55 @@
+'use strict';
+
 var Server = require('./lib/server');
 
-const cleanup = (servers, spy, callback) => {
+let mockServers = [];
+const cleanup = (spy, callback) => {
   if (typeof spy === 'function') {
     callback = spy;
     spy = undefined;
   }
 
-  if (!Array.isArray(servers)) {
-    throw new Error('First argument must be an array of mock servers');
-  }
-
   if (spy) {
     const alreadyDrained = spy.connectionCount() === 0;
-    const finish = () => {
-      callback(null, null);
-    };
+    const drainedPromise = !alreadyDrained
+      ? new Promise(resolve => spy.once('drained', () => resolve()))
+      : Promise.resolve();
 
-    if (!alreadyDrained) {
-      spy.once('drained', () => finish());
+    const cleanupPromise = Promise.all(mockServers.map(server => server.destroy()))
+      .then(drainedPromise)
+      .then(() => {
+        mockServers = [];
+      })
+      .catch(err => {
+        mockServers = [];
+        throw err;
+      });
+
+    if (typeof callback !== 'function') {
+      return cleanupPromise;
     }
 
-    const cleanupPromise = Promise.all(servers.map(server => server.destroy())).catch(err =>
-      callback(err, null)
-    );
-
-    if (alreadyDrained) {
-      cleanupPromise.then(() => finish());
-    }
+    return cleanupPromise.then(() => callback(null, null)).catch(err => callback(err, null));
   } else {
-    Promise.all(servers.map(server => server.destroy()))
-      .then(() => callback(null, null))
-      .catch(err => callback(err, null));
+    const cleanupPromise = Promise.all(mockServers.map(server => server.destroy()));
+    if (typeof callback !== 'function') {
+      return cleanupPromise;
+    }
+
+    return cleanupPromise.then(() => callback(null, null)).catch(err => callback(err, null));
   }
+};
+
+// Default message fields
+const DEFAULT_ISMASTER = {
+  ismaster: true,
+  maxBsonObjectSize: 16777216,
+  maxMessageSizeBytes: 48000000,
+  maxWriteBatchSize: 1000,
+  localTime: new Date(),
+  maxWireVersion: 5,
+  minWireVersion: 0,
+  ok: 1
 };
 
 /*
@@ -40,8 +58,11 @@ const cleanup = (servers, spy, callback) => {
 module.exports = {
   createServer: function(port, host, options) {
     options = options || {};
-    return new Server(port, host, options).start();
+    let mockServer = new Server(port, host, options);
+    mockServers.push(mockServer);
+    return mockServer.start();
   },
 
-  cleanup: cleanup
+  cleanup: cleanup,
+  DEFAULT_ISMASTER: DEFAULT_ISMASTER
 };
