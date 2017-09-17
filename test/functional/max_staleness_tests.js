@@ -2,9 +2,11 @@
 var expect = require('chai').expect;
 var assign = require('../../lib/utils').assign;
 var co = require('co');
-var mockupdb = require('../mock');
+var mock = require('../mock');
 
 describe('Max Staleness', function() {
+  afterEach(() => mock.cleanup());
+
   it('should correctly set maxStalenessSeconds on Mongos query using MongoClient.connect', {
     metadata: {
       requires: {
@@ -18,22 +20,9 @@ describe('Max Staleness', function() {
         MongoClient = self.configuration.require.MongoClient,
         Long = self.configuration.require.Long;
 
-      // Contain mock server
-      var mongos1 = null;
-      var running = true;
-
-      // Default message fields
-      var defaultFields = {
-        ismaster: true,
-        msg: 'isdbgrid',
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 5,
-        minWireVersion: 0,
-        ok: 1
-      };
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+        msg: 'isdbgrid'
+      });
 
       // Primary server states
       var serverIsMaster = [assign({}, defaultFields)];
@@ -41,32 +30,25 @@ describe('Max Staleness', function() {
       var command = null;
       // Boot the mock
       co(function*() {
-        mongos1 = yield mockupdb.createServer(62001, 'localhost');
+        const mongos1 = yield mock.createServer(62001, 'localhost');
 
-        // Mongos
-        co(function*() {
-          while (running) {
-            var request = yield mongos1.receive();
-
-            // Get the document
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc['$query'] && doc['$readPreference']) {
-              command = doc;
-              request.reply({
-                waitedMS: Long.ZERO,
-                cursor: {
-                  id: Long.ZERO,
-                  ns: 'test.t',
-                  firstBatch: []
-                },
-                ok: 1
-              });
-            }
+        mongos1.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc['$query'] && doc['$readPreference']) {
+            command = doc;
+            request.reply({
+              waitedMS: Long.ZERO,
+              cursor: {
+                id: Long.ZERO,
+                ns: 'test.t',
+                firstBatch: []
+              },
+              ok: 1
+            });
           }
-        }).catch(function() {});
+        });
 
         MongoClient.connect(
           'mongodb://localhost:62001/test?readPreference=secondary&maxStalenessSeconds=250',
@@ -85,8 +67,6 @@ describe('Max Staleness', function() {
                 });
 
                 client.close();
-                mongos1.destroy();
-                running = false;
                 done();
               });
           }
@@ -109,22 +89,10 @@ describe('Max Staleness', function() {
         ReadPreference = self.configuration.require.ReadPreference,
         Long = self.configuration.require.Long;
 
-      // Contain mock server
-      var mongos1 = null;
-      var running = true;
-
       // Default message fields
-      var defaultFields = {
-        ismaster: true,
-        msg: 'isdbgrid',
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 5,
-        minWireVersion: 0,
-        ok: 1
-      };
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+        msg: 'isdbgrid'
+      });
 
       // Primary server states
       var serverIsMaster = [assign({}, defaultFields)];
@@ -132,32 +100,26 @@ describe('Max Staleness', function() {
       var command = null;
       // Boot the mock
       co(function*() {
-        mongos1 = yield mockupdb.createServer(62002, 'localhost');
+        const mongos1 = yield mock.createServer(62002, 'localhost');
 
-        // Mongos
-        co(function*() {
-          while (running) {
-            var request = yield mongos1.receive();
+        mongos1.setMessageHandler(request => {
+          var doc = request.document;
 
-            // Get the document
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc['$query'] && doc['$readPreference']) {
-              command = doc;
-              request.reply({
-                waitedMS: Long.ZERO,
-                cursor: {
-                  id: Long.ZERO,
-                  ns: 'test.t',
-                  firstBatch: []
-                },
-                ok: 1
-              });
-            }
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc['$query'] && doc['$readPreference']) {
+            command = doc;
+            request.reply({
+              waitedMS: Long.ZERO,
+              cursor: {
+                id: Long.ZERO,
+                ns: 'test.t',
+                firstBatch: []
+              },
+              ok: 1
+            });
           }
-        }).catch(function() {});
+        });
 
         MongoClient.connect('mongodb://localhost:62002/test', function(err, client) {
           expect(err).to.not.exist;
@@ -178,8 +140,6 @@ describe('Max Staleness', function() {
               });
 
               client.close();
-              mongos1.destroy();
-              running = false;
               done();
             });
         });
@@ -203,22 +163,10 @@ describe('Max Staleness', function() {
           ReadPreference = self.configuration.require.ReadPreference,
           Long = self.configuration.require.Long;
 
-        // Contain mock server
-        var mongos1 = null;
-        var running = true;
-
         // Default message fields
-        var defaultFields = {
-          ismaster: true,
-          msg: 'isdbgrid',
-          maxBsonObjectSize: 16777216,
-          maxMessageSizeBytes: 48000000,
-          maxWriteBatchSize: 1000,
-          localTime: new Date(),
-          maxWireVersion: 5,
-          minWireVersion: 0,
-          ok: 1
-        };
+        var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+          msg: 'isdbgrid'
+        });
 
         // Primary server states
         var serverIsMaster = [assign({}, defaultFields)];
@@ -226,32 +174,26 @@ describe('Max Staleness', function() {
         var command = null;
         // Boot the mock
         co(function*() {
-          mongos1 = yield mockupdb.createServer(62003, 'localhost');
+          const mongos1 = yield mock.createServer(62003, 'localhost');
 
-          // Mongos
-          co(function*() {
-            while (running) {
-              var request = yield mongos1.receive();
+          mongos1.setMessageHandler(request => {
+            var doc = request.document;
 
-              // Get the document
-              var doc = request.document;
-
-              if (doc.ismaster) {
-                request.reply(serverIsMaster[0]);
-              } else if (doc['$query'] && doc['$readPreference']) {
-                command = doc;
-                request.reply({
-                  waitedMS: Long.ZERO,
-                  cursor: {
-                    id: Long.ZERO,
-                    ns: 'test.t',
-                    firstBatch: []
-                  },
-                  ok: 1
-                });
-              }
+            if (doc.ismaster) {
+              request.reply(serverIsMaster[0]);
+            } else if (doc['$query'] && doc['$readPreference']) {
+              command = doc;
+              request.reply({
+                waitedMS: Long.ZERO,
+                cursor: {
+                  id: Long.ZERO,
+                  ns: 'test.t',
+                  firstBatch: []
+                },
+                ok: 1
+              });
             }
-          }).catch(function() {});
+          });
 
           MongoClient.connect('mongodb://localhost:62003/test', function(err, client) {
             expect(err).to.not.exist;
@@ -271,8 +213,6 @@ describe('Max Staleness', function() {
                 });
 
                 client.close();
-                mongos1.destroy();
-                running = false;
                 done();
               });
           });
@@ -295,22 +235,10 @@ describe('Max Staleness', function() {
         ReadPreference = self.configuration.require.ReadPreference,
         Long = self.configuration.require.Long;
 
-      // Contain mock server
-      var mongos1 = null;
-      var running = true;
-
       // Default message fields
-      var defaultFields = {
-        ismaster: true,
-        msg: 'isdbgrid',
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 5,
-        minWireVersion: 0,
-        ok: 1
-      };
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+        msg: 'isdbgrid'
+      });
 
       // Primary server states
       var serverIsMaster = [assign({}, defaultFields)];
@@ -318,32 +246,26 @@ describe('Max Staleness', function() {
       var command = null;
       // Boot the mock
       co(function*() {
-        mongos1 = yield mockupdb.createServer(62004, 'localhost');
+        const mongos1 = yield mock.createServer(62004, 'localhost');
 
-        // Mongos
-        co(function*() {
-          while (running) {
-            var request = yield mongos1.receive();
+        mongos1.setMessageHandler(request => {
+          var doc = request.document;
 
-            // Get the document
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc['$query'] && doc['$readPreference']) {
-              command = doc;
-              request.reply({
-                waitedMS: Long.ZERO,
-                cursor: {
-                  id: Long.ZERO,
-                  ns: 'test.t',
-                  firstBatch: []
-                },
-                ok: 1
-              });
-            }
+          if (doc.ismaster) {
+            request.reply(serverIsMaster[0]);
+          } else if (doc['$query'] && doc['$readPreference']) {
+            command = doc;
+            request.reply({
+              waitedMS: Long.ZERO,
+              cursor: {
+                id: Long.ZERO,
+                ns: 'test.t',
+                firstBatch: []
+              },
+              ok: 1
+            });
           }
-        }).catch(function() {});
+        });
 
         MongoClient.connect('mongodb://localhost:62004/test', function(err, client) {
           expect(err).to.not.exist;
@@ -363,8 +285,6 @@ describe('Max Staleness', function() {
               });
 
               client.close();
-              mongos1.destroy();
-              running = false;
               done();
             });
         });

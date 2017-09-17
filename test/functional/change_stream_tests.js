@@ -5,7 +5,7 @@ var setupDatabase = require('./shared').setupDatabase;
 var delay = require('./shared').delay;
 var assign = require('../../lib/utils').assign;
 var co = require('co');
-var mockupdb = require('../mock');
+var mock = require('../mock');
 
 // Define the pipeline processing changes
 var pipeline = [
@@ -634,7 +634,7 @@ describe('Change Streams', function() {
     metadata: {
       requires: {
         generators: true,
-        topology: 'mock',
+        topology: 'single',
         mongodb: '>=3.5.10'
       }
     },
@@ -642,13 +642,10 @@ describe('Change Streams', function() {
     test: function(done) {
       var configuration = this.configuration;
       var MongoClient = configuration.require.MongoClient,
-        ObjectId = configuration.require.ObjectId,
-        co = require('co'),
-        mockupdb = require('../mock');
+        ObjectId = configuration.require.ObjectId;
 
       // Contain mock server
       var primaryServer = null;
-      var running = true;
 
       // Default message fields
       var defaultFields = {
@@ -665,35 +662,30 @@ describe('Change Streams', function() {
         hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002']
       };
 
-      // Boot the mock
       co(function*() {
-        primaryServer = yield mockupdb.createServer(32000, 'localhost');
+        primaryServer = yield mock.createServer(32000, 'localhost');
 
-        // Primary state machine
-        return co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            var doc = request.document;
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
 
-            if (doc.ismaster) {
-              request.reply(
-                assign(
-                  {
-                    ismaster: true,
-                    secondary: false,
-                    me: 'localhost:32000',
-                    primary: 'localhost:32000',
-                    tags: { loc: 'ny' }
-                  },
-                  defaultFields
-                )
-              );
-            } else {
-              // kill the connection, simulating a network error
-              request.connection.destroy();
-            }
+          if (doc.ismaster) {
+            request.reply(
+              assign(
+                {
+                  ismaster: true,
+                  secondary: false,
+                  me: 'localhost:32000',
+                  primary: 'localhost:32000',
+                  tags: { loc: 'ny' }
+                },
+                defaultFields
+              )
+            );
+          } else {
+            // kill the connection, simulating a network error
+            request.connection.destroy();
           }
-        }).catch(function() {});
+        });
       });
 
       var client = new MongoClient(configuration.url());
@@ -704,7 +696,7 @@ describe('Change Streams', function() {
         // var collection = database.collection('MongoNetworkErrorTestPromises');
         // var changeStream = collection.watch(pipeline);
 
-        done();
+        mock.cleanup([primaryServer], () => done());
 
         // changeStream.next()
         //   .then(function (change) {
@@ -735,7 +727,7 @@ describe('Change Streams', function() {
     metadata: {
       requires: {
         generators: true,
-        topology: 'mock',
+        topology: 'single',
         mongodb: '>=3.5.10'
       }
     },
@@ -746,7 +738,6 @@ describe('Change Streams', function() {
 
       // Contain mock server
       var primaryServer = null;
-      var running = true;
 
       // Default message fields
       var defaultFields = {
@@ -766,72 +757,65 @@ describe('Change Streams', function() {
       // Die
       var die = false;
 
-      // Boot the mock
       co(function*() {
-        primaryServer = yield mockupdb.createServer(32000, 'localhost');
+        primaryServer = yield mock.createServer(32000, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            var doc = request.document;
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
 
-            if (die) {
-              request.connection.destroy();
-            } else if (doc.ismaster) {
-              request.reply(
-                assign(
-                  {
-                    ismaster: true,
-                    secondary: false,
-                    me: 'localhost:32000',
-                    primary: 'localhost:32000',
-                    tags: { loc: 'ny' }
-                  },
-                  defaultFields
-                )
-              );
-            }
-            // Do not respond to other requests
+          if (die) {
+            request.connection.destroy();
+          } else if (doc.ismaster) {
+            request.reply(
+              assign(
+                {
+                  ismaster: true,
+                  secondary: false,
+                  me: 'localhost:32000',
+                  primary: 'localhost:32000',
+                  tags: { loc: 'ny' }
+                },
+                defaultFields
+              )
+            );
           }
-        }).catch(function(err) {
-          throw err;
+          // Do not respond to other requests
         });
-
-        MongoClient.connect(
-          'mongodb://localhost:32000/test?replicaSet=rs',
-          {
-            socketTimeoutMS: 500,
-            validateOptions: true
-          },
-          function(err, client) {
-            assert.ifError(err);
-
-            var theDatabase = client.db('integration_tests5');
-            var theCollection = theDatabase.collection('MongoNetworkErrorTestPromises');
-            var thisChangeStream = theCollection.watch(pipeline);
-
-            thisChangeStream.next(function(err, change) {
-              assert.ok(err instanceof MongoNetworkError);
-              assert.ok(err.message);
-              assert.ok(err.message.indexOf('timed out') > -1);
-
-              assert.equal(
-                change,
-                null,
-                'ChangeStream.next() returned a change document but it should have returned a MongoNetworkError'
-              );
-
-              thisChangeStream.close(function(err) {
-                assert.ifError(err);
-                thisChangeStream.close();
-                primaryServer.destroy();
-                done();
-              });
-            });
-          }
-        );
       });
+
+      MongoClient.connect(
+        'mongodb://localhost:32000/test?replicaSet=rs',
+        {
+          socketTimeoutMS: 500,
+          validateOptions: true
+        },
+        function(err, client) {
+          assert.ifError(err);
+
+          var theDatabase = client.db('integration_tests5');
+          var theCollection = theDatabase.collection('MongoNetworkErrorTestPromises');
+          var thisChangeStream = theCollection.watch(pipeline);
+
+          thisChangeStream.next(function(err, change) {
+            assert.ok(err instanceof MongoNetworkError);
+            assert.ok(err.message);
+            assert.ok(err.message.indexOf('timed out') > -1);
+
+            assert.equal(
+              change,
+              null,
+              'ChangeStream.next() returned a change document but it should have returned a MongoNetworkError'
+            );
+
+            thisChangeStream.close(function(err) {
+              assert.ifError(err);
+              thisChangeStream.close();
+
+              mock.cleanup([primaryServer], () => done());
+            });
+          });
+        }
+      );
     }
   });
 
@@ -839,11 +823,11 @@ describe('Change Streams', function() {
     metadata: {
       requires: {
         generators: true,
-        topology: 'mock',
+        topology: 'single',
         mongodb: '>=3.5.10'
       }
     },
-    test: function(done) {
+    test: function() {
       var configuration = this.configuration;
       var MongoClient = configuration.require.MongoClient,
         ObjectId = configuration.require.ObjectId,
@@ -852,7 +836,6 @@ describe('Change Streams', function() {
 
       // Contain mock server
       var primaryServer = null;
-      var running = true;
 
       // Default message fields
       var defaultFields = {
@@ -874,104 +857,86 @@ describe('Change Streams', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mockupdb.createServer(32000, 'localhost');
+        primaryServer = yield mock.createServer(32000, 'localhost');
 
         var counter = 0;
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            var doc = request.document;
-
-            // Create a server that responds to the initial aggregation to connect to the server, but not to subsequent getMore requests
-            if (doc.ismaster) {
-              request.reply(
-                assign(
-                  {
-                    ismaster: true,
-                    secondary: false,
-                    me: 'localhost:32000',
-                    primary: 'localhost:32000',
-                    tags: { loc: 'ny' }
-                  },
-                  defaultFields
-                )
-              );
-            } else if (doc.getMore) {
-              callsToGetMore++;
-            } else if (doc.aggregate) {
-              var changeDoc = {
-                _id: {
-                  ts: new Timestamp(4, 1501511802),
-                  ns: 'integration_tests.docsDataEvent',
-                  _id: new ObjectId('597f407a8fd4abb616feca93')
+          // Create a server that responds to the initial aggregation to connect to the server, but not to subsequent getMore requests
+          if (doc.ismaster) {
+            request.reply(
+              assign(
+                {
+                  ismaster: true,
+                  secondary: false,
+                  me: 'localhost:32000',
+                  primary: 'localhost:32000',
+                  tags: { loc: 'ny' }
                 },
-                operationType: 'insert',
-                ns: {
-                  db: 'integration_tests',
-                  coll: 'docsDataEvent'
-                },
-                fullDocument: {
-                  _id: new ObjectId('597f407a8fd4abb616feca93'),
-                  a: 1,
-                  counter: counter++
-                }
-              };
-              request.reply(changeDoc, {
-                cursorId: new Long(1407, 1407)
-              });
-            }
+                defaultFields
+              )
+            );
+          } else if (doc.getMore) {
+            callsToGetMore++;
+          } else if (doc.aggregate) {
+            var changeDoc = {
+              _id: {
+                ts: new Timestamp(4, 1501511802),
+                ns: 'integration_tests.docsDataEvent',
+                _id: new ObjectId('597f407a8fd4abb616feca93')
+              },
+              operationType: 'insert',
+              ns: {
+                db: 'integration_tests',
+                coll: 'docsDataEvent'
+              },
+              fullDocument: {
+                _id: new ObjectId('597f407a8fd4abb616feca93'),
+                a: 1,
+                counter: counter++
+              }
+            };
+            request.reply(changeDoc, {
+              cursorId: new Long(1407, 1407)
+            });
           }
-        }).catch(function(err) {
-          throw err;
         });
+      });
 
-        MongoClient.connect(
-          'mongodb://localhost:32000/test?replicaSet=rs',
-          {
-            socketTimeoutMS: 500,
-            validateOptions: true
-          },
-          function(err, client) {
-            assert.ifError(err);
+      return MongoClient.connect('mongodb://localhost:32000/test?replicaSet=rs', {
+        socketTimeoutMS: 500,
+        validateOptions: true
+      }).then(client => {
+        var database = client.db('integration_tests5');
+        var collection = database.collection('MongoNetworkErrorTestPromises');
+        var changeStream = collection.watch(pipeline);
 
-            var theDatabase = client.db('integration_tests5');
-            var theCollection = theDatabase.collection('MongoNetworkErrorTestPromises');
-            var thisChangeStream = theCollection.watch(pipeline);
+        return changeStream
+          .next()
+          .then(function(change) {
+            assert.ok(change);
+            assert.equal(change.operationType, 'insert');
+            assert.equal(change.fullDocument.counter, 0);
 
-            thisChangeStream
-              .next()
-              .then(function(change) {
-                assert.ok(change);
-                assert.equal(change.operationType, 'insert');
-                assert.equal(change.fullDocument.counter, 0);
+            // Add a tag to the cursor
+            changeStream.cursor.track = 1;
 
-                // Add a tag to the cursor
-                thisChangeStream.cursor.track = 1;
+            return changeStream.next();
+          })
+          .then(function(change) {
+            assert.ok(change);
+            assert.equal(change.operationType, 'insert');
+            assert.equal(change.fullDocument.counter, 1);
 
-                return thisChangeStream.next();
-              })
-              .then(function(change) {
-                assert.ok(change);
-                assert.equal(change.operationType, 'insert');
-                assert.equal(change.fullDocument.counter, 1);
+            // Check this cursor doesn't have the tag added earlier (therefore it is a new cursor)
+            assert.notEqual(changeStream.cursor.track, 1);
 
-                // Check this cursor doesn't have the tag added earlier (therefore it is a new cursor)
-                assert.notEqual(thisChangeStream.cursor.track, 1);
+            // Check that only one getMore call was made
+            assert.equal(callsToGetMore, 1);
 
-                // Check that only one getMore call was made
-                assert.equal(callsToGetMore, 1);
-
-                thisChangeStream.close();
-                primaryServer.destroy();
-                done();
-              })
-              .catch(function(err) {
-                assert.ifError(err);
-              });
-          }
-        );
+            return Promise.all([changeStream.close(), primaryServer.destroy]);
+          });
       });
     }
   });
@@ -980,14 +945,12 @@ describe('Change Streams', function() {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
     // The actual test we wish to run
-    test: function(done) {
+    test: function() {
       var configuration = this.configuration;
       var MongoClient = configuration.require.MongoClient;
       var client = new MongoClient(configuration.url());
 
-      client.connect(function(err, client) {
-        assert.ifError(err);
-
+      return client.connect().then(client => {
         var database = client.db('integration_tests');
         var collection = database.collection('resumeAfterTest2');
 
@@ -997,7 +960,7 @@ describe('Change Streams', function() {
         var docs = [{ a: 0 }, { a: 1 }, { a: 2 }];
 
         // Trigger the first database event
-        collection
+        return collection
           .insert(docs[0])
           .then(function(result) {
             assert.equal(result.insertedCount, 1);
@@ -1059,12 +1022,6 @@ describe('Change Streams', function() {
             assert.equal(change.operationType, 'insert');
             assert.equal(change.fullDocument.a, docs[2].a);
             return secondChangeStream.close();
-          })
-          .then(function() {
-            done();
-          })
-          .catch(function(err) {
-            assert.ifError(err);
           });
       });
     }
@@ -1074,20 +1031,18 @@ describe('Change Streams', function() {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
     // The actual test we wish to run
-    test: function(done) {
+    test: function() {
       var configuration = this.configuration;
       var MongoClient = configuration.require.MongoClient;
       var client = new MongoClient(configuration.url());
 
-      client.connect(function(err, client) {
-        assert.ifError(err);
-
+      return client.connect().then(client => {
         var database = client.db('integration_tests09');
         var collection = database.collection('fullDocumentLookup');
         var changeStream = collection.watch(pipeline, { fullDocument: 'lookup' });
         changeStream.hasNext();
 
-        delay(500)
+        return delay(500)
           .then(function() {
             console.log('inserting');
             return collection.insert({ f: 128 });
@@ -1133,12 +1088,6 @@ describe('Change Streams', function() {
             assert.equal(change.fullDocument.c, 2);
 
             return changeStream.close();
-          })
-          .then(function() {
-            done();
-          })
-          .catch(function(err) {
-            assert.ifError(err);
           });
       });
     }
@@ -1148,26 +1097,23 @@ describe('Change Streams', function() {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
     // The actual test we wish to run
-    test: function(done) {
+    test: function() {
       var configuration = this.configuration;
       var MongoClient = configuration.require.MongoClient;
       var client = new MongoClient(configuration.url());
 
-      client.connect(function(err, client) {
-        assert.ifError(err);
-
-        var theDatabase = client.db('integration_tests13');
-        var theCollection = theDatabase.collection('fullLookupTest');
-
-        var thisChangeStream = theCollection.watch(pipeline, { fullDocument: 'lookup' });
+      return client.connect().then(client => {
+        var database = client.db('integration_tests13');
+        var collection = database.collection('fullLookupTest');
+        var changeStream = collection.watch(pipeline, { fullDocument: 'lookup' });
 
         // Trigger the first database event
-        theCollection
+        return collection
           .insert({ i: 128 })
           .then(function(result) {
             assert.equal(result.insertedCount, 1);
 
-            return theCollection.deleteOne({ i: 128 });
+            return collection.deleteOne({ i: 128 });
           })
           .then(function(result) {
             assert.equal(result.result.n, 1);
@@ -1175,17 +1121,17 @@ describe('Change Streams', function() {
             return delay(200);
           })
           .then(function() {
-            return thisChangeStream.hasNext();
+            return changeStream.hasNext();
           })
           .then(function(hasNext) {
             assert.equal(true, hasNext);
-            return thisChangeStream.next();
+            return changeStream.next();
           })
           .then(function(change) {
             assert.equal(change.operationType, 'insert');
             assert.equal(change.fullDocument.i, 128);
-            assert.equal(change.ns.db, theDatabase.databaseName);
-            assert.equal(change.ns.coll, theCollection.collectionName);
+            assert.equal(change.ns.db, database.databaseName);
+            assert.equal(change.ns.coll, collection.collectionName);
             assert.ok(!change.documentKey);
             assert.equal(
               change.comment,
@@ -1193,14 +1139,14 @@ describe('Change Streams', function() {
             );
 
             // Trigger the second database event
-            return theCollection.update({ i: 128 }, { $set: { c: 2 } });
+            return collection.update({ i: 128 }, { $set: { c: 2 } });
           })
           .then(function() {
-            return thisChangeStream.hasNext();
+            return changeStream.hasNext();
           })
           .then(function(hasNext) {
             assert.equal(true, hasNext);
-            return thisChangeStream.next();
+            return changeStream.next();
           })
           .then(function(change) {
             assert.equal(change.operationType, 'delete');
@@ -1208,13 +1154,7 @@ describe('Change Streams', function() {
             // Check the full lookedUpDocument is present
             assert.equal(change.lookedUpDocument, null);
 
-            return thisChangeStream.close();
-          })
-          .then(function() {
-            done();
-          })
-          .catch(function(err) {
-            assert.ifError(err);
+            return changeStream.close();
           });
       });
     }
@@ -1224,52 +1164,41 @@ describe('Change Streams', function() {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
     // The actual test we wish to run
-    test: function(done) {
+    test: function() {
       var configuration = this.configuration;
       var MongoClient = configuration.require.MongoClient;
       var ReadPreference = configuration.require.ReadPreference;
       var client = new MongoClient(configuration.url());
 
-      client.connect(function(err, client) {
-        assert.ifError(err);
-
+      return client.connect().then(client => {
         // Should get preference from database
-        var theDatabase = client.db('integration_tests', {
+        var database = client.db('integration_tests', {
           readPreference: ReadPreference.PRIMARY_PREFERRED
         });
-        var thisChangeStream0 = theDatabase.collection('docs0').watch(pipeline);
+        var changeStream0 = database.collection('docs0').watch(pipeline);
         assert.deepEqual(
-          thisChangeStream0.cursor.readPreference.preference,
+          changeStream0.cursor.readPreference.preference,
           ReadPreference.PRIMARY_PREFERRED
         );
 
         // Should get preference from collection
-        var theCollection = theDatabase.collection('docs1', {
+        var collection = database.collection('docs1', {
           readPreference: ReadPreference.SECONDARY_PREFERRED
         });
-        var thisChangeStream1 = theCollection.watch(pipeline);
+        var changeStream1 = collection.watch(pipeline);
         assert.deepEqual(
-          thisChangeStream1.cursor.readPreference.preference,
+          changeStream1.cursor.readPreference.preference,
           ReadPreference.SECONDARY_PREFERRED
         );
 
         // Should get preference from Change Stream options
-        var thisChangeStream2 = theCollection.watch(pipeline, {
+        var changeStream2 = collection.watch(pipeline, {
           readPreference: ReadPreference.NEAREST
         });
 
-        assert.deepEqual(
-          thisChangeStream2.cursor.readPreference.preference,
-          ReadPreference.NEAREST
-        );
+        assert.deepEqual(changeStream2.cursor.readPreference.preference, ReadPreference.NEAREST);
 
-        Promise.all([
-          thisChangeStream0.close(),
-          thisChangeStream1.close(),
-          thisChangeStream2.close()
-        ]).then(function() {
-          done();
-        });
+        return Promise.all([changeStream0.close(), changeStream1.close(), changeStream2.close()]);
       });
     }
   });
@@ -1324,7 +1253,7 @@ describe('Change Streams', function() {
     metadata: {
       requires: {
         generators: true,
-        topology: 'mock',
+        topology: 'single',
         mongodb: '>=3.5.10'
       }
     },
@@ -1333,13 +1262,10 @@ describe('Change Streams', function() {
       var MongoClient = configuration.require.MongoClient,
         ObjectId = configuration.require.ObjectId,
         Timestamp = configuration.require.Timestamp,
-        Long = configuration.require.Long,
-        co = require('co'),
-        mockupdb = require('../mock');
+        Long = configuration.require.Long;
 
       // Contain mock server
       var primaryServer = null;
-      var running = true;
 
       // Default message fields
       var defaultFields = {
@@ -1356,132 +1282,124 @@ describe('Change Streams', function() {
         hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002']
       };
 
-      // Boot the mock
       co(function*() {
-        primaryServer = yield mockupdb.createServer(32000, 'localhost');
+        primaryServer = yield mock.createServer(32000, 'localhost');
 
         var counter = 0;
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            var doc = request.document;
+          // Create a server that responds to the initial aggregation to connect to the server, but not to subsequent getMore requests
+          if (doc.ismaster) {
+            request.reply(
+              assign(
+                {
+                  ismaster: true,
+                  secondary: false,
+                  me: 'localhost:32000',
+                  primary: 'localhost:32000',
+                  tags: { loc: 'ny' }
+                },
+                defaultFields
+              )
+            );
+          } else if (doc.getMore) {
+            console.log('GETMORE EVENT');
 
-            // Create a server that responds to the initial aggregation to connect to the server, but not to subsequent getMore requests
-            if (doc.ismaster) {
-              request.reply(
-                assign(
+            var changeDoc = {
+              cursor: {
+                id: new Long(1407, 1407),
+                nextBatch: [
                   {
-                    ismaster: true,
-                    secondary: false,
-                    me: 'localhost:32000',
-                    primary: 'localhost:32000',
-                    tags: { loc: 'ny' }
-                  },
-                  defaultFields
-                )
-              );
-            } else if (doc.getMore) {
-              console.log('GETMORE EVENT');
-
-              var changeDoc = {
-                cursor: {
-                  id: new Long(1407, 1407),
-                  nextBatch: [
-                    {
-                      _id: {
-                        ts: new Timestamp(4, 1501511802),
-                        ns: 'integration_tests.docsDataEvent',
-                        _id: new ObjectId('597f407a8fd4abb616feca93')
-                      },
-                      operationType: 'insert',
-                      ns: {
-                        db: 'integration_tests',
-                        coll: 'docsDataEvent'
-                      },
-                      fullDocument: {
-                        _id: new ObjectId('597f407a8fd4abb616feca93'),
-                        a: 1,
-                        counter: counter++
-                      }
+                    _id: {
+                      ts: new Timestamp(4, 1501511802),
+                      ns: 'integration_tests.docsDataEvent',
+                      _id: new ObjectId('597f407a8fd4abb616feca93')
+                    },
+                    operationType: 'insert',
+                    ns: {
+                      db: 'integration_tests',
+                      coll: 'docsDataEvent'
+                    },
+                    fullDocument: {
+                      _id: new ObjectId('597f407a8fd4abb616feca93'),
+                      a: 1,
+                      counter: counter++
                     }
-                  ]
-                },
-                ok: 1
-              };
-              request.reply(changeDoc, {
-                cursorId: new Long(1407, 1407)
-              });
-            } else if (doc.aggregate) {
-              console.log('AGGREGATE EVENT');
-              changeDoc = {
-                _id: {
-                  ts: new Timestamp(4, 1501511802),
-                  ns: 'integration_tests.docsDataEvent',
-                  _id: new ObjectId('597f407a8fd4abb616feca93')
-                },
-                operationType: 'insert',
-                ns: {
-                  db: 'integration_tests',
-                  coll: 'docsDataEvent'
-                },
-                fullDocument: {
-                  _id: new ObjectId('597f407a8fd4abb616feca93'),
-                  a: 1,
-                  counter: counter++
-                }
-              };
-              request.reply(changeDoc, {
-                cursorId: new Long(1407, 1407)
-              });
-            }
-          }
-        }).catch(function(err) {
-          throw err;
-        });
-
-        MongoClient.connect(
-          'mongodb://localhost:32000/test?replicaSet=rs',
-          {
-            socketTimeoutMS: 500,
-            validateOptions: true
-          },
-          function(err, client) {
-            assert.ifError(err);
-
-            var fs = require('fs');
-            var theDatabase = client.db('integration_tests5');
-            var theCollection = theDatabase.collection('MongoNetworkErrorTestPromises');
-            var thisChangeStream = theCollection.watch(pipeline);
-
-            var filename = '/tmp/_nodemongodbnative_resumepipe.txt';
-            var outStream = fs.createWriteStream(filename);
-
-            thisChangeStream.stream({ transform: JSON.stringify }).pipe(outStream);
-
-            // Listen for changes to the file
-            var watcher = fs.watch(filename, function(eventType) {
-              assert.equal(eventType, 'change');
-
-              var fileContents = fs.readFileSync(filename, 'utf8');
-              console.log(fileContents);
-
-              // var parsedFileContents = JSON.parse(fileContents);
-              // assert.equal(parsedFileContents.fullDocument.a, 1);
-              //
-              watcher.close();
-              done();
-
-              //
-              // thisChangeStream.close(function(err) {
-              //   assert.ifError(err);
-              //   done();
-              // });
+                  }
+                ]
+              },
+              ok: 1
+            };
+            request.reply(changeDoc, {
+              cursorId: new Long(1407, 1407)
+            });
+          } else if (doc.aggregate) {
+            console.log('AGGREGATE EVENT');
+            changeDoc = {
+              _id: {
+                ts: new Timestamp(4, 1501511802),
+                ns: 'integration_tests.docsDataEvent',
+                _id: new ObjectId('597f407a8fd4abb616feca93')
+              },
+              operationType: 'insert',
+              ns: {
+                db: 'integration_tests',
+                coll: 'docsDataEvent'
+              },
+              fullDocument: {
+                _id: new ObjectId('597f407a8fd4abb616feca93'),
+                a: 1,
+                counter: counter++
+              }
+            };
+            request.reply(changeDoc, {
+              cursorId: new Long(1407, 1407)
             });
           }
-        );
+        });
       });
+
+      MongoClient.connect(
+        'mongodb://localhost:32000/test?replicaSet=rs',
+        {
+          socketTimeoutMS: 500,
+          validateOptions: true
+        },
+        function(err, client) {
+          assert.ifError(err);
+
+          var fs = require('fs');
+          var theDatabase = client.db('integration_tests5');
+          var theCollection = theDatabase.collection('MongoNetworkErrorTestPromises');
+          var thisChangeStream = theCollection.watch(pipeline);
+
+          var filename = '/tmp/_nodemongodbnative_resumepipe.txt';
+          var outStream = fs.createWriteStream(filename);
+
+          thisChangeStream.stream({ transform: JSON.stringify }).pipe(outStream);
+
+          // Listen for changes to the file
+          var watcher = fs.watch(filename, function(eventType) {
+            assert.equal(eventType, 'change');
+
+            var fileContents = fs.readFileSync(filename, 'utf8');
+            console.log(fileContents);
+
+            // var parsedFileContents = JSON.parse(fileContents);
+            // assert.equal(parsedFileContents.fullDocument.a, 1);
+            //
+            watcher.close();
+            done();
+
+            //
+            // thisChangeStream.close(function(err) {
+            //   assert.ifError(err);
+            //   done();
+            // });
+          });
+        }
+      );
     }
   });
 
@@ -1542,7 +1460,7 @@ describe('Change Streams', function() {
   });
 
   it.skip('Should error when attempting to create a Change Stream against a stand-alone server', {
-    metadata: { requires: { topology: 'mock', mongodb: '>=3.5.10' } },
+    metadata: { requires: { topology: 'single', mongodb: '>=3.5.10' } },
 
     // The actual test we wish to run
     test: function(done) {

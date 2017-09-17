@@ -1,6 +1,8 @@
 'use strict';
 var expect = require('chai').expect,
-  assign = require('../../lib/utils').assign;
+  assign = require('../../lib/utils').assign,
+  mock = require('../mock'),
+  co = require('co');
 
 describe('Views', function() {
   it('should successfully pass through collation to findAndModify command', {
@@ -9,57 +11,35 @@ describe('Views', function() {
     test: function(done) {
       var self = this,
         MongoClient = self.configuration.mongo.MongoClient,
-        co = require('co'),
-        Long = self.configuration.mongo.Long,
-        mockupdb = require('../mock');
-
-      // Contain mock server
-      var singleServer = null;
-      var running = true;
+        Long = self.configuration.mongo.Long;
 
       // Default message fields
-      var defaultFields = {
-        ismaster: true,
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 5,
-        minWireVersion: 0,
-        ok: 1
-      };
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER);
 
       // Primary server states
       var primary = [assign({}, defaultFields)];
 
       // Boot the mock
       co(function*() {
-        singleServer = yield mockupdb.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer(32000, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield singleServer.receive();
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(primary[0]);
-            } else if (doc.listCollections) {
-              request.reply({
-                ok: 1,
-                cursor: {
-                  id: Long.fromNumber(0),
-                  ns: 'test.cmd$.listCollections',
-                  firstBatch: []
-                }
-              });
-            } else if (doc.create) {
-              commandResult = doc;
-              request.reply({ ok: 1 });
-            }
+        singleServer.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.ismaster) {
+            request.reply(primary[0]);
+          } else if (doc.listCollections) {
+            request.reply({
+              ok: 1,
+              cursor: {
+                id: Long.fromNumber(0),
+                ns: 'test.cmd$.listCollections',
+                firstBatch: []
+              }
+            });
+          } else if (doc.create) {
+            commandResult = doc;
+            request.reply({ ok: 1 });
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
         var commandResult = null;
@@ -81,9 +61,6 @@ describe('Views', function() {
               viewOn: 'users',
               pipeline: [{ $match: {} }]
             });
-
-            singleServer.destroy();
-            running = false;
 
             client.close();
             done();
