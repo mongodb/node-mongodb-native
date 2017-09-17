@@ -1,7 +1,8 @@
 'use strict';
 var test = require('./shared').assert;
 var co = require('co');
-var mockupdb = require('../mock');
+var mock = require('../mock');
+var assign = require('../../lib/utils').assign;
 
 var extend = function(template, fields) {
   var object = {};
@@ -17,6 +18,8 @@ var extend = function(template, fields) {
 };
 
 describe.skip('Buffering Proxy', function() {
+  afterEach(() => mock.cleanup());
+
   it('successfully handle buffering store execution for primary server', {
     metadata: {
       requires: {
@@ -31,31 +34,17 @@ describe.skip('Buffering Proxy', function() {
         ObjectId = configuration.require.ObjectId,
         ReadPreference = configuration.require.ReadPreference;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var secondSecondaryServer = null;
-      var running = true;
       var currentIsMasterIndex = 0;
-
-      // Election Ids
       var electionIds = [new ObjectId(0), new ObjectId(1)];
 
       // Default message fields
-      var defaultFields = {
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 4,
-        minWireVersion: 0,
-        ok: 1,
         hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002'],
         arbiters: ['localhost:32002']
-      };
+      });
 
       // Primary server states
       var primary = [
@@ -141,66 +130,48 @@ describe.skip('Buffering Proxy', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mockupdb.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            var doc = request.document;
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
 
-            if (die) {
-              request.connection.destroy();
-            } else {
-              if (doc.ismaster) {
-                request.reply(primary[currentIsMasterIndex]);
-              } else if (doc.insert) {
-                request.reply({ ok: 1, n: 1 });
-              } else if (doc.aggregate) {
-                request.reply({ ok: 1, n: 1 });
-              }
+          if (die) {
+            request.connection.destroy();
+          } else {
+            if (doc.ismaster) {
+              request.reply(primary[currentIsMasterIndex]);
+            } else if (doc.insert) {
+              request.reply({ ok: 1, n: 1 });
+            } else if (doc.aggregate) {
+              request.reply({ ok: 1, n: 1 });
             }
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
 
-            if (die || dieSecondary) {
-              request.connection.destroy();
-            } else {
-              if (doc.ismaster) {
-                request.reply(firstSecondary[currentIsMasterIndex]);
-              }
+          if (die || dieSecondary) {
+            request.connection.destroy();
+          } else {
+            if (doc.ismaster) {
+              request.reply(firstSecondary[currentIsMasterIndex]);
             }
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield secondSecondaryServer.receive();
-            var doc = request.document;
+        secondSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
 
-            if (die || dieSecondary) {
-              request.connection.destroy();
-            } else {
-              if (doc.ismaster) {
-                request.reply(secondSecondary[currentIsMasterIndex]);
-              }
+          if (die || dieSecondary) {
+            request.connection.destroy();
+          } else {
+            if (doc.ismaster) {
+              request.reply(secondSecondary[currentIsMasterIndex]);
             }
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
         MongoClient.connect(
@@ -210,7 +181,6 @@ describe.skip('Buffering Proxy', function() {
             haInterval: 1000
           },
           function(err, client) {
-            console.dir(err);
             test.equal(null, err);
             var db = client.db(configuration.db);
             var results = [];
@@ -257,13 +227,8 @@ describe.skip('Buffering Proxy', function() {
                   setTimeout(function() {
                     test.deepEqual(['insertOne', 'aggregate'].sort(), results.sort());
 
-                    running = false;
                     client.close();
                     // test.deepEqual(['insertOne', 'aggregate', 'count', 'find'], results);
-
-                    primaryServer.destroy();
-                    firstSecondaryServer.destroy();
-                    secondSecondaryServer.destroy();
                     done();
                   }, 1000);
                 }, 1000);
@@ -289,30 +254,17 @@ describe.skip('Buffering Proxy', function() {
         ObjectId = configuration.require.ObjectId,
         ReadPreference = configuration.require.ReadPreference;
 
-      // Contain mock server
-      var primaryServer = null;
-      var firstSecondaryServer = null;
-      var secondSecondaryServer = null;
-      var running = true;
       var currentIsMasterIndex = 0;
-
-      // Election Ids
       var electionIds = [new ObjectId(0), new ObjectId(1)];
+
       // Default message fields
-      var defaultFields = {
+      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 4,
-        minWireVersion: 0,
-        ok: 1,
         hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002'],
         arbiters: ['localhost:32002']
-      };
+      });
 
       // Primary server states
       var primary = [
@@ -398,70 +350,52 @@ describe.skip('Buffering Proxy', function() {
 
       // Boot the mock
       co(function*() {
-        primaryServer = yield mockupdb.createServer(32000, 'localhost');
-        firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
-        secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
+        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
+        const secondSecondaryServer = yield mock.createServer(32002, 'localhost');
 
-        // Primary state machine
-        co(function*() {
-          while (running) {
-            var request = yield primaryServer.receive();
-            var doc = request.document;
+        primaryServer.setMessageHandler(request => {
+          var doc = request.document;
 
-            if (die || diePrimary) {
-              request.connection.destroy();
-            } else {
-              if (doc.ismaster) {
-                request.reply(primary[currentIsMasterIndex]);
-              }
+          if (die || diePrimary) {
+            request.connection.destroy();
+          } else {
+            if (doc.ismaster) {
+              request.reply(primary[currentIsMasterIndex]);
             }
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // First secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield firstSecondaryServer.receive();
-            var doc = request.document;
+        firstSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
 
-            if (die) {
-              request.connection.destroy();
-            } else {
-              if (doc.ismaster) {
-                request.reply(firstSecondary[currentIsMasterIndex]);
-              } else if (doc.count) {
-                request.reply({ ok: 1, n: 10 });
-              } else if (doc.find) {
-                request.reply({ ok: 1, n: 10 });
-              }
+          if (die) {
+            request.connection.destroy();
+          } else {
+            if (doc.ismaster) {
+              request.reply(firstSecondary[currentIsMasterIndex]);
+            } else if (doc.count) {
+              request.reply({ ok: 1, n: 10 });
+            } else if (doc.find) {
+              request.reply({ ok: 1, n: 10 });
             }
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
-        // Second secondary state machine
-        co(function*() {
-          while (running) {
-            var request = yield secondSecondaryServer.receive();
-            var doc = request.document;
+        secondSecondaryServer.setMessageHandler(request => {
+          var doc = request.document;
 
-            if (die) {
-              request.connection.destroy();
-            } else {
-              if (doc.ismaster) {
-                request.reply(secondSecondary[currentIsMasterIndex]);
-              } else if (doc.count) {
-                request.reply({ ok: 1, n: 10 });
-              } else if (doc.find) {
-                request.reply({ ok: 1, n: 10 });
-              }
+          if (die) {
+            request.connection.destroy();
+          } else {
+            if (doc.ismaster) {
+              request.reply(secondSecondary[currentIsMasterIndex]);
+            } else if (doc.count) {
+              request.reply({ ok: 1, n: 10 });
+            } else if (doc.find) {
+              request.reply({ ok: 1, n: 10 });
             }
           }
-        }).catch(function() {
-          // console.log(err.stack);
         });
 
         MongoClient.connect(
@@ -518,14 +452,9 @@ describe.skip('Buffering Proxy', function() {
                   setTimeout(function() {
                     test.deepEqual(['count', 'find'].sort(), results.sort());
 
-                    running = false;
                     client.close();
 
                     // test.deepEqual(['count', 'find', 'insertOne', 'aggregate'], results);
-
-                    primaryServer.destroy();
-                    firstSecondaryServer.destroy();
-                    secondSecondaryServer.destroy();
                     done();
                   }, 1500);
                 }, 1000);
