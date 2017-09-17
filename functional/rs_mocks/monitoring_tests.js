@@ -10,7 +10,20 @@ var delay = function(timeout) {
   return new Promise(resolve => setTimeout(() => resolve(), timeout));
 };
 
+let test = {};
 describe('ReplSet Monitoring (mocks)', function() {
+  beforeEach(() => {
+    test.spy = new ConnectionSpy();
+    Connection.enableConnectionAccounting(test.spy);
+  });
+
+  afterEach(() => {
+    return mock.cleanup(test.spy).then(() => {
+      test.spy = undefined;
+      Connection.disableConnectionAccounting();
+    });
+  });
+
   it(
     'Should correctly connect to a replicaset where the primary hangs causing monitoring thread to hang',
     {
@@ -167,9 +180,6 @@ describe('ReplSet Monitoring (mocks)', function() {
           }, 500);
         });
 
-        const spy = new ConnectionSpy();
-        Connection.enableConnectionAccounting(spy);
-
         // Attempt to connect
         var server = new ReplSet(
           [
@@ -201,16 +211,8 @@ describe('ReplSet Monitoring (mocks)', function() {
                   expect(joinedPrimaries).to.eql({ 'localhost:32000': 1, 'localhost:32001': 1 });
                   expect(joinedSecondaries).to.eql({ 'localhost:32001': 1, 'localhost:32002': 1 });
 
-                  // Destroy mock
-                  mock.cleanup(
-                    [primaryServer, firstSecondaryServer, secondSecondaryServer, server],
-                    spy,
-                    () => {
-                      Connection.disableConnectionAccounting();
-                      done();
-                    }
-                  );
-
+                  server.destroy();
+                  done();
                   return;
                 }
 
@@ -373,10 +375,8 @@ describe('ReplSet Monitoring (mocks)', function() {
         setTimeout(function() {
           expect(_server.intervalIds.length).to.be.greaterThan(1);
 
-          mock.cleanup([primaryServer, firstSecondaryServer, secondSecondaryServer, server], () => {
-            expect(_server.intervalIds.length).to.equal(0);
-            done();
-          });
+          server.destroy();
+          done();
         }, 100);
       });
 

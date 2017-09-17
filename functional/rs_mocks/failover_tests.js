@@ -6,7 +6,20 @@ var expect = require('chai').expect,
   mock = require('../../../mock'),
   ConnectionSpy = require('../shared').ConnectionSpy;
 
+let test = {};
 describe('ReplSet Failover (mocks)', function() {
+  beforeEach(() => {
+    test.spy = new ConnectionSpy();
+    Connection.enableConnectionAccounting(test.spy);
+  });
+
+  afterEach(() => {
+    return mock.cleanup(test.spy).then(() => {
+      test.spy = undefined;
+      Connection.disableConnectionAccounting();
+    });
+  });
+
   it('Successfully failover to new primary', {
     metadata: {
       requires: {
@@ -165,9 +178,6 @@ describe('ReplSet Failover (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -217,15 +227,9 @@ describe('ReplSet Failover (mocks)', function() {
               expect(server.s.replicaSetState.primary).to.not.be.null;
               expect(server.s.replicaSetState.primary.name).to.equal('localhost:32001');
 
-              mock.cleanup(
-                [primaryServer, firstSecondaryServer, secondSecondaryServer, server],
-                spy,
-                () => {
-                  Server.disableServerAccounting();
-                  Connection.disableConnectionAccounting();
-                  done();
-                }
-              );
+              server.destroy();
+              Server.disableServerAccounting();
+              done();
             }
           });
 
@@ -236,7 +240,7 @@ describe('ReplSet Failover (mocks)', function() {
         }, 100);
       });
 
-      server.on('error', function() {});
+      server.on('error', done);
       // Gives proxies a chance to boot up
       setTimeout(function() {
         server.connect();
@@ -402,9 +406,6 @@ describe('ReplSet Failover (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -432,15 +433,9 @@ describe('ReplSet Failover (mocks)', function() {
           currentIsMasterIndex = currentIsMasterIndex + 1;
 
           server.on('reconnect', function() {
-            mock.cleanup(
-              [primaryServer, firstSecondaryServer, secondSecondaryServer, server],
-              spy,
-              () => {
-                Server.disableServerAccounting();
-                Connection.disableConnectionAccounting();
-                done();
-              }
-            );
+            server.destroy();
+            Server.disableServerAccounting();
+            done();
           });
 
           setTimeout(function() {

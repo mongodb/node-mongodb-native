@@ -1,4 +1,5 @@
 'use strict';
+
 var expect = require('chai').expect,
   co = require('co'),
   assign = require('../../../../lib/utils').assign,
@@ -6,7 +7,20 @@ var expect = require('chai').expect,
   mock = require('../../../mock'),
   ConnectionSpy = require('../shared').ConnectionSpy;
 
+let test = {};
 describe('ReplSet All Servers Close (mocks)', function() {
+  beforeEach(() => {
+    test.spy = new ConnectionSpy();
+    Connection.enableConnectionAccounting(test.spy);
+  });
+
+  afterEach(() => {
+    return mock.cleanup(test.spy).then(() => {
+      test.spy = undefined;
+      Connection.disableConnectionAccounting();
+    });
+  });
+
   it('Successful reconnect when driver loses touch with entire replicaset', {
     metadata: {
       requires: {
@@ -119,9 +133,6 @@ describe('ReplSet All Servers Close (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -153,14 +164,8 @@ describe('ReplSet All Servers Close (mocks)', function() {
                 expect(_server.s.replicaSetState.secondaries).to.have.length(1);
                 expect(_server.s.replicaSetState.arbiters).to.have.length(1);
 
-                mock.cleanup(
-                  [primaryServer, firstSecondaryServer, arbiterServer, server],
-                  spy,
-                  () => {
-                    Connection.disableConnectionAccounting();
-                    done();
-                  }
-                );
+                server.destroy();
+                done();
               });
             }, 1500);
           }, 1000);
@@ -183,8 +188,6 @@ describe('ReplSet All Servers Close (mocks)', function() {
     },
 
     test: function(done) {
-      this.timeout(60000);
-
       var ReplSet = this.configuration.mongo.ReplSet,
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
@@ -284,9 +287,6 @@ describe('ReplSet All Servers Close (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -323,14 +323,8 @@ describe('ReplSet All Servers Close (mocks)', function() {
                 expect(server.s.replicaSetState.secondaries).to.have.length(1);
                 expect(server.s.replicaSetState.arbiters).to.have.length(1);
 
-                mock.cleanup(
-                  [primaryServer, firstSecondaryServer, arbiterServer, server],
-                  spy,
-                  () => {
-                    Connection.disableConnectionAccounting();
-                    done();
-                  }
-                );
+                server.destroy();
+                done();
               });
             }, 1500);
           }, 1000);

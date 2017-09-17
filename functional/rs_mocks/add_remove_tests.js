@@ -7,7 +7,20 @@ var expect = require('chai').expect,
   mock = require('../../../mock'),
   ConnectionSpy = require('../shared').ConnectionSpy;
 
+let test = {};
 describe('ReplSet Add Remove (mocks)', function() {
+  beforeEach(() => {
+    test.spy = new ConnectionSpy();
+    Connection.enableConnectionAccounting(test.spy);
+  });
+
+  afterEach(() => {
+    return mock.cleanup(test.spy).then(() => {
+      test.spy = undefined;
+      Connection.disableConnectionAccounting();
+    });
+  });
+
   it('Successfully add a new secondary server to the set', {
     metadata: {
       requires: {
@@ -152,9 +165,6 @@ describe('ReplSet Add Remove (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -186,14 +196,8 @@ describe('ReplSet Add Remove (mocks)', function() {
             expect(secondaries['localhost:32003']).to.not.be.null;
             expect(arbiters['localhost:32002']).to.not.be.null;
 
-            mock.cleanup(
-              [primaryServer, firstSecondaryServer, secondSecondaryServer, arbiterServer, server],
-              spy,
-              () => {
-                Connection.disableConnectionAccounting();
-                done();
-              }
-            );
+            server.destroy();
+            done();
           }
         }
       });
@@ -356,9 +360,6 @@ describe('ReplSet Add Remove (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -407,14 +408,8 @@ describe('ReplSet Add Remove (mocks)', function() {
           expect(server.s.replicaSetState.primary).to.not.be.null;
           expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-          mock.cleanup(
-            [server, primaryServer, firstSecondaryServer, secondSecondaryServer, arbiterServer],
-            spy,
-            () => {
-              Connection.disableConnectionAccounting();
-              done();
-            }
-          );
+          server.destroy();
+          done();
         }
       });
 
@@ -605,9 +600,6 @@ describe('ReplSet Add Remove (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -656,14 +648,8 @@ describe('ReplSet Add Remove (mocks)', function() {
           expect(hosts.indexOf('localhost:32002')).to.not.equal(-1);
           expect(hosts.indexOf('localhost:32003')).to.not.equal(-1);
 
-          mock.cleanup(
-            [primaryServer, firstSecondaryServer, secondSecondaryServer, arbiterServer, server],
-            spy,
-            () => {
-              Connection.disableConnectionAccounting();
-              done();
-            }
-          );
+          server.destroy();
+          done();
         }, 1000);
       }, 500);
 
@@ -834,9 +820,6 @@ describe('ReplSet Add Remove (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -860,15 +843,8 @@ describe('ReplSet Add Remove (mocks)', function() {
       server.on('serverHeartbeatStarted', function(description) {
         allservers[description.connectionId] = true;
         if (allservers['localhost:32003']) {
-          // Finish up the test
-          mock.cleanup(
-            [primaryServer, firstSecondaryServer, secondSecondaryServer, arbiterServer, server],
-            spy,
-            () => {
-              Connection.disableConnectionAccounting();
-              done();
-            }
-          );
+          server.destroy();
+          done();
         }
       });
 

@@ -6,7 +6,20 @@ var expect = require('chai').expect,
   mock = require('../../../mock'),
   ConnectionSpy = require('../shared').ConnectionSpy;
 
+let test = {};
 describe('ReplSet Connection Tests (mocks)', function() {
+  beforeEach(() => {
+    test.spy = new ConnectionSpy();
+    Connection.enableConnectionAccounting(test.spy);
+  });
+
+  afterEach(() => {
+    return mock.cleanup(test.spy).then(() => {
+      test.spy = undefined;
+      Connection.disableConnectionAccounting();
+    });
+  });
+
   it('Successful connection to replicaset of 1 primary, 1 secondary and 1 arbiter', {
     metadata: {
       requires: {
@@ -102,9 +115,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -137,16 +147,10 @@ describe('ReplSet Connection Tests (mocks)', function() {
             expect(server.s.replicaSetState.primary).to.not.be.null;
             expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-            mock.cleanup([primaryServer, firstSecondaryServer, arbiterServer, server], spy, () => {
-              Connection.disableConnectionAccounting();
-              done();
-            });
+            server.destroy();
+            done();
           }
         }
-      });
-
-      server.on('connect', function() {
-        server.__connected = true;
       });
 
       // Gives proxies a chance to boot up
@@ -253,9 +257,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
           });
         });
 
-        const spy = new ConnectionSpy();
-        Connection.enableConnectionAccounting(spy);
-
         // Attempt to connect
         var server = new ReplSet([{ host: 'localhost', port: 32002 }], {
           setName: 'rs',
@@ -281,20 +282,10 @@ describe('ReplSet Connection Tests (mocks)', function() {
               expect(server.s.replicaSetState.primary).to.not.be.null;
               expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-              mock.cleanup(
-                [primaryServer, firstSecondaryServer, arbiterServer, server],
-                spy,
-                () => {
-                  Connection.disableConnectionAccounting();
-                  done();
-                }
-              );
+              server.destroy();
+              done();
             }
           }
-        });
-
-        server.on('connect', function() {
-          server.__connected = true;
         });
 
         // Gives proxies a chance to boot up
@@ -380,9 +371,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -412,10 +400,8 @@ describe('ReplSet Connection Tests (mocks)', function() {
         expect(server.s.replicaSetState.primary).to.not.be.null;
         expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-        mock.cleanup([primaryServer, firstSecondaryServer, server], spy, () => {
-          Connection.disableConnectionAccounting();
-          done();
-        });
+        server.destroy();
+        done();
       }
 
       // Joined
@@ -482,7 +468,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
       // Boot the mock
       co(function*() {
         firstSecondaryServer = yield mock.createServer(32001, 'localhost');
-
         firstSecondaryServer.setMessageHandler(request => {
           var doc = request.document;
           if (doc.ismaster) {
@@ -490,9 +475,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
           }
         });
       });
-
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
 
       // Attempt to connect
       var server = new ReplSet(
@@ -511,10 +493,8 @@ describe('ReplSet Connection Tests (mocks)', function() {
       );
 
       server.on('error', function() {
-        mock.cleanup([server, firstSecondaryServer], spy, () => {
-          Connection.disableConnectionAccounting();
-          done();
-        });
+        server.destroy();
+        done();
       });
 
       // Gives proxies a chance to boot up
@@ -601,9 +581,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
           });
         });
 
-        const spy = new ConnectionSpy();
-        Connection.enableConnectionAccounting(spy);
-
         // Attempt to connect
         var server = new ReplSet(
           [
@@ -634,15 +611,9 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
             expect(server.s.replicaSetState.primary).to.be.null;
 
-            mock.cleanup([firstSecondaryServer, arbiterServer, server], spy, () => {
-              Connection.disableConnectionAccounting();
-              done();
-            });
+            server.destroy();
+            done();
           }
-        });
-
-        server.on('connect', function() {
-          server.__connected = true;
         });
 
         // Gives proxies a chance to boot up
@@ -750,9 +721,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
           });
         });
 
-        const spy = new ConnectionSpy();
-        Connection.enableConnectionAccounting(spy);
-
         // Attempt to connect
         var server = new ReplSet(
           [
@@ -786,20 +754,10 @@ describe('ReplSet Connection Tests (mocks)', function() {
               expect(server.s.replicaSetState.primary).to.not.be.null;
               expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-              mock.cleanup(
-                [primaryServer, firstSecondaryServer, arbiterServer, server],
-                spy,
-                () => {
-                  Connection.disableConnectionAccounting();
-                  done();
-                }
-              );
+              server.destroy();
+              done();
             }
           }
-        });
-
-        server.on('connect', function() {
-          server.__connected = true;
         });
 
         // Gives proxies a chance to boot up
@@ -905,9 +863,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -925,10 +880,8 @@ describe('ReplSet Connection Tests (mocks)', function() {
       );
 
       server.on('error', function() {
-        mock.cleanup([primaryServer, firstSecondaryServer, arbiterServer, server], spy, () => {
-          Connection.disableConnectionAccounting();
-          done();
-        });
+        server.destroy();
+        done();
       });
 
       // Gives proxies a chance to boot up
@@ -1013,9 +966,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [{ host: 'localhost', port: 32000 }, { host: 'localhost', port: 32001 }],
@@ -1040,16 +990,10 @@ describe('ReplSet Connection Tests (mocks)', function() {
             expect(server.s.replicaSetState.primary).to.not.be.null;
             expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-            mock.cleanup([primaryServer, firstSecondaryServer, server], spy, () => {
-              Connection.disableConnectionAccounting();
-              done();
-            });
+            server.destroy();
+            done();
           }
         }
-      });
-
-      server.on('connect', function() {
-        server.__connected = true;
       });
 
       // Gives proxies a chance to boot up
@@ -1156,9 +1100,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
           });
         });
 
-        const spy = new ConnectionSpy();
-        Connection.enableConnectionAccounting(spy);
-
         // Attempt to connect
         var server = new ReplSet(
           [{ host: '127.0.0.1', port: 32002 }, { host: '127.0.0.1', port: 32001 }],
@@ -1187,20 +1128,10 @@ describe('ReplSet Connection Tests (mocks)', function() {
               expect(server.s.replicaSetState.primary).to.not.be.null;
               expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-              mock.cleanup(
-                [primaryServer, firstSecondaryServer, arbiterServer, server],
-                spy,
-                () => {
-                  Connection.disableConnectionAccounting();
-                  done();
-                }
-              );
+              server.destroy();
+              done();
             }
           }
-        });
-
-        server.on('connect', function() {
-          server.__connected = true;
         });
 
         // Gives proxies a chance to boot up
@@ -1284,9 +1215,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
         setName: 'rs',
@@ -1296,6 +1224,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         size: 1
       });
 
+      server.on('error', done);
       server.on('joined', function(_type) {
         if (_type === 'arbiter' || _type === 'secondary' || _type === 'primary') {
           if (server.s.replicaSetState.arbiters.length === 1 && server.s.replicaSetState.primary) {
@@ -1305,17 +1234,10 @@ describe('ReplSet Connection Tests (mocks)', function() {
             expect(server.s.replicaSetState.primary).to.not.be.null;
             expect(server.s.replicaSetState.primary.name).to.equal('localhost:32000');
 
-            mock.cleanup([primaryServer, arbiterServer, server], spy, () => {
-              Connection.disableConnectionAccounting();
-              done();
-            });
+            server.destroy();
+            done();
           }
         }
-      });
-
-      server.on('error', done);
-      server.on('connect', function() {
-        server.__connected = true;
       });
 
       // Gives proxies a chance to boot up
@@ -1422,9 +1344,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
           });
         });
 
-        const spy = new ConnectionSpy();
-        Connection.enableConnectionAccounting(spy);
-
         // Attempt to connect
         var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
           setName: 'rs',
@@ -1438,18 +1357,16 @@ describe('ReplSet Connection Tests (mocks)', function() {
           server.__fullsetup = true;
         });
 
+        server.on('connect', function() {
+          server.__connected = true;
+        });
+
         server.on('all', function() {
           expect(server.__connected).to.be.true;
           expect(server.__fullsetup).to.be.true;
 
-          mock.cleanup([primaryServer, firstSecondaryServer, arbiterServer, server], spy, () => {
-            Connection.disableConnectionAccounting();
-            done();
-          });
-        });
-
-        server.on('connect', function() {
-          server.__connected = true;
+          server.destroy();
+          done();
         });
 
         // Gives proxies a chance to boot up
@@ -1537,9 +1454,6 @@ describe('ReplSet Connection Tests (mocks)', function() {
           });
         });
 
-        const spy = new ConnectionSpy();
-        Connection.enableConnectionAccounting(spy);
-
         // Attempt to connect
         var server = new ReplSet(
           [
@@ -1558,15 +1472,11 @@ describe('ReplSet Connection Tests (mocks)', function() {
         );
 
         server.on('connect', function() {
-          server.__connected = true;
-
           var result = server.lastIsMaster();
           expect(result).to.exist;
 
-          mock.cleanup([firstSecondaryServer, arbiterServer, server], spy, () => {
-            Connection.disableConnectionAccounting();
-            done();
-          });
+          server.destroy();
+          done();
         });
 
         // Gives proxies a chance to boot up

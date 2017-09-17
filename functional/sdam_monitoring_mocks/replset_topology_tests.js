@@ -5,6 +5,8 @@ var expect = require('chai').expect,
   mock = require('../../../mock');
 
 describe.skip('ReplSet SDAM Monitoring (mocks)', function() {
+  afterEach(() => mock.cleanup());
+
   it('Successful emit SDAM monitoring events for replicaset', {
     metadata: {
       requires: {
@@ -237,7 +239,8 @@ describe.skip('ReplSet SDAM Monitoring (mocks)', function() {
                   }
                 }
 
-                mock.cleanup([primaryServer, firstSecondaryServer, arbiterServer], () => done());
+                server.destroy();
+                done();
               }, 1000);
             }, 2000);
           });

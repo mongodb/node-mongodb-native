@@ -5,6 +5,8 @@ var expect = require('chai').expect,
   mock = require('../../../mock');
 
 describe('Single Timeout (mocks)', function() {
+  afterEach(() => mock.cleanup());
+
   it('Should correctly timeout socket operation and then correctly re-execute', {
     metadata: {
       requires: {
@@ -94,7 +96,7 @@ describe('Single Timeout (mocks)', function() {
                   finished = true;
                   expect(_r.connection.port).to.equal('37019');
                   replset.destroy({ force: true });
-                  mock.cleanup([server], () => done());
+                  done();
                 } else {
                   wait();
                 }
@@ -147,9 +149,9 @@ describe('Single Timeout (mocks)', function() {
       var serverIsMaster = [assign({}, defaultFields)];
 
       // Boot the mock
-      var __server;
+      var mockServer;
       co(function*() {
-        __server = yield mock.createServer(37017, 'localhost', {
+        mockServer = yield mock.createServer(37017, 'localhost', {
           onRead: function(_server, connection) {
             // Force EPIPE error
             if (currentStep === 1) {
@@ -165,7 +167,7 @@ describe('Single Timeout (mocks)', function() {
           }
         });
 
-        __server.setMessageHandler(request => {
+        mockServer.setMessageHandler(request => {
           var doc = request.document;
           if (doc.ismaster && currentStep === 0) {
             currentStep += 1;
@@ -267,8 +269,8 @@ describe('Single Timeout (mocks)', function() {
         _server.insert('test.test', [{ created: new Date() }], function(err, r) {
           expect(r).to.exist;
           expect(brokenPipe).to.equal(true);
-          _server.destroy();
-          mock.cleanup([__server, _server], () => done());
+          server.destroy();
+          done();
         });
       });
 

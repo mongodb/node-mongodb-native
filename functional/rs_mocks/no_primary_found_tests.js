@@ -5,7 +5,20 @@ var assign = require('../../../../lib/utils').assign,
   mock = require('../../../mock'),
   ConnectionSpy = require('../shared').ConnectionSpy;
 
+let test = {};
 describe('ReplSet No Primary Found (mocks)', function() {
+  beforeEach(() => {
+    test.spy = new ConnectionSpy();
+    Connection.enableConnectionAccounting(test.spy);
+  });
+
+  afterEach(() => {
+    return mock.cleanup(test.spy).then(() => {
+      test.spy = undefined;
+      Connection.disableConnectionAccounting();
+    });
+  });
+
   it('Should correctly connect to a replicaset where the arbiter hangs no primary found error', {
     metadata: {
       requires: {
@@ -121,9 +134,6 @@ describe('ReplSet No Primary Found (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
         setName: 'rs',
@@ -135,15 +145,8 @@ describe('ReplSet No Primary Found (mocks)', function() {
 
       // Add event listeners
       server.on('connect', function() {
-        // Destroy mock
-        mock.cleanup(
-          [primaryServer, firstSecondaryServer, secondSecondaryServer, arbiterServer, server],
-          spy,
-          () => {
-            Connection.disableConnectionAccounting();
-            done();
-          }
-        );
+        server.destroy();
+        done();
       });
 
       server.on('error', done);

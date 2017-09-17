@@ -99,8 +99,9 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
                   // Do we have both proxies answering
                   if (Object.keys(proxies).length === 2) {
                     clearInterval(intervalId2);
-                    mock.cleanup([server, mongos1, mongos2], () => {
+                    server.destroy();
 
+                    mock.cleanup().then(() => {
                       setTimeout(function() {
                         var results = [
                           {
@@ -296,7 +297,9 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
               // Wait to allow at least one heartbeat to pass
               setTimeout(function() {
                 expect(r.connection.port).to.equal(62003);
-                mock.cleanup([server, mongos1, mongos2], () => {
+                server.destroy();
+
+                mock.cleanup().then(() => {
                   // Wait for a little bit to let all events fire
                   setTimeout(function() {
                     expect(responses.serverOpening.length).to.be.at.least(2);
@@ -479,7 +482,8 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
 
             setTimeout(function() {
               expect(responses.topologyDescriptionChanged.length).to.be.greaterThan(0);
-              mock.cleanup([server, mongos1, mongos2], () => done());
+              server.destroy();
+              mock.cleanup().then(() => done());
             }, 2000);
           }, 2000);
         }, 2000);

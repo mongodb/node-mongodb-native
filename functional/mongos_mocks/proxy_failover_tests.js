@@ -5,6 +5,8 @@ var expect = require('chai').expect,
   mock = require('../../../mock');
 
 describe('Mongos Proxy Failover (mocks)', function() {
+  afterEach(() => mock.cleanup());
+
   it('Should correctly failover due to proxy going away causing timeout', {
     metadata: {
       requires: {
@@ -80,7 +82,9 @@ describe('Mongos Proxy Failover (mocks)', function() {
             if (r) {
               clearInterval(intervalId);
               expect(r.connection.port).to.equal(52008);
-              mock.cleanup([server, mongos1, mongos2], () => done());
+
+              server.destroy();
+              done();
             }
           });
         }, 500);
@@ -188,7 +192,9 @@ describe('Mongos Proxy Failover (mocks)', function() {
                   // Do we have both proxies answering
                   if (Object.keys(proxies).length === 2) {
                     clearInterval(intervalId2);
-                    mock.cleanup([server, mongos1, mongos2], () => done());
+
+                    server.destroy();
+                    done();
                   }
                 });
               }, 500);
@@ -303,7 +309,8 @@ describe('Mongos Proxy Failover (mocks)', function() {
                   clearInterval(intervalId2);
                   intervalId2 = null;
 
-                  mock.cleanup([server, mongos1, mongos2], () => done());
+                  server.destroy();
+                  done();
                 }
               });
             }, 100);

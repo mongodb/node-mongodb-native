@@ -6,7 +6,20 @@ var expect = require('chai').expect,
   mock = require('../../../mock'),
   ConnectionSpy = require('../shared').ConnectionSpy;
 
+let test = {};
 describe('ReplSet Read Preferences (mocks)', function() {
+  beforeEach(() => {
+    test.spy = new ConnectionSpy();
+    Connection.enableConnectionAccounting(test.spy);
+  });
+
+  afterEach(() => {
+    return mock.cleanup(test.spy).then(() => {
+      test.spy = undefined;
+      Connection.disableConnectionAccounting();
+    });
+  });
+
   it('Should correctly connect to a replicaset and select the correct tagged secondary server', {
     metadata: {
       requires: {
@@ -110,9 +123,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -147,14 +157,8 @@ describe('ReplSet Read Preferences (mocks)', function() {
               expect(err).to.be.null;
               expect(r.connection.port).to.equal(32002);
 
-              mock.cleanup(
-                [server, primaryServer, firstSecondaryServer, secondSecondaryServer],
-                spy,
-                () => {
-                  Connection.disableConnectionAccounting();
-                  done();
-                }
-              );
+              server.destroy();
+              done();
             }
           );
         }
@@ -274,9 +278,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -312,14 +313,8 @@ describe('ReplSet Read Preferences (mocks)', function() {
                 expect(err).to.be.null;
                 expect(r.connection.port).to.equal(32000);
 
-                mock.cleanup(
-                  [server, primaryServer, firstSecondaryServer, secondSecondaryServer],
-                  spy,
-                  () => {
-                    Connection.disableConnectionAccounting();
-                    done();
-                  }
-                );
+                server.destroy();
+                done();
               }
             );
           }, 500);
@@ -438,9 +433,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -506,14 +498,8 @@ describe('ReplSet Read Preferences (mocks)', function() {
                         expect(__err).to.be.null;
                         expect(__r.connection.port).to.not.equal(port);
 
-                        mock.cleanup(
-                          [server, primaryServer, firstSecondaryServer, secondSecondaryServer],
-                          spy,
-                          () => {
-                            Connection.disableConnectionAccounting();
-                            done();
-                          }
-                        );
+                        server.destroy();
+                        done();
                       }
                     );
                   }
@@ -629,9 +615,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
         }
       };
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -645,8 +628,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
         ],
         {
           setName: 'rs',
-          // connectionTimeout: 10000,
-          // socketTimeout: 10000,
           haInterval: 10000,
           disconnectHandler: mockDisconnectHandler,
           size: 1
@@ -689,10 +670,8 @@ describe('ReplSet Read Preferences (mocks)', function() {
                         expect(_err).to.be.null;
                         expect(_r.connection.port).to.equal(32001); // reads from secondary while primary down
 
-                        mock.cleanup([server, primaryServer, firstSecondaryServer], spy, () => {
-                          Connection.disableConnectionAccounting();
-                          done();
-                        });
+                        server.destroy();
+                        done();
                       }
                     );
                   },
@@ -816,9 +795,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -882,14 +858,8 @@ describe('ReplSet Read Preferences (mocks)', function() {
                         expect(__err).to.be.null;
                         expect(__r.connection.port).to.not.equal(32000);
 
-                        mock.cleanup(
-                          [server, primaryServer, firstSecondaryServer, secondSecondaryServer],
-                          spy,
-                          () => {
-                            Connection.disableConnectionAccounting();
-                            done();
-                          }
-                        );
+                        server.destroy();
+                        done();
                       }
                     );
                   }
@@ -1012,9 +982,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -1056,14 +1023,8 @@ describe('ReplSet Read Preferences (mocks)', function() {
               expect(err).to.be.null;
               expect(r.connection.port).to.be.oneOf([32000, 32001]);
 
-              mock.cleanup(
-                [server, primaryServer, firstSecondaryServer, secondSecondaryServer],
-                spy,
-                () => {
-                  Connection.disableConnectionAccounting();
-                  done();
-                }
-              );
+              server.destroy();
+              done();
             }
           );
         }
@@ -1183,9 +1144,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -1227,14 +1185,8 @@ describe('ReplSet Read Preferences (mocks)', function() {
               expect(err).to.be.null;
               expect(r.connection.port).to.be.oneOf([32001, 32002]);
 
-              mock.cleanup(
-                [server, primaryServer, firstSecondaryServer, secondSecondaryServer],
-                spy,
-                () => {
-                  Connection.disableConnectionAccounting();
-                  done();
-                }
-              );
+              server.destroy();
+              done();
             }
           );
         }
@@ -1312,9 +1264,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
           });
         });
 
-        const spy = new ConnectionSpy();
-        Connection.enableConnectionAccounting(spy);
-
         // Attempt to connect
         var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
           setName: 'rs',
@@ -1343,10 +1292,8 @@ describe('ReplSet Read Preferences (mocks)', function() {
                   expect(err).to.be.null;
                   expect(r.connection.port).to.equal(32000);
 
-                  mock.cleanup([server, primaryServer], spy, () => {
-                    Connection.disableConnectionAccounting();
-                    done();
-                  });
+                  server.destroy();
+                  done();
                 }
               );
             }, 500);
@@ -1466,9 +1413,6 @@ describe('ReplSet Read Preferences (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -1504,12 +1448,8 @@ describe('ReplSet Read Preferences (mocks)', function() {
               // Should not contain the primary
               expect(portsSeen).to.not.have.key('32000');
 
-              // Shut down mocks
-              mock.cleanup(
-                [server, primaryServer, firstSecondaryServer, secondSecondaryServer],
-                spy,
-                () => done()
-              );
+              server.destroy();
+              done();
             }
           };
 

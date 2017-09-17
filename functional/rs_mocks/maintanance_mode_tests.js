@@ -6,7 +6,20 @@ var expect = require('chai').expect,
   mock = require('../../../mock'),
   ConnectionSpy = require('../shared').ConnectionSpy;
 
+let test = {};
 describe('ReplSet Maintenance Mode (mocks)', function() {
+  beforeEach(() => {
+    test.spy = new ConnectionSpy();
+    Connection.enableConnectionAccounting(test.spy);
+  });
+
+  afterEach(() => {
+    return mock.cleanup(test.spy).then(() => {
+      test.spy = undefined;
+      Connection.disableConnectionAccounting();
+    });
+  });
+
   it('Successfully detect server in maintanance mode', {
     metadata: {
       requires: {
@@ -151,9 +164,6 @@ describe('ReplSet Maintenance Mode (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -195,14 +205,8 @@ describe('ReplSet Maintenance Mode (mocks)', function() {
 
       server.on('left', function(_type, _server) {
         if (_type === 'secondary' && _server.name === 'localhost:32003') {
-          mock.cleanup(
-            [primaryServer, firstSecondaryServer, secondSecondaryServer, arbiterServer, server],
-            spy,
-            () => {
-              Connection.disableConnectionAccounting();
-              done();
-            }
-          );
+          server.destroy();
+          done();
         }
       });
 

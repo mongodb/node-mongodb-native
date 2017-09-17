@@ -5,7 +5,20 @@ var assign = require('../../../../lib/utils').assign,
   mock = require('../../../mock'),
   ConnectionSpy = require('../shared').ConnectionSpy;
 
+let test = {};
 describe('ReplSet Operations (mocks)', function() {
+  beforeEach(() => {
+    test.spy = new ConnectionSpy();
+    Connection.enableConnectionAccounting(test.spy);
+  });
+
+  afterEach(() => {
+    return mock.cleanup(test.spy).then(() => {
+      test.spy = undefined;
+      Connection.disableConnectionAccounting();
+    });
+  });
+
   it('Correctly execute count command against replicaset with a single member', {
     metadata: {
       requires: {
@@ -62,9 +75,6 @@ describe('ReplSet Operations (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
         setName: 'rs',
@@ -80,7 +90,8 @@ describe('ReplSet Operations (mocks)', function() {
 
       server.on('connect', function(_server) {
         _server.command('test.test', { count: 'test' }, function() {
-          mock.cleanup([primaryServer, server], spy, () => done());
+          server.destroy();
+          done();
         });
       });
 
@@ -150,9 +161,6 @@ describe('ReplSet Operations (mocks)', function() {
           });
         });
 
-        const spy = new ConnectionSpy();
-        Connection.enableConnectionAccounting(spy);
-
         // Attempt to connect
         var server = new ReplSet([{ host: 'localhost', port: 32000 }], {
           setName: 'rs',
@@ -166,13 +174,14 @@ describe('ReplSet Operations (mocks)', function() {
           }
         });
 
-        server.on('connect', function(_server) {
-          _server.command(
+        server.on('connect', function() {
+          server.command(
             'test.test',
             { count: 'test' },
             { readPreference: ReadPreference.secondaryPreferred },
             function() {
-              mock.cleanup([primaryServer, _server], spy, () => done());
+              server.destroy();
+              done();
             }
           );
         });

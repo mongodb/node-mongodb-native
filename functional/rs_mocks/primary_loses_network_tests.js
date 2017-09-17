@@ -5,7 +5,20 @@ var assign = require('../../../../lib/utils').assign,
   mock = require('../../../mock'),
   ConnectionSpy = require('../shared').ConnectionSpy;
 
+let test = {};
 describe('ReplSet Primary Loses Network (mocks)', function() {
+  beforeEach(() => {
+    test.spy = new ConnectionSpy();
+    Connection.enableConnectionAccounting(test.spy);
+  });
+
+  afterEach(() => {
+    return mock.cleanup(test.spy).then(() => {
+      test.spy = undefined;
+      Connection.disableConnectionAccounting();
+    });
+  });
+
   it('Recover from Primary losing network connectivity', {
     metadata: {
       requires: {
@@ -125,9 +138,6 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
         });
       });
 
-      const spy = new ConnectionSpy();
-      Connection.enableConnectionAccounting(spy);
-
       // Attempt to connect
       var server = new ReplSet(
         [
@@ -155,11 +165,8 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
               }
 
               cleaningUp = true;
-              mock.cleanup(
-                [server, primaryServer, firstSecondaryServer, secondSecondaryServer],
-                spy,
-                () => done()
-              );
+              server.destroy();
+              done();
             }
           });
         }

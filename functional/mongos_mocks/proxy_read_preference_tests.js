@@ -5,6 +5,8 @@ var expect = require('chai').expect,
   mock = require('../../../mock');
 
 describe('Mongos Proxy Read Preference (mocks)', function() {
+  afterEach(() => mock.cleanup());
+
   it('Should correctly set query and readpreference field on wire protocol for 3.2', {
     metadata: {
       requires: {
@@ -87,7 +89,8 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
           expect(command).to.have.keys(['$query', '$readPreference']);
           expect(command.$readPreference.mode).to.equal('secondary');
 
-          mock.cleanup([server, mongos1], () => done());
+          server.destroy();
+          done();
         });
       });
 
@@ -180,7 +183,8 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
           expect(command.$readPreference.mode).to.equal('nearest');
           expect(command.$readPreference.tags).to.eql([{ db: 'sf' }]);
 
-          mock.cleanup([server, mongos1], () => done());
+          server.destroy();
+          done();
         });
       });
 
@@ -263,7 +267,8 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
           expect(command).to.have.keys(['$query', '$readPreference']);
           expect(command.$readPreference.mode, 'secondary');
 
-          mock.cleanup([server, mongos1], () => done());
+          server.destroy();
+          done();
         });
       });
 

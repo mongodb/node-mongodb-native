@@ -8,6 +8,8 @@ var Server = require('../../../../lib/topologies/server'),
 // https://github.com/malexandert/mongodb-test-runner/issues/3 is fixed
 
 describe('Single Compression (mocks)', function() {
+  afterEach(() => mock.cleanup());
+
   it("server should recieve list of client's supported compressors in handshake", {
     metadata: {
       requires: {
@@ -53,7 +55,8 @@ describe('Single Compression (mocks)', function() {
       });
 
       client.on('connect', function() {
-        mock.cleanup([client, server], () => done());
+        client.destroy();
+        done();
       });
 
       setTimeout(function() {
@@ -150,7 +153,8 @@ describe('Single Compression (mocks)', function() {
                   expect(___err).to.be.null;
                   expect(___r.result.ok).to.equal(1);
 
-                  mock.cleanup([client, server], () => done());
+                  client.destroy();
+                  done();
                 });
               });
             });
@@ -252,7 +256,8 @@ describe('Single Compression (mocks)', function() {
                   expect(___err).to.be.null;
                   expect(___r.result.ok).to.equal(1);
 
-                  mock.cleanup([client, server], () => done());
+                  client.destroy();
+                  done();
                 });
               });
             });
@@ -354,7 +359,8 @@ describe('Single Compression (mocks)', function() {
                   expect(___err).to.be.null;
                   expect(___r.result.ok).to.equal(1);
 
-                  mock.cleanup([client, server], () => done());
+                  client.destroy();
+                  done();
                 });
               });
             });
@@ -445,7 +451,8 @@ describe('Single Compression (mocks)', function() {
                 expect(___err).to.be.null;
                 expect(___r.result.ok).to.equal(1);
 
-                mock.cleanup([client, server], () => done());
+                client.destroy();
+                done();
               });
             });
           });

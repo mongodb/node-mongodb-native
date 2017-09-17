@@ -5,6 +5,8 @@ var expect = require('chai').expect,
   mock = require('../../../mock');
 
 describe('Mongos Multiple Proxies (mocks)', function() {
+  afterEach(() => mock.cleanup());
+
   it('Should correctly load-balance the operations', {
     metadata: {
       requires: {
@@ -89,7 +91,8 @@ describe('Mongos Multiple Proxies (mocks)', function() {
               expect(__err).to.be.null;
               expect(__r.connection.port).to.equal(lastPort);
 
-              mock.cleanup([server, mongos1, mongos2], () => done());
+              server.destroy();
+              done();
             });
           });
         });
@@ -201,7 +204,9 @@ describe('Mongos Multiple Proxies (mocks)', function() {
                   expect(___err).to.be.null;
                   expect(___r.connection.port).to.equal(11003);
 
-                  mock.cleanup([server, server2, mongos1, mongos2], () => done());
+                  server.destroy();
+                  server2.destroy();
+                  done();
                 });
               });
             });

@@ -6,6 +6,8 @@ var expect = require('chai').expect,
   mock = require('../../../mock');
 
 describe('Mongos Single Proxy Connection (mocks)', function() {
+  afterEach(() => mock.cleanup());
+
   it('Should correctly timeout mongos socket operation and then correctly re-execute', {
     metadata: {
       requires: {
@@ -91,7 +93,8 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
               clearInterval(intervalId);
               expect(r.connection.port).to.equal(52017);
 
-              mock.cleanup([mongos, server], () => done());
+              server.destroy();
+              done();
             }
           });
         }, 500);
@@ -195,7 +198,8 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
             expect(_err).to.not.exist;
             expect(_d).to.exist;
 
-            mock.cleanup([mongos, server], () => done());
+            server.destroy();
+            done();
           });
         });
       });

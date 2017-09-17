@@ -5,6 +5,8 @@ var expect = require('chai').expect,
   mock = require('../../../mock');
 
 describe('Mongos Mixed Seed List (mocks)', function() {
+  afterEach(() => mock.cleanup());
+
   it('Should correctly print warning when non mongos proxy passed in seed list', {
     metadata: {
       requires: {
@@ -102,7 +104,8 @@ describe('Mongos Mixed Seed List (mocks)', function() {
       server.once('connect', function() {
         Logger.setCurrentLogger(logger);
 
-        mock.cleanup([server, mongos1, mongos2], () => done());
+        server.destroy();
+        done();
       });
 
       server.on('error', done);
@@ -205,7 +208,8 @@ describe('Mongos Mixed Seed List (mocks)', function() {
         expect(warnings[1].message).to.be.oneOf(errors);
         expect(warnings[2].message).to.be.oneOf(errors);
 
-        Promise.all([server.destroy(), mongos1.destroy(), mongos2.destroy()]).then(() => done());
+        server.destroy();
+        done();
       });
 
       setTimeout(function() {

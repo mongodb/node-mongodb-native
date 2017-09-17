@@ -5,6 +5,8 @@ var expect = require('chai').expect,
   mock = require('../../../mock');
 
 describe.skip('Single SDAM Monitoring (mocks)', function() {
+  afterEach(() => mock.cleanup());
+
   it('Should correctly emit sdam monitoring events for single server', {
     metadata: {
       requires: {
@@ -145,7 +147,8 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
             }
           }).to.eql(flags[5]);
 
-          mock.cleanup([mockServer], () => done());
+          server.destroy();
+          done();
         }, 100);
       });
 
@@ -290,7 +293,8 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
             }
           }).to.eql(flags[5]);
 
-          mock.cleanup([mockServer], () => done());
+          server.destroy();
+          done();
         }, 100);
       });
 
