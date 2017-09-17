@@ -90,11 +90,11 @@ var Response = function(bson, data, opts) {
   this.documents = new Array(this.numberReturned);
 
   // Flag values
-  this.cursorNotFound = (this.responseFlags & CURSOR_NOT_FOUND) !== 0;
-  this.queryFailure = (this.responseFlags & QUERY_FAILURE) !== 0;
-  this.shardConfigStale = (this.responseFlags & SHARD_CONFIG_STALE) !== 0;
-  this.awaitCapable = (this.responseFlags & AWAIT_CAPABLE) !== 0;
-  this.promoteLongs = typeof opts.promoteLongs === 'boolean' ? opts.promoteLongs : true;
+  this.cursorNotFound = (this.responseFlags & CURSOR_NOT_FOUND) != 0;
+  this.queryFailure = (this.responseFlags & QUERY_FAILURE) != 0;
+  this.shardConfigStale = (this.responseFlags & SHARD_CONFIG_STALE) != 0;
+  this.awaitCapable = (this.responseFlags & AWAIT_CAPABLE) != 0;
+  this.promoteLongs = typeof opts.promoteLongs == 'boolean' ? opts.promoteLongs : true;
 };
 
 Response.prototype.isParsed = function() {
@@ -113,7 +113,7 @@ Response.prototype.parse = function(options) {
   //
   // Single document and documentsReturnedIn set
   //
-  if (this.numberReturned === 1 && documentsReturnedIn != null && raw) {
+  if (this.numberReturned == 1 && documentsReturnedIn != null && raw) {
     // Calculate the bson size
     var bsonSize =
       this.data[this.index] |
@@ -136,7 +136,7 @@ Response.prototype.parse = function(options) {
     this.numberReturned = this.documents.length;
     // Ensure we have a Long valie cursor id
     this.cursorId =
-      typeof doc.cursor.id === 'number' ? Long.fromNumber(doc.cursor.id) : doc.cursor.id;
+      typeof doc.cursor.id == 'number' ? Long.fromNumber(doc.cursor.id) : doc.cursor.id;
 
     // Adjust the index
     this.index = this.index + bsonSize;
