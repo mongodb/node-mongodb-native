@@ -13,9 +13,9 @@ connect.Admin = require('./lib/admin');
 connect.MongoClient = require('./lib/mongo_client');
 connect.Db = require('./lib/db');
 connect.Collection = require('./lib/collection');
-connect.Server = require('./lib/server');
-connect.ReplSet = require('./lib/replset');
-connect.Mongos = require('./lib/mongos');
+connect.Server = require('./lib/topologies/server');
+connect.ReplSet = require('./lib/topologies/replset');
+connect.Mongos = require('./lib/topologies/mongos');
 connect.ReadPreference = require('./lib/read_preference');
 connect.GridStore = require('./lib/gridfs/grid_store');
 connect.Chunk = require('./lib/gridfs/chunk');
@@ -48,9 +48,13 @@ connect.connect = connect;
 
 // Set up the instrumentation method
 connect.instrument = function(options, callback) {
-  if(typeof options == 'function') callback = options, options = {};
+  if (typeof options === 'function') {
+    callback = options;
+    options = {};
+  }
+
   return new Instrumentation(core, options, callback);
-}
+};
 
 // Set our exports to be the connect function
 module.exports = connect;
