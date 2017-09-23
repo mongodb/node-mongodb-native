@@ -1,3 +1,5 @@
+'use strict';
+
 var crypto = require('crypto');
 var ejson = require('mongodb-extended-json');
 var fs = require('fs');

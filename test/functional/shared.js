@@ -1,3 +1,5 @@
+'use strict';
+
 var MongoClient = require('../../').MongoClient,
   expect = require('chai').expect;
 

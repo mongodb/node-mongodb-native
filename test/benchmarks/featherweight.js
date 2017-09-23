@@ -1,3 +1,5 @@
+'use strict';
+
 var Suite = require('betterbenchmarks').Suite,
   Benchmark = require('betterbenchmarks').Benchmark,
   // JSONStream = require('JSONStream'),

@@ -1,3 +1,5 @@
+'use strict';
+
 var mockupdb = require('../'),
   co = require('co');
 

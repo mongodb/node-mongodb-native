@@ -23,6 +23,7 @@
     }],
 
     "no-console": 0,
-    "eqeqeq": ["error", "always", {"null": "ignore"}]
+    "eqeqeq": ["error", "always", {"null": "ignore"}],
+    "strict": ["error", "global"]
   }
 }

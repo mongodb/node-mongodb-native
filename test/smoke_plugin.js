@@ -1,3 +1,5 @@
+'use strict';
+
 var fs = require('fs');
 
 /* Note: because this plugin uses process.on('uncaughtException'), only one

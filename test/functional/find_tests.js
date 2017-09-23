@@ -1803,16 +1803,10 @@ describe('Find', function() {
             // Insert original doc
             collection.insert(doc, configuration.writeConcernMax(), function(err) {
               test.equal(null, err);
-              collection.findAndModify(
-                q,
-                [],
-                set,
-                opts,
-                function(/* err */) {
-                  client.close();
-                  done();
-                }
-              );
+              collection.findAndModify(q, [], set, opts, function(/* err */) {
+                client.close();
+                done();
+              });
             });
           }
         );

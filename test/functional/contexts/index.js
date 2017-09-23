@@ -1,3 +1,5 @@
+'use strict';
+
 var vm = require('vm');
 var fs = require('fs');
 var path = require('path');

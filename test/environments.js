@@ -1,3 +1,5 @@
+'use strict';
+
 var f = require('util').format;
 var semver = require('semver');
 var path = require('path');

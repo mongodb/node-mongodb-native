@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = function(o, callback) {
   var MongoClient = require('../../').MongoClient,
     fs = require('fs');

@@ -1,3 +1,5 @@
+'use strict';
+
 // Reads in a C style string
 var readCStyleStringSpecial = function(buffer, index) {
   // Get the start search index
@@ -69,7 +71,7 @@ var Query = function(bson, data) {
   index = index + docSize;
 
   // No field selection
-  if (index == data.length) {
+  if (index === data.length) {
     return;
   }
 

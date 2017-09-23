@@ -1,3 +1,5 @@
+'use strict';
+
 var net = require('net'),
   BSON = require('bson'),
   Snappy = require('mongodb-core/lib/connection/utils').retrieveSnappy(),
@@ -25,7 +27,7 @@ var Server = function(port, host, options) {
   options = options || {};
 
   // Do we have an onRead function
-  this.onRead = typeof options.onRead == 'function' ? options.onRead : null;
+  this.onRead = typeof options.onRead === 'function' ? options.onRead : null;
 
   // Create a bson instance
   this.bson = new BSON();
@@ -102,7 +104,7 @@ Server.prototype.start = function() {
         self.connections = self.connections - 1;
         var index = self.sockets.indexOf(c);
 
-        if (index != -1) {
+        if (index !== -1) {
           self.sockets.splice(index, 1);
         }
       });
@@ -130,7 +132,7 @@ Server.prototype.receive = function() {
 
   return new Promise(function(resolve, reject) {
     var waiting = function() {
-      if (self.state == 'destroyed') {
+      if (self.state === 'destroyed') {
         return reject(new Error('mock server is in destroyed state'));
       }
 
@@ -160,7 +162,7 @@ var protocol = function(self, message) {
     (message[index++] << 8) |
     (message[index++] << 16) |
     (message[index++] << 24);
-  if (size != message.length) throw new Error('corrupt wire protocol message');
+  if (size !== message.length) throw new Error('corrupt wire protocol message');
   // Adjust to opcode
   index = 12;
   // Get the opCode for the message
@@ -171,7 +173,7 @@ var protocol = function(self, message) {
     (message[index++] << 24);
 
   // Unpack and decompress if the message is OP_COMPRESSED
-  if (type == opcodes.OP_COMPRESSED) {
+  if (type === opcodes.OP_COMPRESSED) {
     var requestID = message.readInt32LE(4);
     var responseTo = message.readInt32LE(8);
     var originalOpcode = message.readInt32LE(16);
@@ -213,12 +215,12 @@ var protocol = function(self, message) {
   }
 
   // Switch on type
-  if (type == opcodes.OP_UPDATE) return new Update(self.bson, message);
-  if (type == opcodes.OP_INSERT) return new Insert(self.bson, message);
-  if (type == opcodes.OP_QUERY) return new Query(self.bson, message);
-  if (type == opcodes.OP_GETMORE) return new GetMore(self.bson, message);
-  if (type == opcodes.OP_DELETE) return new Delete(self.bson, message);
-  if (type == opcodes.OP_KILL_CURSORS) return new KillCursor(self.bson, message);
+  if (type === opcodes.OP_UPDATE) return new Update(self.bson, message);
+  if (type === opcodes.OP_INSERT) return new Insert(self.bson, message);
+  if (type === opcodes.OP_QUERY) return new Query(self.bson, message);
+  if (type === opcodes.OP_GETMORE) return new GetMore(self.bson, message);
+  if (type === opcodes.OP_DELETE) return new Delete(self.bson, message);
+  if (type === opcodes.OP_KILL_CURSORS) return new KillCursor(self.bson, message);
   throw new Error('unknown wire protocol message type');
 };
 
@@ -227,7 +229,7 @@ var dataHandler = function(server, self, connection) {
     // Parse until we are done with the data
     while (data.length > 0) {
       // Call the onRead function
-      if (typeof server.onRead == 'function') {
+      if (typeof server.onRead === 'function') {
         // If onRead returns true, terminate the reading for this connection as
         // it's dead
         if (server.onRead(server, connection, self.buffer, self.bytesRead)) {
@@ -348,7 +350,7 @@ var dataHandler = function(server, self, connection) {
             } else if (
               sizeOfMessage > 4 &&
               sizeOfMessage < self.maxBsonMessageSize &&
-              sizeOfMessage == data.length
+              sizeOfMessage === data.length
             ) {
               try {
                 emitBuffer = data;

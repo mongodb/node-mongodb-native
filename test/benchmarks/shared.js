@@ -1,3 +1,5 @@
+'use strict';
+
 var MongoClient = require('../../').MongoClient,
   ServerManager = require('mongodb-topology-manager').Server,
   co = require('co'),
