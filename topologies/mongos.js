@@ -250,6 +250,14 @@ Object.defineProperty(Mongos.prototype, 'parserType', {
   }
 });
 
+Object.defineProperty(Mongos.prototype, 'logicalSessionTimeoutMinutes', {
+  enumerable: true,
+  get: function() {
+    if (!this.ismaster) return null;
+    return this.ismaster.logicalSessionTimeoutMinutes || null;
+  }
+});
+
 /**
  * Emit event if it exists
  * @method

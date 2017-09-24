@@ -72,6 +72,8 @@ var ReplSetState = function(options) {
     topologyType: 'Unknown',
     servers: []
   };
+
+  this.logicalSessionTimeoutMinutes = undefined;
 };
 
 inherits(ReplSetState, EventEmitter);
@@ -261,6 +263,21 @@ ReplSetState.prototype.update = function(server) {
 
     // Set the topology
     return false;
+  }
+
+  // Update logicalSessionTimeoutMinutes
+  if (ismaster.logicalSessionTimeoutMinutes !== undefined) {
+    if (
+      self.logicalSessionTimeoutMinutes === undefined ||
+      ismaster.logicalSessionTimeoutMinutes === null
+    ) {
+      self.logicalSessionTimeoutMinutes = ismaster.logicalSessionTimeoutMinutes;
+    } else {
+      self.logicalSessionTimeoutMinutes = Math.min(
+        self.logicalSessionTimeoutMinutes,
+        ismaster.logicalSessionTimeoutMinutes
+      );
+    }
   }
 
   //

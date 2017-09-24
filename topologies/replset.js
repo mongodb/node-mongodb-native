@@ -270,6 +270,13 @@ Object.defineProperty(ReplSet.prototype, 'parserType', {
   }
 });
 
+Object.defineProperty(ReplSet.prototype, 'logicalSessionTimeoutMinutes', {
+  enumerable: true,
+  get: function() {
+    return this.s.replicaSetState.logicalSessionTimeoutMinutes || null;
+  }
+});
+
 function rexecuteOperations(self) {
   // If we have a primary and a disconnect handler, execute
   // buffered operations

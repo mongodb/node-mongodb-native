@@ -195,6 +195,14 @@ Object.defineProperty(Server.prototype, 'parserType', {
   }
 });
 
+Object.defineProperty(Server.prototype, 'logicalSessionTimeoutMinutes', {
+  enumerable: true,
+  get: function() {
+    if (!this.ismaster) return null;
+    return this.ismaster.logicalSessionTimeoutMinutes || null;
+  }
+});
+
 Server.enableServerAccounting = function() {
   serverAccounting = true;
   servers = {};
