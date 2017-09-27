@@ -17,7 +17,7 @@ describe('Pool tests', function() {
       Connection.enableConnectionAccounting();
 
       // Attempt to connect
-      var pool = new Pool({
+      var pool = new Pool(null, {
         host: this.configuration.host,
         port: this.configuration.port,
         bson: new Bson(),
@@ -45,7 +45,7 @@ describe('Pool tests', function() {
       Connection.enableConnectionAccounting();
 
       // Attempt to connect
-      var pool = new Pool({
+      var pool = new Pool(null, {
         host: this.configuration.host,
         port: this.configuration.port,
         bson: new Bson()
@@ -85,7 +85,7 @@ describe('Pool tests', function() {
       var index = 0;
 
       // Attempt to connect
-      var pool = new Pool({
+      var pool = new Pool(null, {
         host: this.configuration.host,
         port: this.configuration.port,
         bson: new Bson()
@@ -205,7 +205,7 @@ describe('Pool tests', function() {
       this.timeout(0);
 
       // Attempt to connect
-      var pool = new Pool({
+      var pool = new Pool(null, {
         host: this.configuration.host,
         port: this.configuration.port,
         socketTimeout: 3000,
@@ -242,7 +242,7 @@ describe('Pool tests', function() {
       Connection.enableConnectionAccounting();
 
       // Attempt to connect
-      var pool = new Pool({
+      var pool = new Pool(null, {
         host: this.configuration.host,
         port: this.configuration.port,
         socketTimeout: 3000,
@@ -300,7 +300,7 @@ describe('Pool tests', function() {
       Connection.enableConnectionAccounting();
 
       // Attempt to connect
-      var pool = new Pool({
+      var pool = new Pool(null, {
         host: this.configuration.host,
         port: this.configuration.port,
         socketTimeout: 3000,
@@ -382,7 +382,7 @@ describe('Pool tests', function() {
       Connection.enableConnectionAccounting();
 
       // Attempt to connect
-      var pool = new Pool({
+      var pool = new Pool(null, {
         host: this.configuration.host,
         port: this.configuration.port,
         socketTimeout: 3000,
@@ -459,7 +459,7 @@ describe('Pool tests', function() {
       Connection.enableConnectionAccounting();
 
       // Attempt to connect
-      var pool = new Pool({
+      var pool = new Pool(null, {
         host: this.configuration.host,
         port: this.configuration.port,
         socketTimeout: 1000,
@@ -526,7 +526,7 @@ describe('Pool tests', function() {
               expect(createUserRes).to.exist;
               expect(createUserErr).to.be.null;
               // Attempt to connect
-              var pool = new Pool({
+              var pool = new Pool(null, {
                 host: self.configuration.host,
                 port: self.configuration.port,
                 bson: new Bson()
@@ -606,7 +606,7 @@ describe('Pool tests', function() {
                     expect(createAdminUserErr).to.be.null;
 
                     // Attempt to connect
-                    var pool = new Pool({
+                    var pool = new Pool(null, {
                       host: self.configuration.host,
                       port: self.configuration.port,
                       bson: new Bson()
@@ -812,7 +812,7 @@ describe('Pool tests', function() {
                   expect(createAdminUserErr).to.be.null;
 
                   // Attempt to connect
-                  var pool = new Pool({
+                  var pool = new Pool(null, {
                     host: self.configuration.host,
                     port: self.configuration.port,
                     bson: new Bson()
@@ -936,7 +936,7 @@ describe('Pool tests', function() {
                   expect(createAdminUserRes).to.exist;
                   expect(createAdminUserErr).to.be.null;
                   // Attempt to connect
-                  var pool = new Pool({
+                  var pool = new Pool(null, {
                     host: self.configuration.host,
                     port: self.configuration.port,
                     bson: new Bson()
@@ -1030,7 +1030,7 @@ describe('Pool tests', function() {
                   expect(createAdminUserRes).to.exist;
 
                   // Attempt to connect
-                  var pool = new Pool({
+                  var pool = new Pool(null, {
                     host: self.configuration.host,
                     port: self.configuration.port,
                     bson: new Bson()
@@ -1098,7 +1098,7 @@ describe('Pool tests', function() {
       Connection.enableConnectionAccounting();
 
       // Attempt to connect
-      var pool = new Pool({
+      var pool = new Pool(null, {
         host: this.configuration.host,
         port: this.configuration.port,
         bson: new Bson(),

@@ -17,7 +17,7 @@ function executeCommand(configuration, db, cmd, options, cb) {
   var port = options.port || configuration.port;
 
   // Attempt to connect
-  var pool = new Pool({
+  var pool = new Pool(null, {
     host: host,
     port: port,
     bson: new bson()
@@ -60,7 +60,7 @@ function locateAuthMethod(configuration, cb) {
   var cmd = { ismaster: true };
 
   // Attempt to connect
-  var pool = new Pool({
+  var pool = new Pool(null, {
     host: configuration.host,
     port: configuration.port,
     bson: new bson()
