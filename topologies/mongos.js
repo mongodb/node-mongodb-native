@@ -40,7 +40,8 @@ var MongoCR = require('../auth/mongocr'),
   Plain = require('../auth/plain'),
   GSSAPI = require('../auth/gssapi'),
   SSPI = require('../auth/sspi'),
-  ScramSHA1 = require('../auth/scram');
+  ScramSHA1 = require('../auth/scram'),
+  resolveClusterTime = require('./shared').resolveClusterTime;
 
 //
 // States
@@ -230,6 +231,9 @@ var Mongos = function(seedlist, options) {
     servers: []
   };
 
+  // Highest clusterTime seen in responses from the current deployment
+  this.clusterTime = null;
+
   // Add event listener
   EventEmitter.call(this);
 };
@@ -283,7 +287,9 @@ Mongos.prototype.connect = function(options) {
   var servers = this.s.seedlist.map(function(x) {
     return new Server(
       assign(
-        {},
+        {
+          clusterTimeWatcher: clusterTime => resolveClusterTime(self, clusterTime)
+        },
         self.s.options,
         x,
         {
@@ -606,7 +612,9 @@ function reconnectProxies(self, proxies, callback) {
       // Create a new server instance
       var server = new Server(
         assign(
-          {},
+          {
+            clusterTimeWatcher: clusterTime => resolveClusterTime(self, clusterTime)
+          },
           self.s.options,
           {
             host: _server.name.split(':')[0],

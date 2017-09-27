@@ -354,6 +354,23 @@ function diff(previous, current) {
   return diff;
 }
 
+/**
+ * Shared function to determine clusterTime for a given topology
+ *
+ * @param {*} topology
+ * @param {*} clusterTime
+ */
+function resolveClusterTime(topology, $clusterTime) {
+  if (topology.clusterTime == null) {
+    topology.clusterTime = $clusterTime;
+  } else {
+    if ($clusterTime.clusterTime.greaterThan(topology.clusterTime.clusterTime)) {
+      topology.clusterTime = $clusterTime;
+    }
+  }
+}
+
+module.exports.resolveClusterTime = resolveClusterTime;
 module.exports.inquireServerState = inquireServerState;
 module.exports.getTopologyType = getTopologyType;
 module.exports.emitServerDescriptionChanged = emitServerDescriptionChanged;

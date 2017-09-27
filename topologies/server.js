@@ -154,6 +154,14 @@ var Server = function(options) {
     compression: { compressors: createCompressionInfo(options) }
   };
 
+  // special case for Mongos and ReplSet deployments
+  if (options.clusterTimeWatcher) {
+    this.s.clusterTimeWatcher = options.clusterTimeWatcher;
+  } else {
+    // otherwise this is a single deployment and we need to track the clusterTime here
+    this.s.clusterTime = null;
+  }
+
   // Curent ismaster
   this.ismaster = null;
   // Current ping time
@@ -200,6 +208,24 @@ Object.defineProperty(Server.prototype, 'logicalSessionTimeoutMinutes', {
   get: function() {
     if (!this.ismaster) return null;
     return this.ismaster.logicalSessionTimeoutMinutes || null;
+  }
+});
+
+// In single server deployments we track the clusterTime directly on the topology, however
+// in Mongos and ReplSet deployments we instead need to delegate the clusterTime up to the
+// tracking objects so we can ensure we are gossiping the maximum time received from the
+// server.
+Object.defineProperty(Server.prototype, 'clusterTime', {
+  enumerable: true,
+  set: function(clusterTime) {
+    if (this.s.clusterTimeWatcher) {
+      this.s.clusterTimeWatcher(clusterTime);
+    } else {
+      this.s.clusterTime = clusterTime;
+    }
+  },
+  get: function() {
+    return this.s.clusterTime || null;
   }
 });
 
@@ -503,7 +529,7 @@ Server.prototype.connect = function(options) {
   }
 
   // Create a pool
-  self.s.pool = new Pool(assign(self.s.options, options, { bson: this.s.bson }));
+  self.s.pool = new Pool(this, assign(self.s.options, options, { bson: this.s.bson }));
 
   // Set up listeners
   self.s.pool.on('close', eventHandler(self, 'close'));

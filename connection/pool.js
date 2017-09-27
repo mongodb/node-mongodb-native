@@ -65,9 +65,13 @@ var _id = 0;
  * @fires Pool#parseError
  * @return {Pool} A cursor instance
  */
-var Pool = function(options) {
+var Pool = function(topology, options) {
   // Add event listener
   EventEmitter.call(this);
+
+  // Store topology for later use
+  this.topology = topology;
+
   // Add the options
   this.options = assign(
     {
@@ -103,9 +107,6 @@ var Pool = function(options) {
     },
     options
   );
-
-  // console.log("=================================== pool options")
-  // console.dir(this.options)
 
   // Identification information
   this.id = _id++;
@@ -269,9 +270,6 @@ function reauthenticate(pool, connection, cb) {
 
 function connectionFailureHandler(self, event) {
   return function(err) {
-    // console.log("========== connectionFailureHandler :: " + event)
-    // console.dir(err)
-
     if (this._connectionFailHandled) return;
     this._connectionFailHandled = true;
     // Destroy the connection
@@ -323,7 +321,6 @@ function connectionFailureHandler(self, event) {
 
 function attemptReconnect(self) {
   return function() {
-    // console.log("========================= attemptReconnect")
     self.emit('attemptReconnect', self);
     if (self.state === DESTROYED || self.state === DESTROYING) return;
 
@@ -540,6 +537,12 @@ function messageHandler(self) {
           message.parse(workItem);
         } catch (err) {
           return handleOperationCallback(self, workItem.cb, new MongoError(err));
+        }
+
+        // Look for clusterTime, and update it if necessary
+        if (message.documents[0] && message.documents[0].hasOwnProperty('$clusterTime')) {
+          const $clusterTime = message.documents[0].$clusterTime;
+          self.topology.clusterTime = $clusterTime;
         }
 
         // Establish if we have an error

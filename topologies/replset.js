@@ -14,7 +14,8 @@ var inherits = require('util').inherits,
   clone = require('./shared').clone,
   Timeout = require('./shared').Timeout,
   Interval = require('./shared').Interval,
-  createClientInfo = require('./shared').createClientInfo;
+  createClientInfo = require('./shared').createClientInfo,
+  resolveClusterTime = require('./shared').resolveClusterTime;
 
 var MongoCR = require('../auth/mongocr'),
   X509 = require('../auth/x509'),
@@ -252,6 +253,9 @@ var ReplSet = function(seedlist, options) {
   this.ismaster = null;
   // Contains the intervalId
   this.intervalIds = [];
+
+  // Highest clusterTime seen in responses from the current deployment
+  this.clusterTime = null;
 };
 
 inherits(ReplSet, EventEmitter);
@@ -377,7 +381,9 @@ function connectNewServers(self, servers, callback) {
       // Create a new server instance
       var server = new Server(
         assign(
-          {},
+          {
+            clusterTimeWatcher: clusterTime => resolveClusterTime(self, clusterTime)
+          },
           self.s.options,
           {
             host: _server.split(':')[0],
@@ -956,7 +962,9 @@ ReplSet.prototype.connect = function(options) {
   var servers = this.s.seedlist.map(function(x) {
     return new Server(
       assign(
-        {},
+        {
+          clusterTimeWatcher: clusterTime => resolveClusterTime(self, clusterTime)
+        },
         self.s.options,
         x,
         {
