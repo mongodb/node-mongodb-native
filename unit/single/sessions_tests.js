@@ -83,6 +83,40 @@ describe('Sessions (Single)', function() {
     }
   });
 
+  it('should send `clusterTime` on outgoing messages', {
+    metadata: { requires: { topology: 'single' } },
+    test: function(done) {
+      const clusterTime = genClusterTime(Date.now());
+      let sentIsMaster = false;
+      test.server.setMessageHandler(request => {
+        if (sentIsMaster) {
+          expect(request.document.$clusterTime).to.eql(clusterTime);
+          request.reply({ ok: 1 });
+          return;
+        }
+
+        sentIsMaster = true;
+        request.reply(
+          assign({}, mock.DEFAULT_ISMASTER, {
+            maxWireVersion: 6,
+            $clusterTime: clusterTime
+          })
+        );
+      });
+
+      const client = new Server(test.server.address());
+      client.on('error', done);
+      client.once('connect', () => {
+        client.command('admin.$cmd', { ping: 1 }, err => {
+          expect(err).to.not.exist;
+          done();
+        });
+      });
+
+      client.connect();
+    }
+  });
+
   it('should default `logicalSessionTimeoutMinutes` to `null`', {
     metadata: { requires: { topology: 'single' } },
     test: function() {
