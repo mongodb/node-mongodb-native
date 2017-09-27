@@ -31,6 +31,10 @@ var DESTROYED = 'destroyed';
 
 var _id = 0;
 
+function supportsClusterTime(topology) {
+  return topology.ismaster == null ? false : topology.ismaster.maxWireVersion >= 6;
+}
+
 /**
  * Creates a new Pool instance
  * @class
@@ -1136,6 +1140,16 @@ Pool.prototype.write = function(commands, options, cb) {
 
   // Get the requestId
   operation.requestId = commands[commands.length - 1].requestId;
+
+  if (supportsClusterTime(this.topology) && this.topology.clusterTime) {
+    commands.forEach(command => {
+      if (command instanceof Query) {
+        command.query.$clusterTime = this.topology.clusterTime;
+      } else {
+        command.$clusterTime = this.topology.clusterTime;
+      }
+    });
+  }
 
   // Prepare the operation buffer
   serializeCommands(self, commands, [], function(err, serializedCommands) {
