@@ -32,6 +32,7 @@ var DESTROYED = 'destroyed';
 var _id = 0;
 
 function supportsClusterTime(topology) {
+  if (topology == null) return false;
   return topology.ismaster == null ? false : topology.ismaster.maxWireVersion >= 6;
 }
 
