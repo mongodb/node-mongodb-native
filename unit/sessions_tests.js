@@ -11,6 +11,23 @@ const Server = require('../../..').Server,
 let test = {};
 describe('Sessions', function() {
   describe('ClientSession', function() {
+    it('should throw errors with invalid parameters', {
+      metadata: { requires: { topology: 'single' } },
+      test: function() {
+        expect(() => {
+          new ClientSession();
+        }).to.throw(/ClientSession requires a topology/);
+
+        expect(() => {
+          new ClientSession({});
+        }).to.throw(/ClientSession requires a ServerSessionPool/);
+
+        expect(() => {
+          new ClientSession({}, {});
+        }).to.throw(/ClientSession requires a ServerSessionPool/);
+      }
+    });
+
     it('should default to `null` for `clusterTime`', {
       metadata: { requires: { topology: 'single' } },
       test: function() {
@@ -62,6 +79,15 @@ describe('Sessions', function() {
             test.client.connect();
           });
         });
+    });
+
+    it('should throw errors with invalid parameters', {
+      metadata: { requires: { topology: 'single' } },
+      test: function() {
+        expect(() => {
+          new ServerSessionPool();
+        }).to.throw(/ServerSessionPool requires a topology/);
+      }
     });
 
     it('should create a new session if the pool is empty', {
