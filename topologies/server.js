@@ -692,7 +692,8 @@ Server.prototype.command = function(ns, cmd, options, callback) {
     monitoring: typeof options.monitoring === 'boolean' ? options.monitoring : false,
     fullResult: typeof options.fullResult === 'boolean' ? options.fullResult : false,
     requestId: query.requestId,
-    socketTimeout: typeof options.socketTimeout === 'number' ? options.socketTimeout : null
+    socketTimeout: typeof options.socketTimeout === 'number' ? options.socketTimeout : null,
+    session: options.session || null
   };
 
   // Write the operation to the pool
