@@ -32,7 +32,7 @@ var DESTROYED = 'destroyed';
 
 var _id = 0;
 
-function supportsClusterTime(topology) {
+function hasSessionSupport(topology) {
   if (topology == null) return false;
   return topology.ismaster == null ? false : topology.ismaster.maxWireVersion >= 6;
 }
@@ -1148,19 +1148,31 @@ Pool.prototype.write = function(commands, options, cb) {
   // Get the requestId
   operation.requestId = commands[commands.length - 1].requestId;
 
-  if (supportsClusterTime(this.topology) && this.topology.clusterTime) {
-    let $clusterTime = this.topology.clusterTime;
-    if (operation.session && operation.session.clusterTime) {
-      $clusterTime = operation.session.clusterTime.clusterTime.greaterThan($clusterTime.clusterTime)
-        ? operation.session.clusterTime
-        : $clusterTime;
+  if (hasSessionSupport(this.topology)) {
+    let sessionOptions = {};
+    if (this.topology.clusterTime) {
+      sessionOptions = { $clusterTime: this.topology.clusterTime };
     }
 
+    if (operation.session) {
+      if (
+        operation.session.clusterTime &&
+        operation.session.clusterTime.clusterTime.greaterThan(
+          sessionOptions.$clusterTime.clusterTime
+        )
+      ) {
+        sessionOptions.$clusterTime = operation.session.clusterTime;
+      }
+
+      sessionOptions.lsid = operation.session.id;
+    }
+
+    // decorate the commands with session-specific details
     commands.forEach(command => {
       if (command instanceof Query) {
-        command.query.$clusterTime = $clusterTime;
+        Object.assign(command.query, sessionOptions);
       } else {
-        command.$clusterTime = $clusterTime;
+        Object.assign(command, sessionOptions);
       }
     });
   }

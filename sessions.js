@@ -7,14 +7,15 @@ const Binary = require('mongodb-core').BSON.Binary,
  *
  */
 class ClientSession {
-  constructor(topology, options) {
+  constructor(topology, sessionPool, options) {
     if (topology == null) {
       throw new Error('ClientSession requires a topology');
     }
 
     this.topology = topology;
+    this.sessionPool = sessionPool;
     this.hasEnded = false;
-    this._serverSession = undefined; // TBD
+    this.serverSession = sessionPool.dequeue();
 
     options = options || {};
     if (typeof options.initialClusterTime !== 'undefined') {
@@ -39,11 +40,20 @@ class ClientSession {
     this.topology.command('admin.$cmd', { endSessions: 1, ids: [this.id] }, err => {
       this.hasEnded = true;
 
+      // release the server session back to the pool
+      this.sessionPool.enqueue(this.serverSession);
+
       if (err) return callback(err, null);
       callback(null, null);
     });
   }
 }
+
+Object.defineProperty(ClientSession.prototype, 'id', {
+  get: function() {
+    return this.serverSession.id;
+  }
+});
 
 /**
  *
