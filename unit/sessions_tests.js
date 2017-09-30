@@ -69,14 +69,14 @@ describe('Sessions', function() {
       test: function(done) {
         const pool = new ServerSessionPool(test.client);
         expect(pool.sessions).to.have.length(0);
-        const session = pool.dequeue();
+        const session = pool.acquire();
         expect(session).to.exist;
         expect(pool.sessions).to.have.length(0);
         done();
       }
     });
 
-    it('should reuse sessions which have not timed out yet on dequeue', {
+    it('should reuse sessions which have not timed out yet on acquire', {
       metadata: { requires: { topology: 'single' } },
 
       test: function(done) {
@@ -84,7 +84,7 @@ describe('Sessions', function() {
         const pool = new ServerSessionPool(test.client);
         pool.sessions.push(oldSession);
 
-        const session = pool.dequeue();
+        const session = pool.acquire();
         expect(session).to.exist;
         expect(session).to.eql(oldSession);
 
@@ -92,7 +92,7 @@ describe('Sessions', function() {
       }
     });
 
-    it('should remove sessions which have timed out on dequeue, and return a fresh session', {
+    it('should remove sessions which have timed out on acquire, and return a fresh session', {
       metadata: { requires: { topology: 'single' } },
 
       test: function(done) {
@@ -102,7 +102,7 @@ describe('Sessions', function() {
         const pool = new ServerSessionPool(test.client);
         pool.sessions.push(oldSession);
 
-        const session = pool.dequeue();
+        const session = pool.acquire();
         expect(session).to.exist;
         expect(session).to.not.eql(oldSession);
 
@@ -110,7 +110,7 @@ describe('Sessions', function() {
       }
     });
 
-    it('should remove sessions which have timed out on enqueue', {
+    it('should remove sessions which have timed out on release', {
       metadata: { requires: { topology: 'single' } },
 
       test: function(done) {
@@ -123,7 +123,7 @@ describe('Sessions', function() {
         const pool = new ServerSessionPool(test.client);
         pool.sessions = pool.sessions.concat(oldSessions);
 
-        pool.enqueue(newSession);
+        pool.release(newSession);
         expect(pool.sessions).to.have.length(1);
         expect(pool.sessions[0]).to.eql(newSession);
         done();
