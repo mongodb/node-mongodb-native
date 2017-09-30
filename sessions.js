@@ -12,6 +12,10 @@ class ClientSession {
       throw new Error('ClientSession requires a topology');
     }
 
+    if (sessionPool == null || !(sessionPool instanceof ServerSessionPool)) {
+      throw new Error('ClientSession requires a ServerSessionPool');
+    }
+
     this.topology = topology;
     this.sessionPool = sessionPool;
     this.hasEnded = false;
@@ -82,6 +86,10 @@ class ServerSession {
  */
 class ServerSessionPool {
   constructor(topology) {
+    if (topology == null) {
+      throw new Error('ServerSessionPool requires a topology');
+    }
+
     this.topology = topology;
     this.sessions = [];
   }
