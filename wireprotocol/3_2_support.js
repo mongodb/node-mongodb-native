@@ -255,6 +255,10 @@ WireProtocol.prototype.getMore = function(
     queryOptions.promoteBuffers = cursorState.promoteBuffers;
   }
 
+  if (typeof cursorState.session === 'object') {
+    queryOptions.session = cursorState.session;
+  }
+
   // Write out the getMore command
   connection.write(query, queryOptions, queryCallback);
 };

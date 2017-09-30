@@ -111,6 +111,8 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
     this.cursorState.promoteLongs = topologyOptions.promoteLongs;
   } else if (typeof options.promoteLongs === 'boolean') {
     this.cursorState.promoteLongs = options.promoteLongs;
+  } else if (typeof options.session === 'object') {
+    this.cursorState.session = options.session;
   }
 
   // Add promoteValues to cursor state
@@ -286,6 +288,11 @@ Cursor.prototype._find = function(callback) {
   if (typeof self.cursorState.promoteBuffers === 'boolean') {
     queryOptions.promoteBuffers = self.cursorState.promoteBuffers;
   }
+
+  if (typeof self.cursorState.session === 'object') {
+    queryOptions.session = self.cursorState.session;
+  }
+
   // Write the initial command out
   self.server.s.pool.write(self.query, queryOptions, queryCallback);
 };
