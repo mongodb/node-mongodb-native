@@ -15,7 +15,8 @@ describe('Sessions', function() {
       metadata: { requires: { topology: 'single' } },
       test: function() {
         const client = new Server();
-        const session = new ClientSession(client);
+        const sessionPool = new ServerSessionPool(client);
+        const session = new ClientSession(client, sessionPool);
         expect(session.clusterTime).to.not.exist;
       }
     });
@@ -25,7 +26,8 @@ describe('Sessions', function() {
       test: function() {
         const clusterTime = genClusterTime(Date.now());
         const client = new Server();
-        const session = new ClientSession(client, { initialClusterTime: clusterTime });
+        const sessionPool = new ServerSessionPool(client);
+        const session = new ClientSession(client, sessionPool, { initialClusterTime: clusterTime });
         expect(session.clusterTime).to.eql(clusterTime);
       }
     });

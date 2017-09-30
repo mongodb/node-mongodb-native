@@ -276,7 +276,7 @@ describe('Sessions (Single)', function() {
       client.once('connect', () => {
         client.command('admin.$cmd', { ping: 1 }, { session: session }, err => {
           expect(err).to.not.exist;
-          expect(command.document.lsid).to.eql(session.id);
+          expect(command.lsid).to.eql(session.id);
           done();
         });
       });
