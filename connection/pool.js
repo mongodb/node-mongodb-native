@@ -14,7 +14,8 @@ var inherits = require('util').inherits,
   opcodes = require('../wireprotocol/shared').opcodes,
   compress = require('../wireprotocol/compression').compress,
   compressorIDs = require('../wireprotocol/compression').compressorIDs,
-  uncompressibleCommands = require('../wireprotocol/compression').uncompressibleCommands;
+  uncompressibleCommands = require('../wireprotocol/compression').uncompressibleCommands,
+  resolveClusterTime = require('../topologies/shared').resolveClusterTime;
 
 var MongoCR = require('../auth/mongocr'),
   X509 = require('../auth/x509'),
@@ -546,7 +547,12 @@ function messageHandler(self) {
 
         // Look for clusterTime, and update it if necessary
         if (message.documents[0] && message.documents[0].hasOwnProperty('$clusterTime')) {
-          self.topology.clusterTime = message.documents[0].$clusterTime;
+          const $clusterTime = message.documents[0].$clusterTime;
+          self.topology.clusterTime = $clusterTime;
+
+          if (workItem.session != null) {
+            resolveClusterTime(workItem.session, $clusterTime);
+          }
         }
 
         // Establish if we have an error
@@ -1124,6 +1130,7 @@ Pool.prototype.write = function(commands, options, cb) {
   operation.command = typeof options.command === 'boolean' ? options.command : false;
   operation.fullResult = typeof options.fullResult === 'boolean' ? options.fullResult : false;
   operation.noResponse = typeof options.noResponse === 'boolean' ? options.noResponse : false;
+  operation.session = options.session || null;
 
   // Optional per operation socketTimeout
   operation.socketTimeout = options.socketTimeout;
@@ -1142,11 +1149,18 @@ Pool.prototype.write = function(commands, options, cb) {
   operation.requestId = commands[commands.length - 1].requestId;
 
   if (supportsClusterTime(this.topology) && this.topology.clusterTime) {
+    let $clusterTime = this.topology.clusterTime;
+    if (operation.session && operation.session.clusterTime) {
+      $clusterTime = operation.session.clusterTime.clusterTime.greaterThan($clusterTime.clusterTime)
+        ? operation.session.clusterTime
+        : $clusterTime;
+    }
+
     commands.forEach(command => {
       if (command instanceof Query) {
-        command.query.$clusterTime = this.topology.clusterTime;
+        command.query.$clusterTime = $clusterTime;
       } else {
-        command.$clusterTime = this.topology.clusterTime;
+        command.$clusterTime = $clusterTime;
       }
     });
   }
