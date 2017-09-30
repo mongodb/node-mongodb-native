@@ -4,10 +4,33 @@ const Server = require('../../..').Server,
   mock = require('../../mock'),
   expect = require('chai').expect,
   ServerSessionPool = require('../../../lib/sessions').ServerSessionPool,
-  ServerSession = require('../../../lib/sessions').ServerSession;
+  ServerSession = require('../../../lib/sessions').ServerSession,
+  ClientSession = require('../../../lib/sessions').ClientSession,
+  genClusterTime = require('./common').genClusterTime;
 
 let test = {};
 describe('Sessions', function() {
+  describe('ClientSession', function() {
+    it('should default to `null` for `clusterTime`', {
+      metadata: { requires: { topology: 'single' } },
+      test: function() {
+        const client = new Server();
+        const session = new ClientSession(client);
+        expect(session.clusterTime).to.not.exist;
+      }
+    });
+
+    it('should set the internal clusterTime to `initialClusterTime` if provided', {
+      metadata: { requires: { topology: 'single' } },
+      test: function() {
+        const clusterTime = genClusterTime(Date.now());
+        const client = new Server();
+        const session = new ClientSession(client, { initialClusterTime: clusterTime });
+        expect(session.clusterTime).to.eql(clusterTime);
+      }
+    });
+  });
+
   describe('ServerSessionPool', function() {
     afterEach(() => {
       test.client.destroy();
@@ -41,7 +64,6 @@ describe('Sessions', function() {
 
     it('should create a new session if the pool is empty', {
       metadata: { requires: { topology: 'single' } },
-
       test: function(done) {
         const pool = new ServerSessionPool(test.client);
         expect(pool.sessions).to.have.length(0);
