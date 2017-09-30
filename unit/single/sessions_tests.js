@@ -1,5 +1,7 @@
 'use strict';
 var Server = require('../../../../lib/topologies/server'),
+  Long = require('bson').Long,
+  ObjectId = require('bson').ObjectId,
   expect = require('chai').expect,
   assign = require('../../../../lib/utils').assign,
   mock = require('../../../mock'),
@@ -138,10 +140,12 @@ describe('Sessions (Single)', function() {
     metadata: { requires: { topology: 'single' } },
     test: function(done) {
       const clusterTime = genClusterTime(Date.now());
-      let sentIsMaster = false;
+      let sentIsMaster = false,
+        command = null;
+
       test.server.setMessageHandler(request => {
         if (sentIsMaster) {
-          expect(request.document.$clusterTime).to.eql(clusterTime);
+          command = request.document;
           request.reply({ ok: 1 });
           return;
         }
@@ -160,6 +164,8 @@ describe('Sessions (Single)', function() {
       client.once('connect', () => {
         client.command('admin.$cmd', { ping: 1 }, err => {
           expect(err).to.not.exist;
+          expect(command.$clusterTime).to.eql(clusterTime);
+
           done();
         });
       });
@@ -174,10 +180,11 @@ describe('Sessions (Single)', function() {
       const clusterTime = genClusterTime(Date.now()),
         futureClusterTime = genClusterTime(Date.now() + 10 * 60 * 1000);
 
-      let sentIsMaster = false;
+      let sentIsMaster = false,
+        command = null;
       test.server.setMessageHandler(request => {
         if (sentIsMaster) {
-          expect(request.document.$clusterTime).to.eql(futureClusterTime);
+          command = request.document;
           request.reply({ ok: 1 });
           return;
         }
@@ -201,6 +208,7 @@ describe('Sessions (Single)', function() {
       client.once('connect', () => {
         client.command('admin.$cmd', { ping: 1 }, { session: session }, err => {
           expect(err).to.not.exist;
+          expect(command.$clusterTime).to.eql(futureClusterTime);
           done();
         });
       });
@@ -247,10 +255,11 @@ describe('Sessions (Single)', function() {
       const sessionPool = new ServerSessionPool(client);
       const session = new ClientSession(client, sessionPool);
 
-      let sentIsMaster = false;
+      let sentIsMaster = false,
+        command = null;
       test.server.setMessageHandler(request => {
         if (sentIsMaster) {
-          expect(request.document.lsid).to.eql(session.id);
+          command = request.document;
           request.reply({ ok: 1 });
           return;
         }
@@ -267,7 +276,80 @@ describe('Sessions (Single)', function() {
       client.once('connect', () => {
         client.command('admin.$cmd', { ping: 1 }, { session: session }, err => {
           expect(err).to.not.exist;
+          expect(command.document.lsid).to.eql(session.id);
           done();
+        });
+      });
+
+      client.connect();
+    }
+  });
+
+  it('should use the same session for all getMore issued by a cursor', {
+    metadata: { requires: { topology: 'single' } },
+    test: function(done) {
+      const client = new Server(test.server.address());
+      const sessionPool = new ServerSessionPool(client);
+      const session = new ClientSession(client, sessionPool);
+
+      let commands = [];
+      test.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(
+            assign({}, mock.DEFAULT_ISMASTER, {
+              maxWireVersion: 6
+            })
+          );
+        } else if (doc.find) {
+          commands.push(doc);
+          request.reply({
+            cursor: {
+              id: Long.fromNumber(1),
+              ns: 'test.t',
+              firstBatch: []
+            },
+            ok: 1
+          });
+        } else if (doc.getMore) {
+          commands.push(doc);
+          request.reply({
+            cursor: {
+              id: Long.ZERO,
+              ns: 'test.t',
+              nextBatch: [{ _id: new ObjectId(), a: 1 }]
+            },
+            ok: 1
+          });
+        }
+      });
+
+      client.on('error', done);
+      client.once('connect', () => {
+        const cursor = client.cursor(
+          'test.test',
+          {
+            find: 'test',
+            query: {},
+            batchSize: 2
+          },
+          {
+            session: session
+          }
+        );
+
+        // Execute next
+        cursor.next(function(err) {
+          expect(err).to.not.exist;
+          expect(commands[0].lsid).to.eql(session.id);
+
+          cursor.next(function(err) {
+            expect(err).to.not.exist;
+            expect(commands[1].lsid).to.eql(session.id);
+
+            client.destroy();
+            done();
+          });
         });
       });
 
