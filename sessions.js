@@ -15,7 +15,7 @@ class ClientSession {
     this.topology = topology;
     this.sessionPool = sessionPool;
     this.hasEnded = false;
-    this.serverSession = sessionPool.dequeue();
+    this.serverSession = sessionPool.acquire();
 
     options = options || {};
     if (typeof options.initialClusterTime !== 'undefined') {
@@ -41,7 +41,7 @@ class ClientSession {
       this.hasEnded = true;
 
       // release the server session back to the pool
-      this.sessionPool.enqueue(this.serverSession);
+      this.sessionPool.release(this.serverSession);
 
       if (err) return callback(err, null);
       callback(null, null);
@@ -89,7 +89,7 @@ class ServerSessionPool {
   /**
    * @returns {ServerSession}
    */
-  dequeue() {
+  acquire() {
     const sessionTimeoutMinutes = this.topology.logicalSessionTimeoutMinutes;
     while (this.sessions.length) {
       const session = this.sessions.shift();
@@ -105,7 +105,7 @@ class ServerSessionPool {
    *
    * @param {*} session
    */
-  enqueue(session) {
+  release(session) {
     const sessionTimeoutMinutes = this.topology.logicalSessionTimeoutMinutes;
     while (this.sessions.length) {
       const session = this.sessions[this.sessions.length - 1];
