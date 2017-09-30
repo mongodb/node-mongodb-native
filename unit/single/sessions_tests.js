@@ -217,6 +217,49 @@ describe('Sessions (Single)', function() {
     }
   });
 
+  it.only('should return server sessions to the pool on `endSession`', {
+    metadata: { requires: { topology: 'single' } },
+    test: function(done) {
+      let sentIsMaster = false;
+      test.server.setMessageHandler(request => {
+        if (sentIsMaster) {
+          request.reply({ ok: 1 });
+          return;
+        }
+
+        sentIsMaster = true;
+        request.reply(
+          assign({}, mock.DEFAULT_ISMASTER, {
+            maxWireVersion: 6
+          })
+        );
+      });
+
+      const client = new Server(test.server.address());
+      const sessionPool = new ServerSessionPool(client);
+      const session = new ClientSession(client, sessionPool);
+      const clientServerSession = session.serverSession;
+
+      client.on('error', done);
+      client.once('connect', () => {
+        client.command('admin.$cmd', { ping: 1 }, { session: session }, err => {
+          expect(err).to.not.exist;
+
+          session.endSession(err => {
+            expect(err).to.not.exist;
+            expect(session.hasEnded).to.be.true;
+            expect(sessionPool.sessions).to.have.length(1);
+            expect(sessionPool.sessions[0]).to.eql(clientServerSession);
+
+            done();
+          });
+        });
+      });
+
+      client.connect();
+    }
+  });
+
   it('should default `logicalSessionTimeoutMinutes` to `null`', {
     metadata: { requires: { topology: 'single' } },
     test: function() {
