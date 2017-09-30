@@ -4,13 +4,14 @@ var Server = require('../../../../lib/topologies/server'),
   assign = require('../../../../lib/utils').assign,
   mock = require('../../../mock'),
   genClusterTime = require('../common').genClusterTime,
-  ClientSession = require('../../../../lib/sessions').ClientSession;
+  ClientSession = require('../../../../lib/sessions').ClientSession,
+  ServerSessionPool = require('../../../../lib/sessions').ServerSessionPool;
 
 const test = {};
 describe('Sessions (Single)', function() {
   afterEach(() => mock.cleanup());
   beforeEach(() => {
-    return mock.createServer(37019, 'localhost').then(mockServer => {
+    return mock.createServer().then(mockServer => {
       test.server = mockServer;
     });
   });
@@ -109,7 +110,8 @@ describe('Sessions (Single)', function() {
       });
 
       const client = new Server(test.server.address());
-      const session = new ClientSession(client);
+      const sessionPool = new ServerSessionPool(client);
+      const session = new ClientSession(client, sessionPool);
 
       client.on('error', done);
       client.once('connect', () => {
@@ -190,7 +192,11 @@ describe('Sessions (Single)', function() {
       });
 
       const client = new Server(test.server.address());
-      const session = new ClientSession(client, { initialClusterTime: futureClusterTime });
+      const sessionPool = new ServerSessionPool(client);
+      const session = new ClientSession(client, sessionPool, {
+        initialClusterTime: futureClusterTime
+      });
+
       client.on('error', done);
       client.once('connect', () => {
         client.command('admin.$cmd', { ping: 1 }, { session: session }, err => {
@@ -228,6 +234,41 @@ describe('Sessions (Single)', function() {
         expect(client.logicalSessionTimeoutMinutes).to.equal(10);
         client.destroy();
         done();
+      });
+
+      client.connect();
+    }
+  });
+
+  it('should add `lsid` to commands sent to the server with a session', {
+    metadata: { requires: { topology: 'single' } },
+    test: function(done) {
+      const client = new Server(test.server.address());
+      const sessionPool = new ServerSessionPool(client);
+      const session = new ClientSession(client, sessionPool);
+
+      let sentIsMaster = false;
+      test.server.setMessageHandler(request => {
+        if (sentIsMaster) {
+          expect(request.document.lsid).to.eql(session.id);
+          request.reply({ ok: 1 });
+          return;
+        }
+
+        sentIsMaster = true;
+        request.reply(
+          assign({}, mock.DEFAULT_ISMASTER, {
+            maxWireVersion: 6
+          })
+        );
+      });
+
+      client.on('error', done);
+      client.once('connect', () => {
+        client.command('admin.$cmd', { ping: 1 }, { session: session }, err => {
+          expect(err).to.not.exist;
+          done();
+        });
       });
 
       client.connect();
