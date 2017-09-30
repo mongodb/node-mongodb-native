@@ -13,9 +13,13 @@ class ClientSession {
     }
 
     this.topology = topology;
-    this.options = options || {};
     this.hasEnded = false;
     this._serverSession = undefined; // TBD
+
+    options = options || {};
+    if (typeof options.initialClusterTime !== 'undefined') {
+      this.clusterTime = options.initialClusterTime;
+    }
   }
 
   /**
@@ -25,6 +29,12 @@ class ClientSession {
     if (this.hasEnded) {
       return callback(null, null);
     }
+
+    // TODO:
+    //   When connected to a sharded cluster the endSessions command
+    //   can be sent to any mongos. When connected to a replica set the
+    //   endSessions command MUST be sent to the primary if the primary
+    //   is available, otherwise it MUST be sent to any available secondary.
 
     this.topology.command('admin.$cmd', { endSessions: 1, ids: [this.id] }, err => {
       this.hasEnded = true;
