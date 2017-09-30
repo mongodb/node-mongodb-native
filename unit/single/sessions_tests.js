@@ -356,4 +356,78 @@ describe('Sessions (Single)', function() {
       client.connect();
     }
   });
+
+  it('should use the same session for any killCursor issued by a cursor', {
+    metadata: { requires: { topology: 'single' } },
+    test: function(done) {
+      const client = new Server(test.server.address());
+      const sessionPool = new ServerSessionPool(client);
+      const session = new ClientSession(client, sessionPool);
+
+      let commands = [];
+      test.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(
+            assign({}, mock.DEFAULT_ISMASTER, {
+              maxWireVersion: 6
+            })
+          );
+        } else if (doc.find) {
+          commands.push(doc);
+          request.reply({
+            cursor: {
+              id: Long.fromNumber(1),
+              ns: 'test.t',
+              firstBatch: []
+            },
+            ok: 1
+          });
+        } else if (doc.getMore) {
+          commands.push(doc);
+          request.reply({
+            cursor: {
+              id: Long.fromNumber(1),
+              ns: 'test.t',
+              nextBatch: [{ _id: new ObjectId(), a: 1 }]
+            },
+            ok: 1
+          });
+        } else if (doc.killCursors) {
+          commands.push(doc);
+          request.reply({ ok: 1 });
+        }
+      });
+
+      client.on('error', done);
+      client.once('connect', () => {
+        const cursor = client.cursor(
+          'test.test',
+          {
+            find: 'test',
+            query: {},
+            batchSize: 2
+          },
+          {
+            session: session
+          }
+        );
+
+        // Execute next
+        cursor.next(function(err) {
+          expect(err).to.not.exist;
+
+          cursor.kill(err => {
+            expect(err).to.not.exist;
+            commands.forEach(command => expect(command.lsid).to.eql(session.id));
+
+            client.destroy();
+            done();
+          });
+        });
+      });
+
+      client.connect();
+    }
+  });
 });
