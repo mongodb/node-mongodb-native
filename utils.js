@@ -1,10 +1,12 @@
 'use strict';
 
+const crypto = require('crypto');
+
 /**
  * Copy the values of all enumerable own properties from one or more
  * source objects to a target object. It will return the target object.
  */
-var assign = Object.assign
+const assign = Object.assign
   ? Object.assign
   : function assign(target) {
       if (target === undefined || target === null) {
@@ -31,6 +33,14 @@ var assign = Object.assign
       return to;
     };
 
+const uuidV4 = () => {
+  const result = crypto.randomBytes(16);
+  result[6] = (result[6] & 0x0f) | 0x40;
+  result[8] = (result[8] & 0x3f) | 0x80;
+  return result;
+};
+
 module.exports = {
-  assign: assign
+  assign: assign,
+  uuidV4: uuidV4
 };
