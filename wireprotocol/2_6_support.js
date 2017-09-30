@@ -84,15 +84,30 @@ WireProtocol.prototype.remove = function(pool, ismaster, ns, bson, ops, options,
   executeWrite(pool, bson, 'delete', 'deletes', ns, ops, options, callback);
 };
 
-WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callback) {
+WireProtocol.prototype.killCursor = function(bson, ns, cursorState, pool, callback) {
+  var cursorId = cursorState.cursorId;
   // Create a kill cursor command
   var killCursor = new KillCursor(bson, [cursorId]);
+
+  // Build killCursor options
+  const options = {
+    immediateRelease: true,
+    noResponse: true
+  };
+
+  if (typeof cursorState.session === 'object') {
+    options.session = cursorState.session;
+  }
+
   // Execute the kill cursor command
   if (pool && pool.isConnected()) {
-    pool.write(killCursor, {
-      immediateRelease: true,
-      noResponse: true
-    });
+    try {
+      pool.write(killCursor, options, callback);
+    } catch (err) {
+      callback(err, null);
+    }
+
+    return;
   }
 
   // Callback

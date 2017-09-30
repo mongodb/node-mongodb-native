@@ -348,13 +348,7 @@ Cursor.prototype._killcursor = function(callback) {
   // Default pool
   var pool = this.server.s.pool;
   // Execute command
-  this.server.wireProtocolHandler.killCursor(
-    this.bson,
-    this.ns,
-    this.cursorState.cursorId,
-    pool,
-    callback
-  );
+  this.server.wireProtocolHandler.killCursor(this.bson, this.ns, this.cursorState, pool, callback);
 };
 
 /**

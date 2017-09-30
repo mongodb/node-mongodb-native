@@ -94,12 +94,13 @@ WireProtocol.prototype.remove = function(pool, ismaster, ns, bson, ops, options,
   executeWrite(pool, bson, 'delete', 'deletes', ns, ops, options, callback);
 };
 
-WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callback) {
+WireProtocol.prototype.killCursor = function(bson, ns, cursorState, pool, callback) {
   // Build command namespace
   var parts = ns.split(/\./);
   // Command namespace
   var commandns = f('%s.$cmd', parts.shift());
-  // Create getMore command
+  const cursorId = cursorState.cursorId;
+  // Create killCursor command
   var killcursorCmd = {
     killCursors: parts.join('.'),
     cursors: [cursorId]
@@ -144,16 +145,24 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callback)
     }
   };
 
+  const options = { command: true };
+  if (typeof cursorState.session === 'object') {
+    options.session = cursorState.session;
+  }
+
   // Execute the kill cursor command
   if (pool && pool.isConnected()) {
-    pool.write(
-      query,
-      {
-        command: true
-      },
-      killCursorCallback
-    );
+    try {
+      pool.write(query, options, killCursorCallback);
+    } catch (err) {
+      killCursorCallback(err, null);
+    }
+
+    return;
   }
+
+  // Callback
+  if (typeof callback === 'function') callback(null, null);
 };
 
 WireProtocol.prototype.getMore = function(
