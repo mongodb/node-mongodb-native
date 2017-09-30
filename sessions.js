@@ -1,6 +1,7 @@
 'use strict';
 
-const Binary = require('mongodb-core').BSON.Binary,
+const ReadPreference = require('./topologies/read_preference'),
+  Binary = require('mongodb-core').BSON.Binary,
   uuidV4 = require('./utils').uuidV4;
 
 /**
@@ -40,16 +41,22 @@ class ClientSession {
     //   can be sent to any mongos. When connected to a replica set the
     //   endSessions command MUST be sent to the primary if the primary
     //   is available, otherwise it MUST be sent to any available secondary.
+    //   Is it enough to use: ReadPreference.primaryPreferred ?
 
-    this.topology.command('admin.$cmd', { endSessions: 1, ids: [this.id] }, err => {
-      this.hasEnded = true;
+    this.topology.command(
+      'admin.$cmd',
+      { endSessions: 1, ids: [this.id] },
+      { readPreference: ReadPreference.primaryPreferred },
+      err => {
+        this.hasEnded = true;
 
-      // release the server session back to the pool
-      this.sessionPool.release(this.serverSession);
+        // release the server session back to the pool
+        this.sessionPool.release(this.serverSession);
 
-      if (err) return callback(err, null);
-      callback(null, null);
-    });
+        if (err) return callback(err, null);
+        callback(null, null);
+      }
+    );
   }
 }
 
