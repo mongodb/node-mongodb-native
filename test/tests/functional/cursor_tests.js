@@ -467,7 +467,67 @@ exports['Should finish cursor correctly after all sockets to pool destroyed'] = 
         });
       });
     })
- 
+
+    // Start connection
+    server.connect();
+  }
+};
+
+exports['Should not hang if autoReconnect=false and pools sockets all timed out'] = {
+  metadata: {
+    requires: { topology: ["single"] }
+  },
+
+  test: function(configuration, test) {
+    var Server = require('../../../lib/topologies/server')
+      , bson = require('bson');
+
+    // Attempt to connect
+    var server = new Server({
+      host: configuration.host,
+      port: configuration.port,
+      bson: new bson(),
+      // Nasty edge case: small timeout, small pool, no auto reconnect
+      socketTimeout: 100,
+      size: 1,
+      reconnect: false
+    });
+
+    var ns = f("%s.cursor7", configuration.db);
+    // Add event listeners
+    server.on('connect', function(_server) {
+      // Execute the write
+      _server.insert(ns, [{a:1}], {
+        writeConcern: {w:1}, ordered:true
+      }, function(err, results) {
+        test.equal(null, err);
+        test.equal(1, results.result.n);
+
+        // Execute slow find
+        var cursor = _server.cursor(ns, {
+          find: ns,
+          query: { $where: 'sleep(250) || true' },
+          batchSize: 1
+        });
+
+        // Execute next
+        cursor.next(function(err, doc) {
+          test.ok(err);
+
+          cursor = _server.cursor(ns, {
+            find: ns,
+            query: {},
+            batchSize: 1
+          });
+
+          cursor.next(function(err) {
+            test.ok(err);
+            test.done();
+          });
+        });
+      });
+    })
+
     // Start connection
     server.connect();
   }
@@ -515,7 +575,7 @@ exports['Should not leak connnection workItem elements when using killCursor'] =
               for(var i = 0; i < connections.length; i++) {
                 test.equal(0, connections[i].workItems.length);
               };
-              
+
               // Destroy the server connection
               _server.destroy();
               // Finish the test
