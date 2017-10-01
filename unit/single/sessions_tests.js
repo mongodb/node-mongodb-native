@@ -217,7 +217,7 @@ describe('Sessions (Single)', function() {
     }
   });
 
-  it.only('should return server sessions to the pool on `endSession`', {
+  it('should return server sessions to the pool on `endSession`', {
     metadata: { requires: { topology: 'single' } },
     test: function(done) {
       let sentIsMaster = false;
