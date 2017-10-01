@@ -287,7 +287,6 @@ function connectionFailureHandler(self, event) {
     // Flush all work Items on this connection
     while (this.workItems.length > 0) {
       var workItem = this.workItems.shift();
-      // if(workItem.cb) workItem.cb(err);
       if (workItem.cb) workItem.cb(err);
     }
 

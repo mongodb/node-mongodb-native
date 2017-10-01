@@ -106,8 +106,6 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorState, pool, callba
     } catch (err) {
       callback(err, null);
     }
-
-    return;
   }
 
   // Callback
