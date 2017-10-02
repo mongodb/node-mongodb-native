@@ -1305,7 +1305,7 @@ describe.skip('SSL (MongoClient)', function() {
 
                   setTimeout(function() {
                     // Force a reconnect of a server
-                    var secondary = client.topology.s.replset.s.replicaSetState.secondaries[0];
+                    var secondary = client.topology.s.coreTopology.s.replicaSetState.secondaries[0];
                     secondary.destroy({ emitClose: true });
                     sets.push({});
 
