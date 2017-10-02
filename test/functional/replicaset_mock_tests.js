@@ -220,8 +220,8 @@ describe('ReplSet (mocks)', function() {
           'mongodb://localhost:12004,localhost:12005/test?socketTimeoutMS=120000&connectTimeoutMS=15000',
           function(err, client) {
             test.equal(null, err);
-            test.equal(15000, client.topology.s.mongos.s.options.connectionTimeout);
-            test.equal(120000, client.topology.s.mongos.s.options.socketTimeout);
+            test.equal(15000, client.topology.s.coreTopology.s.options.connectionTimeout);
+            test.equal(120000, client.topology.s.coreTopology.s.options.socketTimeout);
 
             client.close();
             done();

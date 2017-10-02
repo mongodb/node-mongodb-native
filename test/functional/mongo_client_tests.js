@@ -318,7 +318,7 @@ describe('MongoClient', function() {
 
       MongoClient.connect(url, function(err, client) {
         test.equal(1, client.topology.connections().length);
-        test.equal(100, client.topology.s.server.s.pool.size);
+        test.equal(100, client.topology.s.coreTopology.s.pool.size);
 
         client.close();
         done();
@@ -705,8 +705,8 @@ describe('MongoClient', function() {
 
       MongoClient.connect(uri, {}, function(err, client) {
         test.equal(null, err);
-        test.equal(120000, client.topology.s.server.s.options.socketTimeout);
-        test.equal(15000, client.topology.s.server.s.options.connectionTimeout);
+        test.equal(120000, client.topology.s.coreTopology.s.options.socketTimeout);
+        test.equal(15000, client.topology.s.coreTopology.s.options.connectionTimeout);
 
         client.close();
         done();

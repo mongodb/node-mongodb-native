@@ -1260,7 +1260,7 @@ describe('ReplSet (Connection)', function() {
         function(err, client) {
           test.equal(null, err);
 
-          var servers = client.topology.s.replset.s.replicaSetState.allServers();
+          var servers = client.topology.s.coreTopology.s.replicaSetState.allServers();
           for (var i = 0; i < servers.length; i++) {
             test.equal(10, servers[i].s.pool.options.reconnectTries);
           }

@@ -157,7 +157,7 @@ describe('Sharding (Connection)', function() {
           test.equal(null, err);
           test.ok(client != null);
 
-          var servers = client.topology.s.mongos.connectedProxies;
+          var servers = client.topology.s.coreTopology.connectedProxies;
           for (var i = 0; i < servers.length; i++) {
             test.equal(10, servers[i].s.pool.options.reconnectTries);
           }

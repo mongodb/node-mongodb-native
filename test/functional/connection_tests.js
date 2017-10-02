@@ -48,7 +48,7 @@ describe('Connection', function() {
 
       client.connect(function(err, client) {
         test.equal(null, err);
-        test.equal(false, client.topology.s.server.s.monitoring);
+        test.equal(false, client.topology.s.coreTopology.s.monitoring);
 
         client.close();
         done();
@@ -283,7 +283,7 @@ describe('Connection', function() {
         { auto_reconnect: true, poolSize: 4 },
         connectionTester(configuration, 'testConnectServerOptions', function(client) {
           test.equal(1, client.topology.poolSize);
-          test.equal(4, client.topology.s.server.s.pool.size);
+          test.equal(4, client.topology.s.coreTopology.s.pool.size);
           test.equal(true, client.topology.autoReconnect);
           client.close();
           done();
@@ -312,7 +312,7 @@ describe('Connection', function() {
         },
         connectionTester(configuration, 'testConnectAllOptions', function(client) {
           test.ok(client.topology.poolSize >= 1);
-          test.equal(4, client.topology.s.server.s.pool.size);
+          test.equal(4, client.topology.s.coreTopology.s.pool.size);
           test.equal(true, client.topology.autoReconnect);
           client.close();
           done();
