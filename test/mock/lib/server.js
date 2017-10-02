@@ -31,22 +31,36 @@ var Server = function(port, host, options) {
 
   // Create a bson instance
   this.bson = new BSON();
+
   // Save the settings
   this.host = host;
   this.port = port;
+
   // Create a server socket
   this.server = net.createServer();
+
   // Responses
   this.messages = [];
+
   // state
   this.state = 'stopped';
+
   // Number of connections
   this.connections = 0;
+
   // sockets
   this.sockets = [];
 };
 
 inherits(Server, EventEmitter);
+
+Server.prototype.uri = function() {
+  return `${this.host}:${this.port}`;
+};
+
+Server.prototype.address = function() {
+  return { host: this.host, port: this.port };
+};
 
 Server.prototype.destroy = function() {
   var self = this;
@@ -111,6 +125,10 @@ Server.prototype.start = function() {
     });
 
     self.server.listen(self.port, self.host, function() {
+      // update address information if necessary
+      self.host = self.server.address().address;
+      self.port = self.server.address().port;
+
       resolve(self);
     });
 

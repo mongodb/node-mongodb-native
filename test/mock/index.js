@@ -57,7 +57,10 @@ const DEFAULT_ISMASTER = {
  */
 module.exports = {
   createServer: function(port, host, options) {
+    port = port || 0;
+    host = host || 'localhost';
     options = options || {};
+
     let mockServer = new Server(port, host, options);
     mockServers.push(mockServer);
     return mockServer.start();
