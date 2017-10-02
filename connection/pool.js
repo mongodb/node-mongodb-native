@@ -546,8 +546,7 @@ function messageHandler(self) {
 
         // Look for clusterTime, and update it if necessary
         if (message.documents[0] && message.documents[0].hasOwnProperty('$clusterTime')) {
-          const $clusterTime = message.documents[0].$clusterTime;
-          self.topology.clusterTime = $clusterTime;
+          self.topology.clusterTime = message.documents[0].$clusterTime;
         }
 
         // Establish if we have an error
