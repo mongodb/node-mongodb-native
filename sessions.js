@@ -1,7 +1,9 @@
 'use strict';
 
-const ReadPreference = require('./topologies/read_preference'),
-  Binary = require('mongodb-core').BSON.Binary,
+const retrieveBSON = require('./connection/utils').retrieveBSON,
+  ReadPreference = require('./topologies/read_preference'),
+  BSON = retrieveBSON(),
+  Binary = BSON.Binary,
   uuidV4 = require('./utils').uuidV4;
 
 /**
