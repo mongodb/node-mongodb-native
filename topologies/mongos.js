@@ -921,6 +921,7 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
  * @param {object} [options.writeConcern={}] Write concern for the operation
  * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+ * @param {ClientSession} [options.session=null] Session to use for the operation
  * @param {opResultCallback} callback A callback function
  */
 Mongos.prototype.insert = function(ns, ops, options, callback) {
@@ -953,6 +954,7 @@ Mongos.prototype.insert = function(ns, ops, options, callback) {
  * @param {object} [options.writeConcern={}] Write concern for the operation
  * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+ * @param {ClientSession} [options.session=null] Session to use for the operation
  * @param {opResultCallback} callback A callback function
  */
 Mongos.prototype.update = function(ns, ops, options, callback) {
@@ -985,6 +987,7 @@ Mongos.prototype.update = function(ns, ops, options, callback) {
  * @param {object} [options.writeConcern={}] Write concern for the operation
  * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+ * @param {ClientSession} [options.session=null] Session to use for the operation
  * @param {opResultCallback} callback A callback function
  */
 Mongos.prototype.remove = function(ns, ops, options, callback) {
@@ -1017,6 +1020,7 @@ Mongos.prototype.remove = function(ns, ops, options, callback) {
  * @param {Connection} [options.connection] Specify connection object to execute command against
  * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+ * @param {ClientSession} [options.session=null] Session to use for the operation
  * @param {opResultCallback} callback A callback function
  */
 Mongos.prototype.command = function(ns, cmd, options, callback) {
@@ -1060,6 +1064,7 @@ Mongos.prototype.command = function(ns, cmd, options, callback) {
  * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
  * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+ * @param {ClientSession} [options.session=null] Session to use for the operation
  * @returns {Cursor}
  */
 Mongos.prototype.cursor = function(ns, cmd, cursorOptions) {

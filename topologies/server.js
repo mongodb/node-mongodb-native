@@ -639,6 +639,7 @@ function basicReadValidations(self, options) {
  * @param {Boolean} [options.checkKeys=false] Specify if the bson parser should validate keys.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {Boolean} [options.fullResult=false] Return the full envelope instead of just the result document.
+ * @param {ClientSession} [options.session=null] Session to use for the operation
  * @param {opResultCallback} callback A callback function
  */
 Server.prototype.command = function(ns, cmd, options, callback) {
@@ -709,6 +710,7 @@ Server.prototype.command = function(ns, cmd, options, callback) {
  * @param {object} [options.writeConcern={}] Write concern for the operation
  * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+ * @param {ClientSession} [options.session=null] Session to use for the operation
  * @param {opResultCallback} callback A callback function
  */
 Server.prototype.insert = function(ns, ops, options, callback) {
@@ -747,6 +749,7 @@ Server.prototype.insert = function(ns, ops, options, callback) {
  * @param {object} [options.writeConcern={}] Write concern for the operation
  * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+ * @param {ClientSession} [options.session=null] Session to use for the operation
  * @param {opResultCallback} callback A callback function
  */
 Server.prototype.update = function(ns, ops, options, callback) {
@@ -789,6 +792,7 @@ Server.prototype.update = function(ns, ops, options, callback) {
  * @param {object} [options.writeConcern={}] Write concern for the operation
  * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+ * @param {ClientSession} [options.session=null] Session to use for the operation
  * @param {opResultCallback} callback A callback function
  */
 Server.prototype.remove = function(ns, ops, options, callback) {
@@ -833,6 +837,7 @@ Server.prototype.remove = function(ns, ops, options, callback) {
  * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
  * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+ * @param {ClientSession} [options.session=null] Session to use for the operation
  * @returns {Cursor}
  */
 Server.prototype.cursor = function(ns, cmd, cursorOptions) {
