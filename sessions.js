@@ -49,13 +49,13 @@ class ClientSession {
       'admin.$cmd',
       { endSessions: 1, ids: [this.id] },
       { readPreference: ReadPreference.primaryPreferred },
-      err => {
+      () => {
         this.hasEnded = true;
 
         // release the server session back to the pool
         this.sessionPool.release(this.serverSession);
 
-        if (err) return callback(err, null);
+        // spec indicates that we should ignore all errors for `endSessions`
         callback(null, null);
       }
     );
