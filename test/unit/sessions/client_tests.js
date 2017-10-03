@@ -1,13 +1,13 @@
 'use strict';
 
-const MongoClient = require('../..').MongoClient;
+const MongoClient = require('../../..').MongoClient;
 const expect = require('chai').expect;
-const assign = require('../../lib/utils').assign;
-const mock = require('../mock');
+const assign = require('../../../lib/utils').assign;
+const mock = require('../../mock');
 
 const test = {};
 describe('Sessions', function() {
-  describe('unit', function() {
+  describe('Client', function() {
     afterEach(() => mock.cleanup());
     beforeEach(() => {
       return mock.createServer().then(server => {
