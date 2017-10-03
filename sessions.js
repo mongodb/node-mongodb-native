@@ -82,6 +82,8 @@ class ServerSession {
    * @param {*} sessionTimeoutMinutes
    */
   hasTimedOut(sessionTimeoutMinutes) {
+    // Take the difference of the lastUse timestamp and now, which will result in a value in
+    // milliseconds, and then convert milliseconds to minutes to compare to `sessionTimeoutMinutes`
     const idleTimeMinutes = Math.round(
       (((Date.now() - this.lastUse) % 86400000) % 3600000) / 60000
     );
