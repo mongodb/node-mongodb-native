@@ -1962,7 +1962,7 @@ exports['should correctly insert > 1000 docs using insert and insertMany'] = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
     db.open(function(err, db) {
-      var col = db.collection('shouldCorreclyAllowforMoreThanAThousandDocsInsert', {serializeFunctions:true});
+      var col = db.collection('shouldCorrectlyAllowforMoreThanAThousandDocsInsert', {serializeFunctions:true});
       var docs = [];
 
       for(var i = 0; i < 2000; i++) {

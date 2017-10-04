@@ -107,7 +107,7 @@ exports['Should correctly catch command error using Promise'] = {
   }
 }
 
-exports['Should correctly createCollecton using Promise'] = {
+exports['Should correctly createCollection using Promise'] = {
   metadata: {
     requires: {
       promises: true,
@@ -326,7 +326,7 @@ exports['Should correctly execute executeDbAdminCommand using Promise'] = {
   }
 }
 
-exports['Should correctly execute creatIndex using Promise'] = {
+exports['Should correctly execute createIndex using Promise'] = {
   metadata: {
     requires: {
       promises: true,

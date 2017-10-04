@@ -3658,7 +3658,7 @@ exports['Should correctly handle negative batchSize and set the limit'] = {
   }
 }
 
-exports['Correcly decorate the cursor count command with skip, limit, hint, readConcern'] = {
+exports['Correctly decorate the cursor count command with skip, limit, hint, readConcern'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -3699,7 +3699,7 @@ exports['Correcly decorate the cursor count command with skip, limit, hint, read
   }
 }
 
-exports['Correcly decorate the collection cursor count command with skip, limit, hint, readConcern'] = {
+exports['Correctly decorate the collection cursor count command with skip, limit, hint, readConcern'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },

@@ -1024,7 +1024,7 @@ exports['Ensure killcursor commands are sent on 3.0 or earlier when APM is enabl
   }
 }
 
-exports['Correcly decorate the apm result for aggregation with cursorId'] = {
+exports['Correctly decorate the apm result for aggregation with cursorId'] = {
   metadata: { requires: { topology: ['single', 'replicaset'], mongodb: ">=3.0.0" } },
 
   // The actual test we wish to run
@@ -1060,7 +1060,7 @@ exports['Correcly decorate the apm result for aggregation with cursorId'] = {
         db.collection('apm_test_u_4').aggregate([{$match: {}}]).toArray().then(function(r) {
           test.equal(3, started.length);
           test.equal(3, succeeded.length);
-          var cursors = succeeded.map(function(x){ 
+          var cursors = succeeded.map(function(x){
             return x.reply.cursor
           });
 
@@ -1079,7 +1079,7 @@ exports['Correcly decorate the apm result for aggregation with cursorId'] = {
   }
 }
 
-exports['Correcly decorate the apm result for listCollections with cursorId'] = {
+exports['Correctly decorate the apm result for listCollections with cursorId'] = {
   metadata: { requires: { topology: ['single', 'replicaset'], mongodb: ">=3.0.0" } },
 
   // The actual test we wish to run
@@ -1116,7 +1116,7 @@ exports['Correcly decorate the apm result for listCollections with cursorId'] = 
           test.equal(1, started.length);
           test.equal(1, succeeded.length);
 
-          var cursors = succeeded.map(function(x){ 
+          var cursors = succeeded.map(function(x){
             return x.reply.cursor
           });
 
