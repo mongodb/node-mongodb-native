@@ -7033,8 +7033,8 @@ describe('Operation (Promises)', function() {
             [{ insertOne: { document: { _id: 1 } } }, { insertOne: { document: { _id: 1 } } }],
             { ordered: true, w: 1 }
           )
-          .then(function(r) {
-            test.equal(true, r.hasWriteErrors());
+          .catch(function(err) {
+            test.equal(true, err.result.hasWriteErrors());
             // Ordered bulk operation
             client.close();
           });
