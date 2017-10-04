@@ -10,7 +10,7 @@ title = "GridFS API"
 
 # The GridFS API
 
-The MongoDB Node.j6 driver now supports a
+The MongoDB Node.js driver now supports a
 [stream-based API for GridFS](https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-spec.rst)
 that's compatible with Node.js'
 [streams3](https://strongloop.com/strongblog/whats-new-io-js-beta-streams3/), so you can `.pipe()` directly from file streams to MongoDB. In
