@@ -1371,9 +1371,10 @@ describe('Insert', function() {
           test.ok(result);
 
           // Update two fields
-          collection.insert({ _id: 1 }, configuration.writeConcernMax(), function(err, result) {
+          collection.insert({ _id: 1 }, configuration.writeConcernMax(), function(err, r) {
+            test.equal(r, null);
             test.ok(err != null);
-            test.ok(result);
+            test.ok(err.result);
 
             client.close();
             done();
@@ -2508,9 +2509,10 @@ describe('Insert', function() {
               [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
               { ordered: false },
               function(err, r) {
+                test.equal(r, null);
                 test.ok(err != null);
                 test.ok(err.writeErrors.length === 2);
-                test.ok(r);
+                test.ok(err.result);
 
                 client.close();
                 done();
@@ -2547,9 +2549,10 @@ describe('Insert', function() {
               [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
               { ordered: false },
               function(err, r) {
+                test.equal(r, null);
                 test.ok(err != null);
                 test.ok(err.writeErrors.length === 2);
-                test.ok(r);
+                test.ok(err.result);
 
                 client.close();
                 done();
@@ -2588,8 +2591,9 @@ describe('Insert', function() {
               [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
               { ordered: true },
               function(err, r) {
+                test.equal(r, null);
                 test.ok(err != null);
-                test.ok(r);
+                test.ok(err.result);
 
                 client.close();
                 done();
@@ -2628,8 +2632,9 @@ describe('Insert', function() {
               [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
               { ordered: true },
               function(err, r) {
+                test.equal(r, null);
                 test.ok(err != null);
-                test.ok(r);
+                test.ok(err.result);
 
                 client.close();
                 done();

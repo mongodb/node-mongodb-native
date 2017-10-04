@@ -2863,8 +2863,9 @@ describe('Operation Examples', function() {
                 ],
                 { w: 1, keepGoing: true },
                 function(err, result) {
-                  test.ok(result);
+                  test.equal(result, null);
                   test.ok(err);
+                  test.ok(err.result);
 
                   // Count the number of documents left (should not include the duplicates)
                   collection.count(function(err, count) {

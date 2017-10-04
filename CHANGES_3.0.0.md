@@ -57,7 +57,7 @@ new MongoClient(new Server('localhost', 27017), {
 The legacy operation
 
 ```js
-MongoClient.connect('mongodb://localhost:27017/test', (err, db) => {  
+MongoClient.connect('mongodb://localhost:27017/test', (err, db) => {
 });
 ```
 
@@ -78,3 +78,36 @@ Following [changes to the MongoDB connection string specification](https://githu
 For example, whereas before `mongodb://u$ername:pa$$w{}rd@/tmp/mongodb-27017.sock/test` would have been a valid connection string (with username `u$ername`, password `pa$$w{}rd`, host `/tmp/mongodb-27017.sock` and auth database `test`), the connection string for those details would now have to be provided to MongoClient as `mongodb://u%24ername:pa%24%24w%7B%7Drd@%2Ftmp%2Fmongodb-27017.sock/test`.
 
 For more information about connection strings, read the [connection string specification](https://github.com/mongodb/specifications/blob/master/source/connection-string/connection-string-spec.rst).
+
+
+## BulkWriteResult & BulkWriteError
+When errors occured with bulk write operations in the past, the driver would callback or reject with
+the first write error, as well as passing the resulting `BulkWriteResult`.  For example:
+
+```
+MongoClient.connect('mongodb://localhost', function(err, client) {
+  const collection = client.db('foo').collection('test-collection')
+
+  collection
+    .insert({ id: 1 })
+    .then(() => collection.insert({ id: 1 }))
+    .then(result => /* deal with errors in `result */);
+});
+```
+
+becomes:
+
+```
+MongoClient.connect('mongodb://localhost', function(err, client) {
+  const collection = client.db('foo').collection('test-collection')
+
+  collection
+    .insert({ id: 1 })
+    .then(() => collection.insert({ id: 1 }))
+    .catch(err => /* deal with errors in `err */);
+});
+```
+
+Where the result of the failed operation is a `BulkWriteError` which has a child value `result` which
+is the original `BulkWriteResult`.  Similarly, the callback form no longer calls back with an
+`(Error, BulkWriteResult)`, but instead just a `(BulkWriteError)`.
