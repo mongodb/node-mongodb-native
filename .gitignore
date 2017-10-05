@@ -29,7 +29,6 @@ jsconfig.json
 manual_tests/
 docs/build
 docs/Makefile
-*.lock
 
 # Directory for dbs
 db

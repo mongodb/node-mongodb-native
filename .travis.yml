@@ -1,12 +1,7 @@
-sudo: required 
 dist: trusty
-
+sudo: required
 language: node_js
-
-cache:
-  yarn: true
-  directories:
-    - node_modules
+cache: yarn
 
 jobs:
   include:
