@@ -230,7 +230,8 @@ describe('Sessions (Single)', function() {
         sentIsMaster = true;
         request.reply(
           assign({}, mock.DEFAULT_ISMASTER, {
-            maxWireVersion: 6
+            maxWireVersion: 6,
+            logicalSessionTimeoutMinutes: 10
           })
         );
       });

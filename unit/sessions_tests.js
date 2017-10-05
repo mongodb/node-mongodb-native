@@ -155,5 +155,19 @@ describe('Sessions', function() {
         done();
       }
     });
+
+    it('should not reintroduce a soon-to-expire session to the pool on release', {
+      metadata: { requires: { topology: 'single' } },
+
+      test: function(done) {
+        const session = new ServerSession();
+        session.lastUse = new Date(Date.now() - 9.5 * 60 * 1000).getTime(); // add 9.5min
+
+        const pool = new ServerSessionPool(test.client);
+        pool.release(session);
+        expect(pool.sessions).to.have.length(0);
+        done();
+      }
+    });
   });
 });
