@@ -119,11 +119,11 @@ describe('CRUD spec', function() {
             .find({})
             .toArray()
             .then(function(collectionResults) {
-              test.deepEqual(scenarioTest.outcome.result, collectionResults);
+              test.deepEqual(collectionResults, scenarioTest.outcome.result);
             });
         }
 
-        test.deepEqual(scenarioTest.outcome.result, results);
+        test.deepEqual(results, scenarioTest.outcome.result);
         return Promise.resolve();
       });
   }
@@ -135,7 +135,7 @@ describe('CRUD spec', function() {
     delete options.filter;
 
     return collection.count(filter, options).then(function(result) {
-      test.equal(scenarioTest.outcome.result, result);
+      test.equal(result, scenarioTest.outcome.result);
     });
   }
 
@@ -148,7 +148,7 @@ describe('CRUD spec', function() {
     delete options.filter;
 
     return collection.distinct(fieldName, filter, options).then(function(result) {
-      test.deepEqual(scenarioTest.outcome.result, result);
+      test.deepEqual(result, scenarioTest.outcome.result);
     });
   }
 
@@ -162,7 +162,7 @@ describe('CRUD spec', function() {
       .find(filter, options)
       .toArray()
       .then(function(results) {
-        test.deepEqual(scenarioTest.outcome.result, results);
+        test.deepEqual(results, scenarioTest.outcome.result);
       });
   }
 
@@ -175,7 +175,7 @@ describe('CRUD spec', function() {
 
     return collection[scenarioTest.operation.name](filter, options).then(function(result) {
       Object.keys(scenarioTest.outcome.result).forEach(function(resultName) {
-        test.equal(scenarioTest.outcome.result[resultName], result[resultName]);
+        test.equal(result[resultName], scenarioTest.outcome.result[resultName]);
       });
 
       if (scenarioTest.outcome.collection) {
@@ -183,7 +183,7 @@ describe('CRUD spec', function() {
           .find({})
           .toArray()
           .then(function(results) {
-            test.deepEqual(scenarioTest.outcome.collection.data, results);
+            test.deepEqual(results, scenarioTest.outcome.collection.data);
           });
       }
     });
@@ -202,9 +202,9 @@ describe('CRUD spec', function() {
     return collection[opName](filter, replacement, options).then(function(result) {
       Object.keys(scenarioTest.outcome.result).forEach(function(resultName) {
         if (resultName === 'upsertedId') {
-          test.equal(scenarioTest.outcome.result[resultName], result[resultName]._id);
+          test.equal(result[resultName]._id, scenarioTest.outcome.result[resultName]);
         } else {
-          test.equal(scenarioTest.outcome.result[resultName], result[resultName]);
+          test.equal(result[resultName], scenarioTest.outcome.result[resultName]);
         }
       });
 
@@ -213,7 +213,7 @@ describe('CRUD spec', function() {
           .find({})
           .toArray()
           .then(function(results) {
-            test.deepEqual(scenarioTest.outcome.collection.data, results);
+            test.deepEqual(results, scenarioTest.outcome.collection.data);
           });
       }
     });
@@ -230,9 +230,9 @@ describe('CRUD spec', function() {
     return collection[scenarioTest.operation.name](filter, update, options).then(function(result) {
       Object.keys(scenarioTest.outcome.result).forEach(function(resultName) {
         if (resultName === 'upsertedId') {
-          test.equal(scenarioTest.outcome.result[resultName], result[resultName]._id);
+          test.equal(result[resultName]._id, scenarioTest.outcome.result[resultName]);
         } else {
-          test.equal(scenarioTest.outcome.result[resultName], result[resultName]);
+          test.equal(result[resultName], scenarioTest.outcome.result[resultName]);
         }
       });
 
@@ -241,7 +241,7 @@ describe('CRUD spec', function() {
           .find({})
           .toArray()
           .then(function(results) {
-            test.deepEqual(scenarioTest.outcome.collection.data, results);
+            test.deepEqual(results, scenarioTest.outcome.collection.data);
           });
       }
     });
@@ -269,7 +269,7 @@ describe('CRUD spec', function() {
 
     return findPromise.then(function(result) {
       if (scenarioTest.outcome.result) {
-        test.deepEqual(scenarioTest.outcome.result, result.value);
+        test.deepEqual(result.value, scenarioTest.outcome.result);
       }
 
       if (scenarioTest.outcome.collection) {
@@ -277,7 +277,7 @@ describe('CRUD spec', function() {
           .find({})
           .toArray()
           .then(function(results) {
-            test.deepEqual(scenarioTest.outcome.collection.data, results);
+            test.deepEqual(results, scenarioTest.outcome.collection.data);
           });
       }
     });
@@ -288,15 +288,19 @@ describe('CRUD spec', function() {
       'crud_spec_tests_' + scenario.name + '_' + scenarioTest.operation.name
     );
 
+    const errorHandler = err => {
+      if (!err.message.match(/ns not found/)) throw err;
+    }
+
     // Test setup
     var setupPromises = [];
-    setupPromises.push(collection.drop().catch(function() {}));
+    setupPromises.push(collection.drop().catch(errorHandler));
     if (scenarioTest.outcome.collection && scenarioTest.outcome.collection.name) {
       setupPromises.push(
         context.db
           .collection(scenarioTest.outcome.collection.name)
           .drop()
-          .catch(function() {})
+          .catch(errorHandler)
       );
     }
 

@@ -2351,13 +2351,6 @@ mongodb-core@mongodb-js/mongodb-core#3.0.0:
     bson "~1.0.4"
     require_optional "^1.0.1"
 
-mongodb-core@mongodb-js/mongodb-core#driver-sessions:
-  version "2.1.14"
-  resolved "https://codeload.github.com/mongodb-js/mongodb-core/tar.gz/b4fe91c079889207122e4497f625d9aa9908aefb"
-  dependencies:
-    bson "~1.0.4"
-    require_optional "^1.0.1"
-
 mongodb-download-url@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/mongodb-download-url/-/mongodb-download-url-0.3.0.tgz#de5a463b4489dd9ab043cca1672d4b8aaaf5b5d9"
