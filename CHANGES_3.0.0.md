@@ -90,8 +90,9 @@ MongoClient.connect('mongodb://localhost', function(err, client) {
 
   collection
     .insert({ id: 1 })
-    .then(() => collection.insert({ id: 1 }))
-    .then(result => /* deal with errors in `result */);
+    .then(() => collection.insertMany([ { id: 1 }, { id: 1 } ]))
+    .then(result => /* deal with errors in `result */)
+    .catch(err => /* no error is thrown for bulk errors */);
 });
 ```
 
@@ -103,8 +104,9 @@ MongoClient.connect('mongodb://localhost', function(err, client) {
 
   collection
     .insert({ id: 1 })
-    .then(() => collection.insert({ id: 1 }))
-    .catch(err => /* deal with errors in `err */);
+    .then(() => collection.insertMany([ { id: 1 }, { id: 1 } ]))
+    .then(() => /* this will not be called in the event of a bulk write error */)
+    .catch(err => /* deal with errors in `err` */);
 });
 ```
 
