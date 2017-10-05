@@ -292,42 +292,49 @@ describe('Sessions (Single)', function() {
     }
   });
 
-  it('should add `lsid` to commands sent to the server with a session', {
-    metadata: { requires: { topology: 'single' } },
-    test: function(done) {
-      const client = new Server(test.server.address());
-      const sessionPool = new ServerSessionPool(client);
-      const session = new ClientSession(client, sessionPool);
+  it(
+    'should add `lsid` to commands sent to the server, and update the session `lastUse` when a session is provided',
+    {
+      metadata: { requires: { topology: 'single' } },
+      test: function(done) {
+        const client = new Server(test.server.address());
+        const sessionPool = new ServerSessionPool(client);
+        const session = new ClientSession(client, sessionPool);
+        const initialLastUse = session.serverSession.lastUse;
 
-      let sentIsMaster = false,
-        command = null;
-      test.server.setMessageHandler(request => {
-        if (sentIsMaster) {
-          command = request.document;
-          request.reply({ ok: 1 });
-          return;
-        }
+        let sentIsMaster = false,
+          command = null;
+        test.server.setMessageHandler(request => {
+          if (sentIsMaster) {
+            command = request.document;
+            request.reply({ ok: 1 });
+            return;
+          }
 
-        sentIsMaster = true;
-        request.reply(
-          assign({}, mock.DEFAULT_ISMASTER, {
-            maxWireVersion: 6
-          })
-        );
-      });
-
-      client.on('error', done);
-      client.once('connect', () => {
-        client.command('admin.$cmd', { ping: 1 }, { session: session }, err => {
-          expect(err).to.not.exist;
-          expect(command.lsid).to.eql(session.id);
-          done();
+          sentIsMaster = true;
+          request.reply(
+            assign({}, mock.DEFAULT_ISMASTER, {
+              maxWireVersion: 6,
+              logicalSessionTimeoutMinutes: 10
+            })
+          );
         });
-      });
 
-      client.connect();
+        client.on('error', done);
+        client.once('connect', () => {
+          client.command('admin.$cmd', { ping: 1 }, { session: session }, err => {
+            expect(err).to.not.exist;
+            expect(command.lsid).to.eql(session.id);
+            expect(session.serverSession.lastUse).to.not.eql(initialLastUse);
+
+            done();
+          });
+        });
+
+        client.connect();
+      }
     }
-  });
+  );
 
   it('should use the same session for all getMore issued by a cursor', {
     metadata: { requires: { topology: 'single' } },
