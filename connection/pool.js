@@ -1164,6 +1164,9 @@ Pool.prototype.write = function(commands, options, cb) {
       }
 
       sessionOptions.lsid = operation.session.id;
+
+      // update the `lastUse` of the acquired ServerSession
+      operation.session.serverSession.lastUse = Date.now();
     }
 
     // decorate the commands with session-specific details
