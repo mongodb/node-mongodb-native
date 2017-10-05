@@ -88,7 +88,7 @@ class ServerSession {
       (((Date.now() - this.lastUse) % 86400000) % 3600000) / 60000
     );
 
-    return idleTimeMinutes > sessionTimeoutMinutes;
+    return idleTimeMinutes > sessionTimeoutMinutes - 1;
   }
 }
 
@@ -135,7 +135,9 @@ class ServerSessionPool {
       }
     }
 
-    this.sessions.push(session);
+    if (!session.hasTimedOut(sessionTimeoutMinutes)) {
+      this.sessions.push(session);
+    }
   }
 }
 
