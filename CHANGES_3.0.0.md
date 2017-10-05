@@ -113,3 +113,11 @@ MongoClient.connect('mongodb://localhost', function(err, client) {
 Where the result of the failed operation is a `BulkWriteError` which has a child value `result` which
 is the original `BulkWriteResult`.  Similarly, the callback form no longer calls back with an
 `(Error, BulkWriteResult)`, but instead just a `(BulkWriteError)`.
+
+## mapReduce inlined results
+When `Collection.prototype.mapReduce` is invoked with a callback with `out: 'inline'`, it would
+diverge from the `Promise`-based variant by returning additional data as positional arguments to
+the callback (`(err, result, stats, ...)`).  This is no longer the case, both variants of the
+method will now return a single object for all results - a single value for the default case,
+and an object similar to the existing `Promise` form for cases where there is more data to pass
+to the user.

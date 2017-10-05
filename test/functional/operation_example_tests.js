@@ -2172,18 +2172,17 @@ describe('Operation Examples', function() {
           // Execute map reduce and return results inline
           collection.mapReduce(map, reduce, { out: { inline: 1 }, verbose: true }, function(
             err,
-            results,
-            stats
+            result
           ) {
-            test.equal(2, results.length);
-            test.ok(stats != null);
+            test.equal(2, result.results.length);
+            test.ok(result.stats != null);
 
             collection.mapReduce(
               map,
               reduce,
               { out: { replace: 'mapreduce_integration_test' }, verbose: true },
-              function(err, results, stats) {
-                test.ok(stats != null);
+              function(err, result) {
+                test.ok(result.stats != null);
                 client.close();
                 done();
               }
