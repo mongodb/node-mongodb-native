@@ -186,10 +186,7 @@ describe('Authentication', function() {
             });
 
             // Authenticate using the newly added user
-            client.connect('mongodb://admin15:admin15@localhost:27017/admin', function(
-              err,
-              client
-            ) {
+            client.connect(function(err, client) {
               test.equal(null, err);
               client.close();
             });
