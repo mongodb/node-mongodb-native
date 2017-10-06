@@ -214,7 +214,7 @@ babel-code-frame@^6.22.0, babel-code-frame@^6.26.0:
     esutils "^2.0.2"
     js-tokens "^3.0.2"
 
-babel-core@^6.2.1, babel-core@^6.25.0, babel-core@^6.26.0:
+babel-core@^6.2.1, babel-core@^6.26.0:
   version "6.26.0"
   resolved "https://registry.yarnpkg.com/babel-core/-/babel-core-6.26.0.tgz#af32f78b31a6fcef119c87b0fd8d9753f03a0bb8"
   dependencies:
@@ -264,7 +264,7 @@ babel-messages@^6.23.0:
   dependencies:
     babel-runtime "^6.22.0"
 
-babel-polyfill@^6.2.0, babel-polyfill@^6.23.0:
+babel-polyfill@^6.2.0:
   version "6.26.0"
   resolved "https://registry.yarnpkg.com/babel-polyfill/-/babel-polyfill-6.26.0.tgz#379937abc67d7895970adc621f284cd966cf2153"
   dependencies:
@@ -2337,7 +2337,7 @@ moment@^2.10.6:
   version "2.18.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.18.1.tgz#c36193dd3ce1c2eed2adb7c802dbbc77a81b1c0f"
 
-mongodb-core@2.1.15, mongodb-core@^2.1.12:
+mongodb-core@2.1.15:
   version "2.1.15"
   resolved "https://registry.yarnpkg.com/mongodb-core/-/mongodb-core-2.1.15.tgz#841f53b87ffff4c7458189c35c8ae827e1169764"
   dependencies:
@@ -2381,23 +2381,21 @@ mongodb-test-runner@mbroadst/mongodb-test-runner#master:
   resolved "https://codeload.github.com/mbroadst/mongodb-test-runner/tar.gz/f22e1a77d04e8225c01bade081fab7c9d5e370d5"
   dependencies:
     metamocha "^1.2.5"
-    mongodb-topology-manager "^1.0.13"
+    mongodb-topology-manager mongodb-js/mongodb-topology-manager#3.0.0
     mongodb-version-manager "^1.0.7"
     semver "^5.4.1"
     yargs "^8.0.2"
 
-mongodb-topology-manager@^1.0.13:
+mongodb-topology-manager@mongodb-js/mongodb-topology-manager#3.0.0:
   version "1.0.13"
-  resolved "https://registry.yarnpkg.com/mongodb-topology-manager/-/mongodb-topology-manager-1.0.13.tgz#053577386c587d2cfcc1cc45a0567b93b0f8710b"
+  resolved "https://codeload.github.com/mongodb-js/mongodb-topology-manager/tar.gz/719c142350017c934fec2944dc4fa516563937f5"
   dependencies:
-    babel-core "^6.25.0"
-    babel-polyfill "^6.23.0"
     bluebird "^3.5.0"
     co "^4.6.0"
     kerberos "^0.0.23"
     mkdirp "^0.5.1"
-    mongodb-core "^2.1.12"
-    rimraf "^2.6.1"
+    mongodb-core mongodb-js/mongodb-core#3.0.0
+    rimraf "^2.6.2"
 
 mongodb-version-list@^1.0.0:
   version "1.0.0"
@@ -2992,7 +2990,7 @@ rimraf@2.6.1:
   dependencies:
     glob "^7.0.5"
 
-rimraf@^2.2.8, rimraf@^2.3.3, rimraf@^2.5.2, rimraf@^2.5.4, rimraf@^2.6.1:
+rimraf@^2.2.8, rimraf@^2.3.3, rimraf@^2.5.2, rimraf@^2.5.4, rimraf@^2.6.1, rimraf@^2.6.2:
   version "2.6.2"
   resolved "https://registry.yarnpkg.com/rimraf/-/rimraf-2.6.2.tgz#2ed8150d24a16ea8651e6d6ef0f47c4158ce7a36"
   dependencies:
