@@ -2121,7 +2121,8 @@ describe('Insert', function() {
         db.collection('shouldCorrectlyHonorPromoteLong').insert({
           doc: Long.fromNumber(10),
           array: [[Long.fromNumber(10)]]
-        }, function(err, doc) {
+        },
+        function(err, doc) {
           test.equal(null, err);
           test.ok(doc);
 
@@ -2226,7 +2227,8 @@ describe('Insert', function() {
         db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').insert({
           doc: Long.fromNumber(10),
           array: [[Long.fromNumber(10)]]
-        }, function(err, doc) {
+        },
+        function(err, doc) {
           test.equal(null, err);
           test.ok(doc);
 
@@ -2266,7 +2268,8 @@ describe('Insert', function() {
         db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').insert({
           doc: Long.fromNumber(10),
           array: [[Long.fromNumber(10)]]
-        }, function(err, doc) {
+        },
+        function(err, doc) {
           test.equal(null, err);
           test.ok(doc);
 
@@ -2301,7 +2304,8 @@ describe('Insert', function() {
         db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').insert({
           doc: Long.fromNumber(10),
           array: [[Long.fromNumber(10)]]
-        }, function(err, doc) {
+        },
+        function(err, doc) {
           test.equal(null, err);
           test.ok(doc);
 
@@ -2334,7 +2338,10 @@ describe('Insert', function() {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyOverrideCheckKeysJSOnUpdate').update({
           'ps.op.t': 1
-        }, { $set: { b: 1 } }, { checkKeys: false }, function(err, doc) {
+        },
+        { $set: { b: 1 } },
+        { checkKeys: false },
+        function(err, doc) {
           test.equal(null, err);
           test.ok(doc);
 

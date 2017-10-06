@@ -758,12 +758,15 @@ describe('CRUD API', function() {
             test.equal(null, err);
             test.equal(1, r.result.n);
 
-            db.collection('t5_2').findOneAndReplace({ a: 1 }, { c: 1, b: 1 }, {
+            db.collection('t5_2').findOneAndReplace({ a: 1 },
+            { c: 1, b: 1 },
+            {
               projection: { b: 1, c: 1 },
               sort: { a: 1 },
               returnOriginal: false,
               upsert: true
-            }, function(err, r) {
+            },
+            function(err, r) {
               test.equal(null, err);
               test.equal(1, r.lastErrorObject.n);
               test.equal(1, r.value.b);
@@ -782,12 +785,15 @@ describe('CRUD API', function() {
             test.equal(null, err);
             test.equal(1, r.result.n);
 
-            db.collection('t5_3').findOneAndUpdate({ a: 1 }, { $set: { d: 1 } }, {
+            db.collection('t5_3').findOneAndUpdate({ a: 1 },
+            { $set: { d: 1 } },
+            {
               projection: { b: 1, d: 1 },
               sort: { a: 1 },
               returnOriginal: false,
               upsert: true
-            }, function(err, r) {
+            },
+            function(err, r) {
               test.equal(null, err);
               test.equal(1, r.lastErrorObject.n);
               test.equal(1, r.value.b);

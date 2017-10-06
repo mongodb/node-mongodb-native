@@ -427,7 +427,8 @@ describe('Sharding (Read Preference)', function() {
               client.db('admin').command({
                 shardCollection: 'integration_test_2.items',
                 key: { _id: 'hashed' }
-              }, function(err) {
+              },
+              function(err) {
                 test.equal(null, err);
 
                 var map = function() {

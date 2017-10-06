@@ -351,10 +351,13 @@ describe('Collation', function() {
           var reduce = new Code('function(k,vals) { return 1; }');
 
           // db.collection('test').mapReduce({
-          db.collection('test').mapReduce(map, reduce, {
+          db.collection('test').mapReduce(map,
+          reduce,
+          {
             out: { replace: 'tempCollection' },
             collation: { caseLevel: true }
-          }, function(err) {
+          },
+          function(err) {
             test.equal(null, err);
             test.deepEqual({ caseLevel: true }, commandResult.collation);
 
@@ -778,7 +781,9 @@ describe('Collation', function() {
               }
             },
             { deleteOne: { q: { c: 1 } } }
-          ], { ordered: true }, function(err) {
+          ],
+          { ordered: true },
+          function(err) {
             test.equal(null, err);
             test.ok(commandResult);
             test.deepEqual({ caseLevel: true }, commandResult.updates[0].collation);
@@ -830,7 +835,9 @@ describe('Collation', function() {
               }
             },
             { deleteOne: { q: { c: 1 } } }
-          ], { ordered: true }, function(err) {
+          ],
+          { ordered: true },
+          function(err) {
             test.ok(err);
             test.equal('server/primary/mongos does not support collation', err.message);
 
@@ -946,7 +953,9 @@ describe('Collation', function() {
                   }
                 },
                 { deleteOne: { q: { c: 1 } } }
-              ], { ordered: true }, function(err) {
+              ],
+              { ordered: true },
+              function(err) {
                 test.ok(err);
                 test.equal('server/primary/mongos does not support collation', err.message);
 

@@ -34,7 +34,8 @@ describe('Promote Values', function() {
           int: 10,
           double: 2.2222,
           array: [[Long.fromNumber(10)]]
-        }, function(err) {
+        },
+        function(err) {
           test.equal(null, err);
 
           db.collection('shouldCorrectlyHonorPromoteValues').findOne(function(err, doc) {
@@ -79,7 +80,8 @@ describe('Promote Values', function() {
             int: 10,
             double: 2.2222,
             array: [[Long.fromNumber(10)]]
-          }, function(err) {
+          },
+          function(err) {
             test.equal(null, err);
 
             db.collection('shouldCorrectlyHonorPromoteValues').findOne(function(err, doc) {
@@ -125,7 +127,8 @@ describe('Promote Values', function() {
             int: 10,
             double: 2.2222,
             array: [[Long.fromNumber(10)]]
-          }, function(err) {
+          },
+          function(err) {
             test.equal(null, err);
 
             db
@@ -169,7 +172,8 @@ describe('Promote Values', function() {
           int: 10,
           double: 2.2222,
           array: [[Long.fromNumber(10)]]
-        }, function(err) {
+        },
+        function(err) {
           test.equal(null, err);
 
           db
@@ -212,7 +216,8 @@ describe('Promote Values', function() {
           int: 10,
           double: 2.2222,
           array: [[Long.fromNumber(10)]]
-        }, function(err) {
+        },
+        function(err) {
           test.equal(null, err);
 
           db
