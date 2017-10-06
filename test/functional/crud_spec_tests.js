@@ -290,13 +290,12 @@ describe('CRUD spec', function() {
 
     const errorHandler = err => {
       if (!err.message.match(/ns not found/)) throw err;
-    }
+    };
 
-    // Test setup
-    var setupPromises = [];
-    setupPromises.push(collection.drop().catch(errorHandler));
+    const dropPromises = [];
+    dropPromises.push(collection.drop().catch(errorHandler));
     if (scenarioTest.outcome.collection && scenarioTest.outcome.collection.name) {
-      setupPromises.push(
+      dropPromises.push(
         context.db
           .collection(scenarioTest.outcome.collection.name)
           .drop()
@@ -304,33 +303,31 @@ describe('CRUD spec', function() {
       );
     }
 
-    if (scenario.data) {
-      setupPromises.push(collection.insertMany(scenario.data));
-    }
-
-    return Promise.all(setupPromises).then(function() {
-      switch (scenarioTest.operation.name) {
-        case 'aggregate':
-          return executeAggregateTest(scenarioTest, context.db, collection);
-        case 'count':
-          return executeCountTest(scenarioTest, context.db, collection);
-        case 'distinct':
-          return executeDistinctTest(scenarioTest, context.db, collection);
-        case 'find':
-          return executeFindTest(scenarioTest, context.db, collection);
-        case 'deleteOne':
-        case 'deleteMany':
-          return executeDeleteTest(scenarioTest, context.db, collection);
-        case 'replaceOne':
-          return executeReplaceTest(scenarioTest, context.db, collection);
-        case 'updateOne':
-        case 'updateMany':
-          return executeUpdateTest(scenarioTest, context.db, collection);
-        case 'findOneAndReplace':
-        case 'findOneAndUpdate':
-        case 'findOneAndDelete':
-          return executeFindOneTest(scenarioTest, context.db, collection);
-      }
-    });
+    return Promise.all([dropPromises])
+      .then(() => (scenario.data ? collection.insertMany(scenario.data) : Promise.resolve()))
+      .then(() => {
+        switch (scenarioTest.operation.name) {
+          case 'aggregate':
+            return executeAggregateTest(scenarioTest, context.db, collection);
+          case 'count':
+            return executeCountTest(scenarioTest, context.db, collection);
+          case 'distinct':
+            return executeDistinctTest(scenarioTest, context.db, collection);
+          case 'find':
+            return executeFindTest(scenarioTest, context.db, collection);
+          case 'deleteOne':
+          case 'deleteMany':
+            return executeDeleteTest(scenarioTest, context.db, collection);
+          case 'replaceOne':
+            return executeReplaceTest(scenarioTest, context.db, collection);
+          case 'updateOne':
+          case 'updateMany':
+            return executeUpdateTest(scenarioTest, context.db, collection);
+          case 'findOneAndReplace':
+          case 'findOneAndUpdate':
+          case 'findOneAndDelete':
+            return executeFindOneTest(scenarioTest, context.db, collection);
+        }
+      });
   }
 });
