@@ -4140,12 +4140,14 @@ describe('Cursor', function() {
 
         db.collection('cursor_count_test1', { readConcern: { level: 'local' } }).count({
           project: '123'
-        }, {
+        },
+        {
           readConcern: { level: 'local' },
           limit: 5,
           skip: 5,
           hint: { project: 1 }
-        }, function(err) {
+        },
+        function(err) {
           test.equal(null, err);
           test.equal(1, started.length);
           if (started[0].command.readConcern)

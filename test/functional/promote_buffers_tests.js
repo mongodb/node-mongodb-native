@@ -27,7 +27,8 @@ describe('Promote Buffers', function() {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteBuffer1').insert({
           doc: new Buffer(256)
-        }, function(err) {
+        },
+        function(err) {
           test.equal(null, err);
 
           db.collection('shouldCorrectlyHonorPromoteBuffer1').findOne(function(err, doc) {
@@ -64,7 +65,8 @@ describe('Promote Buffers', function() {
 
           db.collection('shouldCorrectlyHonorPromoteBuffer2').insert({
             doc: new Buffer(256)
-          }, function(err) {
+          },
+          function(err) {
             test.equal(null, err);
 
             db.collection('shouldCorrectlyHonorPromoteBuffer2').findOne(function(err, doc) {
@@ -102,7 +104,8 @@ describe('Promote Buffers', function() {
 
           db.collection('shouldCorrectlyHonorPromoteBuffer3').insert({
             doc: new Buffer(256)
-          }, function(err) {
+          },
+          function(err) {
             test.equal(null, err);
 
             db
@@ -137,7 +140,8 @@ describe('Promote Buffers', function() {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteBuffer4').insert({
           doc: new Buffer(256)
-        }, function(err) {
+        },
+        function(err) {
           test.equal(null, err);
 
           db
@@ -174,7 +178,8 @@ describe('Promote Buffers', function() {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteBuffer5').insert({
           doc: new Buffer(256)
-        }, function(err) {
+        },
+        function(err) {
           test.equal(null, err);
 
           db
