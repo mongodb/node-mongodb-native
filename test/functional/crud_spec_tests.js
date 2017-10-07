@@ -303,7 +303,7 @@ describe('CRUD spec', function() {
       );
     }
 
-    return Promise.all([dropPromises])
+    return Promise.all(dropPromises)
       .then(() => (scenario.data ? collection.insertMany(scenario.data) : Promise.resolve()))
       .then(() => {
         switch (scenarioTest.operation.name) {
