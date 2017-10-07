@@ -1,11 +1,44 @@
 'use strict';
-var expect = require('chai').expect;
-var assign = require('../../lib/utils').assign;
-var co = require('co');
-var mock = require('../mock');
+const Long = require('bson').Long,
+  expect = require('chai').expect,
+  assign = require('../../lib/utils').assign,
+  mock = require('../mock');
 
+const test = {};
 describe('Max Staleness', function() {
   afterEach(() => mock.cleanup());
+  beforeEach(() => {
+    return mock.createServer().then(server => {
+      test.server = server;
+
+      const defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+        msg: 'isdbgrid'
+      });
+
+      // Primary server states
+      const serverIsMaster = [assign({}, defaultFields)];
+      server.setMessageHandler(request => {
+        var doc = request.document;
+        if (doc.ismaster) {
+          request.reply(serverIsMaster[0]);
+          return;
+        }
+
+        if (doc['$query'] && doc['$readPreference']) {
+          test.checkCommand = doc;
+          request.reply({
+            waitedMS: Long.ZERO,
+            cursor: {
+              id: Long.ZERO,
+              ns: 'test.t',
+              firstBatch: []
+            },
+            ok: 1
+          });
+        }
+      });
+    });
+  });
 
   it('should correctly set maxStalenessSeconds on Mongos query using MongoClient.connect', {
     metadata: {
@@ -17,61 +50,29 @@ describe('Max Staleness', function() {
 
     test: function(done) {
       var self = this,
-        MongoClient = self.configuration.require.MongoClient,
-        Long = self.configuration.require.Long;
+        MongoClient = self.configuration.require.MongoClient;
 
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
-        msg: 'isdbgrid'
-      });
+      MongoClient.connect(
+        `mongodb://${test.server.uri()}/test?readPreference=secondary&maxStalenessSeconds=250`,
+        function(err, client) {
+          expect(err).to.not.exist;
+          var db = client.db(self.configuration.db);
 
-      // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
-      // Received command on server
-      var command = null;
-      // Boot the mock
-      co(function*() {
-        const mongos1 = yield mock.createServer(62001, 'localhost');
-
-        mongos1.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(serverIsMaster[0]);
-          } else if (doc['$query'] && doc['$readPreference']) {
-            command = doc;
-            request.reply({
-              waitedMS: Long.ZERO,
-              cursor: {
-                id: Long.ZERO,
-                ns: 'test.t',
-                firstBatch: []
-              },
-              ok: 1
-            });
-          }
-        });
-
-        MongoClient.connect(
-          'mongodb://localhost:62001/test?readPreference=secondary&maxStalenessSeconds=250',
-          function(err, client) {
-            expect(err).to.not.exist;
-            var db = client.db(self.configuration.db);
-
-            db
-              .collection('test')
-              .find({})
-              .toArray(function(err) {
-                expect(err).to.not.exist;
-                expect(command).to.eql({
-                  $query: { find: 'test', filter: {} },
-                  $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
-                });
-
-                client.close();
-                done();
+          db
+            .collection('test')
+            .find({})
+            .toArray(function(err) {
+              expect(err).to.not.exist;
+              expect(test.checkCommand).to.eql({
+                $query: { find: 'test', filter: {} },
+                $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
               });
-          }
-        );
-      });
+
+              client.close();
+              done();
+            });
+        }
+      );
     }
   });
 
@@ -86,63 +87,29 @@ describe('Max Staleness', function() {
     test: function(done) {
       var self = this,
         MongoClient = self.configuration.require.MongoClient,
-        ReadPreference = self.configuration.require.ReadPreference,
-        Long = self.configuration.require.Long;
+        ReadPreference = self.configuration.require.ReadPreference;
 
-      // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
-        msg: 'isdbgrid'
-      });
+      MongoClient.connect(`mongodb://${test.server.uri()}/test`, function(err, client) {
+        expect(err).to.not.exist;
 
-      // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
-      // Received command on server
-      var command = null;
-      // Boot the mock
-      co(function*() {
-        const mongos1 = yield mock.createServer(62002, 'localhost');
-
-        mongos1.setMessageHandler(request => {
-          var doc = request.document;
-
-          if (doc.ismaster) {
-            request.reply(serverIsMaster[0]);
-          } else if (doc['$query'] && doc['$readPreference']) {
-            command = doc;
-            request.reply({
-              waitedMS: Long.ZERO,
-              cursor: {
-                id: Long.ZERO,
-                ns: 'test.t',
-                firstBatch: []
-              },
-              ok: 1
-            });
-          }
+        // Get a db with a new readPreference
+        var db1 = client.db('test', {
+          readPreference: new ReadPreference('secondary', { maxStalenessSeconds: 250 })
         });
 
-        MongoClient.connect('mongodb://localhost:62002/test', function(err, client) {
-          expect(err).to.not.exist;
+        db1
+          .collection('test')
+          .find({})
+          .toArray(function(err) {
+            expect(err).to.not.exist;
+            expect(test.checkCommand).to.eql({
+              $query: { find: 'test', filter: {} },
+              $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
+            });
 
-          // Get a db with a new readPreference
-          var db1 = client.db('test', {
-            readPreference: new ReadPreference('secondary', { maxStalenessSeconds: 250 })
+            client.close();
+            done();
           });
-
-          db1
-            .collection('test')
-            .find({})
-            .toArray(function(err) {
-              expect(err).to.not.exist;
-              expect(command).to.eql({
-                $query: { find: 'test', filter: {} },
-                $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
-              });
-
-              client.close();
-              done();
-            });
-        });
       });
     }
   });
@@ -160,62 +127,28 @@ describe('Max Staleness', function() {
       test: function(done) {
         var self = this,
           MongoClient = self.configuration.require.MongoClient,
-          ReadPreference = self.configuration.require.ReadPreference,
-          Long = self.configuration.require.Long;
+          ReadPreference = self.configuration.require.ReadPreference;
 
-        // Default message fields
-        var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
-          msg: 'isdbgrid'
-        });
+        MongoClient.connect(`mongodb://${test.server.uri()}/test`, function(err, client) {
+          expect(err).to.not.exist;
+          var db = client.db(self.configuration.db);
 
-        // Primary server states
-        var serverIsMaster = [assign({}, defaultFields)];
-        // Received command on server
-        var command = null;
-        // Boot the mock
-        co(function*() {
-          const mongos1 = yield mock.createServer(62003, 'localhost');
-
-          mongos1.setMessageHandler(request => {
-            var doc = request.document;
-
-            if (doc.ismaster) {
-              request.reply(serverIsMaster[0]);
-            } else if (doc['$query'] && doc['$readPreference']) {
-              command = doc;
-              request.reply({
-                waitedMS: Long.ZERO,
-                cursor: {
-                  id: Long.ZERO,
-                  ns: 'test.t',
-                  firstBatch: []
-                },
-                ok: 1
+          // Get a db with a new readPreference
+          db
+            .collection('test', {
+              readPreference: new ReadPreference('secondary', { maxStalenessSeconds: 250 })
+            })
+            .find({})
+            .toArray(function(err) {
+              expect(err).to.not.exist;
+              expect(test.checkCommand).to.eql({
+                $query: { find: 'test', filter: {} },
+                $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
               });
-            }
-          });
 
-          MongoClient.connect('mongodb://localhost:62003/test', function(err, client) {
-            expect(err).to.not.exist;
-            var db = client.db(self.configuration.db);
-
-            // Get a db with a new readPreference
-            db
-              .collection('test', {
-                readPreference: new ReadPreference('secondary', { maxStalenessSeconds: 250 })
-              })
-              .find({})
-              .toArray(function(err) {
-                expect(err).to.not.exist;
-                expect(command).to.eql({
-                  $query: { find: 'test', filter: {} },
-                  $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
-                });
-
-                client.close();
-                done();
-              });
-          });
+              client.close();
+              done();
+            });
         });
       }
     }
@@ -232,62 +165,28 @@ describe('Max Staleness', function() {
     test: function(done) {
       var self = this,
         MongoClient = self.configuration.require.MongoClient,
-        ReadPreference = self.configuration.require.ReadPreference,
-        Long = self.configuration.require.Long;
+        ReadPreference = self.configuration.require.ReadPreference;
 
-      // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
-        msg: 'isdbgrid'
-      });
+      MongoClient.connect(`mongodb://${test.server.uri()}/test`, function(err, client) {
+        expect(err).to.not.exist;
+        var db = client.db(self.configuration.db);
+        var readPreference = new ReadPreference('secondary', { maxStalenessSeconds: 250 });
 
-      // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
-      // Received command on server
-      var command = null;
-      // Boot the mock
-      co(function*() {
-        const mongos1 = yield mock.createServer(62004, 'localhost');
-
-        mongos1.setMessageHandler(request => {
-          var doc = request.document;
-
-          if (doc.ismaster) {
-            request.reply(serverIsMaster[0]);
-          } else if (doc['$query'] && doc['$readPreference']) {
-            command = doc;
-            request.reply({
-              waitedMS: Long.ZERO,
-              cursor: {
-                id: Long.ZERO,
-                ns: 'test.t',
-                firstBatch: []
-              },
-              ok: 1
+        // Get a db with a new readPreference
+        db
+          .collection('test')
+          .find({})
+          .setReadPreference(readPreference)
+          .toArray(function(err) {
+            expect(err).to.not.exist;
+            expect(test.checkCommand).to.eql({
+              $query: { find: 'test', filter: {} },
+              $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
             });
-          }
-        });
 
-        MongoClient.connect('mongodb://localhost:62004/test', function(err, client) {
-          expect(err).to.not.exist;
-          var db = client.db(self.configuration.db);
-          var readPreference = new ReadPreference('secondary', { maxStalenessSeconds: 250 });
-
-          // Get a db with a new readPreference
-          db
-            .collection('test')
-            .find({})
-            .setReadPreference(readPreference)
-            .toArray(function(err) {
-              expect(err).to.not.exist;
-              expect(command).to.eql({
-                $query: { find: 'test', filter: {} },
-                $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
-              });
-
-              client.close();
-              done();
-            });
-        });
+            client.close();
+            done();
+          });
       });
     }
   });

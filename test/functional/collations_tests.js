@@ -34,7 +34,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
         singleServer.setMessageHandler(request => {
           var doc = request.document;
 
@@ -49,7 +49,7 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -85,7 +85,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
         singleServer.setMessageHandler(request => {
           var doc = request.document;
           if (doc.ismaster) {
@@ -99,7 +99,7 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -127,7 +127,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -143,7 +143,7 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -176,7 +176,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -192,7 +192,7 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -222,7 +222,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -238,7 +238,7 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -270,7 +270,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -286,7 +286,7 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -326,7 +326,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -342,7 +342,7 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -380,7 +380,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -396,7 +396,7 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -424,7 +424,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -440,7 +440,7 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -472,7 +472,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -488,7 +488,7 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -519,7 +519,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -535,7 +535,7 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -567,7 +567,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -583,7 +583,7 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -614,7 +614,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -639,7 +639,7 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -667,7 +667,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields, { maxWireVersion: 4 })];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -680,7 +680,7 @@ describe('Collation', function() {
         });
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -688,7 +688,7 @@ describe('Collation', function() {
           db
             .collection('test')
             .findOne({ a: 1 }, { collation: { caseLevel: true } }, function(err) {
-              test.equal('server localhost:32000 does not support collation', err.message);
+              test.equal(`server ${singleServer.uri()} does not support collation`, err.message);
               singleServer.destroy();
               client.close();
               done();
@@ -709,7 +709,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields, { maxWireVersion: 4 })];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -722,13 +722,13 @@ describe('Collation', function() {
         });
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
           // Simple findAndModify command returning the new document
           db.command({ count: 'test', query: {}, collation: { caseLevel: true } }, function(err) {
-            test.equal('server localhost:32000 does not support collation', err.message);
+            test.equal(`server ${singleServer.uri()} does not support collation`, err.message);
 
             client.close();
             done();
@@ -749,7 +749,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -767,7 +767,7 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -807,7 +807,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields, { maxWireVersion: 4 })];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -821,7 +821,7 @@ describe('Collation', function() {
         });
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -910,7 +910,7 @@ describe('Collation', function() {
       ];
 
       co(function*() {
-        const primaryServer = yield mock.createServer(32000, 'localhost');
+        const primaryServer = yield mock.createServer();
         const firstSecondaryServer = yield mock.createServer(32001, 'localhost');
         const arbiterServer = yield mock.createServer(32002, 'localhost');
 
@@ -980,7 +980,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields)];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
         singleServer.setMessageHandler(request => {
           var doc = request.document;
           if (doc.ismaster) {
@@ -994,7 +994,7 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -1030,7 +1030,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields, { maxWireVersion: 4 })];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -1043,7 +1043,7 @@ describe('Collation', function() {
         });
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -1073,7 +1073,7 @@ describe('Collation', function() {
       var primary = [assign({}, defaultFields, { maxWireVersion: 4 })];
 
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
 
         // Primary state machine
         singleServer.setMessageHandler(request => {
@@ -1086,7 +1086,7 @@ describe('Collation', function() {
         });
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 

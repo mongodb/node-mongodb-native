@@ -1,11 +1,53 @@
 'use strict';
-var test = require('./shared').assert;
-var co = require('co');
-var mock = require('../mock');
-var assign = require('../../lib/utils').assign;
+var expect = require('chai').expect,
+  mock = require('../mock'),
+  assign = require('../../lib/utils').assign,
+  ObjectId = require('bson').ObjectId;
 
+const test = {};
 describe('ReplSet (mocks)', function() {
   afterEach(() => mock.cleanup());
+  beforeEach(() => {
+    // Default message fields
+    const defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      msg: 'isdbgrid'
+    });
+
+    // Default message fields
+    const defaultRSFields = assign({}, mock.DEFAULT_ISMASTER, {
+      setName: 'rs',
+      setVersion: 1,
+      electionId: new ObjectId(),
+      hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002'],
+      arbiters: ['localhost:32002']
+    });
+
+    // Primary server states
+    const serverIsMaster = [assign({}, defaultFields), assign({}, defaultRSFields)];
+
+    return Promise.all([mock.createServer(), mock.createServer()]).then(servers => {
+      test.mongos1 = servers[0];
+      test.mongos2 = servers[1];
+
+      test.mongos1.setMessageHandler(request => {
+        var doc = request.document;
+        if (doc.ismaster) {
+          request.reply(serverIsMaster[0]);
+        } else if (doc.insert) {
+          request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
+        }
+      });
+
+      test.mongos2.setMessageHandler(request => {
+        var doc = request.document;
+        if (doc.ismaster) {
+          request.reply(serverIsMaster[1]);
+        } else if (doc.insert) {
+          request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
+        }
+      });
+    });
+  });
 
   it('Should correctly print warning when non mongos proxy passed in seed list', {
     metadata: {
@@ -18,68 +60,27 @@ describe('ReplSet (mocks)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var MongoClient = configuration.require.MongoClient,
-        ObjectId = configuration.require.ObjectId,
         Logger = configuration.require.Logger;
 
-      // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
-        msg: 'isdbgrid'
+      var logger = Logger.currentLogger();
+      Logger.setLevel('warn');
+      Logger.setCurrentLogger(function(msg, state) {
+        expect(state.type).to.equal('warn');
+        expect(state.message).to.equal(
+          `expected mongos proxy, but found replicaset member mongod for server ${test.mongos2.uri()}`
+        );
       });
 
-      // Default message fields
-      var defaultRSFields = assign({}, mock.DEFAULT_ISMASTER, {
-        setName: 'rs',
-        setVersion: 1,
-        electionId: new ObjectId(),
-        hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002'],
-        arbiters: ['localhost:32002']
-      });
+      MongoClient.connect(`mongodb://${test.mongos1.uri()},${test.mongos2.uri()}/test`, function(
+        err,
+        client
+      ) {
+        Logger.setCurrentLogger(logger);
+        Logger.reset();
+        expect(err).to.not.exist;
 
-      // Primary server states
-      var serverIsMaster = [assign({}, defaultFields), assign({}, defaultRSFields)];
-
-      // Boot the mock
-      co(function*() {
-        const mongos1 = yield mock.createServer(52000, 'localhost');
-        const mongos2 = yield mock.createServer(52001, 'localhost');
-
-        mongos1.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(serverIsMaster[0]);
-          } else if (doc.insert) {
-            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
-          }
-        });
-
-        mongos2.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(serverIsMaster[1]);
-          } else if (doc.insert) {
-            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
-          }
-        });
-
-        var logger = Logger.currentLogger();
-        Logger.setCurrentLogger(function(msg, state) {
-          test.equal('warn', state.type);
-          test.equal(
-            'expected mongos proxy, but found replicaset member mongod for server localhost:52001',
-            state.message
-          );
-        });
-
-        MongoClient.connect('mongodb://localhost:52000,localhost:52001/test', function(
-          err,
-          client
-        ) {
-          Logger.setCurrentLogger(logger);
-          test.equal(null, err);
-
-          client.close();
-          done();
-        });
+        client.close();
+        done();
       });
     }
   });
@@ -96,84 +97,47 @@ describe('ReplSet (mocks)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var MongoClient = configuration.require.MongoClient,
-        ObjectId = configuration.require.ObjectId,
         Logger = configuration.require.Logger;
 
-      // Default message fields
-      var defaultRSFields = assign({}, mock.DEFAULT_ISMASTER, {
-        setName: 'rs',
-        setVersion: 1,
-        electionId: new ObjectId(),
-        hosts: ['localhost:32000', 'localhost:32001', 'localhost:32002'],
-        arbiters: ['localhost:32002']
+      var warnings = [];
+      var logger = Logger.currentLogger();
+      Logger.setLevel('warn');
+      Logger.setCurrentLogger(function(msg, state) {
+        expect(state.type).to.equal('warn');
+        warnings.push(state);
       });
 
-      // Primary server states
-      var serverIsMaster = [assign({}, defaultRSFields), assign({}, defaultRSFields)];
+      MongoClient.connect(`mongodb://${test.mongos1.uri()},${test.mongos2.uri()}/test`, function(
+        err,
+        client
+      ) {
+        Logger.setCurrentLogger(logger);
+        Logger.reset();
 
-      // Boot the mock
-      co(function*() {
-        const mongos1 = yield mock.createServer(52002, 'localhost');
-        const mongos2 = yield mock.createServer(52003, 'localhost');
+        // Assert all warnings
+        expect(warnings[0].message).to.equal(
+          `expected mongos proxy, but found replicaset member mongod for server ${test.mongos1.uri()}`
+        );
 
-        mongos1.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(serverIsMaster[0]);
-          } else if (doc.insert) {
-            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
-          }
-        });
+        expect(warnings[1].message).to.equal(
+          `expected mongos proxy, but found replicaset member mongod for server ${test.mongos2.uri()}`
+        );
 
-        mongos2.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(serverIsMaster[1]);
-          } else if (doc.insert) {
-            request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
-          }
-        });
+        expect(warnings[2].message).to.equal(
+          'no mongos proxies found in seed list, did you mean to connect to a replicaset'
+        );
 
-        var warnings = [];
-        var logger = Logger.currentLogger();
-        Logger.setCurrentLogger(function(msg, state) {
-          console.log('HERE');
-          test.equal('warn', state.type);
-          warnings.push(state);
-        });
+        expect(warnings[3].message).to.equal(
+          'seed list contains no mongos proxies, replicaset connections requires the parameter replicaSet to be supplied in the URI or options object, mongodb://server:port/db?replicaSet=name'
+        );
 
-        MongoClient.connect('mongodb://localhost:52002,localhost:52003/test', function(
-          err,
-          client
-        ) {
-          Logger.setCurrentLogger(logger);
+        // Assert error
+        expect(err.message).to.equal(
+          'seed list contains no mongos proxies, replicaset connections requires the parameter replicaSet to be supplied in the URI or options object, mongodb://server:port/db?replicaSet=name'
+        );
 
-          // Assert all warnings
-          test.equal(
-            'expected mongos proxy, but found replicaset member mongod for server localhost:52002',
-            warnings[0].message
-          );
-          test.equal(
-            'expected mongos proxy, but found replicaset member mongod for server localhost:52003',
-            warnings[1].message
-          );
-          test.equal(
-            'no mongos proxies found in seed list, did you mean to connect to a replicaset',
-            warnings[2].message
-          );
-          test.equal(
-            'seed list contains no mongos proxies, replicaset connections requires the parameter replicaSet to be supplied in the URI or options object, mongodb://server:port/db?replicaSet=name',
-            warnings[3].message
-          );
-          // Assert error
-          test.equal(
-            'seed list contains no mongos proxies, replicaset connections requires the parameter replicaSet to be supplied in the URI or options object, mongodb://server:port/db?replicaSet=name',
-            err.message
-          );
-
-          client.close();
-          done();
-        });
+        client.close();
+        done();
       });
     }
   });
@@ -190,44 +154,17 @@ describe('ReplSet (mocks)', function() {
       var configuration = this.configuration;
       var MongoClient = configuration.require.MongoClient;
 
-      // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
-        msg: 'isdbgrid'
-      });
+      MongoClient.connect(
+        `mongodb://${test.mongos1.uri()},${test.mongos2.uri()}/test?socketTimeoutMS=120000&connectTimeoutMS=15000`,
+        function(err, client) {
+          expect(err).to.not.exist;
+          expect(client.topology.s.coreTopology.s.options.connectionTimeout).to.equal(15000);
+          expect(client.topology.s.coreTopology.s.options.socketTimeout).to.equal(120000);
 
-      // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
-      // Boot the mock
-      co(function*() {
-        const mongos1 = yield mock.createServer(12004, 'localhost');
-        const mongos2 = yield mock.createServer(12005, 'localhost');
-
-        mongos1.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(serverIsMaster[0]);
-          }
-        });
-
-        mongos2.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(serverIsMaster[0]);
-          }
-        });
-
-        MongoClient.connect(
-          'mongodb://localhost:12004,localhost:12005/test?socketTimeoutMS=120000&connectTimeoutMS=15000',
-          function(err, client) {
-            test.equal(null, err);
-            test.equal(15000, client.topology.s.coreTopology.s.options.connectionTimeout);
-            test.equal(120000, client.topology.s.coreTopology.s.options.socketTimeout);
-
-            client.close();
-            done();
-          }
-        );
-      });
+          client.close();
+          done();
+        }
+      );
     }
   });
 });

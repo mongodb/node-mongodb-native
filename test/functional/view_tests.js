@@ -21,7 +21,7 @@ describe('Views', function() {
 
       // Boot the mock
       co(function*() {
-        const singleServer = yield mock.createServer(32000, 'localhost');
+        const singleServer = yield mock.createServer();
 
         singleServer.setMessageHandler(request => {
           var doc = request.document;
@@ -45,7 +45,7 @@ describe('Views', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect('mongodb://localhost:32000/test', function(err, client) {
+        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
           expect(err).to.not.exist;
           var db = client.db(self.configuration.db);
 
