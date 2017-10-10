@@ -77,20 +77,28 @@ var xor = function(a, b) {
 };
 
 // hiCache stores previous salt creations so it's not regenerated per-pool member
-var _hiCache = {};
+var _hiCache = {},
+  _hiCacheCount = 0;
+
+var _hiCachePurge = function() {
+  _hiCache = {};
+  _hiCacheCount = 0;
+};
 
 var hi = function(data, salt, iterations) {
-  var key = [data, salt.toString('base64'), iterations].join('_');
-  // check if we've already generated this salt
-  if (_hiCache[key] !== undefined) {
-    return _hiCache[key];
-  }
+  // omit the work if already generated
+  var key = data + '_' + salt.toString('base64') + '_' + iterations;
+  if (_hiCache[key] !== undefined) return _hiCache[key];
 
-  // generate the salt and store it in the cache for the next worker
-  var result = crypto.pbkdf2Sync(data, salt, iterations, 20, 'sha1');
-  _hiCache[key] = result;
+  // generate the salt
+  var saltedData = crypto.pbkdf2Sync(data, salt, iterations, 20, 'sha1');
 
-  return result;
+  // cache a copy to speed up the next lookup, but prevent unbounded cache growth
+  if (_hiCacheCount >= 200) _hiCachePurge();
+  _hiCache[key] = data;
+  _hiCacheCount += 1;
+
+  return saltedData;
 };
 
 /**
