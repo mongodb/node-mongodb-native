@@ -37,6 +37,40 @@ exports['Should correctly connect pool to single server'] = {
   }
 }
 
+exports['Should properly emit errors on forced destroy'] = {
+  metadata: { requires: { topology: "single" } },
+
+  test: function(configuration, test) {
+    var Pool = require('../../../lib/connection/pool')
+      , Connection = require('../../../lib/connection/connection')
+      , bson = require('bson')
+      , Query = require('../../../lib/connection/commands').Query;
+
+    var pool = new Pool({
+      host: configuration.host,
+      port: configuration.port,
+      bson: new bson()
+    });
+
+    pool.on('connect', function(_pool) {
+      var query = new Query(new bson(), 'system.$cmd', { ismaster: true }, { numberToSkip: 0, numberToReturn: 1 });
+      _pool.write(query, function(err, result) {
+        test.ok(err);
+        test.ok(err.message.match(/Pool was force destroyed/));
+        test.equal(result, null);
+
+        test.equal(0, Object.keys(Connection.connections()).length);
+        Connection.disableConnectionAccounting();
+        test.done();
+      });
+
+      _pool.destroy({ force: true });
+    });
+
+    pool.connect();
+  }
+}
+
 exports['Should correctly write ismaster operation to the server'] = {
   metadata: { requires: { topology: "single" } },
 
