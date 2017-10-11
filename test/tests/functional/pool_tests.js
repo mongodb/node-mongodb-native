@@ -899,7 +899,7 @@ exports['Should remove all connections from further use during reauthentication 
     var server = null;
     var running = true;
     co(function*() {
-      server = yield mockupdb.createServer(37017, 'localhost');
+      server = yield mockupdb.createServer(17017, 'localhost');
 
       co(function*() {
         var authCount = 0;
@@ -919,7 +919,7 @@ exports['Should remove all connections from further use during reauthentication 
 
       var pool = new Pool({
         host: 'localhost',
-        port: 37017,
+        port: 17017,
         bson: new bson(),
         size: 10
       });
