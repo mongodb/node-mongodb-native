@@ -201,7 +201,7 @@ exports['Successfully handle buffering store execution for primary server'] = {
                 setTimeout(function() {
                   // console.log("================================== 2")
                   // console.dir(results)
-                  test.deepEqual(['insertOne', 'aggregate'].sort(), results.sort());
+                  test.deepEqual(['aggregate', 'find', 'insertOne'].sort(), results.sort());
 
                   running = false;
                   db.close();
@@ -423,7 +423,7 @@ exports['Successfully handle buffering store execution for secondary server'] = 
                 setTimeout(function() {
                   // console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 4")
                   // console.dir(results)
-                  test.deepEqual(['count', 'find'].sort(), results.sort());
+                  test.deepEqual(['aggregate', 'find', 'count'].sort(), results.sort());
 
                   running = false;
                   db.close();
