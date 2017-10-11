@@ -885,6 +885,79 @@ exports['Should correctly have auth wait for logout to finish'] = {
   }
 }
 
+exports['Should remove all connections from further use during reauthentication of a pool'] = {
+  metadata: { requires: { topology: 'single' } },
+
+  test: function(configuration, test) {
+    var Pool = require('../../../lib/connection/pool')
+      , Connection = require('../../../lib/connection/connection')
+      , bson = require('bson')
+      , Query = require('../../../lib/connection/commands').Query
+      , co = require('co')
+      , mockupdb = require('../../mock');
+
+    var server = null;
+    var running = true;
+    co(function*() {
+      server = yield mockupdb.createServer(37017, 'localhost');
+
+      co(function*() {
+        var authCount = 0;
+        while(running) {
+          var request = yield server.receive();
+          var doc = request.document;
+
+          if (doc.getnonce) {
+            request.reply({ ok: 1, result: { nonce: 'testing' } });
+          } else if (doc.authenticate) {
+            request.reply({ ok: 1 });
+          } else if (doc.ismaster) {
+            setTimeout(function() { request.reply({ ok: 1 }); }, 10000);
+          }
+        }
+      });
+
+      var pool = new Pool({
+        host: 'localhost',
+        port: 37017,
+        bson: new bson(),
+        size: 10
+      });
+
+      var query =
+        new Query(new bson(), 'system.$cmd', { ismaster:true }, { numberToSkip: 0, numberToReturn: 1 });
+
+      pool.on('connect', function() {
+        pool.write(query, { monitoring: true }, function() {});
+
+        setTimeout(function() {
+          var queryConnection = pool.inUseConnections[0];
+          pool.auth('mongocr', 'test', 'admin', 'admin', function(err) {
+            test.equal(err, null);
+
+            // ensure that there are no duplicates in the available connection queue
+            var availableIds = pool.availableConnections.map(function(conn) { return conn.id; });
+            availableIds.forEach(function(id, pos, arr) {
+              test.equal(arr.indexOf(id), pos);
+            });
+
+            test.equal(pool.availableConnections.length, 1);
+            test.equal(pool.inUseConnections.length, 0);
+
+            running = false;
+            pool.destroy(true);
+            test.equal(0, Object.keys(Connection.connections()).length);
+            Connection.disableConnectionAccounting();
+            test.done();
+          });
+        }, 500);
+      });
+
+      pool.connect();
+    });
+  }
+}
+
 exports['Should correctly exit _execute loop when single avialable connection is destroyed'] = {
   metadata: { requires: { topology: "single" } },
 
