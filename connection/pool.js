@@ -951,7 +951,7 @@ Pool.prototype.destroy = function(force) {
     while (self.queue.length > 0) {
       var workItem = self.queue.shift();
       if (typeof workItem.cb === 'function') {
-        workItem.cb(null, new Error('force flushing work queue'));
+        workItem.cb(new MongoError('Pool was force destroyed'));
       }
     }
 
