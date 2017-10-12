@@ -270,7 +270,7 @@ function disconnectHandler(self, type, ns, cmd, options, callback) {
     !self.s.pool.isConnected() &&
     self.s.options.reconnect &&
     self.s.disconnectHandler != null &&
-    options.monitoring
+    !options.monitoring
   ) {
     self.s.disconnectHandler.add(type, ns, cmd, options, callback);
     return true;
