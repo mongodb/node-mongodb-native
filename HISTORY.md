@@ -1,13 +1,21 @@
+2.2.32 2017-10-11
+-----------------
+* update to mongodb-core 2.1.16
+* ensure that the `cursor` key is always present in aggregation commands
+* `Cursor.prototype.hasNext` now propagates errors when using callback
+* allow passing `noCursorTimeout` as an option to `find()`
+* bubble up `reconnectFailed` event from Server topology
+
 2.2.31 2017-08-08
 -----------------
-* update mongodb-core to 2.2.15
+* update mongodb-core to 2.1.15
 * allow auth option in MongoClient.connect
 * remove duplicate option `promoteLongs` from MongoClient's `connect`
 * bulk operations should not throw an error on empty batch
 
 2.2.30 2017-07-07
 -----------------
-* Update mongodb-core to 2.2.14
+* Update mongodb-core to 2.1.14
 * MongoClient
   * add `appname` to list of valid option names
   * added test for passing appname as option
