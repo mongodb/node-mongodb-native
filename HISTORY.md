@@ -1,3 +1,7 @@
+2.1.17 2017-10-11
+-----------------
+* fix a typo that completely broke SCRAM-SHA1 authentication
+
 2.1.16 2017-10-11
 -----------------
 * avoid waiting for reconnect if reconnect disabled in Server topology
