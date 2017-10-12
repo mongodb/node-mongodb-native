@@ -6,7 +6,9 @@ var expect = require('chai').expect,
   Pool = require('../../../lib/connection/pool'),
   Connection = require('../../../lib/connection/connection'),
   Query = require('../../../lib/connection/commands').Query,
-  Bson = require('bson');
+  Bson = require('bson'),
+  co = require('co'),
+  mock = require('../../mock');
 
 describe('Pool tests', function() {
   it.skip('should correctly connect pool to single server', {
@@ -1181,6 +1183,66 @@ describe('Pool tests', function() {
       });
 
       pool.connect();
+    }
+  });
+
+  it('should remove all connections from further use during reauthentication of a pool', {
+    metadata: { requires: { topology: 'single' } },
+
+    test: function(done) {
+      co(function*() {
+        const server = yield mock.createServer(37017, 'localhost');
+        server.setMessageHandler(request => {
+          var doc = request.document;
+          if (doc.getnonce) {
+            request.reply({ ok: 1, result: { nonce: 'testing' } });
+          } else if (doc.authenticate) {
+            request.reply({ ok: 1 });
+          } else if (doc.ismaster) {
+            setTimeout(() => request.reply({ ok: 1 }), 10000);
+          }
+        });
+
+        var pool = new Pool(null, {
+          host: 'localhost',
+          port: 37017,
+          bson: new Bson(),
+          size: 10
+        });
+
+        var query = new Query(
+          new Bson(),
+          'system.$cmd',
+          { ismaster: true },
+          { numberToSkip: 0, numberToReturn: 1 }
+        );
+
+        pool.on('connect', function() {
+          pool.write(query, { monitoring: true }, function() {});
+
+          setTimeout(function() {
+            pool.auth('mongocr', 'test', 'admin', 'admin', function(err) {
+              expect(err).to.not.exist;
+
+              // ensure that there are no duplicates in the available connection queue
+              var availableIds = pool.availableConnections.map(conn => conn.id);
+              availableIds.forEach(function(id, pos, arr) {
+                expect(arr.indexOf(id)).to.equal(pos);
+              });
+
+              expect(pool.availableConnections).to.have.length(1);
+              expect(pool.inUseConnections).to.have.length(0);
+
+              pool.destroy(true);
+              expect(Object.keys(Connection.connections())).to.have.length(0);
+              Connection.disableConnectionAccounting();
+              done();
+            });
+          }, 500);
+        });
+
+        pool.connect();
+      });
     }
   });
 });
