@@ -129,6 +129,11 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
     this.cursorState.promoteBuffers = options.promoteBuffers;
   }
 
+  if (topologyOptions.reconnect) {
+    console.log('HERE!');
+    this.cursorState.reconnect = topologyOptions.reconnect;
+  }
+
   // Logger
   this.logger = Logger('Cursor', topologyOptions);
 
@@ -570,24 +575,26 @@ var nextFunction = function(self, callback) {
   if (!self.cursorState.init) {
     // Topology is not connected, save the call in the provided store to be
     // Executed at some point when the handler deems it's reconnected
-    if (!self.topology.isConnected(self.options) && self.disconnectHandler != null) {
-      if (self.topology.isDestroyed()) {
-        // Topology was destroyed, so don't try to wait for it to reconnect
-        return callback(new MongoError('Topology was destroyed'));
-      }
-
-      if (!self.s.topologyOptions.reconnect) {
+    if (!self.topology.isConnected(self.options)) {
+      if (!self.cursorState.reconnect) {
         // Reconnect is disabled, so we'll never reconnect
         return callback(new MongoError('no connection available'));
       }
 
-      return self.disconnectHandler.addObjectAndMethod(
-        'cursor',
-        self,
-        'next',
-        [callback],
-        callback
-      );
+      if (self.disconnectHandler != null) {
+        if (self.topology.isDestroyed()) {
+          // Topology was destroyed, so don't try to wait for it to reconnect
+          return callback(new MongoError('Topology was destroyed'));
+        }
+
+        return self.disconnectHandler.addObjectAndMethod(
+          'cursor',
+          self,
+          'next',
+          [callback],
+          callback
+        );
+      }
     }
 
     try {
