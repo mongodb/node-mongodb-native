@@ -510,7 +510,7 @@ var pingServer = function(self, server, cb) {
         });
       }
 
-      // Calculate the stalness for this server
+      // Calculate the staleness for this server
       self.s.replicaSetState.updateServerMaxStaleness(server, self.s.haInterval);
 
       // Callback

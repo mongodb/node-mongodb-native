@@ -687,7 +687,7 @@ ReplSetState.prototype.updateServerMaxStaleness = function(server, haInterval) {
 };
 
 /**
- * Recalculate all the stalness values for secodaries
+ * Recalculate all the staleness values for secodaries
  * @method
  */
 ReplSetState.prototype.updateSecondariesMaxStaleness = function(haInterval) {
