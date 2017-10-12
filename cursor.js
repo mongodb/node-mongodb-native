@@ -130,7 +130,6 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   }
 
   if (topologyOptions.reconnect) {
-    console.log('HERE!');
     this.cursorState.reconnect = topologyOptions.reconnect;
   }
 
