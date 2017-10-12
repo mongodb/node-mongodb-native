@@ -578,4 +578,67 @@ describe('Cursor tests', function() {
       server.connect();
     }
   });
+
+  it('should not hang if autoReconnect=false and pools sockets all timed out', {
+    metadata: { requires: { topology: ['single'] } },
+    test: function(done) {
+      var configuration = this.configuration,
+        Server = require('../../../lib/topologies/server'),
+        bson = require('bson');
+
+      // Attempt to connect
+      var server = new Server({
+        host: configuration.host,
+        port: configuration.port,
+        bson: new bson(),
+        // Nasty edge case: small timeout, small pool, no auto reconnect
+        socketTimeout: 100,
+        size: 1,
+        reconnect: false
+      });
+
+      var ns = f('%s.cursor7', configuration.db);
+      server.on('connect', function(_server) {
+        // Execute the write
+        _server.insert(
+          ns,
+          [{ a: 1 }],
+          {
+            writeConcern: { w: 1 },
+            ordered: true
+          },
+          function(err, results) {
+            expect(err).to.not.exist;
+            expect(results.result.n).to.equal(1);
+
+            // Execute slow find
+            var cursor = _server.cursor(ns, {
+              find: ns,
+              query: { $where: 'sleep(250) || true' },
+              batchSize: 1
+            });
+
+            // Execute next
+            cursor.next(function(err) {
+              expect(err).to.exist;
+
+              cursor = _server.cursor(ns, {
+                find: ns,
+                query: {},
+                batchSize: 1
+              });
+
+              cursor.next(function(err) {
+                expect(err).to.exist;
+                done();
+              });
+            });
+          }
+        );
+      });
+
+      // Start connection
+      server.connect();
+    }
+  });
 });
