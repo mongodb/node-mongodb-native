@@ -1148,4 +1148,39 @@ describe('Pool tests', function() {
       pool.connect();
     }
   });
+
+  it('should properly emit errors on forced destroy', {
+    metadata: { requires: { topology: 'single' } },
+
+    test: function(done) {
+      const pool = new Pool(null, {
+        host: this.configuration.host,
+        port: this.configuration.port,
+        bson: new Bson()
+      });
+
+      pool.on('connect', () => {
+        var query = new Query(
+          new Bson(),
+          'system.$cmd',
+          { ismaster: true },
+          { numberToSkip: 0, numberToReturn: 1 }
+        );
+
+        pool.write(query, function(err, result) {
+          expect(err).to.exist;
+          expect(err).to.match(/Pool was force destroyed/);
+          expect(result).to.not.exist;
+
+          expect(Object.keys(Connection.connections())).to.have.length(0);
+          Connection.disableConnectionAccounting();
+          done();
+        });
+
+        pool.destroy({ force: true });
+      });
+
+      pool.connect();
+    }
+  });
 });
