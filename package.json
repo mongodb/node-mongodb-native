@@ -24,15 +24,11 @@
     "coveralls": "^2.11.6",
     "eslint": "^4.5.0",
     "eslint-plugin-prettier": "^2.2.0",
-    "event-stream": "^3.3.4",
+    "istanbul": "^0.4.5",
     "jsdoc": "3.5.4",
-    "JSONStream": "^1.3.1",
-    "ldjson-stream": "^1.2.1",
     "mongodb-extended-json": "^1.10.0",
     "mongodb-test-runner": "mbroadst/mongodb-test-runner#master",
     "prettier": "^1.5.3",
-    "nyc": "^11.1.0",
-    "rimraf": "2.6.1",
     "semver": "5.4.1",
     "worker-farm": "^1.5.0"
   },
@@ -46,7 +42,7 @@
   },
   "scripts": {
     "test": "mongodb-test-runner -t 60000 test/unit test/functional",
-    "coverage": "node_modules/.bin/nyc node test/runner.js -t functional && node_modules/.bin/nyc report --reporter=text-lcov | node_modules/.bin/coveralls",
+    "coverage": "istanbul cover mongodb-test-runner -- -t 60000  test/unit test/functional",
     "lint": "eslint lib test",
     "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'"
   },
