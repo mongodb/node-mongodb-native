@@ -2551,33 +2551,23 @@ describe('Find', function() {
             test.ok(cursors.length <= numCursors);
 
             var left = cursors.length;
+            var iterate = _cursor => {
+              _cursor.toArray().then(_docs => {
+                results = results.concat(_docs);
+                left--;
+
+                // No more cursors let's ensure we got all results
+                test.equal(true, _cursor.isClosed());
+                if (left === 0) {
+                  test.equal(docs.length, results.length);
+                  client.close();
+                  return done();
+                }
+              });
+            };
 
             for (var i = 0; i < cursors.length; i++) {
-              // Iterate using next method
-              var nextIterator = function(_cursor) {
-                var _callback = function(err, item) {
-                  if (item) {
-                    results.push(item);
-                    return _cursor.next(_callback);
-                  }
-
-                  left = left - 1;
-                  // Ensure cursor is closed
-                  test.equal(true, _cursor.isClosed());
-                  // No more cursors let's ensure we got all results
-                  if (left === 0) {
-                    test.equal(docs.length, results.length);
-
-                    client.close();
-                    return done();
-                  }
-                };
-
-                _cursor.next(_callback);
-              };
-
-              // Start iteration using next
-              nextIterator(cursors[i]);
+              iterate(cursors[i]);
             }
           });
         });
