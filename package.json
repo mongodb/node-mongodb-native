@@ -27,7 +27,7 @@
     "istanbul": "^0.4.5",
     "jsdoc": "3.5.4",
     "mongodb-extended-json": "^1.10.0",
-    "mongodb-test-runner": "mbroadst/mongodb-test-runner#master",
+    "mongodb-test-runner": "^1.1.18",
     "prettier": "^1.5.3",
     "semver": "5.4.1",
     "worker-farm": "^1.5.0"
