@@ -2128,9 +2128,9 @@ mongodb-extended-json@^1.10.0:
     moment "^2.10.6"
     raf "^3.1.0"
 
-mongodb-test-runner@mbroadst/mongodb-test-runner#master:
-  version "1.1.17"
-  resolved "https://codeload.github.com/mbroadst/mongodb-test-runner/tar.gz/f22e1a77d04e8225c01bade081fab7c9d5e370d5"
+mongodb-test-runner@^1.1.18:
+  version "1.1.18"
+  resolved "https://registry.yarnpkg.com/mongodb-test-runner/-/mongodb-test-runner-1.1.18.tgz#fb07a3ea509211871480239fa50f13a296edcb17"
   dependencies:
     metamocha "^1.2.5"
     mongodb-topology-manager mongodb-js/mongodb-topology-manager#3.0.0
@@ -2138,7 +2138,7 @@ mongodb-test-runner@mbroadst/mongodb-test-runner#master:
     semver "^5.4.1"
     yargs "^8.0.2"
 
-mongodb-topology-manager@mongodb-js/mongodb-topology-manager#3.0.0:
+"mongodb-topology-manager@github:mongodb-js/mongodb-topology-manager#3.0.0":
   version "1.0.13"
   resolved "https://codeload.github.com/mongodb-js/mongodb-topology-manager/tar.gz/719c142350017c934fec2944dc4fa516563937f5"
   dependencies:
