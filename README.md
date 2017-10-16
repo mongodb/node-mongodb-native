@@ -1,4 +1,4 @@
-[![NPM](https://nodei.co/npm/mongodb.png?downloads=true&downloadRank=true)](https://nodei.co/npm/mongodb/) [![NPM](https://nodei.co/npm-dl/mongodb.png?months=6&height=3)](https://nodei.co/npm/mongodb/)
+[![npm](https://nodei.co/npm/mongodb.png?downloads=true&downloadRank=true)](https://nodei.co/npm/mongodb/) [![npm](https://nodei.co/npm-dl/mongodb.png?months=6&height=3)](https://nodei.co/npm/mongodb/)
 
 [![Build Status](https://secure.travis-ci.org/mongodb/node-mongodb-native.svg?branch=2.1)](http://travis-ci.org/mongodb/node-mongodb-native)
 [![Coverage Status](https://coveralls.io/repos/github/mongodb/node-mongodb-native/badge.svg?branch=2.1)](https://coveralls.io/github/mongodb/node-mongodb-native?branch=2.1)
@@ -12,21 +12,18 @@ The official [MongoDB](https://www.mongodb.com/) driver for Node.js. Provides a 
 
 | what          | where                                          |
 |---------------|------------------------------------------------|
-| documentation | http://mongodb.github.io/node-mongodb-native/  |
-| api-doc        | http://mongodb.github.io/node-mongodb-native/2.2/api/  |
+| documentation | http://mongodb.github.io/node-mongodb-native  |
+| api-doc        | http://mongodb.github.io/node-mongodb-native/2.2/api  |
 | source        | https://github.com/mongodb/node-mongodb-native |
-| mongodb       | http://www.mongodb.org/                        |
-
-### Blogs of Engineers involved in the driver
-- Christian Kvalheim [@christkv](https://twitter.com/christkv) <http://christiankvalheim.com>
+| mongodb       | http://www.mongodb.org                        |
 
 ### Bugs / Feature Requests
 
-Think you’ve found a bug? Want to see a new feature in node-mongodb-native? Please open a
+Think you’ve found a bug? Want to see a new feature in `node-mongodb-native`? Please open a
 case in our issue management tool, JIRA:
 
-- Create an account and login <https://jira.mongodb.org>.
-- Navigate to the NODE project <https://jira.mongodb.org/browse/NODE>.
+- Create an account and login [jira.mongodb.org](https://jira.mongodb.org).
+- Navigate to the NODE project [jira.mongodb.org/browse/NODE](https://jira.mongodb.org/browse/NODE).
 - Click **Create Issue** - Please provide as much information as possible about the issue type and how to reproduce it.
 
 Bug reports in JIRA for all driver projects (i.e. NODE, PYTHON, CSHARP, JAVA) and the
@@ -34,22 +31,22 @@ Core Server (i.e. SERVER) project are **public**.
 
 ### Questions and Bug Reports
 
- * mailing list: https://groups.google.com/forum/#!forum/node-mongodb-native
- * jira: http://jira.mongodb.org/
+ * Mailing List: [groups.google.com/forum/#!forum/node-mongodb-native](https://groups.google.com/forum/#!forum/node-mongodb-native)
+ * JIRA: [jira.mongodb.org](http://jira.mongodb.org)
 
 ### Change Log
 
-http://jira.mongodb.org/browse/NODE
+Change history can be found in [`HISTORY.md`](HISTORY.md).
 
 # Installation
 
-The recommended way to get started using the Node.js 2.0 driver is by using the `NPM` (Node Package Manager) to install the dependency in your project.
+The recommended way to get started using the Node.js 2.0 driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
 
 ## MongoDB Driver
 
-Given that you have created your own project using `npm init` we install the mongodb driver and it's dependencies by executing the following `NPM` command.
+Given that you have created your own project using `npm init` we install the MongoDB driver and its dependencies by executing the following `npm` command.
 
-```
+```bash
 npm install mongodb --save
 ```
 
@@ -57,45 +54,43 @@ This will download the MongoDB driver and add a dependency entry in your `packag
 
 ## Troubleshooting
 
-The MongoDB driver depends on several other packages. These are.
+The MongoDB driver depends on several other packages. These are:
 
-* mongodb-core
-* bson
-* kerberos
-* node-gyp
+* [mongodb-core](https://github.com/mongodb-js/mongodb-core)
+* [bson](https://github.com/mongodb-js/bson-ext)
+* [kerberos](https://github.com/christkv/kerberos)
+* [node-gyp](https://github.com/nodejs/node-gyp)
 
-The `kerberos` package is a C++ extension that requires a build environment to be installed on your system. You must be able to build node.js itself to be able to compile and install the `kerberos` module. Furthermore the `kerberos` module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operation system package manager what libraries to install.
+The `kerberos` package is a C++ extension that requires a build environment to be installed on your system. You must be able to build Node.js itself in order to compile and install the `kerberos` module. Furthermore, the `kerberos` module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operation system package manager for what libraries to install.
 
-{{% note class="important" %}}
-Windows already contains the SSPI API used for Kerberos authentication. However you will need to install a full compiler tool chain using visual studio C++ to correctly install the kerberos extension.
-{{% /note %}}
+**Windows already contains the SSPI API used for Kerberos authentication. However you will need to install a full compiler tool chain using Visual Studio C++ to correctly install the Kerberos extension.**
 
 ### Diagnosing on UNIX
 
-If you don’t have the build essentials it won’t build. In the case of linux you will need gcc and g++, node.js with all the headers and python. The easiest way to figure out what’s missing is by trying to build the kerberos project. You can do this by performing the following steps.
+If you don’t have the build essentials, this module won’t build. In the case of Linux, you will need gcc, g++, Node.js with all the headers and Python. The easiest way to figure out what’s missing is by trying to build the Kerberos project. You can do this by performing the following steps.
 
-```
+```bash
 git clone https://github.com/christkv/kerberos.git
 cd kerberos
 npm install
 ```
 
-If all the steps complete you have the right toolchain installed. If you get node-gyp not found you need to install it globally by doing.
+If all the steps complete, you have the right toolchain installed. If you get the error "node-gyp not found," you need to install `node-gyp` globally:
 
-```
+```bash
 npm install -g node-gyp
 ```
 
-If correctly compiles and runs the tests you are golden. We can now try to install the mongod driver by performing the following command.
+If it correctly compiles and runs the tests you are golden. We can now try to install the `mongod` driver by performing the following command.
 
-```
+```bash
 cd yourproject
 npm install mongodb --save
 ```
 
 If it still fails the next step is to examine the npm log. Rerun the command but in this case in verbose mode.
 
-```
+```bash
 npm --loglevel verbose install mongodb
 ```
 
@@ -103,21 +98,21 @@ This will print out all the steps npm is performing while trying to install the 
 
 ### Diagnosing on Windows
 
-A known compiler tool chain known to work for compiling `kerberos` on windows is the following.
+A compiler tool chain known to work for compiling `kerberos` on Windows is the following.
 
-* Visual Studio c++ 2010 (do not use higher versions)
+* Visual Studio C++ 2010 (do not use higher versions)
 * Windows 7 64bit SDK
 * Python 2.7 or higher
 
-Open visual studio command prompt. Ensure node.exe is in your path and install node-gyp.
+Open the Visual Studio command prompt. Ensure `node.exe` is in your path and install `node-gyp`.
 
-```
+```bash
 npm install -g node-gyp
 ```
 
-Next you will have to build the project manually to test it. Use any tool you use with git and grab the repo.
+Next, you will have to build the project manually to test it. Clone the repo, install dependencies and rebuild:
 
-```
+```bash
 git clone https://github.com/christkv/kerberos.git
 cd kerberos
 npm install
@@ -128,32 +123,32 @@ This should rebuild the driver successfully if you have everything set up correc
 
 ### Other possible issues
 
-Your python installation might be hosed making gyp break. I always recommend that you test your deployment environment first by trying to build node itself on the server in question as this should unearth any issues with broken packages (and there are a lot of broken packages out there).
+Your Python installation might be hosed making gyp break. Test your deployment environment first by trying to build Node.js itself on the server in question, as this should unearth any issues with broken packages (and there are a lot of broken packages out there).
 
-Another thing is to ensure your user has write permission to wherever the node modules are being installed.
+Another tip is to ensure your user has write permission to wherever the Node.js modules are being installed.
 
 QuickStart
 ==========
-The quick start guide will show you how to setup a simple application using node.js and MongoDB. Its scope is only how to set up the driver and perform the simple crud operations. For more in depth coverage we encourage reading the tutorials.
+The quick start guide will show you how to setup a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD (Create, Read, Update, Delete) operations. For more in depth coverage we encourage reading the [tutorials](https://docs.mongodb.com/manual/tutorial).
 
-Create the package.json file
+Create the `package.json` file
 ----------------------------
 Let's create a directory where our application will live. In our case we will put this under our projects directory.
 
-```
+```bash
 mkdir myproject
 cd myproject
 ```
 
 Enter the following command and answer the questions to create the initial structure for your new project
 
-```
+```bash
 npm init
 ```
 
-Next we need to edit the generated package.json file to add the dependency for the MongoDB driver. The package.json file below is just an example and your will look different depending on how you answered the questions after entering `npm init`
+Next we need to edit the generated `package.json` file to add the dependency for the MongoDB driver. The `package.json` content below is just an example and yours will look different depending on how you answered the questions after entering `npm init`.
 
-```
+```json
 {
   "name": "myproject",
   "version": "1.0.0",
@@ -175,19 +170,19 @@ Next we need to edit the generated package.json file to add the dependency for t
 }
 ```
 
-Save the file and return to the shell or command prompt and use **NPM** to install all the dependencies.
+Save the file and return to the shell or command prompt and use **npm** to install all the dependencies.
 
-```
+```bash
 npm install
 ```
 
-You should see **NPM** download a lot of files. Once it's done you'll find all the downloaded packages under the **node_modules** directory.
+You should see **npm** download a lot of files. Once it's done you'll find all the downloaded packages under the **node_modules** directory.
 
 Booting up a MongoDB Server
 ---------------------------
 Let's boot up a MongoDB server instance. Download the right MongoDB version from [MongoDB](http://www.mongodb.org), open a new shell or command line and ensure the **mongod** command is in the shell or command line path. Now let's create a database directory (in our case under **/data**).
 
-```
+```bash
 mongod --dbpath=/data --port 27017
 ```
 
@@ -319,7 +314,7 @@ MongoClient.connect(url, function(err, db) {
 
 Delete a document
 -----------------
-Next lets delete the document where the field **a** equals to **3**.
+Next let's delete the document where the field **a** equals to **3**.
 
 ```js
 var deleteDocument = function(db, callback) {
@@ -335,8 +330,7 @@ var deleteDocument = function(db, callback) {
 }
 ```
 
-This will delete the first document where the field **a** equals to **3**. Let's add the method to the **MongoClient
-.connect** callback function.
+This will delete the first document where the field **a** equals to **3**. Let's add the method to the **MongoClient.connect** callback function.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -380,8 +374,7 @@ var findDocuments = function(db, callback) {
 }
 ```
 
-This query will return all the documents in the **documents** collection. Since we deleted a document the total
-documents returned is **2**. Finally let's add the findDocument method to the **MongoClient.connect** callback.
+This query will return all the documents in the **documents** collection. Since we deleted a document the total documents returned is **2**. Finally let's add the findDocument method to the **MongoClient.connect** callback.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -406,10 +399,10 @@ MongoClient.connect(url, function(err, db) {
 });
 ```
 
-This concludes the QuickStart of connecting and performing some Basic operations using the MongoDB Node.js driver. For more detailed information you can look at the tutorials covering more specific topics of interest.
+This concludes the QuickStart of connecting and performing some Basic operations using the MongoDB Node.js driver. For more detailed information you can look at the [tutorials](https://docs.mongodb.com/manual/tutorial) covering more specific topics of interest.
 
 ## Next Steps
 
- * [MongoDB Documentation](http://mongodb.org/)
- * [Read about Schemas](http://learnmongodbthehardway.com/)
+ * [MongoDB Documentation](http://mongodb.org)
+ * [Read about Schemas](http://learnmongodbthehardway.com)
  * [Star us on GitHub](https://github.com/mongodb/node-mongodb-native)
