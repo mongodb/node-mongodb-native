@@ -1,7 +1,8 @@
 'use strict';
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
-var Script = require('vm');
+const test = require('./shared').assert,
+  setupDatabase = require('./shared').setupDatabase,
+  Script = require('vm'),
+  expect = require('chai').expect;
 
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.
@@ -2516,10 +2517,10 @@ describe('Insert', function() {
               [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
               { ordered: false },
               function(err, r) {
-                test.equal(r, null);
-                test.ok(err != null);
-                test.ok(err.writeErrors.length === 2);
-                test.ok(err.result);
+                expect(r).to.not.exist;
+                expect(err).to.exist;
+                expect(err.result).to.exist;
+                expect(err.result.getWriteErrors()).to.have.length(2);
 
                 client.close();
                 done();
@@ -2556,10 +2557,10 @@ describe('Insert', function() {
               [{ a: 1 }, { a: 2 }, { a: 1 }, { a: 3 }, { a: 1 }],
               { ordered: false },
               function(err, r) {
-                test.equal(r, null);
-                test.ok(err != null);
-                test.ok(err.writeErrors.length === 2);
-                test.ok(err.result);
+                expect(r).to.not.exist;
+                expect(err).to.exist;
+                expect(err.result).to.exist;
+                expect(err.result.getWriteErrors()).to.have.length(2);
 
                 client.close();
                 done();

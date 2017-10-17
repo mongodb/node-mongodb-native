@@ -1,6 +1,7 @@
 'use strict';
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
+const test = require('./shared').assert,
+  setupDatabase = require('./shared').setupDatabase,
+  expect = require('chai').expect;
 
 describe('Bulk', function() {
   before(function() {
@@ -35,6 +36,11 @@ describe('Bulk', function() {
           batch.insert({ b: 3, a: 2 });
 
           batch.execute(function(err, result) {
+            expect(err).to.exist;
+            expect(result).to.not.exist;
+
+            result = err.result;
+
             // Basic properties check
             test.equal(1, result.nInserted);
             test.equal(true, result.hasWriteErrors());
@@ -102,7 +108,11 @@ describe('Bulk', function() {
           batch.insert({ b: 5, a: 1 });
 
           batch.execute(function(err, result) {
+            expect(err).to.exist;
+            expect(result).to.not.exist;
+
             // Basic properties check
+            result = err.result;
             test.equal(err instanceof Error, true);
             test.equal(1, result.nInserted);
             test.equal(true, result.hasWriteErrors());
@@ -297,7 +307,11 @@ describe('Bulk', function() {
 
             // Execute the operations
             batch.execute(function(err, result) {
+              expect(err).to.exist;
+              expect(result).to.not.exist;
+
               // Test basic settings
+              result = err.result;
               test.equal(1, result.nInserted);
               test.equal(1, result.nMatched);
               test.ok(1 === result.nModified || result.nModified == null);
@@ -356,7 +370,11 @@ describe('Bulk', function() {
 
             // Execute the operations
             batch.execute(function(err, result) {
+              expect(err).to.exist;
+              expect(result).to.not.exist;
+
               // Test basic settings
+              result = err.result;
               test.equal(1, result.nInserted);
               test.equal(2, result.nUpserted);
               test.equal(1, result.nMatched);
@@ -528,7 +546,11 @@ describe('Bulk', function() {
 
           // Execute the operations
           batch.execute(function(err, result) {
+            expect(err).to.exist;
+            expect(result).to.not.exist;
+
             // Basic properties check
+            result = err.result;
             test.equal(err instanceof Error, true);
             test.equal(2, result.nInserted);
             test.equal(0, result.nUpserted);
@@ -601,7 +623,11 @@ describe('Bulk', function() {
 
           // Execute the operations
           batch.execute(function(err, result) {
+            expect(err).to.exist;
+            expect(result).to.not.exist;
+
             // Basic properties check
+            result = err.result;
             test.equal(2, result.nInserted);
             test.equal(true, result.hasWriteErrors());
             test.ok(3, result.getWriteErrorCount());
@@ -829,7 +855,11 @@ describe('Bulk', function() {
 
           // Execute the operations
           batch.execute(self.configuration.writeConcernMax(), function(err, result) {
+            expect(err).to.exist;
+            expect(result).to.not.exist;
+
             // Test basic settings
+            result = err.result;
             test.equal(2, result.nInserted);
             test.equal(true, result.hasWriteErrors());
             test.ok(result.getWriteErrorCount() === 4 || result.getWriteErrorCount() === 3);
@@ -885,7 +915,11 @@ describe('Bulk', function() {
 
             // Execute the operations
             batch.execute(self.configuration.writeConcernMax(), function(err, result) {
+              expect(err).to.exist;
+              expect(result).to.not.exist;
+
               // Test basic settings
+              result = err.result;
               test.equal(2, result.nInserted);
               test.equal(2, result.nUpserted);
               test.ok(0 === result.nModified || result.nModified == null);
