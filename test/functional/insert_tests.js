@@ -2506,7 +2506,7 @@ describe('Insert', function() {
         // Get collection
         var col = db.collection('insertManyMultipleWriteErrors');
         col.drop(function(err, r) {
-          test.equal(undefined, r);
+          expect(r).to.not.exist;
 
           // Create unique index
           col.createIndex({ a: 1 }, { unique: true }, function(err, r) {
@@ -2546,7 +2546,7 @@ describe('Insert', function() {
         // Get collection
         var col = db.collection('insertManyMultipleWriteErrors1');
         col.drop(function(err, r) {
-          test.equal(undefined, r);
+          expect(r).to.not.exist;
 
           // Create unique index
           col.createIndex({ a: 1 }, { unique: true }, function(err, r) {
@@ -2588,7 +2588,7 @@ describe('Insert', function() {
         // Get collection
         var col = db.collection('insertManyMultipleWriteErrors2');
         col.drop(function(err, r) {
-          test.equal(undefined, r);
+          expect(r).to.not.exist;
 
           // Create unique index
           col.createIndex({ a: 1 }, { unique: true }, function(err, r) {
@@ -2629,7 +2629,7 @@ describe('Insert', function() {
         // Get collection
         var col = db.collection('insertManyMultipleWriteErrors3');
         col.drop(function(err, r) {
-          test.equal(undefined, r);
+          expect(r).to.not.exist;
 
           // Create unique index
           col.createIndex({ a: 1 }, { unique: true }, function(err, r) {

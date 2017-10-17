@@ -1,6 +1,7 @@
 'use strict';
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
+const test = require('./shared').assert,
+  setupDatabase = require('./shared').setupDatabase,
+  expect = require('chai').expect;
 
 describe('MongoClient Options', function() {
   before(function() {
@@ -78,7 +79,7 @@ describe('MongoClient Options', function() {
         },
         function(err, client) {
           test.ok(err.message.indexOf('option notlegal is not supported') !== -1);
-          test.equal(undefined, client);
+          expect(client).to.not.exist;
           done();
         }
       );
