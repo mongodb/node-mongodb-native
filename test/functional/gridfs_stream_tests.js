@@ -1,10 +1,11 @@
 'use strict';
 
-var crypto = require('crypto');
-var ejson = require('mongodb-extended-json');
-var fs = require('fs');
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
+const crypto = require('crypto'),
+  ejson = require('mongodb-extended-json'),
+  fs = require('fs'),
+  test = require('./shared').assert,
+  setupDatabase = require('./shared').setupDatabase,
+  expect = require('chai').expect;
 
 describe('GridFS Stream', function() {
   before(function() {
@@ -446,9 +447,8 @@ describe('GridFS Stream', function() {
         var id = uploadStream.id;
 
         uploadStream.once('finish', function() {
-          bucket.delete(id, function(error) {
-            test.equal(error, undefined);
-
+          bucket.delete(id, function(err) {
+            expect(err).to.not.exist;
             var chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
             chunksQuery.toArray(function(error, docs) {
               test.equal(error, null);
@@ -798,8 +798,8 @@ describe('GridFS Stream', function() {
         var id = uploadStream.id;
 
         uploadStream.once('finish', function() {
-          bucket.drop(function(error) {
-            test.equal(undefined, error);
+          bucket.drop(function(err) {
+            expect(err).to.not.exist;
 
             var chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
             chunksQuery.toArray(function(error, docs) {
@@ -964,7 +964,7 @@ describe('GridFS Stream', function() {
         uploadStream.once('finish', function() {
           // Rename the file
           bucket.rename(id, 'renamed_it.dat', function(err) {
-            test.equal(undefined, err);
+            expect(err).to.not.exist;
             done();
           });
         });

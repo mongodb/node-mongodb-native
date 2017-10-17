@@ -1,6 +1,7 @@
 'use strict';
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
+const test = require('./shared').assert,
+  setupDatabase = require('./shared').setupDatabase,
+  expect = require('chai').expect;
 
 describe('Connection', function() {
   before(function() {
@@ -409,8 +410,8 @@ describe('Connection', function() {
       var connect = configuration.require;
 
       connect(configuration.url('slithy', 'toves'), function(err, client) {
-        test.ok(err);
-        test.equal(undefined, client);
+        expect(err).to.exist;
+        expect(client).to.not.exist;
         done();
       });
     }

@@ -1,8 +1,8 @@
 'use strict';
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
-var f = require('util').format;
-var expect = require('chai').expect;
+const test = require('./shared').assert,
+  setupDatabase = require('./shared').setupDatabase,
+  f = require('util').format,
+  expect = require('chai').expect;
 
 describe('Operation Examples', function() {
   before(function() {
@@ -1053,8 +1053,8 @@ describe('Operation Examples', function() {
 
         // Drop the collection
         collection.drop(function(err, reply) {
-          test.ok(err);
-          test.equal(undefined, reply);
+          expect(err).to.exist;
+          expect(reply).to.not.exist;
 
           // Ensure we don't have the collection in the set of names
           db.listCollections().toArray(function(err, replies) {
@@ -3827,8 +3827,8 @@ describe('Operation Examples', function() {
 
             // Attemp to insert should fail now with correct message 'db closed by application'
             collection.insertOne({ a: 2 }, configuration.writeConcernMax(), function(err, result) {
-              test.equal(undefined, result);
-              test.ok(err != null);
+              expect(err).to.exist;
+              expect(result).to.not.exist;
 
               client.close();
               done();
@@ -4414,8 +4414,8 @@ describe('Operation Examples', function() {
                 MongoClient.connect(
                   'mongodb://user:name@localhost:27017/integration_tests',
                   function(err, client) {
-                    test.equal(undefined, client);
-                    test.ok(err);
+                    expect(err).to.exist;
+                    expect(client).to.not.exist;
                     done();
                   }
                 );
