@@ -21,7 +21,7 @@ describe('Bulk', function() {
 
       client.connect(function(err, client) {
         var db = client.db(self.configuration.db);
-        var col = db.collection('batch_write_ordered_ops_2');
+        var col = db.collection('batch_write_ordered_ops_10');
 
         // Add unique index on b field causing all updates to fail
         col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function(err) {
@@ -129,7 +129,7 @@ describe('Bulk', function() {
     }
   });
 
-  it('should correctly handle ordered multiple batch api write command error', {
+  it('should correctly handle ordered multiple batch api write command errors', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -144,7 +144,7 @@ describe('Bulk', function() {
         var db = client.db(self.configuration.db);
         var col = db.collection('batch_write_ordered_ops_2');
 
-        // Add unique index on b field causing all updates to fail
+        // Add unique index on field `a` causing all updates to fail
         col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function(err) {
           test.equal(err, null);
 
