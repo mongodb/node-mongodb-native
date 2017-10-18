@@ -71,6 +71,64 @@ describe('Bulk', function() {
     }
   });
 
+  it('should ignore undefined values in unordered bulk operation if `ignoreUndefined` specified', {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+
+    test: function() {
+      const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+        poolSize: 1
+      });
+
+      return client
+        .connect()
+        .then(client => {
+          const db = client.db(this.configuration.db);
+          const col = db.collection('batch_write_unordered_ops_1');
+
+          return col
+            .initializeUnorderedBulkOp({ ignoreUndefined: true })
+            .insert({ a: 1, b: undefined })
+            .execute()
+            .then(() => col.find({}).toArray())
+            .then(docs => {
+              expect(docs[0]['a']).to.equal(1);
+              expect(docs[0]['b']).to.not.exist;
+            });
+        })
+        .then(() => client.close());
+    }
+  });
+
+  it('should ignore undefined values in ordered bulk operation if `ignoreUndefined` specified', {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+
+    test: function() {
+      var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+        poolSize: 1
+      });
+
+      return client.connect().then(client => {
+        var db = client.db(this.configuration.db);
+        var col = db.collection('batch_write_ordered_ops_1');
+
+        return col
+          .initializeOrderedBulkOp({ ignoreUndefined: true })
+          .insert({ a: 1, b: undefined })
+          .execute()
+          .then(() => col.find({}).toArray())
+          .then(docs => {
+            expect(docs[0]['a']).to.equal(1);
+            expect(docs[0]['b']).to.not.exist;
+          })
+          .then(() => client.close());
+      });
+    }
+  });
+
   it('should correctly handle ordered multiple batch api write command error', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
