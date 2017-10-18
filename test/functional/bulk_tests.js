@@ -21,7 +21,7 @@ describe('Bulk', function() {
 
       client.connect(function(err, client) {
         var db = client.db(self.configuration.db);
-        var col = db.collection('batch_write_ordered_ops_1');
+        var col = db.collection('batch_write_ordered_ops_2');
 
         // Add unique index on b field causing all updates to fail
         col.ensureIndex({ a: 1 }, { unique: true, sparse: false }, function(err) {
@@ -113,7 +113,7 @@ describe('Bulk', function() {
 
       return client.connect().then(client => {
         var db = client.db(this.configuration.db);
-        var col = db.collection('batch_write_ordered_ops_1');
+        var col = db.collection('batch_write_ordered_ops_3');
 
         return col
           .initializeOrderedBulkOp({ ignoreUndefined: true })
