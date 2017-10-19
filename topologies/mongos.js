@@ -1065,12 +1065,18 @@ Mongos.prototype.command = function(ns, cmd, options, callback) {
  * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {ClientSession} [options.session=null] Session to use for the operation
+ * @param {object} [options.topology] The internal topology of the created cursor
  * @returns {Cursor}
  */
-Mongos.prototype.cursor = function(ns, cmd, cursorOptions) {
-  cursorOptions = cursorOptions || {};
-  var FinalCursor = cursorOptions.cursorFactory || this.s.Cursor;
-  return new FinalCursor(this.s.bson, ns, cmd, cursorOptions, this, this.s.options);
+Mongos.prototype.cursor = function(ns, cmd, options) {
+  options = options || {};
+  const topology = options.topology || this;
+
+  // Set up final cursor type
+  var FinalCursor = options.cursorFactory || this.s.Cursor;
+
+  // Return the cursor
+  return new FinalCursor(this.s.bson, ns, cmd, options, topology, this.s.options);
 };
 
 /**

@@ -843,15 +843,18 @@ Server.prototype.remove = function(ns, ops, options, callback) {
  * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {ClientSession} [options.session=null] Session to use for the operation
+ * @param {object} [options.topology] The internal topology of the created cursor
  * @returns {Cursor}
  */
-Server.prototype.cursor = function(ns, cmd, cursorOptions) {
-  var s = this.s;
-  cursorOptions = cursorOptions || {};
+Server.prototype.cursor = function(ns, cmd, options) {
+  options = options || {};
+  const topology = options.topology || this;
+
   // Set up final cursor type
-  var FinalCursor = cursorOptions.cursorFactory || s.Cursor;
+  var FinalCursor = options.cursorFactory || this.s.Cursor;
+
   // Return the cursor
-  return new FinalCursor(s.bson, ns, cmd, cursorOptions, this, s.options);
+  return new FinalCursor(this.s.bson, ns, cmd, options, topology, this.s.options);
 };
 
 /**
