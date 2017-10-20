@@ -563,12 +563,12 @@ describe('Url Parser', function() {
       Logger.setCurrentLogger(function(msg, context) {
         expect(msg).to.exist;
         expect(msg).to.contain('not supported');
-        expect(context.type).to.equal('info');
+        expect(context.type).to.equal('warn');
         expect(context.className).to.equal('URL Parser');
         logged = true;
       });
 
-      Logger.setLevel('info');
+      Logger.setLevel('warn');
 
       parse('mongodb://localhost/db?minPoolSize=100');
       expect(logged).to.be.true;
