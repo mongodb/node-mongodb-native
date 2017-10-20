@@ -550,31 +550,38 @@ describe('Url Parser', function() {
   /**
    * @ignore
    */
-  it('should throw on unsuported options', {
+  it.only('should log when unsuported options are used in url', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
     test: function() {
-      expect(function() {
-        parse('mongodb://localhost/db?minPoolSize=100');
-      }).to.throw(/minPoolSize not supported/);
+      var self = this,
+        Logger = self.configuration.require.Logger,
+        logged = false;
 
-      expect(function() {
-        parse('mongodb://localhost/db?maxIdleTimeMS=100');
-      }).to.throw(/maxIdleTimeMS not supported/);
+      Logger.setCurrentLogger(function(msg, context) {
+        expect(msg).to.exist;
+        expect(msg).to.contain('not supported');
+        expect(context.type).to.equal('info');
+        expect(context.className).to.equal('URL Parser');
+        logged = true;
+      });
 
-      expect(function() {
-        parse('mongodb://localhost/db?waitQueueMultiple=100');
-      }).to.throw(/waitQueueMultiple not supported/);
+      Logger.setLevel('info');
 
-      expect(function() {
-        parse('mongodb://localhost/db?waitQueueTimeoutMS=100');
-      }).to.throw(/waitQueueTimeoutMS not supported/);
+      parse('mongodb://localhost/db?minPoolSize=100');
+      expect(logged).to.be.true;
+      parse('mongodb://localhost/db?maxIdleTimeMS=100');
+      expect(logged).to.be.true;
+      parse('mongodb://localhost/db?waitQueueMultiple=100');
+      expect(logged).to.be.true;
+      parse('mongodb://localhost/db?waitQueueTimeoutMS=100');
+      expect(logged).to.be.true;
+      parse('mongodb://localhost/db?uuidRepresentation=1');
+      expect(logged).to.be.true;
 
-      expect(function() {
-        parse('mongodb://localhost/db?uuidRepresentation=1');
-      }).to.throw(/uuidRepresentation not supported/);
+      Logger.reset();
     }
   });
 
