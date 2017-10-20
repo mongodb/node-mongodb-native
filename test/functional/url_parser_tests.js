@@ -550,7 +550,7 @@ describe('Url Parser', function() {
   /**
    * @ignore
    */
-  it.only('should log when unsuported options are used in url', {
+  it('should log when unsuported options are used in url', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
