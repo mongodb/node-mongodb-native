@@ -481,4 +481,32 @@ describe('Sessions (Single)', function() {
       client.connect();
     }
   });
+
+  it('should not hang on endSession when topology is closed', {
+    metadata: { requires: { topology: 'single' } },
+    test: function(done) {
+      const client = new Server(test.server.address());
+      const sessionPool = new ServerSessionPool(client);
+      const session = new ClientSession(client, sessionPool);
+
+      test.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(
+            assign({}, mock.DEFAULT_ISMASTER, {
+              maxWireVersion: 6
+            })
+          );
+        }
+      });
+
+      client.on('error', done);
+      client.once('connect', () => {
+        client.destroy({ force: true });
+        session.endSession(() => done());
+      });
+
+      client.connect();
+    }
+  });
 });
