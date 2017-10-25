@@ -49,10 +49,11 @@ class ClientSession {
       this.topology.command(
         'admin.$cmd',
         { endSessions: 1, ids: [this.id] },
-        { readPreference: ReadPreference.primaryPreferred }
+        { readPreference: ReadPreference.primaryPreferred },
+        () => {
+          // intentionally ignored, per spec
+        }
       );
-
-      return;
     }
 
     this.hasEnded = true;
