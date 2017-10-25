@@ -35,7 +35,8 @@ class ClientSession {
    */
   endSession(callback) {
     if (this.hasEnded) {
-      return callback(null, null);
+      if (typeof callback === 'function') callback(null, null);
+      return;
     }
 
     // TODO:
@@ -44,21 +45,23 @@ class ClientSession {
     //   endSessions command MUST be sent to the primary if the primary
     //   is available, otherwise it MUST be sent to any available secondary.
     //   Is it enough to use: ReadPreference.primaryPreferred ?
+    if (this.topology.isConnected()) {
+      this.topology.command(
+        'admin.$cmd',
+        { endSessions: 1, ids: [this.id] },
+        { readPreference: ReadPreference.primaryPreferred }
+      );
 
-    this.topology.command(
-      'admin.$cmd',
-      { endSessions: 1, ids: [this.id] },
-      { readPreference: ReadPreference.primaryPreferred },
-      () => {
-        this.hasEnded = true;
+      return;
+    }
 
-        // release the server session back to the pool
-        this.sessionPool.release(this.serverSession);
+    this.hasEnded = true;
 
-        // spec indicates that we should ignore all errors for `endSessions`
-        callback(null, null);
-      }
-    );
+    // release the server session back to the pool
+    this.sessionPool.release(this.serverSession);
+
+    // spec indicates that we should ignore all errors for `endSessions`
+    if (typeof callback === 'function') callback(null, null);
   }
 }
 
