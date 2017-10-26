@@ -778,6 +778,8 @@ describe('Change Streams', function() {
                 defaultFields
               )
             );
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
           // Do not respond to other requests
         });
@@ -900,6 +902,8 @@ describe('Change Streams', function() {
             request.reply(changeDoc, {
               cursorId: new Long(1407, 1407)
             });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
       });
@@ -1356,6 +1360,8 @@ describe('Change Streams', function() {
             request.reply(changeDoc, {
               cursorId: new Long(1407, 1407)
             });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
       });

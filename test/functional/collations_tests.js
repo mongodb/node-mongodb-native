@@ -37,12 +37,13 @@ describe('Collation', function() {
         const singleServer = yield mock.createServer();
         singleServer.setMessageHandler(request => {
           var doc = request.document;
-
           if (doc.ismaster) {
             request.reply(primary[0]);
           } else if (doc.findandmodify) {
             commandResult = doc;
             request.reply({ ok: 1, result: {} });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -93,6 +94,8 @@ describe('Collation', function() {
           } else if (doc.count) {
             commandResult = doc;
             request.reply({ ok: 1, result: { n: 1 } });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -136,6 +139,8 @@ describe('Collation', function() {
             request.reply(primary[0]);
           } else if (doc.aggregate) {
             commandResult = doc;
+            request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
             request.reply({ ok: 1 });
           }
         });
@@ -186,6 +191,8 @@ describe('Collation', function() {
           } else if (doc.distinct) {
             commandResult = doc;
             request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -231,6 +238,8 @@ describe('Collation', function() {
             request.reply(primary[0]);
           } else if (doc.geoNear) {
             commandResult = doc;
+            request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
             request.reply({ ok: 1 });
           }
         });
@@ -279,6 +288,8 @@ describe('Collation', function() {
             request.reply(primary[0]);
           } else if (doc.group) {
             commandResult = doc;
+            request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
             request.reply({ ok: 1 });
           }
         });
@@ -336,6 +347,8 @@ describe('Collation', function() {
           } else if (doc.mapreduce) {
             commandResult = doc;
             request.reply({ ok: 1, result: 'tempCollection' });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -390,6 +403,8 @@ describe('Collation', function() {
           } else if (doc.delete) {
             commandResult = doc;
             request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -433,6 +448,8 @@ describe('Collation', function() {
             request.reply(primary[0]);
           } else if (doc.update) {
             commandResult = doc;
+            request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
             request.reply({ ok: 1 });
           }
         });
@@ -482,6 +499,8 @@ describe('Collation', function() {
           } else if (doc.find) {
             commandResult = doc;
             request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -528,6 +547,8 @@ describe('Collation', function() {
             request.reply(primary[0]);
           } else if (doc.find) {
             commandResult = doc;
+            request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
             request.reply({ ok: 1 });
           }
         });
@@ -576,6 +597,8 @@ describe('Collation', function() {
             request.reply(primary[0]);
           } else if (doc.find) {
             commandResult = doc;
+            request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
             request.reply({ ok: 1 });
           }
         });
@@ -633,6 +656,8 @@ describe('Collation', function() {
           } else if (doc.create) {
             commandResult = doc;
             request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -676,6 +701,8 @@ describe('Collation', function() {
             request.reply(primary[0]);
           } else if (doc.find) {
             request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -717,6 +744,8 @@ describe('Collation', function() {
           if (doc.ismaster) {
             request.reply(primary[0]);
           } else if (doc.find) {
+            request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
             request.reply({ ok: 1 });
           }
         });
@@ -760,6 +789,8 @@ describe('Collation', function() {
             commandResult = doc;
             request.reply({ ok: 1 });
           } else if (doc.delete) {
+            request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
             request.reply({ ok: 1 });
           }
         });
@@ -816,6 +847,8 @@ describe('Collation', function() {
           if (doc.ismaster) {
             request.reply(primary[0]);
           } else if (doc.update) {
+            request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
             request.reply({ ok: 1 });
           }
         });
@@ -925,6 +958,8 @@ describe('Collation', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(firstSecondary[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -932,6 +967,8 @@ describe('Collation', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(arbiter[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -988,6 +1025,8 @@ describe('Collation', function() {
           } else if (doc.createIndexes) {
             commandResult = doc;
             request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -1039,6 +1078,8 @@ describe('Collation', function() {
             request.reply(primary[0]);
           } else if (doc.createIndexes) {
             request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -1081,6 +1122,8 @@ describe('Collation', function() {
           if (doc.ismaster) {
             request.reply(primary[0]);
           } else if (doc.createIndexes) {
+            request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
             request.reply({ ok: 1 });
           }
         });

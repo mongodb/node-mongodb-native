@@ -89,6 +89,8 @@ describe('Command Write Concern', function() {
           } else if (doc.aggregate) {
             commandResult = doc;
             request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -96,6 +98,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(firstSecondary[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -103,6 +107,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(arbiter[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -211,6 +217,8 @@ describe('Command Write Concern', function() {
           } else if (doc.create) {
             commandResult = doc;
             request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -218,6 +226,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(firstSecondary[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -225,6 +235,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(arbiter[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -319,6 +331,8 @@ describe('Command Write Concern', function() {
           } else if (doc.createIndexes) {
             commandResult = doc;
             request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -326,6 +340,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(firstSecondary[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -333,6 +349,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(arbiter[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -432,6 +450,8 @@ describe('Command Write Concern', function() {
           } else if (doc.drop) {
             commandResult = doc;
             request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -439,6 +459,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(firstSecondary[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -446,6 +468,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(arbiter[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -543,6 +567,8 @@ describe('Command Write Concern', function() {
           } else if (doc.dropDatabase) {
             commandResult = doc;
             request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -550,6 +576,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(firstSecondary[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -557,6 +585,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(arbiter[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -656,6 +686,8 @@ describe('Command Write Concern', function() {
           } else if (doc.dropIndexes) {
             commandResult = doc;
             request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -663,6 +695,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(firstSecondary[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -670,6 +704,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(arbiter[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -768,6 +804,8 @@ describe('Command Write Concern', function() {
           } else if (doc.mapreduce) {
             commandResult = doc;
             request.reply({ ok: 1, result: 'tempCollection' });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -775,6 +813,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(firstSecondary[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -782,6 +822,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(arbiter[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -887,6 +929,8 @@ describe('Command Write Concern', function() {
           } else if (doc.createUser) {
             commandResult = doc;
             request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -894,6 +938,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(firstSecondary[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -901,6 +947,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(arbiter[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -994,6 +1042,8 @@ describe('Command Write Concern', function() {
           } else if (doc.dropUser) {
             commandResult = doc;
             request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -1001,6 +1051,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(firstSecondary[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -1008,6 +1060,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(arbiter[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -1101,6 +1155,8 @@ describe('Command Write Concern', function() {
           } else if (doc.findandmodify) {
             commandResult = doc;
             request.reply({ ok: 1, result: {} });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -1108,6 +1164,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(firstSecondary[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -1115,6 +1173,8 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(arbiter[0]);
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 

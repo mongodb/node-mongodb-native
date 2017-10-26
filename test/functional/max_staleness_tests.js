@@ -35,6 +35,8 @@ describe('Max Staleness', function() {
             },
             ok: 1
           });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
         }
       });
     });

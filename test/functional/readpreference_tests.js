@@ -32,7 +32,10 @@ describe('ReadPreference', function() {
         // Set up our checker method
         client.topology.command = function() {
           var args = Array.prototype.slice.call(arguments, 0);
-          test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+          if (args[0] === 'integration_tests.$cmd') {
+            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+          }
+
           return command.apply(db.serverConfig, args);
         };
 
@@ -74,7 +77,10 @@ describe('ReadPreference', function() {
         // Set up our checker method
         client.topology.command = function() {
           var args = Array.prototype.slice.call(arguments, 0);
-          test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+          if (args[0] === 'integration_tests.$cmd') {
+            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+          }
+
           return command.apply(db.serverConfig, args);
         };
 
@@ -162,7 +168,10 @@ describe('ReadPreference', function() {
         // Set up our checker method
         client.topology.command = function() {
           var args = Array.prototype.slice.call(arguments, 0);
-          test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+          if (args[0] === 'integration_tests.$cmd') {
+            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+          }
+
           return command.apply(db.serverConfig, args);
         };
 
@@ -205,7 +214,10 @@ describe('ReadPreference', function() {
         // Set up our checker method
         client.topology.command = function() {
           var args = Array.prototype.slice.call(arguments, 0);
-          test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+          if (args[0] === 'integration_tests.$cmd') {
+            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+          }
+
           return command.apply(db.serverConfig, args);
         };
 
@@ -250,7 +262,10 @@ describe('ReadPreference', function() {
         // Set up our checker method
         client.topology.command = function() {
           var args = Array.prototype.slice.call(arguments, 0);
-          test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+          if (args[0] === 'integration_tests.$cmd') {
+            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+          }
+
           return command.apply(db.serverConfig, args);
         };
 
@@ -305,7 +320,10 @@ describe('ReadPreference', function() {
           // Set up our checker method
           client.topology.command = function() {
             var args = Array.prototype.slice.call(arguments, 0);
-            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+            if (args[0] === 'integration_tests.$cmd') {
+              test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+            }
+
             return command.apply(db.serverConfig, args);
           };
 
@@ -400,7 +418,10 @@ describe('ReadPreference', function() {
         // Set up our checker method
         client.topology.command = function() {
           var args = Array.prototype.slice.call(arguments, 0);
-          test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+          if (args[0] === 'integration_tests.$cmd') {
+            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+          }
+
           return command.apply(db.serverConfig, args);
         };
 
@@ -461,7 +482,10 @@ describe('ReadPreference', function() {
         // Set up our checker method
         client.topology.command = function() {
           var args = Array.prototype.slice.call(arguments, 0);
-          test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+          if (args[0] === 'integration_tests.$cmd') {
+            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+          }
+
           return command.apply(db.serverConfig, args);
         };
 
@@ -496,7 +520,10 @@ describe('ReadPreference', function() {
         // Set up our checker method
         client.topology.command = function() {
           var args = Array.prototype.slice.call(arguments, 0);
-          test.equal(ReadPreference.SECONDARY, args[2].readPreference.preference);
+          if (args[0] === 'integration_tests.$cmd') {
+            test.equal(ReadPreference.SECONDARY, args[2].readPreference.preference);
+          }
+
           return command.apply(db.serverConfig, args);
         };
 
@@ -505,7 +532,10 @@ describe('ReadPreference', function() {
 
           client.topology.command = function() {
             var args = Array.prototype.slice.call(arguments, 0);
-            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+            if (args[0] === 'integration_tests.$cmd') {
+              test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+            }
+
             return command.apply(db.serverConfig, args);
           };
 

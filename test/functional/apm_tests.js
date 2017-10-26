@@ -993,6 +993,7 @@ describe('APM', function() {
       return setupDatabase(this.configuration);
     });
 
+    var filterSessionsCommands = x => x.filter(y => y.commandName !== 'endSessions');
     var validateExpecations = function(expectation, results) {
       var obj, databaseName, commandName, reply, result;
       if (expectation.command_started_event) {
@@ -1043,6 +1044,7 @@ describe('APM', function() {
         commandName = obj.command_name;
 
         // Get the result
+        results.failures = filterSessionsCommands(results.failures);
         result = results.failures.shift();
 
         // Validate the test
