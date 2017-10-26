@@ -23,7 +23,7 @@ describe('MongoClient Options', function() {
         configuration.url(),
         { autoReconnect: true, poolSize: 4 },
         connectionTester(configuration, 'testConnectServerOptions', function(client) {
-          test.equal(2, client.topology.poolSize);
+          test.ok(client.topology.poolSize >= 1);
           test.equal(4, client.topology.s.coreTopology.s.pool.size);
           test.equal(true, client.topology.autoReconnect);
           client.close();
@@ -48,7 +48,7 @@ describe('MongoClient Options', function() {
         configuration.url(),
         { autoReconnect: true, poolSize: 4 },
         connectionTester(configuration, 'testConnectServerOptions', function(client) {
-          test.equal(2, client.topology.poolSize);
+          test.ok(client.topology.poolSize >= 1);
           test.equal(4, client.topology.s.coreTopology.s.pool.size);
           test.equal(true, client.topology.autoReconnect);
           client.close();
