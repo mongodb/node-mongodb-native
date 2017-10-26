@@ -35,6 +35,8 @@ describe('ReplSet (mocks)', function() {
           request.reply(serverIsMaster[0]);
         } else if (doc.insert) {
           request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
         }
       });
 
@@ -44,6 +46,8 @@ describe('ReplSet (mocks)', function() {
           request.reply(serverIsMaster[1]);
         } else if (doc.insert) {
           request.reply({ ok: 1, n: doc.documents, lastOp: new Date() });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
         }
       });
     });

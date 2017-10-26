@@ -146,6 +146,8 @@ describe.skip('Buffering Proxy', function() {
               request.reply({ ok: 1, n: 1 });
             } else if (doc.aggregate) {
               request.reply({ ok: 1, n: 1 });
+            } else if (doc.endSessions) {
+              request.reply({ ok: 1 });
             }
           }
         });
@@ -158,6 +160,8 @@ describe.skip('Buffering Proxy', function() {
           } else {
             if (doc.ismaster) {
               request.reply(firstSecondary[currentIsMasterIndex]);
+            } else if (doc.endSessions) {
+              request.reply({ ok: 1 });
             }
           }
         });
@@ -170,6 +174,8 @@ describe.skip('Buffering Proxy', function() {
           } else {
             if (doc.ismaster) {
               request.reply(secondSecondary[currentIsMasterIndex]);
+            } else if (doc.endSessions) {
+              request.reply({ ok: 1 });
             }
           }
         });
@@ -362,6 +368,8 @@ describe.skip('Buffering Proxy', function() {
           } else {
             if (doc.ismaster) {
               request.reply(primary[currentIsMasterIndex]);
+            } else if (doc.endSessions) {
+              request.reply({ ok: 1 });
             }
           }
         });
@@ -378,6 +386,8 @@ describe.skip('Buffering Proxy', function() {
               request.reply({ ok: 1, n: 10 });
             } else if (doc.find) {
               request.reply({ ok: 1, n: 10 });
+            } else if (doc.endSessions) {
+              request.reply({ ok: 1 });
             }
           }
         });
@@ -394,6 +404,8 @@ describe.skip('Buffering Proxy', function() {
               request.reply({ ok: 1, n: 10 });
             } else if (doc.find) {
               request.reply({ ok: 1, n: 10 });
+            } else if (doc.endSessions) {
+              request.reply({ ok: 1 });
             }
           }
         });

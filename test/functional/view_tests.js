@@ -39,6 +39,8 @@ describe('Views', function() {
           } else if (doc.create) {
             commandResult = doc;
             request.reply({ ok: 1 });
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 

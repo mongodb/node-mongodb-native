@@ -22,6 +22,8 @@ describe('Sessions', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(assign({}, mock.DEFAULT_ISMASTER));
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
@@ -49,6 +51,8 @@ describe('Sessions', function() {
                 logicalSessionTimeoutMinutes: 10
               })
             );
+          } else if (doc.endSessions) {
+            request.reply({ ok: 1 });
           }
         });
 
