@@ -1042,13 +1042,10 @@ describe('Collation', function() {
             .collection('test')
             .createIndex({ a: 1 }, { collation: { caseLevel: true } }, function(err) {
               test.equal(null, err);
-              test.deepEqual(
-                {
-                  createIndexes: 'test',
-                  indexes: [{ name: 'a_1', key: { a: 1 }, collation: { caseLevel: true } }]
-                },
-                commandResult
-              );
+              test.deepEqual(commandResult, {
+                createIndexes: 'test',
+                indexes: [{ name: 'a_1', key: { a: 1 }, collation: { caseLevel: true } }]
+              });
 
               client.close();
               done();
