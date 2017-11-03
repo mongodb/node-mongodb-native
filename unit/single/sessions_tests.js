@@ -509,4 +509,38 @@ describe('Sessions (Single)', function() {
       client.connect();
     }
   });
+
+  it('should not allow use of an expired session', {
+    metadata: { requires: { topology: 'single' } },
+    test: function(done) {
+      const client = new Server(test.server.address());
+      const sessionPool = new ServerSessionPool(client);
+      const session = new ClientSession(client, sessionPool);
+
+      test.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(
+            assign({}, mock.DEFAULT_ISMASTER, {
+              maxWireVersion: 6
+            })
+          );
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
+
+      client.on('error', done);
+      client.once('connect', () => {
+        session.endSession(() => {
+          client.command('admin.$cmd', { ping: 1 }, { session: session }, err => {
+            expect(err).to.exist;
+            done();
+          });
+        });
+      });
+
+      client.connect();
+    }
+  });
 });
