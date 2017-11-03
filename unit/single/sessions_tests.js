@@ -543,4 +543,39 @@ describe('Sessions (Single)', function() {
       client.connect();
     }
   });
+
+  it('should not allow use of session object across clients', {
+    metadata: { requires: { topology: 'single' } },
+    test: function(done) {
+      const client = new Server(test.server.address());
+      const client2 = new Server(test.server.address());
+      const sessionPool = new ServerSessionPool(client);
+      const session = new ClientSession(client, sessionPool);
+
+      test.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(
+            assign({}, mock.DEFAULT_ISMASTER, {
+              maxWireVersion: 6
+            })
+          );
+        } else if (doc.ping) {
+          request.reply({ ok: 1 });
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
+
+      client2.on('error', done);
+      client2.once('connect', () => {
+        client2.command('admin.$cmd', { ping: 1 }, { session: session }, err => {
+          expect(err).to.exist;
+          done();
+        });
+      });
+
+      client2.connect();
+    }
+  });
 });
