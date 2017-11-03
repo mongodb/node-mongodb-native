@@ -1156,6 +1156,12 @@ Pool.prototype.write = function(commands, options, cb) {
     }
 
     if (operation.session) {
+      if (operation.session.topology !== this.topology) {
+        return cb(
+          new MongoError('Sessions may only be used with the client they were created from')
+        );
+      }
+
       if (operation.session.hasEnded) {
         return cb(new MongoError('Use of expired sessions is not permitted'));
       }
