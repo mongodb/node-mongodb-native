@@ -1156,6 +1156,10 @@ Pool.prototype.write = function(commands, options, cb) {
     }
 
     if (operation.session) {
+      if (operation.session.hasEnded) {
+        return cb(new MongoError('Use of expired sessions is not permitted'));
+      }
+
       if (
         operation.session.clusterTime &&
         operation.session.clusterTime.clusterTime.greaterThan(
