@@ -140,7 +140,7 @@ class ServerSessionPool {
     }
 
     if (!session.hasTimedOut(sessionTimeoutMinutes)) {
-      this.sessions.push(session);
+      this.sessions.unshift(session);
     }
   }
 }
