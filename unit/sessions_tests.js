@@ -169,5 +169,25 @@ describe('Sessions', function() {
         done();
       }
     });
+
+    it('should maintain a LIFO queue of sessions', {
+      metadata: { requires: { topology: 'single' } },
+      test: function(done) {
+        const pool = new ServerSessionPool(test.client);
+
+        const sessionA = new ServerSession();
+        const sessionB = new ServerSession();
+
+        pool.release(sessionA);
+        pool.release(sessionB);
+
+        const sessionC = pool.acquire();
+        const sessionD = pool.acquire();
+
+        expect(sessionC.id).to.eql(sessionB.id);
+        expect(sessionD.id).to.eql(sessionA.id);
+        done();
+      }
+    });
   });
 });
