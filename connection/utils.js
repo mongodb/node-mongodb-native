@@ -89,7 +89,10 @@ var noSnappyWarning = function() {
 
 // Facilitate loading Snappy optionally
 var retrieveSnappy = function() {
-  var snappy = require_optional('snappy');
+  var snappy = null;
+  try {
+    snappy = require_optional('snappy');
+  } catch (error) {} // eslint-disable-line
   if (!snappy) {
     snappy = {
       compress: noSnappyWarning,
