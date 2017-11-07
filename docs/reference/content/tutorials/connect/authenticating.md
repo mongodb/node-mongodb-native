@@ -165,7 +165,7 @@ var MongoClient = require('mongodb').MongoClient,
   assert = require('assert');
 
 // KDC Server
-var server = "kerberos.example.com";
+var server = "mongo-server.example.com";
 var principal = "drivers@KERBEROS.EXAMPLE.COM";
 var urlEncodedPrincipal = encodeURIComponent(principal);
 
@@ -204,7 +204,7 @@ var url = f("mongodb://%s:%s@%s/test?authMechanism=PLAIN&maxPoolSize=1", user, p
 
 // Let's write the actual connection code
 MongoClient.connect(url, function(err, db) {
-  test.equal(null, err);    
+  test.equal(null, err);
 
   db.close();
   test.done();
