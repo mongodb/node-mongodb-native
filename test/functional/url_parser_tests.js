@@ -833,3 +833,105 @@ describe('Url Parser', function() {
     }
   });
 });
+
+describe.only('Url SRV Parser', function() {
+  /**
+   * @ignore
+   */
+  it('should error if port is included in SRV URL', {
+    metadata: {
+      requires: { topology: ['replicaset'] }
+    },
+    test: function() {
+      var object = parse('mongodb+srv://test6.test.build.10gen.cc:27017', {}, function(err) {
+        expect(err).to.exist;
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it('should error if no records are found in SRV discovery', {
+    metadata: {
+      requires: { topology: ['replicaset'] }
+    },
+    test: function() {
+      // This url has no srv records
+      var object = parse('mongodb+srv://server.mongodb.com', {}, function(err) {
+        expect(err).to.exist;
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it('should allow for multiple SRV records', {
+    metadata: {
+      requires: { topology: ['replicaset'] }
+    },
+    test: function() {
+      // This url has 2 srv records, no txt records
+      var object = parse('mongodb+srv://test1.test.build.10gen.cc', {}, function(err, string) {
+        if (err) return console.log(err);
+        expect(err).to.be.null;
+        expect(string).to.exist;
+        // TODO localhost?
+        expect(string).to.equal(
+          'mongodb://localhost.build.10gen.cc:27018,localhost.build.10gen.cc:27017'
+        );
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  // it('should warn if two txt records have the same options', {
+  //   metadata: {
+  //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+  //   },
+  //   test: function() {
+  //     var object = parse('mongodb+srv://test5.test.build.10gen.cc');
+  //     expect(object.txt).to.be.true;
+  //   }
+  // });
+  //
+  /**
+   * @ignore
+   */
+  it('should build a connection string based on SRV records', {
+    metadata: {
+      requires: { topology: ['replicaset'] }
+    },
+    test: function() {
+      // This url has no txt records
+      var object = parse('mongodb+srv://test3.test.build.10gen.cc', {}, function(err, string) {
+        if (err) return console.log(err);
+        expect(err).to.be.null;
+        expect(string).to.exist;
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it('should build a connection string based on SRV and TXT records', {
+    metadata: {
+      requires: { topology: ['replicaset'] }
+    },
+    test: function() {
+      // This url has txt and srv records
+      var object = parse('mongodb+srv://test6.test.build.10gen.cc', {}, function(err, string) {
+        if (err) return console.log(err);
+        expect(err).to.be.null;
+        expect(string).to.exist;
+        expect(string).to.equal(
+          'mongodb://localhost.build.10gen.cc:27017/?connectTimeoutMS=200000&socketTimeoutMS=200000'
+        );
+      });
+    }
+  });
+});
