@@ -211,7 +211,10 @@ describe('Url Parser', function() {
     },
 
     test: function() {
-      parse('mongodb://fred:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true', {}, function(err, object) {
+      parse('mongodb://fred:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true', {}, function(
+        err,
+        object
+      ) {
         expect(err).to.be.null;
         expect(object.servers).to.have.length(1);
         expect(object.servers[0].domain_socket).to.equal('/tmp/mongodb-27017.sock');
@@ -347,7 +350,10 @@ describe('Url Parser', function() {
     },
 
     test: function() {
-      parse('mongodb://host1,host2,host3/?safe=true;w=2;wtimeoutMS=2000', {}, function(err, object) {
+      parse('mongodb://host1,host2,host3/?safe=true;w=2;wtimeoutMS=2000', {}, function(
+        err,
+        object
+      ) {
         expect(err).to.be.null;
         expect(object.servers).to.have.length(3);
         expect(object.servers[0].host).to.equal('host1');
@@ -516,7 +522,10 @@ describe('Url Parser', function() {
       },
 
       test: function() {
-        parse('mongodb://localhost/?compressors=snappy&zlibCompressionLevel=3', {}, function(err, object) {
+        parse('mongodb://localhost/?compressors=snappy&zlibCompressionLevel=3', {}, function(
+          err,
+          object
+        ) {
           expect(err).to.be.null;
           expect(object.servers).to.have.length(1);
           expect(object.servers[0].host).to.equal('localhost');
@@ -540,7 +549,10 @@ describe('Url Parser', function() {
       },
 
       test: function() {
-        parse('mongodb://localhost/?compressors=snappy,zlib&zlibCompressionLevel=-1', {}, function(err, object) {
+        parse('mongodb://localhost/?compressors=snappy,zlib&zlibCompressionLevel=-1', {}, function(
+          err,
+          object
+        ) {
           expect(err).to.be.null;
           expect(object.servers).to.have.length(1);
           expect(object.servers[0].host).to.equal('localhost');
@@ -660,12 +672,16 @@ describe('Url Parser', function() {
 
       parse('mongodb://localhost/db?safe=true&w=0', {}, function(err) {
         expect(err).to.exist;
-        expect(err.message).to.equal('w set to -1 or 0 cannot be combined with safe/w/journal/fsync');
+        expect(err.message).to.equal(
+          'w set to -1 or 0 cannot be combined with safe/w/journal/fsync'
+        );
       });
 
       parse('mongodb://localhost/db?fsync=true&w=-1', {}, function(err) {
         expect(err).to.exist;
-        expect(err.message).to.equal('w set to -1 or 0 cannot be combined with safe/w/journal/fsync');
+        expect(err.message).to.equal(
+          'w set to -1 or 0 cannot be combined with safe/w/journal/fsync'
+        );
       });
     }
   });
@@ -679,7 +695,10 @@ describe('Url Parser', function() {
     },
 
     test: function() {
-      parse('mongodb://dev1%4010GEN.ME@kdc.10gen.com/test?authMechanism=GSSAPI', {}, function(err, object) {
+      parse('mongodb://dev1%4010GEN.ME@kdc.10gen.com/test?authMechanism=GSSAPI', {}, function(
+        err,
+        object
+      ) {
         expect(err).to.be.null;
         expect(object.auth).to.eql({ user: 'dev1@10GEN.ME', password: null });
         expect(object.db_options.authMechanism).to.equal('GSSAPI');
@@ -699,7 +718,10 @@ describe('Url Parser', function() {
         );
       });
 
-      parse('mongodb://dev1%4010GEN.ME:test@kdc.10gen.com/test?authMechanism=GSSAPI', {}, function(err, object) {
+      parse('mongodb://dev1%4010GEN.ME:test@kdc.10gen.com/test?authMechanism=GSSAPI', {}, function(
+        err,
+        object
+      ) {
         expect(err).to.be.null;
         expect(object.auth).to.eql({ user: 'dev1@10GEN.ME', password: 'test' });
         expect(object.db_options.authMechanism).to.equal('GSSAPI');
@@ -869,7 +891,10 @@ describe('Url Parser', function() {
     },
 
     test: function() {
-      parse('mongodb://k%3Fy:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true', {}, function(err, object) {
+      parse('mongodb://k%3Fy:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true', {}, function(
+        err,
+        object
+      ) {
         expect(err).to.be.null;
         expect(object.auth.user).to.equal('k?y');
       });
@@ -887,7 +912,10 @@ describe('Url Parser', function() {
       },
 
       test: function() {
-        parse('mongodb://k%3Fy:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true', {}, function(err, object) {
+        parse('mongodb://k%3Fy:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true', {}, function(
+          err,
+          object
+        ) {
           expect(err).to.be.null;
           expect(object.auth.user).to.equal('k?y');
         });
@@ -906,7 +934,10 @@ describe('Url Parser', function() {
       },
 
       test: function() {
-        parse('mongodb://kay%3Akay:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true', {}, function(err, object) {
+        parse('mongodb://kay%3Akay:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true', {}, function(
+          err,
+          object
+        ) {
           expect(err).to.be.null;
           expect(object.auth.user).to.equal('kay:kay');
         });
