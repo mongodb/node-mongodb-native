@@ -19,15 +19,24 @@ class ClientSession {
       throw new Error('ClientSession requires a ServerSessionPool');
     }
 
+    options = options || {};
     this.topology = topology;
     this.sessionPool = sessionPool;
     this.hasEnded = false;
     this.serverSession = sessionPool.acquire();
 
+    this.supports = {
+      causalConsistency: !!options.causalConsistency
+    };
+
     options = options || {};
     if (typeof options.initialClusterTime !== 'undefined') {
       this.clusterTime = options.initialClusterTime;
+    } else {
+      this.clusterTime = null;
     }
+
+    this.operationTime = null;
   }
 
   /**
@@ -63,6 +72,22 @@ class ClientSession {
 
     // spec indicates that we should ignore all errors for `endSessions`
     if (typeof callback === 'function') callback(null, null);
+  }
+
+  /**
+   * Advances the operationTime for a ClientSession.
+   *
+   * @param {object} operationTime the `BSON.Timestamp` of the operation type it is desired to advance to
+   */
+  advanceOperationTime(operationTime) {
+    if (this.operationTime == null) {
+      this.operationTime = operationTime;
+      return;
+    }
+
+    if (operationTime.greaterThan(this.operationTime)) {
+      this.operationTime = operationTime;
+    }
   }
 }
 
