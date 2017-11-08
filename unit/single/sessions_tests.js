@@ -2,6 +2,7 @@
 var Server = require('../../../../lib/topologies/server'),
   Long = require('bson').Long,
   ObjectId = require('bson').ObjectId,
+  Timestamp = require('bson').Timestamp,
   expect = require('chai').expect,
   assign = require('../../../../lib/utils').assign,
   mock = require('../../../mock'),
@@ -576,6 +577,52 @@ describe('Sessions (Single)', function() {
       });
 
       client2.connect();
+    }
+  });
+
+  it('should track the highest `operationTime` seen, if causal consistency is enabled', {
+    metadata: { requires: { topology: 'single' } },
+    test: function(done) {
+      const client = new Server(test.server.address()),
+        sessionPool = new ServerSessionPool(client),
+        session = new ClientSession(client, sessionPool, { causalConsistency: true }),
+        insertOperationTime1 = Timestamp.fromNumber(Date.now()),
+        insertOperationTime2 = Timestamp.fromNumber(Date.now() + 10 * 60 * 1000);
+
+      let insertCount = 0;
+      test.server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.ismaster) {
+          request.reply(mock.DEFAULT_ISMASTER_36);
+        } else if (doc.insert) {
+          request.reply({
+            ok: 1,
+            operationTime: insertCount === 0 ? insertOperationTime1 : insertOperationTime2
+          });
+
+          insertCount++;
+        }
+      });
+
+      client.on('error', done);
+      client.once('connect', () => {
+        client.insert('db.test', [{ a: 42 }], { session: session }, err => {
+          expect(err).to.not.exist;
+          expect(session.operationTime).to.exist;
+          expect(session.operationTime).to.eql(insertOperationTime1);
+
+          client.insert('db.test', [{ b: 52 }], { session: session }, err => {
+            expect(err).to.not.exist;
+            expect(session.operationTime).to.exist;
+            expect(session.operationTime).to.eql(insertOperationTime2);
+
+            client.destroy();
+            done();
+          });
+        });
+      });
+
+      client.connect();
     }
   });
 });

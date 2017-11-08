@@ -91,6 +91,13 @@ class ReplSetFixture {
   }
 }
 
+/**
+ * Creates a cluster time for use in unit testing cluster time gossiping and
+ * causal consistency.
+ *
+ * @param {Number} time the logical time
+ * @returns a cluster time according to the driver sessions specification
+ */
 function genClusterTime(time) {
   return {
     clusterTime: new Timestamp(time),
