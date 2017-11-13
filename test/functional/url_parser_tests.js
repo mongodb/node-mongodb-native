@@ -1019,19 +1019,6 @@ describe('Url SRV Parser', function() {
   /**
    * @ignore
    */
-  // it('should warn if two txt records have the same options', {
-  //   metadata: {
-  //     requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-  //   },
-  //   test: function() {
-  //     var object = parse('mongodb+srv://test5.test.build.10gen.cc');
-  //     expect(object.txt).to.be.true;
-  //   }
-  // });
-  //
-  /**
-   * @ignore
-   */
   it('should build a connection string based on SRV records', {
     metadata: {
       requires: { topology: ['replicaset'] }
