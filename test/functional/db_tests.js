@@ -304,7 +304,7 @@ describe('Db', function() {
                   test.equal(null, err);
 
                   // Force a reindex of the collection
-                  collection.reIndex('create_and_drop_all_indexes', function(err, result) {
+                  collection.reIndex(function(err, result) {
                     test.equal(null, err);
                     test.equal(true, result);
 
