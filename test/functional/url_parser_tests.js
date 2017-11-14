@@ -1036,8 +1036,6 @@ describe('Url SRV Parser', function() {
       // This url has 2 srv records, no txt records
       // mongodb://localhost.build.10gen.cc:27018,localhost.build.10gen.cc:27017
       parse('mongodb+srv://test1.test.build.10gen.cc', {}, function(err, object) {
-        if (err) return console.log(err);
-
         var servers = [
           { host: 'localhost.build.10gen.cc', port: 27017 },
           { host: 'localhost.build.10gen.cc', port: 27018 }
@@ -1061,7 +1059,6 @@ describe('Url SRV Parser', function() {
     test: function(done) {
       // This url has no txt records
       parse('mongodb+srv://test3.test.build.10gen.cc', {}, function(err, object) {
-        if (err) return console.log(err);
         expect(err).to.be.null;
         expect(object).to.exist;
         expect(object.servers[0].host).to.equal('localhost.build.10gen.cc');
@@ -1082,7 +1079,6 @@ describe('Url SRV Parser', function() {
       // This url has txt and srv records
       // mongodb://localhost.build.10gen.cc:27017/?connectTimeoutMS=200000&socketTimeoutMS=200000
       parse('mongodb+srv://test6.test.build.10gen.cc', {}, function(err, object) {
-        if (err) return console.log(err);
         expect(err).to.be.null;
         expect(object).to.exist;
         expect(object.servers[0].host).to.equal('localhost.build.10gen.cc');
