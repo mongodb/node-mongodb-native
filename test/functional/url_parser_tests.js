@@ -1003,15 +1003,15 @@ describe('Url SRV Parser', function() {
       // mongodb://localhost.build.10gen.cc:27018,localhost.build.10gen.cc:27017
       parse('mongodb+srv://test1.test.build.10gen.cc', {}, function(err, object) {
         if (err) return console.log(err);
+
+        var servers = [
+          { host: 'localhost.build.10gen.cc', port: 27017 },
+          { host: 'localhost.build.10gen.cc', port: 27018 }
+        ];
+
         expect(err).to.be.null;
         expect(object).to.exist;
-        expect(object.servers.length).to.equal(2);
-        // TODO these objects come back in different orders
-        // var servers = [
-        //   { host: 'localhost.build.10gen.cc', port: 27017 },
-        //   { host: 'localhost.build.10gen.cc', port: 27018 }
-        // ];
-        // expect(object.servers).to.deep.equal(servers);
+        expect(object.servers).to.have.members(servers);
       });
     }
   });
