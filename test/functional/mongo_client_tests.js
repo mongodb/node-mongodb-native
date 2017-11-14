@@ -421,7 +421,9 @@ describe('MongoClient', function() {
       var MongoClient = configuration.require.MongoClient;
 
       MongoClient.connect('user:password@localhost:27017/test', function(err, client) {
-        if (err) done();
+        test.notEqual(err, null);
+        test.notEqual(err, undefined);
+        done();
         client.close();
       });
     }
