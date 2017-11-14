@@ -1045,7 +1045,7 @@ describe('Url SRV Parser', function() {
 
         expect(err).to.be.null;
         expect(object).to.exist;
-        expect(object.servers).to.have.members(servers);
+        expect(object.servers).to.have.deep.members(servers);
         done();
       });
     }
