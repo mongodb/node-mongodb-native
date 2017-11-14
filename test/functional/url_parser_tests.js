@@ -967,7 +967,7 @@ describe('Url SRV Parser', function() {
    */
   it('should error if port is included in SRV URL', {
     metadata: {
-      requires: { topology: ['replicaset'] }
+      requires: { topology: ['single'] }
     },
     test: function() {
       parse('mongodb+srv://test6.test.build.10gen.cc:27017', {}, function(err) {
@@ -981,7 +981,7 @@ describe('Url SRV Parser', function() {
    */
   it('should error if no records are found in SRV discovery', {
     metadata: {
-      requires: { topology: ['replicaset'] }
+      requires: { topology: ['single'] }
     },
     test: function() {
       // This url has no srv records
@@ -996,7 +996,7 @@ describe('Url SRV Parser', function() {
    */
   it('should allow for multiple SRV records', {
     metadata: {
-      requires: { topology: ['replicaset'] }
+      requires: { topology: ['single'] }
     },
     test: function() {
       // This url has 2 srv records, no txt records
@@ -1021,7 +1021,7 @@ describe('Url SRV Parser', function() {
    */
   it('should build a connection string based on SRV records', {
     metadata: {
-      requires: { topology: ['replicaset'] }
+      requires: { topology: ['single'] }
     },
     test: function() {
       // This url has no txt records
@@ -1040,7 +1040,7 @@ describe('Url SRV Parser', function() {
    */
   it('should build a connection string based on SRV and TXT records', {
     metadata: {
-      requires: { topology: ['replicaset'] }
+      requires: { topology: ['single'] }
     },
     test: function() {
       // This url has txt and srv records
