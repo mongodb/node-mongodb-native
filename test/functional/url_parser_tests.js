@@ -1150,6 +1150,30 @@ describe('Url SRV Parser', function() {
     }
   });
 
+  /**
+   * @ignore
+   */
+  it('should build a connection string based on SRV, TXT records and option override', {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+    test: function(done) {
+      // This url has txt and srv records and options passed in through api
+      parse('mongodb+srv://test6.test.build.10gen.cc', { connectTimeoutMS: 250000 }, function(
+        err,
+        object
+      ) {
+        expect(err).to.be.null;
+        expect(object).to.exist;
+        expect(object.servers[0].host).to.equal('localhost.build.10gen.cc');
+        expect(object.servers[0].port).to.equal(27017);
+        // TODO check all options get override
+        expect(object.db_options.connectTimeoutMS).to.equal(250000);
+        done();
+      });
+    }
+  });
+
   // /**
   //  * @ignore
   //  */
