@@ -114,7 +114,6 @@ describe('Url Parser', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      // console.dir(parse)
       parse('mongodb://fred:foobar@localhost/baz', {}, function(err, object) {
         expect(err).to.be.null;
         expect(object.servers).to.have.length(1);
@@ -997,37 +996,6 @@ describe('Url SRV Parser', function() {
   /**
    * @ignore
    */
-  it('should error if port is included in SRV URL', {
-    metadata: {
-      requires: { topology: ['single'] }
-    },
-    test: function(done) {
-      parse('mongodb+srv://test6.test.build.10gen.cc:27017', {}, function(err) {
-        expect(err).to.exist;
-        done();
-      });
-    }
-  });
-
-  /**
-   * @ignore
-   */
-  it('should error if no records are found in SRV discovery', {
-    metadata: {
-      requires: { topology: ['single'] }
-    },
-    test: function(done) {
-      // This url has no srv records
-      parse('mongodb+srv://server.mongodb.com', {}, function(err) {
-        expect(err).to.exist;
-        done();
-      });
-    }
-  });
-
-  /**
-   * @ignore
-   */
   it('should allow for multiple SRV records', {
     metadata: {
       requires: { topology: ['single'] }
@@ -1052,7 +1020,30 @@ describe('Url SRV Parser', function() {
   /**
    * @ignore
    */
-  it('should build a connection string based on SRV records', {
+  it('should handle srv records with non standard ports', {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+    test: function(done) {
+      // This url has 2 srv records, no txt records
+      // mongodb://localhost.build.10gen.cc:27018,localhost.build.10gen.cc:27017
+      parse('mongodb+srv://test2.test.build.10gen.cc', {}, function(err, object) {
+        var servers = [
+          { host: 'localhost.build.10gen.cc', port: 27018 },
+          { host: 'localhost.build.10gen.cc', port: 27019 }
+        ];
+        expect(err).to.be.null;
+        expect(object).to.exist;
+        expect(object.servers).to.have.deep.members(servers);
+        done();
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it('should handle one srv result with default port', {
     metadata: {
       requires: { topology: ['single'] }
     },
@@ -1063,6 +1054,75 @@ describe('Url SRV Parser', function() {
         expect(object).to.exist;
         expect(object.servers[0].host).to.equal('localhost.build.10gen.cc');
         expect(object.servers[0].port).to.equal(27017);
+        done();
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it('should error because no srv records for this uri', {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+    test: function(done) {
+      // This url has no srv records
+      parse('mongodb+srv://test4.test.build.10gen.cc', {}, function(err) {
+        expect(err).to.exist;
+        expect(err.code).to.equal('ENOTFOUND');
+        done();
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it('should error if port is included in SRV URL', {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+    test: function(done) {
+      parse('mongodb+srv://test5.test.build.10gen.cc:27017', {}, function(err) {
+        expect(err).to.exist;
+        done();
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it('should fail with uri with two host names', {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+    test: function(done) {
+      parse('mongodb+srv://test5.test.build.10gen.cc,test6.test.build.10gen.cc', {}, function(err) {
+        expect(err).to.exist;
+        expect(err.message).to.equal('invalid uri, cannot contain multiple hostnames');
+        done();
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it('should handle a single text record with multiple options', {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+    test: function(done) {
+      // This text record contains two options
+      // connectTimeoutMS=300000&socketTimeoutMS=300000
+      parse('mongodb+srv://test5.test.build.10gen.cc', {}, function(err, object) {
+        var serverOptions = {
+          socketOptions: { connectTimeoutMS: 300000, socketTimeoutMS: 300000 }
+        };
+        expect(err).to.be.null;
+        expect(object.server_options).to.deep.equal(serverOptions);
         done();
       });
     }
@@ -1085,6 +1145,42 @@ describe('Url SRV Parser', function() {
         expect(object.servers[0].port).to.equal(27017);
         expect(object.server_options.socketOptions.connectTimeoutMS).to.equal(200000);
         expect(object.server_options.socketOptions.socketTimeoutMS).to.equal(200000);
+        done();
+      });
+    }
+  });
+
+  // /**
+  //  * @ignore
+  //  */
+  // it('should handle text record with listable option override', {
+  //   metadata: {
+  //     requires: { topology: ['single'] }
+  //   },
+  //   test: function(done) {
+  //     // TODO Test server has not been updated
+  //     // mongodb+srv://test7.test.build.10gen.cc/?replicaSet=repl0&readPreferenceTags=dc:fr,item:cheese&readPreferenceTags=dc:de,item:hotdog
+  //     parse('mongodb+srv://test7.test.build.10gen.cc', {}, function(err, object) {
+  //       console.dir(object, { depth: 5 });
+  //       expect(err).to.exist;
+  //       done();
+  //     });
+  //   }
+  // });
+
+  /**
+   * @ignore
+   */
+  it('should error when a key with no value', {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+    test: function(done) {
+      // This text record key contains no value
+      // readPreference
+      parse('mongodb+srv://test8.test.build.10gen.cc', {}, function(err) {
+        expect(err).to.exist;
+        expect(err.message).to.equal('query parameter readPreference is an incomplete value pair');
         done();
       });
     }
