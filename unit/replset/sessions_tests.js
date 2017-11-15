@@ -46,6 +46,47 @@ describe('Sessions (ReplSet)', function() {
     }
   });
 
+  it('should report the deployment clusterTime for Server topologies in a ReplSet topology', {
+    metadata: { requires: { topology: 'single' } },
+    test: function(done) {
+      const clusterTime = genClusterTime(Date.now()),
+        futureClusterTime = genClusterTime(Date.now() + 10 * 60 * 1000);
+
+      test.primaryStates[0].$clusterTime = clusterTime;
+      test.firstSecondaryStates[0].$clusterTime = futureClusterTime;
+      test.arbiterStates[0].$clusterTime = futureClusterTime;
+
+      var replset = new ReplSet(
+        [test.primaryServer.address(), test.firstSecondaryServer.address()],
+        {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 100,
+          size: 1
+        }
+      );
+
+      let serverCount = 0;
+      replset.on('joined', () => {
+        serverCount++;
+        if (serverCount === 3) {
+          expect(replset.clusterTime).to.eql(futureClusterTime);
+          const servers = replset.s.replicaSetState.secondaries
+            .concat(replset.s.replicaSetState.arbiters)
+            .concat([replset.s.replicaSetState.primary]);
+          servers.forEach(server => expect(server.clusterTime).to.eql(futureClusterTime));
+
+          replset.destroy();
+          done();
+        }
+      });
+
+      replset.on('error', done);
+      replset.connect();
+    }
+  });
+
   it('should set `logicalSessionTimeoutMinutes` to `null` if any incoming server is `null`', {
     metadata: { requires: { topology: 'single' } },
     test: function(done) {

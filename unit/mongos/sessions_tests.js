@@ -45,6 +45,40 @@ describe('Sessions (Mongos)', function() {
     }
   });
 
+  it('should report the deployment `clusterTime` for all servers in the topology', {
+    metadata: { requires: { topology: 'single' } },
+    test: function(done) {
+      const clusterTime = genClusterTime(Date.now());
+      test.server.setMessageHandler(request => {
+        request.reply(
+          assign({}, mock.DEFAULT_ISMASTER, {
+            msg: 'isdbgrid',
+            $clusterTime: clusterTime
+          })
+        );
+      });
+
+      const mongos = new Mongos([test.server.address()], {
+        connectionTimeout: 30000,
+        socketTimeout: 30000,
+        haInterval: 500,
+        size: 1
+      });
+
+      mongos.on('error', done);
+      mongos.once('connect', () => {
+        expect(mongos.clusterTime).to.eql(clusterTime);
+        const servers = mongos.connectingProxies.concat(mongos.connectedProxies);
+        servers.forEach(server => expect(server.clusterTime).to.eql(clusterTime));
+
+        mongos.destroy();
+        done();
+      });
+
+      mongos.connect();
+    }
+  });
+
   it('should track the highest `$clusterTime` seen', {
     metadata: { requires: { topology: 'single' } },
     test: function(done) {

@@ -544,7 +544,7 @@ describe('Sessions (Single)', function() {
     }
   });
 
-  it('should not allow use of session object across clients', {
+  it.skip('should not allow use of session object across clients', {
     metadata: { requires: { topology: 'single' } },
     test: function(done) {
       const client = new Server(test.server.address());
