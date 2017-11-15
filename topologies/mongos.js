@@ -8,7 +8,6 @@ var inherits = require('util').inherits,
   retrieveBSON = require('../connection/utils').retrieveBSON,
   MongoError = require('../error').MongoError,
   Server = require('./server'),
-  assign = require('../utils').assign,
   clone = require('./shared').clone,
   diff = require('./shared').diff,
   cloneOptions = require('./shared').cloneOptions,
@@ -40,8 +39,7 @@ var MongoCR = require('../auth/mongocr'),
   Plain = require('../auth/plain'),
   GSSAPI = require('../auth/gssapi'),
   SSPI = require('../auth/sspi'),
-  ScramSHA1 = require('../auth/scram'),
-  resolveClusterTime = require('./shared').resolveClusterTime;
+  ScramSHA1 = require('../auth/scram');
 
 //
 // States
@@ -134,7 +132,7 @@ var Mongos = function(seedlist, options) {
 
   // Internal state
   this.s = {
-    options: assign({}, options),
+    options: Object.assign({}, options),
     // BSON instance
     bson:
       options.bson ||
@@ -286,22 +284,13 @@ Mongos.prototype.connect = function(options) {
   // Create server instances
   var servers = this.s.seedlist.map(function(x) {
     return new Server(
-      assign(
-        {
-          clusterTimeWatcher: clusterTime => resolveClusterTime(self, clusterTime)
-        },
-        self.s.options,
-        x,
-        {
-          authProviders: self.authProviders,
-          reconnect: false,
-          monitoring: false,
-          inTopology: true
-        },
-        {
-          clientInfo: clone(self.s.clientInfo)
-        }
-      )
+      Object.assign({}, self.s.options, x, {
+        authProviders: self.authProviders,
+        reconnect: false,
+        monitoring: false,
+        parent: self,
+        clientInfo: clone(self.s.clientInfo)
+      })
     );
   });
 
@@ -611,25 +600,15 @@ function reconnectProxies(self, proxies, callback) {
 
       // Create a new server instance
       var server = new Server(
-        assign(
-          {
-            clusterTimeWatcher: clusterTime => resolveClusterTime(self, clusterTime)
-          },
-          self.s.options,
-          {
-            host: _server.name.split(':')[0],
-            port: parseInt(_server.name.split(':')[1], 10)
-          },
-          {
-            authProviders: self.authProviders,
-            reconnect: false,
-            monitoring: false,
-            inTopology: true
-          },
-          {
-            clientInfo: clone(self.s.clientInfo)
-          }
-        )
+        Object.assign({}, self.s.options, {
+          host: _server.name.split(':')[0],
+          port: parseInt(_server.name.split(':')[1], 10),
+          authProviders: self.authProviders,
+          reconnect: false,
+          monitoring: false,
+          parent: self,
+          clientInfo: clone(self.s.clientInfo)
+        })
       );
 
       // Relay the server description change

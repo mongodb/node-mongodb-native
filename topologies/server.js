@@ -17,7 +17,8 @@ var inherits = require('util').inherits,
   sdam = require('./shared'),
   assign = require('../utils').assign,
   createClientInfo = require('./shared').createClientInfo,
-  createCompressionInfo = require('./shared').createCompressionInfo;
+  createCompressionInfo = require('./shared').createCompressionInfo,
+  resolveClusterTime = require('./shared').resolveClusterTime;
 
 // Used for filtering out fields for loggin
 var debugFields = [
@@ -145,20 +146,19 @@ var Server = function(options) {
     // Monitor thread (keeps the connection alive)
     monitoring: typeof options.monitoring === 'boolean' ? options.monitoring : true,
     // Is the server in a topology
-    inTopology: typeof options.inTopology === 'boolean' ? options.inTopology : false,
+    inTopology: !!options.parent,
     // Monitoring timeout
     monitoringInterval:
       typeof options.monitoringInterval === 'number' ? options.monitoringInterval : 5000,
     // Topology id
     topologyId: -1,
-    compression: { compressors: createCompressionInfo(options) }
+    compression: { compressors: createCompressionInfo(options) },
+    // Optional parent topology
+    parent: options.parent
   };
 
-  // special case for Mongos and ReplSet deployments
-  if (options.clusterTimeWatcher) {
-    this.s.clusterTimeWatcher = options.clusterTimeWatcher;
-  } else {
-    // otherwise this is a single deployment and we need to track the clusterTime here
+  // If this is a single deployment we need to track the clusterTime here
+  if (!this.s.parent) {
     this.s.clusterTime = null;
   }
 
@@ -218,14 +218,12 @@ Object.defineProperty(Server.prototype, 'logicalSessionTimeoutMinutes', {
 Object.defineProperty(Server.prototype, 'clusterTime', {
   enumerable: true,
   set: function(clusterTime) {
-    if (this.s.clusterTimeWatcher) {
-      this.s.clusterTimeWatcher(clusterTime);
-    } else {
-      this.s.clusterTime = clusterTime;
-    }
+    const settings = this.s.parent ? this.s.parent : this.s;
+    resolveClusterTime(settings, clusterTime);
   },
   get: function() {
-    return this.s.clusterTime || null;
+    const settings = this.s.parent ? this.s.parent : this.s;
+    return settings.clusterTime || null;
   }
 });
 

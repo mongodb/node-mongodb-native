@@ -10,12 +10,10 @@ var inherits = require('util').inherits,
   MongoError = require('../error').MongoError,
   Server = require('./server'),
   ReplSetState = require('./replset_state'),
-  assign = require('../utils').assign,
   clone = require('./shared').clone,
   Timeout = require('./shared').Timeout,
   Interval = require('./shared').Interval,
-  createClientInfo = require('./shared').createClientInfo,
-  resolveClusterTime = require('./shared').resolveClusterTime;
+  createClientInfo = require('./shared').createClientInfo;
 
 var MongoCR = require('../auth/mongocr'),
   X509 = require('../auth/x509'),
@@ -144,7 +142,7 @@ var ReplSet = function(seedlist, options) {
 
   // Internal state
   this.s = {
-    options: assign({}, options),
+    options: Object.assign({}, options),
     // BSON instance
     bson:
       options.bson ||
@@ -380,25 +378,15 @@ function connectNewServers(self, servers, callback) {
 
       // Create a new server instance
       var server = new Server(
-        assign(
-          {
-            clusterTimeWatcher: clusterTime => resolveClusterTime(self, clusterTime)
-          },
-          self.s.options,
-          {
-            host: _server.split(':')[0],
-            port: parseInt(_server.split(':')[1], 10)
-          },
-          {
-            authProviders: self.authProviders,
-            reconnect: false,
-            monitoring: false,
-            inTopology: true
-          },
-          {
-            clientInfo: clone(self.s.clientInfo)
-          }
-        )
+        Object.assign({}, self.s.options, {
+          host: _server.split(':')[0],
+          port: parseInt(_server.split(':')[1], 10),
+          authProviders: self.authProviders,
+          reconnect: false,
+          monitoring: false,
+          parent: self,
+          clientInfo: clone(self.s.clientInfo)
+        })
       );
 
       // Add temp handlers
@@ -961,22 +949,13 @@ ReplSet.prototype.connect = function(options) {
   // Create server instances
   var servers = this.s.seedlist.map(function(x) {
     return new Server(
-      assign(
-        {
-          clusterTimeWatcher: clusterTime => resolveClusterTime(self, clusterTime)
-        },
-        self.s.options,
-        x,
-        {
-          authProviders: self.authProviders,
-          reconnect: false,
-          monitoring: false,
-          inTopology: true
-        },
-        {
-          clientInfo: clone(self.s.clientInfo)
-        }
-      )
+      Object.assign({}, self.s.options, x, {
+        authProviders: self.authProviders,
+        reconnect: false,
+        monitoring: false,
+        parent: self,
+        clientInfo: clone(self.s.clientInfo)
+      })
     );
   });
 
