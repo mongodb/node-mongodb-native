@@ -1174,23 +1174,23 @@ describe('Url SRV Parser', function() {
     }
   });
 
-  // /**
-  //  * @ignore
-  //  */
-  // it('should handle text record with listable option override', {
-  //   metadata: {
-  //     requires: { topology: ['single'] }
-  //   },
-  //   test: function(done) {
-  //     // TODO Test server has not been updated
-  //     // mongodb+srv://test7.test.build.10gen.cc/?replicaSet=repl0&readPreferenceTags=dc:fr,item:cheese&readPreferenceTags=dc:de,item:hotdog
-  //     parse('mongodb+srv://test7.test.build.10gen.cc', {}, function(err, object) {
-  //       console.dir(object, { depth: 5 });
-  //       expect(err).to.exist;
-  //       done();
-  //     });
-  //   }
-  // });
+  /**
+   * @ignore
+   */
+  it.skip('should handle text record with listable option override', {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+    test: function(done) {
+      // TODO Test server has not been updated, when updated fill out this test
+      // mongodb+srv://test7.test.build.10gen.cc/?replicaSet=repl0&readPreferenceTags=dc:fr,item:cheese&readPreferenceTags=dc:de,item:hotdog
+      parse('mongodb+srv://test7.test.build.10gen.cc', {}, function(err, object) {
+        console.dir(object, { depth: 5 });
+        expect(err).to.be.null;
+        done();
+      });
+    }
+  });
 
   /**
    * @ignore
