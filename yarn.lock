@@ -2110,7 +2110,14 @@ mongodb-core@2.1.17:
 
 mongodb-core@mongodb-js/mongodb-core#3.0.0:
   version "3.0.0-beta1"
-  resolved "https://codeload.github.com/mongodb-js/mongodb-core/tar.gz/d7cd5cdda5fddc8635353063d245fb083ef1d545"
+  resolved "https://codeload.github.com/mongodb-js/mongodb-core/tar.gz/69994597bd354c9945d0f47fe4abfb917448ace1"
+  dependencies:
+    bson "~1.0.4"
+    require_optional "^1.0.1"
+
+mongodb-core@mongodb-js/mongodb-core#causally-consistent-reads:
+  version "3.0.0-beta1"
+  resolved "https://codeload.github.com/mongodb-js/mongodb-core/tar.gz/67b10c1f9175851496f5675ad18171466079dccc"
   dependencies:
     bson "~1.0.4"
     require_optional "^1.0.1"
