@@ -239,13 +239,13 @@ Cursor.prototype._find = function(callback) {
         }
 
         // Return after processing command cursor
-        return callback(null, null);
+        return callback(null, result);
       }
 
       if (Array.isArray(result.documents[0].result)) {
         self.cursorState.documents = result.documents[0].result;
         self.cursorState.cursorId = Long.ZERO;
-        return callback(null, null);
+        return callback(null, result);
       }
     }
 
@@ -260,7 +260,7 @@ Cursor.prototype._find = function(callback) {
     }
 
     // Return callback
-    callback(null, null);
+    callback(null, result);
   };
 
   // Options passed to the pool
