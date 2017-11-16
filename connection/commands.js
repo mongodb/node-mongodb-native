@@ -59,7 +59,7 @@ var Query = function(bson, ns, query, options) {
   this.ignoreUndefined =
     typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
   this.maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
-  this.checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : true;
+  this.checkKeys = typeof options.checkKeys === 'boolean' ? options.checkKeys : false;
   this.batchSize = self.numberToReturn;
 
   // Flags
