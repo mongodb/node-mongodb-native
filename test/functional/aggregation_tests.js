@@ -1081,6 +1081,45 @@ describe('Aggregation', function() {
     }
   );
 
+  it('should pass a comment down via the aggregation command', {
+    metadata: {
+      requires: {
+        mongodb: '>=3.5.0',
+        topology: 'single',
+        node: '>=4.8.5'
+      }
+    },
+    test: function(done) {
+      const client = this.configuration.newClient({ w: 1 }, { poolSize: 1 });
+      const databaseName = this.configuration.db;
+
+      const comment = 'Darmok and Jalad at Tanagra';
+
+      client.connect(function(err, client) {
+        expect(err).to.be.null;
+
+        const db = client.db(databaseName);
+        const collection = db.collection('testingPassingDownTheAggregationCommand');
+
+        const command = db.command;
+
+        db.command = function(c) {
+          expect(c).to.be.an('object');
+          expect(c.comment)
+            .to.be.a('string')
+            .and.to.equal('comment');
+          command.apply(db, Array.prototype.slice.call(arguments, 0));
+        };
+
+        collection.aggregate([{ $project: { _id: 1 } }], { comment }, function(err, r) {
+          expect(err).to.be.null;
+          expect(r).to.not.be.null;
+          done();
+        });
+      });
+    }
+  });
+
   /**
    * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
    *
