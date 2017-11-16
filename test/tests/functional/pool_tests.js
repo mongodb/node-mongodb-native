@@ -37,6 +37,55 @@ exports['Should correctly connect pool to single server'] = {
   }
 }
 
+exports['Should only listen on connect once'] = {
+  metadata: { requires: { topology: "single" } },
+
+  test: function(configuration, test) {
+    var Pool = require('../../../lib/connection/pool')
+      , Connection = require('../../../lib/connection/connection')
+      , bson = require('bson');
+
+    // Enable connections accounting
+    Connection.enableConnectionAccounting();
+
+    // Attempt to connect
+    var pool = new Pool({
+        host: configuration.host
+      , port: configuration.port
+      , bson: new bson()
+      , messageHandler: function() {}
+    });
+
+    var connection;
+
+    // Add event listeners
+    pool.on('connect', function(_pool) {
+      process.nextTick(() => {
+        // Now that we are in next tick, connection should still exist, but there
+        // should be no connect listeners
+        test.equal(0, connection.connection.listenerCount('connect'));
+        test.equal(1, pool.allConnections().length);
+
+        _pool.destroy();
+
+        // Connection should be gone after destroy
+        test.equal(0, pool.allConnections().length);
+        Connection.disableConnectionAccounting();
+        test.done();
+      });
+    });
+
+    test.equal(0, pool.allConnections().length);
+
+    // Start connection
+    pool.connect();
+
+    test.equal(1, pool.allConnections().length);
+    connection = pool.allConnections()[0];
+    test.equal(1, connection.connection.listenerCount('connect'));
+  }
+}
+
 exports['Should properly emit errors on forced destroy'] = {
   metadata: { requires: { topology: "single" } },
 
