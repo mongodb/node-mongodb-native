@@ -1175,22 +1175,8 @@ describe('Url SRV Parser', function() {
   });
 
   /**
-   * @ignore
+   * test7.test server is n/a
    */
-  it.skip('should handle text record with listable option override', {
-    metadata: {
-      requires: { topology: ['single'] }
-    },
-    test: function(done) {
-      // TODO Test server has not been updated, when updated fill out this test
-      // mongodb+srv://test7.test.build.10gen.cc/?replicaSet=repl0&readPreferenceTags=dc:fr,item:cheese&readPreferenceTags=dc:de,item:hotdog
-      parse('mongodb+srv://test7.test.build.10gen.cc', {}, function(err, object) {
-        console.dir(object, { depth: 5 });
-        expect(err).to.be.null;
-        done();
-      });
-    }
-  });
 
   /**
    * @ignore
@@ -1205,6 +1191,47 @@ describe('Url SRV Parser', function() {
       parse('mongodb+srv://test8.test.build.10gen.cc', {}, function(err) {
         expect(err).to.exist;
         expect(err.message).to.equal('query parameter readPreference is an incomplete value pair');
+        done();
+      });
+    }
+  });
+
+  /**
+   * test9.test server is n/a
+   */
+
+  /**
+   * @ignore
+   */
+  it('should ignore element when a value is an unspported format', {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+    test: function(done) {
+      // This text record's key contains an unsupported format (expected interger, given string)
+      parse('mongodb+srv://test10.test.build.10gen.cc', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.server_options.socketOptions).to.deep.equal({});
+        done();
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it('should handle single text records with multiple strings', {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+    test: function(done) {
+      // This text record contains multiple strings
+      parse('mongodb+srv://test11.test.build.10gen.cc', function(err, object) {
+        var serverOptions = {
+          socketOptions: { connectTimeoutMS: 150000, socketTimeoutMS: 250000 }
+        };
+        expect(err).to.be.null;
+        expect(object.server_options).to.deep.equal(serverOptions);
         done();
       });
     }
