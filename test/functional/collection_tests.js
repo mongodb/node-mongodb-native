@@ -341,7 +341,7 @@ describe('Collection', function() {
   /**
    * @ignore
    */
-  it('should fail to insert due to illegal keys', {
+  it.skip('should fail to insert due to illegal keys', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
