@@ -150,13 +150,12 @@ describe('Causal Consistency', function() {
       metadata: { requires: { topology: ['single'] } },
 
       test: function() {
-        const session = test.client.startSession({ causalConsistency: true });
         const db = test.client.db(this.configuration.db);
-        const coll = db.collection('causal_test', { readConcern: { level: 'majority' } });
+        const coll = db.collection('causal_test', { readConcern: { level: 'local' } });
 
         return coll
-          .findOne({}, null, { session: session })
-          .then(() => coll.findOne({}, null, { session: session }))
+          .findOne({})
+          .then(() => coll.findOne({}))
           .then(() => {
             const command = test.commands.started[1].command;
             expect(command).to.have.any.key('readConcern');
