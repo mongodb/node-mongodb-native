@@ -423,8 +423,8 @@ describe('MongoClient', function() {
       MongoClient.connect('user:password@localhost:27017/test', function(err, client) {
         test.notEqual(err, null);
         test.notEqual(err, undefined);
-        done();
         client.close();
+        done();
       });
     }
   });
