@@ -13,7 +13,7 @@
     "official"
   ],
   "dependencies": {
-    "mongodb-core": "mongodb-js/mongodb-core#causally-consistent-reads"
+    "mongodb-core": "mongodb-js/mongodb-core#3.0.0"
   },
   "devDependencies": {
     "betterbenchmarks": "^0.1.0",
