@@ -10,6 +10,7 @@ We removed the following API methods.
 - Db.prototype.logout
 - Db.prototype.open
 - Db.prototype.db
+- Db.prototype.close
 - Admin.prototype.authenticate
 - Admin.prototype.logout
 - Admin.prototype.profilingLevel
