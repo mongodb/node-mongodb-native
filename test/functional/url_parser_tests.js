@@ -1048,7 +1048,7 @@ describe('Url SRV Parser', function() {
       requires: { topology: ['single'] }
     },
     test: function(done) {
-      // This url has no txt records
+      // This url has one srv record and no txt records
       parse('mongodb+srv://test3.test.build.10gen.cc', {}, function(err, object) {
         expect(err).to.be.null;
         expect(object).to.exist;
@@ -1084,6 +1084,7 @@ describe('Url SRV Parser', function() {
       requires: { topology: ['single'] }
     },
     test: function(done) {
+      // This uri includes a port
       parse('mongodb+srv://test5.test.build.10gen.cc:27017', {}, function(err) {
         expect(err).to.exist;
         done();
@@ -1094,11 +1095,12 @@ describe('Url SRV Parser', function() {
   /**
    * @ignore
    */
-  it('should fail with uri with two host names', {
+  it('should fail with uri with two hostnames', {
     metadata: {
       requires: { topology: ['single'] }
     },
     test: function(done) {
+      // This uri has two hostnames
       parse('mongodb+srv://test5.test.build.10gen.cc,test6.test.build.10gen.cc', {}, function(err) {
         expect(err).to.exist;
         expect(err.message).to.equal('invalid uri, cannot contain multiple hostnames');
@@ -1131,12 +1133,12 @@ describe('Url SRV Parser', function() {
   /**
    * @ignore
    */
-  it('should build a connection string based on SRV and TXT records', {
+  it('should build a connection string based on a SRV with multiple TXT records', {
     metadata: {
       requires: { topology: ['single'] }
     },
     test: function(done) {
-      // This url has txt and srv records
+      // This url has a text record with multiple records
       // mongodb://localhost.build.10gen.cc:27017/?connectTimeoutMS=200000&socketTimeoutMS=200000
       parse('mongodb+srv://test6.test.build.10gen.cc', {}, function(err, object) {
         expect(err).to.be.null;
@@ -1153,12 +1155,12 @@ describe('Url SRV Parser', function() {
   /**
    * @ignore
    */
-  it('should build a connection string based on SRV, TXT records and option override', {
+  it('should build a connection string based on SRV, TXT records and options override', {
     metadata: {
       requires: { topology: ['single'] }
     },
     test: function(done) {
-      // This url has txt and srv records and options passed in through api
+      // This url has srv and txt records and options passed in through api
       parse('mongodb+srv://test6.test.build.10gen.cc', { connectTimeoutMS: 250000 }, function(
         err,
         object
@@ -1181,12 +1183,12 @@ describe('Url SRV Parser', function() {
   /**
    * @ignore
    */
-  it('should error when a key with no value', {
+  it('should error when a key has no value', {
     metadata: {
       requires: { topology: ['single'] }
     },
     test: function(done) {
-      // This text record key contains no value
+      // This text record contains a key with no value
       // readPreference
       parse('mongodb+srv://test8.test.build.10gen.cc', {}, function(err) {
         expect(err).to.exist;
@@ -1203,12 +1205,13 @@ describe('Url SRV Parser', function() {
   /**
    * @ignore
    */
-  it('should ignore element when a value is an unspported format', {
+  it.skip('should ignore and warn when an element has a value in an unspported format', {
     metadata: {
       requires: { topology: ['single'] }
     },
     test: function(done) {
       // This text record's key contains an unsupported format (expected interger, given string)
+      // TODO warn and ignore when this occurs
       parse('mongodb+srv://test10.test.build.10gen.cc', {}, function(err, object) {
         expect(err).to.be.null;
         expect(object.server_options.socketOptions).to.deep.equal({});
@@ -1226,6 +1229,7 @@ describe('Url SRV Parser', function() {
     },
     test: function(done) {
       // This text record contains multiple strings
+      // "connectTime" "outMS=150000" "&socketT" "imeoutMS" "=" "250000"
       parse('mongodb+srv://test11.test.build.10gen.cc', function(err, object) {
         var serverOptions = {
           socketOptions: { connectTimeoutMS: 150000, socketTimeoutMS: 250000 }
