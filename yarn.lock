@@ -2115,13 +2115,6 @@ mongodb-core@mongodb-js/mongodb-core#3.0.0:
     bson "~1.0.4"
     require_optional "^1.0.1"
 
-mongodb-core@mongodb-js/mongodb-core#causally-consistent-reads:
-  version "3.0.0-beta1"
-  resolved "https://codeload.github.com/mongodb-js/mongodb-core/tar.gz/67b10c1f9175851496f5675ad18171466079dccc"
-  dependencies:
-    bson "~1.0.4"
-    require_optional "^1.0.1"
-
 mongodb-download-url@^0.3.0:
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/mongodb-download-url/-/mongodb-download-url-0.3.3.tgz#e3a8a548f13eb20f5a0cdf863cbc063421a3934c"
@@ -2157,7 +2150,7 @@ mongodb-test-runner@^1.1.18:
     semver "^5.4.1"
     yargs "^8.0.2"
 
-"mongodb-topology-manager@github:mongodb-js/mongodb-topology-manager#3.0.0":
+mongodb-topology-manager@mongodb-js/mongodb-topology-manager#3.0.0:
   version "1.0.13"
   resolved "https://codeload.github.com/mongodb-js/mongodb-topology-manager/tar.gz/719c142350017c934fec2944dc4fa516563937f5"
   dependencies:
