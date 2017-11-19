@@ -1005,8 +1005,8 @@ describe('Url SRV Parser', function() {
       // mongodb://localhost.build.10gen.cc:27018,localhost.build.10gen.cc:27017
       parse('mongodb+srv://test1.test.build.10gen.cc', {}, function(err, object) {
         var servers = [
-          { host: 'localhost.build.10gen.cc', port: 27017 },
-          { host: 'localhost.build.10gen.cc', port: 27018 }
+          { host: 'localhost.test.build.10gen.cc', port: 27017 },
+          { host: 'localhost.test.build.10gen.cc', port: 27018 }
         ];
 
         expect(err).to.be.null;
@@ -1029,8 +1029,8 @@ describe('Url SRV Parser', function() {
       // mongodb://localhost.build.10gen.cc:27018,localhost.build.10gen.cc:27017
       parse('mongodb+srv://test2.test.build.10gen.cc', {}, function(err, object) {
         var servers = [
-          { host: 'localhost.build.10gen.cc', port: 27018 },
-          { host: 'localhost.build.10gen.cc', port: 27019 }
+          { host: 'localhost.test.build.10gen.cc', port: 27018 },
+          { host: 'localhost.test.build.10gen.cc', port: 27019 }
         ];
         expect(err).to.be.null;
         expect(object).to.exist;
@@ -1052,7 +1052,7 @@ describe('Url SRV Parser', function() {
       parse('mongodb+srv://test3.test.build.10gen.cc', {}, function(err, object) {
         expect(err).to.be.null;
         expect(object).to.exist;
-        expect(object.servers[0].host).to.equal('localhost.build.10gen.cc');
+        expect(object.servers[0].host).to.equal('localhost.test.build.10gen.cc');
         expect(object.servers[0].port).to.equal(27017);
         done();
       });
@@ -1143,7 +1143,7 @@ describe('Url SRV Parser', function() {
       parse('mongodb+srv://test6.test.build.10gen.cc', {}, function(err, object) {
         expect(err).to.be.null;
         expect(object).to.exist;
-        expect(object.servers[0].host).to.equal('localhost.build.10gen.cc');
+        expect(object.servers[0].host).to.equal('localhost.test.build.10gen.cc');
         expect(object.servers[0].port).to.equal(27017);
         expect(object.server_options.socketOptions.connectTimeoutMS).to.equal(200000);
         expect(object.server_options.socketOptions.socketTimeoutMS).to.equal(200000);
@@ -1167,7 +1167,7 @@ describe('Url SRV Parser', function() {
       ) {
         expect(err).to.be.null;
         expect(object).to.exist;
-        expect(object.servers[0].host).to.equal('localhost.build.10gen.cc');
+        expect(object.servers[0].host).to.equal('localhost.test.build.10gen.cc');
         expect(object.servers[0].port).to.equal(27017);
         // TODO check all options get override
         expect(object.db_options.connectTimeoutMS).to.equal(250000);
