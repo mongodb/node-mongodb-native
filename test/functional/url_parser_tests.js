@@ -1256,4 +1256,101 @@ describe('Url SRV Parser', function() {
       });
     }
   });
+
+  /**
+   * @ignore
+   */
+  it.skip("should fail because returned host name's parent (build.10gen.cc) misses 'test'", {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+    test: function(done) {
+      // TODO it does return 'test'
+      // test.build.10gen.cc
+      parse('mongodb+srv://test13.test.build.10gen.cc', function(err, object) {
+        expect(err).to.exist;
+        expect(err.message).to.equal('srv record does not share hostname with parent uri');
+        done();
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it("should fail because returned host name's part 'not-test' mismatches URI parent part 'test'", {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+    test: function(done) {
+      parse('mongodb+srv://test14.test.build.10gen.cc', function(err, object) {
+        expect(err).to.exist;
+        expect(err.message).to.equal('srv record does not share hostname with parent uri');
+        done();
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it("should fail because returned host name's part 'not-build' mismatches URI parent part 'build'", {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+    test: function(done) {
+      parse('mongodb+srv://test15.test.build.10gen.cc', function(err, object) {
+        expect(err).to.exist;
+        expect(err.message).to.equal('srv record does not share hostname with parent uri');
+        done();
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it("Should fail because returned host name's part 'not-10gen' mismatches URI parent part '10gen'", {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+    test: function(done) {
+      parse('mongodb+srv://test16.test.build.10gen.cc', function(err, object) {
+        expect(err).to.exist;
+        expect(err.message).to.equal('srv record does not share hostname with parent uri');
+        done();
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it("should fail because returned host name's TLD 'not-cc' mismatches URI TLD 'cc'", {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+    test: function(done) {
+      parse('mongodb+srv://test17.test.build.10gen.cc', function(err, object) {
+        expect(err).to.exist;
+        expect(err.message).to.equal('srv record does not share hostname with parent uri');
+        done();
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it('should handle a srv record with more sub domains than the parent but same root', {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+    test: function(done) {
+      parse('mongodb+srv://test18.test.build.10gen.cc', function(err, object) {
+        expect(err).to.be.null;
+        done();
+      });
+    }
+  });
 });
