@@ -1240,4 +1240,20 @@ describe('Url SRV Parser', function() {
       });
     }
   });
+
+  /**
+   * @ignore
+   */
+  it('should fail because host in URI does not have hostname, domainname and tld', {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+    test: function(done) {
+      parse('mongodb+srv://10gen.cc', function(err, object) {
+        expect(err).to.exist;
+        expect(err.message).to.equal('uri does not have hostname, domainname and tld');
+        done();
+      });
+    }
+  });
 });
