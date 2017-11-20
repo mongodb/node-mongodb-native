@@ -1034,7 +1034,7 @@ describe('APM', function() {
         // Do we have a getMore command
         if (commandName.toLowerCase() === 'getmore' || commandName.toLowerCase() === 'find') {
           reply.cursor.id = result.reply.cursor.id;
-          expect(reply).to.eql(result.reply);
+          expect(result.reply).to.deep.include(reply);
         }
       } else if (expectation.command_failed_event) {
         obj = expectation.command_failed_event;
