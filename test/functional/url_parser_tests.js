@@ -1249,7 +1249,7 @@ describe('Url SRV Parser', function() {
       requires: { topology: ['single'] }
     },
     test: function(done) {
-      parse('mongodb+srv://10gen.cc', function(err, object) {
+      parse('mongodb+srv://10gen.cc', function(err) {
         expect(err).to.exist;
         expect(err.message).to.equal('uri does not have hostname, domainname and tld');
         done();
@@ -1260,14 +1260,14 @@ describe('Url SRV Parser', function() {
   /**
    * @ignore
    */
-  it.skip("should fail because returned host name's parent (build.10gen.cc) misses 'test'", {
+  it.only("should fail because returned host name's parent (build.10gen.cc) misses 'test'", {
     metadata: {
       requires: { topology: ['single'] }
     },
     test: function(done) {
       // TODO it does return 'test'
       // test.build.10gen.cc
-      parse('mongodb+srv://test13.test.build.10gen.cc', function(err, object) {
+      parse('mongodb+srv://test13.test.build.10gen.cc', function(err) {
         expect(err).to.exist;
         expect(err.message).to.equal('srv record does not share hostname with parent uri');
         done();
@@ -1283,7 +1283,7 @@ describe('Url SRV Parser', function() {
       requires: { topology: ['single'] }
     },
     test: function(done) {
-      parse('mongodb+srv://test14.test.build.10gen.cc', function(err, object) {
+      parse('mongodb+srv://test14.test.build.10gen.cc', function(err) {
         expect(err).to.exist;
         expect(err.message).to.equal('srv record does not share hostname with parent uri');
         done();
@@ -1294,12 +1294,12 @@ describe('Url SRV Parser', function() {
   /**
    * @ignore
    */
-  it("should fail because returned host name's part 'not-build' mismatches URI parent part 'build'", {
+  it("should fail because returned host name's 'not-build' mismatches URI parent 'build'", {
     metadata: {
       requires: { topology: ['single'] }
     },
     test: function(done) {
-      parse('mongodb+srv://test15.test.build.10gen.cc', function(err, object) {
+      parse('mongodb+srv://test15.test.build.10gen.cc', function(err) {
         expect(err).to.exist;
         expect(err.message).to.equal('srv record does not share hostname with parent uri');
         done();
@@ -1310,12 +1310,12 @@ describe('Url SRV Parser', function() {
   /**
    * @ignore
    */
-  it("Should fail because returned host name's part 'not-10gen' mismatches URI parent part '10gen'", {
+  it("Should fail because returned host name's 'not-10gen' mismatches URI part '10gen'", {
     metadata: {
       requires: { topology: ['single'] }
     },
     test: function(done) {
-      parse('mongodb+srv://test16.test.build.10gen.cc', function(err, object) {
+      parse('mongodb+srv://test16.test.build.10gen.cc', function(err) {
         expect(err).to.exist;
         expect(err.message).to.equal('srv record does not share hostname with parent uri');
         done();
@@ -1331,7 +1331,7 @@ describe('Url SRV Parser', function() {
       requires: { topology: ['single'] }
     },
     test: function(done) {
-      parse('mongodb+srv://test17.test.build.10gen.cc', function(err, object) {
+      parse('mongodb+srv://test17.test.build.10gen.cc', function(err) {
         expect(err).to.exist;
         expect(err.message).to.equal('srv record does not share hostname with parent uri');
         done();
@@ -1347,7 +1347,7 @@ describe('Url SRV Parser', function() {
       requires: { topology: ['single'] }
     },
     test: function(done) {
-      parse('mongodb+srv://test18.test.build.10gen.cc', function(err, object) {
+      parse('mongodb+srv://test18.test.build.10gen.cc', function(err) {
         expect(err).to.be.null;
         done();
       });
