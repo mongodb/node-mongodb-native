@@ -1260,13 +1260,11 @@ describe('Url SRV Parser', function() {
   /**
    * @ignore
    */
-  it.only("should fail because returned host name's parent (build.10gen.cc) misses 'test'", {
+  it("should fail because returned host name's parent (build.10gen.cc) misses 'test'", {
     metadata: {
       requires: { topology: ['single'] }
     },
     test: function(done) {
-      // TODO it does return 'test'
-      // test.build.10gen.cc
       parse('mongodb+srv://test13.test.build.10gen.cc', function(err) {
         expect(err).to.exist;
         expect(err.message).to.equal('srv record does not share hostname with parent uri');
