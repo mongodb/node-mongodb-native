@@ -11,7 +11,8 @@ var inherits = require('util').inherits,
   clone = require('./shared').clone,
   diff = require('./shared').diff,
   cloneOptions = require('./shared').cloneOptions,
-  createClientInfo = require('./shared').createClientInfo;
+  createClientInfo = require('./shared').createClientInfo,
+  SessionMixins = require('./shared').SessionMixins;
 
 var BSON = retrieveBSON();
 
@@ -237,6 +238,7 @@ var Mongos = function(seedlist, options) {
 };
 
 inherits(Mongos, EventEmitter);
+Object.assign(Mongos.prototype, SessionMixins);
 
 Object.defineProperty(Mongos.prototype, 'type', {
   enumerable: true,

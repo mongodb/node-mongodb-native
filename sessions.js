@@ -1,7 +1,7 @@
 'use strict';
 
 const retrieveBSON = require('./connection/utils').retrieveBSON,
-  ReadPreference = require('./topologies/read_preference'),
+  EventEmitter = require('events'),
   BSON = retrieveBSON(),
   Binary = BSON.Binary,
   uuidV4 = require('./utils').uuidV4;
@@ -9,8 +9,10 @@ const retrieveBSON = require('./connection/utils').retrieveBSON,
 /**
  *
  */
-class ClientSession {
+class ClientSession extends EventEmitter {
   constructor(topology, sessionPool, options) {
+    super();
+
     if (topology == null) {
       throw new Error('ClientSession requires a topology');
     }
@@ -42,30 +44,23 @@ class ClientSession {
   /**
    *
    */
-  endSession(callback) {
+  endSession(options, callback) {
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = options || {};
+
     if (this.hasEnded) {
       if (typeof callback === 'function') callback(null, null);
       return;
     }
 
-    // TODO:
-    //   When connected to a sharded cluster the endSessions command
-    //   can be sent to any mongos. When connected to a replica set the
-    //   endSessions command MUST be sent to the primary if the primary
-    //   is available, otherwise it MUST be sent to any available secondary.
-    //   Is it enough to use: ReadPreference.primaryPreferred ?
-    if (this.topology.isConnected()) {
-      this.topology.command(
-        'admin.$cmd',
-        { endSessions: 1, ids: [this.id] },
-        { readPreference: ReadPreference.primaryPreferred },
-        () => {
-          // intentionally ignored, per spec
-        }
-      );
+    if (!options.skipCommand) {
+      // send the `endSessions` command
+      this.topology.endSessions(this.id);
     }
 
+    // mark the session as ended, and emit a signal
     this.hasEnded = true;
+    this.emit('ended', this);
 
     // release the server session back to the pool
     this.sessionPool.release(this.serverSession);

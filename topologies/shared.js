@@ -1,7 +1,8 @@
 'use strict';
 
 var os = require('os'),
-  f = require('util').format;
+  f = require('util').format,
+  ReadPreference = require('./read_preference');
 
 /**
  * Emit event if it exists
@@ -370,6 +371,38 @@ function resolveClusterTime(topology, $clusterTime) {
   }
 }
 
+// NOTE: this is a temporary move until the topologies can be more formally refactored
+//       to share code.
+const SessionMixins = {
+  endSessions: function(sessions, callback) {
+    if (this.isConnected()) {
+      if (typeof callback === 'function') callback();
+      return;
+    }
+
+    if (!Array.isArray(sessions)) {
+      sessions = [sessions];
+    }
+
+    // TODO:
+    //   When connected to a sharded cluster the endSessions command
+    //   can be sent to any mongos. When connected to a replica set the
+    //   endSessions command MUST be sent to the primary if the primary
+    //   is available, otherwise it MUST be sent to any available secondary.
+    //   Is it enough to use: ReadPreference.primaryPreferred ?
+    this.command(
+      'admin.$cmd',
+      { endSessions: sessions.map(s => s.id) },
+      { readPreference: ReadPreference.primaryPreferred },
+      () => {
+        // intentionally ignored, per spec
+        if (typeof callback === 'function') callback();
+      }
+    );
+  }
+};
+
+module.exports.SessionMixins = SessionMixins;
 module.exports.resolveClusterTime = resolveClusterTime;
 module.exports.inquireServerState = inquireServerState;
 module.exports.getTopologyType = getTopologyType;

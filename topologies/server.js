@@ -18,7 +18,8 @@ var inherits = require('util').inherits,
   assign = require('../utils').assign,
   createClientInfo = require('./shared').createClientInfo,
   createCompressionInfo = require('./shared').createCompressionInfo,
-  resolveClusterTime = require('./shared').resolveClusterTime;
+  resolveClusterTime = require('./shared').resolveClusterTime,
+  SessionMixins = require('./shared').SessionMixins;
 
 // Used for filtering out fields for loggin
 var debugFields = [
@@ -188,6 +189,7 @@ var Server = function(options) {
 };
 
 inherits(Server, EventEmitter);
+Object.assign(Server.prototype, SessionMixins);
 
 Object.defineProperty(Server.prototype, 'type', {
   enumerable: true,
@@ -566,7 +568,7 @@ Server.prototype.connect = function(options) {
  * Get the server description
  * @method
  * @return {object}
-*/
+ */
 Server.prototype.getDescription = function() {
   var ismaster = this.ismaster || {};
   var description = {

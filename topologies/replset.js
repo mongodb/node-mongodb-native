@@ -13,7 +13,8 @@ var inherits = require('util').inherits,
   clone = require('./shared').clone,
   Timeout = require('./shared').Timeout,
   Interval = require('./shared').Interval,
-  createClientInfo = require('./shared').createClientInfo;
+  createClientInfo = require('./shared').createClientInfo,
+  SessionMixins = require('./shared').SessionMixins;
 
 var MongoCR = require('../auth/mongocr'),
   X509 = require('../auth/x509'),
@@ -257,6 +258,7 @@ var ReplSet = function(seedlist, options) {
 };
 
 inherits(ReplSet, EventEmitter);
+Object.assign(ReplSet.prototype, SessionMixins);
 
 Object.defineProperty(ReplSet.prototype, 'type', {
   enumerable: true,
