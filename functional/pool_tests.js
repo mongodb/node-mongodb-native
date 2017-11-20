@@ -39,7 +39,7 @@ describe('Pool tests', function() {
     }
   });
 
-  it.only('Should only listen on connect once', {
+  it('Should only listen on connect once', {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
