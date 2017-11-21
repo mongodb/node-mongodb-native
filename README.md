@@ -325,7 +325,7 @@ Next lets delete the document where the field **a** equals to **3**.
 var deleteDocument = function(db, callback) {
   // Get the documents collection
   var collection = db.collection('documents');
-  // Insert some documents
+  // Delete document where a is 3
   collection.deleteOne({ a : 3 }, function(err, result) {
     assert.equal(err, null);
     assert.equal(1, result.result.n);
