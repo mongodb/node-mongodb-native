@@ -27,7 +27,7 @@ describe('Sessions', function() {
   });
 
   it('should send endSessions for multiple sessions', {
-    metadata: { requires: { topology: ['single'] } },
+    metadata: { requires: { topology: ['single'], mongodb: '>3.6.0-rc0' } },
     test: function(done) {
       var client = this.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
       client.connect((err, client) => {
