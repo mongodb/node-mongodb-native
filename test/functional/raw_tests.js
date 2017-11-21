@@ -49,7 +49,7 @@ describe('Raw', function() {
           collection.insert([{ a: 1 }, { b: 2000 }, { c: 2.3 }], { w: 1 }, function(err) {
             test.equal(null, err);
             // You have to pass at least query + fields before passing options
-            collection.find({}, null, { raw: true, batchSize: 2 }).toArray(function(err, items) {
+            collection.find({}, { raw: true, batchSize: 2 }).toArray(function(err, items) {
               var objects = [];
 
               for (var i = 0; i < items.length; i++) {

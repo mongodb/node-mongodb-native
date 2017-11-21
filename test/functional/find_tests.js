@@ -818,7 +818,7 @@ describe('Find', function() {
               docs = retDocs;
 
               collection
-                .find({}, { a: 1 }, { limit: 3, sort: [['a', -1]] })
+                .find({}, { limit: 3, sort: [['a', -1]], projection: { a: 1 } })
                 .toArray(function(err, documents) {
                   test.equal(3, documents.length);
 
@@ -827,16 +827,8 @@ describe('Find', function() {
                     test.equal(24 - idx, doc.a); // checking limit sort object with field select
                   });
 
-                  collection.find({}, {}, 10, 3).toArray(function(err, documents) {
-                    test.equal(3, documents.length);
-                    documents.forEach(function(doc, idx) {
-                      test.equal(doc.a, doc.b); // making sure empty field select returns properly
-                      test.equal(14 - idx, doc.a); // checking skip and limit in args
-                    });
-
-                    client.close();
-                    done();
-                  });
+                  client.close();
+                  done();
                 });
             });
           });
@@ -1525,7 +1517,7 @@ describe('Find', function() {
   /**
    * @ignore
    */
-  it('Should correctly execute find and findOne queries in the same way', {
+  it('Should correctly execute find queries with selector set to null', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
@@ -1545,60 +1537,14 @@ describe('Find', function() {
             // insert doc
             collection.insert(doc, configuration.writeConcernMax(), function(err) {
               test.equal(null, err);
-
               collection
-                .find({ _id: doc._id }, { comments: { $slice: -5 } })
+                .find({ _id: doc._id })
+                .project({ comments: { $slice: -5 } })
                 .toArray(function(err, docs) {
                   test.equal(5, docs[0].comments.length);
-
-                  collection.findOne({ _id: doc._id }, { comments: { $slice: -5 } }, function(
-                    err,
-                    item
-                  ) {
-                    test.equal(5, item.comments.length);
-                    client.close();
-                    done();
-                  });
-                });
-            });
-          }
-        );
-      });
-    }
-  });
-
-  /**
-   * @ignore
-   */
-  it('Should correctly execute find and findOne queries with selector set to null', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    // The actual test we wish to run
-    test: function(done) {
-      var configuration = this.configuration;
-      var ObjectID = configuration.require.ObjectID;
-
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
-        var db = client.db(configuration.db);
-        db.createCollection(
-          'Should_correctly_execute_find_and_findOne_queries_in_the_same_way',
-          function(err, collection) {
-            var doc = { _id: new ObjectID(), a: 1, c: 2, comments: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] };
-            // insert doc
-            collection.insert(doc, configuration.writeConcernMax(), function(err) {
-              test.equal(null, err);
-              collection.find(null, { comments: { $slice: -5 } }).toArray(function(err, docs) {
-                test.equal(5, docs[0].comments.length);
-
-                collection.findOne(null, { comments: { $slice: -5 } }, function(err, item) {
-                  test.equal(5, item.comments.length);
                   client.close();
                   done();
                 });
-              });
             });
           }
         );
@@ -2079,23 +2025,29 @@ describe('Find', function() {
               test.equal(null, err);
 
               // Perform a simple find and return all the documents
-              collection.find({ a: 2 }, ['b']).toArray(function(err, docs) {
-                test.equal(null, err);
-                test.equal(1, docs.length);
-                test.equal(undefined, docs[0].a);
-                test.equal(2, docs[0].b);
-
-                // Perform a simple find and return all the documents
-                collection.find({ a: 2 }, { b: 1 }).toArray(function(err, docs) {
+              collection
+                .find({ a: 2 })
+                .project({ b: 1 })
+                .toArray(function(err, docs) {
                   test.equal(null, err);
                   test.equal(1, docs.length);
                   test.equal(undefined, docs[0].a);
                   test.equal(2, docs[0].b);
 
-                  client.close();
-                  done();
+                  // Perform a simple find and return all the documents
+                  collection
+                    .find({ a: 2 })
+                    .project({ b: 1 })
+                    .toArray(function(err, docs) {
+                      test.equal(null, err);
+                      test.equal(1, docs.length);
+                      test.equal(undefined, docs[0].a);
+                      test.equal(2, docs[0].b);
+
+                      client.close();
+                      done();
+                    });
                 });
-              });
             }
           );
         });
@@ -2130,15 +2082,18 @@ describe('Find', function() {
               test.equal(null, err);
 
               // Perform a simple find and return all the documents
-              collection.find({ a: 2 }, { fields: ['b'] }).toArray(function(err, docs) {
-                test.equal(null, err);
-                test.equal(1, docs.length);
-                test.equal(undefined, docs[0].a);
-                test.equal(2, docs[0].b);
+              collection
+                .find({ a: 2 })
+                .project({ b: 1 })
+                .toArray(function(err, docs) {
+                  test.equal(null, err);
+                  test.equal(1, docs.length);
+                  test.equal(undefined, docs[0].a);
+                  test.equal(2, docs[0].b);
 
-                client.close();
-                done();
-              });
+                  client.close();
+                  done();
+                });
             }
           );
         });
@@ -2430,7 +2385,8 @@ describe('Find', function() {
               test.equal(null, err);
 
               collection
-                .find({ _id: { $in: ['some', 'value', 123] } }, { _id: 1, max: 1 }, {})
+                .find({ _id: { $in: ['some', 'value', 123] } })
+                .project({ _id: 1, max: 1 })
                 .toArray(function(err, docs) {
                   test.equal(null, err);
                   test.equal(10, docs[0].max);
@@ -2726,7 +2682,7 @@ describe('Find', function() {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldNotMutateUserOptions');
         var options = { raw: 'TEST' };
-        collection.find({}, {}, options, function(error) {
+        collection.find({}, options, function(error) {
           test.equal(null, error);
           test.equal(undefined, options.skip);
           test.equal(undefined, options.limit);

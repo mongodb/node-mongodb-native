@@ -177,12 +177,15 @@ describe('Unicode', function() {
         db.createCollection('test_utf8_key_name', function(err, collection) {
           collection.insert({ šđžčćŠĐŽČĆ: 1 }, { w: 1 }, function(err) {
             test.equal(null, err);
-            collection.find({}, { fields: ['šđžčćŠĐŽČĆ'] }).toArray(function(err, items) {
-              test.equal(1, items[0]['šđžčćŠĐŽČĆ']);
-              // Let's close the db
-              client.close();
-              done();
-            });
+            collection
+              .find({})
+              .project({ šđžčćŠĐŽČĆ: 1 })
+              .toArray(function(err, items) {
+                test.equal(1, items[0]['šđžčćŠĐŽČĆ']);
+                // Let's close the db
+                client.close();
+                done();
+              });
           });
         });
       });

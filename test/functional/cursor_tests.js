@@ -1719,20 +1719,16 @@ describe('Cursor', function() {
           collection.save({ x: 1, a: 2 }, configuration.writeConcernMax(), function(err) {
             test.equal(null, err);
 
-            collection.find({}, { fields: ['a'] }).toArray(function(err, items) {
-              test.equal(null, err);
-              test.equal(1, items.length);
-              test.equal(2, items[0].a);
-              test.equal(undefined, items[0].x);
-            });
-
-            collection.findOne({}, { fields: ['a'] }, function(err, item) {
-              test.equal(null, err);
-              test.equal(2, item.a);
-              test.equal(undefined, item.x);
-              client.close();
-              done();
-            });
+            collection
+              .find({})
+              .project({ a: 1 })
+              .toArray(function(err, items) {
+                test.equal(null, err);
+                test.equal(1, items.length);
+                test.equal(2, items[0].a);
+                test.equal(undefined, items[0].x);
+                done();
+              });
           });
         });
       });
@@ -4139,28 +4135,28 @@ describe('Cursor', function() {
         test.equal(null, err);
 
         db.collection('cursor_count_test1', { readConcern: { level: 'local' } }).count({
-          project: '123'
-        },
-        {
-          readConcern: { level: 'local' },
-          limit: 5,
-          skip: 5,
-          hint: { project: 1 }
-        },
-        function(err) {
-          test.equal(null, err);
-          test.equal(1, started.length);
-          if (started[0].command.readConcern)
-            test.deepEqual({ level: 'local' }, started[0].command.readConcern);
-          test.deepEqual({ project: 1 }, started[0].command.hint);
-          test.equal(5, started[0].command.skip);
-          test.equal(5, started[0].command.limit);
+            project: '123'
+          },
+          {
+            readConcern: { level: 'local' },
+            limit: 5,
+            skip: 5,
+            hint: { project: 1 }
+          },
+          function(err) {
+            test.equal(null, err);
+            test.equal(1, started.length);
+            if (started[0].command.readConcern)
+              test.deepEqual({ level: 'local' }, started[0].command.readConcern);
+            test.deepEqual({ project: 1 }, started[0].command.hint);
+            test.equal(5, started[0].command.skip);
+            test.equal(5, started[0].command.limit);
 
-          listener.uninstrument();
+            listener.uninstrument();
 
-          client.close();
-          done();
-        });
+            client.close();
+            done();
+          });
       });
     }
   });

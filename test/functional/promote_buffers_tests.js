@@ -146,7 +146,7 @@ describe('Promote Buffers', function() {
 
           db
             .collection('shouldCorrectlyHonorPromoteBuffer4')
-            .find({}, {}, { promoteBuffers: true })
+            .find({}, { promoteBuffers: true })
             .next(function(err, doc) {
               test.equal(null, err);
               test.ok(doc.doc instanceof Buffer);
