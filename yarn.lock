@@ -2115,9 +2115,9 @@ mongodb-core@mongodb-js/mongodb-core#3.0.0:
     bson "~1.0.4"
     require_optional "^1.0.1"
 
-mongodb-core@mongodb-js/mongodb-core#8aaac8bcc7bdc02bf8bf4b03337a0af71ddc513e:
+mongodb-core@mongodb-js/mongodb-core#6510d7d3d82d84cc0811a853355deaa918b96941:
   version "3.0.0-beta2"
-  resolved "https://codeload.github.com/mongodb-js/mongodb-core/tar.gz/8aaac8bcc7bdc02bf8bf4b03337a0af71ddc513e"
+  resolved "https://codeload.github.com/mongodb-js/mongodb-core/tar.gz/6510d7d3d82d84cc0811a853355deaa918b96941"
   dependencies:
     bson "~1.0.4"
     require_optional "^1.0.1"
