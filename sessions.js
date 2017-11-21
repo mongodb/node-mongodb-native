@@ -84,6 +84,17 @@ class ClientSession extends EventEmitter {
       this.operationTime = operationTime;
     }
   }
+
+  /**
+   * Used to determine if this session equals another
+   */
+  equals(session) {
+    if (!(session instanceof ClientSession)) {
+      return false;
+    }
+
+    return this.id.id.buffer.equals(session.id.id.buffer);
+  }
 }
 
 Object.defineProperty(ClientSession.prototype, 'id', {
