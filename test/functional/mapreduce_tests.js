@@ -8,8 +8,8 @@ describe('MapReduce', function() {
   });
 
   /**
-  * @ignore
-  */
+   * @ignore
+   */
   it('shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -66,9 +66,9 @@ describe('MapReduce', function() {
   });
 
   /**
-  * Mapreduce tests
-  * @ignore
-  */
+   * Mapreduce tests
+   * @ignore
+   */
   it('shouldPerformMapReduceWithStringFunctions', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -113,9 +113,9 @@ describe('MapReduce', function() {
   });
 
   /**
-  * Mapreduce tests
-  * @ignore
-  */
+   * Mapreduce tests
+   * @ignore
+   */
   it('shouldForceMapReduceError', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
@@ -155,8 +155,8 @@ describe('MapReduce', function() {
   });
 
   /**
-  * @ignore
-  */
+   * @ignore
+   */
   it('shouldPerformMapReduceWithParametersBeingFunctions', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -209,8 +209,8 @@ describe('MapReduce', function() {
   });
 
   /**
-  * @ignore
-  */
+   * @ignore
+   */
   it('shouldPerformMapReduceWithCodeObjects', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -256,8 +256,8 @@ describe('MapReduce', function() {
   });
 
   /**
-  * @ignore
-  */
+   * @ignore
+   */
   it('shouldPerformMapReduceWithOptions', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -309,8 +309,8 @@ describe('MapReduce', function() {
   });
 
   /**
-  * @ignore
-  */
+   * @ignore
+   */
   it('shouldHandleMapReduceErrors', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -352,8 +352,8 @@ describe('MapReduce', function() {
   });
 
   /**
-  * @ignore
-  */
+   * @ignore
+   */
   it('shouldSaveDataToDifferentDbFromMapreduce', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -410,8 +410,8 @@ describe('MapReduce', function() {
   });
 
   /**
-  * @ignore
-  */
+   * @ignore
+   */
   it('shouldCorrectlyReturnNestedKeys', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -474,9 +474,9 @@ describe('MapReduce', function() {
   });
 
   /**
-  * Mapreduce tests
-  * @ignore
-  */
+   * Mapreduce tests
+   * @ignore
+   */
   it.skip('shouldPerformMapReduceWithScopeContainingFunction', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }

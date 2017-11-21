@@ -363,19 +363,21 @@ describe('Command Write Concern', function() {
             test.equal(null, err);
             var db = client.db(configuration.db);
 
-            db.collection('indexOptionDefault').createIndex({ a: 1 },
-            {
-              indexOptionDefaults: true,
-              w: 2,
-              wtimeout: 1000
-            },
-            function(err) {
-              test.equal(null, err);
-              test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
+            db.collection('indexOptionDefault').createIndex(
+              { a: 1 },
+              {
+                indexOptionDefaults: true,
+                w: 2,
+                wtimeout: 1000
+              },
+              function(err) {
+                test.equal(null, err);
+                test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
-              client.close();
-              done();
-            });
+                client.close();
+                done();
+              }
+            );
           }
         );
       });
@@ -482,17 +484,19 @@ describe('Command Write Concern', function() {
             test.equal(null, err);
             var db = client.db(configuration.db);
 
-            db.collection('indexOptionDefault').drop({
-              w: 2,
-              wtimeout: 1000
-            },
-            function(err) {
-              test.equal(null, err);
-              test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
+            db.collection('indexOptionDefault').drop(
+              {
+                w: 2,
+                wtimeout: 1000
+              },
+              function(err) {
+                test.equal(null, err);
+                test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
-              client.close();
-              done();
-            });
+                client.close();
+                done();
+              }
+            );
           }
         );
       });
@@ -718,17 +722,19 @@ describe('Command Write Concern', function() {
             test.equal(null, err);
             var db = client.db(configuration.db);
 
-            db.collection('test').dropIndexes({
-              w: 2,
-              wtimeout: 1000
-            },
-            function(err) {
-              test.equal(null, err);
-              test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
+            db.collection('test').dropIndexes(
+              {
+                w: 2,
+                wtimeout: 1000
+              },
+              function(err) {
+                test.equal(null, err);
+                test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
-              client.close();
-              done();
-            });
+                client.close();
+                done();
+              }
+            );
           }
         );
       });
@@ -841,20 +847,22 @@ describe('Command Write Concern', function() {
             var reduce = new Code('function(k,vals) { return 1; }');
 
             // db.collection('test').mapReduce({
-            db.collection('test').mapReduce(map,
-            reduce,
-            {
-              out: { replace: 'tempCollection' },
-              w: 2,
-              wtimeout: 1000
-            },
-            function(err) {
-              test.equal(null, err);
-              test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
+            db.collection('test').mapReduce(
+              map,
+              reduce,
+              {
+                out: { replace: 'tempCollection' },
+                w: 2,
+                wtimeout: 1000
+              },
+              function(err) {
+                test.equal(null, err);
+                test.deepEqual({ w: 2, wtimeout: 1000 }, commandResult.writeConcern);
 
-              client.close();
-              done();
-            });
+                client.close();
+                done();
+              }
+            );
           }
         );
       });

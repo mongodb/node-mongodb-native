@@ -29,26 +29,28 @@ describe('Promote Values', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
 
-        db.collection('shouldCorrectlyHonorPromoteValues').insert({
-          doc: Long.fromNumber(10),
-          int: 10,
-          double: 2.2222,
-          array: [[Long.fromNumber(10)]]
-        },
-        function(err) {
-          test.equal(null, err);
-
-          db.collection('shouldCorrectlyHonorPromoteValues').findOne(function(err, doc) {
+        db.collection('shouldCorrectlyHonorPromoteValues').insert(
+          {
+            doc: Long.fromNumber(10),
+            int: 10,
+            double: 2.2222,
+            array: [[Long.fromNumber(10)]]
+          },
+          function(err) {
             test.equal(null, err);
 
-            test.deepEqual(Long.fromNumber(10), doc.doc);
-            test.deepEqual(new Int32(10), doc.int);
-            test.deepEqual(new Double(2.2222), doc.double);
+            db.collection('shouldCorrectlyHonorPromoteValues').findOne(function(err, doc) {
+              test.equal(null, err);
 
-            client.close();
-            done();
-          });
-        });
+              test.deepEqual(Long.fromNumber(10), doc.doc);
+              test.deepEqual(new Int32(10), doc.int);
+              test.deepEqual(new Double(2.2222), doc.double);
+
+              client.close();
+              done();
+            });
+          }
+        );
       });
     }
   });
@@ -75,26 +77,28 @@ describe('Promote Values', function() {
         },
         function(err, client) {
           var db = client.db(configuration.db);
-          db.collection('shouldCorrectlyHonorPromoteValues').insert({
-            doc: Long.fromNumber(10),
-            int: 10,
-            double: 2.2222,
-            array: [[Long.fromNumber(10)]]
-          },
-          function(err) {
-            test.equal(null, err);
-
-            db.collection('shouldCorrectlyHonorPromoteValues').findOne(function(err, doc) {
+          db.collection('shouldCorrectlyHonorPromoteValues').insert(
+            {
+              doc: Long.fromNumber(10),
+              int: 10,
+              double: 2.2222,
+              array: [[Long.fromNumber(10)]]
+            },
+            function(err) {
               test.equal(null, err);
 
-              test.deepEqual(Long.fromNumber(10), doc.doc);
-              test.deepEqual(new Int32(10), doc.int);
-              test.deepEqual(new Double(2.2222), doc.double);
+              db.collection('shouldCorrectlyHonorPromoteValues').findOne(function(err, doc) {
+                test.equal(null, err);
 
-              client.close();
-              done();
-            });
-          });
+                test.deepEqual(Long.fromNumber(10), doc.doc);
+                test.deepEqual(new Int32(10), doc.int);
+                test.deepEqual(new Double(2.2222), doc.double);
+
+                client.close();
+                done();
+              });
+            }
+          );
         }
       );
     }
@@ -122,29 +126,31 @@ describe('Promote Values', function() {
         },
         function(err, client) {
           var db = client.db(configuration.db);
-          db.collection('shouldCorrectlyHonorPromoteValues').insert({
-            doc: Long.fromNumber(10),
-            int: 10,
-            double: 2.2222,
-            array: [[Long.fromNumber(10)]]
-          },
-          function(err) {
-            test.equal(null, err);
+          db.collection('shouldCorrectlyHonorPromoteValues').insert(
+            {
+              doc: Long.fromNumber(10),
+              int: 10,
+              double: 2.2222,
+              array: [[Long.fromNumber(10)]]
+            },
+            function(err) {
+              test.equal(null, err);
 
-            db
-              .collection('shouldCorrectlyHonorPromoteValues')
-              .find()
-              .next(function(err, doc) {
-                test.equal(null, err);
+              db
+                .collection('shouldCorrectlyHonorPromoteValues')
+                .find()
+                .next(function(err, doc) {
+                  test.equal(null, err);
 
-                test.deepEqual(Long.fromNumber(10), doc.doc);
-                test.deepEqual(new Int32(10), doc.int);
-                test.deepEqual(new Double(2.2222), doc.double);
+                  test.deepEqual(Long.fromNumber(10), doc.doc);
+                  test.deepEqual(new Int32(10), doc.int);
+                  test.deepEqual(new Double(2.2222), doc.double);
 
-                client.close();
-                done();
-              });
-          });
+                  client.close();
+                  done();
+                });
+            }
+          );
         }
       );
     }
@@ -167,29 +173,31 @@ describe('Promote Values', function() {
 
       MongoClient.connect(configuration.url(), {}, function(err, client) {
         var db = client.db(configuration.db);
-        db.collection('shouldCorrectlyHonorPromoteValues').insert({
-          doc: Long.fromNumber(10),
-          int: 10,
-          double: 2.2222,
-          array: [[Long.fromNumber(10)]]
-        },
-        function(err) {
-          test.equal(null, err);
+        db.collection('shouldCorrectlyHonorPromoteValues').insert(
+          {
+            doc: Long.fromNumber(10),
+            int: 10,
+            double: 2.2222,
+            array: [[Long.fromNumber(10)]]
+          },
+          function(err) {
+            test.equal(null, err);
 
-          db
-            .collection('shouldCorrectlyHonorPromoteValues')
-            .find({}, { promoteValues: false })
-            .next(function(err, doc) {
-              test.equal(null, err);
+            db
+              .collection('shouldCorrectlyHonorPromoteValues')
+              .find({}, { promoteValues: false })
+              .next(function(err, doc) {
+                test.equal(null, err);
 
-              test.deepEqual(Long.fromNumber(10), doc.doc);
-              test.deepEqual(new Int32(10), doc.int);
-              test.deepEqual(new Double(2.2222), doc.double);
+                test.deepEqual(Long.fromNumber(10), doc.doc);
+                test.deepEqual(new Int32(10), doc.int);
+                test.deepEqual(new Double(2.2222), doc.double);
 
-              client.close();
-              done();
-            });
-        });
+                client.close();
+                done();
+              });
+          }
+        );
       });
     }
   });
@@ -211,29 +219,31 @@ describe('Promote Values', function() {
 
       MongoClient.connect(configuration.url(), {}, function(err, client) {
         var db = client.db(configuration.db);
-        db.collection('shouldCorrectlyHonorPromoteValues2').insert({
-          doc: Long.fromNumber(10),
-          int: 10,
-          double: 2.2222,
-          array: [[Long.fromNumber(10)]]
-        },
-        function(err) {
-          test.equal(null, err);
+        db.collection('shouldCorrectlyHonorPromoteValues2').insert(
+          {
+            doc: Long.fromNumber(10),
+            int: 10,
+            double: 2.2222,
+            array: [[Long.fromNumber(10)]]
+          },
+          function(err) {
+            test.equal(null, err);
 
-          db
-            .collection('shouldCorrectlyHonorPromoteValues2')
-            .aggregate([{ $match: {} }], { promoteValues: false })
-            .next(function(err, doc) {
-              test.equal(null, err);
+            db
+              .collection('shouldCorrectlyHonorPromoteValues2')
+              .aggregate([{ $match: {} }], { promoteValues: false })
+              .next(function(err, doc) {
+                test.equal(null, err);
 
-              test.deepEqual(Long.fromNumber(10), doc.doc);
-              test.deepEqual(new Int32(10), doc.int);
-              test.deepEqual(new Double(2.2222), doc.double);
+                test.deepEqual(Long.fromNumber(10), doc.doc);
+                test.deepEqual(new Int32(10), doc.int);
+                test.deepEqual(new Double(2.2222), doc.double);
 
-              client.close();
-              done();
-            });
-        });
+                client.close();
+                done();
+              });
+          }
+        );
       });
     }
   });

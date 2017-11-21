@@ -424,39 +424,41 @@ describe('Sharding (Read Preference)', function() {
             col.createIndex({ _id: 'hashed' }, function(err) {
               test.equal(null, err);
 
-              client.db('admin').command({
-                shardCollection: 'integration_test_2.items',
-                key: { _id: 'hashed' }
-              },
-              function(err) {
-                test.equal(null, err);
+              client.db('admin').command(
+                {
+                  shardCollection: 'integration_test_2.items',
+                  key: { _id: 'hashed' }
+                },
+                function(err) {
+                  test.equal(null, err);
 
-                var map = function() {
+                  var map = function() {
                   emit(this._id, this._id); // eslint-disable-line
-                };
+                  };
 
                 var reduce = function(key, values) {  // eslint-disable-line
                   // eslint-disable-line
-                  return 123;
-                };
+                    return 123;
+                  };
 
-                col.mapReduce(
-                  map,
-                  reduce,
-                  {
-                    out: {
-                      inline: 1
+                  col.mapReduce(
+                    map,
+                    reduce,
+                    {
+                      out: {
+                        inline: 1
+                      },
+                      readPreference: ReadPreference.SECONDARY_PREFERRED
                     },
-                    readPreference: ReadPreference.SECONDARY_PREFERRED
-                  },
-                  function(err, r) {
-                    test.equal(null, err);
-                    test.equal(3, r.length);
-                    client.close();
-                    done();
-                  }
-                );
-              });
+                    function(err, r) {
+                      test.equal(null, err);
+                      test.equal(3, r.length);
+                      client.close();
+                      done();
+                    }
+                  );
+                }
+              );
             });
           });
         });
