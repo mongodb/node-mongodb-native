@@ -178,7 +178,7 @@ describe('Promote Values', function() {
 
           db
             .collection('shouldCorrectlyHonorPromoteValues')
-            .find({}, {}, { promoteValues: false })
+            .find({}, { promoteValues: false })
             .next(function(err, doc) {
               test.equal(null, err);
 

@@ -96,7 +96,9 @@ describe('Db', function() {
 
         try {
           coll.findOne({}, null, function() {
-            //e - Cannot convert undefined or null to object
+            //e - errors b/c findOne needs a query selector
+            test.equal(1, count);
+            done();
           });
         } catch (e) {
           process.nextTick(function() {

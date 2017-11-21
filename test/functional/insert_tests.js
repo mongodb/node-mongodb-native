@@ -2023,12 +2023,15 @@ describe('Insert', function() {
             test.equal(null, err);
             test.ok(ids);
 
-            collection.find({}, { fields: ['b'] }).toArray(function(err, items) {
-              test.equal('' + regexp, '' + items[0].b);
-              // Let's close the db
-              client.close();
-              done();
-            });
+            collection
+              .find({})
+              .project({ b: 1 })
+              .toArray(function(err, items) {
+                test.equal('' + regexp, '' + items[0].b);
+                // Let's close the db
+                client.close();
+                done();
+              });
           });
         });
       });
@@ -2056,13 +2059,16 @@ describe('Insert', function() {
           test.equal(null, err);
           test.ok(ids);
 
-          collection.find({}, { fields: ['b'] }).toArray(function(err, items) {
-            test.equal(null, err);
-            test.equal('' + regexp, '' + items[0].b);
-            // Let's close the db
-            client.close();
-            done();
-          });
+          collection
+            .find({})
+            .project({ b: 1 })
+            .toArray(function(err, items) {
+              test.equal(null, err);
+              test.equal('' + regexp, '' + items[0].b);
+              // Let's close the db
+              client.close();
+              done();
+            });
         });
       });
     }
@@ -2120,21 +2126,21 @@ describe('Insert', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteLong').insert({
-          doc: Long.fromNumber(10),
-          array: [[Long.fromNumber(10)]]
-        },
-        function(err, doc) {
-          test.equal(null, err);
-          test.ok(doc);
-
-          db.collection('shouldCorrectlyHonorPromoteLong').findOne(function(err, doc) {
+            doc: Long.fromNumber(10),
+            array: [[Long.fromNumber(10)]]
+          },
+          function(err, doc) {
             test.equal(null, err);
-            test.ok(doc.doc._bsontype === 'Long');
-            test.ok(doc.array[0][0]._bsontype === 'Long');
-            client.close();
-            done();
+            test.ok(doc);
+
+            db.collection('shouldCorrectlyHonorPromoteLong').findOne(function(err, doc) {
+              test.equal(null, err);
+              test.ok(doc.doc._bsontype === 'Long');
+              test.ok(doc.array[0][0]._bsontype === 'Long');
+              client.close();
+              done();
+            });
           });
-        });
       });
     }
   });
@@ -2226,23 +2232,23 @@ describe('Insert', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').insert({
-          doc: Long.fromNumber(10),
-          array: [[Long.fromNumber(10)]]
-        },
-        function(err, doc) {
-          test.equal(null, err);
-          test.ok(doc);
+            doc: Long.fromNumber(10),
+            array: [[Long.fromNumber(10)]]
+          },
+          function(err, doc) {
+            test.equal(null, err);
+            test.ok(doc);
 
-          db
-            .collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON')
-            .findOne(function(err, doc) {
-              test.equal(null, err);
-              test.equal(null, err);
-              test.ok('number', typeof doc.doc);
-              test.ok('number', typeof doc.array[0][0]);
-              client.close();
-              done();
-            });
+            db
+              .collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON')
+              .findOne(function(err, doc) {
+                test.equal(null, err);
+                test.equal(null, err);
+                test.ok('number', typeof doc.doc);
+                test.ok('number', typeof doc.array[0][0]);
+                client.close();
+                done();
+              });
         });
       });
     }
@@ -2267,21 +2273,21 @@ describe('Insert', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').insert({
-          doc: Long.fromNumber(10),
-          array: [[Long.fromNumber(10)]]
-        },
-        function(err, doc) {
-          test.equal(null, err);
-          test.ok(doc);
+            doc: Long.fromNumber(10),
+            array: [[Long.fromNumber(10)]]
+          },
+          function(err, doc) {
+            test.equal(null, err);
+            test.ok(doc);
 
-          db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').findOne(function(err, doc) {
-            test.equal(null, err);
-            test.equal(null, err);
-            test.ok(doc.doc._bsontype === 'Long');
-            test.ok(doc.array[0][0]._bsontype === 'Long');
-            client.close();
-            done();
-          });
+            db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').findOne(function(err, doc) {
+              test.equal(null, err);
+              test.equal(null, err);
+              test.ok(doc.doc._bsontype === 'Long');
+              test.ok(doc.array[0][0]._bsontype === 'Long');
+              client.close();
+              done();
+            });
         });
       });
     }
@@ -2303,21 +2309,21 @@ describe('Insert', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').insert({
-          doc: Long.fromNumber(10),
-          array: [[Long.fromNumber(10)]]
-        },
-        function(err, doc) {
-          test.equal(null, err);
-          test.ok(doc);
+            doc: Long.fromNumber(10),
+            array: [[Long.fromNumber(10)]]
+          },
+          function(err, doc) {
+            test.equal(null, err);
+            test.ok(doc);
 
-          db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').findOne(function(err, doc) {
-            test.equal(null, err);
-            test.equal(null, err);
-            test.ok('number', typeof doc.doc);
-            test.ok('number', typeof doc.array[0][0]);
-            client.close();
-            done();
-          });
+            db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').findOne(function(err, doc) {
+              test.equal(null, err);
+              test.equal(null, err);
+              test.ok('number', typeof doc.doc);
+              test.ok('number', typeof doc.array[0][0]);
+              client.close();
+              done();
+            });
         });
       });
     }
@@ -2338,16 +2344,16 @@ describe('Insert', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyOverrideCheckKeysJSOnUpdate').update({
-          'ps.op.t': 1
-        },
-        { $set: { b: 1 } },
-        { checkKeys: false },
-        function(err, doc) {
-          test.equal(null, err);
-          test.ok(doc);
+            'ps.op.t': 1
+          },
+          { $set: { b: 1 } },
+          { checkKeys: false },
+          function(err, doc) {
+            test.equal(null, err);
+            test.ok(doc);
 
-          client.close();
-          done();
+            client.close();
+            done();
         });
       });
     }

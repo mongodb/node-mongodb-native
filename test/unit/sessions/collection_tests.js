@@ -40,9 +40,7 @@ describe('Sessions', function() {
 
           return coll
             .insert({ a: 42 }, { session: session })
-            .then(() =>
-              coll.findOne({}, null, { session: session, readConcern: { level: 'majoroy' } })
-            )
+            .then(() => coll.findOne({}, { session: session, readConcern: { level: 'majoroy' } }))
             .then(() => {
               expect(findCommand.readConcern).to.have.keys(['level', 'afterClusterTime']);
               expect(findCommand.readConcern.afterClusterTime).to.eql(insertOperationTime);
