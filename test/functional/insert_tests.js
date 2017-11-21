@@ -2125,7 +2125,8 @@ describe('Insert', function() {
       });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        db.collection('shouldCorrectlyHonorPromoteLong').insert({
+        db.collection('shouldCorrectlyHonorPromoteLong').insert(
+          {
             doc: Long.fromNumber(10),
             array: [[Long.fromNumber(10)]]
           },
@@ -2140,7 +2141,8 @@ describe('Insert', function() {
               client.close();
               done();
             });
-          });
+          }
+        );
       });
     }
   });
@@ -2231,7 +2233,8 @@ describe('Insert', function() {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').insert({
+        db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').insert(
+          {
             doc: Long.fromNumber(10),
             array: [[Long.fromNumber(10)]]
           },
@@ -2249,7 +2252,8 @@ describe('Insert', function() {
                 client.close();
                 done();
               });
-        });
+          }
+        );
       });
     }
   });
@@ -2272,7 +2276,8 @@ describe('Insert', function() {
       });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').insert({
+        db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').insert(
+          {
             doc: Long.fromNumber(10),
             array: [[Long.fromNumber(10)]]
           },
@@ -2288,7 +2293,8 @@ describe('Insert', function() {
               client.close();
               done();
             });
-        });
+          }
+        );
       });
     }
   });
@@ -2308,7 +2314,8 @@ describe('Insert', function() {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').insert({
+        db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').insert(
+          {
             doc: Long.fromNumber(10),
             array: [[Long.fromNumber(10)]]
           },
@@ -2324,7 +2331,8 @@ describe('Insert', function() {
               client.close();
               done();
             });
-        });
+          }
+        );
       });
     }
   });
@@ -2343,7 +2351,8 @@ describe('Insert', function() {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        db.collection('shouldCorrectlyOverrideCheckKeysJSOnUpdate').update({
+        db.collection('shouldCorrectlyOverrideCheckKeysJSOnUpdate').update(
+          {
             'ps.op.t': 1
           },
           { $set: { b: 1 } },
@@ -2354,7 +2363,8 @@ describe('Insert', function() {
 
             client.close();
             done();
-        });
+          }
+        );
       });
     }
   });

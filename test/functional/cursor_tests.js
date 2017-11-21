@@ -4134,7 +4134,8 @@ describe('Cursor', function() {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db.collection('cursor_count_test1', { readConcern: { level: 'local' } }).count({
+        db.collection('cursor_count_test1', { readConcern: { level: 'local' } }).count(
+          {
             project: '123'
           },
           {
@@ -4156,7 +4157,8 @@ describe('Cursor', function() {
 
             client.close();
             done();
-          });
+          }
+        );
       });
     }
   });

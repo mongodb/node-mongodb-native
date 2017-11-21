@@ -36,17 +36,19 @@ describe('Decimal128', function() {
         db.collection('decimal128').insertOne(object, function(err) {
           test.equal(null, err);
 
-          db.collection('decimal128').findOne({
-            id: 1
-          },
-          function(err, doc) {
-            test.equal(null, err);
-            test.ok(doc.value instanceof Decimal128);
-            test.equal('1', doc.value.toString());
+          db.collection('decimal128').findOne(
+            {
+              id: 1
+            },
+            function(err, doc) {
+              test.equal(null, err);
+              test.ok(doc.value instanceof Decimal128);
+              test.equal('1', doc.value.toString());
 
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            }
+          );
         });
       });
     }

@@ -364,19 +364,21 @@ describe('Collation', function() {
           var reduce = new Code('function(k,vals) { return 1; }');
 
           // db.collection('test').mapReduce({
-          db.collection('test').mapReduce(map,
-          reduce,
-          {
-            out: { replace: 'tempCollection' },
-            collation: { caseLevel: true }
-          },
-          function(err) {
-            test.equal(null, err);
-            test.deepEqual({ caseLevel: true }, commandResult.collation);
+          db.collection('test').mapReduce(
+            map,
+            reduce,
+            {
+              out: { replace: 'tempCollection' },
+              collation: { caseLevel: true }
+            },
+            function(err) {
+              test.equal(null, err);
+              test.deepEqual({ caseLevel: true }, commandResult.collation);
 
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            }
+          );
         });
       });
     }
@@ -802,26 +804,28 @@ describe('Collation', function() {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
-          db.collection('test').bulkWrite([
-            {
-              updateOne: {
-                q: { a: 2 },
-                u: { $set: { a: 2 } },
-                upsert: true,
-                collation: { caseLevel: true }
-              }
-            },
-            { deleteOne: { q: { c: 1 } } }
-          ],
-          { ordered: true },
-          function(err) {
-            test.equal(null, err);
-            test.ok(commandResult);
-            test.deepEqual({ caseLevel: true }, commandResult.updates[0].collation);
+          db.collection('test').bulkWrite(
+            [
+              {
+                updateOne: {
+                  q: { a: 2 },
+                  u: { $set: { a: 2 } },
+                  upsert: true,
+                  collation: { caseLevel: true }
+                }
+              },
+              { deleteOne: { q: { c: 1 } } }
+            ],
+            { ordered: true },
+            function(err) {
+              test.equal(null, err);
+              test.ok(commandResult);
+              test.deepEqual({ caseLevel: true }, commandResult.updates[0].collation);
 
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            }
+          );
         });
       });
     }
@@ -858,25 +862,27 @@ describe('Collation', function() {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
-          db.collection('test').bulkWrite([
-            {
-              updateOne: {
-                q: { a: 2 },
-                u: { $set: { a: 2 } },
-                upsert: true,
-                collation: { caseLevel: true }
-              }
-            },
-            { deleteOne: { q: { c: 1 } } }
-          ],
-          { ordered: true },
-          function(err) {
-            test.ok(err);
-            test.equal('server/primary/mongos does not support collation', err.message);
+          db.collection('test').bulkWrite(
+            [
+              {
+                updateOne: {
+                  q: { a: 2 },
+                  u: { $set: { a: 2 } },
+                  upsert: true,
+                  collation: { caseLevel: true }
+                }
+              },
+              { deleteOne: { q: { c: 1 } } }
+            ],
+            { ordered: true },
+            function(err) {
+              test.ok(err);
+              test.equal('server/primary/mongos does not support collation', err.message);
 
-            client.close();
-            done();
-          });
+              client.close();
+              done();
+            }
+          );
         });
       });
     }
@@ -980,25 +986,27 @@ describe('Collation', function() {
               test.equal(null, err);
               var db = client.db(configuration.db);
 
-              db.collection('test').bulkWrite([
-                {
-                  updateOne: {
-                    q: { a: 2 },
-                    u: { $set: { a: 2 } },
-                    upsert: true,
-                    collation: { caseLevel: true }
-                  }
-                },
-                { deleteOne: { q: { c: 1 } } }
-              ],
-              { ordered: true },
-              function(err) {
-                test.ok(err);
-                test.equal('server/primary/mongos does not support collation', err.message);
+              db.collection('test').bulkWrite(
+                [
+                  {
+                    updateOne: {
+                      q: { a: 2 },
+                      u: { $set: { a: 2 } },
+                      upsert: true,
+                      collation: { caseLevel: true }
+                    }
+                  },
+                  { deleteOne: { q: { c: 1 } } }
+                ],
+                { ordered: true },
+                function(err) {
+                  test.ok(err);
+                  test.equal('server/primary/mongos does not support collation', err.message);
 
-                client.close();
-                done();
-              });
+                  client.close();
+                  done();
+                }
+              );
             }
           );
         }, 500);

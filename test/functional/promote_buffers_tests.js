@@ -25,20 +25,22 @@ describe('Promote Buffers', function() {
 
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        db.collection('shouldCorrectlyHonorPromoteBuffer1').insert({
-          doc: new Buffer(256)
-        },
-        function(err) {
-          test.equal(null, err);
-
-          db.collection('shouldCorrectlyHonorPromoteBuffer1').findOne(function(err, doc) {
+        db.collection('shouldCorrectlyHonorPromoteBuffer1').insert(
+          {
+            doc: new Buffer(256)
+          },
+          function(err) {
             test.equal(null, err);
-            test.ok(doc.doc instanceof Buffer);
 
-            client.close();
-            done();
-          });
-        });
+            db.collection('shouldCorrectlyHonorPromoteBuffer1').findOne(function(err, doc) {
+              test.equal(null, err);
+              test.ok(doc.doc instanceof Buffer);
+
+              client.close();
+              done();
+            });
+          }
+        );
       });
     }
   });
@@ -63,20 +65,22 @@ describe('Promote Buffers', function() {
         function(err, client) {
           var db = client.db(configuration.db);
 
-          db.collection('shouldCorrectlyHonorPromoteBuffer2').insert({
-            doc: new Buffer(256)
-          },
-          function(err) {
-            test.equal(null, err);
-
-            db.collection('shouldCorrectlyHonorPromoteBuffer2').findOne(function(err, doc) {
+          db.collection('shouldCorrectlyHonorPromoteBuffer2').insert(
+            {
+              doc: new Buffer(256)
+            },
+            function(err) {
               test.equal(null, err);
-              test.ok(doc.doc instanceof Buffer);
 
-              client.close();
-              done();
-            });
-          });
+              db.collection('shouldCorrectlyHonorPromoteBuffer2').findOne(function(err, doc) {
+                test.equal(null, err);
+                test.ok(doc.doc instanceof Buffer);
+
+                client.close();
+                done();
+              });
+            }
+          );
         }
       );
     }
@@ -102,23 +106,25 @@ describe('Promote Buffers', function() {
         function(err, client) {
           var db = client.db(configuration.db);
 
-          db.collection('shouldCorrectlyHonorPromoteBuffer3').insert({
-            doc: new Buffer(256)
-          },
-          function(err) {
-            test.equal(null, err);
+          db.collection('shouldCorrectlyHonorPromoteBuffer3').insert(
+            {
+              doc: new Buffer(256)
+            },
+            function(err) {
+              test.equal(null, err);
 
-            db
-              .collection('shouldCorrectlyHonorPromoteBuffer3')
-              .find()
-              .next(function(err, doc) {
-                test.equal(null, err);
-                test.ok(doc.doc instanceof Buffer);
+              db
+                .collection('shouldCorrectlyHonorPromoteBuffer3')
+                .find()
+                .next(function(err, doc) {
+                  test.equal(null, err);
+                  test.ok(doc.doc instanceof Buffer);
 
-                client.close();
-                done();
-              });
-          });
+                  client.close();
+                  done();
+                });
+            }
+          );
         }
       );
     }
@@ -138,23 +144,25 @@ describe('Promote Buffers', function() {
 
       MongoClient.connect(configuration.url(), {}, function(err, client) {
         var db = client.db(configuration.db);
-        db.collection('shouldCorrectlyHonorPromoteBuffer4').insert({
-          doc: new Buffer(256)
-        },
-        function(err) {
-          test.equal(null, err);
+        db.collection('shouldCorrectlyHonorPromoteBuffer4').insert(
+          {
+            doc: new Buffer(256)
+          },
+          function(err) {
+            test.equal(null, err);
 
-          db
-            .collection('shouldCorrectlyHonorPromoteBuffer4')
-            .find({}, { promoteBuffers: true })
-            .next(function(err, doc) {
-              test.equal(null, err);
-              test.ok(doc.doc instanceof Buffer);
+            db
+              .collection('shouldCorrectlyHonorPromoteBuffer4')
+              .find({}, { promoteBuffers: true })
+              .next(function(err, doc) {
+                test.equal(null, err);
+                test.ok(doc.doc instanceof Buffer);
 
-              client.close();
-              done();
-            });
-        });
+                client.close();
+                done();
+              });
+          }
+        );
       });
     }
   });
@@ -176,23 +184,25 @@ describe('Promote Buffers', function() {
 
       MongoClient.connect(configuration.url(), {}, function(err, client) {
         var db = client.db(configuration.db);
-        db.collection('shouldCorrectlyHonorPromoteBuffer5').insert({
-          doc: new Buffer(256)
-        },
-        function(err) {
-          test.equal(null, err);
+        db.collection('shouldCorrectlyHonorPromoteBuffer5').insert(
+          {
+            doc: new Buffer(256)
+          },
+          function(err) {
+            test.equal(null, err);
 
-          db
-            .collection('shouldCorrectlyHonorPromoteBuffer5')
-            .aggregate([{ $match: {} }], { promoteBuffers: true })
-            .next(function(err, doc) {
-              test.equal(null, err);
-              test.ok(doc.doc instanceof Buffer);
+            db
+              .collection('shouldCorrectlyHonorPromoteBuffer5')
+              .aggregate([{ $match: {} }], { promoteBuffers: true })
+              .next(function(err, doc) {
+                test.equal(null, err);
+                test.ok(doc.doc instanceof Buffer);
 
-              client.close();
-              done();
-            });
-        });
+                client.close();
+                done();
+              });
+          }
+        );
       });
     }
   });
