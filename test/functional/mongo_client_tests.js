@@ -474,7 +474,7 @@ describe('MongoClient', function() {
       var configuration = this.configuration;
       var MongoClient = configuration.require.MongoClient;
 
-      MongoClient.connect('mongodb://test.com:80/test', function(err) {
+      MongoClient.connect('mongodb://test.does.not.exist.com:80/test', function(err) {
         test.ok(err != null);
 
         done();
