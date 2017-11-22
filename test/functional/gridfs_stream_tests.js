@@ -1016,7 +1016,7 @@ describe('GridFS Stream', function() {
     }
   });
 
-  var UPLOAD_SPEC = require('./specs/gridfs-upload.json');
+  var UPLOAD_SPEC = require('./spec/gridfs/gridfs-upload.json');
   UPLOAD_SPEC.tests.forEach(function(specTest) {
     (function(testSpec) {
       it(testSpec.description, {
@@ -1074,7 +1074,7 @@ describe('GridFS Stream', function() {
     })(specTest);
   });
 
-  var DOWNLOAD_SPEC = require('./specs/gridfs-download.json');
+  var DOWNLOAD_SPEC = require('./spec/gridfs/gridfs-download.json');
   DOWNLOAD_SPEC.tests.forEach(function(specTest) {
     (function(testSpec) {
       it(testSpec.description, {

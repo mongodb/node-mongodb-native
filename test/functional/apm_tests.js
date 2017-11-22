@@ -1226,13 +1226,13 @@ describe('APM', function() {
     };
 
     var scenarios = fs
-      .readdirSync(__dirname + '/apm')
+      .readdirSync(__dirname + '/spec/apm')
       .filter(x => x.indexOf('.json') !== -1)
       .map(function(x) {
         var r = null;
 
         try {
-          r = JSON.parse(fs.readFileSync(__dirname + '/apm/' + x));
+          r = JSON.parse(fs.readFileSync(__dirname + '/spec/apm/' + x));
         } catch (err) {
           console.dir(err);
         }

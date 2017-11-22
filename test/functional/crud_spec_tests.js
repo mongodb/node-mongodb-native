@@ -8,12 +8,12 @@ var assign = require('../../lib/utils').assign;
 
 function findScenarios(type) {
   return fs
-    .readdirSync(path.join(__dirname, 'crud', type))
+    .readdirSync(path.join(__dirname, 'spec', 'crud', type))
     .filter(x => {
       return x.indexOf('json') !== -1;
     })
     .map(x => {
-      return [x, fs.readFileSync(path.join(__dirname, 'crud', type, x), 'utf8')];
+      return [x, fs.readFileSync(path.join(__dirname, 'spec', 'crud', type, x), 'utf8')];
     })
     .map(x => {
       return [path.basename(x[0], '.json'), JSON.parse(x[1])];
