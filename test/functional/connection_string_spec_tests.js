@@ -6,12 +6,12 @@ var fs = require('fs'),
 
 describe('Connection String', function() {
   var testFiles = fs
-    .readdirSync(f('%s/connection-string', __dirname))
+    .readdirSync(f('%s/spec/connection-string', __dirname))
     .filter(function(x) {
       return x.indexOf('.json') !== -1;
     })
     .map(function(x) {
-      return JSON.parse(fs.readFileSync(f('%s/connection-string/%s', __dirname, x)));
+      return JSON.parse(fs.readFileSync(f('%s/spec/connection-string/%s', __dirname, x)));
     });
 
   // Execute the tests
