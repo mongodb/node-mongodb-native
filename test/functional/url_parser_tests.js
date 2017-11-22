@@ -1118,13 +1118,10 @@ describe('Url SRV Parser', function() {
     },
     test: function(done) {
       // This text record contains two options
-      // connectTimeoutMS=300000&socketTimeoutMS=300000
       parse('mongodb+srv://test5.test.build.10gen.cc', {}, function(err, object) {
-        var serverOptions = {
-          socketOptions: { connectTimeoutMS: 300000, socketTimeoutMS: 300000 }
-        };
         expect(err).to.be.null;
-        expect(object.server_options).to.deep.equal(serverOptions);
+        expect(object.rs_options.rs_name).to.equal('repl0');
+        expect(object.db_options.authSource).to.equal('thisDB');
         done();
       });
     }
@@ -1133,7 +1130,7 @@ describe('Url SRV Parser', function() {
   /**
    * @ignore
    */
-  it('should build a connection string based on a SRV with multiple TXT records', {
+  it('should fail if multiple TXT records', {
     metadata: {
       requires: { topology: ['single'] }
     },
@@ -1141,12 +1138,8 @@ describe('Url SRV Parser', function() {
       // This url has a text record with multiple records
       // mongodb://localhost.build.10gen.cc:27017/?connectTimeoutMS=200000&socketTimeoutMS=200000
       parse('mongodb+srv://test6.test.build.10gen.cc', {}, function(err, object) {
-        expect(err).to.be.null;
-        expect(object).to.exist;
-        expect(object.servers[0].host).to.equal('localhost.test.build.10gen.cc');
-        expect(object.servers[0].port).to.equal(27017);
-        expect(object.server_options.socketOptions.connectTimeoutMS).to.equal(200000);
-        expect(object.server_options.socketOptions.socketTimeoutMS).to.equal(200000);
+        expect(err).to.exist;
+        expect(err.message).to.equal('multiple text records not allowed');
         done();
       });
     }
@@ -1155,11 +1148,13 @@ describe('Url SRV Parser', function() {
   /**
    * @ignore
    */
-  it('should build a connection string based on SRV, TXT records and options override', {
+  it.skip('should build a connection string based on SRV, TXT records and options override', {
     metadata: {
       requires: { topology: ['single'] }
     },
     test: function(done) {
+      // TODO this url should error because of multiple text records but need a
+      // test to check options override
       // This url has srv and txt records and options passed in through api
       parse('mongodb+srv://test6.test.build.10gen.cc', { connectTimeoutMS: 250000 }, function(
         err,
@@ -1189,10 +1184,10 @@ describe('Url SRV Parser', function() {
     },
     test: function(done) {
       // This text record contains a key with no value
-      // readPreference
+      // authSource
       parse('mongodb+srv://test8.test.build.10gen.cc', {}, function(err) {
         expect(err).to.exist;
-        expect(err.message).to.equal('query parameter readPreference is an incomplete value pair');
+        expect(err.message).to.equal('query parameter authSource is an incomplete value pair');
         done();
       });
     }
@@ -1229,13 +1224,10 @@ describe('Url SRV Parser', function() {
     },
     test: function(done) {
       // This text record contains multiple strings
-      // "connectTime" "outMS=150000" "&socketT" "imeoutMS" "=" "250000"
+      // 'replicaS' 'et=rep' 'l0'
       parse('mongodb+srv://test11.test.build.10gen.cc', function(err, object) {
-        var serverOptions = {
-          socketOptions: { connectTimeoutMS: 150000, socketTimeoutMS: 250000 }
-        };
         expect(err).to.be.null;
-        expect(object.server_options).to.deep.equal(serverOptions);
+        expect(object.rs_options.rs_name).to.equal('repl0');
         done();
       });
     }
