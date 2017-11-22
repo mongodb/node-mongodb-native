@@ -1148,24 +1148,17 @@ describe('Url SRV Parser', function() {
   /**
    * @ignore
    */
-  it.skip('should build a connection string based on SRV, TXT records and options override', {
+  it('should fail because two text records', {
     metadata: {
       requires: { topology: ['single'] }
     },
     test: function(done) {
-      // TODO this url should error because of multiple text records but need a
-      // test to check options override
-      // This url has srv and txt records and options passed in through api
-      parse('mongodb+srv://test6.test.build.10gen.cc', { connectTimeoutMS: 250000 }, function(
+      parse('mongodb+srv://test6.test.build.10gen.cc', {}, function(
         err,
         object
       ) {
-        expect(err).to.be.null;
-        expect(object).to.exist;
-        expect(object.servers[0].host).to.equal('localhost.test.build.10gen.cc');
-        expect(object.servers[0].port).to.equal(27017);
-        // TODO check all options get override
-        expect(object.db_options.connectTimeoutMS).to.equal(250000);
+        expect(err).to.be.exist;
+        expect(err.message).to.equal('multiple text records not allowed');
         done();
       });
     }
