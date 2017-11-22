@@ -47,8 +47,8 @@ ajv@^4.7.0:
     json-stable-stringify "^1.0.1"
 
 ajv@^5.1.0, ajv@^5.2.3, ajv@^5.3.0:
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/ajv/-/ajv-5.3.0.tgz#4414ff74a50879c208ee5fdc826e32c303549eda"
+  version "5.4.0"
+  resolved "https://registry.yarnpkg.com/ajv/-/ajv-5.4.0.tgz#32d1cf08dbc80c432f426f12e10b2511f6b46474"
   dependencies:
     co "^4.6.0"
     fast-deep-equal "^1.0.0"
@@ -489,6 +489,10 @@ chalk@^2.0.0, chalk@^2.1.0:
     ansi-styles "^3.1.0"
     escape-string-regexp "^1.0.5"
     supports-color "^4.0.0"
+
+chardet@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/chardet/-/chardet-0.4.0.tgz#0bbe1355ac44d7a3ed4a925707c4ef70f8190f6c"
 
 check-error@^1.0.1:
   version "1.0.2"
@@ -1066,11 +1070,11 @@ extend@^3.0.0, extend@~3.0.0, extend@~3.0.1:
   resolved "https://registry.yarnpkg.com/extend/-/extend-3.0.1.tgz#a755ea7bc1adfcc5a31ce7e762dbaadc5e636444"
 
 external-editor@^2.0.4:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/external-editor/-/external-editor-2.0.5.tgz#52c249a3981b9ba187c7cacf5beb50bf1d91a6bc"
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/external-editor/-/external-editor-2.1.0.tgz#3d026a21b7f95b5726387d4200ac160d372c3b48"
   dependencies:
+    chardet "^0.4.0"
     iconv-lite "^0.4.17"
-    jschardet "^1.4.2"
     tmp "^0.0.33"
 
 extsprintf@1.3.0, extsprintf@^1.2.0:
@@ -1500,8 +1504,8 @@ inherits@2, inherits@^2.0.1, inherits@^2.0.3, inherits@~2.0.1, inherits@~2.0.3:
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.3.tgz#633c2c83e3da42a502f52466022480f4208261de"
 
 ini@^1.3.4:
-  version "1.3.4"
-  resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.4.tgz#0537cb79daf59b59a1a517dff706c86ec039162e"
+  version "1.3.5"
+  resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.5.tgz#eee25f56db1c9ec6085e0c22778083f596abf927"
 
 inquirer@^3.0.6:
   version "3.3.0"
@@ -1698,10 +1702,6 @@ js2xmlparser@~3.0.0:
 jsbn@~0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/jsbn/-/jsbn-0.1.1.tgz#a5e654c2e5a2deb5f201d96cefbca80c0ef2f513"
-
-jschardet@^1.4.2:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/jschardet/-/jschardet-1.6.0.tgz#c7d1a71edcff2839db2f9ec30fc5d5ebd3c1a678"
 
 jsdoc@3.5.4:
   version "3.5.4"
@@ -2108,15 +2108,9 @@ mongodb-core@2.1.17:
     bson "~1.0.4"
     require_optional "~1.0.0"
 
-mongodb-core@mongodb-js/mongodb-core#3.0.0:
-  version "3.0.0-beta1"
-  resolved "https://codeload.github.com/mongodb-js/mongodb-core/tar.gz/69994597bd354c9945d0f47fe4abfb917448ace1"
-  dependencies:
-    bson "~1.0.4"
-    require_optional "^1.0.1"
-
-mongodb-core@mongodb-js/mongodb-core#6510d7d3d82d84cc0811a853355deaa918b96941:
+mongodb-core@mongodb-js/mongodb-core#3.0.0, mongodb-core@mongodb-js/mongodb-core#6510d7d3d82d84cc0811a853355deaa918b96941:
   version "3.0.0-beta2"
+  uid "6510d7d3d82d84cc0811a853355deaa918b96941"
   resolved "https://codeload.github.com/mongodb-js/mongodb-core/tar.gz/6510d7d3d82d84cc0811a853355deaa918b96941"
   dependencies:
     bson "~1.0.4"
@@ -2157,7 +2151,7 @@ mongodb-test-runner@^1.1.18:
     semver "^5.4.1"
     yargs "^8.0.2"
 
-mongodb-topology-manager@mongodb-js/mongodb-topology-manager#3.0.0:
+"mongodb-topology-manager@github:mongodb-js/mongodb-topology-manager#3.0.0":
   version "1.0.13"
   resolved "https://codeload.github.com/mongodb-js/mongodb-topology-manager/tar.gz/719c142350017c934fec2944dc4fa516563937f5"
   dependencies:
@@ -2349,8 +2343,8 @@ p-locate@^2.0.0:
     p-limit "^1.1.0"
 
 p-timeout@^1.1.1:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/p-timeout/-/p-timeout-1.2.0.tgz#9820f99434c5817868b4f34809ee5291660d5b6c"
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/p-timeout/-/p-timeout-1.2.1.tgz#5eb3b353b7fce99f101a1038880bb054ebbea386"
   dependencies:
     p-finally "^1.0.0"
 
@@ -3112,8 +3106,8 @@ wordwrap@~0.0.2:
   resolved "https://registry.yarnpkg.com/wordwrap/-/wordwrap-0.0.3.tgz#a3d5da6cd5c0bc0008d37234bbaf1bed63059107"
 
 worker-farm@^1.5.0:
-  version "1.5.1"
-  resolved "https://registry.yarnpkg.com/worker-farm/-/worker-farm-1.5.1.tgz#8e9f4a7da4f3c595aa600903051b969390423fa1"
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/worker-farm/-/worker-farm-1.5.2.tgz#32b312e5dc3d5d45d79ef44acc2587491cd729ae"
   dependencies:
     errno "^0.1.4"
     xtend "^4.0.1"
