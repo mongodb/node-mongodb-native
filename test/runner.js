@@ -116,7 +116,7 @@ var Configuration = function(options) {
             console.log("[purge the directories]");
 
             var Logger = require('mongodb-topology-manager').Logger;
-            manager.start().then(function() {
+            return manager.start().then(function() {
               console.log("[started the topology]");
               var Logger = require('mongodb-topology-manager').Logger;
               // Logger.setLevel('info');
