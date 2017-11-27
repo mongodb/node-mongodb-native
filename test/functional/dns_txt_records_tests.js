@@ -1,3 +1,5 @@
+'use strict';
+
 var fs = require('fs');
 var path = require('path');
 
@@ -15,25 +17,25 @@ function getTests() {
 }
 
 describe('DNS and TXT record tests', function() {
-    getTests().forEach(function (test) {
-      if (!test[1].comment) test[1].comment = test[0];
+  getTests().forEach(function(test) {
+    if (!test[1].comment) test[1].comment = test[0];
 
-      it(test[1].comment, {
-        metadata: {
-          requires: { topology: ['single'] }
-        },
-        test: function(done) {
-          parse(test[1].uri, function(err, object) {
-            if (test[1].error) {
-              expect(err).to.exist;
-              expect(object).to.not.exist;
-            } else {
-              expect(err).to.be.null;
-              expect(object).to.exist;
-            }
-            done();
-          });
-        }
-      });
+    it(test[1].comment, {
+      metadata: {
+        requires: { topology: ['single'] }
+      },
+      test: function(done) {
+        parse(test[1].uri, function(err, object) {
+          if (test[1].error) {
+            expect(err).to.exist;
+            expect(object).to.not.exist;
+          } else {
+            expect(err).to.be.null;
+            expect(object).to.exist;
+          }
+          done();
+        });
+      }
+    });
   });
 });
