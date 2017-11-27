@@ -11,28 +11,29 @@ class ReplSetFixture {
     this.electionIds = [new ObjectId(), new ObjectId()];
   }
 
-  setup() {
-    return Promise.all([
-      mock.createServer(),
-      mock.createServer(),
-      mock.createServer()
-    ]).then(servers => {
-      this.servers = servers;
-      this.primaryServer = servers[0];
-      this.firstSecondaryServer = servers[1];
-      this.arbiterServer = servers[2];
+  setup(options) {
+    options = options || {};
+    const ismaster = options.ismaster ? options.ismaster : mock.DEFAULT_ISMASTER;
 
-      this.defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
-        setName: 'rs',
-        setVersion: 1,
-        electionId: this.electionIds[0],
-        hosts: this.servers.map(server => server.uri()),
-        arbiters: [this.arbiterServer.uri()]
-      });
+    return Promise.all([mock.createServer(), mock.createServer(), mock.createServer()]).then(
+      servers => {
+        this.servers = servers;
+        this.primaryServer = servers[0];
+        this.firstSecondaryServer = servers[1];
+        this.arbiterServer = servers[2];
 
-      this.defineReplSetStates();
-      this.configureMessageHandlers();
-    });
+        this.defaultFields = assign({}, ismaster, {
+          setName: 'rs',
+          setVersion: 1,
+          electionId: this.electionIds[0],
+          hosts: this.servers.map(server => server.uri()),
+          arbiters: [this.arbiterServer.uri()]
+        });
+
+        this.defineReplSetStates();
+        this.configureMessageHandlers();
+      }
+    );
   }
 
   defineReplSetStates() {
