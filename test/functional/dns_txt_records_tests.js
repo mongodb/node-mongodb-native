@@ -32,6 +32,12 @@ describe('DNS and TXT record tests', function() {
           } else {
             expect(err).to.be.null;
             expect(object).to.exist;
+            if (test[1].options && test[1].options.replicaSet) {
+              expect(object.rs_options.rs_name).to.equal(test[1].options.replicaSet);
+            }
+            if (test[1].options && test[1].options.ssl) {
+              expect(object.server_options.ssl).to.equal(test[1].options.ssl);
+            }
           }
           done();
         });
