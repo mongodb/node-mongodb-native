@@ -110,6 +110,7 @@ class ServerSession {
   constructor() {
     this.id = { id: new Binary(uuidV4(), Binary.SUBTYPE_UUID) };
     this.lastUse = Date.now();
+    this.txnNumber = 0;
   }
 
   /**
