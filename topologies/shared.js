@@ -1,8 +1,11 @@
 'use strict';
 
-var os = require('os'),
+const os = require('os'),
   f = require('util').format,
-  ReadPreference = require('./read_preference');
+  ReadPreference = require('./read_preference'),
+  retrieveBSON = require('../connection/utils').retrieveBSON;
+
+const BSON = retrieveBSON();
 
 /**
  * Emit event if it exists
@@ -402,6 +405,36 @@ const SessionMixins = {
   }
 };
 
+const RETRYABLE_WIRE_VERSION = 6;
+
+/**
+ * Determines whether the provided topology supports retryable writes
+ *
+ * @param {Mongos|Replset} topology
+ */
+const isRetryableWritesSupported = function(topology) {
+  const maxWireVersion = topology.lastIsMaster().maxWireVersion;
+  if (maxWireVersion < RETRYABLE_WIRE_VERSION) {
+    return false;
+  }
+
+  if (!topology.logicalSessionTimeoutMinutes) {
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Increment the transaction number on the ServerSession contained by the provided ClientSession
+ *
+ * @param {ClientSession} session
+ */
+const txnNumber = function(session) {
+  session.serverSession.txnNumber++;
+  return BSON.Long.fromNumber(session.serverSession.txnNumber);
+};
+
 module.exports.SessionMixins = SessionMixins;
 module.exports.resolveClusterTime = resolveClusterTime;
 module.exports.inquireServerState = inquireServerState;
@@ -415,3 +448,5 @@ module.exports.clone = clone;
 module.exports.diff = diff;
 module.exports.Interval = Interval;
 module.exports.Timeout = Timeout;
+module.exports.isRetryableWritesSupported = isRetryableWritesSupported;
+module.exports.txnNumber = txnNumber;

@@ -8,13 +8,16 @@ var inherits = require('util').inherits,
   retrieveBSON = require('../connection/utils').retrieveBSON,
   Logger = require('../connection/logger'),
   MongoError = require('../error').MongoError,
+  errors = require('../error'),
   Server = require('./server'),
   ReplSetState = require('./replset_state'),
   clone = require('./shared').clone,
   Timeout = require('./shared').Timeout,
   Interval = require('./shared').Interval,
   createClientInfo = require('./shared').createClientInfo,
-  SessionMixins = require('./shared').SessionMixins;
+  SessionMixins = require('./shared').SessionMixins,
+  isRetryableWritesSupported = require('./shared').isRetryableWritesSupported,
+  txnNumber = require('./shared').txnNumber;
 
 var MongoCR = require('../auth/mongocr'),
   X509 = require('../auth/x509'),
@@ -1154,20 +1157,39 @@ ReplSet.prototype.getServers = function() {
 //
 // Execute write operation
 var executeWriteOperation = function(self, op, ns, ops, options, callback) {
-  if (typeof options === 'function') {
-    (callback = options), (options = {}), (options = options || {});
-  }
-
-  // Ensure we have no options
+  if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
-  // No server returned we had an error
-  if (self.s.replicaSetState.primary == null) {
-    return callback(new MongoError('no primary server found'));
+  if (!options.retryWrites || !options.session || !isRetryableWritesSupported(self)) {
+    // No server returned we had an error
+    if (self.s.replicaSetState.primary == null) {
+      return callback(new MongoError('no primary server found'));
+    }
+
+    // Execute the command
+    return self.s.replicaSetState.primary[op](ns, ops, options, callback);
   }
 
-  // Execute the command
-  self.s.replicaSetState.primary[op](ns, ops, options, callback);
+  // increment and assign txnNumber
+  options.txnNumber = txnNumber(options.session);
+
+  self.s.replicaSetState.primary[op](ns, ops, options, (err, result) => {
+    if (!err) return callback(null, result);
+    if (err instanceof errors.MongoNetworkError) {
+      return callback(err);
+    }
+
+    // check again, this might have changed in the interim
+    if (self.s.replicaSetState.primary == null) {
+      return callback(new MongoError('no primary server found'));
+    }
+
+    // increment and assign txnNumber
+    options.txnNumber = txnNumber(options.session);
+
+    // rerun the operation
+    self.s.replicaSetState.primary[op](ns, ops, options, callback);
+  });
 };
 
 /**
