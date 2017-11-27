@@ -56,6 +56,11 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
     writeCommand.bypassDocumentValidation = options.bypassDocumentValidation;
   }
 
+  // optionally add a `txnNumber` if retryable writes are being attempted
+  if (typeof options.txnNumber !== 'undefined') {
+    writeCommand.txnNumber = options.txnNumber;
+  }
+
   // Options object
   var opts = { command: true };
   if (typeof options.session !== 'undefined') opts.session = options.session;
