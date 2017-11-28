@@ -15,12 +15,15 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://localhost/');
-      expect(object.servers).to.have.length(1);
-      expect(object.servers[0].host).to.equal('localhost');
-      expect(object.servers[0].port).to.equal(27017);
-      expect(object.dbName).to.equal('admin');
+    test: function(done) {
+      parse('mongodb://localhost/', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(1);
+        expect(object.servers[0].host).to.equal('localhost');
+        expect(object.servers[0].port).to.equal(27017);
+        expect(object.dbName).to.equal('admin');
+        done();
+      });
     }
   });
 
@@ -32,13 +35,15 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      // console.dir(parse)
-      var object = parse('mongodb://localhost:27017/');
-      expect(object.servers).to.have.length(1);
-      expect(object.servers[0].host).to.equal('localhost');
-      expect(object.servers[0].port).to.equal(27017);
-      expect(object.dbName).to.equal('admin');
+    test: function(done) {
+      parse('mongodb://localhost:27017/', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(1);
+        expect(object.servers[0].host).to.equal('localhost');
+        expect(object.servers[0].port).to.equal(27017);
+        expect(object.dbName).to.equal('admin');
+        done();
+      });
     }
   });
 
@@ -50,9 +55,12 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://localhost:27017/test?appname=hello%20world');
-      expect(object.appname).to.equal('hello world');
+    test: function(done) {
+      parse('mongodb://localhost:27017/test?appname=hello%20world', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.appname).to.equal('hello world');
+        done();
+      });
     }
   });
 
@@ -64,12 +72,15 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://localhost/?safe=true&readPreference=secondary');
-      expect(object.servers).to.have.length(1);
-      expect(object.servers[0].host).to.equal('localhost');
-      expect(object.servers[0].port).to.equal(27017);
-      expect(object.dbName).to.equal('admin');
+    test: function(done) {
+      parse('mongodb://localhost/?safe=true&readPreference=secondary', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(1);
+        expect(object.servers[0].host).to.equal('localhost');
+        expect(object.servers[0].port).to.equal(27017);
+        expect(object.dbName).to.equal('admin');
+        done();
+      });
     }
   });
 
@@ -81,12 +92,15 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://localhost:28101/');
-      expect(object.servers).to.have.length(1);
-      expect(object.servers[0].host).to.equal('localhost');
-      expect(object.servers[0].port).to.equal(28101);
-      expect(object.dbName).to.equal('admin');
+    test: function(done) {
+      parse('mongodb://localhost:28101/', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(1);
+        expect(object.servers[0].host).to.equal('localhost');
+        expect(object.servers[0].port).to.equal(28101);
+        expect(object.dbName).to.equal('admin');
+        done();
+      });
     }
   });
 
@@ -99,15 +113,17 @@ describe('Url Parser', function() {
     },
 
     // The actual test we wish to run
-    test: function() {
-      // console.dir(parse)
-      var object = parse('mongodb://fred:foobar@localhost/baz');
-      expect(object.servers).to.have.length(1);
-      expect(object.servers[0].host).to.equal('localhost');
-      expect(object.servers[0].port).to.equal(27017);
-      expect(object.dbName).to.equal('baz');
-      expect(object.auth.user).to.equal('fred');
-      expect(object.auth.password).to.equal('foobar');
+    test: function(done) {
+      parse('mongodb://fred:foobar@localhost/baz', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(1);
+        expect(object.servers[0].host).to.equal('localhost');
+        expect(object.servers[0].port).to.equal(27017);
+        expect(object.dbName).to.equal('baz');
+        expect(object.auth.user).to.equal('fred');
+        expect(object.auth.password).to.equal('foobar');
+        done();
+      });
     }
   });
 
@@ -120,15 +136,17 @@ describe('Url Parser', function() {
     },
 
     // The actual test we wish to run
-    test: function() {
-      // console.dir(parse)
-      var object = parse('mongodb://fred:foo%20bar@localhost/baz');
-      expect(object.servers).to.have.length(1);
-      expect(object.servers[0].host).to.equal('localhost');
-      expect(object.servers[0].port).to.equal(27017);
-      expect(object.dbName).to.equal('baz');
-      expect(object.auth.user).to.equal('fred');
-      expect(object.auth.password).to.equal('foo bar');
+    test: function(done) {
+      parse('mongodb://fred:foo%20bar@localhost/baz', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(1);
+        expect(object.servers[0].host).to.equal('localhost');
+        expect(object.servers[0].port).to.equal(27017);
+        expect(object.dbName).to.equal('baz');
+        expect(object.auth.user).to.equal('fred');
+        expect(object.auth.password).to.equal('foo bar');
+        done();
+      });
     }
   });
 
@@ -140,11 +158,14 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://%2Ftmp%2Fmongodb-27017.sock');
-      expect(object.servers).to.have.length(1);
-      expect(object.servers[0].domain_socket).to.equal('/tmp/mongodb-27017.sock');
-      expect(object.dbName).to.equal('admin');
+    test: function(done) {
+      parse('mongodb://%2Ftmp%2Fmongodb-27017.sock', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(1);
+        expect(object.servers[0].domain_socket).to.equal('/tmp/mongodb-27017.sock');
+        expect(object.dbName).to.equal('admin');
+        done();
+      });
     }
   });
 
@@ -156,13 +177,16 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://fred:foo@%2Ftmp%2Fmongodb-27017.sock');
-      expect(object.servers).to.have.length(1);
-      expect(object.servers[0].domain_socket).to.equal('/tmp/mongodb-27017.sock');
-      expect(object.dbName).to.equal('admin');
-      expect(object.auth.user).to.equal('fred');
-      expect(object.auth.password).to.equal('foo');
+    test: function(done) {
+      parse('mongodb://fred:foo@%2Ftmp%2Fmongodb-27017.sock', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(1);
+        expect(object.servers[0].domain_socket).to.equal('/tmp/mongodb-27017.sock');
+        expect(object.dbName).to.equal('admin');
+        expect(object.auth.user).to.equal('fred');
+        expect(object.auth.password).to.equal('foo');
+        done();
+      });
     }
   });
 
@@ -174,15 +198,16 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      // console.dir(parse)
-      var object = parse('mongodb://fred:foo@%2Ftmp%2Fmongodb-27017.sock/somedb');
-
-      expect(object.servers).to.have.length(1);
-      expect(object.servers[0].domain_socket).to.equal('/tmp/mongodb-27017.sock');
-      expect(object.dbName).to.equal('somedb');
-      expect(object.auth.user).to.equal('fred');
-      expect(object.auth.password).to.equal('foo');
+    test: function(done) {
+      parse('mongodb://fred:foo@%2Ftmp%2Fmongodb-27017.sock/somedb', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(1);
+        expect(object.servers[0].domain_socket).to.equal('/tmp/mongodb-27017.sock');
+        expect(object.dbName).to.equal('somedb');
+        expect(object.auth.user).to.equal('fred');
+        expect(object.auth.password).to.equal('foo');
+        done();
+      });
     }
   });
 
@@ -194,15 +219,20 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://fred:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true');
-
-      expect(object.servers).to.have.length(1);
-      expect(object.servers[0].domain_socket).to.equal('/tmp/mongodb-27017.sock');
-      expect(object.dbName).to.equal('somedb');
-      expect(object.auth.user).to.equal('fred');
-      expect(object.auth.password).to.equal('foo');
-      expect(object.db_options.safe).to.be.true;
+    test: function(done) {
+      parse('mongodb://fred:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true', {}, function(
+        err,
+        object
+      ) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(1);
+        expect(object.servers[0].domain_socket).to.equal('/tmp/mongodb-27017.sock');
+        expect(object.dbName).to.equal('somedb');
+        expect(object.auth.user).to.equal('fred');
+        expect(object.auth.password).to.equal('foo');
+        expect(object.db_options.safe).to.be.true;
+        done();
+      });
     }
   });
 
@@ -214,14 +244,17 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://example1.com:27017,example2.com:27018');
-      expect(object.servers).to.have.length(2);
-      expect(object.servers[0].host).to.equal('example1.com');
-      expect(object.servers[0].port).to.equal(27017);
-      expect(object.servers[1].host).to.equal('example2.com');
-      expect(object.servers[1].port).to.equal(27018);
-      expect(object.dbName).to.equal('admin');
+    test: function(done) {
+      parse('mongodb://example1.com:27017,example2.com:27018', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(2);
+        expect(object.servers[0].host).to.equal('example1.com');
+        expect(object.servers[0].port).to.equal(27017);
+        expect(object.servers[1].host).to.equal('example2.com');
+        expect(object.servers[1].port).to.equal(27018);
+        expect(object.dbName).to.equal('admin');
+        done();
+      });
     }
   });
 
@@ -233,16 +266,19 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://localhost,localhost:27018,localhost:27019');
-      expect(object.servers).to.have.length(3);
-      expect(object.servers[0].host).to.equal('localhost');
-      expect(object.servers[0].port).to.equal(27017);
-      expect(object.servers[1].host).to.equal('localhost');
-      expect(object.servers[1].port).to.equal(27018);
-      expect(object.servers[2].host).to.equal('localhost');
-      expect(object.servers[2].port).to.equal(27019);
-      expect(object.dbName).to.equal('admin');
+    test: function(done) {
+      parse('mongodb://localhost,localhost:27018,localhost:27019', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(3);
+        expect(object.servers[0].host).to.equal('localhost');
+        expect(object.servers[0].port).to.equal(27017);
+        expect(object.servers[1].host).to.equal('localhost');
+        expect(object.servers[1].port).to.equal(27018);
+        expect(object.servers[2].host).to.equal('localhost');
+        expect(object.servers[2].port).to.equal(27019);
+        expect(object.dbName).to.equal('admin');
+        done();
+      });
     }
   });
 
@@ -254,17 +290,20 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://host1,host2,host3/?slaveOk=true');
-      expect(object.servers).to.have.length(3);
-      expect(object.servers[0].host).to.equal('host1');
-      expect(object.servers[0].port).to.equal(27017);
-      expect(object.servers[1].host).to.equal('host2');
-      expect(object.servers[1].port).to.equal(27017);
-      expect(object.servers[2].host).to.equal('host3');
-      expect(object.servers[2].port).to.equal(27017);
-      expect(object.dbName).to.equal('admin');
-      expect(object.server_options.slave_ok).to.be.true;
+    test: function(done) {
+      parse('mongodb://host1,host2,host3/?slaveOk=true', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(3);
+        expect(object.servers[0].host).to.equal('host1');
+        expect(object.servers[0].port).to.equal(27017);
+        expect(object.servers[1].host).to.equal('host2');
+        expect(object.servers[1].port).to.equal(27017);
+        expect(object.servers[2].host).to.equal('host3');
+        expect(object.servers[2].port).to.equal(27017);
+        expect(object.dbName).to.equal('admin');
+        expect(object.server_options.slave_ok).to.be.true;
+        done();
+      });
     }
   });
 
@@ -278,17 +317,20 @@ describe('Url Parser', function() {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
       },
 
-      test: function() {
-        var object = parse('mongodb://host1,host2,host3,host1/?slaveOk=true');
-        expect(object.servers).to.have.length(3);
-        expect(object.servers[0].host).to.equal('host1');
-        expect(object.servers[0].port).to.equal(27017);
-        expect(object.servers[1].host).to.equal('host2');
-        expect(object.servers[1].port).to.equal(27017);
-        expect(object.servers[2].host).to.equal('host3');
-        expect(object.servers[2].port).to.equal(27017);
-        expect(object.dbName).to.equal('admin');
-        expect(object.server_options.slave_ok).to.be.true;
+      test: function(done) {
+        parse('mongodb://host1,host2,host3,host1/?slaveOk=true', {}, function(err, object) {
+          expect(err).to.be.null;
+          expect(object.servers).to.have.length(3);
+          expect(object.servers[0].host).to.equal('host1');
+          expect(object.servers[0].port).to.equal(27017);
+          expect(object.servers[1].host).to.equal('host2');
+          expect(object.servers[1].port).to.equal(27017);
+          expect(object.servers[2].host).to.equal('host3');
+          expect(object.servers[2].port).to.equal(27017);
+          expect(object.dbName).to.equal('admin');
+          expect(object.server_options.slave_ok).to.be.true;
+          done();
+        });
       }
     }
   );
@@ -301,13 +343,16 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://localhost/?safe=true');
-      expect(object.servers).to.have.length(1);
-      expect(object.servers[0].host).to.equal('localhost');
-      expect(object.servers[0].port).to.equal(27017);
-      expect(object.dbName).to.equal('admin');
-      expect(object.db_options.safe).to.be.true;
+    test: function(done) {
+      parse('mongodb://localhost/?safe=true', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(1);
+        expect(object.servers[0].host).to.equal('localhost');
+        expect(object.servers[0].port).to.equal(27017);
+        expect(object.dbName).to.equal('admin');
+        expect(object.db_options.safe).to.be.true;
+        done();
+      });
     }
   });
 
@@ -319,19 +364,25 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://host1,host2,host3/?safe=true;w=2;wtimeoutMS=2000');
-      expect(object.servers).to.have.length(3);
-      expect(object.servers[0].host).to.equal('host1');
-      expect(object.servers[0].port).to.equal(27017);
-      expect(object.servers[1].host).to.equal('host2');
-      expect(object.servers[1].port).to.equal(27017);
-      expect(object.servers[2].host).to.equal('host3');
-      expect(object.servers[2].port).to.equal(27017);
-      expect(object.dbName).to.equal('admin');
-      expect(object.db_options.safe).to.be.true;
-      expect(object.db_options.w).to.equal(2);
-      expect(object.db_options.wtimeout).to.equal(2000);
+    test: function(done) {
+      parse('mongodb://host1,host2,host3/?safe=true;w=2;wtimeoutMS=2000', {}, function(
+        err,
+        object
+      ) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(3);
+        expect(object.servers[0].host).to.equal('host1');
+        expect(object.servers[0].port).to.equal(27017);
+        expect(object.servers[1].host).to.equal('host2');
+        expect(object.servers[1].port).to.equal(27017);
+        expect(object.servers[2].host).to.equal('host3');
+        expect(object.servers[2].port).to.equal(27017);
+        expect(object.dbName).to.equal('admin');
+        expect(object.db_options.safe).to.be.true;
+        expect(object.db_options.w).to.equal(2);
+        expect(object.db_options.wtimeout).to.equal(2000);
+        done();
+      });
     }
   });
 
@@ -345,22 +396,26 @@ describe('Url Parser', function() {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
       },
 
-      test: function() {
-        var object = parse(
-          'mongodb://localhost/db?replicaSet=hello&ssl=prefer&connectTimeoutMS=1000&socketTimeoutMS=2000'
+      test: function(done) {
+        parse(
+          'mongodb://localhost/db?replicaSet=hello&ssl=prefer&connectTimeoutMS=1000&socketTimeoutMS=2000',
+          {},
+          function(err, object) {
+            expect(err).to.be.null;
+            expect(object.servers).to.have.length(1);
+            expect(object.servers[0].host).to.equal('localhost');
+            expect(object.servers[0].port).to.equal(27017);
+            expect(object.dbName).to.equal('db');
+            expect(object.rs_options.rs_name).to.equal('hello');
+            expect(object.server_options.socketOptions.connectTimeoutMS).to.equal(1000);
+            expect(object.server_options.socketOptions.socketTimeoutMS).to.equal(2000);
+            expect(object.rs_options.socketOptions.connectTimeoutMS).to.equal(1000);
+            expect(object.rs_options.socketOptions.socketTimeoutMS).to.equal(2000);
+            expect(object.rs_options.ssl).to.equal('prefer');
+            expect(object.server_options.ssl).to.equal('prefer');
+            done();
+          }
         );
-
-        expect(object.servers).to.have.length(1);
-        expect(object.servers[0].host).to.equal('localhost');
-        expect(object.servers[0].port).to.equal(27017);
-        expect(object.dbName).to.equal('db');
-        expect(object.rs_options.rs_name).to.equal('hello');
-        expect(object.server_options.socketOptions.connectTimeoutMS).to.equal(1000);
-        expect(object.server_options.socketOptions.socketTimeoutMS).to.equal(2000);
-        expect(object.rs_options.socketOptions.connectTimeoutMS).to.equal(1000);
-        expect(object.rs_options.socketOptions.socketTimeoutMS).to.equal(2000);
-        expect(object.rs_options.ssl).to.equal('prefer');
-        expect(object.server_options.ssl).to.equal('prefer');
       }
     }
   );
@@ -373,15 +428,17 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://localhost/db?ssl=true');
-
-      expect(object.servers).to.have.length(1);
-      expect(object.servers[0].host).to.equal('localhost');
-      expect(object.servers[0].port).to.equal(27017);
-      expect(object.dbName).to.equal('db');
-      expect(object.rs_options.ssl).to.be.true;
-      expect(object.server_options.ssl).to.be.true;
+    test: function(done) {
+      parse('mongodb://localhost/db?ssl=true', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(1);
+        expect(object.servers[0].host).to.equal('localhost');
+        expect(object.servers[0].port).to.equal(27017);
+        expect(object.dbName).to.equal('db');
+        expect(object.rs_options.ssl).to.be.true;
+        expect(object.server_options.ssl).to.be.true;
+        done();
+      });
     }
   });
 
@@ -393,14 +450,17 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://localhost/db?maxPoolSize=100');
-      expect(object.servers).to.have.length(1);
-      expect(object.servers[0].host).to.equal('localhost');
-      expect(object.servers[0].port).to.equal(27017);
-      expect(object.dbName).to.equal('db');
-      expect(object.rs_options.poolSize).to.equal(100);
-      expect(object.server_options.poolSize).to.equal(100);
+    test: function(done) {
+      parse('mongodb://localhost/db?maxPoolSize=100', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(1);
+        expect(object.servers[0].host).to.equal('localhost');
+        expect(object.servers[0].port).to.equal(27017);
+        expect(object.dbName).to.equal('db');
+        expect(object.rs_options.poolSize).to.equal(100);
+        expect(object.server_options.poolSize).to.equal(100);
+        done();
+      });
     }
   });
 
@@ -412,13 +472,16 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://localhost/db?w=-1');
-      expect(object.servers).to.have.length(1);
-      expect(object.servers[0].host).to.equal('localhost');
-      expect(object.servers[0].port).to.equal(27017);
-      expect(object.dbName).to.equal('db');
-      expect(object.db_options.w).to.equal(-1);
+    test: function(done) {
+      parse('mongodb://localhost/db?w=-1', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(1);
+        expect(object.servers[0].host).to.equal('localhost');
+        expect(object.servers[0].port).to.equal(27017);
+        expect(object.dbName).to.equal('db');
+        expect(object.db_options.w).to.equal(-1);
+        done();
+      });
     }
   });
 
@@ -432,13 +495,16 @@ describe('Url Parser', function() {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
       },
 
-      test: function() {
-        var object = parse('mongodb://localhost/?compressors=snappy');
-        expect(object.servers).to.have.length(1);
-        expect(object.servers[0].host).to.equal('localhost');
-        expect(object.servers[0].port).to.equal(27017);
-        expect(object.dbName).to.equal('admin');
-        expect(object.server_options.compression.compressors[0]).to.equal('snappy');
+      test: function(done) {
+        parse('mongodb://localhost/?compressors=snappy', {}, function(err, object) {
+          expect(err).to.be.null;
+          expect(object.servers).to.have.length(1);
+          expect(object.servers[0].host).to.equal('localhost');
+          expect(object.servers[0].port).to.equal(27017);
+          expect(object.dbName).to.equal('admin');
+          expect(object.server_options.compression.compressors[0]).to.equal('snappy');
+          done();
+        });
       }
     }
   );
@@ -453,13 +519,16 @@ describe('Url Parser', function() {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
       },
 
-      test: function() {
-        var object = parse('mongodb://localhost/?zlibCompressionLevel=-1 ');
-        expect(object.servers).to.have.length(1);
-        expect(object.servers[0].host).to.equal('localhost');
-        expect(object.servers[0].port).to.equal(27017);
-        expect(object.dbName).to.equal('admin');
-        expect(object.server_options.compression.zlibCompressionLevel).to.equal(-1);
+      test: function(done) {
+        parse('mongodb://localhost/?zlibCompressionLevel=-1 ', {}, function(err, object) {
+          expect(err).to.be.null;
+          expect(object.servers).to.have.length(1);
+          expect(object.servers[0].host).to.equal('localhost');
+          expect(object.servers[0].port).to.equal(27017);
+          expect(object.dbName).to.equal('admin');
+          expect(object.server_options.compression.zlibCompressionLevel).to.equal(-1);
+          done();
+        });
       }
     }
   );
@@ -474,14 +543,20 @@ describe('Url Parser', function() {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
       },
 
-      test: function() {
-        var object = parse('mongodb://localhost/?compressors=snappy&zlibCompressionLevel=3');
-        expect(object.servers).to.have.length(1);
-        expect(object.servers[0].host).to.equal('localhost');
-        expect(object.servers[0].port).to.equal(27017);
-        expect(object.dbName).to.equal('admin');
-        expect(object.server_options.compression.compressors[0]).to.equal('snappy');
-        expect(object.server_options.compression.zlibCompressionLevel).to.equal(3);
+      test: function(done) {
+        parse('mongodb://localhost/?compressors=snappy&zlibCompressionLevel=3', {}, function(
+          err,
+          object
+        ) {
+          expect(err).to.be.null;
+          expect(object.servers).to.have.length(1);
+          expect(object.servers[0].host).to.equal('localhost');
+          expect(object.servers[0].port).to.equal(27017);
+          expect(object.dbName).to.equal('admin');
+          expect(object.server_options.compression.compressors[0]).to.equal('snappy');
+          expect(object.server_options.compression.zlibCompressionLevel).to.equal(3);
+          done();
+        });
       }
     }
   );
@@ -496,15 +571,21 @@ describe('Url Parser', function() {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
       },
 
-      test: function() {
-        var object = parse('mongodb://localhost/?compressors=snappy,zlib&zlibCompressionLevel=-1');
-        expect(object.servers).to.have.length(1);
-        expect(object.servers[0].host).to.equal('localhost');
-        expect(object.servers[0].port).to.equal(27017);
-        expect(object.dbName).to.equal('admin');
-        expect(object.server_options.compression.compressors[0]).to.equal('snappy');
-        expect(object.server_options.compression.compressors[1]).to.equal('zlib');
-        expect(object.server_options.compression.zlibCompressionLevel).to.equal(-1);
+      test: function(done) {
+        parse('mongodb://localhost/?compressors=snappy,zlib&zlibCompressionLevel=-1', {}, function(
+          err,
+          object
+        ) {
+          expect(err).to.be.null;
+          expect(object.servers).to.have.length(1);
+          expect(object.servers[0].host).to.equal('localhost');
+          expect(object.servers[0].port).to.equal(27017);
+          expect(object.dbName).to.equal('admin');
+          expect(object.server_options.compression.compressors[0]).to.equal('snappy');
+          expect(object.server_options.compression.compressors[1]).to.equal('zlib');
+          expect(object.server_options.compression.zlibCompressionLevel).to.equal(-1);
+          done();
+        });
       }
     }
   );
@@ -519,11 +600,13 @@ describe('Url Parser', function() {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
       },
 
-      test: function() {
+      test: function(done) {
         // Should throw due to unsupported compressor
-        expect(function() {
-          parse('mongodb://localhost/?compressors=foo');
-        }).to.throw(/compressors must be at least one of snappy or zlib/);
+        parse('mongodb://localhost/?compressors=foo', {}, function(err) {
+          expect(err).to.exist;
+          expect(err.message).to.equal('Compressors must be at least one of snappy or zlib');
+          done();
+        });
       }
     }
   );
@@ -538,11 +621,13 @@ describe('Url Parser', function() {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
       },
 
-      test: function() {
+      test: function(done) {
         // Should throw due to unsupported compressor
-        expect(function() {
-          parse('mongodb://localhost/?zlibCompressionLevel=10');
-        }).to.throw(/zlibCompressionLevel must be an integer between -1 and 9/);
+        parse('mongodb://localhost/?zlibCompressionLevel=10', {}, function(err) {
+          expect(err).to.exist;
+          expect(err.message).to.equal('zlibCompressionLevel must be an integer between -1 and 9');
+          done();
+        });
       }
     }
   );
@@ -555,7 +640,7 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
+    test: function(done) {
       var self = this,
         Logger = self.configuration.require.Logger,
         logged = false;
@@ -570,16 +655,22 @@ describe('Url Parser', function() {
 
       Logger.setLevel('warn');
 
-      parse('mongodb://localhost/db?minPoolSize=100');
-      expect(logged).to.be.true;
-      parse('mongodb://localhost/db?maxIdleTimeMS=100');
-      expect(logged).to.be.true;
-      parse('mongodb://localhost/db?waitQueueMultiple=100');
-      expect(logged).to.be.true;
-      parse('mongodb://localhost/db?waitQueueTimeoutMS=100');
-      expect(logged).to.be.true;
-      parse('mongodb://localhost/db?uuidRepresentation=1');
-      expect(logged).to.be.true;
+      parse('mongodb://localhost/db?minPoolSize=100', {}, function() {
+        expect(logged).to.be.true;
+        parse('mongodb://localhost/db?maxIdleTimeMS=100', {}, function() {
+          expect(logged).to.be.true;
+          parse('mongodb://localhost/db?waitQueueMultiple=100', {}, function() {
+            expect(logged).to.be.true;
+            parse('mongodb://localhost/db?waitQueueTimeoutMS=100', {}, function() {
+              expect(logged).to.be.true;
+              parse('mongodb://localhost/db?uuidRepresentation=1', {}, function() {
+                expect(logged).to.be.true;
+                done();
+              });
+            });
+          });
+        });
+      });
 
       Logger.reset();
     }
@@ -593,21 +684,30 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://localhost/db?safe=true&w=1');
-      expect(object.db_options.safe).to.be.true;
-
-      object = parse('mongodb://localhost/db?safe=false&w=1');
-      expect(object.db_options.safe).to.be.false;
-
-      // should throw as fireAndForget is set aswell as safe or any other write concerns
-      expect(function() {
-        parse('mongodb://localhost/db?safe=true&w=0');
-      }).to.throw(/w set to -1 or 0 cannot be combined with safe\/w\/journal\/fsync/);
-
-      expect(function() {
-        parse('mongodb://localhost/db?fsync=true&w=-1');
-      }).to.throw(/w set to -1 or 0 cannot be combined with safe\/w\/journal\/fsync/);
+    test: function(done) {
+      parse('mongodb://localhost/db?safe=true&w=1', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.db_options.safe).to.be.true;
+        parse('mongodb://localhost/db?safe=false&w=1', {}, function(err, object) {
+          expect(err).to.be.null;
+          expect(object.db_options.safe).to.be.false;
+          // should throw as fireAndForget is set aswell as safe or any other
+          // write concerns
+          parse('mongodb://localhost/db?safe=true&w=0', {}, function(err) {
+            expect(err).to.exist;
+            expect(err.message).to.equal(
+              'w set to -1 or 0 cannot be combined with safe/w/journal/fsync'
+            );
+            parse('mongodb://localhost/db?fsync=true&w=-1', {}, function(err) {
+              expect(err).to.exist;
+              expect(err.message).to.equal(
+                'w set to -1 or 0 cannot be combined with safe/w/journal/fsync'
+              );
+              done();
+            });
+          });
+        });
+      });
     }
   });
 
@@ -619,26 +719,37 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://dev1%4010GEN.ME@kdc.10gen.com/test?authMechanism=GSSAPI');
-      expect(object.auth).to.eql({ user: 'dev1@10GEN.ME', password: null });
-      expect(object.db_options.authMechanism).to.equal('GSSAPI');
-
-      // Should throw due to missing principal
-      expect(function() {
-        parse('mongodb://kdc.10gen.com/test?authMechanism=GSSAPI');
-      }).to.throw(/GSSAPI requires a provided principal/);
-
-      // Should throw due to unsupported mechanism
-      expect(function() {
-        parse('mongodb://kdc.10gen.com/test?authMechanism=NONE');
-      }).to.throw(
-        /only DEFAULT, GSSAPI, PLAIN, MONGODB-X509, SCRAM-SHA-1 or MONGODB-CR is supported by authMechanism/
-      );
-
-      object = parse('mongodb://dev1%4010GEN.ME:test@kdc.10gen.com/test?authMechanism=GSSAPI');
-      expect(object.auth).to.eql({ user: 'dev1@10GEN.ME', password: 'test' });
-      expect(object.db_options.authMechanism).to.equal('GSSAPI');
+    test: function(done) {
+      parse('mongodb://dev1%4010GEN.ME@kdc.10gen.com/test?authMechanism=GSSAPI', {}, function(
+        err,
+        object
+      ) {
+        expect(err).to.be.null;
+        expect(object.auth).to.eql({ user: 'dev1@10GEN.ME', password: null });
+        expect(object.db_options.authMechanism).to.equal('GSSAPI');
+        // Should throw due to missing principal
+        parse('mongodb://kdc.10gen.com/test?authMechanism=GSSAPI', {}, function(err) {
+          expect(err).to.exist;
+          expect(err.message).to.equal('GSSAPI requires a provided principal');
+          // Should throw due to unsupported mechanism
+          parse('mongodb://kdc.10gen.com/test?authMechanism=NONE', {}, function(err) {
+            expect(err).to.exist;
+            expect(err.message).to.equal(
+              'Only DEFAULT, GSSAPI, PLAIN, MONGODB-X509, SCRAM-SHA-1 or MONGODB-CR is supported by authMechanism'
+            );
+            parse(
+              'mongodb://dev1%4010GEN.ME:test@kdc.10gen.com/test?authMechanism=GSSAPI',
+              {},
+              function(err, object) {
+                expect(err).to.be.null;
+                expect(object.auth).to.eql({ user: 'dev1@10GEN.ME', password: 'test' });
+                expect(object.db_options.authMechanism).to.equal('GSSAPI');
+                done();
+              }
+            );
+          });
+        });
+      });
     }
   });
 
@@ -650,33 +761,41 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://localhost/db?slaveOk=true');
-      expect(object.server_options.slave_ok).to.be.true;
-
-      object = parse('mongodb://localhost/db?readPreference=primary');
-      expect(object.db_options.readPreference).to.equal('primary');
-
-      object = parse('mongodb://localhost/db?readPreference=primaryPreferred');
-      expect(object.db_options.readPreference).to.equal('primaryPreferred');
-
-      object = parse('mongodb://localhost/db?readPreference=secondary');
-      expect(object.db_options.readPreference).to.equal('secondary');
-
-      object = parse('mongodb://localhost/db?readPreference=secondaryPreferred');
-      expect(object.db_options.readPreference).to.equal('secondaryPreferred');
-
-      object = parse('mongodb://localhost/db?readPreference=nearest');
-      expect(object.db_options.readPreference).to.equal('nearest');
-
-      object = parse('mongodb://localhost/db');
-      expect(object.db_options.readPreference).to.equal('primary');
-
-      expect(function() {
-        parse('mongodb://localhost/db?readPreference=blah');
-      }).to.throw(
-        /readPreference must be either primary\/primaryPreferred\/secondary\/secondaryPreferred\/nearest/
-      );
+    test: function(done) {
+      parse('mongodb://localhost/db?slaveOk=true', {}, function(err, object) {
+        expect(object.server_options.slave_ok).to.be.true;
+        parse('mongodb://localhost/db?readPreference=primary', {}, function(err, object) {
+          expect(object.db_options.readPreference).to.equal('primary');
+          parse('mongodb://localhost/db?readPreference=primaryPreferred', {}, function(
+            err,
+            object
+          ) {
+            expect(object.db_options.readPreference).to.equal('primaryPreferred');
+            parse('mongodb://localhost/db?readPreference=secondary', {}, function(err, object) {
+              expect(object.db_options.readPreference).to.equal('secondary');
+              parse('mongodb://localhost/db?readPreference=secondaryPreferred', {}, function(
+                err,
+                object
+              ) {
+                expect(object.db_options.readPreference).to.equal('secondaryPreferred');
+                parse('mongodb://localhost/db?readPreference=nearest', {}, function(err, object) {
+                  expect(object.db_options.readPreference).to.equal('nearest');
+                  parse('mongodb://localhost/db', {}, function(err, object) {
+                    expect(object.db_options.readPreference).to.equal('primary');
+                    parse('mongodb://localhost/db?readPreference=blah', {}, function(err) {
+                      expect(err).to.exist;
+                      expect(err.message).to.equal(
+                        'readPreference must be either primary/primaryPreferred/secondary/secondaryPreferred/nearest'
+                      );
+                      done();
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
     }
   });
 
@@ -688,32 +807,41 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://localhost/db');
-      expect(object.db_options.read_preference_tags).to.be.null;
-
-      object = parse('mongodb://localhost/db?readPreferenceTags=dc:ny');
-      expect(object.db_options.read_preference_tags).to.eql([{ dc: 'ny' }]);
-
-      object = parse('mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1');
-      expect(object.db_options.read_preference_tags).to.eql([{ dc: 'ny', rack: '1' }]);
-
-      object = parse(
-        'mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1&readPreferenceTags=dc:sf,rack:2'
-      );
-      expect(object.db_options.read_preference_tags).to.eql([
-        { dc: 'ny', rack: '1' },
-        { dc: 'sf', rack: '2' }
-      ]);
-
-      object = parse(
-        'mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1&readPreferenceTags=dc:sf,rack:2&readPreferenceTags='
-      );
-      expect(object.db_options.read_preference_tags).to.eql([
-        { dc: 'ny', rack: '1' },
-        { dc: 'sf', rack: '2' },
-        {}
-      ]);
+    test: function(done) {
+      parse('mongodb://localhost/db', {}, function(err, object) {
+        expect(object.db_options.read_preference_tags).to.be.null;
+        parse('mongodb://localhost/db?readPreferenceTags=dc:ny', {}, function(err, object) {
+          expect(object.db_options.read_preference_tags).to.eql([{ dc: 'ny' }]);
+          parse('mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1', {}, function(
+            err,
+            object
+          ) {
+            expect(object.db_options.read_preference_tags).to.eql([{ dc: 'ny', rack: '1' }]);
+            parse(
+              'mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1&readPreferenceTags=dc:sf,rack:2',
+              {},
+              function(err, object) {
+                expect(object.db_options.read_preference_tags).to.eql([
+                  { dc: 'ny', rack: '1' },
+                  { dc: 'sf', rack: '2' }
+                ]);
+                parse(
+                  'mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1&readPreferenceTags=dc:sf,rack:2&readPreferenceTags=',
+                  {},
+                  function(err, object) {
+                    expect(object.db_options.read_preference_tags).to.eql([
+                      { dc: 'ny', rack: '1' },
+                      { dc: 'sf', rack: '2' },
+                      {}
+                    ]);
+                    done();
+                  }
+                );
+              }
+            );
+          });
+        });
+      });
     }
   });
 
@@ -725,12 +853,15 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://[::1]:1234');
-      expect(object.servers).to.have.length(1);
-      expect(object.servers[0].host).to.equal('::1');
-      expect(object.servers[0].port).to.equal(1234);
-      expect(object.dbName).to.equal('admin');
+    test: function(done) {
+      parse('mongodb://[::1]:1234', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(1);
+        expect(object.servers[0].host).to.equal('::1');
+        expect(object.servers[0].port).to.equal(1234);
+        expect(object.dbName).to.equal('admin');
+        done();
+      });
     }
   });
 
@@ -742,12 +873,15 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://[::1]');
-      expect(object.servers).to.have.length(1);
-      expect(object.servers[0].host).to.equal('::1');
-      expect(object.servers[0].port).to.equal(27017);
-      expect(object.dbName).to.equal('admin');
+    test: function(done) {
+      parse('mongodb://[::1]', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(1);
+        expect(object.servers[0].host).to.equal('::1');
+        expect(object.servers[0].port).to.equal(27017);
+        expect(object.dbName).to.equal('admin');
+        done();
+      });
     }
   });
 
@@ -759,16 +893,19 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://localhost,[::1]:27018,[2607:f0d0:1002:51::41]');
-      expect(object.servers).to.have.length(3);
-      expect(object.servers[0].host).to.equal('localhost');
-      expect(object.servers[0].port).to.equal(27017);
-      expect(object.servers[1].host).to.equal('::1');
-      expect(object.servers[1].port).to.equal(27018);
-      expect(object.servers[2].host).to.equal('2607:f0d0:1002:51::41');
-      expect(object.servers[2].port).to.equal(27017);
-      expect(object.dbName).to.equal('admin');
+    test: function(done) {
+      parse('mongodb://localhost,[::1]:27018,[2607:f0d0:1002:51::41]', {}, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.servers).to.have.length(3);
+        expect(object.servers[0].host).to.equal('localhost');
+        expect(object.servers[0].port).to.equal(27017);
+        expect(object.servers[1].host).to.equal('::1');
+        expect(object.servers[1].port).to.equal(27018);
+        expect(object.servers[2].host).to.equal('2607:f0d0:1002:51::41');
+        expect(object.servers[2].port).to.equal(27017);
+        expect(object.dbName).to.equal('admin');
+        done();
+      });
     }
   });
 
@@ -780,9 +917,15 @@ describe('Url Parser', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    test: function() {
-      var object = parse('mongodb://k%3Fy:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true');
-      expect(object.auth.user).to.equal('k?y');
+    test: function(done) {
+      parse('mongodb://k%3Fy:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true', {}, function(
+        err,
+        object
+      ) {
+        expect(err).to.be.null;
+        expect(object.auth.user).to.equal('k?y');
+        done();
+      });
     }
   });
 
@@ -796,9 +939,15 @@ describe('Url Parser', function() {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
       },
 
-      test: function() {
-        var object = parse('mongodb://k%3Fy:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true');
-        expect(object.auth.user).to.equal('k?y');
+      test: function(done) {
+        parse('mongodb://k%3Fy:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true', {}, function(
+          err,
+          object
+        ) {
+          expect(err).to.be.null;
+          expect(object.auth.user).to.equal('k?y');
+          done();
+        });
       }
     }
   );
@@ -813,9 +962,15 @@ describe('Url Parser', function() {
         requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
       },
 
-      test: function() {
-        var object = parse('mongodb://kay%3Akay:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true');
-        expect(object.auth.user).to.equal('kay:kay');
+      test: function(done) {
+        parse('mongodb://kay%3Akay:foo@%2Ftmp%2Fmongodb-27017.sock/somedb?safe=true', {}, function(
+          err,
+          object
+        ) {
+          expect(err).to.be.null;
+          expect(object.auth.user).to.equal('kay:kay');
+          done();
+        });
       }
     }
   );
@@ -827,9 +982,12 @@ describe('Url Parser', function() {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
-    test: function() {
-      var object = parse('mongodb://localhost/', { readPreference: 'secondary' });
-      expect(object.db_options.readPreference).to.equal('secondary');
+    test: function(done) {
+      parse('mongodb://localhost/', { readPreference: 'secondary' }, function(err, object) {
+        expect(err).to.be.null;
+        expect(object.db_options.readPreference).to.equal('secondary');
+        done();
+      });
     }
   });
 });

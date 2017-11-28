@@ -28,7 +28,7 @@ describe('Connection String', function() {
           var valid = test.valid;
 
           try {
-            parse(test.uri);
+            parse(test.uri, {}, function() {});
             if (valid === false) done('should not have been able to parse');
           } catch (err) {
             if (valid === true) done(err);

@@ -420,13 +420,10 @@ describe('MongoClient', function() {
       var configuration = this.configuration;
       var MongoClient = configuration.require.MongoClient;
 
-      try {
-        MongoClient.connect('user:password@localhost:27017/test', function(err, client) {
-          client.close();
-        });
-      } catch (err) {
+      MongoClient.connect('user:password@localhost:27017/test', function(err) {
+        test.equal(err.message, 'Invalid schema, expected `mongodb` or `mongodb+srv`');
         done();
-      }
+      });
     }
   });
 
