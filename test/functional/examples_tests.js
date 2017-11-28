@@ -851,7 +851,7 @@ exports['update and replace'] = {
 
         var promise =
         // Start Example 54
-        db.collection('inventory').updateOne(
+        db.collection('inventory').replaceOne(
           { item: "paper" },
           { item: "paper", 
             instock: [
