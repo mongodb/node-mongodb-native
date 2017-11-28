@@ -1032,7 +1032,7 @@ describe('Examples', function() {
             // Start Example 54
             db
               .collection('inventory')
-              .updateOne(
+              .replaceOne(
                 { item: 'paper' },
                 {
                   $set: {
