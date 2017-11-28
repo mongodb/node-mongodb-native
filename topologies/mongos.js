@@ -900,7 +900,7 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
 
   server[op](ns, ops, options, (err, result) => {
     if (!err) return callback(null, result);
-    if (err instanceof errors.MongoNetworkError) {
+    if (!(err instanceof errors.MongoNetworkError)) {
       return callback(err);
     }
 
@@ -908,7 +908,7 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
     server = pickProxy(self);
 
     // No server found error out with original error
-    if (!server) {
+    if (!server || !isRetryableWritesSupported(server)) {
       return callback(err);
     }
 

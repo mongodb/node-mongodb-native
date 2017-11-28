@@ -1175,7 +1175,7 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
 
   self.s.replicaSetState.primary[op](ns, ops, options, (err, result) => {
     if (!err) return callback(null, result);
-    if (err instanceof errors.MongoNetworkError) {
+    if (!(err instanceof errors.MongoNetworkError)) {
       return callback(err);
     }
 
