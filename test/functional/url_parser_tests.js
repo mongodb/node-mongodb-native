@@ -604,7 +604,7 @@ describe('Url Parser', function() {
         // Should throw due to unsupported compressor
         parse('mongodb://localhost/?compressors=foo', {}, function(err) {
           expect(err).to.exist;
-          expect(err.message).to.equal('compressors must be at least one of snappy or zlib');
+          expect(err.message).to.equal('Compressors must be at least one of snappy or zlib');
           done();
         });
       }
@@ -735,7 +735,7 @@ describe('Url Parser', function() {
           parse('mongodb://kdc.10gen.com/test?authMechanism=NONE', {}, function(err) {
             expect(err).to.exist;
             expect(err.message).to.equal(
-              'only DEFAULT, GSSAPI, PLAIN, MONGODB-X509, SCRAM-SHA-1 or MONGODB-CR is supported by authMechanism'
+              'Only DEFAULT, GSSAPI, PLAIN, MONGODB-X509, SCRAM-SHA-1 or MONGODB-CR is supported by authMechanism'
             );
             parse(
               'mongodb://dev1%4010GEN.ME:test@kdc.10gen.com/test?authMechanism=GSSAPI',
