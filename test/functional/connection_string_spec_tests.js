@@ -29,35 +29,13 @@ exports['Should run all connection string tests'] = {
       for(var j = 0; j < testFile.tests.length; j++) {
         var test = testFile.tests[j];
         console.log(f('  %s', test.description))
-        // console.dir(test)
-
-        // Unpack the test
-        var auth = test.auth;
-        var description = test.description;
-        var hosts = test.hosts;
-        var options = test.options;
-        var uri = test.uri;
-        var valid = test.valid;
-        var warning = test.warning;
-
-        // Test state
-        var success = true;
 
         // Parse the test
-        try {
-          var result = parser(test.uri);
-          if(valid == false) success = false;
-        } catch(err) {
-          // console.log(err.stack)
-          if(valid == true) success = false;
-        }
-
-        // If we were unsuccessful
-        if(!success) {
-          throw test;
-        }
-      };
-    };
+        parser(test.uri, {}, function(err) {
+          if (err && test.valid !== false) throw test;
+        });
+      }
+    }
 
     assert.done();
   }
