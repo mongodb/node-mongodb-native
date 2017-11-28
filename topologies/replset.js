@@ -1184,9 +1184,6 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
       return callback(new MongoError('no primary server found'));
     }
 
-    // increment and assign txnNumber
-    options.txnNumber = txnNumber(options.session);
-
     // rerun the operation
     self.s.replicaSetState.primary[op](ns, ops, options, callback);
   });

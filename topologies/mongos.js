@@ -912,9 +912,6 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
       return callback(err);
     }
 
-    // increment and assign txnNumber
-    options.txnNumber = txnNumber(options.session);
-
     // rerun the operation
     server[op](ns, ops, options, callback);
   });
