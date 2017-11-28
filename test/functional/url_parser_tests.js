@@ -669,3 +669,15 @@ exports['Should use options passed into url parsing'] = {
     test.done();
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Raises exceptions on invalid hostnames'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  test: function(configure, test) {
+    test.throws(function() { parse("mongodb://invalid::host:27017/db") }, "double colon in host identifier");
+    test.throws(function() { parse("mongodb://invalid/host:27017/db") }, "slash in host identifier");
+    test.done();
+  }
+}
