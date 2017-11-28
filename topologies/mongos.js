@@ -1,20 +1,23 @@
 'use strict';
 
-var inherits = require('util').inherits,
+const inherits = require('util').inherits,
   f = require('util').format,
   EventEmitter = require('events').EventEmitter,
   BasicCursor = require('../cursor'),
   Logger = require('../connection/logger'),
   retrieveBSON = require('../connection/utils').retrieveBSON,
   MongoError = require('../error').MongoError,
+  errors = require('../error'),
   Server = require('./server'),
   clone = require('./shared').clone,
   diff = require('./shared').diff,
   cloneOptions = require('./shared').cloneOptions,
   createClientInfo = require('./shared').createClientInfo,
-  SessionMixins = require('./shared').SessionMixins;
+  SessionMixins = require('./shared').SessionMixins,
+  isRetryableWritesSupported = require('./shared').isRetryableWritesSupported,
+  txnNumber = require('./shared').txnNumber;
 
-var BSON = retrieveBSON();
+const BSON = retrieveBSON();
 
 /**
  * @fileOverview The **Mongos** class is a class that represents a Mongos Proxy topology and is
@@ -879,18 +882,42 @@ Mongos.prototype.isDestroyed = function() {
 
 // Execute write operation
 var executeWriteOperation = function(self, op, ns, ops, options, callback) {
-  if (typeof options === 'function') {
-    (callback = options), (options = {}), (options = options || {});
-  }
-
-  // Ensure we have no options
+  if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
+
   // Pick a server
-  var server = pickProxy(self);
+  let server = pickProxy(self);
   // No server found error out
   if (!server) return callback(new MongoError('no mongos proxy available'));
-  // Execute the command
-  server[op](ns, ops, options, callback);
+
+  if (!options.retryWrites || !options.session || !isRetryableWritesSupported(self)) {
+    // Execute the command
+    return server[op](ns, ops, options, callback);
+  }
+
+  // increment and assign txnNumber
+  options.txnNumber = txnNumber(options.session);
+
+  server[op](ns, ops, options, (err, result) => {
+    if (!err) return callback(null, result);
+    if (err instanceof errors.MongoNetworkError) {
+      return callback(err);
+    }
+
+    // Pick another server
+    server = pickProxy(self);
+
+    // No server found error out with original error
+    if (!server) {
+      return callback(err);
+    }
+
+    // increment and assign txnNumber
+    options.txnNumber = txnNumber(options.session);
+
+    // rerun the operation
+    server[op](ns, ops, options, callback);
+  });
 };
 
 /**
