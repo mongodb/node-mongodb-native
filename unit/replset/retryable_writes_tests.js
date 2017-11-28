@@ -7,7 +7,7 @@ var expect = require('chai').expect,
   ServerSessionPool = require('../../../../lib/sessions').ServerSessionPool;
 
 const test = new ReplSetFixture();
-describe('Sessions (ReplSet)', function() {
+describe('Retryable Writes (ReplSet)', function() {
   afterEach(() => mock.cleanup());
   beforeEach(() => test.setup({ ismaster: mock.DEFAULT_ISMASTER_36 }));
 
