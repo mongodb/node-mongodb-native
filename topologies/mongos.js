@@ -927,6 +927,7 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
  * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {ClientSession} [options.session=null] Session to use for the operation
+ * @param {boolean} [options.retryWrites] Enable retryable writes for this operation
  * @param {opResultCallback} callback A callback function
  */
 Mongos.prototype.insert = function(ns, ops, options, callback) {
@@ -960,6 +961,7 @@ Mongos.prototype.insert = function(ns, ops, options, callback) {
  * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {ClientSession} [options.session=null] Session to use for the operation
+ * @param {boolean} [options.retryWrites] Enable retryable writes for this operation
  * @param {opResultCallback} callback A callback function
  */
 Mongos.prototype.update = function(ns, ops, options, callback) {
@@ -993,6 +995,7 @@ Mongos.prototype.update = function(ns, ops, options, callback) {
  * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {ClientSession} [options.session=null] Session to use for the operation
+ * @param {boolean} [options.retryWrites] Enable retryable writes for this operation
  * @param {opResultCallback} callback A callback function
  */
 Mongos.prototype.remove = function(ns, ops, options, callback) {
