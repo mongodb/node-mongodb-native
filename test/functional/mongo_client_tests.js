@@ -389,13 +389,10 @@ exports['Should fail due to wrong uri user:password@localhost'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
 
-    try {
-      MongoClient.connect('user:password@localhost:27017/test', function(err, db) {
-        db.close();
-      });
-    } catch(err) {
+    MongoClient.connect('user:password@localhost:27017/test', function (err) {
+      test.equal(err.message, 'invalid schema, expected mongodb or mongodb+srv');
       test.done();
-    }
+    });
   }
 }
 

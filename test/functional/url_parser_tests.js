@@ -14,12 +14,14 @@ exports['Should correctly parse mongodb://localhost'] = {
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://localhost/");
-    test.equal(1, object.servers.length);
-    test.equal('localhost', object.servers[0].host);
-    test.equal('27017', object.servers[0].port);
-    test.equal('admin', object.dbName);
-    test.done();
+    parse("mongodb://localhost/", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(1, object.servers.length);
+      test.equal('localhost', object.servers[0].host);
+      test.equal('27017', object.servers[0].port);
+      test.equal('admin', object.dbName);
+      test.done();
+    });
   }
 }
 
@@ -32,12 +34,14 @@ exports['Should correctly parse mongodb://localhost:27017'] = {
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://localhost:27017/");
+  parse("mongodb://localhost:27017/", {}, function(err, object) {
+    test.equal(err, null);
     test.equal(1, object.servers.length);
     test.equal('localhost', object.servers[0].host);
     test.equal('27017', object.servers[0].port);
     test.equal('admin', object.dbName);
     test.done();
+  });
   }
 }
 
@@ -49,9 +53,12 @@ exports['Should correctly parse mongodb://localhost:27017test?appname=hello%20wo
 
   // The actual test we wish to run
   test: function(configure, test) {
-    var object = parse("mongodb://localhost:27017/test?appname=hello%20world");
+  // console.dir(parse)
+  parse("mongodb://localhost:27017/test?appname=hello%20world", {}, function(err, object) {
+    test.equal(err, null);
     test.equal("hello world", object.appname);
     test.done();
+  });
   }
 }
 
@@ -63,14 +70,15 @@ exports['Should correctly parse mongodb://localhost/?safe=true&readPreference=se
 
   // The actual test we wish to run
   test: function(configure, test) {
-    // console.dir(parse)
-    var object = parse("mongodb://localhost/?safe=true&readPreference=secondary");
-    // var object = parse("mongodb://localhost?safe");
+  // console.dir(parse)
+  parse("mongodb://localhost/?safe=true&readPreference=secondary", {}, function(err, object) {
+    test.equal(err, null);
     test.equal(1, object.servers.length);
     test.equal('localhost', object.servers[0].host);
     test.equal('27017', object.servers[0].port);
     test.equal('admin', object.dbName);
     test.done();
+  });
   }
 }
 
@@ -82,13 +90,15 @@ exports['Should correctly parse mongodb://localhost:28101/'] = {
 
   // The actual test we wish to run
   test: function(configure, test) {
-    // console.dir(parse)
-    var object = parse("mongodb://localhost:28101/");
+  // console.dir(parse)
+  parse("mongodb://localhost:28101/", {}, function(err, object) {
+    test.equal(err, null);
     test.equal(1, object.servers.length);
     test.equal('localhost', object.servers[0].host);
     test.equal('28101', object.servers[0].port);
     test.equal('admin', object.dbName);
     test.done();
+  });
   }
 }
 
@@ -101,14 +111,16 @@ exports['Should correctly parse mongodb://fred:foobar@localhost/baz'] = {
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://fred:foobar@localhost/baz");
-    test.equal(1, object.servers.length);
-    test.equal('localhost', object.servers[0].host);
-    test.equal('27017', object.servers[0].port);
-    test.equal('baz', object.dbName);
-    test.equal('fred', object.auth.user);
-    test.equal('foobar', object.auth.password);
-    test.done();
+    parse("mongodb://fred:foobar@localhost/baz", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(1, object.servers.length);
+      test.equal('localhost', object.servers[0].host);
+      test.equal('27017', object.servers[0].port);
+      test.equal('baz', object.dbName);
+      test.equal('fred', object.auth.user);
+      test.equal('foobar', object.auth.password);
+      test.done();
+    });
   }
 }
 
@@ -121,14 +133,16 @@ exports['Should correctly parse mongodb://fred:foo%20bar@localhost/baz'] = {
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://fred:foo%20bar@localhost/baz");
-    test.equal(1, object.servers.length);
-    test.equal('localhost', object.servers[0].host);
-    test.equal('27017', object.servers[0].port);
-    test.equal('baz', object.dbName);
-    test.equal('fred', object.auth.user);
-    test.equal('foo bar', object.auth.password);
-    test.done();
+    parse("mongodb://fred:foo%20bar@localhost/baz", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(1, object.servers.length);
+      test.equal('localhost', object.servers[0].host);
+      test.equal('27017', object.servers[0].port);
+      test.equal('baz', object.dbName);
+      test.equal('fred', object.auth.user);
+      test.equal('foo bar', object.auth.password);
+      test.done();
+    });
   }
 }
 
@@ -141,11 +155,13 @@ exports['Should correctly parse mongodb:///tmp/mongodb-27017.sock'] = {
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb:///tmp/mongodb-27017.sock");
-    test.equal(1, object.servers.length);
-    test.equal('/tmp/mongodb-27017.sock', object.servers[0].domain_socket);
-    test.equal('admin', object.dbName);
-    test.done();
+    parse("mongodb:///tmp/mongodb-27017.sock", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(1, object.servers.length);
+      test.equal('/tmp/mongodb-27017.sock', object.servers[0].domain_socket);
+      test.equal('admin', object.dbName);
+      test.done();
+    });
   }
 }
 
@@ -158,13 +174,15 @@ exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock'] = {
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://fred:foo@/tmp/mongodb-27017.sock");
-    test.equal(1, object.servers.length);
-    test.equal('/tmp/mongodb-27017.sock', object.servers[0].domain_socket);
-    test.equal('admin', object.dbName);
-    test.equal('fred', object.auth.user);
-    test.equal('foo', object.auth.password);
-    test.done();
+    parse("mongodb://fred:foo@/tmp/mongodb-27017.sock", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(1, object.servers.length);
+      test.equal('/tmp/mongodb-27017.sock', object.servers[0].domain_socket);
+      test.equal('admin', object.dbName);
+      test.equal('fred', object.auth.user);
+      test.equal('foo', object.auth.password);
+      test.done();
+    });
   }
 }
 
@@ -177,13 +195,15 @@ exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock/somed
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://fred:foo@/tmp/mongodb-27017.sock/somedb");
-    test.equal(1, object.servers.length);
-    test.equal('/tmp/mongodb-27017.sock', object.servers[0].domain_socket);
-    test.equal('somedb', object.dbName);
-    test.equal('fred', object.auth.user);
-    test.equal('foo', object.auth.password);
-    test.done();
+    parse("mongodb://fred:foo@/tmp/mongodb-27017.sock/somedb", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(1, object.servers.length);
+      test.equal('/tmp/mongodb-27017.sock', object.servers[0].domain_socket);
+      test.equal('somedb', object.dbName);
+      test.equal('fred', object.auth.user);
+      test.equal('foo', object.auth.password);
+      test.done();
+    });
   }
 }
 
@@ -196,14 +216,16 @@ exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock/somed
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://fred:foo@/tmp/mongodb-27017.sock/somedb?safe=true");
-    test.equal(1, object.servers.length);
-    test.equal('/tmp/mongodb-27017.sock', object.servers[0].domain_socket);
-    test.equal('somedb', object.dbName);
-    test.equal('fred', object.auth.user);
-    test.equal('foo', object.auth.password);
-    test.equal(true, object.db_options.safe);
-    test.done();
+    parse("mongodb://fred:foo@/tmp/mongodb-27017.sock/somedb?safe=true", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(1, object.servers.length);
+      test.equal('/tmp/mongodb-27017.sock', object.servers[0].domain_socket);
+      test.equal('somedb', object.dbName);
+      test.equal('fred', object.auth.user);
+      test.equal('foo', object.auth.password);
+      test.equal(true, object.db_options.safe);
+      test.done();
+    });
   }
 }
 
@@ -216,14 +238,16 @@ exports['Should correctly parse mongodb://example1.com:27017,example2.com:27018'
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://example1.com:27017,example2.com:27018");
-    test.equal(2, object.servers.length);
-    test.equal("example1.com", object.servers[0].host);
-    test.equal('27017', object.servers[0].port);
-    test.equal("example2.com", object.servers[1].host);
-    test.equal('27018', object.servers[1].port);
-    test.equal('admin', object.dbName);
-    test.done();
+    parse("mongodb://example1.com:27017,example2.com:27018", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(2, object.servers.length);
+      test.equal("example1.com", object.servers[0].host);
+      test.equal('27017', object.servers[0].port);
+      test.equal("example2.com", object.servers[1].host);
+      test.equal('27018', object.servers[1].port);
+      test.equal('admin', object.dbName);
+      test.done();
+    });
   }
 }
 
@@ -236,16 +260,18 @@ exports['Should correctly parse mongodb://localhost,localhost:27018,localhost:27
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://localhost,localhost:27018,localhost:27019");
-    test.equal(3, object.servers.length);
-    test.equal("localhost", object.servers[0].host);
-    test.equal('27017', object.servers[0].port);
-    test.equal("localhost", object.servers[1].host);
-    test.equal('27018', object.servers[1].port);
-    test.equal("localhost", object.servers[2].host);
-    test.equal('27019', object.servers[2].port);
-    test.equal('admin', object.dbName);
-    test.done();
+    parse("mongodb://localhost,localhost:27018,localhost:27019", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(3, object.servers.length);
+      test.equal("localhost", object.servers[0].host);
+      test.equal('27017', object.servers[0].port);
+      test.equal("localhost", object.servers[1].host);
+      test.equal('27018', object.servers[1].port);
+      test.equal("localhost", object.servers[2].host);
+      test.equal('27019', object.servers[2].port);
+      test.equal('admin', object.dbName);
+      test.done();
+    });
   }
 }
 
@@ -258,17 +284,19 @@ exports['Should correctly parse mongodb://host1,host2,host3/?slaveOk=true'] = {
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://host1,host2,host3/?slaveOk=true");
-    test.equal(3, object.servers.length);
-    test.equal("host1", object.servers[0].host);
-    test.equal('27017', object.servers[0].port);
-    test.equal("host2", object.servers[1].host);
-    test.equal('27017', object.servers[1].port);
-    test.equal("host3", object.servers[2].host);
-    test.equal('27017', object.servers[2].port);
-    test.equal('admin', object.dbName);
-    test.equal(true, object.server_options.slave_ok);
-    test.done();
+    parse("mongodb://host1,host2,host3/?slaveOk=true", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(3, object.servers.length);
+      test.equal("host1", object.servers[0].host);
+      test.equal('27017', object.servers[0].port);
+      test.equal("host2", object.servers[1].host);
+      test.equal('27017', object.servers[1].port);
+      test.equal("host3", object.servers[2].host);
+      test.equal('27017', object.servers[2].port);
+      test.equal('admin', object.dbName);
+      test.equal(true, object.server_options.slave_ok);
+      test.done();
+    });
   }
 }
 
@@ -281,17 +309,19 @@ exports['Should correctly parse mongodb://host1,host2,host3,host1/?slaveOk=true 
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://host1,host2,host3,host1/?slaveOk=true");
-    test.equal(3, object.servers.length);
-    test.equal("host1", object.servers[0].host);
-    test.equal('27017', object.servers[0].port);
-    test.equal("host2", object.servers[1].host);
-    test.equal('27017', object.servers[1].port);
-    test.equal("host3", object.servers[2].host);
-    test.equal('27017', object.servers[2].port);
-    test.equal('admin', object.dbName);
-    test.equal(true, object.server_options.slave_ok);
-    test.done();
+    parse("mongodb://host1,host2,host3,host1/?slaveOk=true", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(3, object.servers.length);
+      test.equal("host1", object.servers[0].host);
+      test.equal('27017', object.servers[0].port);
+      test.equal("host2", object.servers[1].host);
+      test.equal('27017', object.servers[1].port);
+      test.equal("host3", object.servers[2].host);
+      test.equal('27017', object.servers[2].port);
+      test.equal('admin', object.dbName);
+      test.equal(true, object.server_options.slave_ok);
+      test.done();
+    });
   }
 }
 
@@ -304,13 +334,15 @@ exports['Should correctly parse mongodb://localhost/?safe=true'] = {
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://localhost/?safe=true");
-    test.equal(1, object.servers.length);
-    test.equal("localhost", object.servers[0].host);
-    test.equal('27017', object.servers[0].port);
-    test.equal('admin', object.dbName);
-    test.equal(true, object.db_options.safe);
-    test.done();
+    parse("mongodb://localhost/?safe=true", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(1, object.servers.length);
+      test.equal("localhost", object.servers[0].host);
+      test.equal('27017', object.servers[0].port);
+      test.equal('admin', object.dbName);
+      test.equal(true, object.db_options.safe);
+      test.done();
+    });
   }
 }
 
@@ -323,19 +355,21 @@ exports['Should correctly parse mongodb://host1,host2,host3/?safe=true;w=2;wtime
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://host1,host2,host3/?safe=true;w=2;wtimeoutMS=2000");
-    test.equal(3, object.servers.length);
-    test.equal("host1", object.servers[0].host);
-    test.equal('27017', object.servers[0].port);
-    test.equal("host2", object.servers[1].host);
-    test.equal('27017', object.servers[1].port);
-    test.equal("host3", object.servers[2].host);
-    test.equal('27017', object.servers[2].port);
-    test.equal('admin', object.dbName);
-    test.equal(true, object.db_options.safe);
-    test.equal(2, object.db_options.w);
-    test.equal(2000, object.db_options.wtimeout);
-    test.done();
+    parse("mongodb://host1,host2,host3/?safe=true;w=2;wtimeoutMS=2000", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(3, object.servers.length);
+      test.equal("host1", object.servers[0].host);
+      test.equal('27017', object.servers[0].port);
+      test.equal("host2", object.servers[1].host);
+      test.equal('27017', object.servers[1].port);
+      test.equal("host3", object.servers[2].host);
+      test.equal('27017', object.servers[2].port);
+      test.equal('admin', object.dbName);
+      test.equal(true, object.db_options.safe);
+      test.equal(2, object.db_options.w);
+      test.equal(2000, object.db_options.wtimeout);
+      test.done();
+    });
   }
 }
 
@@ -348,19 +382,21 @@ exports['Parse mongodb://localhost/db?replicaSet=hello&ssl=prefer&connectTimeout
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://localhost/db?replicaSet=hello&ssl=prefer&connectTimeoutMS=1000&socketTimeoutMS=2000");
-    test.equal(1, object.servers.length);
-    test.equal("localhost", object.servers[0].host);
-    test.equal('27017', object.servers[0].port);
-    test.equal('db', object.dbName);
-    test.equal("hello", object.rs_options.rs_name);
-    test.equal(1000, object.server_options.socketOptions.connectTimeoutMS);
-    test.equal(2000, object.server_options.socketOptions.socketTimeoutMS);
-    test.equal(1000, object.rs_options.socketOptions.connectTimeoutMS);
-    test.equal(2000, object.rs_options.socketOptions.socketTimeoutMS);
-    test.equal('prefer', object.rs_options.ssl);
-    test.equal('prefer', object.server_options.ssl);
-    test.done();
+    parse("mongodb://localhost/db?replicaSet=hello&ssl=prefer&connectTimeoutMS=1000&socketTimeoutMS=2000", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(1, object.servers.length);
+      test.equal("localhost", object.servers[0].host);
+      test.equal('27017', object.servers[0].port);
+      test.equal('db', object.dbName);
+      test.equal("hello", object.rs_options.rs_name);
+      test.equal(1000, object.server_options.socketOptions.connectTimeoutMS);
+      test.equal(2000, object.server_options.socketOptions.socketTimeoutMS);
+      test.equal(1000, object.rs_options.socketOptions.connectTimeoutMS);
+      test.equal(2000, object.rs_options.socketOptions.socketTimeoutMS);
+      test.equal('prefer', object.rs_options.ssl);
+      test.equal('prefer', object.server_options.ssl);
+      test.done();
+    });
   }
 }
 
@@ -373,14 +409,16 @@ exports['Parse mongodb://localhost/db?ssl=true'] = {
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://localhost/db?ssl=true");
-    test.equal(1, object.servers.length);
-    test.equal("localhost", object.servers[0].host);
-    test.equal('27017', object.servers[0].port);
-    test.equal('db', object.dbName);
-    test.equal(true, object.rs_options.ssl);
-    test.equal(true, object.server_options.ssl);
-    test.done();
+    parse("mongodb://localhost/db?ssl=true", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(1, object.servers.length);
+      test.equal("localhost", object.servers[0].host);
+      test.equal('27017', object.servers[0].port);
+      test.equal('db', object.dbName);
+      test.equal(true, object.rs_options.ssl);
+      test.equal(true, object.server_options.ssl);
+      test.done();
+    });
   }
 }
 
@@ -393,14 +431,16 @@ exports['Parse mongodb://localhost/db?maxPoolSize=100'] = {
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://localhost/db?maxPoolSize=100");
-    test.equal(1, object.servers.length);
-    test.equal("localhost", object.servers[0].host);
-    test.equal('27017', object.servers[0].port);
-    test.equal('db', object.dbName);
-    test.equal(100, object.rs_options.poolSize);
-    test.equal(100, object.server_options.poolSize);
-    test.done();
+    parse("mongodb://localhost/db?maxPoolSize=100", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(1, object.servers.length);
+      test.equal("localhost", object.servers[0].host);
+      test.equal('27017', object.servers[0].port);
+      test.equal('db', object.dbName);
+      test.equal(100, object.rs_options.poolSize);
+      test.equal(100, object.server_options.poolSize);
+      test.done();
+    });
   }
 }
 
@@ -413,13 +453,15 @@ exports['Parse mongodb://localhost/db?w=-1'] = {
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://localhost/db?w=-1");
-    test.equal(1, object.servers.length);
-    test.equal("localhost", object.servers[0].host);
-    test.equal('27017', object.servers[0].port);
-    test.equal('db', object.dbName);
-    test.equal(-1, object.db_options.w);
-    test.done();
+    parse("mongodb://localhost/db?w=-1", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(1, object.servers.length);
+      test.equal("localhost", object.servers[0].host);
+      test.equal('27017', object.servers[0].port);
+      test.equal('db', object.dbName);
+      test.equal(-1, object.db_options.w);
+      test.done();
+    });
   }
 }
 
@@ -431,13 +473,22 @@ exports['Throw on unsuported options'] = {
 
   // The actual test we wish to run
   test: function(configure, test) {
-    // console.dir(parse)
-    test.throws(function() { parse("mongodb://localhost/db?minPoolSize=100") }, "minPoolSize not supported");
-    test.throws(function() { parse("mongodb://localhost/db?maxIdleTimeMS=100") }, "maxIdleTimeMS not supported");
-    test.throws(function() { parse("mongodb://localhost/db?waitQueueMultiple=100") }, "waitQueueMultiple not supported");
-    test.throws(function() { parse("mongodb://localhost/db?waitQueueTimeoutMS=100") }, "waitQueueTimeoutMS not supported");
-    test.throws(function() { parse("mongodb://localhost/db?uuidRepresentation=1") }, "uuidRepresentation not supported");
-    test.done();
+    parse("mongodb://localhost/db?minPoolSize=100", {}, function(err) {
+      test.equal(err.message, "minPoolSize not supported");
+      parse("mongodb://localhost/db?maxIdleTimeMS=100", {}, function(err) {
+        test.equal(err.message, "maxIdleTimeMS not supported");
+        parse("mongodb://localhost/db?waitQueueMultiple=100", {}, function(err) {
+          test.equal(err.message, "waitQueueMultiple not supported");
+          parse("mongodb://localhost/db?waitQueueTimeoutMS=100", {}, function(err) {
+            test.equal(err.message, "waitQueueTimeoutMS not supported");
+            parse("mongodb://localhost/db?uuidRepresentation=1", {}, function(err) {
+              test.equal(err.message, "uuidRepresentation not supported");
+              test.done();
+            });
+          });
+        });
+      });
+    });
   }
 }
 
@@ -449,16 +500,22 @@ exports['Write concerns parsing'] = {
 
   // The actual test we wish to run
   test: function(configure, test) {
-    var object = parse("mongodb://localhost/db?safe=true&w=1");
-    test.equal(true, object.db_options.safe);
-
-    object = parse("mongodb://localhost/db?safe=false&w=1");
-    test.equal(false, object.db_options.safe);
-
-    // should throw as fireAndForget is set aswell as safe or any other write concerns
-    test.throws(function() {parse("mongodb://localhost/db?safe=true&w=0"), "w set to -1 or 0 cannot be combined with safe/w/journal/fsync"});
-    test.throws(function() {parse("mongodb://localhost/db?fsync=true&w=-1"), "w set to -1 or 0 cannot be combined with safe/w/journal/fsync"});
-    test.done();
+    parse("mongodb://localhost/db?safe=true&w=1", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(true, object.db_options.safe);
+      parse("mongodb://localhost/db?safe=false&w=1", {}, function(err, object) {
+        test.equal(err, null);
+        test.equal(false, object.db_options.safe);
+        // should throw as fireAndForget is set aswell as safe or any other write concerns
+        parse("mongodb://localhost/db?safe=true&w=0", {}, function(err) {
+          test.equal(err.message, "w set to -1 or 0 cannot be combined with safe/w/journal/fsync");
+          parse("mongodb://localhost/db?fsync=true&w=-1", {}, function(err) {
+            test.equal(err.message, "w set to -1 or 0 cannot be combined with safe/w/journal/fsync");
+            test.done();
+          });
+        });
+      });
+    });
   }
 }
 
@@ -470,28 +527,26 @@ exports['GSSAPI parsing'] = {
 
   // The actual test we wish to run
   test: function(configure, test) {
-    var object = parse("mongodb://dev1%4010GEN.ME@kdc.10gen.com/test?authMechanism=GSSAPI");
-    test.deepEqual({user:'dev1@10GEN.ME', password:null}, object.auth);
-    test.deepEqual("GSSAPI", object.db_options.authMechanism);
-
-    // Should throw due to missing principal
-    try {
-      parse("mongodb://kdc.10gen.com/test?authMechanism=GSSAPI");
-    } catch(err) {
-      test.equal("GSSAPI requires a provided principal", err.message);
-    }
-
-    // Should throw due to unsupported mechanism
-    try {
-      parse("mongodb://kdc.10gen.com/test?authMechanism=NONE");
-    } catch(err) {
-      test.equal("only DEFAULT, GSSAPI, PLAIN, MONGODB-X509, SCRAM-SHA-1 or MONGODB-CR is supported by authMechanism", err.message);
-    }
-
-    object = parse("mongodb://dev1%4010GEN.ME:test@kdc.10gen.com/test?authMechanism=GSSAPI");
-    test.deepEqual({user:'dev1@10GEN.ME', password:'test'}, object.auth);
-    test.deepEqual("GSSAPI", object.db_options.authMechanism);
-    test.done();
+    parse("mongodb://dev1%4010GEN.ME@kdc.10gen.com/test?authMechanism=GSSAPI", {}, function(err, object) {
+      test.equal(err, null);
+      test.deepEqual({user:'dev1@10GEN.ME', password:null}, object.auth);
+      test.deepEqual("GSSAPI", object.db_options.authMechanism);
+      // Should throw due to missing principal
+      parse("mongodb://kdc.10gen.com/test?authMechanism=GSSAPI", {}, function(err) {
+        test.equal("GSSAPI requires a provided principal", err.message);
+        // Should throw due to unsupported mechanism
+        parse("mongodb://kdc.10gen.com/test?authMechanism=NONE", {}, function(err) {
+          test.equal(
+            "only DEFAULT, GSSAPI, PLAIN, MONGODB-X509, SCRAM-SHA-1 or MONGODB-CR is supported by authMechanism", err.message);
+          parse("mongodb://dev1%4010GEN.ME:test@kdc.10gen.com/test?authMechanism=GSSAPI", {}, function(err, object) {
+            test.equal(err, null);
+            test.deepEqual({user:'dev1@10GEN.ME', password:'test'}, object.auth);
+            test.deepEqual("GSSAPI", object.db_options.authMechanism);
+            test.done();
+          });
+        });
+      });
+    });
   }
 }
 
@@ -503,29 +558,38 @@ exports['Read preferences parsing'] = {
 
   // The actual test we wish to run
   test: function(configure, test) {
-    var object = parse("mongodb://localhost/db?slaveOk=true");
-    test.equal(true, object.server_options.slave_ok);
-
-    object = parse("mongodb://localhost/db?readPreference=primary");
-    test.equal("primary", object.db_options.readPreference);
-
-    object = parse("mongodb://localhost/db?readPreference=primaryPreferred");
-    test.equal("primaryPreferred", object.db_options.readPreference);
-
-    object = parse("mongodb://localhost/db?readPreference=secondary");
-    test.equal("secondary", object.db_options.readPreference);
-
-    object = parse("mongodb://localhost/db?readPreference=secondaryPreferred");
-    test.equal("secondaryPreferred", object.db_options.readPreference);
-
-    object = parse("mongodb://localhost/db?readPreference=nearest");
-    test.equal("nearest", object.db_options.readPreference);
-
-    object = parse("mongodb://localhost/db");
-    test.equal("primary", object.db_options.readPreference);
-
-    test.throws(function() {parse("mongodb://localhost/db?readPreference=blah"), "readPreference must be either primary/primaryPreferred/secondary/secondaryPreferred/nearest"});
-    test.done();
+    parse("mongodb://localhost/db?slaveOk=true", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(true, object.server_options.slave_ok);
+      parse("mongodb://localhost/db?readPreference=primary", {}, function(err, object) {
+        test.equal(err, null);
+        test.equal("primary", object.db_options.readPreference);
+        parse("mongodb://localhost/db?readPreference=primaryPreferred", {}, function(err, object) {
+          test.equal(err, null);
+          test.equal("primaryPreferred", object.db_options.readPreference);
+          parse("mongodb://localhost/db?readPreference=secondary", {}, function(err, object) {
+            test.equal(err, null);
+            test.equal("secondary", object.db_options.readPreference);
+            parse("mongodb://localhost/db?readPreference=secondaryPreferred", {}, function(err, object) {
+              test.equal(err, null);
+              test.equal("secondaryPreferred", object.db_options.readPreference);
+              parse("mongodb://localhost/db?readPreference=nearest", {}, function(err, object) {
+                test.equal(err, null);
+                test.equal("nearest", object.db_options.readPreference);
+                parse("mongodb://localhost/db", {}, function(err, object) {
+                  test.equal(err, null);
+                  test.equal("primary", object.db_options.readPreference);
+                  parse("mongodb://localhost/db?readPreference=blah", {}, function(err) {
+                    test.equal(err.message, "readPreference must be either primary/primaryPreferred/secondary/secondaryPreferred/nearest")
+                    test.done();
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
   }
 }
 
@@ -537,21 +601,30 @@ exports['Read preferences tag parsing'] = {
 
   // The actual test we wish to run
   test: function(configure, test) {
-    var object = parse("mongodb://localhost/db");
-    test.equal(null, object.db_options.read_preference_tags);
-
-    var object = parse("mongodb://localhost/db?readPreferenceTags=dc:ny");
-    test.deepEqual([{dc:"ny"}], object.db_options.read_preference_tags);
-
-    var object = parse("mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1");
-    test.deepEqual([{dc:"ny", rack:"1"}], object.db_options.read_preference_tags);
-
-    var object = parse("mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1&readPreferenceTags=dc:sf,rack:2");
-    test.deepEqual([{dc:"ny", rack:"1"}, {dc:"sf", rack:"2"}], object.db_options.read_preference_tags);
-
-    var object = parse("mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1&readPreferenceTags=dc:sf,rack:2&readPreferenceTags=");
-    test.deepEqual([{dc:"ny", rack:"1"}, {dc:"sf", rack:"2"}, {}], object.db_options.read_preference_tags);
-    test.done();
+    parse("mongodb://localhost/db", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(null, object.db_options.read_preference_tags);
+      parse("mongodb://localhost/db?readPreferenceTags=dc:ny", {}, function(err, object) {
+        test.equal(err, null);
+        test.deepEqual([{dc:"ny"}], object.db_options.read_preference_tags);
+        parse("mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1", {}, function(err, object) {
+          test.equal(err, null);
+          test.deepEqual([{dc:"ny", rack:"1"}], object.db_options.read_preference_tags);
+          parse("mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1&readPreferenceTags=dc:sf,rack:2", {}, function(err, object) {
+            test.equal(err, null);
+            test.deepEqual([{dc:"ny", rack:"1"}, {dc:"sf", rack:"2"}], object.db_options.read_preference_tags);
+            parse(
+              "mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1&readPreferenceTags=dc:sf,rack:2&readPreferenceTags=",
+              {},
+              function(err, object) {
+              test.equal(err, null);
+              test.deepEqual([{dc:"ny", rack:"1"}, {dc:"sf", rack:"2"}, {}], object.db_options.read_preference_tags);
+              test.done();
+            });
+          });
+        });
+      });
+    });
   }
 }
 
@@ -564,12 +637,14 @@ exports['Should correctly parse mongodb://[::1]:1234'] = {
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://[::1]:1234");
-    test.equal(1, object.servers.length);
-    test.equal('::1', object.servers[0].host);
-    test.equal('1234', object.servers[0].port);
-    test.equal('admin', object.dbName);
-    test.done();
+    parse("mongodb://[::1]:1234", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(1, object.servers.length);
+      test.equal('::1', object.servers[0].host);
+      test.equal('1234', object.servers[0].port);
+      test.equal('admin', object.dbName);
+      test.done();
+    });
   }
 }
 
@@ -582,12 +657,14 @@ exports['Should correctly parse mongodb://[::1]'] = {
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://[::1]");
-    test.equal(1, object.servers.length);
-    test.equal('::1', object.servers[0].host);
-    test.equal('27017', object.servers[0].port);
-    test.equal('admin', object.dbName);
-    test.done();
+    parse("mongodb://[::1]", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(1, object.servers.length);
+      test.equal('::1', object.servers[0].host);
+      test.equal('27017', object.servers[0].port);
+      test.equal('admin', object.dbName);
+      test.done();
+    });
   }
 }
 
@@ -600,16 +677,18 @@ exports['Should correctly parse mongodb://localhost,[::1]:27018,[2607:f0d0:1002:
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://localhost,[::1]:27018,[2607:f0d0:1002:51::41]");
-    test.equal(3, object.servers.length);
-    test.equal("localhost", object.servers[0].host);
-    test.equal('27017', object.servers[0].port);
-    test.equal("::1", object.servers[1].host);
-    test.equal('27018', object.servers[1].port);
-    test.equal("2607:f0d0:1002:51::41", object.servers[2].host);
-    test.equal('27017', object.servers[2].port);
-    test.equal('admin', object.dbName);
-    test.done();
+    parse("mongodb://localhost,[::1]:27018,[2607:f0d0:1002:51::41]", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal(3, object.servers.length);
+      test.equal("localhost", object.servers[0].host);
+      test.equal('27017', object.servers[0].port);
+      test.equal("::1", object.servers[1].host);
+      test.equal('27018', object.servers[1].port);
+      test.equal("2607:f0d0:1002:51::41", object.servers[2].host);
+      test.equal('27017', object.servers[2].port);
+      test.equal('admin', object.dbName);
+      test.done();
+    });
   }
 }
 
@@ -622,9 +701,11 @@ exports['Should correctly parse mongodb://k?y:foo@/tmp/mongodb-27017.sock/somedb
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://k%3Fy:foo@/tmp/mongodb-27017.sock/somedb?safe=true");
-    test.equal('k?y', object.auth.user);
-    test.done();
+    parse("mongodb://k%3Fy:foo@/tmp/mongodb-27017.sock/somedb?safe=true", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal('k?y', object.auth.user);
+      test.done();
+    });
   }
 }
 
@@ -637,9 +718,11 @@ exports['Should correctly parse uriencoded k?y mongodb://k%3Fy:foo@/tmp/mongodb-
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://k%3Fy:foo@/tmp/mongodb-27017.sock/somedb?safe=true");
-    test.equal('k?y', object.auth.user);
-    test.done();
+    parse("mongodb://k%3Fy:foo@/tmp/mongodb-27017.sock/somedb?safe=true", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal('k?y', object.auth.user);
+      test.done();
+    });
   }
 }
 
@@ -652,9 +735,11 @@ exports['Should correctly parse username kay:kay mongodb://kay%3Akay:foo@/tmp/mo
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://kay%3Akay:foo@/tmp/mongodb-27017.sock/somedb?safe=true");
-    test.equal('kay:kay', object.auth.user);
-    test.done();
+    parse("mongodb://kay%3Akay:foo@/tmp/mongodb-27017.sock/somedb?safe=true", {}, function(err, object) {
+      test.equal(err, null);
+      test.equal('kay:kay', object.auth.user);
+      test.done();
+    });
   }
 }
 
@@ -664,9 +749,11 @@ exports['Should correctly parse username kay:kay mongodb://kay%3Akay:foo@/tmp/mo
 exports['Should use options passed into url parsing'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   test: function(configure, test) {
-    var object = parse('mongodb://localhost/', { readPreference: 'secondary' });
-    test.equal('secondary', object.db_options.readPreference);
-    test.done();
+    parse('mongodb://localhost/', { readPreference: 'secondary' }, function(err, object) {
+      test.equal(err, null);
+      test.equal('secondary', object.db_options.readPreference);
+      test.done();
+    });
   }
 }
 
