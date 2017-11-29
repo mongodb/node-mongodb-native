@@ -657,7 +657,7 @@ describe('Change Streams', function() {
     }
   });
 
-  it.skip('Should return MongoNetworkError after first retry attempt fails using promises', {
+  it('Should return MongoNetworkError after first retry attempt fails using promises', {
     metadata: {
       requires: {
         generators: true,
@@ -715,42 +715,49 @@ describe('Change Streams', function() {
         });
       });
 
-      var client = new MongoClient(configuration.url());
-      client.connect(function(err /* , client */) {
+      const mockServerURL = 'mongodb://localhost:32000/';
+
+      var client = new MongoClient(mockServerURL);
+
+      client.connect(function(err, client) {
         assert.ifError(err);
 
-        // var database = client.db('integration_tests5');
-        // var collection = database.collection('MongoNetworkErrorTestPromises');
-        // var changeStream = collection.watch(pipeline);
+        var database = client.db('integration_tests5');
+        var collection = database.collection('MongoNetworkErrorTestPromises');
+        var changeStream = collection.watch(pipeline);
 
-        mock.cleanup([primaryServer], () => done());
+        return changeStream
+          .next()
+          .then(function() {
+            // We should never execute this line because calling thisChangeStream.next() should throw an error
+            throw new Error(
+              'ChangeStream.next() returned a change document but it should have returned a MongoNetworkError'
+            );
+          })
+          .catch(function(err) {
+            assert.ok(
+              err instanceof MongoNetworkError,
+              'error was not instance of MongoNetworkError'
+            );
+            assert.ok(err.message);
+            assert.ok(err.message.indexOf('closed') > -1);
 
-        // changeStream.next()
-        //   .then(function (change) {
-        //     // We should never execute this line because calling thisChangeStream.next() should throw an error
-        //     throw new Error('ChangeStream.next() returned a change document but it should have returned a MongoNetworkError')
-        //   })
-        //   .catch(function(err) {
-        //     console.dir(err);
-        //     assert.ok(err instanceof MongoNetworkError);
-        //     assert.ok(err.message);
-        //     assert.ok(err.message.indexOf('timed out') > -1);
+            changeStream.close(function(err) {
+              assert.ifError(err);
+              changeStream.close();
 
-        //     changeStream.close(function(err) {
-        //       assert.ifError(err);
-        //       changeStream.close();
+              // running = false;
+              primaryServer.destroy();
 
-        //       running = false;
-        //       primaryServer.destroy();
-
-        //       done();
-        //     });
-        //   });
+              mock.cleanup(primaryServer, () => done());
+            });
+          })
+          .catch(err => done(err));
       });
     }
   });
 
-  it.skip('Should return MongoNetworkError after first retry attempt fails using callbacks', {
+  it('Should return MongoNetworkError after first retry attempt fails using callbacks', {
     metadata: {
       requires: {
         generators: true,
@@ -813,7 +820,7 @@ describe('Change Streams', function() {
       });
 
       MongoClient.connect(
-        'mongodb://localhost:32000/test?replicaSet=rs',
+        'mongodb://localhost:32000/',
         {
           socketTimeoutMS: 500,
           validateOptions: true
@@ -840,7 +847,7 @@ describe('Change Streams', function() {
               assert.ifError(err);
               thisChangeStream.close();
 
-              mock.cleanup([primaryServer], () => done());
+              mock.cleanup(primaryServer, () => done());
             });
           });
         }
@@ -848,7 +855,7 @@ describe('Change Streams', function() {
     }
   });
 
-  it.skip('Should resume Change Stream when a resumable error is encountered', {
+  it('Should resume Change Stream when a resumable error is encountered', {
     metadata: {
       requires: {
         generators: true,
@@ -856,7 +863,7 @@ describe('Change Streams', function() {
         mongodb: '>=3.5.10'
       }
     },
-    test: function() {
+    test: function(done) {
       var configuration = this.configuration;
       var MongoClient = configuration.require.MongoClient,
         ObjectId = configuration.require.ObjectId,
@@ -935,7 +942,9 @@ describe('Change Streams', function() {
         });
       });
 
-      return MongoClient.connect('mongodb://localhost:32000/test?replicaSet=rs', {
+      let finalError = undefined;
+
+      MongoClient.connect('mongodb://localhost:32000/', {
         socketTimeoutMS: 500,
         validateOptions: true
       }).then(client => {
@@ -968,7 +977,13 @@ describe('Change Streams', function() {
 
             return Promise.all([changeStream.close(), primaryServer.destroy]);
           });
-      });
+      })
+      .catch((err) => finalError = err)
+      .then(() => {
+        mock.cleanup(primaryServer)
+      })
+      .catch((err) => finalError = err)
+      .then(() => done(finalError));
     }
   });
 
@@ -1277,7 +1292,7 @@ describe('Change Streams', function() {
     }
   });
 
-  it.skip('Should resume piping of Change Streams when a resumable error is encountered', {
+  it('Should resume piping of Change Streams when a resumable error is encountered', {
     metadata: {
       requires: {
         generators: true,
@@ -1332,7 +1347,6 @@ describe('Change Streams', function() {
               )
             );
           } else if (doc.getMore) {
-            console.log('GETMORE EVENT');
 
             var changeDoc = {
               cursor: {
@@ -1363,7 +1377,6 @@ describe('Change Streams', function() {
               cursorId: new Long(1407, 1407)
             });
           } else if (doc.aggregate) {
-            console.log('AGGREGATE EVENT');
             changeDoc = {
               _id: {
                 ts: new Timestamp(4, 1501511802),
@@ -1391,7 +1404,7 @@ describe('Change Streams', function() {
       });
 
       MongoClient.connect(
-        'mongodb://localhost:32000/test?replicaSet=rs',
+        'mongodb://localhost:32000/',
         {
           socketTimeoutMS: 500,
           validateOptions: true
@@ -1414,19 +1427,18 @@ describe('Change Streams', function() {
             assert.equal(eventType, 'change');
 
             var fileContents = fs.readFileSync(filename, 'utf8');
-            console.log(fileContents);
 
-            // var parsedFileContents = JSON.parse(fileContents);
-            // assert.equal(parsedFileContents.fullDocument.a, 1);
-            //
+            var parsedFileContents = JSON.parse(fileContents);
+            assert.equal(parsedFileContents.fullDocument.a, 1);
+            
+
             watcher.close();
-            done();
+            
+            thisChangeStream.close(function(err) {
+              assert.ifError(err);
 
-            //
-            // thisChangeStream.close(function(err) {
-            //   assert.ifError(err);
-            //   done();
-            // });
+              mock.cleanup(primaryServer, () => done());
+            });
           });
         }
       );
@@ -1497,7 +1509,7 @@ describe('Change Streams', function() {
     }
   });
 
-  it.skip('Should error when attempting to create a Change Stream against a stand-alone server', {
+  it('Should error when attempting to create a Change Stream against a stand-alone server', {
     metadata: { requires: { topology: 'single', mongodb: '>=3.5.10' } },
 
     // The actual test we wish to run
@@ -1516,7 +1528,7 @@ describe('Change Streams', function() {
           assert.ok(err);
           assert.equal(
             err.message,
-            'SOME SERVER ERROR MESSAGE SAYING THAT CHANGE STREAMS CAN ONLY BE CREATED AGAINST REPLSETS'
+            'The $changeStream stage is only supported on replica sets'
           );
 
           done();
