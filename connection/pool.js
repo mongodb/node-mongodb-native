@@ -42,7 +42,8 @@ function hasSessionSupport(topology) {
  * @class
  * @param {string} options.host The server host
  * @param {number} options.port The server port
- * @param {number} [options.size=1] Max server connection pool size
+ * @param {number} [options.size=5] Max server connection pool size
+ * @param {number} [options.minSize=0] Minimum server connection pool size
  * @param {boolean} [options.reconnect=true] Server will attempt to reconnect on loss of connection
  * @param {number} [options.reconnectTries=30] Server attempt to reconnect #times
  * @param {number} [options.reconnectInterval=1000] Server will wait # milliseconds between retries
@@ -86,6 +87,8 @@ var Pool = function(topology, options) {
       port: 27017,
       // Pool default max size
       size: 5,
+      // Pool default min size
+      minSize: 0,
       // socket settings
       connectionTimeout: 30000,
       socketTimeout: 360000,
@@ -172,6 +175,13 @@ Object.defineProperty(Pool.prototype, 'size', {
   enumerable: true,
   get: function() {
     return this.options.size;
+  }
+});
+
+Object.defineProperty(Pool.prototype, 'minSize', {
+  enumerable: true,
+  get: function() {
+    return this.options.minSize;
   }
 });
 
@@ -320,6 +330,16 @@ function connectionFailureHandler(self, event) {
     // Start reconnection attempts
     if (!self.reconnectId && self.options.reconnect) {
       self.reconnectId = setTimeout(attemptReconnect(self), self.options.reconnectInterval);
+    }
+
+    // Do we need to do anything to maintain the minimum pool size
+    const totalConnections =
+      self.availableConnections.length +
+      self.connectingConnections.length +
+      self.inUseConnections.length;
+
+    if (totalConnections < self.minSize) {
+      _createConnection(self);
     }
   };
 }
@@ -733,6 +753,11 @@ Pool.prototype.connect = function() {
 
         // Move the active connection
         moveConnectionBetween(connection, self.connectingConnections, self.availableConnections);
+
+        // if we have a minPoolSize, create a connection
+        if (self.minSize) {
+          for (let i = 0; i < self.minSize; i++) _createConnection(self);
+        }
 
         // Emit the connect event
         self.emit('connect', self);
