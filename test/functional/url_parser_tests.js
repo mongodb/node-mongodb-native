@@ -990,4 +990,36 @@ describe('Url Parser', function() {
       });
     }
   });
+
+  /**
+   * @ignore
+   */
+  it('should raise exceptions on invalid hostnames with double colon in host identifier', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+    test: function(done) {
+      parse('mongodb://invalid::host:27017/db', {}, function(err) {
+        expect(err).to.exist;
+        expect(err.message).to.equal('Double colon in host identifier');
+        done();
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it('should raise exceptions on invalid hostnames with slash in host identifier', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+    test: function(done) {
+      parse('mongodb://invalid/host:27017/db', {}, function(err) {
+        expect(err).to.exist;
+        expect(err.message).to.equal('Slash in host identifier');
+        done();
+      });
+    }
+  });
 });
