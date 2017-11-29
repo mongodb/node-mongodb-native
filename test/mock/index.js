@@ -10,7 +10,7 @@ const cleanup = (spy, callback) => {
   }
 
   if (spy) {
-    const alreadyDrained = spy.connectionCount() === 0;
+    const alreadyDrained = spy.connections === 0;
     const drainedPromise = !alreadyDrained
       ? new Promise(resolve => spy.once('drained', () => resolve()))
       : Promise.resolve();
