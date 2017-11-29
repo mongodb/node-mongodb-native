@@ -640,15 +640,27 @@ function topologyMonitor(self, options) {
       }
 
       if (!self.s.replicaSetState.hasPrimary() && !self.s.options.secondaryOnlyConnectionAllowed) {
-        if (err) return self.emit('error', err);
-        self.emit('error', new MongoError('no primary found in replicaset or invalid replica set name'));
+        if (err) {
+          return self.emit('error', err);
+        }
+
+        self.emit(
+          'error',
+          new MongoError('no primary found in replicaset or invalid replica set name')
+        );
         return self.destroy({ force: true });
       } else if (
         !self.s.replicaSetState.hasSecondary() &&
         self.s.options.secondaryOnlyConnectionAllowed
       ) {
-        if (err) return self.emit('error', err);
-        self.emit('error', new MongoError('no secondary found in replicaset or invalid replica set name'));
+        if (err) {
+          return self.emit('error', err);
+        }
+
+        self.emit(
+          'error',
+          new MongoError('no secondary found in replicaset or invalid replica set name')
+        );
         return self.destroy({ force: true });
       }
 
@@ -1128,7 +1140,7 @@ ReplSet.prototype.isDestroyed = function() {
 ReplSet.prototype.getServer = function(options) {
   // Ensure we have no options
   options = options || {};
-  // Pick the right server baspickServerd on readPreference
+  // Pick the right server based on readPreference
   var server = this.s.replicaSetState.pickServer(options.readPreference);
   if (this.s.debug) this.emit('pickedServer', options.readPreference, server);
   return server;
@@ -1179,12 +1191,11 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
       return callback(err);
     }
 
-    // check again, this might have changed in the interim
     if (self.s.replicaSetState.primary == null) {
       return callback(new MongoError('no primary server found'));
     }
 
-    // rerun the operation
+    // Re-execute the command
     self.s.replicaSetState.primary[op](ns, ops, options, callback);
   });
 };
