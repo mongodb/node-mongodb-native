@@ -6,8 +6,16 @@ var path = require('path'),
   setupDatabase = require('./shared').setupDatabase;
 
 describe('APM', function() {
+  let testListener = undefined;
   before(function() {
     return setupDatabase(this.configuration);
+  });
+
+  afterEach(function() {
+    if (testListener) {
+      testListener.uninstrument();
+      testListener = undefined;
+    }
   });
 
   it('should correctly receive the APM events for an insert', {
@@ -125,9 +133,11 @@ describe('APM', function() {
           .then(function(r) {
             expect(r.insertedCount).to.equal(1);
 
-            var listener = require('../..').instrument(function(err) {
+            testListener = require('../..').instrument(function(err) {
               expect(err).to.be.null;
             });
+
+            var listener = testListener;
 
             listener.on('started', function(event) {
               if (event.commandName === 'listCollections' || event.commandName === 'find') {
@@ -153,7 +163,6 @@ describe('APM', function() {
                     // Ensure command was not sent to the primary
                     expect(started[0].connectionId.port).to.not.equal(started[1].connectionId.port);
 
-                    listener.uninstrument();
                     client.close();
                     done();
                   });
@@ -811,7 +820,7 @@ describe('APM', function() {
     // The actual test we wish to run
     test: function(done) {
       var self = this;
-      var listener = require('../..').instrument(function(err) {
+      testListener = require('../..').instrument(function(err) {
         expect(err).to.not.exist;
       });
 
@@ -846,7 +855,6 @@ describe('APM', function() {
                 cursorCountAfter = result.cursors.clientCursors_size;
                 expect(cursorCountBefore).to.equal(cursorCountAfter);
 
-                listener.uninstrument();
                 client.close();
                 done();
               });
