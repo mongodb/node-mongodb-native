@@ -1,18 +1,15 @@
 'use strict';
-var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
-// var f = require('util').format;
 var expect = require('chai').expect;
 
 // ./node_modules/.bin/mongodb-test-runner -l -e replicaset test/functional/operation_changestream_example_tests.js
-// ./node_modules/.bin/mongodb-test-runner -l -e -s replicaset test/functional/operation_changestream_example_tests.js
 
 describe('Changestream Examples', function() {
   before(function() {
     return setupDatabase(this.configuration);
   });
 
-  it('has next', {
+  it.only('has next', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -29,26 +26,27 @@ describe('Changestream Examples', function() {
 
         // Start Changestream Example 1
         changeStream.next(function(err, next) {
-          if (err) console.log(err);
+          if (err) return console.log(err);
           expect(err).to.equal(null);
           expect(next).to.exist;
-          client.close(function() {
-            done();
-          });
+          client.close();
+          done();
         });
         // End Changestream Example 1
 
         // Insert something
-        collection.insertOne({ a: 1 }, function(err, result) {
-          if (err) return console.log(err);
-          expect(err).to.equal(null);
-          expect(result).to.exist;
+        setTimeout(function() {
+          collection.insertOne({ a: 1 }, function(err, result) {
+            if (err) return console.log(err);
+            expect(err).to.equal(null);
+            expect(result).to.exist;
+          });
         });
       });
     }
   });
 
-  it('event emitter api', {
+  it.only('uses an event emitter api', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -64,27 +62,26 @@ describe('Changestream Examples', function() {
         const collection = db.collection('changeStreamExample1b');
         const changeStream = collection.watch();
 
-        // Use event emitter API
+        // Using event emitter API
         changeStream.on('change', function(change) {
-          console.log('change', change)
           expect(change).to.exist;
-          client.close(function() {
-            done();
-          });
+          client.close();
+          done();
         });
 
         // Insert something
-        collection.insertOne({ a: 1 }, function(err, result) {
-          console.log('inserting');
-          if (err) return console.log(err);
-          expect(err).to.equal(null);
-          expect(result).to.exist;
+        setTimeout(function() {
+          collection.insertOne({ a: 1 }, function(err, result) {
+            if (err) return console.log(err);
+            expect(err).to.equal(null);
+            expect(result).to.exist;
+          });
         });
       });
     }
   });
 
-  it.only('streams changestream', {
+  it.only('streams a changestream', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -105,16 +102,18 @@ describe('Changestream Examples', function() {
         });
 
         // Insert something
-        collection.insertOne({ a: 1 }, function(err, result) {
-          if (err) return console.log(err);
-          expect(err).to.equal(null);
-          expect(result).to.exist;
+        setTimeout(function() {
+          collection.insertOne({ a: 1 }, function(err, result) {
+            if (err) return console.log(err);
+            expect(err).to.equal(null);
+            expect(result).to.exist;
+          });
         });
       });
     }
   });
 
-  it('full document update', {
+  it.only('specifies a full document update', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -125,14 +124,13 @@ describe('Changestream Examples', function() {
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      // Start Changestream Example 2
       client.connect(function(err, client) {
         const db = client.db(configuration.db);
         const collection = db.collection('changeStreamExample1b');
         const changeStream = collection.watch({ fullDocument: 'updateLookup' });
 
+        // Start Changestream Example 2
         changeStream.on('change', function(change) {
-          console.log(change);
           expect(change).to.exist;
           client.close();
           done();
@@ -140,16 +138,18 @@ describe('Changestream Examples', function() {
         // End Changestream Eample 2
 
         // Insert something
-        collection.insertOne({ a: 1 }, function(err, result) {
-          if (err) return console.log(err);
-          expect(err).to.equal(null);
-          expect(result).to.exist;
+        setTimeout(function() {
+          collection.insertOne({ a: 1 }, function(err, result) {
+            if (err) return console.log(err);
+            expect(err).to.equal(null);
+            expect(result).to.exist;
+          });
         });
       });
     }
   });
 
-  it('creates and uses a resume token', {
+  it.only('creates and uses a resume token', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -159,11 +159,11 @@ describe('Changestream Examples', function() {
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      // Start Changestream Example 3
       client.connect(function(err, client) {
         const db = client.db(configuration.db);
         const collection = db.collection('changeStreamExample3');
         const changeStream = collection.watch();
+        // Start Changestream Example 3
         let resumeToken;
 
         changeStream.hasNext(function(err, change) {
@@ -196,15 +196,17 @@ describe('Changestream Examples', function() {
           });
         });
         // Insert something
-        collection.insertOne({ a: 1 }, function(err, result) {
-          if (err) return console.log(err);
-          expect(err).to.equal(null);
-          expect(result).to.exist;
-          // Insert something else
-          collection.insertOne({ a: 2 }, function(err, result) {
+        setTimeout(function() {
+          collection.insertOne({ a: 1 }, function(err, result) {
             if (err) return console.log(err);
             expect(err).to.equal(null);
             expect(result).to.exist;
+            // Insert something else
+            collection.insertOne({ a: 2 }, function(err, result) {
+              if (err) return console.log(err);
+              expect(err).to.equal(null);
+              expect(result).to.exist;
+            });
           });
         });
       });
