@@ -1,34 +1,34 @@
 # Candidates
-Additional auth related candidates for removal are the db level addUser/removeUser as there will
-no longer be any users at the db level for 3.6 or higher.
-- Db.prototype.addUser
-- Db.prototyoe.removeUser
+Additional auth related candidates for removal are the database level addUser/removeUser as there will
+no longer be any users at the database level for MongoDB 3.6 or higher.
+- `Db.prototype.addUser`
+- `Db.prototyoe.removeUser`
 
 # API Changes
 We removed the following API methods.
-- Db.prototype.authenticate
-- Db.prototype.logout
-- Db.prototype.open
-- Db.prototype.db
-- Db.prototype.close
-- Admin.prototype.authenticate
-- Admin.prototype.logout
-- Admin.prototype.profilingLevel
-- Admin.prototype.setProfilingLevel
-- Admin.prototype.profilingInfo
-- Cursor.prototype.nextObject
+- `Db.prototype.authenticate`
+- `Db.prototype.logout`
+- `Db.prototype.open`
+- `Db.prototype.db`
+- `Db.prototype.close`
+- `Admin.prototype.authenticate`
+- `Admin.prototype.logout`
+- `Admin.prototype.profilingLevel`
+- `Admin.prototype.setProfilingLevel`
+- `Admin.prototype.profilingInfo`
+- `Cursor.prototype.nextObject`
 
 We've added the following API methods.
-- MongoClient.prototype.logout
-- MongoClient.prototype.isConnected
-- MongoClient.prototype.db
-- MongoClient.prototype.close
-- MongoClient.prototype.connect
-- Db.prototype.profilingLevel
-- Db.prototype.setProfilingLevel
-- Db.prototype.profilingInfo
+- `MongoClient.prototype.logout`
+- `MongoClient.prototype.isConnected`
+- `MongoClient.prototype.db`
+- `MongoClient.prototype.close`
+- `MongoClient.prototype.connect`
+- `Db.prototype.profilingLevel`
+- `Db.prototype.setProfilingLevel`
+- `Db.prototype.profilingInfo`
 
-Core is we have removed the possibility of authenticating multiple credentials against the same connection pool. This is to avoid problems with MongoDB 3.6 or higher where all users will recide in the admin database and thus db level authentication is no longer supported.
+In core we have removed the possibility of authenticating multiple credentials against the same connection pool. This is to avoid problems with MongoDB 3.6 or higher where all users will reside in the admin database and thus database level authentication is no longer supported.
 
 The legacy construct
 
@@ -59,6 +59,7 @@ The legacy operation
 
 ```js
 MongoClient.connect('mongodb://localhost:27017/test', (err, db) => {
+  // Database returned
 });
 ```
 
@@ -66,11 +67,12 @@ is replaced with
 
 ```js
 MongoClient.connect('mongodb://localhost:27017/test', (err, client) => {
+  // Client returned
   var db = client.db('test');
 });
 ```
 
-`Collection.prototype.aggregate` now returns a cursor if a callback is provided. It used to return the resulting documents which is the same as calling `cursor.toArray()` on the cursor we now pass back.
+`Collection.prototype.aggregate` now returns a cursor if a callback is provided. It used to return the resulting documents which is the same as calling `cursor.toArray()` on the cursor we now pass to the callback.
 
 
 ## Connection String Changes
@@ -85,7 +87,7 @@ For more information about connection strings, read the [connection string speci
 When errors occured with bulk write operations in the past, the driver would callback or reject with
 the first write error, as well as passing the resulting `BulkWriteResult`.  For example:
 
-```
+```js
 MongoClient.connect('mongodb://localhost', function(err, client) {
   const collection = client.db('foo').collection('test-collection')
 
@@ -99,7 +101,7 @@ MongoClient.connect('mongodb://localhost', function(err, client) {
 
 becomes:
 
-```
+```js
 MongoClient.connect('mongodb://localhost', function(err, client) {
   const collection = client.db('foo').collection('test-collection')
 
@@ -116,7 +118,7 @@ is the original `BulkWriteResult`.  Similarly, the callback form no longer calls
 `(Error, BulkWriteResult)`, but instead just a `(BulkWriteError)`.
 
 ## mapReduce inlined results
-When `Collection.prototype.mapReduce` is invoked with a callback with `out: 'inline'`, it would
+When `Collection.prototype.mapReduce` is invoked with a callback that includes `out: 'inline'`, it would
 diverge from the `Promise`-based variant by returning additional data as positional arguments to
 the callback (`(err, result, stats, ...)`).  This is no longer the case, both variants of the
 method will now return a single object for all results - a single value for the default case,
