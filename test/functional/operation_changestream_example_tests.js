@@ -9,7 +9,7 @@ describe('Changestream Examples', function() {
     return setupDatabase(this.configuration);
   });
 
-  it.only('has next', {
+  it('has next', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -46,7 +46,7 @@ describe('Changestream Examples', function() {
     }
   });
 
-  it.only('uses an event emitter api', {
+  it('uses an event emitter api', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -81,7 +81,7 @@ describe('Changestream Examples', function() {
     }
   });
 
-  it.only('streams a changestream', {
+  it('streams a changestream', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -113,7 +113,7 @@ describe('Changestream Examples', function() {
     }
   });
 
-  it.only('specifies a full document update', {
+  it('specifies a full document update', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -149,7 +149,7 @@ describe('Changestream Examples', function() {
     }
   });
 
-  it.only('creates and uses a resume token', {
+  it('creates and uses a resume token', {
     metadata: {
       requires: {
         topology: ['replicaset']
