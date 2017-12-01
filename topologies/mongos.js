@@ -15,7 +15,7 @@ const inherits = require('util').inherits,
   createClientInfo = require('./shared').createClientInfo,
   SessionMixins = require('./shared').SessionMixins,
   isRetryableWritesSupported = require('./shared').isRetryableWritesSupported,
-  txnNumber = require('./shared').txnNumber;
+  getNextTransactionNumber = require('./shared').getNextTransactionNumber;
 
 const BSON = retrieveBSON();
 
@@ -896,7 +896,7 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
   }
 
   // increment and assign txnNumber
-  options.txnNumber = txnNumber(options.session);
+  options.txnNumber = getNextTransactionNumber(options.session);
 
   server[op](ns, ops, options, (err, result) => {
     if (!err) return callback(null, result);
