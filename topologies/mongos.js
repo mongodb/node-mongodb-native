@@ -900,7 +900,7 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
 
   server[op](ns, ops, options, (err, result) => {
     if (!err) return callback(null, result);
-    if (!(err instanceof errors.MongoNetworkError)) {
+    if (!(err instanceof errors.MongoNetworkError) && !err.message.match(/not master/)) {
       return callback(err);
     }
 
