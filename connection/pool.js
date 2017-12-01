@@ -449,7 +449,7 @@ function messageHandler(self) {
 
     // Reset the connection timeout if we modified it for
     // this operation
-    if (workItem.socketTimeout) {
+    if (workItem && workItem.socketTimeout) {
       connection.resetSocketTimeout();
     }
 
@@ -536,7 +536,7 @@ function messageHandler(self) {
       }
 
       // Time to dispatch the message if we have a callback
-      if (!workItem.immediateRelease) {
+      if (workItem && !workItem.immediateRelease) {
         try {
           // Parse the message according to the provided options
           message.parse(workItem);
