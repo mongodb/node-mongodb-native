@@ -60,10 +60,10 @@ exports['Should only listen on connect once'] = {
 
     // Add event listeners
     pool.on('connect', function(_pool) {
-      process.nextTick(() => {
+      process.nextTick(function() {
         // Now that we are in next tick, connection should still exist, but there
         // should be no connect listeners
-        test.equal(0, connection.connection.listenerCount('connect'));
+        test.equal(0, connection.connection.listeners('connect').length);
         test.equal(1, pool.allConnections().length);
 
         _pool.destroy();
@@ -82,7 +82,7 @@ exports['Should only listen on connect once'] = {
 
     test.equal(1, pool.allConnections().length);
     connection = pool.allConnections()[0];
-    test.equal(1, connection.connection.listenerCount('connect'));
+    test.equal(1, connection.connection.listeners('connect').length);
   }
 }
 

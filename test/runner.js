@@ -196,30 +196,43 @@ var runner = new Runner({
   , failFast: true
 });
 
-var testFiles = [
+var testFiles = [];
+
+try {
+  eval("(function *(){})");
+
   // Functional tests
-  '/test/tests/functional/pool_tests.js',
-  '/test/tests/functional/server_tests.js',
-  '/test/tests/functional/cursor_tests.js',
-  '/test/tests/functional/extend_cursor_tests.js',
-  '/test/tests/functional/undefined_tests.js',
-  '/test/tests/functional/tailable_cursor_tests.js',
-  '/test/tests/functional/error_tests.js',
-  '/test/tests/functional/operations_tests.js',
-  '/test/tests/functional/operation_example_tests.js',
-  '/test/tests/functional/basic_single_server_auth_tests.js',
-  '/test/tests/functional/basic_replset_server_auth_tests.js',
-  '/test/tests/functional/replset_tests.js',
-  // Replicaset SDAM tests
-  '/test/tests/functional/replset_state_tests.js',
-  // Replicaset Server selection tests
-  '/test/tests/functional/replset_server_selection_tests.js',
-  '/test/tests/functional/mongos_server_selection_tests.js',
-  // Replicaset max staleness tests
-  '/test/tests/functional/max_staleness_tests.js',
-  // Client Metadata test
-  '/test/tests/functional/client_metadata_tests.js'
-]
+  testFiles.push('/test/tests/functional/pool_tests.js')
+} catch(err) {}
+
+// Functional tests
+testFiles.push('/test/tests/functional/server_tests.js');
+testFiles.push('/test/tests/functional/cursor_tests.js');
+testFiles.push('/test/tests/functional/extend_cursor_tests.js');
+testFiles.push('/test/tests/functional/undefined_tests.js');
+testFiles.push('/test/tests/functional/tailable_cursor_tests.js');
+testFiles.push('/test/tests/functional/error_tests.js');
+testFiles.push('/test/tests/functional/operations_tests.js');
+testFiles.push('/test/tests/functional/operation_example_tests.js');
+testFiles.push('/test/tests/functional/basic_single_server_auth_tests.js');
+testFiles.push('/test/tests/functional/basic_replset_server_auth_tests.js');
+testFiles.push('/test/tests/functional/replset_tests.js');
+
+// Replicaset monitoring tests
+testFiles.push('/test/tests/functional/monitoring_tests.js');
+
+// Replicaset SDAM tests
+testFiles.push('/test/tests/functional/replset_state_tests.js');
+
+// Replicaset Server selection tests
+testFiles.push('/test/tests/functional/replset_server_selection_tests.js');
+testFiles.push('/test/tests/functional/mongos_server_selection_tests.js');
+
+// Replicaset max staleness tests
+testFiles.push('/test/tests/functional/max_staleness_tests.js');
+
+// Client Metadata test
+testFiles.push('/test/tests/functional/client_metadata_tests.js');
 
 // Check if we support es6 generators
 try {

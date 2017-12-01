@@ -51,7 +51,7 @@ exports['Successfully detect server in maintanance mode'] = {
     // Primary server states
     var secondSecondary = [assign({}, defaultFields, {
       "ismaster":false, "secondary":true, "me": "localhost:32003", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
-    }), { "ismaster" : true,
+    }), {
       "ismaster":false, "secondary":false, "arbiterOnly": false, "me": "localhost:32003", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
     }];
 

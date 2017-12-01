@@ -21,6 +21,7 @@
     "require_optional": "~1.0.0"
   },
   "devDependencies": {
+    "request": "2.65.0",
     "co": "^4.5.4",
     "coveralls": "^2.11.6",
     "es6-promise": "^3.0.2",
