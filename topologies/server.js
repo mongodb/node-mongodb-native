@@ -170,7 +170,7 @@ var Server = function(options) {
   // The monitoringProcessId
   this.monitoringProcessId = null;
   // Initial connection
-  this.initalConnect = true;
+  this.initialConnect = true;
   // Wire protocol handler, default to oldest known protocol handler
   // this gets changed when the first ismaster is called.
   this.wireProtocolHandler = new TwoSixWireProtocolSupport();
@@ -382,7 +382,7 @@ var eventHandler = function(self, event) {
           }
 
           // Ensure no error emitted after initial connect when reconnecting
-          self.initalConnect = false;
+          self.initialConnect = false;
           // Save the ismaster
           self.ismaster = result.result;
 
@@ -484,10 +484,10 @@ var eventHandler = function(self, event) {
       // On first connect fail
       if (
         self.s.pool.state === 'disconnected' &&
-        self.initalConnect &&
+        self.initialConnect &&
         ['close', 'timeout', 'error', 'parseError'].indexOf(event) !== -1
       ) {
-        self.initalConnect = false;
+        self.initialConnect = false;
         return self.emit(
           'error',
           new MongoNetworkError(
