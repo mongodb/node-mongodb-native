@@ -13,7 +13,7 @@
     "official"
   ],
   "dependencies": {
-    "mongodb-core": "mongodb-js/mongodb-core#6510d7d3d82d84cc0811a853355deaa918b96941"
+    "mongodb-core": "mongodb-js/mongodb-core#0d74dfd32566d9ab8ebe9ae4b9af736e582e5533"
   },
   "devDependencies": {
     "betterbenchmarks": "^0.1.0",
