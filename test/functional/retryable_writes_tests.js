@@ -34,7 +34,10 @@ describe('Retryable Writes', function() {
         scenario.tests.forEach(test => {
           it(test.description, {
             metadata: {
-              requires: { topology: ['single'], mongodb: '>=' + scenario.minServerVersion }
+              requires: {
+                topology: ['replicaset', 'mongos'],
+                mongodb: '>=' + scenario.minServerVersion
+              }
             },
 
             test: function() {
