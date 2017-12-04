@@ -1,3 +1,5 @@
+'use strict';
+
 // Core module
 var core = require('mongodb-core'),
   Instrumentation = require('./lib/apm');
@@ -16,7 +18,7 @@ connect.Collection = require('./lib/collection');
 connect.Server = require('./lib/topologies/server');
 connect.ReplSet = require('./lib/topologies/replset');
 connect.Mongos = require('./lib/topologies/mongos');
-connect.ReadPreference = require('./lib/read_preference');
+connect.ReadPreference = require('mongodb-core').ReadPreference;
 connect.GridStore = require('./lib/gridfs/grid_store');
 connect.Chunk = require('./lib/gridfs/chunk');
 connect.Logger = core.Logger;

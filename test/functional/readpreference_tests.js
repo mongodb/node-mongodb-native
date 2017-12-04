@@ -33,7 +33,7 @@ describe('ReadPreference', function() {
         client.topology.command = function() {
           var args = Array.prototype.slice.call(arguments, 0);
           if (args[0] === 'integration_tests.$cmd') {
-            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
           }
 
           return command.apply(db.serverConfig, args);
@@ -78,7 +78,7 @@ describe('ReadPreference', function() {
         client.topology.command = function() {
           var args = Array.prototype.slice.call(arguments, 0);
           if (args[0] === 'integration_tests.$cmd') {
-            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
           }
 
           return command.apply(db.serverConfig, args);
@@ -169,7 +169,7 @@ describe('ReadPreference', function() {
         client.topology.command = function() {
           var args = Array.prototype.slice.call(arguments, 0);
           if (args[0] === 'integration_tests.$cmd') {
-            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
           }
 
           return command.apply(db.serverConfig, args);
@@ -215,7 +215,7 @@ describe('ReadPreference', function() {
         client.topology.command = function() {
           var args = Array.prototype.slice.call(arguments, 0);
           if (args[0] === 'integration_tests.$cmd') {
-            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
           }
 
           return command.apply(db.serverConfig, args);
@@ -263,7 +263,7 @@ describe('ReadPreference', function() {
         client.topology.command = function() {
           var args = Array.prototype.slice.call(arguments, 0);
           if (args[0] === 'integration_tests.$cmd') {
-            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
           }
 
           return command.apply(db.serverConfig, args);
@@ -321,7 +321,7 @@ describe('ReadPreference', function() {
           client.topology.command = function() {
             var args = Array.prototype.slice.call(arguments, 0);
             if (args[0] === 'integration_tests.$cmd') {
-              test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+              test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
             }
 
             return command.apply(db.serverConfig, args);
@@ -419,7 +419,7 @@ describe('ReadPreference', function() {
         client.topology.command = function() {
           var args = Array.prototype.slice.call(arguments, 0);
           if (args[0] === 'integration_tests.$cmd') {
-            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
           }
 
           return command.apply(db.serverConfig, args);
@@ -483,7 +483,7 @@ describe('ReadPreference', function() {
         client.topology.command = function() {
           var args = Array.prototype.slice.call(arguments, 0);
           if (args[0] === 'integration_tests.$cmd') {
-            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+            test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
           }
 
           return command.apply(db.serverConfig, args);
@@ -521,7 +521,7 @@ describe('ReadPreference', function() {
         client.topology.command = function() {
           var args = Array.prototype.slice.call(arguments, 0);
           if (args[0] === 'integration_tests.$cmd') {
-            test.equal(ReadPreference.SECONDARY, args[2].readPreference.preference);
+            test.equal(ReadPreference.SECONDARY, args[2].readPreference.mode);
           }
 
           return command.apply(db.serverConfig, args);
@@ -533,7 +533,7 @@ describe('ReadPreference', function() {
           client.topology.command = function() {
             var args = Array.prototype.slice.call(arguments, 0);
             if (args[0] === 'integration_tests.$cmd') {
-              test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.preference);
+              test.equal(ReadPreference.SECONDARY_PREFERRED, args[2].readPreference.mode);
             }
 
             return command.apply(db.serverConfig, args);
@@ -636,7 +636,7 @@ describe('ReadPreference', function() {
         var db = client.db(configuration.db);
         test.equal(null, err);
         var cursor = db.collection('test', { readPreference: SecondaryPreferred }).listIndexes();
-        test.equal(cursor.s.options.readPreference.preference, 'secondaryPreferred');
+        test.equal(cursor.s.options.readPreference.mode, 'secondaryPreferred');
         client.close();
         done();
       });

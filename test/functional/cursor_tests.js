@@ -4138,34 +4138,40 @@ describe('Cursor', function() {
         var db = client.db(configuration.db);
         test.equal(null, err);
 
-        db.collection('cursor_count_test1', { readConcern: { level: 'local' } }).count({
-          project: '123'
-        },
-        {
-          readConcern: { level: 'local' },
-          limit: 5,
-          skip: 5,
-          hint: { project: 1 }
-        },
-        function(err) {
-          test.equal(null, err);
-          test.equal(1, started.length);
-          if (started[0].command.readConcern)
-            test.deepEqual({ level: 'local' }, started[0].command.readConcern);
-          test.deepEqual({ project: 1 }, started[0].command.hint);
-          test.equal(5, started[0].command.skip);
-          test.equal(5, started[0].command.limit);
+        db.collection('cursor_count_test1', { readConcern: { level: 'local' } }).count(
+          {
+            project: '123'
+          },
+          {
+            readConcern: { level: 'local' },
+            limit: 5,
+            skip: 5,
+            hint: { project: 1 }
+          },
+          function(err) {
+            test.equal(null, err);
+            test.equal(1, started.length);
+            if (started[0].command.readConcern)
+              test.deepEqual({ level: 'local' }, started[0].command.readConcern);
+            test.deepEqual({ project: 1 }, started[0].command.hint);
+            test.equal(5, started[0].command.skip);
+            test.equal(5, started[0].command.limit);
 
-          listener.uninstrument();
+            listener.uninstrument();
 
-          client.close();
-          done();
-        });
+            client.close();
+            done();
+          }
+        );
       });
     }
   });
 
-  it('Should propagate hasNext errors when using a callback', {
+  // NOTE: This is skipped because I don't think its correct or adds value. The expected error
+  //       is not an error with hasNext (from server), but rather a local TypeError which should
+  //       be caught anyway. The only solution here would be to wrap the entire top level call
+  //       in a try/catch which is not going to happen.
+  it.skip('Should propagate hasNext errors when using a callback', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
