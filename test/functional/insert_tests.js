@@ -1811,7 +1811,7 @@ describe('Insert', function() {
                       test.equal(null, err);
                       test.ok(doc.maxkey._bsontype === 'MaxKey');
 
-                      collection.findOne({ code: new Code('function () {}', { a: 77 }) }, function(
+                      collection.findOne({ code: new Code('function () {}', { a: 55 }) }, function(
                         err,
                         doc
                       ) {
