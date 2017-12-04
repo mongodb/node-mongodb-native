@@ -122,3 +122,13 @@ the callback (`(err, result, stats, ...)`).  This is no longer the case, both va
 method will now return a single object for all results - a single value for the default case,
 and an object similar to the existing `Promise` form for cases where there is more data to pass
 to the user.
+
+## Find changes
+
+`find` and `findOne` no longer support the `fields` parameter.
+You can achieve the same results as the `fields` parameter by
+using `Cursor.prototype.project` or by passing the `projection`
+property in on the options object . Additionally, `find` does not
+support individual options like `skip` and `limit` as positional
+parameters. You must either pass in these parameters in the `options`
+object, or add them via `Cursor` methods like `Cursor.prototype.skip`.
