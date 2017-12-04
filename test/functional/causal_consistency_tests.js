@@ -35,7 +35,7 @@ describe('Causal Consistency', function() {
 
       return db
         .collection('causal_test')
-        .findOne({}, null, { session: session })
+        .findOne({}, { session: session })
         .then(() => {
           expect(test.commands.started).to.have.length(1);
           expect(test.commands.succeeded).to.have.length(1);
@@ -56,7 +56,7 @@ describe('Causal Consistency', function() {
 
       return db
         .collection('causal_test')
-        .findOne({}, null, { session: session })
+        .findOne({}, { session: session })
         .then(() => {
           expect(test.commands.started).to.have.length(1);
           expect(test.commands.succeeded).to.have.length(1);
@@ -79,13 +79,13 @@ describe('Causal Consistency', function() {
       let firstOperationTime;
       return db
         .collection('causal_test')
-        .findOne({}, null, { session: session })
+        .findOne({}, { session: session })
         .then(() => {
           const firstFindCommand = test.commands.started[0].command;
           expect(firstFindCommand).to.not.have.key('readConcern');
           firstOperationTime = test.commands.succeeded[0].reply.operationTime;
 
-          return db.collection('causal_test').findOne({}, null, { session: session });
+          return db.collection('causal_test').findOne({}, { session: session });
         })
         .then(() => {
           const secondFindCommand = test.commands.started[1].command;
@@ -107,8 +107,8 @@ describe('Causal Consistency', function() {
         const coll = db.collection('causal_test', { readConcern: { level: 'majority' } });
 
         return coll
-          .findOne({}, null, { session: session })
-          .then(() => coll.findOne({}, null, { session: session }))
+          .findOne({}, { session: session })
+          .then(() => coll.findOne({}, { session: session }))
           .then(() => {
             const command = test.commands.started[1].command;
             expect(command).to.have.any.key('readConcern');
@@ -133,7 +133,7 @@ describe('Causal Consistency', function() {
         .insert({}, { session: session })
         .then(() => {
           firstOperationTime = test.commands.succeeded[0].reply.operationTime;
-          return db.collection('causal_test').findOne({}, null, { session: session });
+          return db.collection('causal_test').findOne({}, { session: session });
         })
         .then(() => {
           const secondFindCommand = test.commands.started[1].command;
