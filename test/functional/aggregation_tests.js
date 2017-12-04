@@ -942,6 +942,58 @@ describe('Aggregation', function() {
     }
   });
 
+  it('should fail if you try to use explain flag with readConcern/writeConcern', {
+    metadata: {
+      requires: {
+        mongodb: '>3.6.0',
+        topology: 'single'
+      }
+    },
+
+    test: function(done) {
+      var databaseName = this.configuration.db;
+      var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+        poolSize: 1
+      });
+
+      const testCases = [
+        {readConcern: {level: 'local'}},
+        {writeConcern: {j: true},},
+        {readConcern: {level: 'local'}, writeConcern: {j: true}},
+      ];
+
+      client.connect(function(err, client) {
+        const wrapup = (err) => {
+          client.close();
+          done(err);
+        };
+
+        const db = client.db(databaseName);
+
+        Promise.all(testCases.map((testCase) => {
+          const stringifiedTestCase = JSON.stringify(testCase);
+          const collection = db.collection('foo');
+          Object.assign(collection.s, testCase);
+          try {
+            const promise = collection.aggregate([
+              {$project: {_id: 0}},
+              {$out: 'bar'}
+            ], {explain: true}).toArray().then(() => {
+              throw new Error('Expected aggregation to not succeed for options ' + stringifiedTestCase)
+            }, () => {
+              throw new Error('Expected aggregation to fail on client instead of server for options ' + stringifiedTestCase)
+            });
+
+            return promise;
+          } catch (e) {
+            expect(e).to.exist;
+            return Promise.resolve();
+          }
+        })).then(() => wrapup(), wrapup);
+      });
+    }
+  });
+
   /**
    * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
    *
