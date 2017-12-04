@@ -1201,7 +1201,7 @@ describe('Change Streams', function() {
     }
   });
 
-  it.skip('Should create Change Streams with correct read preferences', {
+  it('Should create Change Streams with correct read preferences', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
 
     // The actual test we wish to run
@@ -1216,6 +1216,7 @@ describe('Change Streams', function() {
         var database = client.db('integration_tests', {
           readPreference: ReadPreference.PRIMARY_PREFERRED
         });
+
         var changeStream0 = database.collection('docs0').watch(pipeline);
         assert.deepEqual(
           changeStream0.cursor.readPreference.preference,
@@ -1226,6 +1227,7 @@ describe('Change Streams', function() {
         var collection = database.collection('docs1', {
           readPreference: ReadPreference.SECONDARY_PREFERRED
         });
+
         var changeStream1 = collection.watch(pipeline);
         assert.deepEqual(
           changeStream1.cursor.readPreference.preference,
@@ -1430,10 +1432,10 @@ describe('Change Streams', function() {
 
             var parsedFileContents = JSON.parse(fileContents);
             assert.equal(parsedFileContents.fullDocument.a, 1);
-            
+
 
             watcher.close();
-            
+
             thisChangeStream.close(function(err) {
               assert.ifError(err);
 
