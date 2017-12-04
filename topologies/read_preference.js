@@ -63,6 +63,15 @@ Object.defineProperty(ReadPreference.prototype, 'preference', {
   }
 });
 
+/**
+ * Read preference mode constants
+ */
+ReadPreference.PRIMARY = 'primary';
+ReadPreference.PRIMARY_PREFERRED = 'primaryPreferred';
+ReadPreference.SECONDARY = 'secondary';
+ReadPreference.SECONDARY_PREFERRED = 'secondaryPreferred';
+ReadPreference.NEAREST = 'nearest';
+
 const VALID_MODES = [
   ReadPreference.PRIMARY,
   ReadPreference.PRIMARY_PREFERRED,
@@ -158,14 +167,5 @@ ReadPreference.secondaryPreferred = new ReadPreference('secondaryPreferred');
  * @return {ReadPreference}
  */
 ReadPreference.nearest = new ReadPreference('nearest');
-
-/**
- * Read preference mode constants
- */
-ReadPreference.PRIMARY = 'primary';
-ReadPreference.PRIMARY_PREFERRED = 'primaryPreferred';
-ReadPreference.SECONDARY = 'secondary';
-ReadPreference.SECONDARY_PREFERRED = 'secondaryPreferred';
-ReadPreference.NEAREST = 'nearest';
 
 module.exports = ReadPreference;
