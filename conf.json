@@ -10,7 +10,6 @@
       "lib/cursor.js",
       "lib/db.js",
       "lib/mongo_client.js",
-      "lib/read_preference.js",
       "lib/bulk/common.js",
       "lib/bulk/ordered.js",
       "lib/bulk/unordered.js",
