@@ -135,6 +135,8 @@ var Connection = function(messageHandler, options) {
   this.cert = options.cert || null;
   this.key = options.key || null;
   this.passphrase = options.passphrase || null;
+  this.ciphers = options.ciphers || null;
+  this.ecdhCurve = options.ecdhCurve || null;
   this.ssl = typeof options.ssl === 'boolean' ? options.ssl : false;
   this.rejectUnauthorized =
     typeof options.rejectUnauthorized === 'boolean' ? options.rejectUnauthorized : true;
@@ -510,6 +512,7 @@ var legalSslSocketOptions = [
   'NPNProtocols',
   'ALPNProtocols',
   'servername',
+  'ecdhCurve',
   'secureProtocol',
   'secureContext',
   'session',
