@@ -1,8 +1,6 @@
 'use strict';
-var setupDatabase = require('./shared').setupDatabase;
-var expect = require('chai').expect;
-
-// ./node_modules/.bin/mongodb-test-runner -l -e replicaset test/functional/operation_changestream_example_tests.js
+const setupDatabase = require('./shared').setupDatabase;
+const expect = require('chai').expect;
 
 describe('Changestream Examples', function() {
   before(function() {
@@ -189,10 +187,10 @@ describe('Changestream Examples', function() {
                 client.close();
                 done();
               });
-              // End Changestream Example 3
             });
           });
         });
+        // End Changestream Example 3
         // Insert something
         setTimeout(function() {
           collection.insertOne({ a: 1 }, function(err, result) {
