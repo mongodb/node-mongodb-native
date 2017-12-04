@@ -177,22 +177,6 @@ in on the options object . Additionally, `find` does not support individual opti
 `limit` as positional parameters. You must either pass in these parameters in the `options` object,
 or add them via `Cursor` methods like `Cursor.prototype.skip`.
 
-### List Databases
-
-Support added for `nameOnly` option to `listDatabases()`.
-
-### Collection
-
-Support for passing `noCursorTimeout` as an option `find()`.
-
-### Topologies
-
-Underlying `logicalSessionTimeoutMinute` exposed.
-
-### Indexes
-
-Support for adding `maxTimeMS` option to both `createIndexes` and `dropIndexes`.
-
 ### Aggregation
 
 Support added for `comment` in the aggregation command. Support also added for a `hint` field in the
@@ -203,4 +187,13 @@ If you use aggregation and try to use the `explain` flag while you have a `readC
 
 ### `updateOne` & `updateMany`
 
-The driver now ensures that updated documents contain atomic operators.
+The driver now ensures that updated documents contain atomic operators. For instance, if a user
+tries to update an existing document but passes in no operations (such as `$set`, `$unset`, or
+`$rename`), the driver will now error:
+
+```js
+
+let testCollection = db.collection('test');
+testCollection.updateOne({_id: 'test'}, {});
+// An error is returned: The update operation document must contain at least one atomic operator.
+```
