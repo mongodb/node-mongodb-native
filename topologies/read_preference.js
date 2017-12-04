@@ -41,8 +41,6 @@
  * @return {ReadPreference}
  */
 const ReadPreference = function(mode, tags, options) {
-  if (!Array.isArray(tags) && typeof tags === 'object') (options = tags), (tags = null);
-
   this.mode = mode;
   this.tags = tags;
   this.options = options;
