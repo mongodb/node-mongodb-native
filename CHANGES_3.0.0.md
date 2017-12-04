@@ -197,3 +197,8 @@ let testCollection = db.collection('test');
 testCollection.updateOne({_id: 'test'}, {});
 // An error is returned: The update operation document must contain at least one atomic operator.
 ```
+
+### Tests
+
+We have updated all of the tests to use [Mocha](https://mochajs.org) and a new test runner, [`mongodb-test-runner`](https://github.com/mongodb-js/mongodb-test-runner), which
+sets up topologies for the test scenarios.
