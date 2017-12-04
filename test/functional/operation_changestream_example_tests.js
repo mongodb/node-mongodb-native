@@ -53,7 +53,6 @@ describe('Changestream Examples', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
@@ -120,7 +119,6 @@ describe('Changestream Examples', function() {
       }
     },
 
-    // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
