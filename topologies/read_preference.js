@@ -1,22 +1,23 @@
 'use strict';
 
-var needSlaveOk = ['primaryPreferred', 'secondary', 'secondaryPreferred', 'nearest'];
-
 /**
  * @fileOverview The **ReadPreference** class is a class that represents a MongoDB ReadPreference and is
  * used to construct connections.
  *
  * @example
- * var ReplSet = require('mongodb-core').ReplSet
- *   , ReadPreference = require('mongodb-core').ReadPreference
- *   , assert = require('assert');
+ * const ReplSet = require('mongodb-core').ReplSet,
+ *   ReadPreference = require('mongodb-core').ReadPreference,
+ *   assert = require('assert');
  *
- * var server = new ReplSet([{host: 'localhost', port: 30000}], {setName: 'rs'});
+ * const server = new ReplSet([{host: 'localhost', port: 30000}], {setName: 'rs'});
  * // Wait for the connection event
  * server.on('connect', function(server) {
- *   var cursor = server.cursor('db.test'
- *     , {find: 'db.test', query: {}}
- *     , {readPreference: new ReadPreference('secondary')});
+ *   const cursor = server.cursor(
+ *     'db.test',
+ *     { find: 'db.test', query: {} },
+ *     { readPreference: new ReadPreference('secondary') }
+ *   );
+ *
  *   cursor.next(function(err, doc) {
  *     server.destroy();
  *   });
@@ -29,18 +30,18 @@ var needSlaveOk = ['primaryPreferred', 'secondary', 'secondaryPreferred', 'neare
 /**
  * Creates a new Pool instance
  * @class
- * @param {string} preference A string describing the preference (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
+ * @param {string} mode A string describing the read preference mode (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
  * @param {array} tags The tags object
  * @param {object} [options] Additional read preference options
- * @param {number} [options.maxStalenessSeconds] Max Secondary Read Stalleness in Seconds, Minimum value is 90 seconds.
- * @property {string} preference The preference string (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
+ * @param {number} [options.maxStalenessSeconds] Max secondary read staleness in seconds, Minimum value is 90 seconds.
+ * @property {string} mode The read preference mode (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
  * @property {array} tags The tags object
  * @property {object} options Additional read preference options
  * @property {number} maxStalenessSeconds MaxStalenessSeconds value for the read preference
  * @return {ReadPreference}
  */
-var ReadPreference = function(preference, tags, options) {
-  this.preference = preference;
+const ReadPreference = function(mode, tags, options) {
+  this.mode = mode;
   this.tags = tags;
   this.options = options;
 
@@ -54,13 +55,54 @@ var ReadPreference = function(preference, tags, options) {
   }
 };
 
+// Support the deprecated `preference` property introduced in the porcelain layer
+Object.defineProperty(ReadPreference.prototype, 'preference', {
+  enumerable: true,
+  get: function() {
+    return this.mode;
+  }
+});
+
+/**
+ * Validate if a mode is legal
+ *
+ * @method
+ * @param {string} mode The string representing the read preference mode.
+ * @return {boolean}
+ */
+ReadPreference.isValid = function(mode) {
+  return (
+    mode === ReadPreference.PRIMARY ||
+    mode === ReadPreference.PRIMARY_PREFERRED ||
+    mode === ReadPreference.SECONDARY ||
+    mode === ReadPreference.SECONDARY_PREFERRED ||
+    mode === ReadPreference.NEAREST ||
+    mode === true ||
+    mode === false ||
+    mode == null
+  );
+};
+
+/**
+ * Validate if a mode is legal
+ *
+ * @method
+ * @param {string} mode The string representing the read preference mode.
+ * @return {boolean}
+ */
+ReadPreference.prototype.isValid = function(mode) {
+  return ReadPreference.isValid(typeof mode === 'string' ? mode : this.mode);
+};
+
+const needSlaveOk = ['primaryPreferred', 'secondary', 'secondaryPreferred', 'nearest'];
+
 /**
  * This needs slaveOk bit set
  * @method
  * @return {boolean}
  */
 ReadPreference.prototype.slaveOk = function() {
-  return needSlaveOk.indexOf(this.preference) !== -1;
+  return needSlaveOk.indexOf(this.mode) !== -1;
 };
 
 /**
@@ -69,7 +111,7 @@ ReadPreference.prototype.slaveOk = function() {
  * @return {boolean}
  */
 ReadPreference.prototype.equals = function(readPreference) {
-  return readPreference.preference === this.preference;
+  return readPreference.mode === this.mode;
 };
 
 /**
@@ -78,7 +120,7 @@ ReadPreference.prototype.equals = function(readPreference) {
  * @return {Object}
  */
 ReadPreference.prototype.toJSON = function() {
-  var readPreference = { mode: this.preference };
+  const readPreference = { mode: this.mode };
   if (Array.isArray(this.tags)) readPreference.tags = this.tags;
   if (this.maxStalenessSeconds) readPreference.maxStalenessSeconds = this.maxStalenessSeconds;
   return readPreference;
@@ -114,5 +156,14 @@ ReadPreference.secondaryPreferred = new ReadPreference('secondaryPreferred');
  * @return {ReadPreference}
  */
 ReadPreference.nearest = new ReadPreference('nearest');
+
+/**
+ * Read preference mode constants
+ */
+ReadPreference.PRIMARY = 'primary';
+ReadPreference.PRIMARY_PREFERRED = 'primaryPreferred';
+ReadPreference.SECONDARY = 'secondary';
+ReadPreference.SECONDARY_PREFERRED = 'secondaryPreferred';
+ReadPreference.NEAREST = 'nearest';
 
 module.exports = ReadPreference;
