@@ -63,6 +63,17 @@ Object.defineProperty(ReadPreference.prototype, 'preference', {
   }
 });
 
+const VALID_MODES = [
+  ReadPreference.PRIMARY,
+  ReadPreference.PRIMARY_PREFERRED,
+  ReadPreference.SECONDARY,
+  ReadPreference.SECONDARY_PREFERRED,
+  ReadPreference.NEAREST,
+  true,
+  false,
+  null
+];
+
 /**
  * Validate if a mode is legal
  *
@@ -71,16 +82,7 @@ Object.defineProperty(ReadPreference.prototype, 'preference', {
  * @return {boolean}
  */
 ReadPreference.isValid = function(mode) {
-  return (
-    mode === ReadPreference.PRIMARY ||
-    mode === ReadPreference.PRIMARY_PREFERRED ||
-    mode === ReadPreference.SECONDARY ||
-    mode === ReadPreference.SECONDARY_PREFERRED ||
-    mode === ReadPreference.NEAREST ||
-    mode === true ||
-    mode === false ||
-    mode == null
-  );
+  return VALID_MODES.indexOf(mode) !== -1;
 };
 
 /**
