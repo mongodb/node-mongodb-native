@@ -93,7 +93,7 @@ describe('Changestream Examples', function() {
         const collection = db.collection('changeStreamExample1c');
         const changeStream = collection.watch();
 
-        changeStream.stream({ transform: JSON.stringify }).on('data', function(chunk) {
+        changeStream.stream({ transform: JSON.stringify }).once('data', function(chunk) {
           expect(chunk).to.exist;
           done();
         });
