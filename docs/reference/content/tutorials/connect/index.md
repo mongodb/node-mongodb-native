@@ -10,14 +10,6 @@ title = "Connect to MongoDB"
 
 # Connect to MongoDB
 
-{{% note %}}
-
-This reference applies to **2.1.11** or higher. For **2.1.10** or
-earlier, refer to the [legacy connection settings] ({{< relref
-"reference/connecting/legacy-connection-settings.md" >}}). **2.1.11**
-is backward compatible with the legacy settings as well as the
-simplified settings. {{% /note %}}
-
 Use the `MongoClient.connect` method to connect to a running MongoDB deployment.
 
 ## Connect to a Single MongoDB Instance
@@ -29,7 +21,7 @@ In the following example, the
 [URI connection string](https://docs.mongodb.org/manual/reference/connection-string/)
 specifies connecting to a MongoDB instance that is running on
 `localhost` using port `27017`. The `myproject` indicates the database
-to use. If the database is omitted, the `MongoClient` uses the default `test` database:
+to use.
 
 ```js
 {{% basic-connection %}}
@@ -44,7 +36,7 @@ To connect to a [replica set](https://docs.mongodb.org/manual/core/replication-i
 include a seedlist of replica set members and the name of the replica set in the
 [URI connection string](https://docs.mongodb.org/manual/reference/connection-string/).
 
-In the following example, the connection string specifies two of the replica set members running on `localhost:27017` and `localhost:27018`, the database to access (`myproject`), and the name of the replica set (`foo`). **When using the 2.0 driver, you must include the replica set name.**
+In the following example, the connection string specifies two of the replica set members running on `localhost:27017` and `localhost:27018` and the name of the replica set (`foo`). 
 
 ```js
 {{% connect-to-replicaset %}}
@@ -57,7 +49,7 @@ For more information on the URI connection string, see
 
 To connect to a [sharded cluster] (https://docs.mongodb.org/manual/core/sharded-cluster-components/), specify the `mongos` instance or instances in the [URI connection string](https://docs.mongodb.org/manual/reference/connection-string/).
 
-In the following example, the connection string specifies the `mongos` instances running on `localhost:50000` and `localhost:50001` and the database to access (`myproject`).
+In the following example, the connection string specifies the `mongos` instances running on `localhost:50000` and `localhost:50001`.
 
 ```js
 {{% connect-to-sharded-cluster %}}
@@ -75,17 +67,17 @@ For example, you can specify TLS/SSL and authentication setting.
 
 ```js
 
-var MongoClient = require('mongodb').MongoClient,
-  f = require('util').format,
-  assert = require('assert'),
-  fs = require('fs');
+const MongoClient = require('mongodb').MongoClient;
+const f = require('util').format;
+const assert = require('assert');
+const fs = require('fs');
 
   // Read the certificate authority
-  var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
-  var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
+const ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+const cert = fs.readFileSync(__dirname + "/ssl/client.pem");
 
 // Connection URL
-var url = 'mongodb://dave:password@localhost:27017?authMechanism=DEFAULT&authSource=db&ssl=true"';
+const url = 'mongodb://dave:password@localhost:27017?authMechanism=DEFAULT&authSource=db&ssl=true"';
 
 // Use connect method to connect to the Server passing in
 // additional options
@@ -95,11 +87,11 @@ MongoClient.connect(url,  {
     , sslCA:ca
     , sslCert:cert
   }
-}, function(err, db) {
+}, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
-  db.close();
+  client.close();
 });
 
 ```

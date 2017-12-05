@@ -24,31 +24,31 @@ To use the default mechanism, either omit the authentication mechanism specifica
 
 Include the name and password and the [authentication database] (https://docs.mongodb.org/manual/core/security-users/#user-authentication-database) (`authSource`) in the connection string.
 
-In the following example, the connection string specifies the user `dave`, password `abc123`, authentication mechanism `DEFAULT`, and authentication database `myproject`.
+In the following example, the connection string specifies the user `dave`, password `abc123`, and authentication mechanism `DEFAULT`.
 
 {{% note class="important" %}}
 The user and password should always be **URI** encoded using `encodeURIComponent` to ensure any non URI compliant user or password characters are correctly parsed.
 {{% /note %}}
 
 ```js
-var MongoClient = require('mongodb').MongoClient,
-  f = require('util').format,
-  assert = require('assert');
+const MongoClient = require('mongodb').MongoClient;
+const f = require('util').format;
+const assert = require('assert');
 
-var user = encodeURIComponent('dave');
-var password = encodeURIComponent('abc123');
-var authMechanism = 'DEFAULT';
+const user = encodeURIComponent('dave');
+const password = encodeURIComponent('abc123');
+const authMechanism = 'DEFAULT';
 
 // Connection URL
-var url = f('mongodb://%s:%s@localhost:27017/myproject?authMechanism=%s',
+const url = f('mongodb://%s:%s@localhost:27017?authMechanism=%s',
   user, password, authMechanism);
 
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
+MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
-  db.close();
+  client.close();
 });
 ```
 
@@ -58,21 +58,21 @@ To explicitly connect to MongoDB using [SCRAM-SHA-1] (http://docs.mongodb.org/ma
 
 Include the name and password and the [authentication database](https://docs.mongodb.org/manual/core/security-users/#user-authentication-database) (`authSource`) in the connection string.
 
-In the following example, the connection string specifies the user `dave`, password `abc123`, authentication mechanism `SCRAM-SHA-1`, and authentication database `myproject`.
+In the following example, the connection string specifies the user `dave`, password `abc123`, authentication mechanism `SCRAM-SHA-1`, and authentication database `myprojectdb`
 
 ```js
-var MongoClient = require('mongodb').MongoClient,
-  f = require('util').format,
-  assert = require('assert');
+const MongoClient = require('mongodb').MongoClient;
+const f = require('util').format;
+const assert = require('assert');
 
 // Connection URL
-var url = 'mongodb://dave:abc123@localhost:27017?authMechanism=SCRAM-SHA-1&authSource=myprojectdb';
+const url = 'mongodb://dave:abc123@localhost:27017?authMechanism=SCRAM-SHA-1&authSource=myprojectdb';
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
+MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
-  db.close();
+  client.close();
 });
 ```
 
@@ -83,21 +83,21 @@ To explicitly connect to MongoDB using [MONGODB-CR](https://docs.mongodb.org/man
 
 Include the name and password and the [authentication database](https://docs.mongodb.org/manual/core/security-users/#user-authentication-database) (`authSource`) in the connection string.
 
-In the following example, the connection string specifies the user `dave`, password `abc123`, authentication mechanism `MONGODB-CR`, and authentication database `myproject`.
+In the following example, the connection string specifies the user `dave`, password `abc123`, authentication mechanism `MONGODB-CR`, and authentication database `myprojectdb`.
 
 ```js
-var MongoClient = require('mongodb').MongoClient,
-  f = require('util').format,
-  assert = require('assert');
+const MongoClient = require('mongodb').MongoClient;
+const f = require('util').format;
+const assert = require('assert');
 
 // Connection URL
-var url = 'mongodb://dave:abc123@localhost:27017?authMechanism=MONGODB-CR&authSource=myprojectdb';
+const url = 'mongodb://dave:abc123@localhost:27017?authMechanism=MONGODB-CR&authSource=myprojectdb';
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
+MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
-  db.close();
+  client.close();
 });
 ```
 
@@ -120,29 +120,29 @@ In addition to the connection string, pass to the `MongoClient.connect` method a
 
 
 ```js
-var MongoClient = require('mongodb').MongoClient,
-  f = require('util').format,
-  assert = require('assert');
+const MongoClient = require('mongodb').MongoClient;
+const f = require('util').format;
+const assert = require('assert');
 
 // Read the cert and key
-var cert = fs.readFileSync(__dirname + "/ssl/x509/client.pem");
-var key = fs.readFileSync(__dirname + "/ssl/x509/client.pem");
+const cert = fs.readFileSync(__dirname + "/ssl/x509/client.pem");
+const key = fs.readFileSync(__dirname + "/ssl/x509/client.pem");
 
 // User name
-var userName = encodeURIComponent("CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US");
+const userName = encodeURIComponent("CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US");
 
 // Connect using X509 authentication
-MongoClient.connect(f('mongodb://%s@server:27017/test?authMechanism=MONGODB-X509&ssl=true', userName), {
+MongoClient.connect(f('mongodb://%s@server:27017?authMechanism=MONGODB-X509&ssl=true', userName), {
   server: {
       sslKey:key
     , sslCert:cert
     , sslValidate:false
   }
-}, function(err, db) {
+}, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
-  db.close();
+  client.close();
 });
 ```
 
@@ -160,21 +160,20 @@ To connect using the X.509 authentication mechanism, specify ``authMechanism=GSS
 The following example connects to MongoDB using Kerberos for UNIX.
 
 ```js
-var MongoClient = require('mongodb').MongoClient,
-  f = require('util').format,
-  assert = require('assert');
+const MongoClient = require('mongodb').MongoClient;
+const f = require('util').format;
+const assert = require('assert');
 
 // KDC Server
-var server = "mongo-server.example.com";
-var principal = "drivers@KERBEROS.EXAMPLE.COM";
-var urlEncodedPrincipal = encodeURIComponent(principal);
+const server = "mongo-server.example.com";
+const principal = "drivers@KERBEROS.EXAMPLE.COM";
+const urlEncodedPrincipal = encodeURIComponent(principal);
 
 // Let's write the actual connection code
-MongoClient.connect(f("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&gssapiServiceName=mongodb", urlEncodedPrincipal, server), function(err, db) {
+MongoClient.connect(f("mongodb://%s@%s?authMechanism=GSSAPI&gssapiServiceName=mongodb", urlEncodedPrincipal, server), function(err, client) {
   assert.equal(null, err);
 
-  db.close();
-  test.done();
+  client.close();
 });
 ```
 
@@ -190,24 +189,23 @@ The method refers to the `GSSAPI` authentication mechanism instead of `Kerberos`
 To connect using the LDAP authentication mechanism, specify ``authMechanism=PLAIN`` as the mechanism in the [URI connection string](https://docs.mongodb.org/manual/reference/connection-string/).
 
 ```js
-var MongoClient = require('mongodb').MongoClient,
-  f = require('util').format,
-  assert = require('assert');
+const MongoClient = require('mongodb').MongoClient;
+const f = require('util').format;
+const assert = require('assert');
 
 // LDAP Server
-var server = "ldap.example.com";
-var user = "ldap-user";
-var pass = "ldap-password";
+const server = "ldap.example.com";
+const user = "ldap-user";
+const pass = "ldap-password";
 
 // Url
-var url = f("mongodb://%s:%s@%s/test?authMechanism=PLAIN&maxPoolSize=1", user, pass, server);
+const url = f("mongodb://%s:%s@%s?authMechanism=PLAIN&maxPoolSize=1", user, pass, server);
 
 // Let's write the actual connection code
-MongoClient.connect(url, function(err, db) {
-  test.equal(null, err);
+MongoClient.connect(url, function(err, client) {
+  assert.equal(null, err);
 
-  db.close();
-  test.done();
+  client.close();
 });
 ```
 
