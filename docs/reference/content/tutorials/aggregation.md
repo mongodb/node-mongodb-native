@@ -34,24 +34,20 @@ sample dataset to find a list of restaurants located in the Bronx,
 grouped by restaurant category.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-var url = 'mongodb://localhost:27017/test';
+{{% myproject-connect %}}
 
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
   simplePipeline(db, function() {
-    db.close();
+    client.close();
   });
 });
 
-var simplePipeline = function(db, callback) {
-  var collection = db.collection( 'restaurants' );
-  collection.aggregate( 
+function simplePipeline(db, callback) {
+  const collection = db.collection( 'restaurants' );
+  collection.aggregate(
       [ { '$match': { "borough": "Bronx" } },
         { '$unwind': '$categories'},
-        { '$group': { '_id': "$categories", 'Bronx restaurants': { '$sum': 1 } } }		
-      ],	  
+        { '$group': { '_id': "$categories", 'Bronx restaurants': { '$sum': 1 } } }
+      ],
 	  function(err, results) {
         assert.equal(err, null);
 
@@ -83,19 +79,15 @@ find the total number of documents which have the exact array
 ``[ 'Chinese', 'Seafood' ]`` in the ``categories`` field.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-var url = 'mongodb://localhost:27017/test';
+{{% myproject-connect %}}
 
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
   simpleCount(db, function() {
-    db.close();
+    client.close();
   });
 });
 
-var simpleCount = function(db, callback) {
-  var collection = db.collection( 'restaurants' );
+function simpleCount(db, callback) {
+  const collection = db.collection( 'restaurants' );
   collection.count({ 'categories': [ 'Chinese', 'Seafood' ] },	  
 	  function(err, result) {
         assert.equal(err, null);
@@ -120,24 +112,19 @@ The example groups the results by number of stars where the ``categories``
 array is ``['Peruvian']``.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-var url = 'mongodb://localhost:27017/test';
+{{% myproject-connect %}}
 
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
   simpleGroup(db, function() {
-    db.close();
+    client.close();
   });
 });
 
-var simpleGroup = function(db, callback) {
-    var collection = db.collection( 'restaurants' );
+function simpleGroup(db, callback) {
+    const collection = db.collection( 'restaurants' );
     collection.group( ['stars'], 
                       { 'categories': ['Peruvian'] }, 
                       { 'total': 0 },
-                      "function ( curr, result ) { result.total++ }",  
-	  
+                      "function ( curr, result ) { result.total++ }", 
       function(err, result) {
         assert.equal(err, null);
         console.log(result)
@@ -156,26 +143,19 @@ The following example returns a list of unique values for the
 ``categories`` field in the ``restaurants`` collection:
 
 ```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-var url = 'mongodb://localhost:27017/test';
+{{% myproject-connect %}}
 
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
   simpleDistinct(db, function() {
-    db.close();
+    client.close();
   });
 });
 
-var simpleDistinct = function(db, callback) {
-	var collection = db.collection( 'restaurants' );
-    collection.distinct( 'categories', 
-	  
-	  function(err, result) {
-        assert.equal(err, null);
-        console.log(result)
-        callback(result);
-      }
-  );
+function simpleDistinct(db, callback) {
+  const collection = db.collection( 'restaurants' );
+  collection.distinct( 'categories', function(err, result) {
+    assert.equal(err, null);
+    console.log(result)
+    callback(result);
+  });
 }
 ```
