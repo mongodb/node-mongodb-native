@@ -6677,7 +6677,7 @@ describe('Operation Examples', function() {
 
         db
           .collection('replicaset_mongo_client_collection')
-          .updateOne({ a: 1 }, { b: 1 }, { upsert: true }, function(err, result) {
+          .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true }, function(err, result) {
             test.equal(null, err);
             test.equal(1, result.result.n);
 
@@ -6728,7 +6728,7 @@ describe('Operation Examples', function() {
 
         db
           .collection('replicaset_mongo_client_collection')
-          .updateOne({ a: 1 }, { b: 1 }, { upsert: true }, function(err, result) {
+          .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true }, function(err, result) {
             test.equal(null, err);
             test.equal(1, result);
 

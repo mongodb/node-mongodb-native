@@ -112,7 +112,7 @@ describe('APM', function() {
     }
   });
 
-  it('should correctly receive the APM events for a listCollections command', {
+  it.skip('should correctly receive the APM events for a listCollections command', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.0.0' } },
 
     // The actual test we wish to run
