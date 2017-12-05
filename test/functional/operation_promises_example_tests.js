@@ -4987,7 +4987,7 @@ describe('Operation (Promises)', function() {
 
         return db
           .collection('replicaset_mongo_client_collection_with_promise')
-          .updateOne({ a: 1 }, { b: 1 }, { upsert: true })
+          .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true })
           .then(function(result) {
             test.equal(1, result.result.n);
             client.close();
@@ -5034,7 +5034,7 @@ describe('Operation (Promises)', function() {
 
         return db
           .collection('replicaset_mongo_client_collection_with_promise')
-          .updateOne({ a: 1 }, { b: 1 }, { upsert: true })
+          .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true })
           .then(function(result) {
             test.equal(1, result);
             client.close();
