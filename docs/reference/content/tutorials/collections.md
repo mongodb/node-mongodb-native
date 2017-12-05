@@ -29,17 +29,15 @@ To create a [capped collection](https://docs.mongodb.com/manual/core/capped-coll
 use the ``createCollection`` method and specify ``'capped' : true``.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-var url = 'mongodb://localhost:27017/test';
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
+
+{{% myproject-connect %}}
+
   createCapped(db, function() {
-    db.close();
+    client.close();
   });
 });
 
-var createCapped = function(db, callback) {
+function createCapped(db, callback) {
   db.createCollection("myCollection", { "capped": true, "size": 100000, "max": 5000},
     function(err, results) {
       console.log("Collection created.");
@@ -67,18 +65,15 @@ least one of three following conditions:
 - the ``status`` field is either ``Unknown`` or ``Incomplete``.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-var url = 'mongodb://localhost:27017/test';
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
+{{% myproject-connect %}}
+
   createValidated(db, function() {
-    db.close();
+    client.close();
   });
 });
 
 
-var createValidated = function(db, callback) {
+function createValidated(db, callback) {
   db.createCollection("contacts", 
 	   {
 	      'validator': { '$or':
@@ -88,14 +83,11 @@ var createValidated = function(db, callback) {
 	            { 'status': { '$in': [ "Unknown", "Incomplete" ] } }
 	         ]
 	      }
-	   },	   
+	   },
     function(err, results) {
       console.log("Collection created.");
       callback();
     }
   );
 };
-  
 ```
-
-
