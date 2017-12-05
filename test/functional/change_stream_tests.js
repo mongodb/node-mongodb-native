@@ -947,43 +947,44 @@ describe('Change Streams', function() {
       MongoClient.connect('mongodb://localhost:32000/', {
         socketTimeoutMS: 500,
         validateOptions: true
-      }).then(client => {
-        var database = client.db('integration_tests5');
-        var collection = database.collection('MongoNetworkErrorTestPromises');
-        var changeStream = collection.watch(pipeline);
-
-        return changeStream
-          .next()
-          .then(function(change) {
-            assert.ok(change);
-            assert.equal(change.operationType, 'insert');
-            assert.equal(change.fullDocument.counter, 0);
-
-            // Add a tag to the cursor
-            changeStream.cursor.track = 1;
-
-            return changeStream.next();
-          })
-          .then(function(change) {
-            assert.ok(change);
-            assert.equal(change.operationType, 'insert');
-            assert.equal(change.fullDocument.counter, 1);
-
-            // Check this cursor doesn't have the tag added earlier (therefore it is a new cursor)
-            assert.notEqual(changeStream.cursor.track, 1);
-
-            // Check that only one getMore call was made
-            assert.equal(callsToGetMore, 1);
-
-            return Promise.all([changeStream.close(), primaryServer.destroy]);
-          });
       })
-      .catch((err) => finalError = err)
-      .then(() => {
-        mock.cleanup(primaryServer)
-      })
-      .catch((err) => finalError = err)
-      .then(() => done(finalError));
+        .then(client => {
+          var database = client.db('integration_tests5');
+          var collection = database.collection('MongoNetworkErrorTestPromises');
+          var changeStream = collection.watch(pipeline);
+
+          return changeStream
+            .next()
+            .then(function(change) {
+              assert.ok(change);
+              assert.equal(change.operationType, 'insert');
+              assert.equal(change.fullDocument.counter, 0);
+
+              // Add a tag to the cursor
+              changeStream.cursor.track = 1;
+
+              return changeStream.next();
+            })
+            .then(function(change) {
+              assert.ok(change);
+              assert.equal(change.operationType, 'insert');
+              assert.equal(change.fullDocument.counter, 1);
+
+              // Check this cursor doesn't have the tag added earlier (therefore it is a new cursor)
+              assert.notEqual(changeStream.cursor.track, 1);
+
+              // Check that only one getMore call was made
+              assert.equal(callsToGetMore, 1);
+
+              return Promise.all([changeStream.close(), primaryServer.destroy]);
+            });
+        })
+        .catch(err => (finalError = err))
+        .then(() => {
+          mock.cleanup(primaryServer);
+        })
+        .catch(err => (finalError = err))
+        .then(() => done(finalError));
     }
   });
 
@@ -1349,7 +1350,6 @@ describe('Change Streams', function() {
               )
             );
           } else if (doc.getMore) {
-
             var changeDoc = {
               cursor: {
                 id: new Long(1407, 1407),
@@ -1433,7 +1433,6 @@ describe('Change Streams', function() {
             var parsedFileContents = JSON.parse(fileContents);
             assert.equal(parsedFileContents.fullDocument.a, 1);
 
-
             watcher.close();
 
             thisChangeStream.close(function(err) {
@@ -1471,10 +1470,12 @@ describe('Change Streams', function() {
         var thisChangeStream = theCollection.watch(pipeline);
 
         // Make a stream transforming to JSON and piping to the file
-        var basicStream = thisChangeStream.pipe(new Transform({
-          transform: (data, encoding, callback) => callback(null, JSON.stringify(data)),
-          objectMode: true
-        }));
+        var basicStream = thisChangeStream.pipe(
+          new Transform({
+            transform: (data, encoding, callback) => callback(null, JSON.stringify(data)),
+            objectMode: true
+          })
+        );
         var pipedStream = basicStream.pipe(cipher).pipe(decipher);
 
         var dataEmitted = '';
@@ -1528,10 +1529,7 @@ describe('Change Streams', function() {
         changeStreamTest.hasNext(function(err, result) {
           assert.equal(null, result);
           assert.ok(err);
-          assert.equal(
-            err.message,
-            'The $changeStream stage is only supported on replica sets'
-          );
+          assert.equal(err.message, 'The $changeStream stage is only supported on replica sets');
 
           done();
         });

@@ -433,11 +433,12 @@ describe('Sharding (Read Preference)', function() {
                   test.equal(null, err);
 
                   var map = function() {
-                  emit(this._id, this._id); // eslint-disable-line
+                    emit(this._id, this._id); // eslint-disable-line
                   };
 
-                var reduce = function(key, values) {  // eslint-disable-line
-                  // eslint-disable-line
+                  var reduce = function(key, values) {
+                    // eslint-disable-line
+                    // eslint-disable-line
                     return 123;
                   };
 

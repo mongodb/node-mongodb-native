@@ -957,39 +957,49 @@ describe('Aggregation', function() {
       });
 
       const testCases = [
-        {readConcern: {level: 'local'}},
-        {writeConcern: {j: true},},
-        {readConcern: {level: 'local'}, writeConcern: {j: true}},
+        { readConcern: { level: 'local' } },
+        { writeConcern: { j: true } },
+        { readConcern: { level: 'local' }, writeConcern: { j: true } }
       ];
 
       client.connect(function(err, client) {
-        const wrapup = (err) => {
+        const wrapup = err => {
           client.close();
           done(err);
         };
 
         const db = client.db(databaseName);
 
-        Promise.all(testCases.map((testCase) => {
-          const stringifiedTestCase = JSON.stringify(testCase);
-          const collection = db.collection('foo');
-          Object.assign(collection.s, testCase);
-          try {
-            const promise = collection.aggregate([
-              {$project: {_id: 0}},
-              {$out: 'bar'}
-            ], {explain: true}).toArray().then(() => {
-              throw new Error('Expected aggregation to not succeed for options ' + stringifiedTestCase)
-            }, () => {
-              throw new Error('Expected aggregation to fail on client instead of server for options ' + stringifiedTestCase)
-            });
+        Promise.all(
+          testCases.map(testCase => {
+            const stringifiedTestCase = JSON.stringify(testCase);
+            const collection = db.collection('foo');
+            Object.assign(collection.s, testCase);
+            try {
+              const promise = collection
+                .aggregate([{ $project: { _id: 0 } }, { $out: 'bar' }], { explain: true })
+                .toArray()
+                .then(
+                  () => {
+                    throw new Error(
+                      'Expected aggregation to not succeed for options ' + stringifiedTestCase
+                    );
+                  },
+                  () => {
+                    throw new Error(
+                      'Expected aggregation to fail on client instead of server for options ' +
+                        stringifiedTestCase
+                    );
+                  }
+                );
 
-            return promise;
-          } catch (e) {
-            expect(e).to.exist;
-            return Promise.resolve();
-          }
-        })).then(() => wrapup(), wrapup);
+              return promise;
+            } catch (e) {
+              expect(e).to.exist;
+              return Promise.resolve();
+            }
+          })
+        ).then(() => wrapup(), wrapup);
       });
     }
   });

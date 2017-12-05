@@ -46,11 +46,13 @@ describe('Indexes', function() {
                     var count1 = 0,
                       count2 = 0;
                     // Get count of indexes
-                    for (var i in collectionInfo) {  // eslint-disable-line
+                    for (var i in collectionInfo) {
+                      // eslint-disable-line
                       // eslint-disable-line
                       count1 += 1;
                     }
-                    for (var i in collectionInfo2) {  // eslint-disable-line
+                    for (var i in collectionInfo2) {
+                      // eslint-disable-line
                       // eslint-disable-line
                       count2 += 1;
                     }
@@ -105,7 +107,8 @@ describe('Indexes', function() {
                 db.indexInformation(collection.collectionName, function(err, collectionInfo) {
                   var count1 = 0;
                   // Get count of indexes
-                  for (var i in collectionInfo) { // eslint-disable-line
+                  for (var i in collectionInfo) {
+                    // eslint-disable-line
                     // eslint-disable-line
                     count1 += 1;
                   }

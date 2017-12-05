@@ -821,10 +821,10 @@ suite.addTest(
         // Drop existing collections
         try {
           yield context.db.collection('files').drop();
-        } catch (e) {}  // eslint-disable-line
+        } catch (e) {} // eslint-disable-line
         try {
           yield context.db.collection('chunks').drop();
-        } catch (e) {}  // eslint-disable-line
+        } catch (e) {} // eslint-disable-line
 
         // Create a simple read stream
         var readStream = new stream.Readable();
