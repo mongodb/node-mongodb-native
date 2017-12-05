@@ -11,7 +11,7 @@ var restartAndDone = function(configuration, done) {
   });
 };
 
-describe('A replica set', function() {
+describe.skip('A replica set', function() {
   this.timeout(0);
 
   it('Discover arbiters', {
