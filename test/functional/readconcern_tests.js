@@ -32,10 +32,10 @@ describe('ReadConcern', function() {
       var started = [];
       // Get a new instance
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        readConcern: { level: 'local' }
-      });
+      var client = configuration.newClient(
+        { w: 1, readConcern: { level: 'local' } },
+        { poolSize: 1 }
+      );
 
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -78,10 +78,10 @@ describe('ReadConcern', function() {
       var started = [];
       // Get a new instance
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        readConcern: { level: 'majority' }
-      });
+      var client = configuration.newClient(
+        { w: 1, readConcern: { level: 'majority' } },
+        { poolSize: 1 }
+      );
 
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -165,10 +165,10 @@ describe('ReadConcern', function() {
       var started = [];
       // Get a new instance
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        readConcern: { level: 'majority' }
-      });
+      var client = configuration.newClient(
+        { w: 1, readConcern: { level: 'majority' } },
+        { poolSize: 1 }
+      );
 
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -353,10 +353,10 @@ describe('ReadConcern', function() {
 
       // Get a new instance
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        readConcern: { level: 'majority' }
-      });
+      var client = configuration.newClient(
+        { w: 1, readConcern: { level: 'majority' } },
+        { poolSize: 1 }
+      );
 
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -375,8 +375,6 @@ describe('ReadConcern', function() {
         // Execute find
         collection.find().toArray(function(err) {
           test.equal(null, err);
-          test.ok(err != null);
-
           listener.uninstrument();
           client.close();
           done();
@@ -398,10 +396,10 @@ describe('ReadConcern', function() {
       var succeeded = [];
       // Get a new instance
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        readConcern: { level: 'majority' }
-      });
+      var client = configuration.newClient(
+        { w: 1, readConcern: { level: 'majority' } },
+        { poolSize: 1 }
+      );
 
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -450,10 +448,10 @@ describe('ReadConcern', function() {
       var succeeded = [];
       // Get a new instance
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        readConcern: { level: 'majority' }
-      });
+      var client = configuration.newClient(
+        { w: 1, readConcern: { level: 'majority' } },
+        { poolSize: 1 }
+      );
 
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -515,10 +513,10 @@ describe('ReadConcern', function() {
       var succeeded = [];
       // Get a new instance
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        readConcern: { level: 'majority' }
-      });
+      var client = configuration.newClient(
+        { w: 1, readConcern: { level: 'majority' } },
+        { poolSize: 1 }
+      );
 
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -578,10 +576,10 @@ describe('ReadConcern', function() {
       var succeeded = [];
       // Get a new instance
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        readConcern: { level: 'majority' }
-      });
+      var client = configuration.newClient(
+        { w: 1, readConcern: { level: 'majority' } },
+        { poolSize: 1 }
+      );
 
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -644,10 +642,10 @@ describe('ReadConcern', function() {
       var succeeded = [];
       // Get a new instance
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        readConcern: { level: 'majority' }
-      });
+      var client = configuration.newClient(
+        { w: 1, readConcern: { level: 'majority' } },
+        { poolSize: 1 }
+      );
 
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -710,10 +708,11 @@ describe('ReadConcern', function() {
       var succeeded = [];
       // Get a new instance
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        readConcern: { level: 'majority' }
-      });
+      var client = configuration.newClient(
+        { w: 1, readConcern: { level: 'majority' } },
+        { poolSize: 1 }
+      );
+
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
@@ -781,10 +780,10 @@ describe('ReadConcern', function() {
       var succeeded = [];
       // Get a new instance
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        readConcern: { level: 'majority' }
-      });
+      var client = configuration.newClient(
+        { w: 1, readConcern: { level: 'majority' } },
+        { poolSize: 1 }
+      );
 
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -847,10 +846,11 @@ describe('ReadConcern', function() {
       var succeeded = [];
       // Get a new instance
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        readConcern: { level: 'majority' }
-      });
+      var client = configuration.newClient(
+        { w: 1, readConcern: { level: 'majority' } },
+        { poolSize: 1 }
+      );
+
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         test.equal(null, err);
@@ -910,10 +910,10 @@ describe('ReadConcern', function() {
       var succeeded = [];
       // Get a new instance
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), {
-        poolSize: 1,
-        readConcern: { level: 'majority' }
-      });
+      var client = configuration.newClient(
+        { w: 1, readConcern: { level: 'majority' } },
+        { poolSize: 1 }
+      );
 
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
