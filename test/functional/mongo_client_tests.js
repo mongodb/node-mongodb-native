@@ -217,17 +217,19 @@ describe('MongoClient', function() {
       MongoClient.connect(
         url,
         {
-          ha: false,
-          haInterval: 10000,
-          replicaSet: 'rs',
-          secondaryAcceptableLatencyMS: 100,
-          connectWithNoPrimary: true,
-          poolSize: 1,
-          socketOptions: {
-            noDelay: false,
-            keepAlive: 100,
-            connectTimeoutMS: 444444,
-            socketTimeoutMS: 555555
+          replSet: {
+            ha: false,
+            haInterval: 10000,
+            replicaSet: 'rs',
+            secondaryAcceptableLatencyMS: 100,
+            connectWithNoPrimary: true,
+            poolSize: 1,
+            socketOptions: {
+              noDelay: false,
+              keepAlive: 100,
+              connectTimeoutMS: 444444,
+              socketTimeoutMS: 555555
+            }
           }
         },
         function(err, client) {
