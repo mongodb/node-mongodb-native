@@ -18,27 +18,17 @@ database commands.
 
 ```js
 // set up a command function
-var getDbStats = function(db, callback) {
-      db.command({'dbStats': 1},
-      function(err, results) {
-        console.log(results);
-        callback();
-    }
-  );
+function getDbStats(db, callback) {
+  db.command({'dbStats': 1}, function(err, results) {
+    console.log(results);
+    callback();
+  });
 };
 
 // use the function
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-
-// Connection URL
-var url = 'mongodb://localhost:27017/test';
-// Use connect method to connect to the server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log("Connected correctly to server");
+{{% myproject-connect %}}
   getDbStats(db, function() {
-    db.close();
+    client.close();
   });
 });
 ```
