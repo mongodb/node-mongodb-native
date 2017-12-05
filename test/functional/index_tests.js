@@ -43,19 +43,8 @@ describe('Indexes', function() {
                   test.deepEqual([['a', 1]], collectionInfo['a_1']);
 
                   db.indexInformation(collection.collectionName, function(err, collectionInfo2) {
-                    var count1 = 0,
-                      count2 = 0;
-                    // Get count of indexes
-                    for (var i in collectionInfo) {
-                      // eslint-disable-line
-                      // eslint-disable-line
-                      count1 += 1;
-                    }
-                    for (var i in collectionInfo2) {
-                      // eslint-disable-line
-                      // eslint-disable-line
-                      count2 += 1;
-                    }
+                    var count1 = Object.keys(collectionInfo).length,
+                      count2 = Object.keys(collectionInfo2).length;
 
                     // Tests
                     test.ok(count2 >= count1);
@@ -105,13 +94,7 @@ describe('Indexes', function() {
                 test.equal('a_-1_b_1_c_-1', indexName);
                 // Let's fetch the index information
                 db.indexInformation(collection.collectionName, function(err, collectionInfo) {
-                  var count1 = 0;
-                  // Get count of indexes
-                  for (var i in collectionInfo) {
-                    // eslint-disable-line
-                    // eslint-disable-line
-                    count1 += 1;
-                  }
+                  var count1 = Object.keys(collectionInfo).length;
 
                   // Test
                   test.equal(2, count1);

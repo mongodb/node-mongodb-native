@@ -274,9 +274,7 @@ describe('ReadPreference', function() {
           emit(this.user_id, 1); // eslint-disable-line
         };
         // Reduce function
-        var reduce = function(k, vals) {
-          // eslint-disable-line
-          // eslint-disable-line
+        var reduce = function(/* k, vals */) {
           return 1;
         };
 
@@ -334,9 +332,7 @@ describe('ReadPreference', function() {
           };
 
           // Reduce function
-          var reduce = function(k, vals) {
-            // eslint-disable-line
-            // eslint-disable-line
+          var reduce = function(/* k, vals */) {
             return 1;
           };
 
@@ -378,9 +374,7 @@ describe('ReadPreference', function() {
         };
 
         // Reduce function
-        var reduce = function(k, vals) {
-          // eslint-disable-line
-          // eslint-disable-line
+        var reduce = function(/* k, vals */) {
           return 1;
         };
 
