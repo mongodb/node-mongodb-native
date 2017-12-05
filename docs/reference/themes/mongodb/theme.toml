@@ -5,8 +5,8 @@ description = "A standalone mongodb docs theme, for individual driver homepages"
 homepage = "http://mongodb.github.io/mongo-java-driver"
 
 [author]
-  name = "MongoDB Java driver authors"
-  homepage = "http://mongodb.github.io/mongo-java-driver"
+  name = "MongoDB Node.js driver authors"
+  homepage = "http://mongodb.github.io/node-mongodb-native"
 
 [original]
   name = "MongoDB Docs"

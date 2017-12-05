@@ -6,7 +6,7 @@ type = "index"
 
 # MongoDB Node.js Driver Documentation
 
-Welcome to the MongoDB Node.js 2.x driver documentation.
+Welcome to the MongoDB Node.js 3.x driver documentation.
 
 
 ## What's New
