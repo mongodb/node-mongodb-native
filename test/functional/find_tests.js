@@ -1847,14 +1847,14 @@ describe('Find', function() {
           );
         };
 
-        insertF(1000, function() {
+        insertF(500, function() {
           var cursor = collection.find({}, {});
           cursor.count(function(err) {
             test.equal(null, err);
             cursor.each(function(err, obj) {
               if (obj == null) {
                 p_client.close();
-                test.equal(1000, numberOfSteps);
+                test.equal(500, numberOfSteps);
                 done();
               } else {
                 numberOfSteps = numberOfSteps + 1;
