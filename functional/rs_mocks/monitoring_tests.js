@@ -193,7 +193,10 @@ describe('ReplSet Monitoring (mocks)', function() {
 
                     // Ensure the state is correct
                     expect(joinedPrimaries).to.eql({ 'localhost:32000': 1, 'localhost:32001': 1 });
-                    expect(joinedSecondaries).to.eql({ 'localhost:32001': 1, 'localhost:32002': 1 });
+                    expect(joinedSecondaries).to.eql({
+                      'localhost:32001': 1,
+                      'localhost:32002': 1
+                    });
 
                     server.destroy();
                     done();
