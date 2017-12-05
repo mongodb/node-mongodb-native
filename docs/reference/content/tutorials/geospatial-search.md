@@ -17,9 +17,9 @@ To create a 2dsphere index on a collection, pass a document containing the name 
 field to be indexed with the value '2dsphere' to the ``createIndex()`` method.
 
 ```js
-var create2dSphereIndex = function(db, callback) {
+function create2dSphereIndex(db, callback) {
   // Get the restaurants collection
-  var collection = db.collection('restaurants');
+  const collection = db.collection('restaurants');
   // Create the index
   collection.createIndex(
     { 'address.coord' : "2dsphere" }, function(err, result) {
@@ -28,21 +28,11 @@ var create2dSphereIndex = function(db, callback) {
   });
 };
 
-// use the create2dSphereIndex function
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-
-// Connection URL
-var url = 'mongodb://localhost:27017/test';
-// Use connect method to connect to the server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log("Connected correctly to server");
+{{% myproject-connect %}}
   create2dSphereIndex(db, function() {
-    db.close();
+    client.close();
   });
 });
-
 
 ```
 
@@ -57,9 +47,9 @@ The [$near](https://docs.mongodb.org/manual/reference/operator/query/near/) oper
 a set of longitude-latitude coordinates and returns documents from nearest to farthest.
 
 ```js
-var findDocuments = function(db, callback) {
+function findDocuments(db, callback) {
   // Get the documents collection
-  var collection = db.collection('restaurants');
+  const collection = db.collection('restaurants');
   // Find some documents
   collection.find(
 	{ 'address.coord':
@@ -92,9 +82,9 @@ The [$geoWithin](https://docs.mongodb.org/manual/reference/operator/query/geoWit
 selects documents with geospatial data that exist within a specified shape.
 
 ```js
-var findDocuments = function(db, callback) {
+function findDocuments(db, callback) {
   // Get the documents collection
-  var collection = db.collection('restaurants');
+  const collection = db.collection('restaurants');
   // Find some documents
   collection.find(
     { 'address.coord':
