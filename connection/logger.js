@@ -98,12 +98,12 @@ Logger.prototype.debug = function(message, object) {
   }
 }),
   /**
- * Log a message at the info level
- * @method
- * @param {string} message The message to log
- * @param {object} object additional meta data to log
- * @return {null}
- */
+   * Log a message at the info level
+   * @method
+   * @param {string} message The message to log
+   * @param {object} object additional meta data to log
+   * @return {null}
+   */
   (Logger.prototype.info = function(message, object) {
     if (
       this.isInfo() &&
@@ -124,12 +124,12 @@ Logger.prototype.debug = function(message, object) {
     }
   }),
   /**
- * Log a message at the error level
- * @method
- * @param {string} message The message to log
- * @param {object} object additional meta data to log
- * @return {null}
- */
+   * Log a message at the error level
+   * @method
+   * @param {string} message The message to log
+   * @param {object} object additional meta data to log
+   * @return {null}
+   */
   (Logger.prototype.error = function(message, object) {
     if (
       this.isError() &&
@@ -150,34 +150,34 @@ Logger.prototype.debug = function(message, object) {
     }
   }),
   /**
- * Is the logger set at info level
- * @method
- * @return {boolean}
- */
+   * Is the logger set at info level
+   * @method
+   * @return {boolean}
+   */
   (Logger.prototype.isInfo = function() {
     return level === 'info' || level === 'debug';
   }),
   /**
- * Is the logger set at error level
- * @method
- * @return {boolean}
- */
+   * Is the logger set at error level
+   * @method
+   * @return {boolean}
+   */
   (Logger.prototype.isError = function() {
     return level === 'error' || level === 'info' || level === 'debug';
   }),
   /**
- * Is the logger set at error level
- * @method
- * @return {boolean}
- */
+   * Is the logger set at error level
+   * @method
+   * @return {boolean}
+   */
   (Logger.prototype.isWarn = function() {
     return level === 'error' || level === 'warn' || level === 'info' || level === 'debug';
   }),
   /**
- * Is the logger set at debug level
- * @method
- * @return {boolean}
- */
+   * Is the logger set at debug level
+   * @method
+   * @return {boolean}
+   */
   (Logger.prototype.isDebug = function() {
     return level === 'debug';
   });

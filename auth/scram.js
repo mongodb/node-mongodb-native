@@ -91,7 +91,7 @@ var hi = function(data, salt, iterations) {
   }
 
   // generate the salt
-  var saltedData = crypto.pbkdf2Sync(data, salt, iterations, 20, "sha1");
+  var saltedData = crypto.pbkdf2Sync(data, salt, iterations, 20, 'sha1');
 
   // cache a copy to speed up the next lookup, but prevent unbounded cache growth
   if (_hiCacheCount >= 200) {
