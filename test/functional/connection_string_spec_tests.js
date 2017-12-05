@@ -1,11 +1,12 @@
 'use strict';
 
-var parse = require('../../lib/url_parser');
-var fs = require('fs'),
-  f = require('util').format;
+const parse = require('../../lib/url_parser'),
+  fs = require('fs'),
+  f = require('util').format,
+  expect = require('chai').expect;
 
-describe('Connection String', function() {
-  var testFiles = fs
+describe('Connection String (spec)', function() {
+  const testFiles = fs
     .readdirSync(f('%s/spec/connection-string', __dirname))
     .filter(function(x) {
       return x.indexOf('.json') !== -1;
@@ -15,26 +16,29 @@ describe('Connection String', function() {
     });
 
   // Execute the tests
-  for (var i = 0; i < testFiles.length; i++) {
-    var testFile = testFiles[i];
+  for (let i = 0; i < testFiles.length; i++) {
+    const testFile = testFiles[i];
 
     // Get each test
-    for (var j = 0; j < testFile.tests.length; j++) {
-      var test = testFile.tests[j];
+    for (let j = 0; j < testFile.tests.length; j++) {
+      const test = testFile.tests[j];
 
       it(test.description, {
         metadata: { requires: { topology: 'single' } },
         test: function(done) {
-          var valid = test.valid;
+          const valid = test.valid;
 
-          try {
-            parse(test.uri, {}, function() {});
-            if (valid === false) done('should not have been able to parse');
-          } catch (err) {
-            if (valid === true) done(err);
-          }
+          parse(test.uri, {}, function(err, result) {
+            if (valid === false) {
+              expect(err).to.exist;
+              expect(result).to.not.exist;
+            } else {
+              expect(err).to.not.exist;
+              expect(result).to.exist;
+            }
 
-          done();
+            done();
+          });
         }
       });
     }
