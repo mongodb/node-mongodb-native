@@ -1,3 +1,89 @@
+<a name="3.0.0-rc0"></a>
+# [3.0.0-rc0](https://github.com/mongodb/node-mongodb-native/compare/v2.2.31...v3.0.0-rc0) (2017-12-05)
+
+
+### Bug Fixes
+
+* **aggregation:** ensure that the `cursor` key is always present ([f16f314](https://github.com/mongodb/node-mongodb-native/commit/f16f314))
+* **apm:** give users access to raw server responses ([88b206b](https://github.com/mongodb/node-mongodb-native/commit/88b206b))
+* **apm:** only rebuilt cursor if reply is non-null ([96052c8](https://github.com/mongodb/node-mongodb-native/commit/96052c8))
+* **apm:** rebuild lost `cursor` info on pre-OP_QUERY responses ([4242d49](https://github.com/mongodb/node-mongodb-native/commit/4242d49))
+* **bulk-unordered:** add check for ignoreUndefined ([f38641a](https://github.com/mongodb/node-mongodb-native/commit/f38641a))
+* **change stream examples:** use timeouts, cleanup ([c5fec5f](https://github.com/mongodb/node-mongodb-native/commit/c5fec5f))
+* **change-streams:** ensure a majority read concern on initial agg ([23011e9](https://github.com/mongodb/node-mongodb-native/commit/23011e9))
+* **changeStreams:** fixing node4 issue with util.inherits ([#1587](https://github.com/mongodb/node-mongodb-native/issues/1587)) ([168bb3d](https://github.com/mongodb/node-mongodb-native/commit/168bb3d))
+* **collection:** allow { upsert: 1 } for findOneAndUpdate() and update() ([5bcedd6](https://github.com/mongodb/node-mongodb-native/commit/5bcedd6))
+* **collection:** allow passing `noCursorTimeout` as an option to `find()` ([e9c4ffc](https://github.com/mongodb/node-mongodb-native/commit/e9c4ffc))
+* **collection:** make the parameters of findOne very explicit ([3054f1a](https://github.com/mongodb/node-mongodb-native/commit/3054f1a))
+* **cursor:** `hasNext` should propagate errors when using callback ([6339625](https://github.com/mongodb/node-mongodb-native/commit/6339625))
+* **cursor:** close readable on `null` response for dead cursor ([6aca2c5](https://github.com/mongodb/node-mongodb-native/commit/6aca2c5))
+* **dns txt records:** check options are set ([e5caf4f](https://github.com/mongodb/node-mongodb-native/commit/e5caf4f))
+* **docs:** Represent each valid option in docs in both places ([fde6e5d](https://github.com/mongodb/node-mongodb-native/commit/fde6e5d))
+* **grid-store:** add missing callback ([66a9a05](https://github.com/mongodb/node-mongodb-native/commit/66a9a05))
+* **grid-store:** move into callback scope ([b53f65f](https://github.com/mongodb/node-mongodb-native/commit/b53f65f))
+* **GridFS:**  fix TypeError: doc.data.length is not a function ([#1570](https://github.com/mongodb/node-mongodb-native/issues/1570)) ([22a4628](https://github.com/mongodb/node-mongodb-native/commit/22a4628))
+* **list-collections:** ensure default of primary ReadPreference ([4a0cfeb](https://github.com/mongodb/node-mongodb-native/commit/4a0cfeb))
+* **mongo client:** close client before calling done ([c828aab](https://github.com/mongodb/node-mongodb-native/commit/c828aab))
+* **mongo client:** do not connect if url parse error ([cd10084](https://github.com/mongodb/node-mongodb-native/commit/cd10084))
+* **mongo client:** send error to cb ([eafc9e2](https://github.com/mongodb/node-mongodb-native/commit/eafc9e2))
+* **mongo-client:** move to inside of callback ([68b0fca](https://github.com/mongodb/node-mongodb-native/commit/68b0fca))
+* **mongo-client:** options should not be passed to `connect` ([474ac65](https://github.com/mongodb/node-mongodb-native/commit/474ac65))
+* **tests:** migrate 2.x tests to 3.x ([3a5232a](https://github.com/mongodb/node-mongodb-native/commit/3a5232a))
+* **updateOne/updateMany:** ensure that update documents contain atomic operators ([8b4255a](https://github.com/mongodb/node-mongodb-native/commit/8b4255a))
+* **url parser:** add check for options as cb ([52b6039](https://github.com/mongodb/node-mongodb-native/commit/52b6039))
+* **url parser:** compare srv address and parent domains ([daa186d](https://github.com/mongodb/node-mongodb-native/commit/daa186d))
+* **url parser:** compare string from first period on ([9e5d77e](https://github.com/mongodb/node-mongodb-native/commit/9e5d77e))
+* **url parser:** default to ssl true for mongodb+srv ([0fbca4b](https://github.com/mongodb/node-mongodb-native/commit/0fbca4b))
+* **url parser:** error when multiple hostnames used ([c1aa681](https://github.com/mongodb/node-mongodb-native/commit/c1aa681))
+* **url parser:** keep original uri options and default to ssl true ([e876a72](https://github.com/mongodb/node-mongodb-native/commit/e876a72))
+* **url parser:** log instead of throw error for unsupported url options ([155de2d](https://github.com/mongodb/node-mongodb-native/commit/155de2d))
+* **url parser:** make sure uri has 3 parts ([aa9871b](https://github.com/mongodb/node-mongodb-native/commit/aa9871b))
+* **url parser:** only 1 txt record allowed with 2 possible options ([d9f4218](https://github.com/mongodb/node-mongodb-native/commit/d9f4218))
+* **url parser:** only check for multiple hostnames with srv protocol ([5542bcc](https://github.com/mongodb/node-mongodb-native/commit/5542bcc))
+* **url parser:** remove .only from test ([642e39e](https://github.com/mongodb/node-mongodb-native/commit/642e39e))
+* **url parser:** return callback ([6096afc](https://github.com/mongodb/node-mongodb-native/commit/6096afc))
+* **url parser:** support single text record with multiple strings ([356fa57](https://github.com/mongodb/node-mongodb-native/commit/356fa57))
+* **url parser:** try catch bug, not actually returning from try loop ([758892b](https://github.com/mongodb/node-mongodb-native/commit/758892b))
+* **url parser:** use warn instead of info ([40ed27d](https://github.com/mongodb/node-mongodb-native/commit/40ed27d))
+* **url-parser:** remove comment, send error to cb ([d44420b](https://github.com/mongodb/node-mongodb-native/commit/d44420b))
+
+
+### Features
+
+* **aggregate:** support hit field for aggregate command ([aa7da15](https://github.com/mongodb/node-mongodb-native/commit/aa7da15))
+* **aggregation:** adds support for comment in aggregation command ([#1571](https://github.com/mongodb/node-mongodb-native/issues/1571)) ([4ac475c](https://github.com/mongodb/node-mongodb-native/commit/4ac475c))
+* **aggregation:** fail aggregation on explain + readConcern/writeConcern ([e0ca1b4](https://github.com/mongodb/node-mongodb-native/commit/e0ca1b4))
+* **causal-consistency:** support `afterClusterTime` in readConcern ([a9097f7](https://github.com/mongodb/node-mongodb-native/commit/a9097f7))
+* **change-streams:** add support for change streams ([c02d25c](https://github.com/mongodb/node-mongodb-native/commit/c02d25c))
+* **collection:** updating find API ([f26362d](https://github.com/mongodb/node-mongodb-native/commit/f26362d))
+* **execute-operation:** implementation for common op execution ([67c344f](https://github.com/mongodb/node-mongodb-native/commit/67c344f))
+* **listDatabases:** add support for nameOnly option to listDatabases ([eb79b5a](https://github.com/mongodb/node-mongodb-native/commit/eb79b5a))
+* **maxTimeMS:** adding maxTimeMS option to createIndexes and dropIndexes ([90d4a63](https://github.com/mongodb/node-mongodb-native/commit/90d4a63))
+* **mongo-client:** implement `MongoClient.prototype.startSession` ([bce5adf](https://github.com/mongodb/node-mongodb-native/commit/bce5adf))
+* **retryable-writes:** add support for `retryWrites` cs option ([2321870](https://github.com/mongodb/node-mongodb-native/commit/2321870))
+* **sessions:** MongoClient will now track sessions and release ([6829f47](https://github.com/mongodb/node-mongodb-native/commit/6829f47))
+* **sessions:** support passing sessions via objects in all methods ([a531f05](https://github.com/mongodb/node-mongodb-native/commit/a531f05))
+* **shared:** add helper utilities for assertion and suite setup ([b6cc34e](https://github.com/mongodb/node-mongodb-native/commit/b6cc34e))
+* **ssl:** adds missing ssl options ssl options for `ciphers` and `ecdhCurve` ([441b7b1](https://github.com/mongodb/node-mongodb-native/commit/441b7b1))
+* **test-shared:** add `notEqual` assertion ([41d93fd](https://github.com/mongodb/node-mongodb-native/commit/41d93fd))
+* **test-shared:** add `strictEqual` assertion method ([cad8e19](https://github.com/mongodb/node-mongodb-native/commit/cad8e19))
+* **topologies:** expose underlaying `logicalSessionTimeoutMinutes' ([1609a37](https://github.com/mongodb/node-mongodb-native/commit/1609a37))
+* **url parser:** better error message for slash in hostname ([457bc29](https://github.com/mongodb/node-mongodb-native/commit/457bc29))
+
+
+### BREAKING CHANGES
+
+* **aggregation:** If you use aggregation, and try to use the explain flag while you
+have a readConcern or writeConcern, your query will fail
+* **collection:** `find` and `findOne` no longer support the `fields` parameter.
+You can achieve the same results as the `fields` parameter by
+either using `Cursor.prototype.project`, or by passing the `projection`
+property in on the `options` object. Additionally, `find` does not
+support individual options like `skip` and `limit` as positional
+parameters. You must pass in these parameters in the `options` object
+
+
+
 3.0.0 2017-??-??
 ----------------
 * NODE-1043 URI-escaping authentication and hostname details in connection string

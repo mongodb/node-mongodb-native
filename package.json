@@ -21,6 +21,7 @@
     "bson": "^1.0.4",
     "chai": "^4.1.1",
     "co": "4.6.0",
+    "conventional-changelog-cli": "^1.3.5",
     "coveralls": "^2.11.6",
     "eslint": "^4.5.0",
     "eslint-plugin-prettier": "^2.2.0",
@@ -41,15 +42,11 @@
     "url": "https://github.com/mongodb/node-mongodb-native/issues"
   },
   "scripts": {
-    "test": "mongodb-test-runner -t 60000 test/unit test/functional",
+    "test": "npm run lint && mongodb-test-runner -t 60000 test/unit test/functional",
     "coverage": "istanbul cover mongodb-test-runner -- -t 60000  test/unit test/functional",
     "lint": "eslint lib test",
-    "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'"
-  },
-  "nyc": {
-    "include": [
-      "lib/**/*.js"
-    ]
+    "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",
+    "changelog": "conventional-changelog -p angular -i HISTORY.md -s"
   },
   "homepage": "https://github.com/mongodb/node-mongodb-native"
 }
