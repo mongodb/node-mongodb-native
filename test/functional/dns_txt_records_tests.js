@@ -6,13 +6,11 @@ var path = require('path');
 var parse = require('../../lib/url_parser');
 var expect = require('chai').expect;
 
-// ./node_modules/.bin/mongodb-test-runner -l test/functional/dns_txt_records_tests.js
-
 function getTests() {
   return fs
-    .readdirSync(path.join(__dirname, 'specs/dns-txt-records'))
+    .readdirSync(path.join(__dirname, 'spec/dns-txt-records'))
     .filter(x => x.indexOf('json') !== -1)
-    .map(x => [x, fs.readFileSync(path.join(__dirname, 'specs/dns-txt-records', x), 'utf8')])
+    .map(x => [x, fs.readFileSync(path.join(__dirname, 'spec/dns-txt-records', x), 'utf8')])
     .map(x => [path.basename(x[0], '.json'), JSON.parse(x[1])]);
 }
 
