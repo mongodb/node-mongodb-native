@@ -811,16 +811,19 @@ describe('Url Parser', function() {
       parse('mongodb://localhost/db', {}, function(err, object) {
         expect(object.db_options.read_preference_tags).to.be.null;
         parse('mongodb://localhost/db?readPreferenceTags=dc:ny', {}, function(err, object) {
+          expect(err).to.not.exist;
           expect(object.db_options.read_preference_tags).to.eql([{ dc: 'ny' }]);
           parse('mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1', {}, function(
             err,
             object
           ) {
+            expect(err).to.not.exist;
             expect(object.db_options.read_preference_tags).to.eql([{ dc: 'ny', rack: '1' }]);
             parse(
               'mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1&readPreferenceTags=dc:sf,rack:2',
               {},
               function(err, object) {
+                expect(err).to.not.exist;
                 expect(object.db_options.read_preference_tags).to.eql([
                   { dc: 'ny', rack: '1' },
                   { dc: 'sf', rack: '2' }
@@ -829,6 +832,7 @@ describe('Url Parser', function() {
                   'mongodb://localhost/db?readPreferenceTags=dc:ny,rack:1&readPreferenceTags=dc:sf,rack:2&readPreferenceTags=',
                   {},
                   function(err, object) {
+                    expect(err).to.not.exist;
                     expect(object.db_options.read_preference_tags).to.eql([
                       { dc: 'ny', rack: '1' },
                       { dc: 'sf', rack: '2' },
