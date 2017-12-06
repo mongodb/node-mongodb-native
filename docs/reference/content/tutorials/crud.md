@@ -18,7 +18,7 @@ This tutorial covers both the basic CRUD methods and the specialized ``findAndMo
 as well as the new Bulk API methods for efficient bulk write operations.
 
 <div class="pull-right">
-  <input type="checkbox" checked="" class="distroPicker" data-toggle="toggle" data-on="JavaScript 5" data-off="JavaScript 6" data-offstyle="success">
+  <input type="checkbox" checked="" class="distroPicker" data-toggle="toggle" data-on="ES2015" data-off="ES2017" data-offstyle="success">
 </div>
 
 
@@ -46,7 +46,7 @@ The ``insertOne`` and ``insertMany`` methods exist on the ``Collection`` class a
       assert.equal(null, err);
       assert.equal(2, r.insertedCount);
 
-      db.close();
+      client.close();
     });
   });
 });
@@ -55,19 +55,20 @@ The ``insertOne`` and ``insertMany`` methods exist on the ``Collection`` class a
 <section class="javascript6 hidden"><pre><code class="hljs">
 {{% js6-connect %}}
 
-  // Insert a single document
-  var r = yield db.collection('inserts').insertOne({a:1});
-  assert.equal(1, r.insertedCount);
+    // Insert a single document
+    let r = await db.collection('inserts').insertOne({a:1});
+    assert.equal(1, r.insertedCount);
 
-  // Insert multiple documents
-  var r = yield db.collection('inserts').insertMany([{a:2}, {a:3}]);
-  assert.equal(2, r.insertedCount);
+    // Insert multiple documents
+    var r = await db.collection('inserts').insertMany([{a:2}, {a:3}]);
+    assert.equal(2, r.insertedCount);
 
-  // Close connection
-  db.close();
-}).catch(function(err) {
-  console.log(err.stack);
-});
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
 </code></pre></section>
 
 The first ``insert`` inserts a single document into the *inserts* collection. Notice that there's no need to
@@ -103,29 +104,30 @@ The following example shows how to serialize a passed-in function when writing t
     }, function(err, r) {
     assert.equal(null, err);
     assert.equal(1, r.insertedCount);
-    db.close();
+    client.close();
   });
 });
 </code></pre></section>
 <section class="javascript6 hidden"><pre><code class="hljs">
 {{% js6-connect %}}
 
-  // Insert a single document
-  var r = yield db.collection('inserts').insertOne({
-        a:1
-      , b: function() { return 'hello'; }
-    }, {
-        w: 'majority'
-      , wtimeout: 10000
-      , serializeFunctions: true
-      , forceServerObjectId: true
-    });
+    // Insert a single document
+    const r = await db.collection('inserts').insertOne({
+          a:1
+        , b: function() { return 'hello'; }
+      }, {
+          w: 'majority'
+        , wtimeout: 10000
+        , serializeFunctions: true
+        , forceServerObjectId: true
+      });
 
-  assert.equal(1, r.insertedCount);
-  db.close();
-}).catch(function(err) {
-  console.log(err.stack);
-});
+    assert.equal(1, r.insertedCount);
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
 </code></pre></section>
 
 <a name='specify-data-type'></a>
@@ -139,41 +141,42 @@ The Decimal128 data type requires MongoDB server version 3.4 or higher.
 {{% /note %}}
 
 <section class="javascript5"><pre><code class="hljs">
-var Long = require('mongodb').Long;
-var Decimal = require('mongodb').Decimal128;
+const Long = require('mongodb').Long;
+const Decimal = require('mongodb').Decimal128;
 
 {{% myproject-connect %}}
 
-  var longValue = Long(1787);
-  var decimalValue = Decimal.fromString("27.8892836");
+  const longValue = Long(1787);
+  const decimalValue = Decimal.fromString("27.8892836");
 
   // Insert multiple documents
   db.collection('numbers').insertMany([ { a : longValue }, { b : decimalValue } ], function(err, r) {
     assert.equal(null, err);
     assert.equal(2, r.insertedCount);
-    db.close();
+    client.close();
   });
 });
 
 </code></pre></section>
 <section class="javascript6 hidden"><pre><code class="hljs">
-var Long = require('mongodb').Long;
-var Decimal = require('mongodb').Decimal128;
+const Long = require('mongodb').Long;
+const Decimal = require('mongodb').Decimal128;
 
 {{% js6-connect %}}
 
-  var longValue = Long(1787);
-  var decimalValue = Decimal.fromString("27.8892836");
+    const longValue = Long(1787);
+    const decimalValue = Decimal.fromString("27.8892836");
 
-  // Insert multiple documents
-  var r = yield db.collection('numbers').insertMany([ { a : longValue }, { b : decimalValue } ]);
-  assert.equal(2, r.insertedCount);
+    // Insert multiple documents
+    const r = await db.collection('numbers').insertMany([ { a : longValue }, { b : decimalValue } ]);
+    assert.equal(2, r.insertedCount);
 
-  // Close connection
-  db.close();
-}).catch(function(err) {
-  console.log(err.stack);
-});
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
 </code></pre></section>
 
 The above operation inserts the following documents into the
@@ -191,7 +194,7 @@ The ``updateOne`` and ``updateMany`` methods exist on the ``Collection`` class a
 <section class="javascript5"><pre><code class="hljs">
 {{% myproject-connect %}}
 
-  var col = db.collection('updates');
+  const col = db.collection('updates');
   // Insert a single document
   col.insertMany([{a:1}, {a:2}, {a:2}], function(err, r) {
     assert.equal(null, err);
@@ -216,7 +219,7 @@ The ``updateOne`` and ``updateMany`` methods exist on the ``Collection`` class a
           assert.equal(null, err);
           assert.equal(0, r.matchedCount);
           assert.equal(1, r.upsertedCount);
-          db.close();
+          client.close();
         });
       });
     });
@@ -226,32 +229,35 @@ The ``updateOne`` and ``updateMany`` methods exist on the ``Collection`` class a
 <section class="javascript6 hidden"><pre><code class="hljs">
 {{% js6-connect %}}
 
-  // Get the updates collection
-  var col = db.collection('updates');
-  // Insert a single document
-  var r = yield col.insertMany([{a:1}, {a:2}, {a:2}]);
-  assert.equal(3, r.insertedCount);
+    // Get the updates collection
+    const col = db.collection('updates');
+    // Insert a single document
+    let r = await col.insertMany([{a:1}, {a:2}, {a:2}]);
+    assert.equal(3, r.insertedCount);
 
-  // Update a single document
-  var r = yield col.updateOne({a:1}, {$set: {b: 1}});
-  assert.equal(1, r.matchedCount);
-  assert.equal(1, r.modifiedCount);
+    // Update a single document
+    r = await col.updateOne({a:1}, {$set: {b: 1}});
+    assert.equal(1, r.matchedCount);
+    assert.equal(1, r.modifiedCount);
 
-  // Update multiple documents
-  var r = yield col.updateMany({a:2}, {$set: {b: 1}});
-  assert.equal(2, r.matchedCount);
-  assert.equal(2, r.modifiedCount);
+    // Update multiple documents
+    r = await col.updateMany({a:2}, {$set: {b: 1}});
+    assert.equal(2, r.matchedCount);
+    assert.equal(2, r.modifiedCount);
 
-  // Upsert a single document
-  var r = yield col.updateOne({a:3}, {$set: {b: 1}}, {
-    upsert: true
-  });
-  assert.equal(0, r.matchedCount);
-  assert.equal(1, r.upsertedCount);
-  db.close();
-}).catch(function(err) {
-  console.log(err.stack);
-});
+    // Upsert a single document
+    r = await col.updateOne({a:3}, {$set: {b: 1}}, {
+      upsert: true
+    });
+    assert.equal(0, r.matchedCount);
+    assert.equal(1, r.upsertedCount);
+
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
 </code></pre></section>
 
 The ``update`` method also accepts a third argument which can be an options object. This object can have the following fields:
@@ -273,7 +279,7 @@ The ``deleteOne`` and ``deleteMany`` methods exist on the ``Collection`` class a
 <section class="javascript5"><pre><code class="hljs">
 {{% myproject-connect %}}
 
-  var col = db.collection('removes');
+  const col = db.collection('removes');
   // Insert a single document
   col.insertMany([{a:1}, {a:2}, {a:2}], function(err, r) {
     assert.equal(null, err);
@@ -288,7 +294,7 @@ The ``deleteOne`` and ``deleteMany`` methods exist on the ``Collection`` class a
       col.deleteMany({a:2}, function(err, r) {
         assert.equal(null, err);
         assert.equal(2, r.deletedCount);
-        db.close();
+        client.close();
       });
     });
   });
@@ -297,23 +303,26 @@ The ``deleteOne`` and ``deleteMany`` methods exist on the ``Collection`` class a
 <section class="javascript6 hidden"><pre><code class="hljs">
 {{% js6-connect %}}
 
-  // Get the removes collection
-  var col = db.collection('removes');
-  // Insert a single document
-  var r = yield col.insertMany([{a:1}, {a:2}, {a:2}]);
-  assert.equal(3, r.insertedCount);
+    // Get the removes collection
+    const col = db.collection('removes');
+    // Insert a single document
+    let r = await col.insertMany([{a:1}, {a:2}, {a:2}]);
+    assert.equal(3, r.insertedCount);
 
-  // Remove a single document
-  var r = yield col.deleteOne({a:1});
-  assert.equal(1, r.deletedCount);
+    // Remove a single document
+    r = await col.deleteOne({a:1});
+    assert.equal(1, r.deletedCount);
 
-  // Update multiple documents
-  var r = yield col.deleteMany({a:2});
-  assert.equal(2, r.deletedCount);
-  db.close();
-}).catch(function(err) {
-  console.log(err.stack);
-});
+    // Update multiple documents
+    r = await col.deleteMany({a:2});
+    assert.equal(2, r.deletedCount);
+
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
 </code></pre></section>
 
 The ``deleteOne`` and ``deleteMany`` methods also accept a second argument which can be an options object. This object can have the following fields:
@@ -337,7 +346,7 @@ methods, the operation takes a write lock for the duration of the operation in o
 <section class="javascript5"><pre><code class="hljs">
 {{% myproject-connect %}}
 
-  var col = db.collection('findAndModify');
+  const col = db.collection('findAndModify');
   // Insert a single document
   col.insert([{a:1}, {a:2}, {a:2}], function(err, r) {
     assert.equal(null, err);
@@ -356,7 +365,7 @@ methods, the operation takes a write lock for the duration of the operation in o
       col.findOneAndDelete({a:2}, function(err, r) {
         assert.equal(null, err);
         assert.ok(r.value.b == null);
-        db.close();
+        client.close();
       });
     });
   });
@@ -365,27 +374,30 @@ methods, the operation takes a write lock for the duration of the operation in o
 <section class="javascript6 hidden"><pre><code class="hljs">
 {{% js6-connect %}}
 
-  // Get the findAndModify collection
-  var col = db.collection('findAndModify');
-  // Insert a single document
-  var r = yield col.insert([{a:1}, {a:2}, {a:2}]);
-  assert.equal(3, r.result.n);
+    // Get the findAndModify collection
+    const col = db.collection('findAndModify');
+    // Insert a single document
+    let r = await col.insert([{a:1}, {a:2}, {a:2}]);
+    assert.equal(3, r.result.n);
 
-  // Modify and return the modified document
-  var r = yield col.findOneAndUpdate({a:1}, {$set: {b: 1}}, {
-      returnOriginal: false
-    , sort: [[a,1]]
-    , upsert: true
-  });
-  assert.equal(1, r.value.b);
+    // Modify and return the modified document
+    r = await col.findOneAndUpdate({a:1}, {$set: {b: 1}}, {
+        returnOriginal: false
+      , sort: [[a,1]]
+      , upsert: true
+    });
+    assert.equal(1, r.value.b);
 
-  // Remove and return a document
-  var r = yield col.findOneAndDelete({a:2});
-  assert.ok(r.value.b == null);
-  db.close();
-}).catch(function(err) {
-  console.log(err.stack);
-});
+    // Remove and return a document
+    r = await col.findOneAndDelete({a:2});
+    assert.ok(r.value.b == null);
+
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
 </code></pre></section>
 
 The ``findOneAndUpdate`` method also accepts a third argument which can be an options object. This object can have the following fields:
@@ -405,7 +417,7 @@ The ``findOneAndDelete`` function is designed to help remove a document.
 <section class="javascript5"><pre><code class="hljs">
 {{% myproject-connect %}}
 
-  var col = db.collection('findAndModify');
+  const col = db.collection('findAndModify');
   // Insert a single document
   col.insert([{a:1}, {a:2}, {a:2}], function(err, r) {
     assert.equal(null, err);
@@ -418,7 +430,7 @@ The ``findOneAndDelete`` function is designed to help remove a document.
       , function(err, r) {
         assert.equal(null, err);
         assert.ok(r.value.b == null);
-        db.close();
+        client.close();
     });
   });
 });
@@ -426,21 +438,24 @@ The ``findOneAndDelete`` function is designed to help remove a document.
 <section class="javascript6 hidden"><pre><code class="hljs">
 {{% js6-connect %}}
 
-  // Get the findAndModify collection
-  var col = db.collection('findAndModify');
-  // Insert a single document
-  var r = yield col.insert([{a:1}, {a:2}, {a:2}]);
-  assert.equal(3, r.result.n);
+    // Get the findAndModify collection
+    const col = db.collection('findAndModify');
+    // Insert a single document
+    let r = await col.insert([{a:1}, {a:2}, {a:2}]);
+    assert.equal(3, r.result.n);
 
-  // Remove a document from MongoDB and return it
-  var r = yield col.findOneAndDelete({a:1}, {
-      sort: [[a,1]]
-    });
-  assert.ok(r.value.b == null);
-  db.close();
-}).catch(function(err) {
-  console.log(err.stack);
-});
+    // Remove a document from MongoDB and return it
+    r = await col.findOneAndDelete({a:1}, {
+        sort: [[a,1]]
+      });
+    assert.ok(r.value.b == null);
+
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
 </code></pre></section>
 
 Like ``findOneAndUpdate``, it allows an object of options to be passed in which can have the following fields:
@@ -460,7 +475,7 @@ The ``bulkWrite`` function allows a simple set of bulk operations to run in a no
 {{% myproject-connect %}}
 
   // Get the collection
-  var col = db.collection('bulk_write');
+  const col = db.collection('bulk_write');
   col.bulkWrite([
       { insertOne: { document: { a: 1 } } }
     , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
@@ -479,36 +494,37 @@ The ``bulkWrite`` function allows a simple set of bulk operations to run in a no
     assert.equal(2, Object.keys(r.upsertedIds).length);
 
     // Ordered bulk operation
-    db.close();
+    client.close();
   });
 });
 </code></pre></section>
 <section class="javascript6 hidden"><pre><code class="hljs">
 {{% js6-connect %}}
 
-  // Get the collection
-  var col = db.collection('bulk_write');
-  var r = yield col.bulkWrite([
-      { insertOne: { document: { a: 1 } } }
-    , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
-    , { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
-    , { deleteOne: { filter: {c:1} } }
-    , { deleteMany: { filter: {c:1} } }
-    , { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}]
-  , {ordered:true, w:1});
-  assert.equal(1, r.insertedCount);
-  assert.equal(1, Object.keys(r.insertedIds).length);
-  assert.equal(1, r.matchedCount);
-  assert.equal(0, r.modifiedCount);
-  assert.equal(0, r.deletedCount);
-  assert.equal(2, r.upsertedCount);
-  assert.equal(2, Object.keys(r.upsertedIds).length);
+    // Get the collection
+    const col = db.collection('bulk_write');
+    const r = await col.bulkWrite([
+        { insertOne: { document: { a: 1 } } }
+      , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+      , { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+      , { deleteOne: { filter: {c:1} } }
+      , { deleteMany: { filter: {c:1} } }
+      , { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}]
+    , {ordered:true, w:1});
+    assert.equal(1, r.insertedCount);
+    assert.equal(1, Object.keys(r.insertedIds).length);
+    assert.equal(1, r.matchedCount);
+    assert.equal(0, r.modifiedCount);
+    assert.equal(0, r.deletedCount);
+    assert.equal(2, r.upsertedCount);
+    assert.equal(2, Object.keys(r.upsertedIds).length);
 
-  // Ordered bulk operation
-  db.close();
-}).catch(function(err) {
-  console.log(err.stack);
-});
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
 </code></pre></section>
 
 The ``bulkWrite`` function takes an array of operations which can be objects of either ``insertOne``, ``insertMany``, ``updateOne``, ``updateMany``, ``deleteOne`` or ``deleteMany``. It also takes a second parameter which takes the following options:
@@ -527,7 +543,7 @@ Bulk write operations make it easy to write groups of operations together to Mon
 <section class="javascript5"><pre><code class="hljs">
 {{% myproject-connect %}}
 
-  var col = db.collection('bulkops');
+  const col = db.collection('bulkops');
   // Create ordered bulk, for unordered initializeUnorderedBulkOp()
   var bulk = col.initializeOrderedBulkOp();
   // Insert 10 documents
@@ -546,36 +562,39 @@ Bulk write operations make it easy to write groups of operations together to Mon
   // Execute the bulk with a journal write concern
   bulk.execute(function(err, result) {
     assert.equal(null, err);
-    db.close();
+    client.close();
   });
 });
 </code></pre></section>
 <section class="javascript6 hidden"><pre><code class="hljs">
 {{% js6-connect %}}
 
-  // Get the collection
-  var col = db.collection('bulkops');
-  // Create ordered bulk, for unordered initializeUnorderedBulkOp()
-  var bulk = col.initializeOrderedBulkOp();
-  // Insert 10 documents
-  for(var i = 0; i < 10; i++) {
-    bulk.insert({a: i});
+    // Get the collection
+    const col = db.collection('bulkops');
+    // Create ordered bulk, for unordered initializeUnorderedBulkOp()
+    const bulk = col.initializeOrderedBulkOp();
+    // Insert 10 documents
+    for(let i = 0; i < 10; i++) {
+      bulk.insert({a: i});
+    }
+
+    // Next perform some upserts
+    for(let i = 0; i < 10; i++) {
+      bulk.find({b:i}).upsert().updateOne({b:1});
+    }
+
+    // Finally perform a remove operation
+    bulk.find({b:1}).deleteOne();
+
+    // Execute the bulk with a journal write concern
+    const result = await bulk.execute();
+
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
   }
-
-  // Next perform some upserts
-  for(var i = 0; i < 10; i++) {
-    bulk.find({b:i}).upsert().updateOne({b:1});
-  }
-
-  // Finally perform a remove operation
-  bulk.find({b:1}).deleteOne();
-
-  // Execute the bulk with a journal write concern
-  var result = yield bulk.execute();
-  db.close();
-}).catch(function(err) {
-  console.log(err.stack);
-});
+})();
 </code></pre></section>
 
 The Bulk API handles all the splitting of operations into multiple writes and also emulates 2.6 and higher write commands for 2.4 and earlier servers.
@@ -594,7 +613,7 @@ This will result in the driver issuing four write commands to the server:
     Update Command {a:1} to {a:1, b:1}
     Insert Command with {a:2}
     Remove Command with {b:1}
-    Insert Command with {a:3}    
+    Insert Command with {a:3}
 
 If you instead organize your *ordered* in the following manner:
 
@@ -625,7 +644,7 @@ The following example materializes all the documents from a query using the ``to
 <section class="javascript5"><pre><code class="hljs">
 {{% myproject-connect %}}
 
-  var col = db.collection('find');
+  const col = db.collection('find');
   // Insert a single document
   col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
     assert.equal(null, err);
@@ -635,7 +654,7 @@ The following example materializes all the documents from a query using the ``to
     col.find({a:1}).limit(2).toArray(function(err, docs) {
       assert.equal(null, err);
       assert.equal(2, docs.length);
-      db.close();
+      client.close();
     });
   });
 });
@@ -643,19 +662,22 @@ The following example materializes all the documents from a query using the ``to
 <section class="javascript6 hidden"><pre><code class="hljs">
 {{% js6-connect %}}
 
-  // Get the collection
-  var col = db.collection('find');
-  // Insert a single document
-  var r = yield col.insertMany([{a:1}, {a:1}, {a:1}]);
-  assert.equal(3, r.insertedCount);
+    // Get the collection
+    const col = db.collection('find');
+    // Insert a single document
+    const r = await col.insertMany([{a:1}, {a:1}, {a:1}]);
+    assert.equal(3, r.insertedCount);
 
-  // Get first two documents that match the query
-  var docs = yield col.find({a:1}).limit(2).toArray();
-  assert.equal(2, docs.length);
-  db.close();
-}).catch(function(err) {
-  console.log(err.stack);
-});
+    // Get first two documents that match the query
+    const docs = await col.find({a:1}).limit(2).toArray();
+    assert.equal(2, docs.length);
+
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
 </code></pre></section>
 
 The cursor returned by the ``find`` method has several methods that allow for chaining of options for a query. Once the query is ready to be executed you can retrieve the documents using the ``next``, ``each`` and ``toArray`` methods. If the query returns many documents it's preferable to use the ``next`` or ``each`` methods, as the ``toArray`` method will materialize all the documents into memory before calling the callback function, potentially using a lot of memory if the query returns many documents.
@@ -698,7 +720,7 @@ The following example uses the ``next`` method.
 <section class="javascript5"><pre><code class="hljs">
 {{% myproject-connect %}}
 
-  var col = db.collection('find');
+  const col = db.collection('find');
   // Insert a single document
   col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
     assert.equal(null, err);
@@ -708,7 +730,7 @@ The following example uses the ``next`` method.
     col.find({a:1}).limit(2).next(function(err, doc) {
       assert.equal(null, err);
       assert.ok(doc != null);
-      db.close();
+      client.close();
     });
   });
 });
@@ -720,25 +742,27 @@ much cleaner and easier way to read iteration code.
 <pre><code class="hljs">
 {{% js6-connect %}}
 
-  // Get the collection
-  var col = db.collection('find');
-  // Insert a single document
-  var r = yield col.insertMany([{a:1}, {a:1}, {a:1}]);
-  assert.equal(3, r.insertedCount);
+    // Get the collection
+    const col = db.collection('find');
+    // Insert a single document
+    const r = await col.insertMany([{a:1}, {a:1}, {a:1}]);
+    assert.equal(3, r.insertedCount);
 
-  // Get the cursor
-  var cursor = col.find({a:1}).limit(2);
+    // Get the cursor
+    const cursor = col.find({a:1}).limit(2);
 
-  // Iterate over the cursor
-  while(yield cursor.hasNext()) {
-    var doc = yield cursor.next();
-    console.dir(doc);
+    // Iterate over the cursor
+    while(await cursor.hasNext()) {
+      const doc = await cursor.next();
+      console.dir(doc);
+    }
+
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
   }
-
-  db.close();
-}).catch(function(err) {
-  console.log(err.stack);
-});
+})();
 </code></pre></section>
 
 The ``next`` method allows the application to read one document at a time using callbacks.
@@ -748,7 +772,7 @@ The following example uses the ``each`` method.
 ```js
 {{% myproject-connect %}}
 
-  var col = db.collection('find');
+  const col = db.collection('find');
   // Insert a single document
   col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
     assert.equal(null, err);
@@ -759,7 +783,7 @@ The following example uses the ``each`` method.
       if(doc) {
         // Got a document
       } else {
-        db.close();
+        client.close();
         return false;
       }
     });
