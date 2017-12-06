@@ -10,30 +10,13 @@ title = "GridFS API"
 
 # The GridFS API
 
-The MongoDB Node.j6 driver now supports a
+The MongoDB Node.js driver now supports a
 [stream-based API for GridFS](https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-spec.rst)
 that's compatible with Node.js'
 [streams3](https://strongloop.com/strongblog/whats-new-io-js-beta-streams3/), so you can `.pipe()` directly from file streams to MongoDB. In
 this tutorial, you'll see how to use the new GridFS streaming API to upload
 [a CC-licensed 28 MB recording of the overture from Richard Wagner's opera *Die Meistersinger von Nurnberg*](https://musopen.org/music/213/richard-wagner/die-meistersinger-von-nurnberg-overture/)
 to MongoDB using streams.
-
-Getting Set Up
---------------
-
-The new GridFS streaming functionality is part of the 2.1.0 release of the
-[MongoDB Node.js driver](https://www.npmjs.com/package/mongodb). To use it,
-put the following dependency in your
-`package.json`. We strongly recommend not using versions from GitHub in
-production, but it's fine for experimentation.
-
-```
-{
-  "dependencies": {
-    "mongodb": "https://github.com/mongodb/node-mongodb-native/archive/gridfs-specification.tar.gz"
-  }
-}
-```
 
 Uploading a File
 ----------------
@@ -47,8 +30,10 @@ In order to use the streaming GridFS API, you first need to create
 a `GridFSBucket`.
 
 ```javascript
-mongodb.MongoClient.connect(uri, function(error, db) {
+mongodb.MongoClient.connect(uri, function(error, client) {
   assert.ifError(error);
+
+  const db = client.db(dbName);
 
   var bucket = new mongodb.GridFSBucket(db);
 
@@ -62,14 +47,17 @@ file name. You can pipe a Node.js `fs` read stream to the
 upload stream.
 
 ```js
-var assert = require('assert');
-var fs = require('fs');
-var mongodb = require('mongodb');
+const assert = require('assert');
+const fs = require('fs');
+const mongodb = require('mongodb');
 
-var uri = 'mongodb://localhost:27017/test';
+const uri = 'mongodb://localhost:27017';
+const dbName = 'test';
 
-mongodb.MongoClient.connect(uri, function(error, db) {
+mongodb.MongoClient.connect(uri, function(error, client) {
   assert.ifError(error);
+
+  const db = client.db(dbName);
 
   var bucket = new mongodb.GridFSBucket(db);
 
@@ -138,7 +126,7 @@ chunks collections at the bucket level. For instance, if you specify the
 27195 chunks in the `songs.chunks` collection.
 
 ```
-var bucket = new mongodb.GridFSBucket(db, {
+const bucket = new mongodb.GridFSBucket(db, {
   chunkSizeBytes: 1024,
   bucketName: 'songs'
 });
@@ -165,7 +153,7 @@ a download stream. The easiest way to get a download stream is
 the `openDownloadStreamByName()` method.
 
 ```js
-var bucket = new mongodb.GridFSBucket(db, {
+const bucket = new mongodb.GridFSBucket(db, {
   chunkSizeBytes: 1024,
   bucketName: 'songs'
 });

@@ -23,7 +23,7 @@ GridStore is a single file inside GridFS that can be managed by the script.
 Opening a GridStore is similar to opening a database. First you create a GridStore object, then `open` it. 
 
 ```js
-var gs = new GridStore(db, filename, mode[, options])
+const gs = new GridStore(db, filename, mode[, options])
 ```
 
 Where:
@@ -38,7 +38,7 @@ Where:
 Example:
 
 ```js
-var gs = new GridStore(db, "test.png", "w", {
+const gs = new GridStore(db, "test.png", "w", {
   "content_type": "image/png",
   "metadata":{
       "author": "Daniel"
