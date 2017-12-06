@@ -52,6 +52,8 @@ npm install mongodb --save
 
 This will download the MongoDB driver and add a dependency entry in your `package.json` file.
 
+You can also use the [Yarn](https://yarnpkg.com/en) package manager.
+
 ## Troubleshooting
 
 The MongoDB driver depends on several other packages. These are:
