@@ -22,7 +22,7 @@ The following code example hooks into all the available features
 of the APM API.
 
 ```js
-var listener = require('mongodb').instrument({
+const listener = require('mongodb').instrument({
   operationIdGenerator: {
     operationId: 1,
 
@@ -274,7 +274,7 @@ APM experience and performance breakdown. Below is a simple
 `operationIdGenerator` example.
 
 ```js
-var generator = {
+const generator = {
   operationId: 1,
 
   next: function() {
@@ -292,7 +292,7 @@ timestamp` and `duration` calculates the total operation duration
 between the `start` and `end` time. Below is a simple generator example.
 
 ```js
-var generator = {
+const generator = {
   current: function() {
     return new Date().getTime();
   },
@@ -443,21 +443,21 @@ The available options are:
 Below is a very basic instrumentation example.
 
 ```js
-var listener = require('../..').instrument(function(err, instrumentations) {
+const listener = require('../..').instrument(function(err, instrumentations) {
   instrumentations.forEach(function(obj) {
-    var object = obj.obj;
+    const object = obj.obj;
 
     // Iterate over all the methods that are just callback with no return
     obj.instrumentations.forEach(function(instr) {
-      var options = instr.options;
+      const options = instr.options;
 
       if(options.callback
         && !options.returns && !options.static) {
 
         // Method name
         instr.methods.forEach(function(method) {
-          var applyMethod = function(_method) {
-            var func = object.prototype[_method];
+          function applyMethod(_method) {
+            const func = object.prototype[_method];
 
             overrides.push({
               obj: object.prototype, method: _method, func: func
@@ -466,7 +466,7 @@ var listener = require('../..').instrument(function(err, instrumentations) {
             object.prototype[_method] = function() {
               if(!methodsCalled[_method]) methodsCalled[_method] = 0;
               methodsCalled[_method] = methodsCalled[_method] + 1;
-              var args = Array.prototype.slice.call(arguments, 0);
+              const args = Array.prototype.slice.call(arguments, 0);
               func.apply(this, args);                
             }                
           }

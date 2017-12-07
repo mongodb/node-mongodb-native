@@ -10,7 +10,7 @@ title = "Pool Design"
 
 # Driver Pool Design
 
-The 2.0 series of the mongodb-core module introduces a newly re-designed pool that will grow and contract based on the usage pattern. This reference outlines how the growing/shrinking of the pool works, how authentication is handled and how operations are executed.
+The 2.0 series of the mongodb-core module introduced a newly re-designed pool that will grow and contract based on the usage pattern. This reference outlines how the growing/shrinking of the pool works, how authentication is handled and how operations are executed.
 
 Operations are executed using a work-queue. That means the Pool is responsible for scheduling the execution of operations on connections. The benefit of this is that one avoids slow operations holding up fast operations as long as the following holds true.
 

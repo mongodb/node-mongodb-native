@@ -19,24 +19,29 @@ The driver allows logging at three different levels: `debug`,
 The following example demonstrates how to set the logger to `debug`.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
-  , Logger = require('mongodb').Logger
-  , assert = require('assert');
+const MongoClient = require('mongodb').MongoClient;
+const Logger = require('mongodb').Logger;
+const assert = require('assert');
 
 // Connection URL
-var url = 'mongodb://localhost:27017/myproject';
+const url = 'mongodb://localhost:27017';
+// Database Name
+const dbName = 'myprojeect';
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
+MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
   // Set debug level
   Logger.setLevel('debug');
 
+  const db = client.db(dbName);
+
   // Execute command {ismaster:true} against db
   db.command({ismaster:true}, function(err, d) {
     assert.equal(null, err);
-    db.close();
+    client.close();
   });
 });
 ```
@@ -47,14 +52,17 @@ You can set the Logger to only log specific class names. The following example
 demonstrates how to log only the `Db` class.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
-  , Logger = require('mongodb').Logger
-  , assert = require('assert');
+const MongoClient = require('mongodb').MongoClient;
+const Logger = require('mongodb').Logger;
+const assert = require('assert');
 
 // Connection URL
-var url = 'mongodb://localhost:27017/myproject';
+const url = 'mongodb://localhost:27017';
+// Database Name
+const dbName = 'myprojeect';
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
+MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -63,10 +71,12 @@ MongoClient.connect(url, function(err, db) {
   // Only log statements on 'Db' class
   Logger.filter('class', ['Db']);
 
+  const db = client.db(dbName);
+
   // Execute command {ismaster:true} against db
   db.command({ismaster:true}, function(err, d) {
     assert.equal(null, err);
-    db.close();
+    client.close();
   });
 });
 ```
@@ -85,19 +95,23 @@ Driver classes available for filtering:
 You can add your own classes to the logger by creating your own logger instances. 
 
 ```js
-var Logger = require('mongodb').Logger
-  , assert = require('assert');
+const Logger = require('mongodb').Logger;
+const assert = require('assert');
 
-var A = function() {
-  var logger = Logger('A', options);
+class A {
+  constructor() {
+    this.logger = Logger('A');
+  }
 
-  this.do = function() {
-    if(logger.isInfo()) logger.info('logging A', {});
+  do() {
+    if (this.logger.isInfo()) {
+      this.logger.info('logging A', {});
+    }
   }
 }
 
 // Execute A
-var a = new A();
+const a = new A();
 a.do();
 ```
 
@@ -106,14 +120,17 @@ a.do();
 The following example demonstrates how to define a custom logger.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
-  , Logger = require('mongodb').Logger
-  , assert = require('assert');
+const MongoClient = require('mongodb').MongoClient;
+const Logger = require('mongodb').Logger;
+const assert = require('assert');
 
 // Connection URL
-var url = 'mongodb://localhost:27017/myproject';
+const url = 'mongodb://localhost:27017';
+// Database Name
+const dbName = 'myprojeect';
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
+MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -125,10 +142,12 @@ MongoClient.connect(url, function(err, db) {
     console.log(msg, context);
   });
 
+  const db = client.db(dbName);
+
   // Execute command {ismaster:true} against db
   db.command({ismaster:true}, function(err, d) {
     assert.equal(null, err);
-    db.close();
+    client.close();
   });
 });
 ```
