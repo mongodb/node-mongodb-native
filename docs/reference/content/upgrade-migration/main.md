@@ -7,6 +7,16 @@ title = "Upgrade Guide"
   pre = "<i class='fa fa-cog'></i>"
 +++
 
+# What's new in 3.0
+
+- Support added for Retryable Writes
+- Support added for DNS Seedlists
+- Support added for Change Streams
+- Support added for sessions
+- `MongoClient.connect` now returns a `Client` instead of a `DB`.
+
+[Full 3.0 Changes Here](https://github.com/mongodb/node-mongodb-native/blob/3.0.0/CHANGES_3.0.0.md)
+
 # What's New in 2.3
 
 Key features of the 2.3 driver include:
@@ -52,4 +62,5 @@ Key features of the 2.0 driver include:
 
 ## Upgrading
 
+See the [3.0 Changes](https://github.com/mongodb/node-mongodb-native/blob/3.0.0/CHANGES_3.0.0.md) on how to upgrade to 3.0
 See the [upgrading guide]({{<ref "upgrade-migration/upgrading.md">}}) on how to upgrade to 2.0
