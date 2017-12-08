@@ -23,12 +23,12 @@ information on recent changes.
 * [CRUD operations]({{< relref "tutorials/crud.md" >}})
 * [Connect]({{< relref "tutorials/connect/index.md" >}})
 
-## Developing with ECMAScript 6
+## Developing with ECMAScript Next
 
-If you'd like to use the MongoDB driver with ES6 features such as Promises and Generators, here are some good starting points.
+If you'd like to use the MongoDB driver with ESNext features such as Promises and `async`/`await`, here are some good starting points.
 
-* [Connecting]({{< relref "reference/ecmascript6/connecting.md" >}})
-* [CRUD operations]({{< relref "reference/ecmascript6/crud.md" >}})
+* [Connecting]({{< relref "reference/ecmascriptnext/connecting.md" >}})
+* [CRUD operations]({{< relref "reference/ecmascriptnext/crud.md" >}})
 
 ## Next steps
 
