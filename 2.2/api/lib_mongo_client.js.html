@@ -809,31 +809,6 @@
             </ul>
         </li>
     
-        <li class="item" data-name="Decimal128">
-            <span class="title">
-                <a href="Decimal128.html">Decimal128</a>
-                
-            </span>
-            <ul class="members itemMembers">
-            
-            </ul>
-            <ul class="typedefs itemMembers">
-            
-            </ul>
-            <ul class="methods itemMembers">
-            
-            <span class="subtitle">Methods</span>
-            
-                <li data-name="Decimal128#toString"><a href="Decimal128.html#toString">toString</a></li>
-            
-                <li data-name="Decimal128.fromString"><a href="Decimal128.html#.fromString">fromString</a></li>
-            
-            </ul>
-            <ul class="events itemMembers">
-            
-            </ul>
-        </li>
-    
         <li class="item" data-name="Double">
             <span class="title">
                 <a href="Double.html">Double</a>
@@ -1224,8 +1199,6 @@
                 <li data-name="Logger#isInfo"><a href="Logger.html#isInfo">isInfo</a></li>
             
                 <li data-name="Logger#isWarn"><a href="Logger.html#isWarn">isWarn</a></li>
-            
-                <li data-name="Logger#warn"><a href="Logger.html#warn">warn</a></li>
             
                 <li data-name="Logger.currentLogger"><a href="Logger.html#.currentLogger">currentLogger</a></li>
             
@@ -1855,29 +1828,6 @@
             </ul>
         </li>
     
-        <li class="item" data-name="Int32">
-            <span class="title">
-                <a href="Int32.html">Int32</a>
-                
-            </span>
-            <ul class="members itemMembers">
-            
-            </ul>
-            <ul class="typedefs itemMembers">
-            
-            </ul>
-            <ul class="methods itemMembers">
-            
-            <span class="subtitle">Methods</span>
-            
-                <li data-name="Int32#valueOf"><a href="Int32.html#valueOf">valueOf</a></li>
-            
-            </ul>
-            <ul class="events itemMembers">
-            
-            </ul>
-        </li>
-    
     </ul>
 </div>
             </td>
@@ -1922,15 +1872,15 @@ var parse = require('./url_parser')
  *   db.close();
  * });
  */
-var validOptionNames = ['poolSize', 'ssl', 'sslValidate', 'sslCA', 'sslCert',
+var validOptionNames = ['poolSize', 'ssl', 'sslValidate', 'sslCA', 'sslCert', 'ciphers', 'ecdhCurve',
   'sslKey', 'sslPass', 'sslCRL', 'autoReconnect', 'noDelay', 'keepAlive', 'connectTimeoutMS', 'family',
   'socketTimeoutMS', 'reconnectTries', 'reconnectInterval', 'ha', 'haInterval',
   'replicaSet', 'secondaryAcceptableLatencyMS', 'acceptableLatencyMS',
   'connectWithNoPrimary', 'authSource', 'w', 'wtimeout', 'j', 'forceServerObjectId',
-  'serializeFunctions', 'ignoreUndefined', 'raw', 'promoteLongs', 'bufferMaxEntries',
+  'serializeFunctions', 'ignoreUndefined', 'raw', 'bufferMaxEntries',
   'readPreference', 'pkFactory', 'promiseLibrary', 'readConcern', 'maxStalenessSeconds',
   'loggerLevel', 'logger', 'promoteValues', 'promoteBuffers', 'promoteLongs',
-  'domainsEnabled', 'keepAliveInitialDelay', 'checkServerIdentity', 'validateOptions'];
+  'domainsEnabled', 'keepAliveInitialDelay', 'checkServerIdentity', 'validateOptions', 'appname', 'auth'];
 var ignoreOptionNames = ['native_parser'];
 var legacyOptionNames = ['server', 'replset', 'replSet', 'mongos', 'db'];
 
@@ -1994,7 +1944,7 @@ function MongoClient() {
    * @param {boolean} [options.autoReconnect=true] Enable autoReconnect for single server instances
    * @param {boolean} [options.noDelay=true] TCP Connection no delay
    * @param {number} [options.family=4] Version of IP stack. Defaults to 4.
-   * @param {boolean} [options.keepAlive=30000] The number of milliseconds to wait before initiating keepAlive on the TCP socket.
+   * @param {number} [options.keepAlive=30000] The number of milliseconds to wait before initiating keepAlive on the TCP socket.
    * @param {number} [options.connectTimeoutMS=30000] TCP Connection timeout setting
    * @param {number} [options.socketTimeoutMS=360000] TCP Socket timeout setting
    * @param {number} [options.reconnectTries=30] Server attempt to reconnect #times
@@ -2006,6 +1956,8 @@ function MongoClient() {
    * @param {number} [options.acceptableLatencyMS=15] Cutoff latency point in MS for Mongos proxies selection.
    * @param {boolean} [options.connectWithNoPrimary=false] Sets if the driver should connect even if no primary is available
    * @param {string} [options.authSource=undefined] Define the database to authenticate against
+   * @param {string} [options.auth.user=undefined] The username for auth
+   * @param {string} [options.auth.password=undefined] The password for auth
    * @param {(number|string)} [options.w=null] The write concern.
    * @param {number} [options.wtimeout=null] The write concern timeout.
    * @param {boolean} [options.j=false] Specify a journal write concern.
@@ -2075,6 +2027,8 @@ var define = MongoClient.define = new Define('MongoClient', MongoClient, false);
  * @param {number} [options.acceptableLatencyMS=15] Cutoff latency point in MS for Mongos proxies selection.
  * @param {boolean} [options.connectWithNoPrimary=false] Sets if the driver should connect even if no primary is available
  * @param {string} [options.authSource=undefined] Define the database to authenticate against
+ * @param {string} [options.auth.user=undefined] The username for auth
+ * @param {string} [options.auth.password=undefined] The password for auth
  * @param {(number|string)} [options.w=null] The write concern.
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
@@ -2370,20 +2324,36 @@ var connect = function(self, url, options, callback) {
   // Get a logger for MongoClient
   var logger = Logger('MongoClient', options);
 
-  // Parse the string
-  var object = parse(url, options);
-  var _finalOptions = createUnifiedOptions({}, object);
-  _finalOptions = mergeOptions(_finalOptions, object, false);
-  _finalOptions = createUnifiedOptions(_finalOptions, options);
+  parse(url, options, function(err, object) {
+    if (err) return callback(err);
 
-  // Check if we have connection and socket timeout set
-  if(_finalOptions.socketTimeoutMS == null) _finalOptions.socketTimeoutMS = 360000;
-  if(_finalOptions.connectTimeoutMS == null) _finalOptions.connectTimeoutMS = 30000;
+    // Parse the string
+    var _finalOptions = createUnifiedOptions({}, object);
+    _finalOptions = mergeOptions(_finalOptions, object, false);
+    _finalOptions = createUnifiedOptions(_finalOptions, options);
 
-  // Failure modes
-  if(object.servers.length == 0) {
-    throw new Error("connection string must contain at least one seed host");
-  }
+    // Check if we have connection and socket timeout set
+    if(_finalOptions.socketTimeoutMS == null) _finalOptions.socketTimeoutMS = 360000;
+    if(_finalOptions.connectTimeoutMS == null) _finalOptions.connectTimeoutMS = 30000;
+
+    if (_finalOptions.db_options &amp;&amp; _finalOptions.db_options.auth) {
+      delete _finalOptions.db_options.auth;
+    }
+
+    // Failure modes
+    if(object.servers.length == 0) {
+      throw new Error("connection string must contain at least one seed host");
+    }
+
+    // Do we have a replicaset then skip discovery and go straight to connectivity
+    if(_finalOptions.replicaSet || _finalOptions.rs_name) {
+      return createReplicaset(self, _finalOptions, connectHandler(_finalOptions, connectCallback));
+    } else if(object.servers.length > 1) {
+      return createMongos(self, _finalOptions, connectHandler(_finalOptions, connectCallback));
+    } else {
+      return createServer(self, _finalOptions, connectHandler(_finalOptions, connectCallback));
+    }
+  });
 
   function connectCallback(err, db) {
     if(err &amp;&amp; err.message == 'no mongos proxies found in seed list') {
@@ -2397,15 +2367,6 @@ var connect = function(self, url, options, callback) {
 
     // Return the error and db instance
     callback(err, db);
-  }
-
-  // Do we have a replicaset then skip discovery and go straight to connectivity
-  if(_finalOptions.replicaSet || _finalOptions.rs_name) {
-    return createReplicaset(self, _finalOptions, connectHandler(_finalOptions, connectCallback));
-  } else if(object.servers.length > 1) {
-    return createMongos(self, _finalOptions, connectHandler(_finalOptions, connectCallback));
-  } else {
-    return createServer(self, _finalOptions, connectHandler(_finalOptions, connectCallback));
   }
 }
 
@@ -2439,7 +2400,7 @@ module.exports = MongoClient
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Jun 19 2017 22:26:53 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Dec 08 2017 18:00:59 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>

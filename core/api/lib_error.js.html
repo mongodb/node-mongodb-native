@@ -314,8 +314,6 @@
             
                 <li data-name="Logger#isWarn"><a href="Logger.html#isWarn">isWarn</a></li>
             
-                <li data-name="Logger#warn"><a href="Logger.html#warn">warn</a></li>
-            
             </ul>
             <ul class="events itemMembers">
             
@@ -486,6 +484,25 @@
             </ul>
         </li>
     
+        <li class="item" data-name="MongoNetworkError">
+            <span class="title">
+                <a href="MongoNetworkError.html">MongoNetworkError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="Mongos">
             <span class="title">
                 <a href="Mongos.html">Mongos</a>
@@ -613,6 +630,10 @@
             </span>
             <ul class="members itemMembers">
             
+            <span class="subtitle">Members</span>
+            
+                <li data-name="ReadPreference.PRIMARY"><a href="ReadPreference.html#.PRIMARY">PRIMARY</a></li>
+            
             </ul>
             <ul class="typedefs itemMembers">
             
@@ -620,6 +641,8 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="ReadPreference.isValid"><a href="ReadPreference.html#.isValid">isValid</a></li>
             
                 <li data-name="ReadPreference.nearest"><a href="ReadPreference.html#.nearest">nearest</a></li>
             
@@ -632,6 +655,8 @@
                 <li data-name="ReadPreference.secondaryPreferred"><a href="ReadPreference.html#.secondaryPreferred">secondaryPreferred</a></li>
             
                 <li data-name="ReadPreference#equals"><a href="ReadPreference.html#equals">equals</a></li>
+            
+                <li data-name="ReadPreference#isValid"><a href="ReadPreference.html#isValid">isValid</a></li>
             
                 <li data-name="ReadPreference#slaveOk"><a href="ReadPreference.html#slaveOk">slaveOk</a></li>
             
@@ -953,50 +978,72 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>"use strict";
+            <pre class="prettyprint source linenums"><code>'use strict';
+
+var util = require('util');
 
 /**
  * Creates a new MongoError
  * @class
  * @augments Error
- * @param {string} message The error message
+ * @param {Error|string|object} message The error message
+ * @property {string} message The error message
+ * @property {string} stack The error call stack
  * @return {MongoError} A MongoError instance
  */
 function MongoError(message) {
-  this.name = 'MongoError';
-  this.message = message;
-  Error.captureStackTrace(this, MongoError);
+  var tmp = Error.apply(this, arguments);
+  tmp.name = this.name = 'MongoError';
+
+  if (message instanceof Error) {
+    this.message = message.message;
+    this.stack = message.stack;
+  } else {
+    if (typeof message === 'string') {
+      this.message = message;
+    } else {
+      this.message = message.message || message.errmsg || message.$err || 'n/a';
+      for (var name in message) {
+        this[name] = message[name];
+      }
+    }
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
+  }
 }
+util.inherits(MongoError, Error);
 
 /**
  * Creates a new MongoError object
  * @method
- * @param {object} options The error options
+ * @param {Error|string|object} options The options used to create the error.
  * @return {MongoError} A MongoError instance
+ * @deprecated Use new MongoError() instead.
  */
 MongoError.create = function(options) {
-  var err = null;
+  return new MongoError(options);
+};
 
-  if(options instanceof Error) {
-    err = new MongoError(options.message);
-    err.stack = options.stack;
-  } else if(typeof options == 'string') {
-    err = new MongoError(options);
-  } else {
-    err = new MongoError(options.message || options.errmsg || options.$err || "n/a");
-    // Other options
-    for(var name in options) {
-      err[name] = options[name];
-    }
-  }
+/**
+ * Creates a new MongoNetworkError
+ * @class
+ * @param {Error|string|object} message The error message
+ * @property {string} message The error message
+ * @property {string} stack The error call stack
+ * @return {MongoNetworkError} A MongoNetworkError instance
+ * @extends {MongoError}
+ */
+var MongoNetworkError = function(message) {
+  MongoError.call(this, message);
+  this.name = 'MongoNetworkError';
+};
+util.inherits(MongoNetworkError, MongoError);
 
-  return err;
-}
-
-// Extend JavaScript error
-MongoError.prototype = new Error;
-
-module.exports = MongoError;
+module.exports = {
+  MongoError: MongoError,
+  MongoNetworkError: MongoNetworkError
+};
 </code></pre>
         </article>
     </section>
@@ -1026,7 +1073,7 @@ module.exports = MongoError;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Jun 19 2017 22:26:58 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Dec 08 2017 18:01:01 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>

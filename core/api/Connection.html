@@ -314,8 +314,6 @@
             
                 <li data-name="Logger#isWarn"><a href="Logger.html#isWarn">isWarn</a></li>
             
-                <li data-name="Logger#warn"><a href="Logger.html#warn">warn</a></li>
-            
             </ul>
             <ul class="events itemMembers">
             
@@ -486,6 +484,25 @@
             </ul>
         </li>
     
+        <li class="item" data-name="MongoNetworkError">
+            <span class="title">
+                <a href="MongoNetworkError.html">MongoNetworkError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="Mongos">
             <span class="title">
                 <a href="Mongos.html">Mongos</a>
@@ -613,6 +630,10 @@
             </span>
             <ul class="members itemMembers">
             
+            <span class="subtitle">Members</span>
+            
+                <li data-name="ReadPreference.PRIMARY"><a href="ReadPreference.html#.PRIMARY">PRIMARY</a></li>
+            
             </ul>
             <ul class="typedefs itemMembers">
             
@@ -620,6 +641,8 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="ReadPreference.isValid"><a href="ReadPreference.html#.isValid">isValid</a></li>
             
                 <li data-name="ReadPreference.nearest"><a href="ReadPreference.html#.nearest">nearest</a></li>
             
@@ -632,6 +655,8 @@
                 <li data-name="ReadPreference.secondaryPreferred"><a href="ReadPreference.html#.secondaryPreferred">secondaryPreferred</a></li>
             
                 <li data-name="ReadPreference#equals"><a href="ReadPreference.html#equals">equals</a></li>
+            
+                <li data-name="ReadPreference#isValid"><a href="ReadPreference.html#isValid">isValid</a></li>
             
                 <li data-name="ReadPreference#slaveOk"><a href="ReadPreference.html#slaveOk">slaveOk</a></li>
             
@@ -975,7 +1000,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line51">line 51</a>
+            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line74">line 74</a>
         </div>
         
     </div>
@@ -1098,7 +1123,7 @@
             
                 <td class="default">
                 
-                    4
+                    null
                 
                 </td>
             
@@ -1112,7 +1137,7 @@
                         
                     
                 
-                <p>Version of IP stack. Defaults to 4.</p></td>
+                <p>IP version for DNS lookup, passed down to Node's <a href="https://nodejs.org/api/dns.html#dns_dns_lookup_hostname_options_callback"><code>dns.lookup()</code> function</a>. If set to <code>6</code>, will only look for ipv6 addresses.</p></td>
         </tr>
 	
 	
@@ -1815,7 +1840,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line396">line 396</a>
+            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line535">line 535</a>
         </div>
         
     </div>
@@ -1886,7 +1911,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line501">line 501</a>
+            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line646">line 646</a>
         </div>
         
     </div>
@@ -1957,7 +1982,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line571">line 571</a>
+            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line722">line 722</a>
         </div>
         
     </div>
@@ -2033,7 +2058,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line562">line 562</a>
+            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line713">line 713</a>
         </div>
         
     </div>
@@ -2109,7 +2134,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line553">line 553</a>
+            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line704">line 704</a>
         </div>
         
     </div>
@@ -2185,7 +2210,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line487">line 487</a>
+            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line632">line 632</a>
         </div>
         
     </div>
@@ -2261,7 +2286,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line519">line 519</a>
+            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line666">line 666</a>
         </div>
         
     </div>
@@ -2385,7 +2410,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line583">line 583</a>
+            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line734">line 734</a>
         </div>
         
     </div>
@@ -2466,7 +2491,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line576">line 576</a>
+            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line727">line 727</a>
         </div>
         
     </div>
@@ -2547,7 +2572,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line590">line 590</a>
+            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line741">line 741</a>
         </div>
         
     </div>
@@ -2628,7 +2653,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line604">line 604</a>
+            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line755">line 755</a>
         </div>
         
     </div>
@@ -2709,7 +2734,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line597">line 597</a>
+            <a href="lib_connection_connection.js.html">lib/connection/connection.js</a>, <a href="lib_connection_connection.js.html#line748">line 748</a>
         </div>
         
     </div>
@@ -2809,7 +2834,7 @@ cursor instance
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Jun 19 2017 22:26:58 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Dec 08 2017 18:01:01 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>

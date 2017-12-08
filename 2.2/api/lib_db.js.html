@@ -809,31 +809,6 @@
             </ul>
         </li>
     
-        <li class="item" data-name="Decimal128">
-            <span class="title">
-                <a href="Decimal128.html">Decimal128</a>
-                
-            </span>
-            <ul class="members itemMembers">
-            
-            </ul>
-            <ul class="typedefs itemMembers">
-            
-            </ul>
-            <ul class="methods itemMembers">
-            
-            <span class="subtitle">Methods</span>
-            
-                <li data-name="Decimal128#toString"><a href="Decimal128.html#toString">toString</a></li>
-            
-                <li data-name="Decimal128.fromString"><a href="Decimal128.html#.fromString">fromString</a></li>
-            
-            </ul>
-            <ul class="events itemMembers">
-            
-            </ul>
-        </li>
-    
         <li class="item" data-name="Double">
             <span class="title">
                 <a href="Double.html">Double</a>
@@ -1224,8 +1199,6 @@
                 <li data-name="Logger#isInfo"><a href="Logger.html#isInfo">isInfo</a></li>
             
                 <li data-name="Logger#isWarn"><a href="Logger.html#isWarn">isWarn</a></li>
-            
-                <li data-name="Logger#warn"><a href="Logger.html#warn">warn</a></li>
             
                 <li data-name="Logger.currentLogger"><a href="Logger.html#.currentLogger">currentLogger</a></li>
             
@@ -1855,29 +1828,6 @@
             </ul>
         </li>
     
-        <li class="item" data-name="Int32">
-            <span class="title">
-                <a href="Int32.html">Int32</a>
-                
-            </span>
-            <ul class="members itemMembers">
-            
-            </ul>
-            <ul class="typedefs itemMembers">
-            
-            </ul>
-            <ul class="methods itemMembers">
-            
-            <span class="subtitle">Methods</span>
-            
-                <li data-name="Int32#valueOf"><a href="Int32.html#valueOf">valueOf</a></li>
-            
-            </ul>
-            <ul class="events itemMembers">
-            
-            </ul>
-        </li>
-    
     </ul>
 </div>
             </td>
@@ -2065,6 +2015,7 @@ var Db = function(databaseName, topology, options) {
   topology.once('fullsetup', createListener(self, 'fullsetup', self));
   topology.once('all', createListener(self, 'all', self));
   topology.on('reconnect', createListener(self, 'reconnect', self));
+  topology.on('reconnectFailed', createListener(self, 'reconnectFailed', self));
 }
 
 inherits(Db, EventEmitter);
@@ -2544,7 +2495,7 @@ var listCollectionsTranforms = function(databaseName) {
  * Get the list of all collection information for the specified db.
  *
  * @method
- * @param {object} filter Query to filter collections by
+ * @param {object} [filter={}] Query to filter collections by
  * @param {object} [options=null] Optional settings.
  * @param {number} [options.batchSize=null] The batchSize for the returned command cursor or if pre 2.8 the systems batch collection
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
@@ -2562,6 +2513,8 @@ Db.prototype.listCollections = function(filter, options) {
   // Ensure valid readPreference
   if(options.readPreference) {
     options.readPreference = convertReadPreference(options.readPreference);
+  } else {
+    options.readPreference = this.s.readPreference || CoreReadPreference.primary;
   }
 
   // We have a list collections command
@@ -2659,7 +2612,7 @@ var evaluate = function(self, code, parameters, options, callback) {
  * @param {Code} code JavaScript to execute on server.
  * @param {(object|array)} parameters The parameters for the call.
  * @param {object} [options=null] Optional settings.
- * @param {boolean} [options.nolock=false] Tell MongoDB not to block on the evaulation of the javascript.
+ * @param {boolean} [options.nolock=false] Tell MongoDB not to block on the evaluation of the javascript.
  * @param {Db~resultCallback} [callback] The results callback
  * @deprecated Eval is deprecated on MongoDB 3.2 and forward
  * @return {Promise} returns Promise if no callback passed
@@ -3042,7 +2995,7 @@ var ensureIndex = function(self, name, fieldOrSpec, options, callback) {
   // Merge primary readPreference
   finalOptions.readPreference = ReadPreference.PRIMARY
 
-  // Check if the index allready exists
+  // Check if the index already exists
   self.indexInformation(name, finalOptions, function(err, indexInformation) {
     if(err != null &amp;&amp; err.code != 26) return handleCallback(callback, err, null);
     // If the index does not exist, create it
@@ -3721,7 +3674,7 @@ module.exports = Db;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Jun 19 2017 22:26:53 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Dec 08 2017 18:00:59 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>

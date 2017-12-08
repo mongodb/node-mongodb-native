@@ -1,0 +1,1815 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="author" content="">
+<meta name="keyword" content="">
+
+    <link rel="shortcut icon" href="/node-mongodb-native/3.0/img/favicon.png">
+
+    <title>Authentication</title>
+
+    <link rel="stylesheet" href="/node-mongodb-native/3.0/lib/bootstrap.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.0/lib/font-awesome/css/font-awesome.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.0/css/mongodb-docs.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.0/css/overrides.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.0/lib/highlight/styles/idea.css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.0/lib/bootstrap-toggle/bootstrap-toggle.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.0/css/java.css" type="text/css" />
+
+
+  </head>
+
+  <body>
+  
+  <section id="container" class="">
+      
+      <header id="header-db" class="row" role="navigation">
+  <div class="header-content">
+    <div class="toggle-nav pull-left">
+        <i class="fa fa-bars"></i>
+        <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+    </div>
+    
+    <div class="logo pull-left">
+      <a href="https://www.mongodb.com/">
+        <img src="http://mongodb.github.io/node-mongodb-native/img/logo-mongodb-header.png", alt="MongoDB.com" />
+      </a>
+    </div>
+    
+    <div>
+<div class="nav-items pull-right">
+  <a href="https://university.mongodb.com" data-toggle="tooltip" data-placement="bottom" title="Free Online Classes">MongoDB University</a>
+  <a href="http://www.mongodb.org/downloads" data-toggle="tooltip" data-placement="bottom" title="Download MongoDB">Downloads</a>
+  <a href="http://www.mongodb.org/get-involved" data-toggle="tooltip" data-placement="bottom" title="Get involved with MongoDB">Community</a>
+  <a href="http://docs.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Documentation">Docs</a>
+  <a href="http://blog.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Blog">Blog</a>
+  <div id="search">
+<form method="get" action="//www.google.com/search" target="_blank">
+    <input type="text" name="searchQuery" size="20" value="" autocomplete="off" placeholder="Search docs">
+    <input type="hidden" name="site" value="/node-mongodb-native/3.0">
+    <input type="hidden" name="q" value="">
+    <label for="searchQuery"><i class="fa fa-search fa-1"></i></label>
+</form>
+</div>
+
+</div>
+</div>
+
+  </div>
+</header>
+
+
+      
+
+      
+<aside id="sidebar" class="sidebar">
+    <div class="ssidebar nav-collapse">
+      <div class="ssidebarwrapper">
+        <h3>
+          <a class="index-link" href="/node-mongodb-native/3.0/../">MongoDB Node.js Driver</a>
+          <a class="version pull-right" href="/node-mongodb-native/3.0">3.0.0-rc0</a>
+        </h3>
+
+        
+        <ul class="sidebar-menu">
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+
+          
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+    
+    
+    
+      
+      
+      
+    
+    
+  
+  
+
+
+        
+      
+    
+      
+      
+        
+      
+    
+    
+  
+
+
+        
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+
+          
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.0/installation-guide/installation-guide/">
+        <i class='fa fa-puzzle-piece'></i>
+        Installation Guide
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.0/quick-start/quick-start/">
+        <i class='fa fa-road'></i>
+        Quick Start
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<li class="toctree-l1  current">
+  <a href="/node-mongodb-native/3.0/tutorials/main/" class="">
+      <i class='fa fa-thumb-tack'></i>
+      <span>Tutorials</span>
+      <span class="menu-arrow fa fa-angle-down"></span>
+  </a>
+    <ul  class="current">
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<li class="toctree-l2  current">
+  <a href="/node-mongodb-native/3.0/tutorials/connect/" class="">
+      <i class='fa'></i>
+      <span>Connect to MongoDB</span>
+      
+  </a>
+    <ul  class="current">
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.0/tutorials/connect/authenticating/">
+        <i class='fa'></i>
+        Authentication
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.0/tutorials/connect/ssl/">
+        <i class='fa'></i>
+        SSL Settings
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.0/tutorials/collations/">
+        <i class='fa'></i>
+        Collations
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.0/tutorials/collections/">
+        <i class='fa'></i>
+        Collections
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.0/tutorials/create-indexes/">
+        <i class='fa'></i>
+        Create Indexes
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.0/tutorials/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.0/tutorials/projections/">
+        <i class='fa'></i>
+        Projections
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.0/tutorials/aggregation/">
+        <i class='fa'></i>
+        Aggregation
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.0/tutorials/text-search/">
+        <i class='fa'></i>
+        Text Search
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.0/tutorials/geospatial-search/">
+        <i class='fa'></i>
+        Geospatial Search
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.0/tutorials/commands/">
+        <i class='fa'></i>
+        Database Commands
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.0/tutorials/gridfs/" class="">
+      <i class='fa'></i>
+      <span>GridFS</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.0/tutorials/gridfs/streaming/">
+        <i class='fa'></i>
+        GridFS API
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.0/tutorials/gridfs/gridstore/">
+        <i class='fa'></i>
+        Legacy GridStore
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/3.0/reference/main/" class="">
+      <i class='fa fa-book'></i>
+      <span>Reference</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.0/reference/connecting/" class="">
+      <i class='fa'></i>
+      <span>Connection Options</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.0/reference/connecting/connection-settings/">
+        <i class='fa'></i>
+        Connection Settings
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.0/reference/ecmascriptnext/" class="">
+      <i class='fa'></i>
+      <span>ECMAScript Next</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.0/reference/ecmascriptnext/connecting/">
+        <i class='fa'></i>
+        Connecting
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.0/reference/ecmascriptnext/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.0/reference/management/" class="">
+      <i class='fa'></i>
+      <span>Management</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.0/reference/management/logging/">
+        <i class='fa'></i>
+        Logging
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.0/reference/management/apm/">
+        <i class='fa'></i>
+        APM
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.0/reference/management/sdam-monitoring/">
+        <i class='fa'></i>
+        Topology Monitoring
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.0/reference/pool/">
+        <i class='fa'></i>
+        Pool Design
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.0/reference/faq/">
+        <i class='fa'></i>
+        Frequently Asked Questions
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/3.0/upgrade-migration/main/" class="">
+      <i class='fa fa-cog'></i>
+      <span>Upgrade Guide</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.0/upgrade-migration/upgrading/">
+        <i class='fa fa-wrench'></i>
+        Upgrading to 2.x
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.0/api">
+        <i class='fa fa-file-text-o'></i>
+        API Documentation
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://github.com/mongodb/node-mongodb-native">
+        <i class='fa fa-github'></i>
+        Source Code
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.0/issues-help/">
+        <i class='fa fa-life-ring'></i>
+        Issues &amp; Help
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge">
+        <img src='https://badges.gitter.im/Join Chat.svg'/>
+        
+    </a>
+  </li>
+
+
+          
+        </ul>
+        
+    </div>
+  </div>
+  
+</aside>
+
+<div class="option-popup closed hidden" id="optionsVersionsPopup">
+<div class="option-header">
+  <i class="fa fa-gear"></i>
+  <span>OPTIONS</span>
+  <i class="fa fa-angle-up pull-right"></i>
+</div>
+<div class="option-body">
+  <ul>
+      
+      <li>
+        <label>Version</label>
+        <div class="btn-group btn-group-xs pull-right">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            Select Version <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu" id="optionsVersionsMenu">
+          </ul>
+        </div>
+      </li>
+
+   
+
+
+    
+
+  </ul>
+</div>
+</div>
+
+
+
+      
+      <section id="main-content" class="content">
+          <section class="main-column pull-left">
+            <div class="document">
+              <div class="documentwrapper">
+                <div class="bodywrapper">
+                  <div class="body">
+                    <p><div class="admonition note">
+                    <h5 class="admonition-title">Survey</h5>
+                    <p>Please help us improve by answering a few questions at our
+						<a href="https://www.research.net/r/BPJSGJC"><strong> user survey</strong></a>.
+                    </p>
+                    </div>
+                    </p>
+
+
+   
+<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.0.0/docs/reference/content/tutorials/connect/authenticating.md" target="_blank" title="Edit tutorials/connect/authenticating.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+
+
+
+
+
+
+
+
+
+
+<div class="bc">
+<ul>
+  
+  
+  
+  
+  <li><a href="/node-mongodb-native/3.0/tutorials/main/">Tutorials</a> <i class="fa fa-angle-right"></i></li>
+  <li><a href="/node-mongodb-native/3.0/tutorials/connect/">Connect to MongoDB</a> <i class="fa fa-angle-right"></i></li>
+  <li>Authentication</li>
+</ul>
+</div>
+
+
+
+
+<h1 id="authentication">Authentication</h1>
+
+<p>The Node.js driver supports all MongoDB <a href="http://docs.mongodb.org/manual/core/authentication/">authentication mechanisms</a>, including those only available in the MongoDB <a href="http://docs.mongodb.org/manual/administration/install-enterprise/">Enterprise Edition</a>.</p>
+
+<h2 id="default">DEFAULT</h2>
+
+<div class="admonition note">
+<h5 class="admonition-title">Note</h5>
+<p>Starting in MongoDB 3.0, MongoDB changed the default authentication mechanism from <a href="https://docs.mongodb.org/manual/core/security-mongodb-cr/">MONGODB-CR</a> to <a href="https://docs.mongodb.org/manual/core/security-scram-sha-1/">SCRAM-SHA-1</a>.</p>
+
+</div>
+
+
+<p>To use the default mechanism, either omit the authentication mechanism specification or specify <code>DEFAULT</code> as the mechanism in the <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI ConnectionString</a>. The driver will attempt to authenticate using the <a href="https://docs.mongodb.org/manual/core/security-scram-sha-1/">SCRAM-SHA-1 authentication</a> method if it is available on the MongoDB server. If the server does not support SCRAM-SHA-1, the driver will authenticate using <a href="https://docs.mongodb.org/manual/core/security-mongodb-cr/">MONGODB-CR</a>.</p>
+
+<p>Include the name and password and the <a href="https://docs.mongodb.org/manual/core/security-users/#user-authentication-database">authentication database</a> (<code>authSource</code>) in the connection string.</p>
+
+<p>In the following example, the connection string specifies the user <code>dave</code>, password <code>abc123</code>, and authentication mechanism <code>DEFAULT</code>.</p>
+
+<div class="admonition important">
+<h5 class="admonition-title">important</h5>
+<p>The user and password should always be <strong>URI</strong> encoded using <code>encodeURIComponent</code> to ensure any non URI compliant user or password characters are correctly parsed.</p>
+
+</div>
+
+
+<pre><code class="language-js">const MongoClient = require('mongodb').MongoClient;
+const f = require('util').format;
+const assert = require('assert');
+
+const user = encodeURIComponent('dave');
+const password = encodeURIComponent('abc123');
+const authMechanism = 'DEFAULT';
+
+// Connection URL
+const url = f('mongodb://%s:%s@localhost:27017?authMechanism=%s',
+  user, password, authMechanism);
+
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, client) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  client.close();
+});
+</code></pre>
+
+<h2 id="scram-sha-1">SCRAM-SHA-1</h2>
+
+<p>To explicitly connect to MongoDB using <a href="http://docs.mongodb.org/manual/core/authentication/#scram-sha-1-authentication">SCRAM-SHA-1</a>, specify <code>SCRAM-SHA-1</code> as the mechanism in the <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI connection string</a>.</p>
+
+<p>Include the name and password and the <a href="https://docs.mongodb.org/manual/core/security-users/#user-authentication-database">authentication database</a> (<code>authSource</code>) in the connection string.</p>
+
+<p>In the following example, the connection string specifies the user <code>dave</code>, password <code>abc123</code>, authentication mechanism <code>SCRAM-SHA-1</code>, and authentication database <code>myprojectdb</code></p>
+
+<pre><code class="language-js">const MongoClient = require('mongodb').MongoClient;
+const f = require('util').format;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://dave:abc123@localhost:27017?authMechanism=SCRAM-SHA-1&amp;authSource=myprojectdb';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, client) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  client.close();
+});
+</code></pre>
+
+<h2 id="mongodb-cr">MONGODB-CR</h2>
+
+<p>To explicitly connect to MongoDB using <a href="https://docs.mongodb.org/manual/core/security-mongodb-cr/">MONGODB-CR</a>, specify <code>MONGODB-CR</code> as the mechanism in the <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI connection string</a>.</p>
+
+<p>Include the name and password and the <a href="https://docs.mongodb.org/manual/core/security-users/#user-authentication-database">authentication database</a> (<code>authSource</code>) in the connection string.</p>
+
+<p>In the following example, the connection string specifies the user <code>dave</code>, password <code>abc123</code>, authentication mechanism <code>MONGODB-CR</code>, and authentication database <code>myprojectdb</code>.</p>
+
+<pre><code class="language-js">const MongoClient = require('mongodb').MongoClient;
+const f = require('util').format;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://dave:abc123@localhost:27017?authMechanism=MONGODB-CR&amp;authSource=myprojectdb';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, client) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  client.close();
+});
+</code></pre>
+
+<div class="admonition important">
+<h5 class="admonition-title">important</h5>
+<p>If you have <a href="https://docs.mongodb.org/manual/release-notes/3.0-scram/">upgraded the authentication schema</a> from <code>MONGODB-CR</code> to <code>SCRAM-SHA-1</code>, <code>MONGODB-CR</code> credentials will fail to authenticate.</p>
+
+</div>
+
+
+<h2 id="x509">X509</h2>
+
+<p>With  <a href="http://docs.mongodb.org/manual/core/authentication/#x-509-certificate-authentication">X.509</a> mechanism, MongoDB uses the X.509 certificate presented during SSL negotiation to authenticate a user whose name is derived from the distinguished name of the X.509 certificate.</p>
+
+<p>X.509 authentication requires the use of SSL connections with certificate validation and is available in MongoDB 2.6 and newer.</p>
+
+<p>To connect using the X.509 authentication mechanism, specify <code>MONGODB-X509</code> as the mechanism in the <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI connection string</a>, <code>ssl=true</code>, and the username. Use <code>enodeURIComponent</code> to encode the username string.</p>
+
+<p>In addition to the connection string, pass to the <code>MongoClient.connect</code> method a connections options for the <code>server</code> with  the X.509 certificate and other <a href="/node-mongodb-native/3.0/tutorials/connect/ssl/">TLS/SSL connections</a> options.</p>
+
+<pre><code class="language-js">const MongoClient = require('mongodb').MongoClient;
+const f = require('util').format;
+const assert = require('assert');
+
+// Read the cert and key
+const cert = fs.readFileSync(__dirname + &quot;/ssl/x509/client.pem&quot;);
+const key = fs.readFileSync(__dirname + &quot;/ssl/x509/client.pem&quot;);
+
+// User name
+const userName = encodeURIComponent(&quot;CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US&quot;);
+
+// Connect using X509 authentication
+MongoClient.connect(f('mongodb://%s@server:27017?authMechanism=MONGODB-X509&amp;ssl=true', userName), {
+  server: {
+      sslKey:key
+    , sslCert:cert
+    , sslValidate:false
+  }
+}, function(err, client) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  client.close();
+});
+</code></pre>
+
+<p>For more information on connecting to MongoDB instance, replica set, and sharded cluster with TLS/SSL options, see <a href="/node-mongodb-native/3.0/tutorials/connect/ssl/">TLS/SSL connections options</a>.</p>
+
+<p>For more information, refer to the MongoDB manual
+<a href="http://docs.mongodb.org/manual/tutorial/configure-x509-client-authentication/#add-x-509-certificate-subject-as-a-user">X.509 tutorial</a> for more information about determining the subject name from the certificate.</p>
+
+<h2 id="kerberos-gssapi-sspi">Kerberos (GSSAPI/SSPI)</h2>
+
+<p><a href="http://www.mongodb.com/products/mongodb-enterprise">MongoDB Enterprise</a> supports proxy authentication through a Kerberos service. The Node.js driver supports Kerberos on UNIX via the MIT Kerberos library and on Windows via the SSPI API.</p>
+
+<p>To connect using the X.509 authentication mechanism, specify <code>authMechanism=GSSAPI</code> as the mechanism in the <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI connection string</a>. Specify the user principal and the service name in the connection string.  Use <code>enodeURIComponent</code> to encode the user principal string.</p>
+
+<p>The following example connects to MongoDB using Kerberos for UNIX.</p>
+
+<pre><code class="language-js">const MongoClient = require('mongodb').MongoClient;
+const f = require('util').format;
+const assert = require('assert');
+
+// KDC Server
+const server = &quot;mongo-server.example.com&quot;;
+const principal = &quot;drivers@KERBEROS.EXAMPLE.COM&quot;;
+const urlEncodedPrincipal = encodeURIComponent(principal);
+
+// Let's write the actual connection code
+MongoClient.connect(f(&quot;mongodb://%s@%s?authMechanism=GSSAPI&amp;gssapiServiceName=mongodb&quot;, urlEncodedPrincipal, server), function(err, client) {
+  assert.equal(null, err);
+
+  client.close();
+});
+</code></pre>
+
+<div class="admonition note">
+<h5 class="admonition-title">Note</h5>
+<p>The method refers to the <code>GSSAPI</code> authentication mechanism instead of <code>Kerberos</code> because technically the driver authenticates via the <a href="https://tools.ietf.org/html/rfc4752">GSSAPI</a> SASL mechanism.</p>
+
+</div>
+
+
+<h2 id="ldap-plain">LDAP (PLAIN)</h2>
+
+<p><a href="http://www.mongodb.com/products/mongodb-enterprise">MongoDB Enterprise</a> supports proxy authentication through a Lightweight Directory Access Protocol (LDAP) service.</p>
+
+<p>To connect using the LDAP authentication mechanism, specify <code>authMechanism=PLAIN</code> as the mechanism in the <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI connection string</a>.</p>
+
+<pre><code class="language-js">const MongoClient = require('mongodb').MongoClient;
+const f = require('util').format;
+const assert = require('assert');
+
+// LDAP Server
+const server = &quot;ldap.example.com&quot;;
+const user = &quot;ldap-user&quot;;
+const pass = &quot;ldap-password&quot;;
+
+// Url
+const url = f(&quot;mongodb://%s:%s@%s?authMechanism=PLAIN&amp;maxPoolSize=1&quot;, user, pass, server);
+
+// Let's write the actual connection code
+MongoClient.connect(url, function(err, client) {
+  assert.equal(null, err);
+
+  client.close();
+});
+</code></pre>
+
+<div class="admonition note">
+<h5 class="admonition-title">Note</h5>
+<p>The method refers to the <code>PLAIN</code> authentication mechanism instead of <code>LDAP</code> because technically the driver authenticates via the <a href="https://www.ietf.org/rfc/rfc4616.txt">PLAIN</a> SASL mechanism.</p>
+
+</div>
+
+
+
+
+
+
+
+<div id="btnv">
+  
+  
+  <div class="pull-right">
+  <a class="navigation next" href="/node-mongodb-native/3.0/tutorials/connect/ssl/">
+    SSL Settings <i class="fa fa-long-arrow-right"> </i>
+  </a>
+  
+</div>
+</div>
+
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+     
+    var disqus_shortname = 'nodejsmongodbdriver'; 
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+</div>
+<div class="right-column">
+<div class="wrapper">
+  
+  <div class="toc">
+    <span class="toc-header">On this page</span>
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#authentication">Authentication</a>
+<ul>
+<li><a href="#default">DEFAULT</a></li>
+<li><a href="#scram-sha-1">SCRAM-SHA-1</a></li>
+<li><a href="#mongodb-cr">MONGODB-CR</a></li>
+<li><a href="#x509">X509</a></li>
+<li><a href="#kerberos-gssapi-sspi">Kerberos (GSSAPI/SSPI)</a></li>
+<li><a href="#ldap-plain">LDAP (PLAIN)</a></li>
+</ul></li>
+</ul>
+</nav>
+  </div>
+  
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+
+</section>
+
+
+<script type="text/javascript">
+  var DOCUMENTATION_OPTIONS = {
+   URL_ROOT:    "/node-mongodb-native/3.0",
+   VERSION:     "3.0.0-rc0",
+   COLLAPSE_INDEX: false,
+   FILE_SUFFIX: '.html',
+   HAS_SOURCE:  true
+  };
+</script>
+<script type="text/javascript" src="/node-mongodb-native/3.0/js/jquery.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.0/lib/bootstrap.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.0/js/navbar.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.0/lib/highlight/highlight.pack.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.0/js/scripts.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.0/lib/bootstrap-toggle/bootstrap-toggle.min.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.0/js/java.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.0/js/toggle-switch.js"></script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-29229787-1', 'auto');
+  ga('send', 'pageview');
+</script>
+</body>
+</html>
+

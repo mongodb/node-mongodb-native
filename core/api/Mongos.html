@@ -314,8 +314,6 @@
             
                 <li data-name="Logger#isWarn"><a href="Logger.html#isWarn">isWarn</a></li>
             
-                <li data-name="Logger#warn"><a href="Logger.html#warn">warn</a></li>
-            
             </ul>
             <ul class="events itemMembers">
             
@@ -486,6 +484,25 @@
             </ul>
         </li>
     
+        <li class="item" data-name="MongoNetworkError">
+            <span class="title">
+                <a href="MongoNetworkError.html">MongoNetworkError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="Mongos">
             <span class="title">
                 <a href="Mongos.html">Mongos</a>
@@ -613,6 +630,10 @@
             </span>
             <ul class="members itemMembers">
             
+            <span class="subtitle">Members</span>
+            
+                <li data-name="ReadPreference.PRIMARY"><a href="ReadPreference.html#.PRIMARY">PRIMARY</a></li>
+            
             </ul>
             <ul class="typedefs itemMembers">
             
@@ -620,6 +641,8 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="ReadPreference.isValid"><a href="ReadPreference.html#.isValid">isValid</a></li>
             
                 <li data-name="ReadPreference.nearest"><a href="ReadPreference.html#.nearest">nearest</a></li>
             
@@ -632,6 +655,8 @@
                 <li data-name="ReadPreference.secondaryPreferred"><a href="ReadPreference.html#.secondaryPreferred">secondaryPreferred</a></li>
             
                 <li data-name="ReadPreference#equals"><a href="ReadPreference.html#equals">equals</a></li>
+            
+                <li data-name="ReadPreference#isValid"><a href="ReadPreference.html#isValid">isValid</a></li>
             
                 <li data-name="ReadPreference#slaveOk"><a href="ReadPreference.html#slaveOk">slaveOk</a></li>
             
@@ -975,7 +1000,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line122">line 122</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line131">line 131</a>
         </div>
         
     </div>
@@ -2053,7 +2078,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line969">line 969</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1098">line 1098</a>
         </div>
         
     </div>
@@ -2260,7 +2285,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line916">line 916</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1034">line 1034</a>
         </div>
         
     </div>
@@ -2508,6 +2533,42 @@ cursor instance
 	
         <tr>
             
+                <td class="name"><code>options.session</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">ClientSession</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Session to use for the operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>callback</code></td>
             
             
@@ -2578,29 +2639,6 @@ cursor instance
     
     
     
-        <h5>Example</h5>
-        
-
-    
-    <pre class="prettyprint"><code>// Correctly execute ismaster command on the Mongos using the cursor
-
-var Mongos = configuration.require.Mongos,
-  test = require('assert');
-var server = new Mongos([{host: 'localhost', port:50000}]);
-// Add event listeners
-server.on('connect', function(_server) {
-  // Execute the command
-  _server.command("system.$cmd", {ismaster: true}, function(err, result) {
-    test.equal(null, err)
-    _server.destroy();
-  });
-});
-
-// Start connection
-server.connect();</code></pre>
-    
-
-    
 </dd>
 
         
@@ -2614,7 +2652,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line232">line 232</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line283">line 283</a>
         </div>
         
     </div>
@@ -2745,7 +2783,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1134">line 1134</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1274">line 1274</a>
         </div>
         
     </div>
@@ -2816,12 +2854,12 @@ server.connect();</code></pre>
     <div class="nameContainer">
         <h4 class="name" id="cursor">
             
-            cursor<span class="signature">(ns, cmd, callback)</span>
+            cursor<span class="signature">(ns, cmd, <span class="optional">options</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Cursor.html">Cursor</a>}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line955">line 955</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1079">line 1079</a>
         </div>
         
     </div>
@@ -2832,7 +2870,7 @@ server.connect();</code></pre>
     
     
     <div class="description">
-        <p>Perform one or more remove operations</p>
+        <p>Get a new cursor</p>
     </div>
     
 
@@ -2852,8 +2890,6 @@ server.connect();</code></pre>
 		
 		<th>Type</th>
 		
-		
-		<th>Default</th>
 		
 		
 		<th class="last">Description</th>
@@ -2878,10 +2914,6 @@ server.connect();</code></pre>
             </td>
             
             
-                <td class="default">
-                
-                </td>
-            
             
             <td class="description last">
                 
@@ -2903,19 +2935,15 @@ server.connect();</code></pre>
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">object</span>
 |
 
-<span class="param-type">Object</span>
+<span class="param-type"><a href="Long.html">Long</a></span>
 
 
             
             </td>
             
-            
-                <td class="default">
-                
-                </td>
             
             
             <td class="description last">
@@ -2932,7 +2960,55 @@ server.connect();</code></pre>
 	
         <tr>
             
-                <td class="name"><code>options.batchSize</code></td>
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Options for the cursor</p>
+                
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Default</th>
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>batchSize</code></td>
             
             
             <td class="type">
@@ -2968,7 +3044,7 @@ server.connect();</code></pre>
 	
         <tr>
             
-                <td class="name"><code>options.documents</code></td>
+                <td class="name"><code>documents</code></td>
             
             
             <td class="type">
@@ -3004,7 +3080,7 @@ server.connect();</code></pre>
 	
         <tr>
             
-                <td class="name"><code>options.readPreference</code></td>
+                <td class="name"><code>readPreference</code></td>
             
             
             <td class="type">
@@ -3038,7 +3114,7 @@ server.connect();</code></pre>
 	
         <tr>
             
-                <td class="name"><code>options.serializeFunctions</code></td>
+                <td class="name"><code>serializeFunctions</code></td>
             
             
             <td class="type">
@@ -3074,7 +3150,7 @@ server.connect();</code></pre>
 	
         <tr>
             
-                <td class="name"><code>options.ignoreUndefined</code></td>
+                <td class="name"><code>ignoreUndefined</code></td>
             
             
             <td class="type">
@@ -3110,13 +3186,49 @@ server.connect();</code></pre>
 	
         <tr>
             
-                <td class="name"><code>callback</code></td>
+                <td class="name"><code>session</code></td>
             
             
             <td class="type">
             
                 
-<span class="param-type">opResultCallback</span>
+<span class="param-type">ClientSession</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Session to use for the operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>topology</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
 
 
             
@@ -3131,11 +3243,19 @@ server.connect();</code></pre>
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
                 
-                <p>A callback function</p></td>
+                <p>The internal topology of the created cursor</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
         </tr>
 	
 	
@@ -3180,44 +3300,10 @@ server.connect();</code></pre>
     
     
     
-        <h5>Example</h5>
-        
+
 
     
-    <pre class="prettyprint"><code>// Correctly find a document on the Mongos using the cursor
-
-var Mongos = configuration.require.Mongos,
-  test = require('assert');
-var server = new Mongos([{host: 'localhost', port:50000}]);
-// Add event listeners
-server.on('connect', function(_server) {
-  // Execute the insert
-  _server.insert('integration_tests.inserts_example_mongos_4', [{a:1}], {
-    writeConcern: {w:1}, ordered:true
-  }, function(err, results) {
-    test.equal(null, err);
-    test.equal(1, results.result.n);
-
-    // Execute the write
-    var cursor = _server.cursor('integration_tests.inserts_example_mongos_4', {
-        find: 'integration_tests.example4'
-      , query: {a:1}
-    });
-
-    // Get the first document
-    cursor.next(function(err, doc) {
-      test.equal(null, err);
-      test.equal(1, doc.a);
-
-      _server.destroy();
-    });
-  });
-});
-
-// Start connection
-server.connect();</code></pre>
     
-
     
 </dd>
 
@@ -3232,7 +3318,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line752">line 752</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line830">line 830</a>
         </div>
         
     </div>
@@ -3363,7 +3449,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1124">line 1124</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1264">line 1264</a>
         </div>
         
     </div>
@@ -3439,7 +3525,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1113">line 1113</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1253">line 1253</a>
         </div>
         
     </div>
@@ -3515,7 +3601,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line829">line 829</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line933">line 933</a>
         </div>
         
     </div>
@@ -3767,6 +3853,76 @@ server.connect();</code></pre>
 	
         <tr>
             
+                <td class="name"><code>options.session</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">ClientSession</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Session to use for the operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.retryWrites</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Enable retryable writes for this operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>callback</code></td>
             
             
@@ -3837,33 +3993,6 @@ server.connect();</code></pre>
     
     
     
-        <h5>Example</h5>
-        
-
-    
-    <pre class="prettyprint"><code>// Correctly insert a document using the Mongos insert method
-
-var Mongos = configuration.require.Mongos,
-  test = require('assert');
-var server = new Mongos([{host: 'localhost', port:50000}]);
-// Add event listeners
-server.on('connect', function(_server) {
-  // Execute the insert
-  _server.insert('integration_tests.inserts_example_mongos_1', [{a:1}], {
-    writeConcern: {w:1}, ordered:true
-  }, function(err, results) {
-    test.equal(null, err);
-    test.equal(1, results.result.n);
-
-    _server.destroy();
-  });
-});
-
-// Start connection
-server.connect();</code></pre>
-    
-
-    
 </dd>
 
         
@@ -3877,7 +4006,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line788">line 788</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line866">line 866</a>
         </div>
         
     </div>
@@ -3953,7 +4082,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line797">line 797</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line875">line 875</a>
         </div>
         
     </div>
@@ -4029,7 +4158,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line727">line 727</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line805">line 805</a>
         </div>
         
     </div>
@@ -4105,7 +4234,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1059">line 1059</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1194">line 1194</a>
         </div>
         
     </div>
@@ -4244,7 +4373,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line887">line 887</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1001">line 1001</a>
         </div>
         
     </div>
@@ -4496,6 +4625,76 @@ server.connect();</code></pre>
 	
         <tr>
             
+                <td class="name"><code>options.session</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">ClientSession</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Session to use for the operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.retryWrites</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Enable retryable writes for this operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>callback</code></td>
             
             
@@ -4566,43 +4765,6 @@ server.connect();</code></pre>
     
     
     
-        <h5>Example</h5>
-        
-
-    
-    <pre class="prettyprint"><code>// Correctly remove a document using the Mongos remove method
-
-var Mongos = configuration.require.Mongos,
-  test = require('assert');
-var server = new Mongos([{host: 'localhost', port:50000}]);
-// Add event listeners
-server.on('connect', function(_server) {
-  // Execute the insert
-  _server.insert('integration_tests.inserts_example_mongos_3', [{a:1}], {
-    writeConcern: {w:1}, ordered:true
-  }, function(err, results) {
-    test.equal(null, err);
-    test.equal(1, results.result.n);
-
-    // Execute the write
-    _server.remove('integration_tests.inserts_example_mongos_3', [{
-      q: {a: 1}, limit: 1
-    }], {
-      writeConcern: {w:1}, ordered:true
-    }, function(err, results) {
-      test.equal(null, err);
-      test.equal(1, results.result.n);
-
-      _server.destroy();
-    });
-  });
-});
-
-// Start connection
-server.connect();</code></pre>
-    
-
-    
 </dd>
 
         
@@ -4616,7 +4778,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line735">line 735</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line813">line 813</a>
         </div>
         
     </div>
@@ -4687,7 +4849,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line858">line 858</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line967">line 967</a>
         </div>
         
     </div>
@@ -4939,6 +5101,76 @@ server.connect();</code></pre>
 	
         <tr>
             
+                <td class="name"><code>options.session</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">ClientSession</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Session to use for the operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.retryWrites</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Enable retryable writes for this operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>callback</code></td>
             
             
@@ -5009,43 +5241,6 @@ server.connect();</code></pre>
     
     
     
-        <h5>Example</h5>
-        
-
-    
-    <pre class="prettyprint"><code>// Correctly update a document using the Mongos update method
-
-var Mongos = configuration.require.Mongos,
-  test = require('assert');
-var server = new Mongos([{host: 'localhost', port:50000}]);
-// Add event listeners
-server.on('connect', function(_server) {
-  // Execute the insert
-  _server.insert('integration_tests.inserts_example_mongos_2', [{a:1}], {
-    writeConcern: {w:1}, ordered:true
-  }, function(err, results) {
-    test.equal(null, err);
-    test.equal(1, results.result.n);
-
-    // Execute the write
-    _server.update('integration_tests.inserts_example_mongos_2', [{
-      q: {a: 1}, u: {'$set': {b:1}}
-    }], {
-      writeConcern: {w:1}, ordered:true
-    }, function(err, results) {
-      test.equal(null, err);
-      test.equal(1, results.result.n);
-
-      _server.destroy();
-    });
-  });
-});
-
-// Start connection
-server.connect();</code></pre>
-    
-
-    
 </dd>
 
         </dl>
@@ -5067,7 +5262,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1219">line 1219</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1360">line 1360</a>
         </div>
         
     </div>
@@ -5148,7 +5343,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1198">line 1198</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1339">line 1339</a>
         </div>
         
     </div>
@@ -5229,7 +5424,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1212">line 1212</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1353">line 1353</a>
         </div>
         
     </div>
@@ -5310,7 +5505,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1235">line 1235</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1376">line 1376</a>
         </div>
         
     </div>
@@ -5459,7 +5654,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1226">line 1226</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1367">line 1367</a>
         </div>
         
     </div>
@@ -5608,7 +5803,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1205">line 1205</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1346">line 1346</a>
         </div>
         
     </div>
@@ -5689,7 +5884,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1251">line 1251</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1392">line 1392</a>
         </div>
         
     </div>
@@ -5770,7 +5965,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1258">line 1258</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1399">line 1399</a>
         </div>
         
     </div>
@@ -5851,7 +6046,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1293">line 1293</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1434">line 1434</a>
         </div>
         
     </div>
@@ -5932,7 +6127,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1286">line 1286</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1427">line 1427</a>
         </div>
         
     </div>
@@ -6013,7 +6208,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1300">line 1300</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1441">line 1441</a>
         </div>
         
     </div>
@@ -6094,7 +6289,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1244">line 1244</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1385">line 1385</a>
         </div>
         
     </div>
@@ -6175,7 +6370,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1272">line 1272</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1413">line 1413</a>
         </div>
         
     </div>
@@ -6256,7 +6451,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1279">line 1279</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1420">line 1420</a>
         </div>
         
     </div>
@@ -6337,7 +6532,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1265">line 1265</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1406">line 1406</a>
         </div>
         
     </div>
@@ -6437,7 +6632,7 @@ server.connect();</code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Jun 19 2017 22:26:58 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Dec 08 2017 18:01:01 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>

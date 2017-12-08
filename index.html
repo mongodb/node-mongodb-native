@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-	<meta name="generator" content="Hugo 0.18.1" />
+	<meta name="generator" content="Hugo 0.30.2" />
     <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="">
 <meta name="author" content="">
 <meta name="keyword" content="">
 
-    <link rel="shortcut icon" href="/node-mongodb-native//s/img/favicon.png">
+    <link rel="shortcut icon" href="/node-mongodb-native/s/img/favicon.png">
 
     <title>MongoDB Node.js Driver</title>
 
-    <link rel="stylesheet" href="/node-mongodb-native//s/lib/bootstrap.min.css" type="text/css" />
-<link rel="stylesheet" href="/node-mongodb-native//s/lib/font-awesome/css/font-awesome.min.css" type="text/css" />
-<link rel="stylesheet" href="/node-mongodb-native//s/lib/highlight/styles/vs.css" type="text/css" />
-<link rel="stylesheet" href="/node-mongodb-native//s/lib/bootstrap-select/bootstrap-select.min.css" type="text/css" />
-<link rel="stylesheet" href="/node-mongodb-native//s/lib/bootstrap-toggle/bootstrap-toggle.min.css" type="text/css" />
-<link rel="stylesheet" href="/node-mongodb-native//s/css/frontpage.css" type="text/css" />
+    <link rel="stylesheet" href="/node-mongodb-native/s/lib/bootstrap.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/s/lib/font-awesome/css/font-awesome.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/s/lib/highlight/styles/vs.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/s/lib/bootstrap-select/bootstrap-select.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/s/lib/bootstrap-toggle/bootstrap-toggle.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/s/css/frontpage.css" type="text/css" />
 
   </head>
 
@@ -27,8 +27,8 @@
   <div class="header-content">
     
     <div class="logo pull-left">
-      <a href="/node-mongodb-native/">
-        <img src="/node-mongodb-native//s/img/logo-mongodb-header.png", alt="MongoDB.org" />
+      <a href="/node-mongodb-native">
+        <img src="/node-mongodb-native/s/img/logo-mongodb-header.png", alt="MongoDB.org" />
       </a>
     </div>
     
@@ -59,7 +59,7 @@
       <p>
         
         
-      <a href="./2.2" class="btn btn-success btn-dark btn-mongo">Latest documentation</a>
+      <a href="./3.0" class="btn btn-success btn-dark btn-mongo">Latest documentation</a>
       </p>
 
     </div>
@@ -75,7 +75,10 @@
         <h2>Introduction</h2>
 
 <p>
-  The official MongoDB Node.js driver provides both callback based as well as Promised based interaction with MongoDB allowing applications to take full advantage of the new features in ES6. The 2.x series of the driver is powered by a brand new core driver and bson library.
+  The official MongoDB Node.js driver provides both callback-based
+  and Promise-based interaction with MongoDB, allowing applications to
+  take full advantage of the new features in ES6. The 2.x series of the
+  driver is powered by a brand new core driver and BSON library.
 </p>
 
 
@@ -83,9 +86,17 @@
 
 <dl>
   <dt>MongoDB Driver</dt>
-  <dd>An brand new MongoDB driver for Node.js that keeps compatibility with the 1.4.x driver series only breaking behavior where the 1.4.x branch had significant problems. The driver also includes support for the shared CRUD API specification and the Server Discovery and Monitoring Specification (SDAM).</dd>
+  <dd>A brand new MongoDB driver for Node.js that keeps compatibility
+	  with the 1.4.x driver series, only breaking behavior where the
+	  1.4.x branch had significant problems. The driver also includes
+	  support for the shared CRUD API specification and the Server
+	  Discovery and Monitoring Specification (SDAM).</dd>
   <dt>Core driver</dt>
-  <dd>The MongoDB Node.js core driver is the new underpinning for the driver and is meant for framework developers that do not need the helpers and abstractions available in the full driver. This driver is not meant for end users as it offers none of the conveniences of the higher level API's</dd>
+  <dd>The MongoDB Node.js core driver is the new underpinning for the
+	  driver and is meant for framework developers that do not need the
+	  helpers and abstractions available in the full driver. This driver
+	  is not meant for end users, as it offers none of the conveniences
+	  of the higher level APIs</dd>.
 </dl>
 
 
@@ -110,27 +121,17 @@ This will download the MongoDB driver and add a dependency entry in your `packag
     <tbody>
     
       <tr>
-        <th class="current">2.2 Driver</th>
+        <th class="current">3.0 Driver</th>
+        <td><a href="./3.0" class="reference">Reference</a> &#124; <a href="./3.0/api">API</a></td>
+      </tr>
+    
+      <tr>
+        <th class="">2.2 Driver</th>
         <td><a href="./2.2" class="reference">Reference</a> &#124; <a href="./2.2/api">API</a></td>
       </tr>
     
       <tr>
-        <th class="current">2.1 Driver</th>
-        <td><a href="./2.1" class="reference">Reference</a> &#124; <a href="./2.1/api">API</a></td>
-      </tr>
-    
-      <tr>
-        <th class="current">2.0 Driver</th>
-        <td><a href="./2.0" class="reference">Reference</a> &#124; <a href="./2.0/api">API</a></td>
-      </tr>
-    
-      <tr>
-        <th class="">1.4 Driver</th>
-        <td><a href="./1.4" class="reference">Reference</a> &#124; <a href="./1.4/api-generated/index.html">API</a></td>
-      </tr>
-    
-      <tr>
-        <th class="">1.2 Core Driver</th>
+        <th class="">3.0 Core Driver</th>
         <td><a href="./core" class="reference">Reference</a> &#124; <a href="./core/api">API</a></td>
       </tr>
     
@@ -175,13 +176,13 @@ This will download the MongoDB driver and add a dependency entry in your `packag
 
 
 
-<script type="text/javascript" src="/node-mongodb-native//s/js/jquery.js"></script>
-<script type="text/javascript" src="/node-mongodb-native//s/lib/bootstrap.js"></script>
-<script type="text/javascript" src="/node-mongodb-native//s/lib/highlight/highlight.pack.js"></script>
-<script type="text/javascript" src="/node-mongodb-native//s/lib/bootstrap-select/bootstrap-select.min.js"></script>
-<script type="text/javascript" src="/node-mongodb-native//s/lib/bootstrap-toggle/bootstrap-toggle.min.js"></script>
-<script type="text/javascript" src="/node-mongodb-native//s/lib/zeroclipboard/ZeroClipboard.min.js"></script>
-<script type="text/javascript" src="/node-mongodb-native//s/js/frontpage.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/s/js/jquery.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/s/lib/bootstrap.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/s/lib/highlight/highlight.pack.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/s/lib/bootstrap-select/bootstrap-select.min.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/s/lib/bootstrap-toggle/bootstrap-toggle.min.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/s/lib/zeroclipboard/ZeroClipboard.min.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/s/js/frontpage.js"></script>
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

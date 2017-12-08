@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Upgrade-migrations on MongoDB Node.js Driver</title>
+    <link>/node-mongodb-native/3.0/upgrade-migration/</link>
+    <description>Recent content in Upgrade-migrations on MongoDB Node.js Driver</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 19 Mar 2015 12:53:39 -0400</lastBuildDate>
+    
+	<atom:link href="/node-mongodb-native/3.0/upgrade-migration/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Upgrading to 2.x</title>
+      <link>/node-mongodb-native/3.0/upgrade-migration/upgrading/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:39 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.0/upgrade-migration/upgrading/</guid>
+      <description>Migrating Your Application To 2.x There are some key changes in the driver that you should be aware of before migrating your application from version 1.x to 2.x. Some APIs are cleaned up, and some 1.x features have been deprecated.
+Design differences in 2.x One major change is that the driver has been split into two pieces. There is a new mongodb-core that contains the low-level MongoDB APIs while mongodb contains the high-level driver.</description>
+    </item>
+    
+    <item>
+      <title>Upgrade Guide</title>
+      <link>/node-mongodb-native/3.0/upgrade-migration/main/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:35 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.0/upgrade-migration/main/</guid>
+      <description>What&amp;rsquo;s new in 3.0  Support added for Retryable Writes Support added for DNS Seedlists Support added for Change Streams Support added for sessions MongoClient.connect now returns a Client instead of a DB.  Full 3.0 Changes Here
+What&amp;rsquo;s New in 2.3 Key features of the 2.3 driver include:
+ Implements Decimal128, a decimal floating-point numbering format that occupies 16 bytes (128 bits). See the CRUD tutorial for an example.</description>
+    </item>
+    
+  </channel>
+</rss>

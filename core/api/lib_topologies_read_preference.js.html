@@ -314,8 +314,6 @@
             
                 <li data-name="Logger#isWarn"><a href="Logger.html#isWarn">isWarn</a></li>
             
-                <li data-name="Logger#warn"><a href="Logger.html#warn">warn</a></li>
-            
             </ul>
             <ul class="events itemMembers">
             
@@ -486,6 +484,25 @@
             </ul>
         </li>
     
+        <li class="item" data-name="MongoNetworkError">
+            <span class="title">
+                <a href="MongoNetworkError.html">MongoNetworkError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="Mongos">
             <span class="title">
                 <a href="Mongos.html">Mongos</a>
@@ -613,6 +630,10 @@
             </span>
             <ul class="members itemMembers">
             
+            <span class="subtitle">Members</span>
+            
+                <li data-name="ReadPreference.PRIMARY"><a href="ReadPreference.html#.PRIMARY">PRIMARY</a></li>
+            
             </ul>
             <ul class="typedefs itemMembers">
             
@@ -620,6 +641,8 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="ReadPreference.isValid"><a href="ReadPreference.html#.isValid">isValid</a></li>
             
                 <li data-name="ReadPreference.nearest"><a href="ReadPreference.html#.nearest">nearest</a></li>
             
@@ -632,6 +655,8 @@
                 <li data-name="ReadPreference.secondaryPreferred"><a href="ReadPreference.html#.secondaryPreferred">secondaryPreferred</a></li>
             
                 <li data-name="ReadPreference#equals"><a href="ReadPreference.html#equals">equals</a></li>
+            
+                <li data-name="ReadPreference#isValid"><a href="ReadPreference.html#isValid">isValid</a></li>
             
                 <li data-name="ReadPreference#slaveOk"><a href="ReadPreference.html#slaveOk">slaveOk</a></li>
             
@@ -953,25 +978,26 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>"use strict";
-
-var needSlaveOk = ['primaryPreferred', 'secondary', 'secondaryPreferred', 'nearest'];
+            <pre class="prettyprint source linenums"><code>'use strict';
 
 /**
  * @fileOverview The **ReadPreference** class is a class that represents a MongoDB ReadPreference and is
  * used to construct connections.
  *
  * @example
- * var ReplSet = require('mongodb-core').ReplSet
- *   , ReadPreference = require('mongodb-core').ReadPreference
- *   , assert = require('assert');
+ * const ReplSet = require('mongodb-core').ReplSet,
+ *   ReadPreference = require('mongodb-core').ReadPreference,
+ *   assert = require('assert');
  *
- * var server = new ReplSet([{host: 'localhost', port: 30000}], {setName: 'rs'});
+ * const server = new ReplSet([{host: 'localhost', port: 30000}], {setName: 'rs'});
  * // Wait for the connection event
  * server.on('connect', function(server) {
- *   var cursor = server.cursor('db.test'
- *     , {find: 'db.test', query: {}}
- *     , {readPreference: new ReadPreference('secondary')});
+ *   const cursor = server.cursor(
+ *     'db.test',
+ *     { find: 'db.test', query: {} },
+ *     { readPreference: new ReadPreference('secondary') }
+ *   );
+ *
  *   cursor.next(function(err, doc) {
  *     server.destroy();
  *   });
@@ -984,30 +1010,82 @@ var needSlaveOk = ['primaryPreferred', 'secondary', 'secondaryPreferred', 'neare
 /**
  * Creates a new Pool instance
  * @class
- * @param {string} preference A string describing the preference (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
+ * @param {string} mode A string describing the read preference mode (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
  * @param {array} tags The tags object
  * @param {object} [options] Additional read preference options
- * @param {number} [options.maxStalenessSeconds] Max Secondary Read Stalleness in Seconds, Minimum value is 90 seconds.
- * @property {string} preference The preference string (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
+ * @param {number} [options.maxStalenessSeconds] Max secondary read staleness in seconds, Minimum value is 90 seconds.
+ * @property {string} mode The read preference mode (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
  * @property {array} tags The tags object
  * @property {object} options Additional read preference options
  * @property {number} maxStalenessSeconds MaxStalenessSeconds value for the read preference
  * @return {ReadPreference}
  */
-var ReadPreference = function(preference, tags, options) {
-  this.preference = preference;
+const ReadPreference = function(mode, tags, options) {
+  this.mode = mode;
   this.tags = tags;
   this.options = options;
 
   // Add the maxStalenessSeconds value to the read Preference
-  if(this.options &amp;&amp; this.options.maxStalenessSeconds != null) {
+  if (this.options &amp;&amp; this.options.maxStalenessSeconds != null) {
     this.options = options;
-    this.maxStalenessSeconds = this.options.maxStalenessSeconds >= 0
-      ? this.options.maxStalenessSeconds : null;
-  } else if(tags &amp;&amp; typeof tags == 'object') {
-    this.options = tags, tags = null;
+    this.maxStalenessSeconds =
+      this.options.maxStalenessSeconds >= 0 ? this.options.maxStalenessSeconds : null;
+  } else if (tags &amp;&amp; typeof tags === 'object') {
+    (this.options = tags), (tags = null);
   }
-}
+};
+
+// Support the deprecated `preference` property introduced in the porcelain layer
+Object.defineProperty(ReadPreference.prototype, 'preference', {
+  enumerable: true,
+  get: function() {
+    return this.mode;
+  }
+});
+
+/**
+ * Read preference mode constants
+ */
+ReadPreference.PRIMARY = 'primary';
+ReadPreference.PRIMARY_PREFERRED = 'primaryPreferred';
+ReadPreference.SECONDARY = 'secondary';
+ReadPreference.SECONDARY_PREFERRED = 'secondaryPreferred';
+ReadPreference.NEAREST = 'nearest';
+
+const VALID_MODES = [
+  ReadPreference.PRIMARY,
+  ReadPreference.PRIMARY_PREFERRED,
+  ReadPreference.SECONDARY,
+  ReadPreference.SECONDARY_PREFERRED,
+  ReadPreference.NEAREST,
+  true,
+  false,
+  null
+];
+
+/**
+ * Validate if a mode is legal
+ *
+ * @method
+ * @param {string} mode The string representing the read preference mode.
+ * @return {boolean}
+ */
+ReadPreference.isValid = function(mode) {
+  return VALID_MODES.indexOf(mode) !== -1;
+};
+
+/**
+ * Validate if a mode is legal
+ *
+ * @method
+ * @param {string} mode The string representing the read preference mode.
+ * @return {boolean}
+ */
+ReadPreference.prototype.isValid = function(mode) {
+  return ReadPreference.isValid(typeof mode === 'string' ? mode : this.mode);
+};
+
+const needSlaveOk = ['primaryPreferred', 'secondary', 'secondaryPreferred', 'nearest'];
 
 /**
  * This needs slaveOk bit set
@@ -1015,8 +1093,8 @@ var ReadPreference = function(preference, tags, options) {
  * @return {boolean}
  */
 ReadPreference.prototype.slaveOk = function() {
-  return needSlaveOk.indexOf(this.preference) != -1;
-}
+  return needSlaveOk.indexOf(this.mode) !== -1;
+};
 
 /**
  * Are the two read preference equal
@@ -1024,8 +1102,8 @@ ReadPreference.prototype.slaveOk = function() {
  * @return {boolean}
  */
 ReadPreference.prototype.equals = function(readPreference) {
-  return readPreference.preference == this.preference;
-}
+  return readPreference.mode === this.mode;
+};
 
 /**
  * Return JSON representation
@@ -1033,11 +1111,11 @@ ReadPreference.prototype.equals = function(readPreference) {
  * @return {Object}
  */
 ReadPreference.prototype.toJSON = function() {
-  var readPreference = {mode: this.preference};
-  if(Array.isArray(this.tags)) readPreference.tags = this.tags;
-  if(this.maxStalenessSeconds) readPreference.maxStalenessSeconds = this.maxStalenessSeconds;
+  const readPreference = { mode: this.mode };
+  if (Array.isArray(this.tags)) readPreference.tags = this.tags;
+  if (this.maxStalenessSeconds) readPreference.maxStalenessSeconds = this.maxStalenessSeconds;
   return readPreference;
-}
+};
 
 /**
  * Primary read preference
@@ -1100,7 +1178,7 @@ module.exports = ReadPreference;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Jun 19 2017 22:26:58 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Dec 08 2017 18:01:01 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>

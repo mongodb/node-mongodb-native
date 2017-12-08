@@ -2,12 +2,14 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Upgrade-migrations on MongoDB Node.js Driver</title>
-    <link>/node-mongodb-native/2.2/upgrade-migration/index.xml</link>
+    <link>/node-mongodb-native/2.2/upgrade-migration/</link>
     <description>Recent content in Upgrade-migrations on MongoDB Node.js Driver</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 19 Mar 2015 12:53:39 -0400</lastBuildDate>
-    <atom:link href="/node-mongodb-native/2.2/upgrade-migration/index.xml" rel="self" type="application/rss+xml" />
+    
+	<atom:link href="/node-mongodb-native/2.2/upgrade-migration/index.xml" rel="self" type="application/rss+xml" />
+    
     
     <item>
       <title>Upgrading to 2.x</title>
@@ -15,86 +17,8 @@
       <pubDate>Thu, 19 Mar 2015 12:53:39 -0400</pubDate>
       
       <guid>/node-mongodb-native/2.2/upgrade-migration/upgrading/</guid>
-      <description>
-
-&lt;h1 id=&#34;migrating-your-application-to-2-x&#34;&gt;Migrating Your Application To 2.x&lt;/h1&gt;
-
-&lt;p&gt;There are some key changes in the driver that you should be aware of before migrating your application from version 1.x to 2.x.
-Some APIs are cleaned up, and some 1.x features have been deprecated.&lt;/p&gt;
-
-&lt;h2 id=&#34;design-differences-in-2-x&#34;&gt;Design differences in 2.x&lt;/h2&gt;
-
-&lt;p&gt;One major change is that the driver has been split into two pieces. There is a new &lt;code&gt;mongodb-core&lt;/code&gt; that contains the
-low-level MongoDB APIs while &lt;code&gt;mongodb&lt;/code&gt; contains the high-level driver. &lt;code&gt;mongodb-core&lt;/code&gt; is targeted to creators of libraries like &lt;a href=&#34;http://mongoosejs.com/&#34;&gt;Mongoose&lt;/a&gt; and other ODMs who do not need the abstractions available in the &lt;code&gt;mongodb&lt;/code&gt; driver. The driver is
-currently compatible with the 0.11.x Node.js branch, which includes support for Kerberos and MongoDB 3.0.&lt;/p&gt;
-
-&lt;h2 id=&#34;changes&#34;&gt;Changes&lt;/h2&gt;
-
-&lt;p&gt;Below are listed some driver changes which could impact your application.&lt;/p&gt;
-
-&lt;h3 id=&#34;node-js-versions-and-streams&#34;&gt;Node.js versions and Streams&lt;/h3&gt;
-
-&lt;p&gt;The 2.0 driver drops support for 0.8.x style streams in favor of 0.10.x or higher style pull-based streams, which are
-faster and more reliable. Backwards compatibility is available by using the &lt;code&gt;readable-stream&lt;/code&gt; npm package (might cause
-some behavior changes for the cursor streams).&lt;/p&gt;
-
-&lt;p&gt;All dependencies have now been updated to use the &lt;code&gt;nan&lt;/code&gt; package. They will compile and work on 0.11.x or higher.&lt;/p&gt;
-
-&lt;h3 id=&#34;grid-object&#34;&gt;Grid Object&lt;/h3&gt;
-
-&lt;p&gt;The grid object has been removed, due to its limited GridStore capabilities.&lt;/p&gt;
-
-&lt;h3 id=&#34;db-object&#34;&gt;db Object&lt;/h3&gt;
-
-&lt;p&gt;The db instance object has changed in several ways. The following methods have been removed:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;db.dereference&lt;/code&gt; due to db references being deprecated in the server.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;db.cursorInfo&lt;/code&gt; removed as it never worked reliably.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;db.stats&lt;/code&gt; removed as inconsistent.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;db.collectionNames&lt;/code&gt; removed as it&amp;rsquo;s just a specialized version of the new &lt;code&gt;listCollections&lt;/code&gt; helper.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;db.collectionInfo&lt;/code&gt; removed as it&amp;rsquo;s not compatible with the new MongoDB 3.0 or higher alternative storage engines.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;New method:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;db.listCollections&lt;/code&gt; to replace all other collection inquiry methods. It works with MongoDB 3.0 and higher and provide backwards compatibility for MongoDB 2.6 or lower.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h3 id=&#34;collection-object&#34;&gt;Collection Object&lt;/h3&gt;
-
-&lt;p&gt;The collection instance object has also changed in several key respects. Most importantly, we now return the &lt;code&gt;mongodb-core&lt;/code&gt; result objects directly, with all the associated information returned from the server, instead of the selective information returned in the 1.4.x version.&lt;/p&gt;
-
-&lt;p&gt;New methods:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;collection.insertOne&lt;/code&gt; insert a single document.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;collection.insertMany&lt;/code&gt; insert an array of documents.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;collection.replaceOne&lt;/code&gt; fully replace an existing document.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;collection.updateOne&lt;/code&gt; update a single document.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;collection.updateMany&lt;/code&gt; update multiple documents.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;collection.deleteOne&lt;/code&gt; delete a single document.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;collection.deleteMany&lt;/code&gt; delete multiple documents.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;collection.findOneAndUpdate&lt;/code&gt; use findAndModify to update a document.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;collection.findOneAndDelete&lt;/code&gt; use findAndModify to remove a specific document.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;collection.findOneAndReplace&lt;/code&gt; use findAndModify to replace a specific document.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;The current &lt;code&gt;insert&lt;/code&gt;, &lt;code&gt;update&lt;/code&gt; and &lt;code&gt;remove&lt;/code&gt; methods are marked for deprecation and will be removed in a future 3.0 driver. These three methods now return the full &lt;code&gt;mongodb-core&lt;/code&gt; results, and their third return value has been removed to ensure fewer compatibility problems with orchestration libraries like &lt;code&gt;async&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;The insert methods are now capping at the &lt;code&gt;maxWriteBatchSize&lt;/code&gt; passed back from MongoDB on the results from the &lt;code&gt;ismaster&lt;/code&gt; command. For MongoDB 2.4 and lower this means a maximum of 1000 documents in each insert batch. Legacy insert mode has been deprecated in favor of proper emulation of current 2.6 or higher write commands.&lt;/p&gt;
-
-&lt;p&gt;Another important change is in how &lt;code&gt;collection.find&lt;/code&gt; works. The idea is to chain commands instead of passing them into the &lt;code&gt;find&lt;/code&gt; method. It still supports old behavior from 1.4 so no code should break, but the API documentation reflects the new, preferred way of using &lt;code&gt;find&lt;/code&gt; to execute queries.&lt;/p&gt;
-
-&lt;h3 id=&#34;gridstore&#34;&gt;GridStore&lt;/h3&gt;
-
-&lt;p&gt;The GridStore object has changed in major ways, due to issues discovered by users related to parallel writing (using the previously available &lt;code&gt;w+&lt;/code&gt; append mode). As a result, in 2.0 &lt;code&gt;w+&lt;/code&gt; only allows for changes to the file metadata and does not allow for appending to a file, avoiding possible data corruption. The hope is to create a new GridStore spec in the future that allows for properly handling parallel writing to an existing file, but that will require changes for all drivers as well as the server.&lt;/p&gt;
-
-&lt;h3 id=&#34;mongoclient&#34;&gt;MongoClient&lt;/h3&gt;
-
-&lt;p&gt;MongoClient now has only the class method &lt;code&gt;connect&lt;/code&gt;. Construction of a new MongoClient using &lt;code&gt;Server&lt;/code&gt;, &lt;code&gt;ReplSet&lt;/code&gt; or &lt;code&gt;Mongos&lt;/code&gt; has been removed, due to the confusion it caused by duplicating the way one can build a topology connection using &lt;code&gt;Db&lt;/code&gt; in 1.4. &lt;code&gt;MongoClient.connect&lt;/code&gt; is the recommended way to connect to a MongoDB topology.&lt;/p&gt;
-</description>
+      <description>Migrating Your Application To 2.x There are some key changes in the driver that you should be aware of before migrating your application from version 1.x to 2.x. Some APIs are cleaned up, and some 1.x features have been deprecated.
+Design differences in 2.x One major change is that the driver has been split into two pieces. There is a new mongodb-core that contains the low-level MongoDB APIs while mongodb contains the high-level driver.</description>
     </item>
     
     <item>
@@ -103,63 +27,9 @@ some behavior changes for the cursor streams).&lt;/p&gt;
       <pubDate>Thu, 19 Mar 2015 12:53:35 -0400</pubDate>
       
       <guid>/node-mongodb-native/2.2/upgrade-migration/main/</guid>
-      <description>
-
-&lt;h1 id=&#34;what-s-new-in-2-3&#34;&gt;What&amp;rsquo;s New in 2.3&lt;/h1&gt;
-
-&lt;p&gt;Key features of the 2.3 driver include:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Implements &lt;a href=&#34;https://docs.mongodb.org&#34;&gt;Decimal128&lt;/a&gt;, a decimal
-floating-point numbering format that occupies 16 bytes (128 bits).
-See the
-&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/crud/#specify-a-data-type&#34;&gt;CRUD tutorial&lt;/a&gt;
-for an example.
-&lt;!-- NOTE: placeholder link to manual entry --&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h1 id=&#34;what-s-new-in-2-2&#34;&gt;What&amp;rsquo;s New in 2.2&lt;/h1&gt;
-
-&lt;p&gt;Key features of the 2.2 driver include:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Redesigned Connection Pool.&lt;/li&gt;
-&lt;li&gt;Connection close will drain any outstanding operations.&lt;/li&gt;
-&lt;li&gt;replicaSet parameter &lt;strong&gt;MUST&lt;/strong&gt; be specified if using MongoClient to connect to replicaset, due to SDAM specification implementation.&lt;/li&gt;
-&lt;li&gt;Domain support disabled by default, enable with parameter &lt;strong&gt;domainsEnabled&lt;/strong&gt; on MongoClient or on the Server/ReplSet/Mongos.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h1 id=&#34;what-s-new-in-2-1&#34;&gt;What&amp;rsquo;s New in 2.1&lt;/h1&gt;
-
-&lt;p&gt;Key features of the 2.1 driver include:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Implements the new GridFS specification&lt;/li&gt;
-&lt;li&gt;Implements support for the new 3.2 wire protocol level &lt;strong&gt;find&lt;/strong&gt;, &lt;strong&gt;getMore&lt;/strong&gt; and &lt;strong&gt;killCursor&lt;/strong&gt; commands&lt;/li&gt;
-&lt;li&gt;A growing/shrinking connection pool&lt;/li&gt;
-&lt;li&gt;A worker-based connection pool which minimizes the impact of slow operations on throughput and latency when the number of slow operations is less than the number of connections in the pool&lt;/li&gt;
-&lt;li&gt;Topology monitoring specification implementation, allowing applications to monitor the view of the topology as it changes&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h1 id=&#34;what-s-new-in-2-0&#34;&gt;What&amp;rsquo;s New in 2.0&lt;/h1&gt;
-
-&lt;p&gt;Key features of the 2.0 driver include:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Adherence to the SDAM (Server Discovery and Monitoring Specification)&lt;/li&gt;
-&lt;li&gt;Implementation of the CRUD Specification&lt;/li&gt;
-&lt;li&gt;Performance improvements&lt;/li&gt;
-&lt;li&gt;New JS-BSON parser which replaces the C++ extension&lt;/li&gt;
-&lt;li&gt;A new core driver on top of which you can build alternative or experimental driver APIs&lt;/li&gt;
-&lt;li&gt;APM (Application Performance Monitoring) API&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/blob/2.1/HISTORY.md&#34;&gt;Driver revision history&lt;/a&gt;.&lt;/p&gt;
-
-&lt;h2 id=&#34;upgrading&#34;&gt;Upgrading&lt;/h2&gt;
-
-&lt;p&gt;See the &lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/upgrade-migration/upgrading/&#34;&gt;upgrading guide&lt;/a&gt; on how to upgrade to 2.0&lt;/p&gt;
-</description>
+      <description>What&amp;rsquo;s New in 2.3 Key features of the 2.3 driver include:
+ Implements Decimal128, a decimal floating-point numbering format that occupies 16 bytes (128 bits). See the CRUD tutorial for an example.   What&amp;rsquo;s New in 2.2 Key features of the 2.2 driver include:
+ Redesigned Connection Pool. Connection close will drain any outstanding operations. replicaSet parameter MUST be specified if using MongoClient to connect to replicaset, due to SDAM specification implementation.</description>
     </item>
     
   </channel>

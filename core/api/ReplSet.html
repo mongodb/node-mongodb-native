@@ -314,8 +314,6 @@
             
                 <li data-name="Logger#isWarn"><a href="Logger.html#isWarn">isWarn</a></li>
             
-                <li data-name="Logger#warn"><a href="Logger.html#warn">warn</a></li>
-            
             </ul>
             <ul class="events itemMembers">
             
@@ -486,6 +484,25 @@
             </ul>
         </li>
     
+        <li class="item" data-name="MongoNetworkError">
+            <span class="title">
+                <a href="MongoNetworkError.html">MongoNetworkError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="Mongos">
             <span class="title">
                 <a href="Mongos.html">Mongos</a>
@@ -613,6 +630,10 @@
             </span>
             <ul class="members itemMembers">
             
+            <span class="subtitle">Members</span>
+            
+                <li data-name="ReadPreference.PRIMARY"><a href="ReadPreference.html#.PRIMARY">PRIMARY</a></li>
+            
             </ul>
             <ul class="typedefs itemMembers">
             
@@ -620,6 +641,8 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="ReadPreference.isValid"><a href="ReadPreference.html#.isValid">isValid</a></li>
             
                 <li data-name="ReadPreference.nearest"><a href="ReadPreference.html#.nearest">nearest</a></li>
             
@@ -632,6 +655,8 @@
                 <li data-name="ReadPreference.secondaryPreferred"><a href="ReadPreference.html#.secondaryPreferred">secondaryPreferred</a></li>
             
                 <li data-name="ReadPreference#equals"><a href="ReadPreference.html#equals">equals</a></li>
+            
+                <li data-name="ReadPreference#isValid"><a href="ReadPreference.html#isValid">isValid</a></li>
             
                 <li data-name="ReadPreference#slaveOk"><a href="ReadPreference.html#slaveOk">slaveOk</a></li>
             
@@ -975,7 +1000,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line109">line 109</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line119">line 119</a>
         </div>
         
     </div>
@@ -2195,7 +2220,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1167">line 1167</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1363">line 1363</a>
         </div>
         
     </div>
@@ -2402,7 +2427,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1126">line 1126</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1302">line 1302</a>
         </div>
         
     </div>
@@ -2650,6 +2675,42 @@ cursor instance
 	
         <tr>
             
+                <td class="name"><code>options.session</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">ClientSession</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Session to use for the operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>callback</code></td>
             
             
@@ -2720,29 +2781,6 @@ cursor instance
     
     
     
-        <h5>Example</h5>
-        
-
-    
-    <pre class="prettyprint"><code>// Correctly execute ismaster command on the ReplSet using the cursor
-
-var Server = require('mongodb-core').Server,
-  test = require('assert');
-var server = new ReplSet([{host: 'localhost', port:31000}], {setName:'rs'});
-// Add event listeners
-server.on('connect', function(_server) {
-  // Execute the command
-  _server.command("system.$cmd", {ismaster: true}, function(err, result) {
-    test.equal(null, err)
-    server.destroy();
-  });
-});
-
-// Start connection
-server.connect();</code></pre>
-    
-
-    
 </dd>
 
         
@@ -2756,7 +2794,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line831">line 831</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line960">line 960</a>
         </div>
         
     </div>
@@ -2887,7 +2925,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line930">line 930</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1077">line 1077</a>
         </div>
         
     </div>
@@ -2958,12 +2996,12 @@ server.connect();</code></pre>
     <div class="nameContainer">
         <h4 class="name" id="cursor">
             
-            cursor<span class="signature">(ns, cmd, callback)</span>
+            cursor<span class="signature">(ns, cmd, <span class="optional">options</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Cursor.html">Cursor</a>}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1332">line 1332</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1545">line 1545</a>
         </div>
         
     </div>
@@ -2974,7 +3012,7 @@ server.connect();</code></pre>
     
     
     <div class="description">
-        <p>Perform one or more remove operations</p>
+        <p>Get a new cursor</p>
     </div>
     
 
@@ -2994,8 +3032,6 @@ server.connect();</code></pre>
 		
 		<th>Type</th>
 		
-		
-		<th>Default</th>
 		
 		
 		<th class="last">Description</th>
@@ -3020,10 +3056,6 @@ server.connect();</code></pre>
             </td>
             
             
-                <td class="default">
-                
-                </td>
-            
             
             <td class="description last">
                 
@@ -3045,19 +3077,15 @@ server.connect();</code></pre>
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">object</span>
 |
 
-<span class="param-type">Object</span>
+<span class="param-type"><a href="Long.html">Long</a></span>
 
 
             
             </td>
             
-            
-                <td class="default">
-                
-                </td>
             
             
             <td class="description last">
@@ -3074,7 +3102,55 @@ server.connect();</code></pre>
 	
         <tr>
             
-                <td class="name"><code>options.batchSize</code></td>
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Options for the cursor</p>
+                
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Default</th>
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>batchSize</code></td>
             
             
             <td class="type">
@@ -3110,7 +3186,7 @@ server.connect();</code></pre>
 	
         <tr>
             
-                <td class="name"><code>options.documents</code></td>
+                <td class="name"><code>documents</code></td>
             
             
             <td class="type">
@@ -3146,7 +3222,7 @@ server.connect();</code></pre>
 	
         <tr>
             
-                <td class="name"><code>options.readPreference</code></td>
+                <td class="name"><code>readPreference</code></td>
             
             
             <td class="type">
@@ -3180,7 +3256,7 @@ server.connect();</code></pre>
 	
         <tr>
             
-                <td class="name"><code>options.serializeFunctions</code></td>
+                <td class="name"><code>serializeFunctions</code></td>
             
             
             <td class="type">
@@ -3216,7 +3292,7 @@ server.connect();</code></pre>
 	
         <tr>
             
-                <td class="name"><code>options.ignoreUndefined</code></td>
+                <td class="name"><code>ignoreUndefined</code></td>
             
             
             <td class="type">
@@ -3252,13 +3328,49 @@ server.connect();</code></pre>
 	
         <tr>
             
-                <td class="name"><code>callback</code></td>
+                <td class="name"><code>session</code></td>
             
             
             <td class="type">
             
                 
-<span class="param-type">opResultCallback</span>
+<span class="param-type">ClientSession</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Session to use for the operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>topology</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
 
 
             
@@ -3273,11 +3385,19 @@ server.connect();</code></pre>
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
                 
-                <p>A callback function</p></td>
+                <p>The internal topology of the created cursor</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
         </tr>
 	
 	
@@ -3322,44 +3442,10 @@ server.connect();</code></pre>
     
     
     
-        <h5>Example</h5>
-        
+
 
     
-    <pre class="prettyprint"><code>// Correctly find a document on the ReplSet using the cursor
-
-var Server = require('mongodb-core').Server,
-  test = require('assert');
-var server = new ReplSet([{host: 'localhost', port:31000}], {setName:'rs'});
-// Add event listeners
-server.on('connect', function(_server) {
-  // Execute the insert
-  _server.insert('integration_tests.inserts_example_replset_4', [{a:1}], {
-    writeConcern: {w:1}, ordered:true
-  }, function(err, results) {
-    test.equal(null, err);
-    test.equal(1, results.result.n);
-
-    // Execute the write
-    var cursor = _server.cursor('integration_tests.inserts_example_replset_4', {
-        find: 'integration_tests.example4'
-      , query: {a:1}
-    });
-
-    // Get the first document
-    cursor.next(function(err, doc) {
-      test.equal(null, err);
-      test.equal(1, doc.a);
-
-      _server.destroy();
-    });
-  });
-});
-
-// Start connection
-server.connect();</code></pre>
     
-
     
 </dd>
 
@@ -3374,7 +3460,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line863">line 863</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1007">line 1007</a>
         </div>
         
     </div>
@@ -3505,7 +3591,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1013">line 1013</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1155">line 1155</a>
         </div>
         
     </div>
@@ -3633,7 +3719,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line998">line 998</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1140">line 1140</a>
         </div>
         
     </div>
@@ -3761,7 +3847,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1023">line 1023</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1165">line 1165</a>
         </div>
         
     </div>
@@ -3837,7 +3923,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1054">line 1054</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1216">line 1216</a>
         </div>
         
     </div>
@@ -4089,6 +4175,76 @@ server.connect();</code></pre>
 	
         <tr>
             
+                <td class="name"><code>options.session</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">ClientSession</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Session to use for the operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.retryWrites</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Enable retryable writes for this operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>callback</code></td>
             
             
@@ -4159,33 +4315,6 @@ server.connect();</code></pre>
     
     
     
-        <h5>Example</h5>
-        
-
-    
-    <pre class="prettyprint"><code>// Correctly insert a document using the ReplSet insert method
-
-var Server = require('mongodb-core').Server,
-  test = require('assert');
-var server = new ReplSet([{host: 'localhost', port:31000}], {setName:'rs'});
-// Add event listeners
-server.on('connect', function(_server) {
-  // Execute the insert
-  _server.insert('integration_tests.inserts_example_replset_1', [{a:1}], {
-    writeConcern: {w:1}, ordered:true
-  }, function(err, results) {
-    test.equal(null, err);
-    test.equal(1, results.result.n);
-
-    _server.destroy();
-  });
-});
-
-// Start connection
-server.connect();</code></pre>
-    
-
-    
 </dd>
 
         
@@ -4199,7 +4328,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line946">line 946</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1093">line 1093</a>
         </div>
         
     </div>
@@ -4327,7 +4456,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line988">line 988</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1130">line 1130</a>
         </div>
         
     </div>
@@ -4403,7 +4532,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line912">line 912</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1056">line 1056</a>
         </div>
         
     </div>
@@ -4479,7 +4608,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1266">line 1266</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1471">line 1471</a>
         </div>
         
     </div>
@@ -4618,7 +4747,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1102">line 1102</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1274">line 1274</a>
         </div>
         
     </div>
@@ -4870,6 +4999,76 @@ server.connect();</code></pre>
 	
         <tr>
             
+                <td class="name"><code>options.session</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">ClientSession</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Session to use for the operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.retryWrites</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Enable retryable writes for this operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>callback</code></td>
             
             
@@ -4940,43 +5139,6 @@ server.connect();</code></pre>
     
     
     
-        <h5>Example</h5>
-        
-
-    
-    <pre class="prettyprint"><code>// Correctly remove a document using the ReplSet remove method
-
-var Server = require('mongodb-core').Server,
-  test = require('assert');
-var server = new ReplSet([{host: 'localhost', port:31000}], {setName:'rs'});
-// Add event listeners
-server.on('connect', function(_server) {
-  // Execute the insert
-  _server.insert('integration_tests.inserts_example_replset_3', [{a:1}], {
-    writeConcern: {w:1}, ordered:true
-  }, function(err, results) {
-    test.equal(null, err);
-    test.equal(1, results.result.n);
-
-    // Execute the write
-    _server.remove('integration_tests.inserts_example_replset_3', [{
-      q: {a: 1}, limit: 1
-    }], {
-      writeConcern: {w:1}, ordered:true
-    }, function(err, results) {
-      test.equal(null, err);
-      test.equal(1, results.result.n);
-
-      _server.destroy();
-    });
-  });
-});
-
-// Start connection
-server.connect();</code></pre>
-    
-
-    
 </dd>
 
         
@@ -4990,7 +5152,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line896">line 896</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1040">line 1040</a>
         </div>
         
     </div>
@@ -5061,7 +5223,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1078">line 1078</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1245">line 1245</a>
         </div>
         
     </div>
@@ -5313,6 +5475,76 @@ server.connect();</code></pre>
 	
         <tr>
             
+                <td class="name"><code>options.session</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">ClientSession</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Session to use for the operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.retryWrites</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Enable retryable writes for this operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>callback</code></td>
             
             
@@ -5383,43 +5615,6 @@ server.connect();</code></pre>
     
     
     
-        <h5>Example</h5>
-        
-
-    
-    <pre class="prettyprint"><code>// Correctly update a document using the Server update method
-
-var Server = require('mongodb-core').Server,
-  test = require('assert');
-var server = new ReplSet([{host: 'localhost', port:31000}], {setName:'rs'});
-// Add event listeners
-server.on('connect', function(_server) {
-  // Execute the insert
-  _server.insert('integration_tests.inserts_example_replset_2', [{a:1}], {
-    writeConcern: {w:1}, ordered:true
-  }, function(err, results) {
-    test.equal(null, err);
-    test.equal(1, results.result.n);
-
-    // Execute the write
-    _server.update('integration_tests.inserts_example_replset_2', [{
-      q: {a: 1}, u: {'$set': {b:1}}
-    }], {
-      writeConcern: {w:1}, ordered:true
-    }, function(err, results) {
-      test.equal(null, err);
-      test.equal(1, results.result.n);
-
-      _server.destroy();
-    });
-  });
-});
-
-// Start connection
-server.connect();</code></pre>
-    
-
-    
 </dd>
 
         </dl>
@@ -5441,7 +5636,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1359">line 1359</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1577">line 1577</a>
         </div>
         
     </div>
@@ -5522,7 +5717,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1338">line 1338</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1556">line 1556</a>
         </div>
         
     </div>
@@ -5603,7 +5798,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1366">line 1366</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1584">line 1584</a>
         </div>
         
     </div>
@@ -5684,7 +5879,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1352">line 1352</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1570">line 1570</a>
         </div>
         
     </div>
@@ -5765,7 +5960,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1382">line 1382</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1600">line 1600</a>
         </div>
         
     </div>
@@ -5914,7 +6109,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1373">line 1373</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1591">line 1591</a>
         </div>
         
     </div>
@@ -6063,7 +6258,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1345">line 1345</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1563">line 1563</a>
         </div>
         
     </div>
@@ -6144,7 +6339,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1398">line 1398</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1616">line 1616</a>
         </div>
         
     </div>
@@ -6225,7 +6420,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1405">line 1405</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1623">line 1623</a>
         </div>
         
     </div>
@@ -6306,7 +6501,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1440">line 1440</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1658">line 1658</a>
         </div>
         
     </div>
@@ -6387,7 +6582,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1433">line 1433</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1651">line 1651</a>
         </div>
         
     </div>
@@ -6468,7 +6663,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1447">line 1447</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1665">line 1665</a>
         </div>
         
     </div>
@@ -6549,7 +6744,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1391">line 1391</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1609">line 1609</a>
         </div>
         
     </div>
@@ -6630,7 +6825,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1419">line 1419</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1637">line 1637</a>
         </div>
         
     </div>
@@ -6711,7 +6906,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1426">line 1426</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1644">line 1644</a>
         </div>
         
     </div>
@@ -6792,7 +6987,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1412">line 1412</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1630">line 1630</a>
         </div>
         
     </div>
@@ -6892,7 +7087,7 @@ server.connect();</code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Jun 19 2017 22:26:58 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Dec 08 2017 18:01:01 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>

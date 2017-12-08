@@ -314,8 +314,6 @@
             
                 <li data-name="Logger#isWarn"><a href="Logger.html#isWarn">isWarn</a></li>
             
-                <li data-name="Logger#warn"><a href="Logger.html#warn">warn</a></li>
-            
             </ul>
             <ul class="events itemMembers">
             
@@ -486,6 +484,25 @@
             </ul>
         </li>
     
+        <li class="item" data-name="MongoNetworkError">
+            <span class="title">
+                <a href="MongoNetworkError.html">MongoNetworkError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="Mongos">
             <span class="title">
                 <a href="Mongos.html">Mongos</a>
@@ -613,6 +630,10 @@
             </span>
             <ul class="members itemMembers">
             
+            <span class="subtitle">Members</span>
+            
+                <li data-name="ReadPreference.PRIMARY"><a href="ReadPreference.html#.PRIMARY">PRIMARY</a></li>
+            
             </ul>
             <ul class="typedefs itemMembers">
             
@@ -620,6 +641,8 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="ReadPreference.isValid"><a href="ReadPreference.html#.isValid">isValid</a></li>
             
                 <li data-name="ReadPreference.nearest"><a href="ReadPreference.html#.nearest">nearest</a></li>
             
@@ -632,6 +655,8 @@
                 <li data-name="ReadPreference.secondaryPreferred"><a href="ReadPreference.html#.secondaryPreferred">secondaryPreferred</a></li>
             
                 <li data-name="ReadPreference#equals"><a href="ReadPreference.html#equals">equals</a></li>
+            
+                <li data-name="ReadPreference#isValid"><a href="ReadPreference.html#isValid">isValid</a></li>
             
                 <li data-name="ReadPreference#slaveOk"><a href="ReadPreference.html#slaveOk">slaveOk</a></li>
             
@@ -975,7 +1000,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_error.js.html">lib/error.js</a>, <a href="lib_error.js.html#line10">line 10</a>
+            <a href="lib_error.js.html">lib/error.js</a>, <a href="lib_error.js.html#line14">line 14</a>
         </div>
         
     </div>
@@ -1023,7 +1048,13 @@
             <td class="type">
             
                 
+<span class="param-type">Error</span>
+|
+
 <span class="param-type">string</span>
+|
+
+<span class="param-type">object</span>
 
 
             
@@ -1043,6 +1074,80 @@
     
     
 <dl class="details">
+    
+        
+        <h5 class="subsection-title">Properties:</h5>
+        
+        <dl>
+
+<table class="props">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>message</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>The error message</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>stack</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>The error call stack</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table></dl>
+        
     
         
     
@@ -1124,7 +1229,7 @@ MongoError instance
     
         
         <div class="tag-source">
-            <a href="lib_error.js.html">lib/error.js</a>, <a href="lib_error.js.html#line22">line 22</a>
+            <a href="lib_error.js.html">lib/error.js</a>, <a href="lib_error.js.html#line44">line 44</a>
         </div>
         
     </div>
@@ -1172,6 +1277,12 @@ MongoError instance
             <td class="type">
             
                 
+<span class="param-type">Error</span>
+|
+
+<span class="param-type">string</span>
+|
+
 <span class="param-type">object</span>
 
 
@@ -1182,7 +1293,7 @@ MongoError instance
             
             <td class="description last">
                 
-                <p>The error options</p></td>
+                <p>The options used to create the error.</p></td>
         </tr>
 	
 	
@@ -1198,6 +1309,8 @@ MongoError instance
     
     
 
+    
+        <dt class="important tag-deprecated">Deprecated</dt><dd><ul class="dummy"><li>Use new MongoError() instead.</li><ul></dd>
     
     
     
@@ -1272,7 +1385,7 @@ MongoError instance
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Jun 19 2017 22:26:58 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Dec 08 2017 18:01:01 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>

@@ -314,8 +314,6 @@
             
                 <li data-name="Logger#isWarn"><a href="Logger.html#isWarn">isWarn</a></li>
             
-                <li data-name="Logger#warn"><a href="Logger.html#warn">warn</a></li>
-            
             </ul>
             <ul class="events itemMembers">
             
@@ -486,6 +484,25 @@
             </ul>
         </li>
     
+        <li class="item" data-name="MongoNetworkError">
+            <span class="title">
+                <a href="MongoNetworkError.html">MongoNetworkError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="Mongos">
             <span class="title">
                 <a href="Mongos.html">Mongos</a>
@@ -613,6 +630,10 @@
             </span>
             <ul class="members itemMembers">
             
+            <span class="subtitle">Members</span>
+            
+                <li data-name="ReadPreference.PRIMARY"><a href="ReadPreference.html#.PRIMARY">PRIMARY</a></li>
+            
             </ul>
             <ul class="typedefs itemMembers">
             
@@ -620,6 +641,8 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="ReadPreference.isValid"><a href="ReadPreference.html#.isValid">isValid</a></li>
             
                 <li data-name="ReadPreference.nearest"><a href="ReadPreference.html#.nearest">nearest</a></li>
             
@@ -632,6 +655,8 @@
                 <li data-name="ReadPreference.secondaryPreferred"><a href="ReadPreference.html#.secondaryPreferred">secondaryPreferred</a></li>
             
                 <li data-name="ReadPreference#equals"><a href="ReadPreference.html#equals">equals</a></li>
+            
+                <li data-name="ReadPreference#isValid"><a href="ReadPreference.html#isValid">isValid</a></li>
             
                 <li data-name="ReadPreference#slaveOk"><a href="ReadPreference.html#slaveOk">slaveOk</a></li>
             
@@ -975,7 +1000,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line81">line 81</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line107">line 107</a>
         </div>
         
     </div>
@@ -2193,7 +2218,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line656">line 656</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line878">line 878</a>
         </div>
         
     </div>
@@ -2400,7 +2425,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line473">line 473</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line650">line 650</a>
         </div>
         
     </div>
@@ -2686,6 +2711,42 @@ cursor instance
 	
         <tr>
             
+                <td class="name"><code>options.session</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">ClientSession</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Session to use for the operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>callback</code></td>
             
             
@@ -2756,29 +2817,6 @@ cursor instance
     
     
     
-        <h5>Example</h5>
-        
-
-    
-    <pre class="prettyprint"><code>// Correctly execute ismaster command on the Server using the cursor
-
-var Server = require('mongodb-core').Server,
-  test = require('assert');
-var server = new Server({host: 'localhost', port: 27017});
-// Add event listeners
-server.on('connect', function(_server) {
-  // Execute the command
-  _server.command("system.$cmd", {ismaster: true}, function(err, result) {
-    test.equal(null, err)
-    _server.destroy();
-  });
-});
-
-// Start connection
-server.connect();</code></pre>
-    
-
-    
 </dd>
 
         
@@ -2792,7 +2830,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line348">line 348</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line524">line 524</a>
         </div>
         
     </div>
@@ -2923,7 +2961,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line705">line 705</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line927">line 927</a>
         </div>
         
     </div>
@@ -2994,12 +3032,12 @@ server.connect();</code></pre>
     <div class="nameContainer">
         <h4 class="name" id="cursor">
             
-            cursor<span class="signature">(ns, cmd, callback)</span>
+            cursor<span class="signature">(ns, cmd, <span class="optional">options</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Cursor.html">Cursor</a>}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line629">line 629</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line849">line 849</a>
         </div>
         
     </div>
@@ -3031,8 +3069,6 @@ server.connect();</code></pre>
 		<th>Type</th>
 		
 		
-		<th>Default</th>
-		
 		
 		<th class="last">Description</th>
 	</tr>
@@ -3056,10 +3092,6 @@ server.connect();</code></pre>
             </td>
             
             
-                <td class="default">
-                
-                </td>
-            
             
             <td class="description last">
                 
@@ -3081,19 +3113,15 @@ server.connect();</code></pre>
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">object</span>
 |
 
-<span class="param-type">Object</span>
+<span class="param-type"><a href="Long.html">Long</a></span>
 
 
             
             </td>
             
-            
-                <td class="default">
-                
-                </td>
             
             
             <td class="description last">
@@ -3110,7 +3138,55 @@ server.connect();</code></pre>
 	
         <tr>
             
-                <td class="name"><code>options.batchSize</code></td>
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Options for the cursor</p>
+                
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Default</th>
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>batchSize</code></td>
             
             
             <td class="type">
@@ -3146,7 +3222,7 @@ server.connect();</code></pre>
 	
         <tr>
             
-                <td class="name"><code>options.documents</code></td>
+                <td class="name"><code>documents</code></td>
             
             
             <td class="type">
@@ -3182,7 +3258,7 @@ server.connect();</code></pre>
 	
         <tr>
             
-                <td class="name"><code>options.readPreference</code></td>
+                <td class="name"><code>readPreference</code></td>
             
             
             <td class="type">
@@ -3216,7 +3292,7 @@ server.connect();</code></pre>
 	
         <tr>
             
-                <td class="name"><code>options.serializeFunctions</code></td>
+                <td class="name"><code>serializeFunctions</code></td>
             
             
             <td class="type">
@@ -3252,7 +3328,7 @@ server.connect();</code></pre>
 	
         <tr>
             
-                <td class="name"><code>options.ignoreUndefined</code></td>
+                <td class="name"><code>ignoreUndefined</code></td>
             
             
             <td class="type">
@@ -3288,13 +3364,49 @@ server.connect();</code></pre>
 	
         <tr>
             
-                <td class="name"><code>callback</code></td>
+                <td class="name"><code>session</code></td>
             
             
             <td class="type">
             
                 
-<span class="param-type">opResultCallback</span>
+<span class="param-type">ClientSession</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Session to use for the operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>topology</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
 
 
             
@@ -3309,11 +3421,19 @@ server.connect();</code></pre>
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
                 
-                <p>A callback function</p></td>
+                <p>The internal topology of the created cursor</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
         </tr>
 	
 	
@@ -3358,44 +3478,10 @@ server.connect();</code></pre>
     
     
     
-        <h5>Example</h5>
-        
+
 
     
-    <pre class="prettyprint"><code>// Correctly find a document on the Server using the cursor
-
-var Server = require('mongodb-core').Server,
-  test = require('assert');
-var server = new Server({host: 'localhost', port: 27017});
-// Add event listeners
-server.on('connect', function(_server) {
-  // Execute the insert
-  _server.insert('integration_tests.inserts_example4', [{a:1}], {
-    writeConcern: {w:1}, ordered:true
-  }, function(err, results) {
-    test.equal(null, err);
-    test.equal(1, results.result.n);
-
-    // Execute the write
-    var cursor = _server.cursor('integration_tests.inserts_example4', {
-        find: 'integration_tests.example4'
-      , query: {a:1}
-    });
-
-    // Get the first document
-    cursor.next(function(err, doc) {
-      test.equal(null, err);
-      test.equal(1, doc.a);
-
-      _server.destroy();
-    });
-  });
-});
-
-// Start connection
-server.connect();</code></pre>
     
-
     
 </dd>
 
@@ -3410,7 +3496,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line736">line 736</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line958">line 958</a>
         </div>
         
     </div>
@@ -3613,7 +3699,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line694">line 694</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line916">line 916</a>
         </div>
         
     </div>
@@ -3734,7 +3820,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line723">line 723</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line945">line 945</a>
         </div>
         
     </div>
@@ -3810,7 +3896,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line396">line 396</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line572">line 572</a>
         </div>
         
     </div>
@@ -3886,7 +3972,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line714">line 714</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line936">line 936</a>
         </div>
         
     </div>
@@ -3962,7 +4048,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line539">line 539</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line721">line 721</a>
         </div>
         
     </div>
@@ -4214,6 +4300,42 @@ server.connect();</code></pre>
 	
         <tr>
             
+                <td class="name"><code>options.session</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">ClientSession</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Session to use for the operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>callback</code></td>
             
             
@@ -4284,33 +4406,6 @@ server.connect();</code></pre>
     
     
     
-        <h5>Example</h5>
-        
-
-    
-    <pre class="prettyprint"><code>// Correctly insert a document using the Server insert method
-
-var Server = require('mongodb-core').Server,
-  test = require('assert');
-var server = new Server({host: 'localhost', port: 27017});
-// Add event listeners
-server.on('connect', function(_server) {
-  // Execute the insert
-  _server.insert('integration_tests.inserts_example1', [{a:1}], {
-    writeConcern: {w:1}, ordered:true
-  }, function(err, results) {
-    test.equal(null, err);
-    test.equal(1, results.result.n);
-
-    _server.destroy();
-  });
-});
-
-// Start connection
-server.connect();</code></pre>
-    
-
-    
 </dd>
 
         
@@ -4324,7 +4419,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line433">line 433</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line609">line 609</a>
         </div>
         
     </div>
@@ -4400,7 +4495,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line443">line 443</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line619">line 619</a>
         </div>
         
     </div>
@@ -4476,7 +4571,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line416">line 416</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line592">line 592</a>
         </div>
         
     </div>
@@ -4552,7 +4647,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line644">line 644</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line866">line 866</a>
         </div>
         
     </div>
@@ -4691,7 +4786,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line597">line 597</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line803">line 803</a>
         </div>
         
     </div>
@@ -4943,6 +5038,42 @@ server.connect();</code></pre>
 	
         <tr>
             
+                <td class="name"><code>options.session</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">ClientSession</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Session to use for the operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>callback</code></td>
             
             
@@ -5013,43 +5144,6 @@ server.connect();</code></pre>
     
     
     
-        <h5>Example</h5>
-        
-
-    
-    <pre class="prettyprint"><code>// Correctly remove a document using the Server remove method
-
-var Server = require('mongodb-core').Server,
-  test = require('assert');
-var server = new Server({host: 'localhost', port: 27017});
-// Add event listeners
-server.on('connect', function(_server) {
-  // Execute the insert
-  _server.insert('integration_tests.inserts_example3', [{a:1}], {
-    writeConcern: {w:1}, ordered:true
-  }, function(err, results) {
-    test.equal(null, err);
-    test.equal(1, results.result.n);
-
-    // Execute the write
-    _server.remove('integration_tests.inserts_example3', [{
-      q: {a: 1}, limit: 1
-    }], {
-      writeConcern: {w:1}, ordered:true
-    }, function(err, results) {
-      test.equal(null, err);
-      test.equal(1, results.result.n);
-
-      _server.destroy();
-    });
-  });
-});
-
-// Start connection
-server.connect();</code></pre>
-    
-
-    
 </dd>
 
         
@@ -5063,7 +5157,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line424">line 424</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line600">line 600</a>
         </div>
         
     </div>
@@ -5134,7 +5228,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line566">line 566</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line760">line 760</a>
         </div>
         
     </div>
@@ -5386,6 +5480,42 @@ server.connect();</code></pre>
 	
         <tr>
             
+                <td class="name"><code>options.session</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">ClientSession</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Session to use for the operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>callback</code></td>
             
             
@@ -5456,43 +5586,6 @@ server.connect();</code></pre>
     
     
     
-        <h5>Example</h5>
-        
-
-    
-    <pre class="prettyprint"><code>// Correctly update a document using the Server update method
-
-var Server = require('mongodb-core').Server,
-  test = require('assert');
-var server = new Server({host: 'localhost', port: 27017});
-// Add event listeners
-server.on('connect', function(_server) {
-  // Execute the insert
-  _server.insert('integration_tests.inserts_example2', [{a:1}], {
-    writeConcern: {w:1}, ordered:true
-  }, function(err, results) {
-    test.equal(null, err);
-    test.equal(1, results.result.n);
-
-    // Execute the write
-    _server.update('integration_tests.inserts_example2', [{
-      q: {a: 1}, u: {'$set': {b:1}}
-    }], {
-      writeConcern: {w:1}, ordered:true
-    }, function(err, results) {
-      test.equal(null, err);
-      test.equal(1, results.result.n);
-
-      _server.destroy();
-    });
-  });
-});
-
-// Start connection
-server.connect();</code></pre>
-    
-
-    
 </dd>
 
         </dl>
@@ -5514,7 +5607,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line847">line 847</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1071">line 1071</a>
         </div>
         
     </div>
@@ -5595,7 +5688,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line784">line 784</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1008">line 1008</a>
         </div>
         
     </div>
@@ -5676,7 +5769,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line861">line 861</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1085">line 1085</a>
         </div>
         
     </div>
@@ -5757,7 +5850,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line854">line 854</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1078">line 1078</a>
         </div>
         
     </div>
@@ -5838,7 +5931,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line791">line 791</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1015">line 1015</a>
         </div>
         
     </div>
@@ -5919,7 +6012,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line840">line 840</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1064">line 1064</a>
         </div>
         
     </div>
@@ -6000,7 +6093,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line805">line 805</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1029">line 1029</a>
         </div>
         
     </div>
@@ -6081,7 +6174,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line812">line 812</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1036">line 1036</a>
         </div>
         
     </div>
@@ -6162,7 +6255,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line798">line 798</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1022">line 1022</a>
         </div>
         
     </div>
@@ -6243,7 +6336,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line826">line 826</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1050">line 1050</a>
         </div>
         
     </div>
@@ -6324,7 +6417,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line833">line 833</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1057">line 1057</a>
         </div>
         
     </div>
@@ -6405,7 +6498,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line819">line 819</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1043">line 1043</a>
         </div>
         
     </div>
@@ -6505,7 +6598,7 @@ server.connect();</code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Jun 19 2017 22:26:58 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Dec 08 2017 18:01:01 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>
