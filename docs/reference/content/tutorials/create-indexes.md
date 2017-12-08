@@ -28,9 +28,9 @@ The following example creates an ascending index key for the
 
 ```js
 
-var createAscendingIndex = function(db, callback) {
+function createAscendingIndex(db, callback) {
   // Get the users collection
-  var collection = db.collection('users');
+  const collection = db.collection('users');
   // Create the index
   collection.createIndex(
     { dateOfBirth : 1 }, function(err, result) {
@@ -49,9 +49,9 @@ The following example specifies a descending index key on the
 ``lastName`` field:
 
 ```js
-var createDescendingIndex = function(db, callback) {
+function createDescendingIndex(db, callback) {
   // Get the documents collection
-  var collection = db.collection('users');
+  const collection = db.collection('users');
   // Create the index
   collection.createIndex(
     { lastName : -1 }, function(err, result) {
@@ -72,9 +72,9 @@ The following example specifies a compound index key composed of the
 ``dateOfBirth`` field sorted in ascending order:
 
 ```js
-var createCompoundIndex = function(db, callback) {
+function createCompoundIndex(db, callback) {
   // Get the documents collection
-  var collection = db.collection('users');
+  const collection = db.collection('users');
   // Create the index
   collection.createIndex(
     { lastName : -1, dateOfBirth : 1 }, function(err, result) {
@@ -106,9 +106,9 @@ use the ``hashed`` method.
 This example specifies a hashed index key for the ``timestamp`` field:
 
 ```js
-var createHashedIndex = function(db, callback) {
+function createHashedIndex(db, callback) {
   // Get the documents collection
-  var collection = db.collection('users');
+  const collection = db.collection('users');
   // Create the index
   collection.createIndex(
     { timestamp : "hashed" }, function(err, result) {
@@ -149,9 +149,9 @@ method.
 This example specifies a 2d index on the ``points`` field:
 
 ```js
-var create2dIndex = function(db, callback) {
+function create2dIndex(db, callback) {
   // Get the documents collection
-  var collection = db.collection('users');
+  const collection = db.collection('users');
   // Create the index
   collection.createIndex(
     { points : "2d" }, function(err, result) {
@@ -171,9 +171,9 @@ indexes or partial indexes.
 
 
 ```js
-var createUniqueIndex = function(db, callback) {
+function createUniqueIndex(db, callback) {
   // Get the documents collection
-  var collection = db.collection('users');
+  const collection = db.collection('users');
   // Create the index
   collection.createIndex(
     { lastName : -1, dateOfBirth : 1 },
@@ -190,9 +190,9 @@ var createUniqueIndex = function(db, callback) {
 
 ```js
 
-var createPartialIndex = function(db, callback) {
+function createPartialIndex(db, callback) {
   // Get the documents collection
-  var collection = db.collection('users');
+  const collection = db.collection('users');
   // Create the index
   collection.createIndex(
     { lastName : 1, firstName: 1 },

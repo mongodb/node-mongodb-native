@@ -84,14 +84,14 @@ another collation.
 {{% myproject-connect %}}
 
   createCollated(db, function() {
-    db.close();
+    client.close();
   });
 });
 
-var createCollated = function(db, callback) {
-  db.createCollection("contacts", 
-    { 
-      'collation' : 
+function createCollated(db, callback) {
+  db.createCollection('contacts',
+    {
+      'collation' :
         { 'locale': 'fr_CA' }
     },
 
@@ -116,13 +116,13 @@ enabled and a default collation with ``locale`` set to ``en_US``.
 {{% myproject-connect %}}
 
   createCollatedIndex(db, function() {
-    db.close();
+    client.close();
   });
 });
 
-var createCollatedIndex = function(db, callback) {
+function createCollatedIndex(db, callback) {
   // Get the contacts collection
-  var collection = db.collection('contacts');
+  const collection = db.collection('contacts');
   // Create the index
   collection.createIndex(
     { 'name' : 1 },
@@ -138,8 +138,8 @@ To use this index, make sure your queries also specify the same
 collation. The following query uses the above index:
 
 ```js
-var findDocuments = function(db, callback) {
-  var collection = db.collection( 'contacts' );
+function findDocuments(db, callback) {
+  const collection = db.collection( 'contacts' );
   collection.find({ 'city' : 'New York' }, { '_id' : 0 }, { 'collation' : {'locale' : 'en_US' }}).toArray(function(err, docs) {
       assert.equal(err, null);
       callback(docs);
@@ -152,16 +152,16 @@ collation, and the second uses a collation with a different ``strength``
 value than the collation on the index.
 
 ```js
-var findDocuments = function(db, callback) {
-  var collection = db.collection( 'contacts' );
+function findDocuments(db, callback) {
+  const collection = db.collection( 'contacts' );
   collection.find({ 'city' : 'New York' }, { '_id' : 0 }).toArray(function(err, docs) {
       assert.equal(err, null);
       callback(docs);
   });
 }
 
-var findDocuments = function(db, callback) {
-  var collection = db.collection( 'contacts' );
+function findDocuments(db, callback) {
+  const collection = db.collection( 'contacts' );
   collection.find({ 'city' : 'New York' }, { '_id' : 0 }, { 'collation' : { 'locale' : 'en_US' , 'strength' : 2 }}).toArray(function(err, docs) {
       assert.equal(err, null);
       callback(docs);
@@ -184,12 +184,12 @@ a German collation with the ``locale`` parameter set to ``de``.
 {{% myproject-connect %}}
 
   findDocuments(db, function() {
-    db.close();
+    client.close();
   });
 });
 
-var findDocuments = function(db, callback) {
-  var collection = db.collection( 'contacts' );
+function findDocuments(db, callback) {
+  const collection = db.collection( 'contacts' );
   collection.find({ 'city' : 'New York' }, { '_id' : 0 }, { 'collation' : {'locale' : 'de' } }).sort({ 'name': 1 }).toArray(function(err, docs) {
       assert.equal(err, null);
       console.log("Found the following records");
@@ -215,13 +215,14 @@ does not specify a collation.
 
 ```js
 {{% myproject-connect %}}
+
   findAndUpdate(db, function() {
-    db.close();
+    client.close();
   });
 });
 
-var findAndUpdate = function(db, callback) {
-  var collection = db.collection('names');
+function findAndUpdate(db, callback) {
+  const collection = db.collection('names');
   collection.findOneAndUpdate({ first_name : { $lt: "Gunter" } }, { $set: { verified: true } }, function(err, result) {
     assert.equal(err, null);
     callback(result);
@@ -245,13 +246,14 @@ umlauts.
 
 ```js
 {{% myproject-connect %}}
+
   findAndUpdate(db, function() {
-    db.close();
+    client.close();
   });
 });
 
-var findAndUpdate = function(db, callback) {
-  var collection = db.collection('names');
+function findAndUpdate(db, callback) {
+  const collection = db.collection('names');
   collection.findOneAndUpdate({ first_name : { $lt: "Gunter" } }, { $set: { verified: true } }, {collation : { locale : 'de@collation=phonebook' } }, function(err, result) {
     assert.equal(err, null);
     console.log(result);
@@ -287,13 +289,14 @@ has a numeric value greater than 100 and deletes it.
 
 ```js
 {{% myproject-connect %}}
+
   findAndDelete(db, function() {
-    db.close();
+    client.close();
   });
 });
 
-var findAndDelete = function(db, callback) {
-  var collection = db.collection('numbers');
+function findAndDelete(db, callback) {
+  const collection = db.collection('numbers');
   collection.findOneAndDelete({ a : { $gt: "100" } }, {collation : { locale : 'en', numericOrdering: true } }, function(err, result) {
     assert.equal(err, null);
     console.log(result);
@@ -316,13 +319,14 @@ greater than ``"100"``.
 
 ```js
 {{% myproject-connect %}}
+
   findAndDelete(db, function() {
-    db.close();
+    client.close();
   });
 });
 
-var findAndDelete = function(db, callback) {
-  var collection = db.collection('numbers');
+function findAndDelete(db, callback) {
+  const collection = db.collection('numbers');
   collection.findOneAndDelete({ a : { $gt: "100" } }, function(err, result) {
     assert.equal(err, null);
     console.log(result);
@@ -351,13 +355,14 @@ results by German phonebook order.
 
 ```js
 {{% myproject-connect %}}
+
   countNames(db, function() {
-    db.close();
+    client.close();
   });
 });
 
-var countNames = function(db, callback) {
-  var collection = db.collection( 'names' );
+function countNames(db, callback) {
+  const collection = db.collection( 'names' );
   collection.aggregate( 
       [ 
         { '$group': { '_id': "$first_name", 'nameCount': { '$sum': 1 } } },

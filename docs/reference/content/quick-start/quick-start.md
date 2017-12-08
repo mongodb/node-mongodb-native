@@ -73,9 +73,9 @@ Add to **app.js** the following function which uses the **insertMany**
 method to add three documents to the **documents** collection.  
 
 ```js
-var insertDocuments = function(db, callback) {
+const insertDocuments = function(db, callback) {
   // Get the documents collection
-  var collection = db.collection('documents');
+  const collection = db.collection('documents');
   // Insert some documents
   collection.insertMany([
     {a : 1}, {a : 2}, {a : 3}
@@ -98,18 +98,24 @@ The **insert** command returns an object with the following fields:
 Add the following code to call the **insertDocuments** function:
 
 ```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
 
 // Connection URL
-var url = 'mongodb://localhost:27017/myproject';
+const url = 'mongodb://localhost:27017';
+
+// Database Name
+const dbName = 'myproject';
+
 // Use connect method to connect to the server
-MongoClient.connect(url, function(err, db) {
+MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected successfully to server");
 
+  const db = client.db(dbName);
+
   insertDocuments(db, function() {
-    db.close();
+    client.close();
   });
 });
 ```
@@ -132,9 +138,9 @@ Find All Documents
 Add a query that returns all the documents.
 
 ```js
-var findDocuments = function(db, callback) {
+const findDocuments = function(db, callback) {
   // Get the documents collection
-  var collection = db.collection('documents');
+  const collection = db.collection('documents');
   // Find some documents
   collection.find({}).toArray(function(err, docs) {
     assert.equal(err, null);
@@ -159,19 +165,25 @@ is run repeatedly the number of documents in the collection will change.
 -->
 
 ```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
 
 // Connection URL
-var url = 'mongodb://localhost:27017/myproject';
+const url = 'mongodb://localhost:27017';
+
+// Database Name
+const dbName = 'myproject';
+
 // Use connect method to connect to the server
-MongoClient.connect(url, function(err, db) {
+MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
+  const db = client.db(dbName);
+
   insertDocuments(db, function() {
     findDocuments(db, function() {
-      db.close();
+      client.close();
     });
   });
 });
@@ -183,16 +195,16 @@ Find Documents with a Query Filter
 Add a query filter to find only documents which meet the query criteria.
 
 ```js
-var findDocuments = function(db, callback) {
+const findDocuments = function(db, callback) {
   // Get the documents collection
-  var collection = db.collection('documents');
+  const collection = db.collection('documents');
   // Find some documents
   collection.find({'a': 3}).toArray(function(err, docs) {
     assert.equal(err, null);
     console.log("Found the following records");
     console.log(docs);
     callback(docs);
-  });      
+  });
 }
 ```
 
@@ -203,9 +215,9 @@ Update a document
 The following operation updates a document in the **documents** collection.
 
 ```js
-var updateDocument = function(db, callback) {
+const updateDocument = function(db, callback) {
   // Get the documents collection
-  var collection = db.collection('documents');
+  const collection = db.collection('documents');
   // Update document where a is 2, set b equal to 1
   collection.updateOne({ a : 2 }
     , { $set: { b : 1 } }, function(err, result) {
@@ -220,19 +232,25 @@ var updateDocument = function(db, callback) {
 The method updates the first document where the field **a** is equal to **2** by adding a new field **b** to the document set to **1**. Next, update the callback function from **MongoClient.connect** to include the update method.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
 
 // Connection URL
-var url = 'mongodb://localhost:27017/myproject';
+const url = 'mongodb://localhost:27017';
+
+// Database Name
+const dbName = 'myproject';
+
 // Use connect method to connect to the server
-MongoClient.connect(url, function(err, db) {
+MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected successfully to server");
 
+  const db = client.db(dbName);
+
   insertDocuments(db, function() {
     updateDocument(db, function() {
-      db.close();
+      client.close();
     });
   });
 });
@@ -243,9 +261,9 @@ Remove a document
 Remove the document where the field **a** is equal to **3**.
 
 ```js
-var removeDocument = function(db, callback) {
+const removeDocument = function(db, callback) {
   // Get the documents collection
-  var collection = db.collection('documents');
+  const collection = db.collection('documents');
   // Delete document where a is 3
   collection.deleteOne({ a : 3 }, function(err, result) {
     assert.equal(err, null);
@@ -259,20 +277,26 @@ var removeDocument = function(db, callback) {
 Add the new method to the **MongoClient.connect** callback function.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
 
 // Connection URL
-var url = 'mongodb://localhost:27017/myproject';
+const url = 'mongodb://localhost:27017';
+
+// Database Name
+const dbName = 'myproject';
+
 // Use connect method to connect to the server
-MongoClient.connect(url, function(err, db) {
+MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected successfully to server");
+
+  const db = client.db(dbName);
 
   insertDocuments(db, function() {
     updateDocument(db, function() {
       removeDocument(db, function() {
-        db.close();
+        client.close();
       });
     });
   });
@@ -293,19 +317,24 @@ performance. The following function creates an index on the **a** field in the
 Add the ``indexCollection`` method to your app:
 
 ```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
 
 // Connection URL
-var url = 'mongodb://localhost:27017/myproject';
+const url = 'mongodb://localhost:27017';
+
+const dbName = 'myproject';
+
 // Use connect method to connect to the server
-MongoClient.connect(url, function(err, db) {
+MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected successfully to server");
 
+  const db = client.db(dbName);
+
   insertDocuments(db, function() {
     indexCollection(db, function() {
-      db.close();
+      client.close();
     });
   });
 });

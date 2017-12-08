@@ -1,6 +1,6 @@
-var createTextIndex = function(db, callback) {
+function createTextIndex(db, callback) {
   // Get the documents collection
-  var collection = db.collection('users');
+  const collection = db.collection('users');
   // Create the index
   collection.createIndex(
     { comments : "text" }, function(err, result) {

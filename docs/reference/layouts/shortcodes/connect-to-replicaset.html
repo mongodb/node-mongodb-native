@@ -1,12 +1,18 @@
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
 
 // Connection URL
-var url = 'mongodb://localhost:27017,localhost:27018/myproject?replicaSet=foo';
+const url = 'mongodb://localhost:27017,localhost:27018/?replicaSet=foo';
+
+// Database Name
+const dbName = 'myproject';
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
+MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
-  db.close();
+  const db = client.db(dbName);
+
+  client.close();
 });

@@ -19,9 +19,9 @@ the name of the field to be indexed with the value 'text' to the
 ``createIndex()`` method.
 
 ```js
-var createTextIndex = function(db, callback) {
+function createTextIndex(db, callback) {
   // Get the restaurants collection
-  var collection = db.collection('restaurants');
+  const collection = db.collection('restaurants');
   // Create the index
   collection.createIndex(
     { name : "text" }, function(err, result) {
@@ -30,18 +30,10 @@ var createTextIndex = function(db, callback) {
   });
 };
 
-// use the createTextIndex function
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
 
-// Connection URL
-var url = 'mongodb://localhost:27017/test';
-// Use connect method to connect to the server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log("Connected correctly to server");
+{{% myproject-connect %}}
   createTextIndex(db, function() {
-    db.close();
+    client.close();
   });
 });
 ```
@@ -53,16 +45,16 @@ A [sample dataset](https://docs.mongodb.org/getting-started/node/import-data/)
 is available for download.
 
 ```js
-var findDocuments = function(db, callback) {
+function findDocuments(db, callback) {
   // Get the documents collection
-  var collection = db.collection('restaurants');
+  const collection = db.collection('restaurants');
   // Find some documents
   collection.find({ '$text': {'$search' : 'Garden' } } ).toArray(function(err, docs) {
     assert.equal(err, null);
     console.log("Found the following records");
     console.log(docs);
     callback(docs);
-  });      
+  });
 }
 
 // use the findDocuments() function
