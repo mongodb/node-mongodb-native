@@ -100,7 +100,7 @@ const assert = require('assert');
 
 class A {
   constructor() {
-    this.logger = Logger('A');
+    this.logger = new Logger('A');
   }
 
   do() {
