@@ -6,7 +6,7 @@ var expect = require('chai').expect;
 
 describe('Cursor', function() {
   before(function() {
-    return setupDatabase(this.configuration);
+    return setupDatabase(this.configuration, ['cursorkilltest1']);
   });
 
   /**
@@ -4160,6 +4160,88 @@ describe('Cursor', function() {
           }
         );
       });
+    }
+  });
+
+  it('Should properly kill a cursor', {
+    metadata: {
+      requires: {
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+        mongodb: '>=3.2.0'
+      }
+    },
+
+    // The actual test we wish to run
+    test: function() {
+      // Load up the documents
+      const docs = [];
+      for (let i = 0; i < 1000; i += 1) {
+        docs.push({
+          a: i
+        });
+      }
+
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      let cleanup = () => {};
+      let caughtError = undefined;
+
+      return (
+        client
+          // Connect
+          .connect()
+          .then(function(client) {
+            cleanup = () => client.close();
+            const db = client.db(configuration.db);
+            const collection = db.collection('cursorkilltest1');
+
+            // Insert 1000 documents
+            return collection.insert(docs).then(() => {
+              // Generate cursor for find operation
+              const cursor = collection.find({});
+
+              // Iterate cursor past first element
+              return cursor
+                .next()
+                .then(() => cursor.next())
+                .then(() => {
+                  // Confirm that cursorId is non-zero
+                  const longId = cursor.cursorState.cursorId;
+                  expect(longId)
+                    .to.be.an('object')
+                    .and.to.haveOwnProperty('_bsontype', 'Long');
+                  const id = longId.toNumber();
+
+                  expect(id).to.not.equal(0);
+
+                  // Kill cursor
+                  return new Promise((resolve, reject) =>
+                    cursor.kill((err, r) => (err ? reject(err) : resolve(r)))
+                  ).then(response => {
+                    // Ensure correct response from cursor kill
+                    expect(response)
+                      .to.be.an('object')
+                      .and.to.deep.include({
+                        ok: 1,
+                        cursorsAlive: [],
+                        cursorsNotFound: [],
+                        cursorsUnknown: [],
+                        cursorsKilled: [id]
+                      });
+                  });
+                });
+            });
+          })
+
+          // Clean up. Make sure that even in case of error, we still always clean up connection
+          .catch(e => (caughtError = e))
+          .then(cleanup)
+          .then(() => {
+            if (caughtError) {
+              throw caughtError;
+            }
+          })
+      );
     }
   });
 
