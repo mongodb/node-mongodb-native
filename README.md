@@ -40,7 +40,7 @@ Change history can be found in [`HISTORY.md`](HISTORY.md).
 
 # Installation
 
-The recommended way to get started using the Node.js 2.0 driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
+The recommended way to get started using the Node.js 3.0 driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
 
 ## MongoDB Driver
 
@@ -59,8 +59,8 @@ You can also use the [Yarn](https://yarnpkg.com/en) package manager.
 The MongoDB driver depends on several other packages. These are:
 
 * [mongodb-core](https://github.com/mongodb-js/mongodb-core)
-* [bson](https://github.com/mongodb-js/bson-ext)
-* [kerberos](https://github.com/christkv/kerberos)
+* [bson](https://github.com/mongodb/js-bson)
+* [kerberos](https://github.com/mongodb-js/kerberos)
 * [node-gyp](https://github.com/nodejs/node-gyp)
 
 The `kerberos` package is a C++ extension that requires a build environment to be installed on your system. You must be able to build Node.js itself in order to compile and install the `kerberos` module. Furthermore, the `kerberos` module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operation system package manager for what libraries to install.
@@ -72,7 +72,7 @@ The `kerberos` package is a C++ extension that requires a build environment to b
 If you don’t have the build essentials, this module won’t build. In the case of Linux, you will need gcc, g++, Node.js with all the headers and Python. The easiest way to figure out what’s missing is by trying to build the Kerberos project. You can do this by performing the following steps.
 
 ```bash
-git clone https://github.com/christkv/kerberos.git
+git clone https://github.com/mongodb-js/kerberos
 cd kerberos
 npm install
 ```
