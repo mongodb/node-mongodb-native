@@ -35,10 +35,10 @@ joining or leaving a replica set.
 The following example demonstrates how to connect to a replica set and monitor all the events that are emitted by the replica set topology.
 
 ```js
-var MongoClient = require('mongodb').MongoClient;
+const MongoClient = require('mongodb').MongoClient;
 
-var url = 'mongodb://localhost:31000,localhost:31001/db?replicaSet=rs';
-var client = new MongoClient();
+const url = 'mongodb://localhost:31000,localhost:31001/?replicaSet=rs';
+const client = new MongoClient();
 
 client.on('serverDescriptionChanged', function(event) {
   console.log('received serverDescriptionChanged');
@@ -85,7 +85,7 @@ client.on('topologyDescriptionChanged', function(event) {
   console.log(JSON.stringify(event, null, 2));
 });
 
-client.connect(url, function(err, db) {
+client.connect(url, function(err, client) {
   if(err) throw err;
 });
 ```

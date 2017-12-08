@@ -111,7 +111,7 @@ This can occur if the connection pool is too large.
 
 ```js
 MongoClient.connect('mongodb://localhost:27017/test?maxPoolSize=5000',
-  function(err, db) {
+  function(err, client) {
     // connection
   });
 ```

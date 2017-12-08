@@ -13,20 +13,22 @@ title = "Connection Settings"
 Optional connection settings are settings not covered by the [URI Connection String ](https://docs.mongodb.org/manual/reference/connection-string/). The following options are passed in the options parameter in the MongoClient.connect function.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
 
 // Connection URL
-var url = 'mongodb://localhost:50000,localhost:50001/myproject';
+const url = 'mongodb://localhost:50000,localhost:50001';
+// Database Name
+const dbName = 'myproject';
 // Use connect method to connect to the Server passing in
 // additional options
 MongoClient.connect(url, {
   poolSize: 10, ssl: true
-}, function(err, db) {
+}, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
-  db.close();
+  client.close();
 });
 ```
 
@@ -35,12 +37,12 @@ The table below shows all settings and what topology they affect.
 | Option | Affects | Type | Default | Description |
 | :----------| :------------------ | :------ | :------ |:------------- |
 | **poolSize** | Server, ReplicaSet, Mongos | integer | 5 | Set the maximum poolSize for each individual server or proxy connection.|
-| **ssl** | Server, ReplicaSet, Mongos | boolean | false | Use ssl connection (needs to have a mongod server with ssl support) |
-| **sslValidate** | Server, ReplicaSet, Mongos | boolean | true | Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher) |
-| **sslCA** | Server, ReplicaSet, Mongos | Array | null | Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher) |
-| **sslCert** | Server, ReplicaSet, Mongos | Buffer/String | null | String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher) |
-| **sslKey** | Server, ReplicaSet, Mongos | Buffer/String | null | String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher) |
-| **sslPass** | Server, ReplicaSet, Mongos | Buffer/String | null | String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher) |
+| **ssl** | Server, ReplicaSet, Mongos | boolean | false | Use ssl connection |
+| **sslValidate** | Server, ReplicaSet, Mongos | boolean | true | Validate mongod server certificate against ca |
+| **sslCA** | Server, ReplicaSet, Mongos | Array | null | Array of valid certificates either as Buffers or Strings |
+| **sslCert** | Server, ReplicaSet, Mongos | Buffer/String | null | String or buffer containing the certificate we wish to present |
+| **sslKey** | Server, ReplicaSet, Mongos | Buffer/String | null | String or buffer containing the certificate private key we wish to present |
+| **sslPass** | Server, ReplicaSet, Mongos | Buffer/String | null | String or buffer containing the certificate password |
 | **autoReconnect** | Server | boolean | true | Reconnect on error. |
 | **noDelay** | Server, ReplicaSet, Mongos | boolean | true | TCP Socket NoDelay option. |
 | **keepAlive** | Server, ReplicaSet, Mongos | integer | 30000 | The number of milliseconds to wait before initiating keepAlive on the TCP socket. |
