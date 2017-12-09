@@ -8,7 +8,7 @@ var expect = require('chai').expect,
 const test = new ReplSetFixture();
 describe('Sessions (ReplSet)', function() {
   afterEach(() => mock.cleanup());
-  beforeEach(() => test.setup());
+  beforeEach(() => test.setup({ ismaster: mock.DEFAULT_ISMASTER_36 }));
 
   it('should track the highest `clusterTime` seen in a replica set', {
     metadata: { requires: { topology: 'single' } },
@@ -31,14 +31,10 @@ describe('Sessions (ReplSet)', function() {
         }
       );
 
-      let serverCount = 0;
-      replset.on('joined', () => {
-        serverCount++;
-        if (serverCount === 3) {
-          expect(replset.clusterTime).to.eql(futureClusterTime);
-          replset.destroy();
-          done();
-        }
+      replset.on('all', () => {
+        expect(replset.clusterTime).to.eql(futureClusterTime);
+        replset.destroy();
+        done();
       });
 
       replset.on('error', done);
@@ -67,19 +63,15 @@ describe('Sessions (ReplSet)', function() {
         }
       );
 
-      let serverCount = 0;
-      replset.on('joined', () => {
-        serverCount++;
-        if (serverCount === 3) {
-          expect(replset.clusterTime).to.eql(futureClusterTime);
-          const servers = replset.s.replicaSetState.secondaries
-            .concat(replset.s.replicaSetState.arbiters)
-            .concat([replset.s.replicaSetState.primary]);
-          servers.forEach(server => expect(server.clusterTime).to.eql(futureClusterTime));
+      replset.on('all', () => {
+        expect(replset.clusterTime).to.eql(futureClusterTime);
+        const servers = replset.s.replicaSetState.secondaries
+          .concat(replset.s.replicaSetState.arbiters)
+          .concat([replset.s.replicaSetState.primary]);
+        servers.forEach(server => expect(server.clusterTime).to.eql(futureClusterTime));
 
-          replset.destroy();
-          done();
-        }
+        replset.destroy();
+        done();
       });
 
       replset.on('error', done);
@@ -90,6 +82,8 @@ describe('Sessions (ReplSet)', function() {
   it('should set `logicalSessionTimeoutMinutes` to `null` if any incoming server is `null`', {
     metadata: { requires: { topology: 'single' } },
     test: function(done) {
+      test.firstSecondaryStates[0].logicalSessionTimeoutMinutes = null;
+
       const replset = new ReplSet(
         [test.primaryServer.address(), test.firstSecondaryServer.address()],
         {
@@ -102,7 +96,7 @@ describe('Sessions (ReplSet)', function() {
       );
 
       replset.on('error', done);
-      replset.once('connect', () => {
+      replset.once('all', () => {
         expect(replset.logicalSessionTimeoutMinutes).to.equal(null);
         replset.destroy();
         done();
@@ -132,15 +126,10 @@ describe('Sessions (ReplSet)', function() {
           }
         );
 
-        let joinCount = 0;
-        replset.on('joined', () => {
-          joinCount++;
-
-          if (joinCount === 3) {
-            expect(replset.logicalSessionTimeoutMinutes).to.equal(1);
-            replset.destroy();
-            done();
-          }
+        replset.on('all', () => {
+          expect(replset.logicalSessionTimeoutMinutes).to.equal(1);
+          replset.destroy();
+          done();
         });
 
         replset.on('error', done);
@@ -148,4 +137,34 @@ describe('Sessions (ReplSet)', function() {
       }
     }
   );
+
+  it('should exclude arbiters when tracking `logicalSessionTimeoutMinutes`', {
+    metadata: { requires: { topology: 'single' } },
+    test: function(done) {
+      test.arbiterServer.setMessageHandler(req => {
+        const doc = req.document;
+        if (doc.ismaster) {
+          req.reply(Object.assign({}, test.arbiterStates[0], { logicalSessionTimeoutMinutes: 2 }));
+        }
+      });
+
+      const replset = new ReplSet(test.servers.map(s => s.address()), {
+        setName: 'rs',
+        connectionTimeout: 3000,
+        socketTimeout: 0,
+        haInterval: 100,
+        size: 1
+      });
+
+      replset.on('joined', type => {
+        if (type === 'arbiter') {
+          expect(replset.logicalSessionTimeoutMinutes).to.equal(10);
+          done();
+        }
+      });
+
+      replset.on('error', done);
+      replset.connect();
+    }
+  });
 });
