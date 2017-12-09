@@ -200,6 +200,8 @@ ReplSetState.prototype.remove = function(server, options) {
   }
 };
 
+const isArbiter = ismaster => ismaster.arbiterOnly && ismaster.setName;
+
 ReplSetState.prototype.update = function(server) {
   var self = this;
   // Get the current ismaster
@@ -266,7 +268,7 @@ ReplSetState.prototype.update = function(server) {
   }
 
   // Update logicalSessionTimeoutMinutes
-  if (ismaster.logicalSessionTimeoutMinutes !== undefined) {
+  if (ismaster.logicalSessionTimeoutMinutes !== undefined && !isArbiter(ismaster)) {
     if (
       self.logicalSessionTimeoutMinutes === undefined ||
       ismaster.logicalSessionTimeoutMinutes === null
@@ -597,8 +599,7 @@ ReplSetState.prototype.update = function(server) {
   // Arbiter handling
   //
   if (
-    ismaster.arbiterOnly &&
-    ismaster.setName &&
+    isArbiter(ismaster) &&
     !inList(ismaster, server, this.arbiters) &&
     this.setName &&
     this.setName === ismaster.setName
