@@ -198,6 +198,10 @@ testCollection.updateOne({_id: 'test'}, {});
 // An error is returned: The update operation document must contain at least one atomic operator.
 ```
 
+### `keepAlive`
+
+Wherever it occurs, the option `keepAlive` has been changed. `keepAlive` is now a boolean that enables/disables `keepAlive`, while `keepAliveInitialDelay` specifies how long to wait before initiating keepAlive. This brings the API in line with [NodeJS's socket api](https://nodejs.org/dist/latest-v9.x/docs/api/all.html#net_socket_setkeepalive_enable_initialdelay)
+
 ### Tests
 
 We have updated all of the tests to use [Mocha](https://mochajs.org) and a new test runner, [`mongodb-test-runner`](https://github.com/mongodb-js/mongodb-test-runner), which

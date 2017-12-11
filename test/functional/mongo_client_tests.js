@@ -181,7 +181,8 @@ describe('MongoClient', function() {
           poolSize: 10,
           autoReconnect: false,
           noDelay: false,
-          keepAlive: 100,
+          keepAlive: true,
+          keepAliveInitialDelay: 100,
           connectTimeoutMS: 444444,
           socketTimeoutMS: 555555
         },
@@ -226,7 +227,8 @@ describe('MongoClient', function() {
             poolSize: 1,
             socketOptions: {
               noDelay: false,
-              keepAlive: 100,
+              keepAlive: true,
+              keepAliveInitialDelay: 100,
               connectTimeoutMS: 444444,
               socketTimeoutMS: 555555
             }
@@ -275,7 +277,8 @@ describe('MongoClient', function() {
           poolSize: 1,
           socketOptions: {
             noDelay: false,
-            keepAlive: 100,
+            keepAlive: true,
+            keepAliveInitialDelay: 100,
             connectTimeoutMS: 444444,
             socketTimeoutMS: 555555
           }
@@ -500,7 +503,8 @@ describe('MongoClient', function() {
       MongoClient.connect(
         configuration.url(),
         {
-          keepAlive: 100
+          keepAlive: true,
+          keepAliveInitialDelay: 100
         },
         function(err, client) {
           test.equal(null, err);

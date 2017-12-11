@@ -201,7 +201,10 @@ describe('ReplSet (Connection)', function() {
           new Server(configuration.host, configuration.port + 1),
           new Server(configuration.host, configuration.port + 2)
         ],
-        { socketOptions: { keepAlive: 100 }, rs_name: configuration.replicasetName }
+        {
+          socketOptions: { keepAlive: true, keepAliveInitialDelay: 100 },
+          rs_name: configuration.replicasetName
+        }
       );
 
       var client = new MongoClient(replSet, { w: 0 });
