@@ -61,7 +61,7 @@ describe('Reconnect', function() {
           db: { native_parser: true, bufferMaxEntries: -1 },
           server: {
             poolSize: 20,
-            socketOptions: { autoReconnect: true, keepAlive: 50 },
+            socketOptions: { autoReconnect: true, keepAlive: true, keepAliveInitialDelay: 50 },
             reconnectTries: 1000,
             reconnectInterval: 1000
           }
