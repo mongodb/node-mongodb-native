@@ -299,10 +299,15 @@ Mongos.prototype.connect = function(options) {
     );
   });
 
+  const serverDescriptionChangedCallback = event => {
+    self.emit('serverDescriptionChanged', event);
+  };
+
   servers.forEach(function(server) {
-    server.on('serverDescriptionChanged', function(event) {
-      self.emit('serverDescriptionChanged', event);
-    });
+    server.on('serverDescriptionChanged', serverDescriptionChangedCallback);
+    server.on('destroy', () =>
+      server.removeListener('serverDescriptionChanged', serverDescriptionChangedCallback)
+    );
   });
 
   // Emit the topology opening event
@@ -851,7 +856,6 @@ Mongos.prototype.destroy = function(options) {
     // Move to list of disconnectedProxies
     moveServerFrom(self.connectedProxies, self.disconnectedProxies, x);
   });
-
   // Emit the final topology change
   emitTopologyDescriptionChanged(self);
   // Emit toplogy closing event
