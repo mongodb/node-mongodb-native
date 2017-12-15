@@ -8,6 +8,8 @@
 
 The official [MongoDB](https://www.mongodb.com/) driver for Node.js. Provides a high-level API on top of [mongodb-core](https://www.npmjs.com/package/mongodb-core) that is meant for end users.
 
+**NOTE: v3.x was recently released with breaking API changes. You can find a list of changes [here](CHANGES_3.0.0.md).**
+
 ## MongoDB Node.JS Driver
 
 | what          | where                                          |
