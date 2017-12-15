@@ -4,7 +4,6 @@ var fs = require('fs');
 var path = require('path');
 var semver = require('semver');
 var test = require('./shared').assert;
-var assign = require('../../lib/utils').assign;
 
 function findScenarios(type) {
   return fs
@@ -131,7 +130,7 @@ describe('CRUD spec', function() {
   function executeCountTest(scenarioTest, db, collection) {
     var args = scenarioTest.operation.arguments;
     var filter = args.filter;
-    var options = assign({}, args);
+    var options = Object.assign({}, args);
     delete options.filter;
 
     return collection.count(filter, options).then(function(result) {
@@ -142,7 +141,7 @@ describe('CRUD spec', function() {
   function executeDistinctTest(scenarioTest, db, collection) {
     var args = scenarioTest.operation.arguments;
     var fieldName = args.fieldName;
-    var options = assign({}, args);
+    var options = Object.assign({}, args);
     var filter = args.filter || {};
     delete options.fieldName;
     delete options.filter;
@@ -155,7 +154,7 @@ describe('CRUD spec', function() {
   function executeFindTest(scenarioTest, db, collection) {
     var args = scenarioTest.operation.arguments;
     var filter = args.filter;
-    var options = assign({}, args);
+    var options = Object.assign({}, args);
     delete options.filter;
 
     return collection
@@ -170,7 +169,7 @@ describe('CRUD spec', function() {
     // Unpack the scenario test
     var args = scenarioTest.operation.arguments;
     var filter = args.filter;
-    var options = assign({}, args);
+    var options = Object.assign({}, args);
     delete options.filter;
 
     return collection[scenarioTest.operation.name](filter, options).then(function(result) {
@@ -193,7 +192,7 @@ describe('CRUD spec', function() {
     var args = scenarioTest.operation.arguments;
     var filter = args.filter;
     var replacement = args.replacement;
-    var options = assign({}, args);
+    var options = Object.assign({}, args);
     delete options.filter;
     delete options.replacement;
     var opName = scenarioTest.operation.name;
@@ -223,7 +222,7 @@ describe('CRUD spec', function() {
     var args = scenarioTest.operation.arguments;
     var filter = args.filter;
     var update = args.update;
-    var options = assign({}, args);
+    var options = Object.assign({}, args);
     delete options.filter;
     delete options.update;
 
@@ -251,7 +250,7 @@ describe('CRUD spec', function() {
     var args = scenarioTest.operation.arguments;
     var filter = args.filter;
     var second = args.update || args.replacement;
-    var options = assign({}, args);
+    var options = Object.assign({}, args);
     if (options.returnDocument) {
       options.returnOriginal = options.returnDocument === 'After' ? false : true;
     }

@@ -2,7 +2,6 @@
 var test = require('./shared').assert;
 var co = require('co');
 var mock = require('../mock');
-var assign = require('../../lib/utils').assign;
 
 var extend = function(template, fields) {
   var object = {};
@@ -38,7 +37,7 @@ describe.skip('Buffering Proxy', function() {
       var electionIds = [new ObjectId(0), new ObjectId(1)];
 
       // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -264,7 +263,7 @@ describe.skip('Buffering Proxy', function() {
       var electionIds = [new ObjectId(0), new ObjectId(1)];
 
       // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],

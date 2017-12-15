@@ -1,7 +1,6 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
-var assign = require('../../lib/utils').assign;
 var co = require('co');
 var mock = require('../mock');
 
@@ -31,7 +30,7 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient;
 
       // Primary server states
-      var primary = [assign({}, defaultFields)];
+      var primary = [Object.assign({}, defaultFields)];
 
       co(function*() {
         const singleServer = yield mock.createServer();
@@ -83,7 +82,7 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient;
 
       // Primary server states
-      var primary = [assign({}, defaultFields)];
+      var primary = [Object.assign({}, defaultFields)];
 
       co(function*() {
         const singleServer = yield mock.createServer();
@@ -127,7 +126,7 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient;
 
       // Primary server states
-      var primary = [assign({}, defaultFields)];
+      var primary = [Object.assign({}, defaultFields)];
 
       co(function*() {
         const singleServer = yield mock.createServer();
@@ -178,7 +177,7 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient;
 
       // Primary server states
-      var primary = [assign({}, defaultFields)];
+      var primary = [Object.assign({}, defaultFields)];
 
       co(function*() {
         const singleServer = yield mock.createServer();
@@ -226,7 +225,7 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient;
 
       // Primary server states
-      var primary = [assign({}, defaultFields)];
+      var primary = [Object.assign({}, defaultFields)];
 
       co(function*() {
         const singleServer = yield mock.createServer();
@@ -276,7 +275,7 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient;
 
       // Primary server states
-      var primary = [assign({}, defaultFields)];
+      var primary = [Object.assign({}, defaultFields)];
 
       co(function*() {
         const singleServer = yield mock.createServer();
@@ -334,7 +333,7 @@ describe('Collation', function() {
         Code = configuration.require.Code;
 
       // Primary server states
-      var primary = [assign({}, defaultFields)];
+      var primary = [Object.assign({}, defaultFields)];
 
       co(function*() {
         const singleServer = yield mock.createServer();
@@ -392,7 +391,7 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient;
 
       // Primary server states
-      var primary = [assign({}, defaultFields)];
+      var primary = [Object.assign({}, defaultFields)];
 
       co(function*() {
         const singleServer = yield mock.createServer();
@@ -438,7 +437,7 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient;
 
       // Primary server states
-      var primary = [assign({}, defaultFields)];
+      var primary = [Object.assign({}, defaultFields)];
 
       co(function*() {
         const singleServer = yield mock.createServer();
@@ -488,7 +487,7 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient;
 
       // Primary server states
-      var primary = [assign({}, defaultFields)];
+      var primary = [Object.assign({}, defaultFields)];
 
       co(function*() {
         const singleServer = yield mock.createServer();
@@ -537,7 +536,7 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient;
 
       // Primary server states
-      var primary = [assign({}, defaultFields)];
+      var primary = [Object.assign({}, defaultFields)];
 
       co(function*() {
         const singleServer = yield mock.createServer();
@@ -587,7 +586,7 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient;
 
       // Primary server states
-      var primary = [assign({}, defaultFields)];
+      var primary = [Object.assign({}, defaultFields)];
 
       co(function*() {
         const singleServer = yield mock.createServer();
@@ -636,7 +635,7 @@ describe('Collation', function() {
         Long = configuration.require.Long;
 
       // Primary server states
-      var primary = [assign({}, defaultFields)];
+      var primary = [Object.assign({}, defaultFields)];
 
       co(function*() {
         const singleServer = yield mock.createServer();
@@ -691,7 +690,7 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient;
 
       // Primary server states
-      var primary = [assign({}, defaultFields, { maxWireVersion: 4 })];
+      var primary = [Object.assign({}, defaultFields, { maxWireVersion: 4 })];
 
       co(function*() {
         const singleServer = yield mock.createServer();
@@ -735,7 +734,7 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient;
 
       // Primary server states
-      var primary = [assign({}, defaultFields, { maxWireVersion: 4 })];
+      var primary = [Object.assign({}, defaultFields, { maxWireVersion: 4 })];
 
       co(function*() {
         const singleServer = yield mock.createServer();
@@ -777,7 +776,7 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient;
 
       // Primary server states
-      var primary = [assign({}, defaultFields)];
+      var primary = [Object.assign({}, defaultFields)];
 
       co(function*() {
         const singleServer = yield mock.createServer();
@@ -839,7 +838,7 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient;
 
       // Primary server states
-      var primary = [assign({}, defaultFields, { maxWireVersion: 4 })];
+      var primary = [Object.assign({}, defaultFields, { maxWireVersion: 4 })];
 
       co(function*() {
         const singleServer = yield mock.createServer();
@@ -897,7 +896,7 @@ describe('Collation', function() {
         ObjectId = configuration.require.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var rsFields = assign({}, defaultFields, {
+      var rsFields = Object.assign({}, defaultFields, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -908,7 +907,7 @@ describe('Collation', function() {
 
       // Primary server states
       var primary = [
-        assign(
+        Object.assign(
           {
             ismaster: true,
             secondary: false,
@@ -922,7 +921,7 @@ describe('Collation', function() {
 
       // Primary server states
       var firstSecondary = [
-        assign(
+        Object.assign(
           {
             ismaster: false,
             secondary: true,
@@ -936,7 +935,7 @@ describe('Collation', function() {
 
       // Primary server states
       var arbiter = [
-        assign(
+        Object.assign(
           {
             ismaster: false,
             secondary: false,
@@ -1022,7 +1021,7 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient;
 
       // Primary server states
-      var primary = [assign({}, defaultFields)];
+      var primary = [Object.assign({}, defaultFields)];
 
       co(function*() {
         const singleServer = yield mock.createServer();
@@ -1071,7 +1070,7 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient;
 
       // Primary server states
-      var primary = [assign({}, defaultFields, { maxWireVersion: 4 })];
+      var primary = [Object.assign({}, defaultFields, { maxWireVersion: 4 })];
 
       co(function*() {
         const singleServer = yield mock.createServer();
@@ -1116,7 +1115,7 @@ describe('Collation', function() {
         MongoClient = configuration.require.MongoClient;
 
       // Primary server states
-      var primary = [assign({}, defaultFields, { maxWireVersion: 4 })];
+      var primary = [Object.assign({}, defaultFields, { maxWireVersion: 4 })];
 
       co(function*() {
         const singleServer = yield mock.createServer();

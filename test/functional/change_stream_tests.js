@@ -4,7 +4,6 @@ var Transform = require('stream').Transform;
 var MongoNetworkError = require('mongodb-core').MongoNetworkError;
 var setupDatabase = require('./shared').setupDatabase;
 var delay = require('./shared').delay;
-var assign = require('../../lib/utils').assign;
 var co = require('co');
 var mock = require('../mock');
 
@@ -697,7 +696,7 @@ describe('Change Streams', function() {
 
           if (doc.ismaster) {
             request.reply(
-              assign(
+              Object.assign(
                 {
                   ismaster: true,
                   secondary: false,
@@ -801,7 +800,7 @@ describe('Change Streams', function() {
             request.connection.destroy();
           } else if (doc.ismaster) {
             request.reply(
-              assign(
+              Object.assign(
                 {
                   ismaster: true,
                   secondary: false,
@@ -902,7 +901,7 @@ describe('Change Streams', function() {
           // Create a server that responds to the initial aggregation to connect to the server, but not to subsequent getMore requests
           if (doc.ismaster) {
             request.reply(
-              assign(
+              Object.assign(
                 {
                   ismaster: true,
                   secondary: false,
@@ -1338,7 +1337,7 @@ describe('Change Streams', function() {
           // Create a server that responds to the initial aggregation to connect to the server, but not to subsequent getMore requests
           if (doc.ismaster) {
             request.reply(
-              assign(
+              Object.assign(
                 {
                   ismaster: true,
                   secondary: false,
