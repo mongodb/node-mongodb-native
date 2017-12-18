@@ -2,7 +2,6 @@
 var test = require('./shared').assert;
 var co = require('co');
 var mock = require('../mock');
-var assign = require('../../lib/utils').assign;
 
 // Extend the object
 var extend = function(template, fields) {
@@ -35,7 +34,7 @@ describe('Command Write Concern', function() {
         ObjectId = configuration.require.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -153,7 +152,7 @@ describe('Command Write Concern', function() {
         Long = configuration.require.Long;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -276,7 +275,7 @@ describe('Command Write Concern', function() {
         ObjectId = configuration.require.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -398,7 +397,7 @@ describe('Command Write Concern', function() {
         ObjectId = configuration.require.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -517,7 +516,7 @@ describe('Command Write Concern', function() {
         ObjectId = configuration.require.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -636,7 +635,7 @@ describe('Command Write Concern', function() {
         ObjectId = configuration.require.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -756,7 +755,7 @@ describe('Command Write Concern', function() {
         Code = configuration.require.Code;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -883,7 +882,7 @@ describe('Command Write Concern', function() {
         ObjectId = configuration.require.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -996,7 +995,7 @@ describe('Command Write Concern', function() {
         ObjectId = configuration.require.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -1109,7 +1108,7 @@ describe('Command Write Concern', function() {
         ObjectId = configuration.require.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],

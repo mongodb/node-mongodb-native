@@ -1,7 +1,6 @@
 'use strict';
 const Long = require('bson').Long,
   expect = require('chai').expect,
-  assign = require('../../lib/utils').assign,
   mock = require('../mock');
 
 const test = {};
@@ -11,12 +10,12 @@ describe('Max Staleness', function() {
     return mock.createServer().then(server => {
       test.server = server;
 
-      const defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      const defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
       });
 
       // Primary server states
-      const serverIsMaster = [assign({}, defaultFields)];
+      const serverIsMaster = [Object.assign({}, defaultFields)];
       server.setMessageHandler(request => {
         var doc = request.document;
         if (doc.ismaster) {

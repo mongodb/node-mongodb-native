@@ -1,7 +1,6 @@
 'use strict';
 var expect = require('chai').expect,
   mock = require('../mock'),
-  assign = require('../../lib/utils').assign,
   ObjectId = require('bson').ObjectId;
 
 const test = {};
@@ -9,12 +8,12 @@ describe('ReplSet (mocks)', function() {
   afterEach(() => mock.cleanup());
   beforeEach(() => {
     // Default message fields
-    const defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+    const defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
       msg: 'isdbgrid'
     });
 
     // Default message fields
-    const defaultRSFields = assign({}, mock.DEFAULT_ISMASTER, {
+    const defaultRSFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
       setName: 'rs',
       setVersion: 1,
       electionId: new ObjectId(),
@@ -23,7 +22,7 @@ describe('ReplSet (mocks)', function() {
     });
 
     // Primary server states
-    const serverIsMaster = [assign({}, defaultFields), assign({}, defaultRSFields)];
+    const serverIsMaster = [Object.assign({}, defaultFields), Object.assign({}, defaultRSFields)];
 
     return Promise.all([mock.createServer(), mock.createServer()]).then(servers => {
       test.mongos1 = servers[0];

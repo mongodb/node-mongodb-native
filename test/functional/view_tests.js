@@ -1,6 +1,5 @@
 'use strict';
 var expect = require('chai').expect,
-  assign = require('../../lib/utils').assign,
   mock = require('../mock'),
   co = require('co');
 
@@ -14,10 +13,10 @@ describe('Views', function() {
         Long = self.configuration.mongo.Long;
 
       // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER);
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER);
 
       // Primary server states
-      var primary = [assign({}, defaultFields)];
+      var primary = [Object.assign({}, defaultFields)];
 
       // Boot the mock
       co(function*() {

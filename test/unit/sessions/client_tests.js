@@ -2,7 +2,6 @@
 
 const MongoClient = require('../../..').MongoClient;
 const expect = require('chai').expect;
-const assign = require('../../../lib/utils').assign;
 const mock = require('../../mock');
 
 const test = {};
@@ -21,7 +20,7 @@ describe('Sessions', function() {
         test.server.setMessageHandler(request => {
           var doc = request.document;
           if (doc.ismaster) {
-            request.reply(assign({}, mock.DEFAULT_ISMASTER));
+            request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
           } else if (doc.endSessions) {
             request.reply({ ok: 1 });
           }
@@ -47,7 +46,7 @@ describe('Sessions', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(
-              assign({}, mock.DEFAULT_ISMASTER, {
+              Object.assign({}, mock.DEFAULT_ISMASTER, {
                 logicalSessionTimeoutMinutes: 10
               })
             );
