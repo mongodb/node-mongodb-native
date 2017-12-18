@@ -1,203 +1,116 @@
 'use strict';
 
-var f = require('util').format;
-var semver = require('semver');
-var path = require('path');
+const f = require('util').format;
+const semver = require('semver');
+const path = require('path');
+const EnvironmentBase = require('mongodb-test-runner').EnvironmentBase;
 
 // topologies
-var Server = require('..').Server,
-  ReplSet = require('..').ReplSet,
-  Mongos = require('..').Mongos;
+const Server = require('..').Server;
+const ReplSet = require('..').ReplSet;
+const Mongos = require('..').Mongos;
 
 // topology managers
-var topologyManagers = require('mongodb-test-runner').topologyManagers,
-  ServerManager = topologyManagers.Server,
-  ReplSetManager = topologyManagers.ReplSet,
-  ShardingManager = topologyManagers.Sharded;
+const topologyManagers = require('mongodb-test-runner').topologyManagers;
+const ServerManager = topologyManagers.Server;
+const ReplSetManager = topologyManagers.ReplSet;
+const ShardingManager = topologyManagers.Sharded;
 
-// utilities
-var clone = function(obj) {
-  var copy = {};
-  for (var name in obj) copy[name] = obj[name];
-  return copy;
+const genReplsetConfig = (port, options) => {
+  return Object.assign(
+    {
+      options: {
+        bind_ip: 'localhost',
+        port: port,
+        dbpath: `${__dirname}/../db/${port}`,
+        setParameter: ['enableTestCommands=1']
+      }
+    },
+    options
+  );
 };
 
 /**
  *
  * @param {*} discoverResult
  */
-var replicaSetEnvironment = function(discoverResult) {
-  var nodes = [
-    {
-      tags: { loc: 'ny' },
-      options: {
-        bind_ip: 'localhost',
-        port: 31000,
-        dbpath: f('%s/../db/31000', __dirname),
-        setParameter: ['enableTestCommands=1']
-      }
-    },
-    {
-      tags: { loc: 'sf' },
-      options: {
-        bind_ip: 'localhost',
-        port: 31001,
-        dbpath: f('%s/../db/31001', __dirname),
-        setParameter: ['enableTestCommands=1']
-      }
-    },
-    {
-      tags: { loc: 'sf' },
-      options: {
-        bind_ip: 'localhost',
-        port: 31002,
-        dbpath: f('%s/../db/31002', __dirname),
-        setParameter: ['enableTestCommands=1']
-      }
-    },
-    {
-      tags: { loc: 'sf' },
-      priority: 0,
-      options: {
-        bind_ip: 'localhost',
-        port: 31003,
-        dbpath: f('%s/../db/31003', __dirname),
-        setParameter: ['enableTestCommands=1']
-      }
-    },
-    {
-      arbiter: true,
-      options: {
-        bind_ip: 'localhost',
-        port: 31004,
-        dbpath: f('%s/../db/31004', __dirname),
-        setParameter: ['enableTestCommands=1']
-      }
-    }
-  ];
+class ReplicaSetEnvironment extends EnvironmentBase {
+  constructor(discoverResult) {
+    super();
 
-  // Do we have 3.2+
-  var version = discoverResult.version.join('.');
-  if (semver.satisfies(version, '>=3.2.0')) {
-    nodes = nodes.map(function(x) {
-      x.options.enableMajorityReadConcern = null;
-      return x;
-    });
-  }
-
-  return {
-    host: 'localhost',
-    port: 31000,
-    setName: 'rs',
-    url: 'mongodb://%slocalhost:31000/integration_tests?rs_name=rs',
-    writeConcernMax: { w: 'majority', wtimeout: 30000 },
-    replicasetName: 'rs',
-    topology: function(host, port, serverOptions) {
+    this.host = 'localhost',
+    this.port = 31000,
+    this.setName = 'rs',
+    this.url = 'mongodb://%slocalhost:31000/integration_tests?rs_name=rs',
+    this.writeConcernMax = { w: 'majority', wtimeout: 30000 },
+    this.replicasetName = 'rs',
+    this.topology = function(host, port, serverOptions) {
       host = host || 'localhost';
       port = port || 31000;
-      serverOptions = clone(serverOptions);
+      serverOptions = Object.assign({}, serverOptions);
       serverOptions.rs_name = 'rs';
       serverOptions.poolSize = 1;
       serverOptions.autoReconnect = false;
 
       return new ReplSet([new Server(host, port, serverOptions)], serverOptions);
-    },
-    manager: new ReplSetManager('mongod', nodes, {
+    };
+
+    this.manager = new ReplSetManager('mongod', nodes, {
       replSet: 'rs'
-    })
-  };
+    });
+
+    this.nodes = [
+      genReplsetConfig(31000, { tags: { loc: 'ny' } }),
+      genReplsetConfig(31001, { tags: { loc: 'sf' } }),
+      genReplsetConfig(31002, { tags: { loc: 'sf' } }),
+      genReplsetConfig(31003, { tags: { loc: 'sf' } }),
+      genReplsetConfig(31004, { arbiter: true })
+    ];
+
+    // Do we have 3.2+
+    const version = discoverResult.version.join('.');
+    if (semver.satisfies(version, '>=3.2.0')) {
+      nodes = nodes.map(function(x) {
+        x.options.enableMajorityReadConcern = null;
+        return x;
+      });
+    }
+  }
 };
 
 /**
  *
  */
-var singleEnvironment = function() {
-  return {
-    host: 'localhost',
-    port: 27017,
-    manager: new ServerManager('mongod', {
+class SingleEnvironment extends EnvironmentBase {
+  constructor() {
+    super();
+
+    this.host = 'localhost';
+    this.port = 27017;
+    this.manager = new ServerManager('mongod', {
       dbpath: path.join(path.resolve('db'), f('data-%d', 27017)),
       setParameter: 'enableTestCommands=1'
-    })
-  };
+    });
+  }
+}
+
+const genShardedConfig = (port, options, shardOptions) => {
+  return Object.assign(
+    {
+      options: {
+        bind_ip: 'localhost',
+        port: port,
+        dbpath: `${__dirname}/../db/${port}`,
+        shardsvr: null
+      }
+    },
+    options,
+    shardOptions
+  );
 };
 
-/**
- *
- */
-var shardedEnvironment = function() {
-  var shardingManager = new ShardingManager({
-    mongod: 'mongod',
-    mongos: 'mongos'
-  });
-
-  // First set of nodes
-  var nodes1 = [
-    {
-      tags: { loc: 'ny' },
-      options: {
-        bind_ip: 'localhost',
-        port: 31010,
-        dbpath: f('%s/../db/31000', __dirname),
-        shardsvr: null
-      }
-    },
-    {
-      tags: { loc: 'sf' },
-      options: {
-        bind_ip: 'localhost',
-        port: 31011,
-        dbpath: f('%s/../db/31001', __dirname),
-        shardsvr: null
-      }
-    },
-    {
-      // Type of node
-      arbiter: true,
-      // mongod process options
-      options: {
-        bind_ip: 'localhost',
-        port: 31012,
-        dbpath: f('%s/../db/31002', __dirname),
-        shardsvr: null
-      }
-    }
-  ];
-
-  // second set of nodes
-  var nodes2 = [
-    {
-      tags: { loc: 'ny' },
-      options: {
-        bind_ip: 'localhost',
-        port: 31020,
-        dbpath: f('%s/../db/31010', __dirname),
-        shardsvr: null
-      }
-    },
-    {
-      tags: { loc: 'sf' },
-      options: {
-        bind_ip: 'localhost',
-        port: 31021,
-        dbpath: f('%s/../db/31011', __dirname),
-        shardsvr: null
-      }
-    },
-    {
-      // Type of node
-      arbiter: true,
-      // mongod process options
-      options: {
-        bind_ip: 'localhost',
-        port: 31022,
-        dbpath: f('%s/../db/31012', __dirname),
-        shardsvr: null
-      }
-    }
-  ];
-
-  var configNodes = [
+const genConfigNode = (port, options) => {
+  return Object.assign(
     {
       options: {
         bind_ip: 'localhost',
@@ -205,153 +118,151 @@ var shardedEnvironment = function() {
         dbpath: f('%s/../db/35000', __dirname)
       }
     },
-    {
-      options: {
-        bind_ip: 'localhost',
-        port: 35001,
-        dbpath: f('%s/../db/35001', __dirname)
-      }
-    },
-    {
-      options: {
-        bind_ip: 'localhost',
-        port: 35002,
-        dbpath: f('%s/../db/35002', __dirname)
-      }
-    }
-  ];
+    options
+  );
+}
 
-  var proxyNodes = [
-    {
-      bind_ip: 'localhost',
-      port: 51000,
-      configdb: 'localhost:35000,localhost:35001,localhost:35002'
-    },
-    {
-      bind_ip: 'localhost',
-      port: 51001,
-      configdb: 'localhost:35000,localhost:35001,localhost:35002'
-    }
-  ];
+/**
+ *
+ */
+class ShardedEnvironment extends EnvironmentBase {
+  constructor() {
+    super();
 
-  // Additional mapping
-  var self = this;
-  nodes1 = nodes1.map(function(x) {
-    if (self.options && self.options.shard) {
-      for (var name in self.options.shard) {
-        x.options[name] = self.options.shard[name];
-      }
-    }
-
-    return x;
-  });
-
-  nodes2 = nodes2.map(function(x) {
-    if (self.options && self.options.shard) {
-      for (var name in self.options.shard) {
-        x.options[name] = self.options.shard[name];
-      }
-    }
-
-    return x;
-  });
-
-  configNodes = configNodes.map(function(x) {
-    if (self.options && self.options.config) {
-      for (var name in self.options.config) {
-        x.options[name] = self.options.config[name];
-      }
-    }
-
-    return x;
-  });
-
-  proxyNodes = proxyNodes.map(function(x) {
-    if (self.options && self.options.proxy) {
-      for (var name in self.options.proxy) {
-        x[name] = self.options.proxy[name];
-      }
-    }
-
-    return x;
-  });
-
-  shardingManager.addShard(nodes1, { replSet: 'rs1' });
-  shardingManager.addShard(nodes2, { replSet: 'rs2' });
-  shardingManager.addConfigurationServers(configNodes, { replSet: 'rs3' });
-  shardingManager.addProxies(proxyNodes, { binary: 'mongos' });
-
-  return {
-    host: 'localhost',
-    port: 51000,
-    url: 'mongodb://%slocalhost:51000/integration_tests',
-    writeConcernMax: { w: 'majority', wtimeout: 30000 },
-    topology: function(host, port, options) {
+    this.host = 'localhost';
+    this.port = 51000;
+    this.url = 'mongodb://%slocalhost:51000/integration_tests';
+    this.writeConcernMax = { w: 'majority', wtimeout: 30000 };
+    this.topology = function(host, port, options) {
       options = options || {};
       options.autoReconnect = false;
 
       return new Mongos([new Server(host, port, options)], options);
-    },
-    manager: shardingManager
-  };
+    };
+
+    const shardingManager = new ShardingManager({
+      mongod: 'mongod',
+      mongos: 'mongos'
+    });
+
+    this.manager = shardingManager;
+    const shardOptions = this.options.shard ? this.options.shard : {};
+
+    // First set of nodes
+    const nodes1 = [
+      genShardedConfig(31010, { tags: { loc: 'ny' } }, shardOptions),
+      genShardedConfig(31011, { tags: { loc: 'sf' } }, shardOptions),
+      genShardedConfig(31012, { arbiter: true }, shardOptions),
+    ];
+
+    // second set of nodes
+    const nodes2 = [
+      genShardedConfig(31020, { tags: { loc: 'ny' } }, shardOptions),
+      genShardedConfig(31021, { tags: { loc: 'sf' } }, shardOptions),
+      genShardedConfig(31020, { arbiter: true }, shardOptions)
+    ];
+
+    const configOptions = this.options.config ? this.options.config : {};
+    const configNodes = [
+      genConfigNode(35000, configOptions),
+      genConfigNode(35001, configOptions),
+      genConfigNode(35002, configOptions)
+    ];
+
+    const proxyNodes = [
+      {
+        bind_ip: 'localhost',
+        port: 51000,
+        configdb: 'localhost:35000,localhost:35001,localhost:35002'
+      },
+      {
+        bind_ip: 'localhost',
+        port: 51001,
+        configdb: 'localhost:35000,localhost:35001,localhost:35002'
+      }
+    ];
+
+    // Additional mapping
+    const self = this;
+    proxyNodes = proxyNodes.map(function(x) {
+      if (self.options && self.options.proxy) {
+        for (let name in self.options.proxy) {
+          x[name] = self.options.proxy[name];
+        }
+      }
+
+      return x;
+    });
+
+    shardingManager.addShard(nodes1, { replSet: 'rs1' });
+    shardingManager.addShard(nodes2, { replSet: 'rs2' });
+    shardingManager.addConfigurationServers(configNodes, { replSet: 'rs3' });
+    shardingManager.addProxies(proxyNodes, { binary: 'mongos' });
+  }
 };
 
 /**
  *
  */
-var sslEnvironment = function() {
-  return {
-    sslOnNormalPorts: null,
-    fork: null,
-    sslPEMKeyFile: __dirname + '/functional/ssl/server.pem',
-    url: 'mongodb://%slocalhost:27017/integration_tests?ssl=true&sslValidate=false',
-    topology: function(host, port, serverOptions) {
+class SslEnvironment extends EnvironmentBase {
+  constructor() {
+    super();
+
+    this.sslOnNormalPorts = null;
+    this.fork = null;
+    this.sslPEMKeyFile = __dirname + '/functional/ssl/server.pem';
+    this.url = 'mongodb://%slocalhost:27017/integration_tests?ssl=true&sslValidate=false';
+    this.topology = function(host, port, serverOptions) {
       host = host || 'localhost';
       port = port || 27017;
-      serverOptions = clone(serverOptions);
+      serverOptions = Object.assign({}, serverOptions);
       serverOptions.poolSize = 1;
       serverOptions.ssl = true;
       serverOptions.sslValidate = false;
       return new Server(host, port, serverOptions);
-    },
-    manager: new ServerManager('mongod', {
+    };
+
+    this.manager = new ServerManager('mongod', {
       dbpath: path.join(path.resolve('db'), f('data-%d', 27017)),
       sslOnNormalPorts: null,
       sslPEMKeyFile: __dirname + '/functional/ssl/server.pem',
       setParameter: ['enableTestCommands=1']
-    })
-  };
-};
+    });
+  }
+}
 
 /**
  *
  */
-var authEnvironment = function() {
-  return {
-    url: 'mongodb://%slocalhost:27017/integration_tests',
-    topology: function(host, port, serverOptions) {
+class AuthEnvironment extends EnvironmentBase {
+  constructor() {
+    super();
+
+    this.url = 'mongodb://%slocalhost:27017/integration_tests';
+    this.topology = function(host, port, serverOptions) {
       host = host || 'localhost';
       port = port || 27017;
-      serverOptions = clone(serverOptions);
+      serverOptions = Object.assign({}, serverOptions);
       serverOptions.poolSize = 1;
       return new Server(host, port, serverOptions);
-    },
-    manager: new ServerManager('mongod', {
+    };
+
+    this.manager = new ServerManager('mongod', {
       dbpath: path.join(path.resolve('db'), f('data-%d', 27017)),
       auth: null
-    })
-  };
-};
+    });
+  }
+}
 
 module.exports = {
-  single: singleEnvironment,
-  replicaset: replicaSetEnvironment,
-  sharded: shardedEnvironment,
-  ssl: sslEnvironment,
-  auth: authEnvironment,
+  single: SingleEnvironment,
+  replicaset: ReplicaSetEnvironment,
+  sharded: ShardedEnvironment,
+  ssl: SslEnvironment,
+  auth: AuthEnvironment,
 
   // informational aliases
-  kerberos: singleEnvironment,
-  ldap: singleEnvironment,
-  sni: singleEnvironment
+  kerberos: SingleEnvironment,
+  ldap: SingleEnvironment,
+  sni: SingleEnvironment
 };
