@@ -1,6 +1,5 @@
 'use strict';
 var expect = require('chai').expect,
-  assign = require('../../../../lib/utils').assign,
   co = require('co'),
   Connection = require('../../../../lib/connection/connection'),
   mock = require('../../../mock'),
@@ -35,7 +34,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         Long = this.configuration.mongo.BSON.Long;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -44,7 +43,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var primary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
@@ -55,7 +54,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var firstSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32001',
@@ -66,7 +65,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var secondSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32002',
@@ -175,7 +174,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         Long = this.configuration.mongo.BSON.Long;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -184,7 +183,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var primary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
@@ -195,7 +194,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var firstSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32001',
@@ -206,7 +205,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var secondSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32002',
@@ -314,7 +313,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         Long = this.configuration.mongo.BSON.Long;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -323,7 +322,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var primary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
@@ -334,7 +333,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var firstSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32001',
@@ -345,7 +344,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var secondSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32002',
@@ -488,7 +487,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         MongoError = this.configuration.mongo.MongoError;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -497,7 +496,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var primary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
@@ -507,7 +506,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var firstSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32001',
@@ -645,7 +644,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         Long = this.configuration.mongo.BSON.Long;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -654,7 +653,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var primary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
@@ -665,7 +664,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var firstSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32001',
@@ -676,7 +675,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var secondSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32002',
@@ -816,7 +815,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         Long = this.configuration.mongo.BSON.Long;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -825,7 +824,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var primary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
@@ -836,7 +835,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var firstSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32001',
@@ -847,7 +846,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var secondSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32002',
@@ -964,7 +963,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         Long = this.configuration.mongo.BSON.Long;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -973,7 +972,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var primary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
@@ -984,7 +983,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var firstSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32001',
@@ -995,7 +994,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var secondSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32002',
@@ -1112,7 +1111,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
           Long = this.configuration.mongo.BSON.Long;
 
         var electionIds = [new ObjectId(), new ObjectId()];
-        var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+        var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
           setVersion: 1,
           electionId: electionIds[0],
@@ -1121,7 +1120,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
         // Primary server states
         var primary = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: true,
             secondary: false,
             me: 'localhost:32000',
@@ -1203,7 +1202,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
         Long = this.configuration.mongo.BSON.Long;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -1212,7 +1211,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var primary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
@@ -1223,7 +1222,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var firstSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32001',
@@ -1234,7 +1233,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
 
       // Primary server states
       var secondSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32002',

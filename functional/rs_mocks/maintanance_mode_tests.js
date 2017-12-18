@@ -1,6 +1,5 @@
 'use strict';
 var expect = require('chai').expect,
-  assign = require('../../../../lib/utils').assign,
   co = require('co'),
   Connection = require('../../../../lib/connection/connection'),
   mock = require('../../../mock'),
@@ -33,7 +32,7 @@ describe('ReplSet Maintenance Mode (mocks)', function() {
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       var currentIsMasterIndex = 0;
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: new ObjectId(),
@@ -43,14 +42,14 @@ describe('ReplSet Maintenance Mode (mocks)', function() {
 
       // Primary server states
       var primary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
           primary: 'localhost:32000',
           tags: { loc: 'ny' }
         }),
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
@@ -61,14 +60,14 @@ describe('ReplSet Maintenance Mode (mocks)', function() {
 
       // Primary server states
       var firstSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32001',
           primary: 'localhost:32000',
           tags: { loc: 'sf' }
         }),
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32001',
@@ -79,7 +78,7 @@ describe('ReplSet Maintenance Mode (mocks)', function() {
 
       // Primary server states
       var secondSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32003',
@@ -98,14 +97,14 @@ describe('ReplSet Maintenance Mode (mocks)', function() {
 
       // Primary server states
       var arbiter = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: false,
           arbiterOnly: true,
           me: 'localhost:32002',
           primary: 'localhost:32000'
         }),
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: false,
           arbiterOnly: true,

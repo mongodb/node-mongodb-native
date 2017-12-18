@@ -1,9 +1,8 @@
 'use strict';
-var assign = require('../../../../lib/utils').assign,
-  co = require('co'),
-  Connection = require('../../../../lib/connection/connection'),
-  mock = require('../../../mock'),
-  ConnectionSpy = require('../shared').ConnectionSpy;
+const co = require('co');
+const Connection = require('../../../../lib/connection/connection');
+const mock = require('../../../mock');
+const ConnectionSpy = require('../shared').ConnectionSpy;
 
 let test = {};
 describe('ReplSet Operations (mocks)', function() {
@@ -32,7 +31,7 @@ describe('ReplSet Operations (mocks)', function() {
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       var currentIsMasterIndex = 0;
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: new ObjectId(),
@@ -41,7 +40,7 @@ describe('ReplSet Operations (mocks)', function() {
 
       // Primary server states
       var primary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
@@ -104,7 +103,7 @@ describe('ReplSet Operations (mocks)', function() {
           ReadPreference = this.configuration.mongo.ReadPreference;
 
         var currentIsMasterIndex = 0;
-        var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+        var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
           setVersion: 1,
           electionId: new ObjectId(),
@@ -113,7 +112,7 @@ describe('ReplSet Operations (mocks)', function() {
 
         // Primary server states
         var primary = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: true,
             secondary: false,
             me: 'localhost:32000',

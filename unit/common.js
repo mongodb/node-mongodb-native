@@ -1,10 +1,9 @@
 'use strict';
 
-var assign = require('../../../lib/utils').assign,
-  mock = require('../../mock'),
-  ObjectId = require('bson').ObjectId,
-  Timestamp = require('bson').Timestamp,
-  Binary = require('bson').Binary;
+const mock = require('../../mock');
+const ObjectId = require('bson').ObjectId;
+const Timestamp = require('bson').Timestamp;
+const Binary = require('bson').Binary;
 
 class ReplSetFixture {
   constructor() {
@@ -22,7 +21,7 @@ class ReplSetFixture {
         this.firstSecondaryServer = servers[1];
         this.arbiterServer = servers[2];
 
-        this.defaultFields = assign({}, ismaster, {
+        this.defaultFields = Object.assign({}, ismaster, {
           setName: 'rs',
           setVersion: 1,
           electionId: this.electionIds[0],
@@ -38,7 +37,7 @@ class ReplSetFixture {
 
   defineReplSetStates() {
     this.primaryStates = [
-      assign({}, this.defaultFields, {
+      Object.assign({}, this.defaultFields, {
         ismaster: true,
         secondary: false,
         me: this.primaryServer.uri(),
@@ -48,7 +47,7 @@ class ReplSetFixture {
     ];
 
     this.firstSecondaryStates = [
-      assign({}, this.defaultFields, {
+      Object.assign({}, this.defaultFields, {
         ismaster: false,
         secondary: true,
         me: this.firstSecondaryServer.uri(),
@@ -58,7 +57,7 @@ class ReplSetFixture {
     ];
 
     this.arbiterStates = [
-      assign({}, this.defaultFields, {
+      Object.assign({}, this.defaultFields, {
         ismaster: false,
         secondary: false,
         arbiterOnly: true,

@@ -2,7 +2,6 @@
 var expect = require('chai').expect,
   f = require('util').format,
   co = require('co'),
-  assign = require('../../../../lib/utils').assign,
   mock = require('../../../mock');
 
 describe('Mongos Single Proxy Connection (mocks)', function() {
@@ -25,12 +24,12 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
       var stopRespondingPrimary = false;
 
       // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
       });
 
       // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
+      var serverIsMaster = [Object.assign({}, defaultFields)];
 
       // Boot the mock
       co(function*() {
@@ -109,12 +108,12 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
       });
 
       // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
+      var serverIsMaster = [Object.assign({}, defaultFields)];
 
       // Boot the mock
       co(function*() {

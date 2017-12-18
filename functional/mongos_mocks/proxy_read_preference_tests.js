@@ -1,6 +1,5 @@
 'use strict';
 var expect = require('chai').expect,
-  assign = require('../../../../lib/utils').assign,
   co = require('co'),
   mock = require('../../../mock');
 
@@ -21,12 +20,12 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
         ReadPreference = this.configuration.mongo.ReadPreference;
 
       // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
       });
 
       // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
+      var serverIsMaster = [Object.assign({}, defaultFields)];
       // Received command on server
       var command = null;
       // Boot the mock
@@ -102,12 +101,12 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
         ReadPreference = this.configuration.mongo.ReadPreference;
 
       // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
       });
 
       // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
+      var serverIsMaster = [Object.assign({}, defaultFields)];
       // Received command on server
       var command = null;
       // Boot the mock
@@ -182,12 +181,12 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
         ReadPreference = this.configuration.mongo.ReadPreference;
 
       // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
       });
 
       // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
+      var serverIsMaster = [Object.assign({}, defaultFields)];
       // Received command on server
       var command = null;
       // Boot the mock

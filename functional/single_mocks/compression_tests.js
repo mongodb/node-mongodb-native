@@ -2,8 +2,7 @@
 var Server = require('../../../../lib/topologies/server'),
   expect = require('chai').expect,
   co = require('co'),
-  mock = require('../../../mock'),
-  assign = require('../../../../lib/utils').assign;
+  mock = require('../../../mock');
 
 // NOTE: eventually use `this.configuration.mongo.Server` instead of direct import when
 // https://github.com/malexandert/mongodb-test-runner/issues/3 is fixed
@@ -21,7 +20,7 @@ describe('Single Compression (mocks)', function() {
 
     test: function(done) {
       // Prepare the server's response
-      var serverResponse = assign({}, mock.DEFAULT_ISMASTER);
+      var serverResponse = Object.assign({}, mock.DEFAULT_ISMASTER);
 
       // Boot the mock
       co(function*() {
@@ -66,7 +65,7 @@ describe('Single Compression (mocks)', function() {
         var currentStep = 0;
 
         // Prepare the server's response
-        let serverResponse = assign({}, mock.DEFAULT_ISMASTER);
+        let serverResponse = Object.assign({}, mock.DEFAULT_ISMASTER);
 
         // Boot the mock
         co(function*() {
@@ -159,7 +158,7 @@ describe('Single Compression (mocks)', function() {
         var currentStep = 0;
 
         // Prepare the server's response
-        var serverResponse = assign({}, mock.DEFAULT_ISMASTER, {
+        var serverResponse = Object.assign({}, mock.DEFAULT_ISMASTER, {
           compression: ['snappy']
         });
 
@@ -255,7 +254,7 @@ describe('Single Compression (mocks)', function() {
         var currentStep = 0;
 
         // Prepare the server's response
-        var serverResponse = assign({}, mock.DEFAULT_ISMASTER, {
+        var serverResponse = Object.assign({}, mock.DEFAULT_ISMASTER, {
           compression: ['zlib']
         });
 
@@ -349,7 +348,7 @@ describe('Single Compression (mocks)', function() {
       var currentStep = 0;
 
       // Prepare the server's response
-      var serverResponse = assign({}, mock.DEFAULT_ISMASTER, {
+      var serverResponse = Object.assign({}, mock.DEFAULT_ISMASTER, {
         compression: ['snappy']
       });
 

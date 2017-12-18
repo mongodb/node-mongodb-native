@@ -1,7 +1,6 @@
 'use strict';
 var Mongos = require('../../../../lib/topologies/mongos'),
   expect = require('chai').expect,
-  assign = require('../../../../lib/utils').assign,
   mock = require('../../../mock'),
   genClusterTime = require('../common').genClusterTime;
 
@@ -20,7 +19,7 @@ describe('Sessions (Mongos)', function() {
       const clusterTime = genClusterTime(Date.now());
       test.server.setMessageHandler(request => {
         request.reply(
-          assign({}, mock.DEFAULT_ISMASTER, {
+          Object.assign({}, mock.DEFAULT_ISMASTER, {
             msg: 'isdbgrid',
             $clusterTime: clusterTime
           })
@@ -51,7 +50,7 @@ describe('Sessions (Mongos)', function() {
       const clusterTime = genClusterTime(Date.now());
       test.server.setMessageHandler(request => {
         request.reply(
-          assign({}, mock.DEFAULT_ISMASTER, {
+          Object.assign({}, mock.DEFAULT_ISMASTER, {
             msg: 'isdbgrid',
             $clusterTime: clusterTime
           })
@@ -89,7 +88,7 @@ describe('Sessions (Mongos)', function() {
         const doc = request.document;
         if (doc.ismaster) {
           request.reply(
-            assign({}, mock.DEFAULT_ISMASTER, {
+            Object.assign({}, mock.DEFAULT_ISMASTER, {
               msg: 'isdbgrid',
               $clusterTime: clusterTime
             })
@@ -138,7 +137,7 @@ describe('Sessions (Mongos)', function() {
     test: function(done) {
       test.server.setMessageHandler(request => {
         request.reply(
-          assign({}, mock.DEFAULT_ISMASTER, {
+          Object.assign({}, mock.DEFAULT_ISMASTER, {
             msg: 'isdbgrid',
             logicalSessionTimeoutMinutes: 10
           })

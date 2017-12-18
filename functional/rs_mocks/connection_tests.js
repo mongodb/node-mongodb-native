@@ -1,7 +1,6 @@
 'use strict';
 var expect = require('chai').expect,
   co = require('co'),
-  assign = require('../../../../lib/utils').assign,
   Connection = require('../../../../lib/connection/connection'),
   mock = require('../../../mock'),
   ConnectionSpy = require('../shared').ConnectionSpy;
@@ -35,7 +34,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
       var electionIds = [new ObjectId(), new ObjectId()];
 
       // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -45,7 +44,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
       // Primary server states
       var primary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
@@ -56,7 +55,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
       // Primary server states
       var firstSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32001',
@@ -67,7 +66,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
       // Primary server states
       var arbiter = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: false,
           arbiterOnly: true,
@@ -161,7 +160,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
           ObjectId = this.configuration.mongo.BSON.ObjectId;
 
         var electionIds = [new ObjectId(), new ObjectId()];
-        var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+        var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
           setVersion: 1,
           electionId: electionIds[0],
@@ -171,7 +170,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
         // Primary server states
         var primary = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: true,
             secondary: false,
             me: 'localhost:32000',
@@ -182,7 +181,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
         // Primary server states
         var firstSecondary = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: false,
             secondary: true,
             me: 'localhost:32001',
@@ -193,7 +192,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
         // Primary server states
         var arbiter = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: false,
             secondary: false,
             arbiterOnly: true,
@@ -279,7 +278,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -289,7 +288,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
       // Primary server states
       var primary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
@@ -300,7 +299,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
       // Primary server states
       var firstSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32001',
@@ -390,7 +389,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -400,7 +399,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
       // Primary server states
       var firstSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32001',
@@ -461,7 +460,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
           ObjectId = this.configuration.mongo.BSON.ObjectId;
 
         var electionIds = [new ObjectId(), new ObjectId()];
-        var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+        var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
           setVersion: 1,
           electionId: electionIds[0],
@@ -471,7 +470,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
         // Primary server states
         var firstSecondary = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: false,
             secondary: true,
             me: 'localhost:32001',
@@ -482,7 +481,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
         // Primary server states
         var arbiter = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: false,
             secondary: false,
             arbiterOnly: true,
@@ -566,7 +565,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
           ObjectId = this.configuration.mongo.BSON.ObjectId;
 
         var electionIds = [new ObjectId(), new ObjectId()];
-        var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+        var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
           setVersion: 1,
           electionId: electionIds[0],
@@ -576,7 +575,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
         // Primary server states
         var primary = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: true,
             secondary: false,
             me: 'localhost:32000',
@@ -587,7 +586,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
         // Primary server states
         var firstSecondary = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: false,
             secondary: true,
             me: 'localhost:32001',
@@ -598,7 +597,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
         // Primary server states
         var arbiter = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: false,
             secondary: false,
             arbiterOnly: true,
@@ -692,7 +691,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -702,7 +701,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
       // Primary server states
       var primary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
@@ -713,7 +712,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
       // Primary server states
       var firstSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32001',
@@ -724,7 +723,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
       // Primary server states
       var arbiter = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: false,
           arbiterOnly: true,
@@ -802,7 +801,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -812,7 +811,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
       // Primary server states
       var primary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
@@ -823,7 +822,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
       // Primary server states
       var firstSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32001',
@@ -901,7 +900,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
           ObjectId = this.configuration.mongo.BSON.ObjectId;
 
         var electionIds = [new ObjectId(), new ObjectId()];
-        var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+        var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
           setVersion: 1,
           electionId: electionIds[0],
@@ -911,7 +910,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
         // Primary server states
         var primary = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: true,
             secondary: false,
             me: 'localhost:32000',
@@ -922,7 +921,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
         // Primary server states
         var firstSecondary = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: false,
             secondary: true,
             me: 'localhost:32001',
@@ -933,7 +932,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
         // Primary server states
         var arbiter = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: false,
             secondary: false,
             arbiterOnly: true,
@@ -1022,7 +1021,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[0],
@@ -1031,7 +1030,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
       });
 
       var primary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
@@ -1041,7 +1040,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
       ];
 
       var arbiter = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: false,
           arbiterOnly: true,
@@ -1117,7 +1116,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
           ObjectId = this.configuration.mongo.BSON.ObjectId;
 
         var electionIds = [new ObjectId(), new ObjectId()];
-        var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+        var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
           setVersion: 1,
           electionId: electionIds[0],
@@ -1127,7 +1126,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
         // Primary server states
         var primary = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: true,
             secondary: false,
             me: 'localhost:32000',
@@ -1138,7 +1137,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
         // Primary server states
         var firstSecondary = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: false,
             secondary: true,
             me: 'localhost:32001',
@@ -1149,7 +1148,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
         // Primary server states
         var arbiter = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: false,
             secondary: false,
             arbiterOnly: true,
@@ -1231,7 +1230,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
           ObjectId = this.configuration.mongo.BSON.ObjectId;
 
         var electionIds = [new ObjectId(), new ObjectId()];
-        var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+        var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
           setVersion: 1,
           electionId: electionIds[0],
@@ -1241,7 +1240,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
         // Primary server states
         var firstSecondary = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: false,
             secondary: true,
             me: 'localhost:32001',
@@ -1252,7 +1251,7 @@ describe('ReplSet Connection Tests (mocks)', function() {
 
         // Primary server states
         var arbiter = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: false,
             secondary: false,
             arbiterOnly: true,

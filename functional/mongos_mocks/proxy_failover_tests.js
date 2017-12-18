@@ -1,6 +1,5 @@
 'use strict';
 var expect = require('chai').expect,
-  assign = require('../../../../lib/utils').assign,
   co = require('co'),
   mock = require('../../../mock');
 
@@ -19,12 +18,12 @@ describe('Mongos Proxy Failover (mocks)', function() {
       var Mongos = this.configuration.mongo.Mongos;
 
       // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
       });
 
       // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
+      var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
         const mongos1 = yield mock.createServer(52007, 'localhost');
@@ -98,12 +97,12 @@ describe('Mongos Proxy Failover (mocks)', function() {
       var currentStep = 0;
 
       // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
       });
 
       // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
+      var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
         const mongos1 = yield mock.createServer(52009, 'localhost');
@@ -198,12 +197,12 @@ describe('Mongos Proxy Failover (mocks)', function() {
       var currentStep = 0;
 
       // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
       });
 
       // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
+      var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
         const mongos1 = yield mock.createServer(52011, 'localhost');

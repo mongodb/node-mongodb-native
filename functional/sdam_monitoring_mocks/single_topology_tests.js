@@ -1,6 +1,5 @@
 'use strict';
 var expect = require('chai').expect,
-  assign = require('../../../../lib/utils').assign,
   co = require('co'),
   mock = require('../../../mock');
 
@@ -34,7 +33,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       };
 
       // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
+      var serverIsMaster = [Object.assign({}, defaultFields)];
 
       // Boot the mock
       var mockServer;
@@ -181,7 +180,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       };
 
       // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
+      var serverIsMaster = [Object.assign({}, defaultFields)];
 
       // Boot the mock
       var mockServer;

@@ -1,6 +1,5 @@
 'use strict';
 var expect = require('chai').expect,
-  assign = require('../../../../lib/utils').assign,
   co = require('co'),
   mock = require('../../../mock');
 
@@ -23,12 +22,12 @@ describe('Mongos Multiple Proxies (mocks)', function() {
       var mongos2 = null;
 
       // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
       });
 
       // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
+      var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
         mongos1 = yield mock.createServer(11000, 'localhost');
@@ -107,12 +106,12 @@ describe('Mongos Multiple Proxies (mocks)', function() {
       var Mongos = this.configuration.mongo.Mongos;
 
       // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
       });
 
       // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
+      var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
         const mongos1 = yield mock.createServer(11002, 'localhost');

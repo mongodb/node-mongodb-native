@@ -1,6 +1,5 @@
 'use strict';
 var expect = require('chai').expect,
-  assign = require('../../../../lib/utils').assign,
   co = require('co'),
   mock = require('../../../mock');
 
@@ -24,10 +23,10 @@ describe('Single Timeout (mocks)', function() {
       var stopRespondingPrimary = false;
 
       // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER);
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER);
 
       // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
+      var serverIsMaster = [Object.assign({}, defaultFields)];
 
       // Boot the mock
       co(function*() {
@@ -119,10 +118,10 @@ describe('Single Timeout (mocks)', function() {
       var brokenPipe = false;
 
       // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER);
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER);
 
       // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
+      var serverIsMaster = [Object.assign({}, defaultFields)];
 
       co(function*() {
         const mockServer = yield mock.createServer(37017, 'localhost', {
@@ -272,10 +271,10 @@ describe('Single Timeout (mocks)', function() {
         var currentStep = 0;
 
         // Default message fields
-        var defaultFields = assign({}, mock.DEFAULT_ISMASTER);
+        var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER);
 
         // Primary server states
-        var serverIsMaster = [assign({}, defaultFields)];
+        var serverIsMaster = [Object.assign({}, defaultFields)];
 
         // Boot the mock
         co(function*() {

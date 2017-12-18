@@ -1,6 +1,5 @@
 'use strict';
 var expect = require('chai').expect,
-  assign = require('../../../../lib/utils').assign,
   co = require('co'),
   Connection = require('../../../../lib/connection/connection'),
   mock = require('../../../mock'),
@@ -41,7 +40,7 @@ describe('ReplSet Monitoring (mocks)', function() {
         var electionIds = [new ObjectId(), new ObjectId()];
         var currentIsMasterState = 0;
         var stopRespondingPrimary = false;
-        var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+        var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
           setName: 'rs',
           setVersion: 1,
           electionId: electionIds[currentIsMasterState],
@@ -50,13 +49,13 @@ describe('ReplSet Monitoring (mocks)', function() {
 
         // Primary server states
         var primary = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: true,
             secondary: false,
             me: 'localhost:32000',
             primary: 'localhost:32000'
           }),
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: false,
             secondary: true,
             me: 'localhost:32000',
@@ -66,13 +65,13 @@ describe('ReplSet Monitoring (mocks)', function() {
 
         // Primary server states
         var firstSecondary = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: false,
             secondary: true,
             me: 'localhost:32001',
             primary: 'localhost:32000'
           }),
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: true,
             secondary: false,
             me: 'localhost:32001',
@@ -82,13 +81,13 @@ describe('ReplSet Monitoring (mocks)', function() {
 
         // Primary server states
         var secondSecondary = [
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: false,
             secondary: true,
             me: 'localhost:32002',
             primary: 'localhost:32000'
           }),
-          assign({}, defaultFields, {
+          Object.assign({}, defaultFields, {
             ismaster: false,
             secondary: true,
             me: 'localhost:32002',
@@ -242,7 +241,7 @@ describe('ReplSet Monitoring (mocks)', function() {
 
       var electionIds = [new ObjectId(), new ObjectId()];
       var currentIsMasterState = 0;
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: electionIds[currentIsMasterState],
@@ -251,13 +250,13 @@ describe('ReplSet Monitoring (mocks)', function() {
 
       // Primary server states
       var primary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
           primary: 'localhost:32000'
         }),
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32000',
@@ -267,13 +266,13 @@ describe('ReplSet Monitoring (mocks)', function() {
 
       // Primary server states
       var firstSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32001',
           primary: 'localhost:32000'
         }),
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32001',
@@ -283,13 +282,13 @@ describe('ReplSet Monitoring (mocks)', function() {
 
       // Primary server states
       var secondSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32002',
           primary: 'localhost:32000'
         }),
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32002',

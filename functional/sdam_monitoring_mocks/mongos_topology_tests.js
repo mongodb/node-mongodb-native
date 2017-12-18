@@ -1,6 +1,5 @@
 'use strict';
 var expect = require('chai').expect,
-  assign = require('../../../../lib/utils').assign,
   co = require('co'),
   mock = require('../../../mock');
 
@@ -36,7 +35,7 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       };
 
       // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
+      var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
         mongos1 = yield mock.createServer(62000, 'localhost');
@@ -248,7 +247,7 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       };
 
       // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
+      var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
         mongos1 = yield mock.createServer(62002, 'localhost');
@@ -451,7 +450,7 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       };
 
       // Primary server states
-      var serverIsMaster = [assign({}, defaultFields)];
+      var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
         mongos1 = yield mock.createServer(62004, 'localhost');

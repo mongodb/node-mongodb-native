@@ -1,9 +1,8 @@
 'use strict';
-var assign = require('../../../../lib/utils').assign,
-  co = require('co'),
-  Connection = require('../../../../lib/connection/connection'),
-  mock = require('../../../mock'),
-  ConnectionSpy = require('../shared').ConnectionSpy;
+const co = require('co');
+const Connection = require('../../../../lib/connection/connection');
+const mock = require('../../../mock');
+const ConnectionSpy = require('../shared').ConnectionSpy;
 
 let test = {};
 describe('ReplSet Primary Loses Network (mocks)', function() {
@@ -33,7 +32,7 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
 
       var currentIsMasterIndex = 0;
       var step = 0;
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: new ObjectId(),
@@ -42,14 +41,14 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
 
       // Primary server states
       var primary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
           primary: 'localhost:32000',
           tags: { loc: 'ny' }
         }),
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
@@ -60,14 +59,14 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
 
       // Primary server states
       var firstSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32001',
           primary: 'localhost:32000',
           tags: { loc: 'sf' }
         }),
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32001',
@@ -78,14 +77,14 @@ describe('ReplSet Primary Loses Network (mocks)', function() {
 
       // Primary server states
       var secondSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32002',
           primary: 'localhost:32000',
           tags: { loc: 'sf' }
         }),
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32002',

@@ -1,6 +1,5 @@
 'use strict';
 var expect = require('chai').expect,
-  assign = require('../../../../lib/utils').assign,
   co = require('co'),
   mock = require('../../../mock');
 
@@ -25,12 +24,12 @@ describe('Mongos Mixed Seed List (mocks)', function() {
       var mongos2 = null;
 
       // Default message fields
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         msg: 'isdbgrid'
       });
 
       // Default message fields
-      var defaultRSFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultRSFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: new ObjectId(),
@@ -39,7 +38,7 @@ describe('Mongos Mixed Seed List (mocks)', function() {
       });
 
       // Primary server states
-      var serverIsMaster = [assign({}, defaultFields), assign({}, defaultRSFields)];
+      var serverIsMaster = [Object.assign({}, defaultFields), Object.assign({}, defaultRSFields)];
 
       // Boot the mock
       co(function*() {
@@ -116,7 +115,7 @@ describe('Mongos Mixed Seed List (mocks)', function() {
       var mongos2 = null;
 
       // Default message fields
-      var defaultRSFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultRSFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: new ObjectId(),
@@ -125,7 +124,7 @@ describe('Mongos Mixed Seed List (mocks)', function() {
       });
 
       // Primary server states
-      var serverIsMaster = [assign({}, defaultRSFields), assign({}, defaultRSFields)];
+      var serverIsMaster = [Object.assign({}, defaultRSFields), Object.assign({}, defaultRSFields)];
 
       // Boot the mock
       co(function*() {

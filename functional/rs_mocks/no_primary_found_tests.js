@@ -1,9 +1,8 @@
 'use strict';
-var assign = require('../../../../lib/utils').assign,
-  co = require('co'),
-  Connection = require('../../../../lib/connection/connection'),
-  mock = require('../../../mock'),
-  ConnectionSpy = require('../shared').ConnectionSpy;
+const co = require('co');
+const Connection = require('../../../../lib/connection/connection');
+const mock = require('../../../mock');
+const ConnectionSpy = require('../shared').ConnectionSpy;
 
 let test = {};
 describe('ReplSet No Primary Found (mocks)', function() {
@@ -31,7 +30,7 @@ describe('ReplSet No Primary Found (mocks)', function() {
       var ReplSet = this.configuration.mongo.ReplSet,
         ObjectId = this.configuration.mongo.BSON.ObjectId;
 
-      var defaultFields = assign({}, mock.DEFAULT_ISMASTER, {
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         setName: 'rs',
         setVersion: 1,
         electionId: new ObjectId(),
@@ -41,7 +40,7 @@ describe('ReplSet No Primary Found (mocks)', function() {
 
       // Primary server states
       var primary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: true,
           secondary: false,
           me: 'localhost:32000',
@@ -51,7 +50,7 @@ describe('ReplSet No Primary Found (mocks)', function() {
 
       // Primary server states
       var firstSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32001',
@@ -61,7 +60,7 @@ describe('ReplSet No Primary Found (mocks)', function() {
 
       // Primary server states
       var secondSecondary = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: true,
           me: 'localhost:32002',
@@ -71,7 +70,7 @@ describe('ReplSet No Primary Found (mocks)', function() {
 
       // Primary server states
       var arbiter = [
-        assign({}, defaultFields, {
+        Object.assign({}, defaultFields, {
           ismaster: false,
           secondary: false,
           arbiterOnly: true,
