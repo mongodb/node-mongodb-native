@@ -9,7 +9,6 @@ var inherits = require('util').inherits,
   f = require('util').format,
   Query = require('./commands').Query,
   CommandResult = require('./command_result'),
-  assign = require('../utils').assign,
   MESSAGE_HEADER_SIZE = require('../wireprotocol/shared').MESSAGE_HEADER_SIZE,
   opcodes = require('../wireprotocol/shared').opcodes,
   compress = require('../wireprotocol/compression').compress,
@@ -80,7 +79,7 @@ var Pool = function(topology, options) {
   this.topology = topology;
 
   // Add the options
-  this.options = assign(
+  this.options = Object.assign(
     {
       // Host and port settings
       host: 'localhost',

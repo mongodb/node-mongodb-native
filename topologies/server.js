@@ -15,7 +15,6 @@ var inherits = require('util').inherits,
   ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support'),
   BasicCursor = require('../cursor'),
   sdam = require('./shared'),
-  assign = require('../utils').assign,
   createClientInfo = require('./shared').createClientInfo,
   createCompressionInfo = require('./shared').createCompressionInfo,
   resolveClusterTime = require('./shared').resolveClusterTime,
@@ -534,7 +533,7 @@ Server.prototype.connect = function(options) {
   }
 
   // Create a pool
-  self.s.pool = new Pool(this, assign(self.s.options, options, { bson: this.s.bson }));
+  self.s.pool = new Pool(this, Object.assign(self.s.options, options, { bson: this.s.bson }));
 
   // Set up listeners
   self.s.pool.on('close', eventHandler(self, 'close'));
@@ -657,7 +656,7 @@ Server.prototype.command = function(ns, cmd, options, callback) {
   if (result) return callback(result);
 
   // Clone the options
-  options = assign({}, options, { wireProtocolCommand: false });
+  options = Object.assign({}, options, { wireProtocolCommand: false });
 
   // Debug log
   if (self.s.logger.isDebug())
