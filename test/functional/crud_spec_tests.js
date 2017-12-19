@@ -188,6 +188,29 @@ describe('CRUD spec', function() {
     });
   }
 
+  function executeInsertTest(scenarioTest, db, collection) {
+    var args = scenarioTest.operation.arguments;
+    var documents = args.document || args.documents;
+    var options = Object.assign({}, args);
+    delete options.document;
+    delete options.documents;
+
+    return collection[scenarioTest.operation.name](documents, options).then(function(result) {
+      Object.keys(scenarioTest.outcome.result).forEach(function(resultName) {
+        test.deepEqual(result[resultName], scenarioTest.outcome.result[resultName]);
+      });
+
+      if (scenarioTest.outcome.collection) {
+        return collection
+          .find({})
+          .toArray()
+          .then(function(results) {
+            test.deepEqual(results, scenarioTest.outcome.collection.data);
+          });
+      }
+    });
+  }
+
   function executeBulkTest(scenarioTest, db, collection) {
     var args = scenarioTest.operation.arguments;
     var operations = args.requests.map(function(operation) {
@@ -349,6 +372,9 @@ describe('CRUD spec', function() {
           case 'findOneAndUpdate':
           case 'findOneAndDelete':
             return executeFindOneTest(scenarioTest, context.db, collection);
+          case 'insertOne':
+          case 'insertMany':
+            return executeInsertTest(scenarioTest, context.db, collection);
           case 'bulkWrite':
             return executeBulkTest(scenarioTest, context.db, collection);
         }
