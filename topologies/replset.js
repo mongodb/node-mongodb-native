@@ -773,6 +773,22 @@ function applyAuthenticationContexts(self, server, callback) {
   applyAuth(authContexts, server, callback);
 }
 
+function shouldTriggerConnect(self) {
+  const isConnecting = self.state === CONNECTING;
+  const hasPrimary = self.s.replicaSetState.hasPrimary();
+  const hasSecondary = self.s.replicaSetState.hasSecondary();
+  const secondaryOnlyConnectionAllowed = self.s.options.secondaryOnlyConnectionAllowed;
+  const readPreferenceSecondary =
+    self.s.connectOptions.readPreference &&
+    self.s.connectOptions.readPreference.equals(ReadPreference.secondary);
+
+  return (
+    (isConnecting &&
+      ((readPreferenceSecondary && hasSecondary) || (!readPreferenceSecondary && hasPrimary))) ||
+    (hasSecondary && secondaryOnlyConnectionAllowed)
+  );
+}
+
 function handleInitialConnectEvent(self, event) {
   return function() {
     var _this = this;
@@ -835,10 +851,7 @@ function handleInitialConnectEvent(self, event) {
           _this.on('parseError', handleEvent(self, 'parseError'));
 
           // Do we have a primary or primaryAndSecondary
-          if (
-            (self.state === CONNECTING && self.s.replicaSetState.hasPrimary()) ||
-            (self.s.replicaSetState.hasSecondary() && self.s.options.secondaryOnlyConnectionAllowed)
-          ) {
+          if (shouldTriggerConnect(self)) {
             // We are connected
             self.state = CONNECTED;
 
