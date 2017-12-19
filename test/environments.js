@@ -38,12 +38,12 @@ class ReplicaSetEnvironment extends EnvironmentBase {
   constructor(discoverResult) {
     super();
 
-    this.host = 'localhost',
-    this.port = 31000,
-    this.setName = 'rs',
-    this.url = 'mongodb://%slocalhost:31000/integration_tests?rs_name=rs',
-    this.writeConcernMax = { w: 'majority', wtimeout: 30000 },
-    this.replicasetName = 'rs',
+    this.host = 'localhost';
+    this.port = 31000;
+    this.setName = 'rs';
+    this.url = 'mongodb://%slocalhost:31000/integration_tests?rs_name=rs';
+    this.writeConcernMax = { w: 'majority', wtimeout: 30000 };
+    this.replicasetName = 'rs';
     this.topology = function(host, port, serverOptions) {
       host = host || 'localhost';
       port = port || 31000;
@@ -55,10 +55,6 @@ class ReplicaSetEnvironment extends EnvironmentBase {
       return new ReplSet([new Server(host, port, serverOptions)], serverOptions);
     };
 
-    this.manager = new ReplSetManager('mongod', nodes, {
-      replSet: 'rs'
-    });
-
     this.nodes = [
       genReplsetConfig(31000, { tags: { loc: 'ny' } }),
       genReplsetConfig(31001, { tags: { loc: 'sf' } }),
@@ -67,16 +63,20 @@ class ReplicaSetEnvironment extends EnvironmentBase {
       genReplsetConfig(31004, { arbiter: true })
     ];
 
+    this.manager = new ReplSetManager('mongod', this.nodes, {
+      replSet: 'rs'
+    });
+
     // Do we have 3.2+
     const version = discoverResult.version.join('.');
     if (semver.satisfies(version, '>=3.2.0')) {
-      nodes = nodes.map(function(x) {
+      this.nodes = this.nodes.map(function(x) {
         x.options.enableMajorityReadConcern = null;
         return x;
       });
     }
   }
-};
+}
 
 /**
  *
@@ -114,13 +114,13 @@ const genConfigNode = (port, options) => {
     {
       options: {
         bind_ip: 'localhost',
-        port: 35000,
-        dbpath: f('%s/../db/35000', __dirname)
+        port: port,
+        dbpath: `${__dirname}/../db/${port}`
       }
     },
     options
   );
-}
+};
 
 /**
  *
@@ -140,36 +140,37 @@ class ShardedEnvironment extends EnvironmentBase {
       return new Mongos([new Server(host, port, options)], options);
     };
 
-    const shardingManager = new ShardingManager({
+    this.manager = new ShardingManager({
       mongod: 'mongod',
       mongos: 'mongos'
     });
+  }
 
-    this.manager = shardingManager;
-    const shardOptions = this.options.shard ? this.options.shard : {};
+  setup(callback) {
+    const shardOptions = this.options && this.options.shard ? this.options.shard : {};
 
     // First set of nodes
     const nodes1 = [
       genShardedConfig(31010, { tags: { loc: 'ny' } }, shardOptions),
       genShardedConfig(31011, { tags: { loc: 'sf' } }, shardOptions),
-      genShardedConfig(31012, { arbiter: true }, shardOptions),
+      genShardedConfig(31012, { arbiter: true }, shardOptions)
     ];
 
     // second set of nodes
     const nodes2 = [
       genShardedConfig(31020, { tags: { loc: 'ny' } }, shardOptions),
       genShardedConfig(31021, { tags: { loc: 'sf' } }, shardOptions),
-      genShardedConfig(31020, { arbiter: true }, shardOptions)
+      genShardedConfig(31022, { arbiter: true }, shardOptions)
     ];
 
-    const configOptions = this.options.config ? this.options.config : {};
+    const configOptions = this.options && this.options.config ? this.options.config : {};
     const configNodes = [
       genConfigNode(35000, configOptions),
       genConfigNode(35001, configOptions),
       genConfigNode(35002, configOptions)
     ];
 
-    const proxyNodes = [
+    let proxyNodes = [
       {
         bind_ip: 'localhost',
         port: 51000,
@@ -194,12 +195,16 @@ class ShardedEnvironment extends EnvironmentBase {
       return x;
     });
 
-    shardingManager.addShard(nodes1, { replSet: 'rs1' });
-    shardingManager.addShard(nodes2, { replSet: 'rs2' });
-    shardingManager.addConfigurationServers(configNodes, { replSet: 'rs3' });
-    shardingManager.addProxies(proxyNodes, { binary: 'mongos' });
+    Promise.all([
+      this.manager.addShard(nodes1, { replSet: 'rs1' }),
+      this.manager.addShard(nodes2, { replSet: 'rs2' })
+    ])
+      .then(() => this.manager.addConfigurationServers(configNodes, { replSet: 'rs3' }))
+      .then(() => this.manager.addProxies(proxyNodes, { binary: 'mongos' }))
+      .then(() => callback())
+      .catch(err => callback(err));
   }
-};
+}
 
 /**
  *
