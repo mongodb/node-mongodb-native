@@ -1056,61 +1056,6 @@ describe('Operation (Promises)', function() {
   });
 
   /**
-   * Example of a simple geoNear query across some documents using a Promise.
-   *
-   * @example-class Collection
-   * @example-method geoNear
-   * @ignore
-   */
-  it('shouldCorrectlyPerformSimpleGeoNearCommandWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
-
-    // The actual test we wish to run
-    test: function() {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-
-      return client.connect().then(function(client) {
-        var db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE done();
-        // BEGIN
-
-        // Fetch the collection
-        var collection = db.collection('simple_geo_near_command_with_promise');
-
-        // Add a location based index
-        return collection
-          .ensureIndex({ loc: '2d' })
-          .then(function(result) {
-            test.ok(result);
-
-            // Save a new location tagged document
-            return collection.insertMany(
-              [{ a: 1, loc: [50, 30] }, { a: 1, loc: [30, 50] }],
-              configuration.writeConcernMax()
-            );
-          })
-          .then(function(result) {
-            test.ok(result);
-
-            // Use geoNear command to find document
-            return collection.geoNear(50, 50, { query: { a: 1 }, num: 1 });
-          })
-          .then(function(docs) {
-            test.equal(1, docs.results.length);
-            client.close();
-          });
-      });
-      // END
-    }
-  });
-
-  /**
    * Example of a simple geoHaystackSearch query across some documents using a Promise.
    *
    * @example-class Collection
@@ -1153,7 +1098,7 @@ describe('Operation (Promises)', function() {
           .then(function(result) {
             test.ok(result);
 
-            // Use geoNear command to find document
+            // Use geoHaystackSearch command to find document
             return collection.geoHaystackSearch(50, 50, {
               search: { a: 1 },
               limit: 1,

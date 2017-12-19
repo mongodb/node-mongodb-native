@@ -1019,60 +1019,6 @@ describe('Operation (Generators)', function() {
   });
 
   /**
-   * Example of a simple geoNear query across some documents using a Generator and the co module.
-   *
-   * @example-class Collection
-   * @example-method geoNear
-   * @ignore
-   */
-  it('shouldCorrectlyPerformSimpleGeoNearCommandWithGenerators', {
-    metadata: { requires: { generators: true, topology: ['single'] } },
-
-    // The actual test we wish to run
-    test: function() {
-      var configuration = this.configuration;
-      var co = require('co');
-
-      return co(function*() {
-        // Connect
-        var client = yield configuration
-          .newClient(configuration.writeConcernMax(), { poolSize: 1 })
-          .connect();
-        var db = client.db(configuration.db);
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   co = require('co');
-        // LINE   test = require('assert');
-        // LINE
-        // LINE co(function*() {
-        // LINE   var client = yield MongoClient.connect('mongodb://localhost:27017/test');
-        // LINE   var db = client.db('test');
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // BEGIN
-
-        // Fetch the collection
-        var collection = db.collection('simple_geo_near_command_with_generators');
-
-        // Add a location based index
-        yield collection.ensureIndex({ loc: '2d' });
-
-        // Save a new location tagged document
-        yield collection.insertMany(
-          [{ a: 1, loc: [50, 30] }, { a: 1, loc: [30, 50] }],
-          configuration.writeConcernMax()
-        );
-
-        // Use geoNear command to find document
-        var docs = yield collection.geoNear(50, 50, { query: { a: 1 }, num: 1 });
-        test.equal(1, docs.results.length);
-
-        // Close db
-        client.close();
-      });
-      // END
-    }
-  });
-
-  /**
    * Example of a simple geoHaystackSearch query across some documents using a Generator and the co module.
    *
    * @example-class Collection
@@ -1115,7 +1061,7 @@ describe('Operation (Generators)', function() {
           configuration.writeConcernMax()
         );
 
-        // Use geoNear command to find document
+        // Use geoHaystackSearch command to find document
         var docs = yield collection.geoHaystackSearch(50, 50, {
           search: { a: 1 },
           limit: 1,
