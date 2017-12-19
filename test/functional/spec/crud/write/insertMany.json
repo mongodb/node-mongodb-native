@@ -25,10 +25,10 @@
       },
       "outcome": {
         "result": {
-          "insertedIds": [
-            2,
-            3
-          ]
+          "insertedIds": {
+            "0": 2,
+            "1": 3
+          }
         },
         "collection": {
           "data": [
