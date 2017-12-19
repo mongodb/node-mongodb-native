@@ -188,6 +188,29 @@ describe('CRUD spec', function() {
     });
   }
 
+  function executeBulkTest(scenarioTest, db, collection) {
+    var args = scenarioTest.operation.arguments;
+    var operations = args.requests.map(function(operation) {
+      let op = {};
+      op[operation.name] = operation['arguments'];
+      return op;
+    });
+    var options = Object.assign({}, args.options);
+
+    collection.bulkWrite(operations, options).then(function(result) {
+      Object.keys(scenarioTest.outcome.result).forEach(function(resultName) {
+        test.deepEqual(result[resultName], scenarioTest.outcome.result[resultName]);
+      });
+    });
+
+    return collection
+      .find({})
+      .toArray()
+      .then(function(results) {
+        test.deepEqual(results, scenarioTest.outcome.collection.data);
+      });
+  }
+
   function executeReplaceTest(scenarioTest, db, collection) {
     var args = scenarioTest.operation.arguments;
     var filter = args.filter;
@@ -326,6 +349,8 @@ describe('CRUD spec', function() {
           case 'findOneAndUpdate':
           case 'findOneAndDelete':
             return executeFindOneTest(scenarioTest, context.db, collection);
+          case 'bulkWrite':
+            return executeBulkTest(scenarioTest, context.db, collection);
         }
       });
   }
