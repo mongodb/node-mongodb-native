@@ -1,8 +1,9 @@
 'use strict';
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
-var fs = require('fs');
-var expect = require('chai').expect;
+const test = require('./shared').assert;
+const setupDatabase = require('./shared').setupDatabase;
+const fs = require('fs');
+const expect = require('chai').expect;
+const Long = require('bson').Long;
 
 describe('Cursor', function() {
   before(function() {
@@ -4218,7 +4219,15 @@ describe('Cursor', function() {
                   return new Promise((resolve, reject) =>
                     cursor.kill((err, r) => (err ? reject(err) : resolve(r)))
                   ).then(response => {
-                    // Ensure correct response from cursor kill
+                    // sharded clusters will return a long, single return integers
+                    if (
+                      response &&
+                      response.cursorsKilled &&
+                      typeof response.cursorsKilled === 'number'
+                    ) {
+                      response.cursorsKilled = Long.fromNumber(response.cursorsKilled);
+                    }
+
                     expect(response)
                       .to.be.an('object')
                       .and.to.deep.include({
@@ -4226,7 +4235,7 @@ describe('Cursor', function() {
                         cursorsAlive: [],
                         cursorsNotFound: [],
                         cursorsUnknown: [],
-                        cursorsKilled: [id]
+                        cursorsKilled: [longId]
                       });
                   });
                 });

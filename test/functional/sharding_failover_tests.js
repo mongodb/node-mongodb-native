@@ -4,7 +4,9 @@ var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 
-describe('Sharding (Failover)', function() {
+// NOTE: these tests should be converted to use the mock server, no use in running
+//       incredibly long integration tests
+describe.skip('Sharding (Failover)', function() {
   before(function() {
     return setupDatabase(this.configuration);
   });
@@ -57,7 +59,7 @@ describe('Sharding (Failover)', function() {
             };
 
             // Get first proxy
-            var mongos = manager.proxies()[0];
+            var mongos = manager.proxies[0];
             mongos.stop().then(function() {
               setTimeout(ticker, 1000);
             });
@@ -115,7 +117,7 @@ describe('Sharding (Failover)', function() {
           test.equal(null, err);
 
           // Server managers
-          var proxies = manager.proxies();
+          var proxies = manager.proxies;
 
           // Kill the mongos proxy
           proxies[0].stop().then(function() {
@@ -208,7 +210,7 @@ describe('Sharding (Failover)', function() {
         });
 
         // Server managers
-        var proxies = manager.proxies();
+        var proxies = manager.proxies;
 
         // Kill the mongos proxy
         proxies[0].stop().then(function() {

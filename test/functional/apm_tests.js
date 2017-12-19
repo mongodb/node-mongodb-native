@@ -953,7 +953,6 @@ describe('APM', function() {
       });
 
       listener.on('succeeded', function(event) {
-        // console.dir(event.commandName)
         if (event.commandName === 'listCollections') succeeded.push(event);
       });
 
