@@ -833,70 +833,6 @@ describe('ReadConcern', function() {
     }
   });
 
-  it('Should set majority readConcern geoNear command', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
-
-    test: function(done) {
-      var listener = require('../..').instrument(function(err) {
-        test.equal(null, err);
-      });
-
-      // Contains all the apm events
-      var started = [];
-      var succeeded = [];
-      // Get a new instance
-      var configuration = this.configuration;
-      var client = configuration.newClient(
-        { w: 1, readConcern: { level: 'majority' } },
-        { poolSize: 1 }
-      );
-
-      client.connect(function(err, client) {
-        var db = client.db(configuration.db);
-        test.equal(null, err);
-        test.deepEqual({ level: 'majority' }, db.s.readConcern);
-
-        // Get the collection
-        var collection = db.collection('test_geo_near_concern');
-
-        // Listen to apm events
-        listener.on('started', function(event) {
-          if (event.commandName === 'geoNear') started.push(event);
-        });
-        listener.on('succeeded', function(event) {
-          if (event.commandName === 'geoNear') succeeded.push(event);
-        });
-
-        // Add a location based index
-        collection.ensureIndex({ loc: '2d' }, configuration.writeConcernMax(), function(err) {
-          test.equal(null, err);
-          // Save a new location tagged document
-          collection.insertMany(
-            [{ a: 1, loc: [50, 30] }, { a: 1, loc: [30, 50] }],
-            configuration.writeConcernMax(),
-            function(err) {
-              test.equal(null, err);
-
-              // Use geoNear command to find document
-              collection.geoNear(50, 50, { query: { a: 1 }, num: 1 }, function(err) {
-                test.equal(null, err);
-                test.equal(1, started.length);
-                test.equal(1, succeeded.length);
-                test.equal('geoNear', started[0].commandName);
-                test.equal('geoNear', succeeded[0].commandName);
-                test.deepEqual({ level: 'majority' }, started[0].command.readConcern);
-
-                listener.uninstrument();
-                client.close();
-                done();
-              });
-            }
-          );
-        });
-      });
-    }
-  });
-
   it('Should set majority readConcern geoSearch command', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
 
@@ -941,7 +877,7 @@ describe('ReadConcern', function() {
             function(err) {
               test.equal(null, err);
 
-              // Use geoNear command to find document
+              // Use geoHaystackSearch command to find document
               collection.geoHaystackSearch(
                 50,
                 50,

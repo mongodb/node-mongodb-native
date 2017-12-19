@@ -202,6 +202,12 @@ testCollection.updateOne({_id: 'test'}, {});
 
 Wherever it occurs, the option `keepAlive` has been changed. `keepAlive` is now a boolean that enables/disables `keepAlive`, while `keepAliveInitialDelay` specifies how long to wait before initiating keepAlive. This brings the API in line with [NodeJS's socket api](https://nodejs.org/dist/latest-v9.x/docs/api/all.html#net_socket_setkeepalive_enable_initialdelay)
 
+### `geoNear` command helper
+
+The functionality of the geoNear command is duplicated elsewhere in the language, in the `$near`/`$nearSphere` query operators on unsharded collections, and in the `$geoNear` aggregation stage on all collections. Maintaining this command increases our test surface, and creates additional work when adding features that must be supported on all read commands. As a result, the command will be fully
+removed in the MongoDB 4.0 release, and we are choosing to remove it in this
+major release of the node driver.
+
 ### Tests
 
 We have updated all of the tests to use [Mocha](https://mochajs.org) and a new test runner, [`mongodb-test-runner`](https://github.com/mongodb-js/mongodb-test-runner), which

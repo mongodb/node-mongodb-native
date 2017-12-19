@@ -1704,64 +1704,6 @@ describe('Operation Examples', function() {
   });
 
   /**
-   * Example of a simple geoNear query across some documents
-   *
-   * @example-class Collection
-   * @example-method geoNear
-   * @ignore
-   */
-  it('shouldCorrectlyPerformSimpleGeoNearCommand', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    // The actual test we wish to run
-    test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
-        // LINE var MongoClient = require('mongodb').MongoClient,
-        // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-        // LINE   var db = client.db('test);
-        // REPLACE configuration.writeConcernMax() WITH {w:1}
-        // REMOVE-LINE restartAndDone
-        // REMOVE-LINE done();
-        // REMOVE-LINE var db = client.db(configuration.db);
-        // BEGIN
-        var db = client.db(configuration.db);
-        // Fetch the collection
-        var collection = db.collection('simple_geo_near_command');
-
-        // Add a location based index
-        collection.ensureIndex({ loc: '2d' }, function(err, result) {
-          test.ok(result);
-          test.equal(null, err);
-
-          // Save a new location tagged document
-          collection.insertMany(
-            [{ a: 1, loc: [50, 30] }, { a: 1, loc: [30, 50] }],
-            configuration.writeConcernMax(),
-            function(err, result) {
-              test.ok(result);
-              test.equal(null, err);
-
-              // Use geoNear command to find document
-              collection.geoNear(50, 50, { query: { a: 1 }, num: 1 }, function(err, docs) {
-                test.equal(1, docs.results.length);
-
-                client.close();
-                done();
-              });
-            }
-          );
-        });
-      });
-      // END
-    }
-  });
-
-  /**
    * Example of a simple geoHaystackSearch query across some documents
    *
    * @example-class Collection
@@ -1805,7 +1747,7 @@ describe('Operation Examples', function() {
               test.ok(result);
               test.equal(null, err);
 
-              // Use geoNear command to find document
+              // Use geoHaystackSearch command to find document
               collection.geoHaystackSearch(
                 50,
                 50,
