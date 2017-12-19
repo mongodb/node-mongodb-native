@@ -4223,9 +4223,11 @@ describe('Cursor', function() {
                     if (
                       response &&
                       response.cursorsKilled &&
-                      typeof response.cursorsKilled === 'number'
+                      Array.isArray(response.cursorsKilled)
                     ) {
-                      response.cursorsKilled = Long.fromNumber(response.cursorsKilled);
+                      response.cursorsKilled = response.cursorsKilled.map(
+                        id => (typeof id === 'number' ? Long.fromNumber(id) : id)
+                      );
                     }
 
                     expect(response)
