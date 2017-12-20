@@ -993,7 +993,7 @@ describe('GridFS Stream', function() {
 
         db.collection('fs.files').insert({ length: 0 }, function(error, result) {
           test.equal(error, null);
-          test.equal(result.insertedIds.length, 1);
+          test.equal(Object.keys(result.insertedIds).length, 1);
           var id = result.insertedIds[0];
 
           var stream = bucket.openDownloadStream(id);

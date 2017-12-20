@@ -342,7 +342,7 @@ describe('CRUD API', function() {
             test.equal(null, err);
             test.equal(2, r.result.n);
             test.equal(2, r.insertedCount);
-            test.equal(2, r.insertedIds.length);
+            test.equal(2, Object.keys(r.insertedIds).length);
 
             // Ordered bulk unordered
             bulkWriteUnOrdered();

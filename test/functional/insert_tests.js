@@ -101,7 +101,7 @@ describe('Insert', function() {
           test.equal(2, r.result.n);
           test.equal(2, r.ops.length);
           test.equal(2, r.insertedCount);
-          test.equal(2, r.insertedIds.length);
+          test.equal(2, Object.keys(r.insertedIds).length);
           test.ok(r.insertedIds[0]._bsontype === 'ObjectID');
           test.ok(r.insertedIds[1]._bsontype === 'ObjectID');
 
@@ -2802,7 +2802,7 @@ describe('Insert', function() {
           .collection('inserted_ids_test')
           .insertMany([{}, {}, {}], { ordered: true })
           .then(function(r) {
-            test.equal(3, r.insertedIds.length);
+            test.equal(3, Object.keys(r.insertedIds).length);
             client.close();
             done();
           });
@@ -2823,7 +2823,7 @@ describe('Insert', function() {
           .insertMany([{}, {}, {}], { ordered: false })
           .then(function(r) {
             test.equal(null, err);
-            test.equal(3, r.insertedIds.length);
+            test.equal(3, Object.keys(r.insertedIds).length);
             client.close();
             done();
           });
