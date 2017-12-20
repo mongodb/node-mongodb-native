@@ -189,9 +189,9 @@ describe('CRUD spec', function() {
   }
 
   function executeInsertTest(scenarioTest, db, collection) {
-    var args = scenarioTest.operation.arguments;
-    var documents = args.document || args.documents;
-    var options = Object.assign({}, args);
+    const args = scenarioTest.operation.arguments;
+    const documents = args.document || args.documents;
+    let options = Object.assign({}, args);
     delete options.document;
     delete options.documents;
 
@@ -212,13 +212,13 @@ describe('CRUD spec', function() {
   }
 
   function executeBulkTest(scenarioTest, db, collection) {
-    var args = scenarioTest.operation.arguments;
-    var operations = args.requests.map(function(operation) {
+    const args = scenarioTest.operation.arguments;
+    const operations = args.requests.map(function(operation) {
       let op = {};
       op[operation.name] = operation['arguments'];
       return op;
     });
-    var options = Object.assign({}, args.options);
+    const options = Object.assign({}, args.options);
 
     collection.bulkWrite(operations, options).then(function(result) {
       Object.keys(scenarioTest.outcome.result).forEach(function(resultName) {
