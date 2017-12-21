@@ -70,7 +70,7 @@ describe('Connection', function() {
     }
   }
 
-  describe('IPv4', function() {
+  describe.skip('IPv4', function() {
     beforeEach(() => mock.createServer(0, '127.0.0.1').then(_server => (server = _server)));
 
     testCase('should connect with no family', {
@@ -95,7 +95,7 @@ describe('Connection', function() {
     });
   });
 
-  describe('IPv6', function() {
+  describe.skip('IPv6', function() {
     beforeEach(() => mock.createServer(0, '::').then(_server => (server = _server)));
 
     testCase('should connect with no family', {
