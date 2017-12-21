@@ -1055,7 +1055,7 @@ describe('Server tests', function() {
 
       test: function(done) {
         server.setMessageHandler(request => {
-          request.reply({ ok: 1, maxWireVersion: 1 });
+          request.reply(Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 1 }));
         });
 
         const client = new Server(server.address());
