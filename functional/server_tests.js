@@ -1,12 +1,13 @@
 'use strict';
 
-var expect = require('chai').expect,
-  f = require('util').format,
-  locateAuthMethod = require('./shared').locateAuthMethod,
-  executeCommand = require('./shared').executeCommand,
-  Server = require('../../../lib/topologies/server'),
-  Bson = require('bson'),
-  Connection = require('../../../lib/connection/connection');
+const expect = require('chai').expect;
+const f = require('util').format;
+const locateAuthMethod = require('./shared').locateAuthMethod;
+const executeCommand = require('./shared').executeCommand;
+const Server = require('../../../lib/topologies/server');
+const Bson = require('bson');
+const Connection = require('../../../lib/connection/connection');
+const mock = require('../../mock');
 
 describe('Server tests', function() {
   it('should correctly connect server to single instance', {
@@ -1043,4 +1044,36 @@ describe('Server tests', function() {
       }
     }
   );
+
+  describe('Unsupported wire protocols', function() {
+    let server;
+    beforeEach(() => mock.createServer().then(_server => (server = _server)));
+    afterEach(() => mock.cleanup());
+
+    it('errors when unsupported wire protocol is returned from isMaster', {
+      metadata: { requires: { topology: ['single'] } },
+
+      test: function(done) {
+        server.setMessageHandler(request => {
+          request.reply({ ok: 1 });
+        });
+
+        const client = new Server(server.address());
+        client.on('error', error => {
+          let err;
+          try {
+            expect(error).to.be.an.instanceOf(Error);
+            expect(error.message).to.have.string('but this version of Node.js Driver requires');
+          } catch (e) {
+            err = e;
+          }
+          done(err);
+        });
+        client.on('connect', () => {
+          done(new Error('This should not connect'));
+        });
+        client.connect();
+      }
+    });
+  });
 });
