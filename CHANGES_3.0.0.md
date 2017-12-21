@@ -215,6 +215,12 @@ Now `insertMany` returns `insertedIds` in a map of the index of the inserted doc
 
 Previously an array of ids was returned: `[ 2, 3 ]`. This change occurs with both ordered and unordered `insertMany` calls, see the [CRUD specifications](https://github.com/mongodb/specifications/blob/master/source/crud/crud.rst#results) for more details.
 
+### `geoNear` command helper
+
+The functionality of the geoNear command is duplicated elsewhere in the language, in the `$near`/`$nearSphere` query operators on unsharded collections, and in the `$geoNear` aggregation stage on all collections. Maintaining this command increases our test surface, and creates additional work when adding features that must be supported on all read commands. As a result, the command will be fully
+removed in the MongoDB 4.0 release, and we are choosing to remove it in this
+major release of the node driver.
+
 ### Tests
 
 We have updated all of the tests to use [Mocha](https://mochajs.org) and a new test runner, [`mongodb-test-runner`](https://github.com/mongodb-js/mongodb-test-runner), which

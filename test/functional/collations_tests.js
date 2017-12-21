@@ -217,56 +217,6 @@ describe('Collation', function() {
     }
   });
 
-  it('Successfully pass through collation to geoNear command', {
-    metadata: { requires: { generators: true, topology: 'single' } },
-
-    test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
-
-      // Primary server states
-      var primary = [Object.assign({}, defaultFields)];
-
-      co(function*() {
-        const singleServer = yield mock.createServer();
-
-        // Primary state machine
-        singleServer.setMessageHandler(request => {
-          var doc = request.document;
-          if (doc.ismaster) {
-            request.reply(primary[0]);
-          } else if (doc.geoNear) {
-            commandResult = doc;
-            request.reply({ ok: 1 });
-          } else if (doc.endSessions) {
-            request.reply({ ok: 1 });
-          }
-        });
-
-        var commandResult = null;
-
-        // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          // Simple findAndModify command returning the new document
-          db
-            .collection('test')
-            .geoNear(50, 50, { query: { a: 1 }, num: 1, collation: { caseLevel: true } }, function(
-              err
-            ) {
-              test.equal(null, err);
-              test.deepEqual({ caseLevel: true }, commandResult.collation);
-
-              client.close();
-              done();
-            });
-        });
-      });
-    }
-  });
-
   it('Successfully pass through collation to group command', {
     metadata: { requires: { generators: true, topology: 'single' } },
 

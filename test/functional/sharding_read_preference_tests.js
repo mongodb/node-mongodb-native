@@ -55,7 +55,6 @@ describe('Sharding (Read Preference)', function() {
 
           collection.findOne(
             { test: 1 },
-            {},
             { readPreference: new ReadPreference(ReadPreference.SECONDARY) },
             function(err, item) {
               test.equal(null, err);
@@ -120,7 +119,6 @@ describe('Sharding (Read Preference)', function() {
 
           collection.findOne(
             { test: 1 },
-            {},
             { readPreference: new ReadPreference('notsupported') },
             function(err) {
               test.ok(err != null);
@@ -186,7 +184,6 @@ describe('Sharding (Read Preference)', function() {
 
           collection.findOne(
             { test: 1 },
-            {},
             {
               readPreference: new ReadPreference(ReadPreference.SECONDARY, [
                 { dc: 'sf', s: '1' },
@@ -255,7 +252,6 @@ describe('Sharding (Read Preference)', function() {
 
           collection.findOne(
             { test: 1 },
-            {},
             {
               readPreference: new ReadPreference(ReadPreference.SECONDARY, [
                 { loc: 'ny' },
@@ -304,7 +300,6 @@ describe('Sharding (Read Preference)', function() {
 
           collection.findOne(
             { test: 1 },
-            {},
             { readPreference: new ReadPreference(ReadPreference.SECONDARY) },
             function(err, item) {
               test.equal(null, err);
@@ -370,8 +365,7 @@ describe('Sharding (Read Preference)', function() {
       var openCalled = false;
       // Connect using the mongos connections
       var client = new MongoClient(mongos, { w: 0 });
-      client.once('open', function(_err) {
-        test.equal(null, _err);
+      client.once('open', function() {
         openCalled = true;
       });
 
