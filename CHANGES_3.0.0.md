@@ -202,6 +202,19 @@ testCollection.updateOne({_id: 'test'}, {});
 
 Wherever it occurs, the option `keepAlive` has been changed. `keepAlive` is now a boolean that enables/disables `keepAlive`, while `keepAliveInitialDelay` specifies how long to wait before initiating keepAlive. This brings the API in line with [NodeJS's socket api](https://nodejs.org/dist/latest-v9.x/docs/api/all.html#net_socket_setkeepalive_enable_initialdelay)
 
+### `insertMany`
+
+Now `insertMany` returns `insertedIds` in a map of the index of the inserted document to the id of the inserted document:
+
+```js
+{
+  "0": 2,
+  "1": 3
+}
+```
+
+Previously an array of ids was returned: `[ 2, 3 ]`. This change occurs with both ordered and unordered `insertMany` calls, see the [CRUD specifications](https://github.com/mongodb/specifications/blob/master/source/crud/crud.rst#results) for more details.
+
 ### `geoNear` command helper
 
 The functionality of the geoNear command is duplicated elsewhere in the language, in the `$near`/`$nearSphere` query operators on unsharded collections, and in the `$geoNear` aggregation stage on all collections. Maintaining this command increases our test surface, and creates additional work when adding features that must be supported on all read commands. As a result, the command will be fully

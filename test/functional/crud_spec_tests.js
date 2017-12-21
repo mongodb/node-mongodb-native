@@ -188,6 +188,52 @@ describe('CRUD spec', function() {
     });
   }
 
+  function executeInsertTest(scenarioTest, db, collection) {
+    const args = scenarioTest.operation.arguments;
+    const documents = args.document || args.documents;
+    let options = Object.assign({}, args);
+    delete options.document;
+    delete options.documents;
+
+    return collection[scenarioTest.operation.name](documents, options).then(function(result) {
+      Object.keys(scenarioTest.outcome.result).forEach(function(resultName) {
+        test.deepEqual(result[resultName], scenarioTest.outcome.result[resultName]);
+      });
+
+      if (scenarioTest.outcome.collection) {
+        return collection
+          .find({})
+          .toArray()
+          .then(function(results) {
+            test.deepEqual(results, scenarioTest.outcome.collection.data);
+          });
+      }
+    });
+  }
+
+  function executeBulkTest(scenarioTest, db, collection) {
+    const args = scenarioTest.operation.arguments;
+    const operations = args.requests.map(function(operation) {
+      let op = {};
+      op[operation.name] = operation['arguments'];
+      return op;
+    });
+    const options = Object.assign({}, args.options);
+
+    collection.bulkWrite(operations, options).then(function(result) {
+      Object.keys(scenarioTest.outcome.result).forEach(function(resultName) {
+        test.deepEqual(result[resultName], scenarioTest.outcome.result[resultName]);
+      });
+    });
+
+    return collection
+      .find({})
+      .toArray()
+      .then(function(results) {
+        test.deepEqual(results, scenarioTest.outcome.collection.data);
+      });
+  }
+
   function executeReplaceTest(scenarioTest, db, collection) {
     var args = scenarioTest.operation.arguments;
     var filter = args.filter;
@@ -326,6 +372,11 @@ describe('CRUD spec', function() {
           case 'findOneAndUpdate':
           case 'findOneAndDelete':
             return executeFindOneTest(scenarioTest, context.db, collection);
+          case 'insertOne':
+          case 'insertMany':
+            return executeInsertTest(scenarioTest, context.db, collection);
+          case 'bulkWrite':
+            return executeBulkTest(scenarioTest, context.db, collection);
         }
       });
   }

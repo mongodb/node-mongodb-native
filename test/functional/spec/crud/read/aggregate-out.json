@@ -65,6 +65,57 @@
           ]
         }
       }
+    },
+    {
+      "description": "Aggregate with $out and batch size of 0",
+      "operation": {
+        "name": "aggregate",
+        "arguments": {
+          "pipeline": [
+            {
+              "$sort": {
+                "x": 1
+              }
+            },
+            {
+              "$match": {
+                "_id": {
+                  "$gt": 1
+                }
+              }
+            },
+            {
+              "$out": "other_test_collection"
+            }
+          ],
+          "batchSize": 0
+        }
+      },
+      "outcome": {
+        "result": [
+          {
+            "_id": 2,
+            "x": 22
+          },
+          {
+            "_id": 3,
+            "x": 33
+          }
+        ],
+        "collection": {
+          "name": "other_test_collection",
+          "data": [
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
     }
   ]
 }
