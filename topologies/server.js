@@ -363,7 +363,18 @@ var eventHandler = function(self, event) {
 
           if (!isSupportedServer(result.result)) {
             self.destroy();
-            return self.emit('error', new MongoError('unsupported server version'), self);
+            const latestSupportedVersion = '2.6';
+            const message =
+              'Server at ' +
+              self.s.options.host +
+              ':' +
+              self.s.options.port +
+              ' reports wire version ' +
+              (result.result.maxWireVersion || 0) +
+              ', but this version of Node.js Driver requires at least 2 (MongoDB' +
+              latestSupportedVersion +
+              ').';
+            return self.emit('error', new MongoError(message), self);
           }
 
           // Determine whether the server is instructing us to use a compressor
