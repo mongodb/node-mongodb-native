@@ -651,6 +651,13 @@ Connection.prototype.connect = function(_options) {
       );
     }
 
+    // clean up existing event handlers
+    this.connection.removeAllListeners('error');
+    this.connection.removeAllListeners('timeout');
+    this.connection.removeAllListeners('close');
+    this.connection.removeAllListeners('data');
+    this.connection = undefined;
+
     return doConnect(this, 4, _options, _errorHandler);
   });
 };
