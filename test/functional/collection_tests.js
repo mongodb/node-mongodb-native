@@ -1,6 +1,7 @@
 'use strict';
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
+const test = require('./shared').assert;
+const setupDatabase = require('./shared').setupDatabase;
+const expect = require('chai').expect;
 
 describe('Collection', function() {
   before(function() {
@@ -1063,6 +1064,45 @@ describe('Collection', function() {
                 });
               }
             );
+          });
+        });
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it('should support createIndex with no options', {
+    metadata: {
+      requires: {
+        mongodb: '>2.1.0',
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+      }
+    },
+
+    // The actual test we wish to run
+    test: function(done) {
+      var self = this;
+      var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
+        poolSize: 1
+      });
+
+      client.connect(function(err, client) {
+        var db = client.db(self.configuration.db);
+
+        db.createCollection('create_index_without_options', {}, function(err, collection) {
+          collection.createIndex({ createdAt: 1 }, function(err) {
+            test.equal(null, err);
+
+            collection.indexInformation({ full: true }, function(err, indexes) {
+              test.equal(null, err);
+              const indexNames = indexes.map(i => i.name);
+              expect(indexNames).to.include('createdAt_1');
+
+              client.close();
+              done();
+            });
           });
         });
       });
