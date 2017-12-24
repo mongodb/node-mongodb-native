@@ -1,3 +1,8 @@
+<a name="3.0.1"></a>
+## [3.0.1](https://github.com/mongodb/node-mongodb-native/compare/v3.0.0...v3.0.1) (2017-12-24)
+
+* update mongodb-core to 3.0.1
+
 <a name="3.0.0"></a>
 # [3.0.0](https://github.com/mongodb/node-mongodb-native/compare/v3.0.0-rc0...v3.0.0) (2017-12-24)
 
