@@ -734,11 +734,15 @@ describe('ReplSet Read Preferences (mocks)', function() {
         );
 
         // Add event listeners
-        server.on('connect', function(_server) {
+        let joinCount = 0;
+        server.on('joined', function() {
+          joinCount++;
+          if (joinCount !== 3) return;
+
           // Set up a write
           function schedule() {
             // Perform a find
-            _server.command(
+            server.command(
               'test.test',
               {
                 count: 'test.test',
@@ -753,7 +757,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
                 // Let all sockets properly close
                 process.nextTick(function() {
                   // Test primaryPreferred
-                  _server.command(
+                  server.command(
                     'test.test',
                     {
                       count: 'test.test',
@@ -767,7 +771,7 @@ describe('ReplSet Read Preferences (mocks)', function() {
                       expect(_r.connection.port).to.not.equal(32000);
 
                       // Test secondaryPreferred
-                      _server.command(
+                      server.command(
                         'test.test',
                         {
                           count: 'test.test',
@@ -904,43 +908,40 @@ describe('ReplSet Read Preferences (mocks)', function() {
           }
         );
 
-        // Add event listeners
-        server.on('connect', function(_server) {
-          // Set up a write
-          function schedule() {
-            _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries
-              .sort((a, b) => {
-                Number(a.ismaster.me.split(':')[1]) < Number(b.ismaster.me.split(':')[1]);
-              })
-              .map((x, i) => {
-                x.lastIsMasterMS = i * 50;
-                return x;
-              });
+        // Set up a write
+        function runTest(_server) {
+          _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries
+            .sort((a, b) => Number(a.name.split(':')[1]) > Number(b.name.split(':')[1]))
+            .map(function(x, i) {
+              x.lastIsMasterMS = i * 50;
+              return x;
+            });
 
-            // Perform a find
-            _server.command(
-              'test.test',
-              {
-                count: 'test.test',
-                batchSize: 2
-              },
-              {
-                readPreference: new ReadPreference('nearest')
-              },
-              function(err, r) {
-                expect(err).to.be.null;
-                expect(r.connection.port).to.be.oneOf([32000, 32001]);
+          // Perform a find
+          _server.command(
+            'test.test',
+            {
+              count: 'test.test',
+              batchSize: 2
+            },
+            {
+              readPreference: new ReadPreference('nearest')
+            },
+            function(err, r) {
+              expect(err).to.be.null;
+              expect(r.connection.port).to.be.oneOf([32000, 32001]);
 
-                server.destroy();
-                done();
-              }
-            );
-          }
+              server.destroy();
+              done();
+            }
+          );
+        }
 
-          // Schedule an insert
-          setTimeout(function() {
-            schedule();
-          }, 2000);
+        let joinCount = 0;
+        server.on('joined', function() {
+          joinCount++;
+          if (joinCount !== 3) return;
+          runTest(server);
         });
 
         server.connect();
@@ -1052,41 +1053,41 @@ describe('ReplSet Read Preferences (mocks)', function() {
           }
         );
 
+        // Set up a write
+        function runTest(_server) {
+          _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries
+            .sort((a, b) => Number(a.name.split(':')[1]) > Number(b.name.split(':')[1]))
+            .map(function(x, i) {
+              x.lastIsMasterMS = i * 50;
+              return x;
+            });
+
+          // Perform a find
+          _server.command(
+            'test.test',
+            {
+              count: 'test.test',
+              batchSize: 2
+            },
+            {
+              readPreference: new ReadPreference('nearest', { loc: 'dc' })
+            },
+            function(err, r) {
+              expect(err).to.be.null;
+              expect(r.connection.port).to.be.oneOf([32001, 32002]);
+
+              server.destroy();
+              done();
+            }
+          );
+        }
+
         // Add event listeners
-        server.on('connect', function(_server) {
-          // Set up a write
-          function schedule() {
-            _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries.map(
-              function(x, i) {
-                x.lastIsMasterMS = i * 20;
-                return x;
-              }
-            );
-
-            // Perform a find
-            _server.command(
-              'test.test',
-              {
-                count: 'test.test',
-                batchSize: 2
-              },
-              {
-                readPreference: new ReadPreference('nearest', { loc: 'dc' })
-              },
-              function(err, r) {
-                expect(err).to.be.null;
-                expect(r.connection.port).to.be.oneOf([32001, 32002]);
-
-                server.destroy();
-                done();
-              }
-            );
-          }
-
-          // Schedule an insert
-          setTimeout(function() {
-            schedule();
-          }, 2000);
+        let joinCount = 0;
+        server.on('joined', function() {
+          joinCount++;
+          if (joinCount !== 3) return;
+          runTest(server);
         });
 
         server.connect();
