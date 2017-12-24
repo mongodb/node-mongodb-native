@@ -535,7 +535,7 @@ function makeSSLConnection(self, _options) {
   };
 
   // Merge in options
-  merge(sslOptions, this.options);
+  merge(sslOptions, self.options);
   merge(sslOptions, _options);
 
   // Set options for ssl
