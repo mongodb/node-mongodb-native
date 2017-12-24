@@ -1328,7 +1328,7 @@ describe('Change Streams', function() {
       };
 
       co(function*() {
-        primaryServer = yield mock.createServer(32000, 'localhost');
+        primaryServer = yield mock.createServer();
 
         var counter = 0;
         primaryServer.setMessageHandler(request => {
@@ -1341,8 +1341,8 @@ describe('Change Streams', function() {
                 {
                   ismaster: true,
                   secondary: false,
-                  me: 'localhost:32000',
-                  primary: 'localhost:32000',
+                  me: primaryServer.uri(),
+                  primary: primaryServer.uri(),
                   tags: { loc: 'ny' }
                 },
                 defaultFields
@@ -1402,46 +1402,46 @@ describe('Change Streams', function() {
             request.reply({ ok: 1 });
           }
         });
-      });
 
-      MongoClient.connect(
-        'mongodb://localhost:32000/',
-        {
-          socketTimeoutMS: 500,
-          validateOptions: true
-        },
-        function(err, client) {
-          assert.ifError(err);
+        MongoClient.connect(
+          `mongodb://${primaryServer.uri()}/`,
+          {
+            socketTimeoutMS: 500,
+            validateOptions: true
+          },
+          function(err, client) {
+            assert.ifError(err);
 
-          var fs = require('fs');
-          var theDatabase = client.db('integration_tests5');
-          var theCollection = theDatabase.collection('MongoNetworkErrorTestPromises');
-          var thisChangeStream = theCollection.watch(pipeline);
+            var fs = require('fs');
+            var theDatabase = client.db('integration_tests5');
+            var theCollection = theDatabase.collection('MongoNetworkErrorTestPromises');
+            var thisChangeStream = theCollection.watch(pipeline);
 
-          var filename = '/tmp/_nodemongodbnative_resumepipe.txt';
-          var outStream = fs.createWriteStream(filename);
+            var filename = '/tmp/_nodemongodbnative_resumepipe.txt';
+            var outStream = fs.createWriteStream(filename);
 
-          thisChangeStream.stream({ transform: JSON.stringify }).pipe(outStream);
+            thisChangeStream.stream({ transform: JSON.stringify }).pipe(outStream);
 
-          // Listen for changes to the file
-          var watcher = fs.watch(filename, function(eventType) {
-            assert.equal(eventType, 'change');
+            // Listen for changes to the file
+            var watcher = fs.watch(filename, function(eventType) {
+              assert.equal(eventType, 'change');
 
-            var fileContents = fs.readFileSync(filename, 'utf8');
+              var fileContents = fs.readFileSync(filename, 'utf8');
 
-            var parsedFileContents = JSON.parse(fileContents);
-            assert.equal(parsedFileContents.fullDocument.a, 1);
+              var parsedFileContents = JSON.parse(fileContents);
+              assert.equal(parsedFileContents.fullDocument.a, 1);
 
-            watcher.close();
+              watcher.close();
 
-            thisChangeStream.close(function(err) {
-              assert.ifError(err);
+              thisChangeStream.close(function(err) {
+                assert.ifError(err);
 
-              mock.cleanup(primaryServer, () => done());
+                mock.cleanup(primaryServer, () => done());
+              });
             });
-          });
-        }
-      );
+          }
+        );
+      });
     }
   });
 
