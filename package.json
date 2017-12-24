@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "3.0.0-rc0",
+  "version": "3.0.0",
   "description": "The official MongoDB driver for Node.js",
   "main": "index.js",
   "repository": {
@@ -13,7 +13,7 @@
     "official"
   ],
   "dependencies": {
-    "mongodb-core": "3.0.0-rc0"
+    "mongodb-core": "3.0.0"
   },
   "devDependencies": {
     "betterbenchmarks": "^0.1.0",

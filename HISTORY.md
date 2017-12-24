@@ -1,3 +1,30 @@
+<a name="3.0.0"></a>
+# [3.0.0](https://github.com/mongodb/node-mongodb-native/compare/v3.0.0-rc0...v3.0.0) (2017-12-24)
+
+
+### Bug Fixes
+
+* **aggregate:** remove support for inline results for aggregate ([#1620](https://github.com/mongodb/node-mongodb-native/issues/1620)) ([84457ec](https://github.com/mongodb/node-mongodb-native/commit/84457ec))
+* **topologies:** unify topologies connect API ([#1615](https://github.com/mongodb/node-mongodb-native/issues/1615)) ([0fb4658](https://github.com/mongodb/node-mongodb-native/commit/0fb4658))
+
+
+### Features
+
+* **keepAlive:** make keepAlive options consistent ([#1612](https://github.com/mongodb/node-mongodb-native/issues/1612)) ([f608f44](https://github.com/mongodb/node-mongodb-native/commit/f608f44))
+
+
+### BREAKING CHANGES
+
+* **topologies:** Function signature for `.connect` method on replset and mongos has changed. You shouldn't have been using this anyway, but if you were, you only should pass `options` and `callback`.
+
+Part of NODE-1089
+* **keepAlive:** option `keepAlive` is now split into boolean `keepAlive` and
+number `keepAliveInitialDelay`
+
+Fixes NODE-998
+
+
+
 <a name="3.0.0-rc0"></a>
 # [3.0.0-rc0](https://github.com/mongodb/node-mongodb-native/compare/v2.2.31...v3.0.0-rc0) (2017-12-05)
 
