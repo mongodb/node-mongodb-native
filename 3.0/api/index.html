@@ -495,8 +495,6 @@
             
                 <li data-name="Collection#geoHaystackSearch"><a href="Collection.html#geoHaystackSearch">geoHaystackSearch</a></li>
             
-                <li data-name="Collection#geoNear"><a href="Collection.html#geoNear">geoNear</a></li>
-            
                 <li data-name="Collection#group"><a href="Collection.html#group">group</a></li>
             
                 <li data-name="Collection#indexes"><a href="Collection.html#indexes">indexes</a></li>
@@ -1946,8 +1944,9 @@
             
 
     
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,<br>  test = require('assert');<br>// Connection url<br>var url = 'mongodb://localhost:27017/test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, db) {<br>  // Use the admin database for the operation<br>  var adminDb = db.admin();</p>
-<p>  // List all the available databases<br>  adminDb.listDatabases(function(err, dbs) {<br>    test.equal(null, err);<br>    test.ok(dbs.databases.length &gt; 0);<br>    db.close();<br>  });<br>});</p></code></pre>
+    <pre class="prettyprint"><code><p>const MongoClient = require('mongodb').MongoClient;<br>const test = require('assert');<br>// Connection url<br>const url = 'mongodb://localhost:27017';<br>// Database Name<br>const dbName = 'test';</p>
+<p>// Connect using MongoClient<br>MongoClient.connect(url, function(err, client) {<br>  // Use the admin database for the operation<br>  const adminDb = client.db(dbName).admin();</p>
+<p>  // List all the available databases<br>  adminDb.listDatabases(function(err, dbs) {<br>    test.equal(null, err);<br>    test.ok(dbs.databases.length &gt; 0);<br>    client.close();<br>  });<br>});</p></code></pre>
     
 
         
@@ -1995,7 +1994,7 @@
     
     
         
-            <div class="description"><p>The <strong>AggregationCursor</strong> class is an internal class that embodies an aggregation cursor on MongoDB<br>allowing for iteration over the results returned from the underlying query. It supports<br>one by one document iteration, conversion to an array or can be iterated as a Node 0.10.X<br>or higher stream</p>
+            <div class="description"><p>The <strong>AggregationCursor</strong> class is an internal class that embodies an aggregation cursor on MongoDB<br>allowing for iteration over the results returned from the underlying query. It supports<br>one by one document iteration, conversion to an array or can be iterated as a Node 4.X<br>or higher stream</p>
 <p><strong>AGGREGATIONCURSOR Cannot directly be instantiated</strong></p></div>
         
         
@@ -2030,7 +2029,7 @@
             
 
     
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,<br>  test = require('assert');<br>// Connection url<br>var url = 'mongodb://localhost:27017/test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, db) {<br>  // Create a collection we want to drop later<br>  var col = db.collection('createIndexExample1');<br>  // Insert a bunch of documents<br>  col.insert([{a:1, b:1}<br>    , {a:2, b:2}, {a:3, b:3}<br>    , {a:4, b:4}], {w:1}, function(err, result) {<br>    test.equal(null, err);<br>    // Show that duplicate records got dropped<br>    col.aggregation({}, {cursor: {}}).toArray(function(err, items) {<br>      test.equal(null, err);<br>      test.equal(4, items.length);<br>      db.close();<br>    });<br>  });<br>});</p></code></pre>
+    <pre class="prettyprint"><code><p>const MongoClient = require('mongodb').MongoClient;<br>const test = require('assert');<br>// Connection url<br>const url = 'mongodb://localhost:27017';<br>// Database Name<br>const dbName = 'test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, client) {<br>  // Create a collection we want to drop later<br>  const col = client.db(dbName).collection('createIndexExample1');<br>  // Insert a bunch of documents<br>  col.insert([{a:1, b:1}<br>    , {a:2, b:2}, {a:3, b:3}<br>    , {a:4, b:4}], {w:1}, function(err, result) {<br>    test.equal(null, err);<br>    // Show that duplicate records got dropped<br>    col.aggregation({}, {cursor: {}}).toArray(function(err, items) {<br>      test.equal(null, err);<br>      test.equal(4, items.length);<br>      client.close();<br>    });<br>  });<br>});</p></code></pre>
     
 
         
@@ -2113,7 +2112,7 @@
             
 
     
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,<br>  test = require('assert');<br>// Connection url<br>var url = 'mongodb://localhost:27017/test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, db) {<br>  // Create a collection we want to drop later<br>  var col = db.collection('createIndexExample1');<br>  // Show that duplicate records got dropped<br>  col.find({}).toArray(function(err, items) {<br>    test.equal(null, err);<br>    test.equal(4, items.length);<br>    db.close();<br>  });<br>});</p></code></pre>
+    <pre class="prettyprint"><code><p>const MongoClient = require('mongodb').MongoClient;<br>const test = require('assert');<br>// Connection url<br>const url = 'mongodb://localhost:27017';<br>// Database Name<br>const dbName = 'test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, client) {<br>  // Create a collection we want to drop later<br>  const col = client.db(dbName).collection('createIndexExample1');<br>  // Show that duplicate records got dropped<br>  col.find({}).toArray(function(err, items) {<br>    test.equal(null, err);<br>    test.equal(4, items.length);<br>    client.close();<br>  });<br>});</p></code></pre>
     
 
         
@@ -2196,12 +2195,7 @@
             
 
     
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,<br>  test = require('assert');<br>// Connection url<br>var url = 'mongodb://localhost:27017/test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, db) {<br>  // Create a collection we want to drop later<br>  var col = db.collection('listCollectionsExample1');<br>  // Insert a bunch of documents<br>  col.insert([{a:1, b:1}<br>    , {a:2, b:2}, {a:3, b:3}<br>    , {a:4, b:4}], {w:1}, function(err, result) {<br>    test.equal(null, err);</p>
-<pre class="prettyprint source"><code>// List the database collections available
-db.listCollections().toArray(function(err, items) {
-  test.equal(null, err);
-  db.close();
-});</code></pre><p>  });<br>});</p></code></pre>
+    <pre class="prettyprint"><code><p>const MongoClient = require('mongodb').MongoClient;<br>const test = require('assert');<br>// Connection url<br>const url = 'mongodb://localhost:27017';<br>// Database Name<br>const dbName = 'test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, client) {<br>  // Create a collection we want to drop later<br>  const col = client.db(dbName).collection('listCollectionsExample1');<br>  // Insert a bunch of documents<br>  col.insert([{a:1, b:1}<br>    , {a:2, b:2}, {a:3, b:3}<br>    , {a:4, b:4}], {w:1}, function(err, result) {<br>    test.equal(null, err);<br>    // List the database collections available<br>    db.listCollections().toArray(function(err, items) {<br>      test.equal(null, err);<br>      client.close();<br>    });<br>  });<br>});</p></code></pre>
     
 
         
@@ -2249,7 +2243,7 @@ db.listCollections().toArray(function(err, items) {
     
     
         
-            <div class="description"><p>The <strong>Cursor</strong> class is an internal class that embodies a cursor on MongoDB<br>allowing for iteration over the results returned from the underlying query. It supports<br>one by one document iteration, conversion to an array or can be iterated as a Node 0.10.X<br>or higher stream</p>
+            <div class="description"><p>The <strong>Cursor</strong> class is an internal class that embodies a cursor on MongoDB<br>allowing for iteration over the results returned from the underlying query. It supports<br>one by one document iteration, conversion to an array or can be iterated as a Node 4.X<br>or higher stream</p>
 <p><strong>CURSORS Cannot directly be instantiated</strong></p></div>
         
         
@@ -2284,13 +2278,7 @@ db.listCollections().toArray(function(err, items) {
             
 
     
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,<br>  test = require('assert');<br>// Connection url<br>var url = 'mongodb://localhost:27017/test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, db) {<br>  // Create a collection we want to drop later<br>  var col = db.collection('createIndexExample1');<br>  // Insert a bunch of documents<br>  col.insert([{a:1, b:1}<br>    , {a:2, b:2}, {a:3, b:3}<br>    , {a:4, b:4}], {w:1}, function(err, result) {<br>    test.equal(null, err);</p>
-<pre class="prettyprint source"><code>// Show that duplicate records got dropped
-col.find({}).toArray(function(err, items) {
-  test.equal(null, err);
-  test.equal(4, items.length);
-  db.close();
-});</code></pre><p>  });<br>});</p></code></pre>
+    <pre class="prettyprint"><code><p>const MongoClient = require('mongodb').MongoClient;<br>const test = require('assert');<br>// Connection url<br>const url = 'mongodb://localhost:27017';<br>// Database Name<br>const dbName = 'test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, client) {<br>  // Create a collection we want to drop later<br>  const col = client.db(dbName).collection('createIndexExample1');<br>  // Insert a bunch of documents<br>  col.insert([{a:1, b:1}<br>    , {a:2, b:2}, {a:3, b:3}<br>    , {a:4, b:4}], {w:1}, function(err, result) {<br>    test.equal(null, err);<br>    // Show that duplicate records got dropped<br>    col.find({}).toArray(function(err, items) {<br>      test.equal(null, err);<br>      test.equal(4, items.length);<br>      client.close();<br>    });<br>  });<br>});</p></code></pre>
     
 
         
@@ -2372,7 +2360,7 @@ col.find({}).toArray(function(err, items) {
             
 
     
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,<br>  test = require('assert');<br>// Connection url<br>var url = 'mongodb://localhost:27017/test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, client) {<br>  // Get an additional db<br>  var testDb = client.db('test');<br>  db.close();<br>});</p></code></pre>
+    <pre class="prettyprint"><code><p>const MongoClient = require('mongodb').MongoClient;<br>const test = require('assert');<br>// Connection url<br>const url = 'mongodb://localhost:27017';<br>// Database Name<br>const dbName = 'test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, client) {<br>  // Get an additional db<br>  const testDb = client.db('test');<br>  client.close();<br>});</p></code></pre>
     
 
         
@@ -2454,16 +2442,7 @@ col.find({}).toArray(function(err, items) {
             
 
     
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,<br>  GridStore = require('mongodb').GridStore,<br>  ObjectID = require('mongodb').ObjectID,<br>  test = require('assert');</p>
-<p>// Connection url<br>var url = 'mongodb://localhost:27017/test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, db) {<br>  var gridStore = new GridStore(db, null, &quot;w&quot;);<br>  gridStore.open(function(err, gridStore) {<br>    gridStore.write(&quot;hello world!&quot;, function(err, gridStore) {<br>      gridStore.close(function(err, result) {</p>
-<pre class="prettyprint source"><code>    // Let's read the file using object Id
-    GridStore.read(db, result._id, function(err, data) {
-      test.equal('hello world!', data);
-      db.close();
-      test.done();
-    });
-  });
-});</code></pre><p>  });<br>});</p></code></pre>
+    <pre class="prettyprint"><code><p>const MongoClient = require('mongodb').MongoClient;<br>const GridStore = require('mongodb').GridStore;<br>const ObjectID = require('mongodb').ObjectID;<br>const test = require('assert');<br>// Connection url<br>const url = 'mongodb://localhost:27017';<br>// Database Name<br>const dbName = 'test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, client) {<br>  const db = client.db(dbName);<br>  const gridStore = new GridStore(db, null, &quot;w&quot;);<br>  gridStore.open(function(err, gridStore) {<br>    gridStore.write(&quot;hello world!&quot;, function(err, gridStore) {<br>      gridStore.close(function(err, result) {<br>        // Let's read the file using object Id<br>        GridStore.read(db, result._id, function(err, data) {<br>          test.equal('hello world!', data);<br>          client.close();<br>          test.done();<br>        });<br>      });<br>    });<br>  });<br>});</p></code></pre>
     
 
         
@@ -2545,7 +2524,7 @@ col.find({}).toArray(function(err, items) {
             
 
     
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,<br>  test = require('assert');<br>// Connection url<br>var url = 'mongodb://localhost:27017/test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, db) {<br>  // Get an additional db<br>  db.close();<br>});</p></code></pre>
+    <pre class="prettyprint"><code><p>const MongoClient = require('mongodb').MongoClient;<br>const test = require('assert');<br>// Connection url<br>const url = 'mongodb://localhost:27017';<br>// Database Name<br>const dbName = 'test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, client) {<br>  const db = client.db(dbName);<br>  client.close();<br>});</p></code></pre>
     
 
         
@@ -2624,14 +2603,6 @@ col.find({}).toArray(function(err, items) {
 
         
         
-            <h3>Example</h3>
-            
-
-    
-    <pre class="prettyprint"><code><p>var Db = require('mongodb').Db,<br>  Mongos = require('mongodb').Mongos,<br>  Server = require('mongodb').Server,<br>  test = require('assert');<br>// Connect using Mongos<br>var server = new Server('localhost', 27017);<br>var db = new Db('test', new Mongos([server]));<br>db.open(function(err, db) {<br>  // Get an additional db<br>  db.close();<br>});</p></code></pre>
-    
-
-        
     
     </div>
     
@@ -2706,14 +2677,6 @@ col.find({}).toArray(function(err, items) {
 </dl>
 
         
-        
-            <h3>Example</h3>
-            
-
-    
-    <pre class="prettyprint"><code><p>var Db = require('mongodb').Db,<br>  ReplSet = require('mongodb').ReplSet,<br>  Server = require('mongodb').Server,<br>  test = require('assert');<br>// Connect using ReplSet<br>var server = new Server('localhost', 27017);<br>var db = new Db('test', new ReplSet([server]));<br>db.open(function(err, db) {<br>  // Get an additional db<br>  db.close();<br>});</p></code></pre>
-    
-
         
     
     </div>
@@ -2790,14 +2753,6 @@ col.find({}).toArray(function(err, items) {
 
         
         
-            <h3>Example</h3>
-            
-
-    
-    <pre class="prettyprint"><code><p>var Db = require('mongodb').Db,<br>  Server = require('mongodb').Server,<br>  test = require('assert');<br>// Connect using single Server<br>var db = new Db('test', new Server('localhost', 27017););<br>db.open(function(err, db) {<br>  // Get an additional db<br>  db.close();<br>});</p></code></pre>
-    
-
-        
     
     </div>
     
@@ -2846,7 +2801,7 @@ col.find({}).toArray(function(err, items) {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Dec 08 2017 18:00:55 GMT-0500 (EST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Dec 27 2017 12:30:13 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>

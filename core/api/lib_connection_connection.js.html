@@ -1508,100 +1508,138 @@ function merge(options1, options2) {
   }
 }
 
+function makeSSLConnection(self, _options) {
+  let sslOptions = {
+    socket: self.connection,
+    rejectUnauthorized: self.rejectUnauthorized
+  };
+
+  // Merge in options
+  merge(sslOptions, self.options);
+  merge(sslOptions, _options);
+
+  // Set options for ssl
+  if (self.ca) sslOptions.ca = self.ca;
+  if (self.crl) sslOptions.crl = self.crl;
+  if (self.cert) sslOptions.cert = self.cert;
+  if (self.key) sslOptions.key = self.key;
+  if (self.passphrase) sslOptions.passphrase = self.passphrase;
+
+  // Override checkServerIdentity behavior
+  if (self.checkServerIdentity === false) {
+    // Skip the identiy check by retuning undefined as per node documents
+    // https://nodejs.org/api/tls.html#tls_tls_connect_options_callback
+    sslOptions.checkServerIdentity = function() {
+      return undefined;
+    };
+  } else if (typeof self.checkServerIdentity === 'function') {
+    sslOptions.checkServerIdentity = self.checkServerIdentity;
+  }
+
+  // Set default sni servername to be the same as host
+  if (sslOptions.servername == null) {
+    sslOptions.servername = self.host;
+  }
+
+  // Attempt SSL connection
+  const connection = tls.connect(self.port, self.host, sslOptions, function() {
+    // Error on auth or skip
+    if (connection.authorizationError &amp;&amp; self.rejectUnauthorized) {
+      return self.emit('error', connection.authorizationError, self, { ssl: true });
+    }
+
+    // Set socket timeout instead of connection timeout
+    connection.setTimeout(self.socketTimeout);
+    // We are done emit connect
+    self.emit('connect', self);
+  });
+  connection.setTimeout(self.connectionTimeout);
+
+  return connection;
+}
+
+function makeUnsecureConnection(self, family) {
+  // Create new connection instance
+  let connection_options;
+  if (self.domainSocket) {
+    connection_options = { path: self.host };
+  } else {
+    connection_options = { port: self.port, host: self.host };
+    connection_options.family = family;
+  }
+
+  const connection = net.createConnection(connection_options);
+
+  // Set the options for the connection
+  connection.setKeepAlive(self.keepAlive, self.keepAliveInitialDelay);
+  connection.setTimeout(self.connectionTimeout);
+  connection.setNoDelay(self.noDelay);
+
+  connection.once('connect', function() {
+    // Set socket timeout instead of connection timeout
+    connection.setTimeout(self.socketTimeout);
+    // Emit connect event
+    self.emit('connect', self);
+  });
+
+  return connection;
+}
+
+function doConnect(self, family, _options, _errorHandler) {
+  self.connection = self.ssl
+    ? makeSSLConnection(self, _options)
+    : makeUnsecureConnection(self, family);
+
+  // Add handlers for events
+  self.connection.once('error', _errorHandler);
+  self.connection.once('timeout', timeoutHandler(self));
+  self.connection.once('close', closeHandler(self));
+  self.connection.on('data', dataHandler(self));
+}
+
 /**
  * Connect
  * @method
  */
 Connection.prototype.connect = function(_options) {
-  var self = this;
   _options = _options || {};
   // Set the connections
   if (connectionAccounting) addConnection(this.id, this);
   // Check if we are overriding the promoteLongs
   if (typeof _options.promoteLongs === 'boolean') {
-    self.responseOptions.promoteLongs = _options.promoteLongs;
-    self.responseOptions.promoteValues = _options.promoteValues;
-    self.responseOptions.promoteBuffers = _options.promoteBuffers;
+    this.responseOptions.promoteLongs = _options.promoteLongs;
+    this.responseOptions.promoteValues = _options.promoteValues;
+    this.responseOptions.promoteBuffers = _options.promoteBuffers;
   }
 
-  // Create new connection instance
-  var connection_options;
-  if (self.domainSocket) {
-    connection_options = { path: self.host };
-  } else {
-    connection_options = { port: self.port, host: self.host };
-    if (self.family !== void 0) {
-      connection_options.family = self.family;
-    }
-  }
-  self.connection = net.createConnection(connection_options);
+  const _errorHandler = errorHandler(this);
 
-  // Set the options for the connection
-  self.connection.setKeepAlive(self.keepAlive, self.keepAliveInitialDelay);
-  self.connection.setTimeout(self.connectionTimeout);
-  self.connection.setNoDelay(self.noDelay);
-
-  // If we have ssl enabled
-  if (self.ssl) {
-    var sslOptions = {
-      socket: self.connection,
-      rejectUnauthorized: self.rejectUnauthorized
-    };
-
-    // Merge in options
-    merge(sslOptions, this.options);
-    merge(sslOptions, _options);
-
-    // Set options for ssl
-    if (self.ca) sslOptions.ca = self.ca;
-    if (self.crl) sslOptions.crl = self.crl;
-    if (self.cert) sslOptions.cert = self.cert;
-    if (self.key) sslOptions.key = self.key;
-    if (self.passphrase) sslOptions.passphrase = self.passphrase;
-
-    // Override checkServerIdentity behavior
-    if (self.checkServerIdentity === false) {
-      // Skip the identiy check by retuning undefined as per node documents
-      // https://nodejs.org/api/tls.html#tls_tls_connect_options_callback
-      sslOptions.checkServerIdentity = function() {
-        return undefined;
-      };
-    } else if (typeof self.checkServerIdentity === 'function') {
-      sslOptions.checkServerIdentity = self.checkServerIdentity;
-    }
-
-    // Set default sni servername to be the same as host
-    if (sslOptions.servername == null) {
-      sslOptions.servername = self.host;
-    }
-
-    // Attempt SSL connection
-    self.connection = tls.connect(self.port, self.host, sslOptions, function() {
-      // Error on auth or skip
-      if (self.connection.authorizationError &amp;&amp; self.rejectUnauthorized) {
-        return self.emit('error', self.connection.authorizationError, self, { ssl: true });
-      }
-
-      // Set socket timeout instead of connection timeout
-      self.connection.setTimeout(self.socketTimeout);
-      // We are done emit connect
-      self.emit('connect', self);
-    });
-    self.connection.setTimeout(self.connectionTimeout);
-  } else {
-    self.connection.once('connect', function() {
-      // Set socket timeout instead of connection timeout
-      self.connection.setTimeout(self.socketTimeout);
-      // Emit connect event
-      self.emit('connect', self);
-    });
+  if (this.family !== void 0) {
+    return doConnect(this, this.family, _options, _errorHandler);
   }
 
-  // Add handlers for events
-  self.connection.once('error', errorHandler(self));
-  self.connection.once('timeout', timeoutHandler(self));
-  self.connection.once('close', closeHandler(self));
-  self.connection.on('data', dataHandler(self));
+  return doConnect(this, 6, _options, err => {
+    if (this.logger.isDebug()) {
+      this.logger.debug(
+        f(
+          'connection %s for [%s:%s] errored out with [%s]',
+          this.id,
+          this.host,
+          this.port,
+          JSON.stringify(err)
+        )
+      );
+    }
+
+    // clean up existing event handlers
+    this.connection.removeAllListeners('error');
+    this.connection.removeAllListeners('timeout');
+    this.connection.removeAllListeners('close');
+    this.connection.removeAllListeners('data');
+    this.connection = undefined;
+
+    return doConnect(this, 4, _options, _errorHandler);
+  });
 };
 
 /**
@@ -1769,7 +1807,7 @@ module.exports = Connection;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Dec 08 2017 18:01:01 GMT-0500 (EST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Dec 27 2017 12:30:18 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>

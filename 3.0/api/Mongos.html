@@ -495,8 +495,6 @@
             
                 <li data-name="Collection#geoHaystackSearch"><a href="Collection.html#geoHaystackSearch">geoHaystackSearch</a></li>
             
-                <li data-name="Collection#geoNear"><a href="Collection.html#geoNear">geoNear</a></li>
-            
                 <li data-name="Collection#group"><a href="Collection.html#group">group</a></li>
             
                 <li data-name="Collection#indexes"><a href="Collection.html#indexes">indexes</a></li>
@@ -1900,7 +1898,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line116">line 116</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line105">line 105</a>
         </div>
         
     </div>
@@ -2674,7 +2672,7 @@
             <td class="type">
             
                 
-<span class="param-type">number</span>
+<span class="param-type">boolean</span>
 
 
             
@@ -2683,7 +2681,7 @@
             
                 <td class="default">
                 
-                    0
+                    true
                 
                 </td>
             
@@ -2697,7 +2695,43 @@
                         
                     
                 
-                <p>TCP KeepAlive on the socket with a X ms delay before start.</p></td>
+                <p>TCP Connection keep alive enabled</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>keepAliveInitialDelay</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    30000
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The number of milliseconds to wait before initiating keepAlive on the TCP socket</p></td>
         </tr>
 	
 	
@@ -2982,7 +3016,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line430">line 430</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line416">line 416</a>
         </div>
         
     </div>
@@ -3063,7 +3097,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line380">line 380</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line366">line 366</a>
         </div>
         
     </div>
@@ -3144,7 +3178,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line437">line 437</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line423">line 423</a>
         </div>
         
     </div>
@@ -3225,7 +3259,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line416">line 416</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line402">line 402</a>
         </div>
         
     </div>
@@ -3306,7 +3340,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line387">line 387</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line373">line 373</a>
         </div>
         
     </div>
@@ -3501,7 +3535,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line407">line 407</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line393">line 393</a>
         </div>
         
     </div>
@@ -3650,7 +3684,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line398">line 398</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line384">line 384</a>
         </div>
         
     </div>
@@ -3799,7 +3833,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line423">line 423</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line409">line 409</a>
         </div>
         
     </div>
@@ -3880,7 +3914,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line451">line 451</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line437">line 437</a>
         </div>
         
     </div>
@@ -3961,7 +3995,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line444">line 444</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line430">line 430</a>
         </div>
         
     </div>
@@ -4061,7 +4095,7 @@ Mongos instance.
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Dec 08 2017 18:00:55 GMT-0500 (EST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Dec 27 2017 12:30:13 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>

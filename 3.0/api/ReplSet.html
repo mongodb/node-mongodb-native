@@ -495,8 +495,6 @@
             
                 <li data-name="Collection#geoHaystackSearch"><a href="Collection.html#geoHaystackSearch">geoHaystackSearch</a></li>
             
-                <li data-name="Collection#geoNear"><a href="Collection.html#geoNear">geoNear</a></li>
-            
                 <li data-name="Collection#group"><a href="Collection.html#group">group</a></li>
             
                 <li data-name="Collection#indexes"><a href="Collection.html#indexes">indexes</a></li>
@@ -1900,7 +1898,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line127">line 127</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line116">line 116</a>
         </div>
         
     </div>
@@ -2744,7 +2742,7 @@
             <td class="type">
             
                 
-<span class="param-type">number</span>
+<span class="param-type">boolean</span>
 
 
             
@@ -2753,7 +2751,7 @@
             
                 <td class="default">
                 
-                    0
+                    true
                 
                 </td>
             
@@ -2767,7 +2765,43 @@
                         
                     
                 
-                <p>TCP KeepAlive on the socket with a X ms delay before start.</p></td>
+                <p>TCP Connection keep alive enabled</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>keepAliveInitialDelay</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    30000
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The number of milliseconds to wait before initiating keepAlive on the TCP socket</p></td>
         </tr>
 	
 	
@@ -3086,7 +3120,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line487">line 487</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line473">line 473</a>
         </div>
         
     </div>
@@ -3167,7 +3201,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line437">line 437</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line423">line 423</a>
         </div>
         
     </div>
@@ -3248,7 +3282,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line494">line 494</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line480">line 480</a>
         </div>
         
     </div>
@@ -3329,7 +3363,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line480">line 480</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line466">line 466</a>
         </div>
         
     </div>
@@ -3410,7 +3444,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line444">line 444</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line430">line 430</a>
         </div>
         
     </div>
@@ -3605,7 +3639,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line464">line 464</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line450">line 450</a>
         </div>
         
     </div>
@@ -3754,7 +3788,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line455">line 455</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line441">line 441</a>
         </div>
         
     </div>
@@ -3903,7 +3937,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line473">line 473</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line459">line 459</a>
         </div>
         
     </div>
@@ -3984,7 +4018,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line508">line 508</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line494">line 494</a>
         </div>
         
     </div>
@@ -4065,7 +4099,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line501">line 501</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line487">line 487</a>
         </div>
         
     </div>
@@ -4165,7 +4199,7 @@ ReplSet instance.
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Dec 08 2017 18:00:55 GMT-0500 (EST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Dec 27 2017 12:30:13 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>

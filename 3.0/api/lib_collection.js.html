@@ -495,8 +495,6 @@
             
                 <li data-name="Collection#geoHaystackSearch"><a href="Collection.html#geoHaystackSearch">geoHaystackSearch</a></li>
             
-                <li data-name="Collection#geoNear"><a href="Collection.html#geoNear">geoNear</a></li>
-            
                 <li data-name="Collection#group"><a href="Collection.html#group">group</a></li>
             
                 <li data-name="Collection#indexes"><a href="Collection.html#indexes">indexes</a></li>
@@ -1898,7 +1896,6 @@ var checkCollectionName = require('./utils').checkCollectionName,
   Cursor = require('./cursor'),
   unordered = require('./bulk/unordered'),
   ordered = require('./bulk/ordered'),
-  assign = require('./utils').assign,
   ChangeStream = require('./change_stream'),
   executeOperation = require('./utils').executeOperation;
 
@@ -1908,19 +1905,21 @@ var checkCollectionName = require('./utils').checkCollectionName,
  *
  * **COLLECTION Cannot directly be instantiated**
  * @example
- * var MongoClient = require('mongodb').MongoClient,
- *   test = require('assert');
+ * const MongoClient = require('mongodb').MongoClient;
+ * const test = require('assert');
  * // Connection url
- * var url = 'mongodb://localhost:27017/test';
+ * const url = 'mongodb://localhost:27017';
+ * // Database Name
+ * const dbName = 'test';
  * // Connect using MongoClient
- * MongoClient.connect(url, function(err, db) {
+ * MongoClient.connect(url, function(err, client) {
  *   // Create a collection we want to drop later
- *   var col = db.collection('createIndexExample1');
+ *   const col = client.db(dbName).collection('createIndexExample1');
  *   // Show that duplicate records got dropped
  *   col.find({}).toArray(function(err, items) {
  *     test.equal(null, err);
  *     test.equal(4, items.length);
- *     db.close();
+ *     client.close();
  *   });
  * });
  */
@@ -2304,21 +2303,11 @@ var insertOne = function(self, doc, options, callback) {
 };
 
 var mapInserManyResults = function(docs, r) {
-  var ids = r.getInsertedIds();
-  var keys = Object.keys(ids);
-  var finalIds = new Array(keys.length);
-
-  for (var i = 0; i &lt; keys.length; i++) {
-    if (ids[keys[i]]._id) {
-      finalIds[ids[keys[i]].index] = ids[keys[i]]._id;
-    }
-  }
-
   var finalResult = {
     result: { ok: 1, n: r.insertedCount },
     ops: docs,
     insertedCount: r.insertedCount,
-    insertedIds: finalIds
+    insertedIds: r.insertedIds
   };
 
   if (r.getLastOp()) {
@@ -2601,7 +2590,7 @@ define.classMethod('bulkWrite', { callback: true, promise: true });
  * @typedef {Object} Collection~insertWriteOpResult
  * @property {Number} insertedCount The total amount of documents inserted.
  * @property {object[]} ops All the documents inserted using insertOne/insertMany/replaceOne. Documents contain the _id field if forceServerObjectId == false for insertOne/insertMany
- * @property {ObjectId[]} insertedIds All the generated _id's for the inserted documents.
+ * @property {Object.&lt;Number, ObjectId>} insertedIds Map of the index of the inserted document to the id of the inserted document.
  * @property {object} connection The connection object used for the operation.
  * @property {object} result The raw command result object returned from MongoDB (content might vary by server version).
  * @property {Number} result.ok Is 1 if the command executed correctly.
@@ -3253,7 +3242,7 @@ define.classMethod('findOne', { callback: true, promise: true });
  */
 Collection.prototype.rename = function(newName, options, callback) {
   if (typeof options === 'function') (callback = options), (options = {});
-  options = assign({}, options, { readPreference: ReadPreference.PRIMARY });
+  options = Object.assign({}, options, { readPreference: ReadPreference.PRIMARY });
 
   return executeOperation(this.s.topology, rename, [this, newName, options, callback]);
 };
@@ -3399,12 +3388,8 @@ define.classMethod('isCapped', { callback: true, promise: true });
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.createIndex = function(fieldOrSpec, options, callback) {
-  var args = Array.prototype.slice.call(arguments, 1);
-  callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-
-  options = args.length ? args.shift() || {} : {};
-  options = typeof callback === 'function' ? options : callback;
-  options = options == null ? {} : options;
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
 
   return executeOperation(this.s.topology, createIndex, [this, fieldOrSpec, options, callback]);
 };
@@ -3457,7 +3442,7 @@ var createIndexes = function(self, indexSpecs, options, callback) {
     }
   }
 
-  options = assign({}, options, { readPreference: ReadPreference.PRIMARY });
+  options = Object.assign({}, options, { readPreference: ReadPreference.PRIMARY });
 
   // Execute the index
   self.s.db.command(
@@ -3874,7 +3859,7 @@ Collection.prototype.indexes = function(options, callback) {
 };
 
 var indexes = function(self, options, callback) {
-  options = assign({}, { full: true }, options);
+  options = Object.assign({}, { full: true }, options);
   self.s.db.indexInformation(self.s.name, options, callback);
 };
 
@@ -4371,10 +4356,8 @@ Collection.prototype.aggregate = function(pipeline, options, callback) {
     throw toError('cursor options must be an object');
   }
 
-  if (this.s.topology.capabilities().hasAggregationCursor) {
-    options.cursor = options.cursor || { batchSize: 1000 };
-    command.cursor = options.cursor;
-  }
+  options.cursor = options.cursor || { batchSize: 1000 };
+  command.cursor = options.cursor;
 
   // promiseLibrary
   options.promiseLibrary = this.s.promiseLibrary;
@@ -4394,28 +4377,7 @@ Collection.prototype.aggregate = function(pipeline, options, callback) {
     return this.s.topology.cursor(this.s.namespace, command, options);
   }
 
-  if (options.cursor) {
-    return handleCallback(
-      callback,
-      null,
-      this.s.topology.cursor(this.s.namespace, command, options)
-    );
-  }
-
-  // For legacy server versions, we execute the command and format the result
-  this.s.db.command(command, options, function(err, result) {
-    if (err) {
-      handleCallback(callback, err);
-    } else if (result['err'] || result['errmsg']) {
-      handleCallback(callback, toError(result));
-    } else if (typeof result === 'object' &amp;&amp; result['serverPipeline']) {
-      handleCallback(callback, null, result['serverPipeline']);
-    } else if (typeof result === 'object' &amp;&amp; result['stages']) {
-      handleCallback(callback, null, result['stages']);
-    } else {
-      handleCallback(callback, null, result.result);
-    }
-  });
+  return handleCallback(callback, null, this.s.topology.cursor(this.s.namespace, command, options));
 };
 
 define.classMethod('aggregate', { callback: true, promise: false });
@@ -4529,76 +4491,6 @@ var parallelCollectionScan = function(self, options, callback) {
 };
 
 define.classMethod('parallelCollectionScan', { callback: true, promise: true });
-
-/**
- * Execute the geoNear command to search for items in the collection
- *
- * @method
- * @param {number} x Point to search on the x axis, ensure the indexes are ordered in the same order.
- * @param {number} y Point to search on the y axis, ensure the indexes are ordered in the same order.
- * @param {object} [options=null] Optional settings.
- * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
- * @param {number} [options.num=null] Max number of results to return.
- * @param {number} [options.minDistance=null] Include results starting at minDistance from a point (2.6 or higher)
- * @param {number} [options.maxDistance=null] Include results up to maxDistance from the point.
- * @param {number} [options.distanceMultiplier=null] Include a value to multiply the distances with allowing for range conversions.
- * @param {object} [options.query=null] Filter the results by a query.
- * @param {boolean} [options.spherical=false] Perform query using a spherical model.
- * @param {boolean} [options.uniqueDocs=false] The closest location in a document to the center of the search region will always be returned MongoDB > 2.X.
- * @param {boolean} [options.includeLocs=false] Include the location data fields in the top level of the results MongoDB > 2.X.
- * @param {ClientSession} [options.session] optional session to use for this operation
- * @param {Collection~resultCallback} [callback] The command result callback
- * @return {Promise} returns Promise if no callback passed
- */
-Collection.prototype.geoNear = function(x, y, options, callback) {
-  var point = typeof x === 'object' &amp;&amp; x,
-    args = Array.prototype.slice.call(arguments, point ? 1 : 2);
-  callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
-  options = args.length ? args.shift() || {} : {};
-
-  return executeOperation(this.s.topology, geoNear, [this, x, y, point, options, callback]);
-};
-
-var geoNear = function(self, x, y, point, options, callback) {
-  // Build command object
-  var commandObject = {
-    geoNear: self.s.name,
-    near: point || [x, y]
-  };
-
-  options = shallowClone(options);
-  // Ensure we have the right read preference inheritance
-  options = getReadPreference(self, options, self.s.db, self);
-
-  // Exclude readPreference and existing options to prevent user from
-  // shooting themselves in the foot
-  var exclude = {
-    readPreference: true,
-    geoNear: true,
-    near: true,
-    session: true
-  };
-
-  // Filter out any excluded objects
-  commandObject = decorateCommand(commandObject, options, exclude);
-
-  // Do we have a readConcern specified
-  decorateWithReadConcern(commandObject, self, options);
-
-  // Have we specified collation
-  decorateWithCollation(commandObject, self, options);
-
-  // Execute the command
-  self.s.db.command(commandObject, options, function(err, res) {
-    if (err) return handleCallback(callback, err);
-    if (res.err || res.errmsg) return handleCallback(callback, toError(res));
-    // should we only be returning res.results here? Not sure if the user
-    // should see the other return information
-    handleCallback(callback, null, res);
-  });
-};
-
-define.classMethod('geoNear', { callback: true, promise: true });
 
 /**
  * Execute a geo search using a geo haystack index on a collection.
@@ -5135,7 +5027,7 @@ module.exports = Collection;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Dec 08 2017 18:00:55 GMT-0500 (EST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Dec 27 2017 12:30:13 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>

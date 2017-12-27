@@ -495,8 +495,6 @@
             
                 <li data-name="Collection#geoHaystackSearch"><a href="Collection.html#geoHaystackSearch">geoHaystackSearch</a></li>
             
-                <li data-name="Collection#geoNear"><a href="Collection.html#geoNear">geoNear</a></li>
-            
                 <li data-name="Collection#group"><a href="Collection.html#group">group</a></li>
             
                 <li data-name="Collection#indexes"><a href="Collection.html#indexes">indexes</a></li>
@@ -1900,7 +1898,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line116">line 116</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line107">line 107</a>
         </div>
         
     </div>
@@ -2636,7 +2634,7 @@
             <td class="type">
             
                 
-<span class="param-type">number</span>
+<span class="param-type">boolean</span>
 
 
             
@@ -2645,7 +2643,7 @@
             
                 <td class="default">
                 
-                    0
+                    true
                 
                 </td>
             
@@ -2659,7 +2657,43 @@
                         
                     
                 
-                <p>TCP KeepAlive on the socket with a X ms delay before start.</p></td>
+                <p>TCP Connection keep alive enabled</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>keepAliveInitialDelay</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    30000
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The number of milliseconds to wait before initiating keepAlive on the TCP socket</p></td>
         </tr>
 	
 	
@@ -3080,7 +3114,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line426">line 426</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line413">line 413</a>
         </div>
         
     </div>
@@ -3161,7 +3195,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line419">line 419</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line406">line 406</a>
         </div>
         
     </div>
@@ -3242,7 +3276,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line440">line 440</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line427">line 427</a>
         </div>
         
     </div>
@@ -3323,7 +3357,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line454">line 454</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line441">line 441</a>
         </div>
         
     </div>
@@ -3404,7 +3438,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line433">line 433</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line420">line 420</a>
         </div>
         
     </div>
@@ -3485,7 +3519,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line447">line 447</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line434">line 434</a>
         </div>
         
     </div>
@@ -3585,7 +3619,7 @@ Server instance.
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Dec 08 2017 18:00:55 GMT-0500 (EST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Dec 27 2017 12:30:13 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>
