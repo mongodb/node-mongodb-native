@@ -425,7 +425,8 @@ describe('Server tests', function() {
   it('should correctly reconnect to server with automatic reconnect enabled', {
     metadata: {
       requires: {
-        topology: 'single'
+        topology: 'single',
+        os: '!darwin' // remove os restriction when SERVER-32477 is resolved
       }
     },
 
@@ -617,7 +618,8 @@ describe('Server tests', function() {
   it('should correctly place new connections in available list on reconnect', {
     metadata: {
       requires: {
-        topology: 'single'
+        topology: 'single',
+        os: '!darwin' // remove os restriction when SERVER-32477 is resolved
       }
     },
 
