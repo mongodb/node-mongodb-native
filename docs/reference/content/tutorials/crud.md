@@ -527,7 +527,7 @@ The ``bulkWrite`` function allows a simple set of bulk operations to run in a no
 })();
 </code></pre></section>
 
-The ``bulkWrite`` function takes an array of operations which can be objects of either ``insertOne``, ``insertMany``, ``updateOne``, ``updateMany``, ``deleteOne`` or ``deleteMany``. It also takes a second parameter which takes the following options:
+The ``bulkWrite`` function takes an array of operations which can be objects of either ``insertOne``, ``updateOne``, ``updateMany``, ``deleteOne``, ``deleteMany``, or ``replaceOne``. It also takes a second parameter which takes the following options:
 
 | Parameter | Type | Description |
 | :----------| :------------- | :------------- |
