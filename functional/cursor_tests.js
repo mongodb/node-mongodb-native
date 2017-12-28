@@ -449,7 +449,10 @@ describe('Cursor tests', function() {
 
   it('Should finish cursor correctly after all sockets to pool destroyed', {
     metadata: {
-      requires: { topology: ['single'] }
+      requires: {
+        topology: ['single'],
+        os: '!darwin' // remove os restriction when SERVER-32477 is resolved
+      }
     },
 
     test: function(done) {
