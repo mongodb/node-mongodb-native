@@ -33,7 +33,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        const server = yield mock.createServer(52017, 'localhost');
+        const server = yield mock.createServer();
 
         server.setMessageHandler(request => {
           var doc = request.document;
@@ -61,7 +61,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
         }, 500);
 
         // Attempt to connect
-        var mongos = new Mongos([{ host: 'localhost', port: 52017 }], {
+        var mongos = new Mongos([server.address()], {
           connectionTimeout: 3000,
           socketTimeout: 1000,
           haInterval: 500,
@@ -79,7 +79,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
               if (r && !finished) {
                 finished = true;
                 clearInterval(intervalId);
-                expect(r.connection.port).to.equal(52017);
+                expect(r.connection.port).to.equal(server.address().port);
 
                 server.destroy();
                 done();
@@ -117,7 +117,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        const server = yield mock.createServer(52018, 'localhost');
+        const server = yield mock.createServer();
 
         server.setMessageHandler(request => {
           var doc = request.document;
@@ -150,7 +150,7 @@ describe('Mongos Single Proxy Connection (mocks)', function() {
         });
 
         // Attempt to connect
-        var mongos = new Mongos([{ host: 'localhost', port: 52018 }], {
+        var mongos = new Mongos([server.address()], {
           connectionTimeout: 30000,
           socketTimeout: 30000,
           haInterval: 500,

@@ -42,8 +42,8 @@ describe('Mongos Mixed Seed List (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        mongos1 = yield mock.createServer(52005, 'localhost');
-        mongos2 = yield mock.createServer(52006, 'localhost');
+        mongos1 = yield mock.createServer();
+        mongos2 = yield mock.createServer();
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -64,16 +64,13 @@ describe('Mongos Mixed Seed List (mocks)', function() {
         });
 
         // Attempt to connect
-        var server = new Mongos(
-          [{ host: 'localhost', port: 52005 }, { host: 'localhost', port: 52006 }],
-          {
-            connectionTimeout: 3000,
-            socketTimeout: 1000,
-            haInterval: 1000,
-            localThresholdMS: 500,
-            size: 1
-          }
-        );
+        var server = new Mongos([mongos1.address(), mongos2.address()], {
+          connectionTimeout: 3000,
+          socketTimeout: 1000,
+          haInterval: 1000,
+          localThresholdMS: 500,
+          size: 1
+        });
 
         var logger = Logger.currentLogger();
         Logger.setCurrentLogger(function(msg, state) {
@@ -128,8 +125,8 @@ describe('Mongos Mixed Seed List (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        mongos1 = yield mock.createServer(52002, 'localhost');
-        mongos2 = yield mock.createServer(52003, 'localhost');
+        mongos1 = yield mock.createServer();
+        mongos2 = yield mock.createServer();
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -150,16 +147,13 @@ describe('Mongos Mixed Seed List (mocks)', function() {
         });
 
         // Attempt to connect
-        var server = new Mongos(
-          [{ host: 'localhost', port: 52002 }, { host: 'localhost', port: 52003 }],
-          {
-            connectionTimeout: 3000,
-            socketTimeout: 1000,
-            haInterval: 1000,
-            localThresholdMS: 500,
-            size: 1
-          }
-        );
+        var server = new Mongos([mongos1.address(), mongos2.address()], {
+          connectionTimeout: 3000,
+          socketTimeout: 1000,
+          haInterval: 1000,
+          localThresholdMS: 500,
+          size: 1
+        });
 
         var warnings = [];
         var logger = Logger.currentLogger();

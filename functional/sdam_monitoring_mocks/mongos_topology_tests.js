@@ -38,8 +38,8 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
-        mongos1 = yield mock.createServer(62000, 'localhost');
-        mongos2 = yield mock.createServer(62001, 'localhost');
+        mongos1 = yield mock.createServer();
+        mongos2 = yield mock.createServer();
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -61,15 +61,12 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       });
 
       // Attempt to connect
-      var server = new Mongos(
-        [{ host: 'localhost', port: 62000 }, { host: 'localhost', port: 62001 }],
-        {
-          connectionTimeout: 3000,
-          socketTimeout: 1500,
-          haInterval: 1000,
-          size: 1
-        }
-      );
+      var server = new Mongos([mongos1.address(), mongos2.address()], {
+        connectionTimeout: 3000,
+        socketTimeout: 1500,
+        haInterval: 1000,
+        size: 1
+      });
 
       // Add event listeners
       server.once('fullsetup', function(_server) {
@@ -250,8 +247,8 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
-        mongos1 = yield mock.createServer(62002, 'localhost');
-        mongos2 = yield mock.createServer(62003, 'localhost');
+        mongos1 = yield mock.createServer();
+        mongos2 = yield mock.createServer();
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -275,15 +272,12 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       });
 
       // Attempt to connect
-      var server = new Mongos(
-        [{ host: 'localhost', port: 62002 }, { host: 'localhost', port: 62003 }],
-        {
-          connectionTimeout: 3000,
-          socketTimeout: 5000,
-          haInterval: 1000,
-          size: 1
-        }
-      );
+      var server = new Mongos([mongos1.address(), mongos2.address()], {
+        connectionTimeout: 3000,
+        socketTimeout: 5000,
+        haInterval: 1000,
+        size: 1
+      });
 
       // Add event listeners
       server.once('fullsetup', function(_server) {
@@ -453,8 +447,8 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
-        mongos1 = yield mock.createServer(62004, 'localhost');
-        mongos2 = yield mock.createServer(62005, 'localhost');
+        mongos1 = yield mock.createServer();
+        mongos2 = yield mock.createServer();
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -489,15 +483,12 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       });
 
       // Attempt to connect
-      var server = new Mongos(
-        [{ host: 'localhost', port: 62004 }, { host: 'localhost', port: 62005 }],
-        {
-          connectionTimeout: 3000,
-          socketTimeout: 1500,
-          haInterval: 1000,
-          size: 1
-        }
-      );
+      var server = new Mongos([mongos1.address(), mongos2.address()], {
+        connectionTimeout: 3000,
+        socketTimeout: 1500,
+        haInterval: 1000,
+        size: 1
+      });
 
       var responses = {};
       var add = function(a) {

@@ -1233,24 +1233,22 @@ describe('Pool tests', function() {
     }
   });
 
-  it.only('should remove all connections from further use during reauthentication of a pool', {
+  it('should remove all connections from further use during reauthentication of a pool', {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
       co(function*() {
-        const server = yield mock.createServer(37017, 'localhost');
+        const server = yield mock.createServer();
 
         server
           .addMessageHandler('getnonce', req => req.reply({ ok: 1, result: { nonce: 'testing' } }))
           .addMessageHandler('authenticate', req => req.reply({ ok: 1 }))
           .addMessageHandler('ismaster', req => setTimeout(() => req.reply({ ok: 1 }), 10000));
 
-        var pool = new Pool(null, {
-          host: 'localhost',
-          port: 37017,
-          bson: new Bson(),
-          size: 10
-        });
+        var pool = new Pool(
+          null,
+          Object.assign({}, server.address(), { bson: new Bson(), size: 10 })
+        );
 
         var query = new Query(
           new Bson(),

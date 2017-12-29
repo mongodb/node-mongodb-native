@@ -26,8 +26,8 @@ describe('Mongos Proxy Failover (mocks)', function() {
       var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
-        const mongos1 = yield mock.createServer(52007, 'localhost');
-        const mongos2 = yield mock.createServer(52008, 'localhost');
+        const mongos1 = yield mock.createServer();
+        const mongos2 = yield mock.createServer();
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -49,15 +49,12 @@ describe('Mongos Proxy Failover (mocks)', function() {
         });
 
         // Attempt to connect
-        var server = new Mongos(
-          [{ host: 'localhost', port: 52007 }, { host: 'localhost', port: 52008 }],
-          {
-            connectionTimeout: 3000,
-            socketTimeout: 5000,
-            haInterval: 1000,
-            size: 1
-          }
-        );
+        var server = new Mongos([mongos1.address(), mongos2.address()], {
+          connectionTimeout: 3000,
+          socketTimeout: 5000,
+          haInterval: 1000,
+          size: 1
+        });
 
         // Add event listeners
         server.once('fullsetup', function() {
@@ -67,7 +64,7 @@ describe('Mongos Proxy Failover (mocks)', function() {
               // validate that it's the expected proxy
               if (r) {
                 clearInterval(intervalId);
-                expect(r.connection.port).to.equal(52008);
+                expect(r.connection.port).to.equal(mongos2.address().port);
 
                 server.destroy();
                 done();
@@ -105,8 +102,8 @@ describe('Mongos Proxy Failover (mocks)', function() {
       var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
-        const mongos1 = yield mock.createServer(52009, 'localhost');
-        const mongos2 = yield mock.createServer(52010, 'localhost');
+        const mongos1 = yield mock.createServer();
+        const mongos2 = yield mock.createServer();
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -129,15 +126,12 @@ describe('Mongos Proxy Failover (mocks)', function() {
         });
 
         // Attempt to connect
-        var server = new Mongos(
-          [{ host: 'localhost', port: 52009 }, { host: 'localhost', port: 52010 }],
-          {
-            connectionTimeout: 3000,
-            socketTimeout: 1500,
-            haInterval: 1000,
-            size: 1
-          }
-        );
+        var server = new Mongos([mongos1.address(), mongos2.address()], {
+          connectionTimeout: 3000,
+          socketTimeout: 1500,
+          haInterval: 1000,
+          size: 1
+        });
 
         // Add event listeners
         server.once('fullsetup', function() {
@@ -147,7 +141,7 @@ describe('Mongos Proxy Failover (mocks)', function() {
               // validate that it's the expected proxy
               if (r) {
                 clearInterval(intervalId);
-                expect(r.connection.port).to.equal(52010);
+                expect(r.connection.port).to.equal(mongos2.address().port);
 
                 // Proxies seen
                 var proxies = {};
@@ -205,8 +199,8 @@ describe('Mongos Proxy Failover (mocks)', function() {
       var serverIsMaster = [Object.assign({}, defaultFields)];
       // Boot the mock
       co(function*() {
-        const mongos1 = yield mock.createServer(52011, 'localhost');
-        const mongos2 = yield mock.createServer(52012, 'localhost');
+        const mongos1 = yield mock.createServer();
+        const mongos2 = yield mock.createServer();
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -231,15 +225,12 @@ describe('Mongos Proxy Failover (mocks)', function() {
         });
 
         // Attempt to connect
-        var server = new Mongos(
-          [{ host: 'localhost', port: 52011 }, { host: 'localhost', port: 52012 }],
-          {
-            connectionTimeout: 3000,
-            socketTimeout: 500,
-            haInterval: 1000,
-            size: 1
-          }
-        );
+        var server = new Mongos([mongos1.address(), mongos2.address()], {
+          connectionTimeout: 3000,
+          socketTimeout: 500,
+          haInterval: 1000,
+          size: 1
+        });
 
         // Add event listeners
         server.once('fullsetup', function() {

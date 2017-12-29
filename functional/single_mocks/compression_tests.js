@@ -24,7 +24,7 @@ describe('Single Compression (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        const server = yield mock.createServer(37046, 'localhost');
+        const server = yield mock.createServer();
 
         server.setMessageHandler(request => {
           expect(request.response.documents[0].compression).to.have.members(['snappy', 'zlib']);
@@ -32,14 +32,14 @@ describe('Single Compression (mocks)', function() {
         });
 
         // Attempt to connect
-        var client = new Server({
-          host: 'localhost',
-          port: '37046',
-          connectionTimeout: 5000,
-          socketTimeout: 1000,
-          size: 1,
-          compression: { compressors: ['snappy', 'zlib'], zlibCompressionLevel: -1 }
-        });
+        var client = new Server(
+          Object.assign({}, server.address(), {
+            connectionTimeout: 5000,
+            socketTimeout: 1000,
+            size: 1,
+            compression: { compressors: ['snappy', 'zlib'], zlibCompressionLevel: -1 }
+          })
+        );
 
         client.on('connect', function() {
           client.destroy();
@@ -69,7 +69,7 @@ describe('Single Compression (mocks)', function() {
 
         // Boot the mock
         co(function*() {
-          const server = yield mock.createServer(37047, 'localhost');
+          const server = yield mock.createServer();
 
           server.setMessageHandler(request => {
             var doc = request.document;
@@ -98,14 +98,14 @@ describe('Single Compression (mocks)', function() {
           });
 
           // Attempt to connect
-          var client = new Server({
-            host: 'localhost',
-            port: '37047',
-            connectionTimeout: 5000,
-            socketTimeout: 1000,
-            size: 1,
-            compression: { compressors: ['snappy', 'zlib'] }
-          });
+          var client = new Server(
+            Object.assign({}, server.address(), {
+              connectionTimeout: 5000,
+              socketTimeout: 1000,
+              size: 1,
+              compression: { compressors: ['snappy', 'zlib'] }
+            })
+          );
 
           // Connect and try inserting, updating, and removing
           // All outbound messages from the driver will be uncompressed
@@ -164,7 +164,7 @@ describe('Single Compression (mocks)', function() {
 
         // Boot the mock
         co(function*() {
-          const server = yield mock.createServer(37048, 'localhost');
+          const server = yield mock.createServer();
 
           server.setMessageHandler(request => {
             var doc = request.document;
@@ -192,14 +192,14 @@ describe('Single Compression (mocks)', function() {
           });
 
           // Attempt to connect
-          var client = new Server({
-            host: 'localhost',
-            port: '37048',
-            connectionTimeout: 5000,
-            socketTimeout: 1000,
-            size: 1,
-            compression: { compressors: ['snappy', 'zlib'] }
-          });
+          var client = new Server(
+            Object.assign({}, server.address(), {
+              connectionTimeout: 5000,
+              socketTimeout: 1000,
+              size: 1,
+              compression: { compressors: ['snappy', 'zlib'] }
+            })
+          );
 
           // Connect and try inserting, updating, and removing
           // All outbound messages from the driver (after initial connection) will be OP_COMPRESSED using snappy
@@ -260,7 +260,7 @@ describe('Single Compression (mocks)', function() {
 
         // Boot the mock
         co(function*() {
-          server = yield mock.createServer(37049, 'localhost');
+          server = yield mock.createServer();
 
           server.setMessageHandler(request => {
             var doc = request.document;
@@ -288,14 +288,14 @@ describe('Single Compression (mocks)', function() {
           });
 
           // Attempt to connect
-          var client = new Server({
-            host: 'localhost',
-            port: '37049',
-            connectionTimeout: 5000,
-            socketTimeout: 1000,
-            size: 1,
-            compression: { compressors: ['snappy', 'zlib'] }
-          });
+          var client = new Server(
+            Object.assign({}, server.address(), {
+              connectionTimeout: 5000,
+              socketTimeout: 1000,
+              size: 1,
+              compression: { compressors: ['snappy', 'zlib'] }
+            })
+          );
 
           // Connect and try inserting, updating, and removing
           // All outbound messages from the driver (after initial connection) will be OP_COMPRESSED using zlib
@@ -354,7 +354,7 @@ describe('Single Compression (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        server = yield mock.createServer(37050, 'localhost');
+        server = yield mock.createServer();
 
         server.setMessageHandler(request => {
           if (currentStep === 0) {
@@ -375,14 +375,14 @@ describe('Single Compression (mocks)', function() {
         });
 
         // Attempt to connect
-        var client = new Server({
-          host: 'localhost',
-          port: '37050',
-          connectionTimeout: 5000,
-          socketTimeout: 1000,
-          size: 1,
-          compression: { compressors: ['snappy', 'zlib'] }
-        });
+        var client = new Server(
+          Object.assign({}, server.address(), {
+            connectionTimeout: 5000,
+            socketTimeout: 1000,
+            size: 1,
+            compression: { compressors: ['snappy', 'zlib'] }
+          })
+        );
 
         // Connect and try some commands, checking that uncompressible commands are indeed not compressed
         client.on('connect', function(_server) {

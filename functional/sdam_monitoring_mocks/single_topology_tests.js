@@ -38,7 +38,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       // Boot the mock
       var mockServer;
       co(function*() {
-        mockServer = yield mock.createServer(37018, 'localhost');
+        mockServer = yield mock.createServer();
 
         mockServer.setMessageHandler(request => {
           var doc = request.document;
@@ -49,13 +49,13 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       });
 
       // Attempt to connect
-      server = new Server({
-        host: 'localhost',
-        port: '37018',
-        connectionTimeout: 3000,
-        socketTimeout: 1000,
-        size: 1
-      });
+      server = new Server(
+        Object.assign({}, mockServer.address(), {
+          connectionTimeout: 3000,
+          socketTimeout: 1000,
+          size: 1
+        })
+      );
 
       // Results
       var flags = [];
@@ -185,7 +185,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       // Boot the mock
       var mockServer;
       co(function*() {
-        mockServer = yield mock.createServer(37008, 'localhost');
+        mockServer = yield mock.createServer();
 
         mockServer.setMessageHandler(request => {
           var doc = request.document;
@@ -196,13 +196,13 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       });
 
       // Attempt to connect
-      server = new Server({
-        host: 'localhost',
-        port: '37008',
-        connectionTimeout: 3000,
-        socketTimeout: 1000,
-        size: 1
-      });
+      server = new Server(
+        Object.assign({}, mockServer.address(), {
+          connectionTimeout: 3000,
+          socketTimeout: 1000,
+          size: 1
+        })
+      );
 
       // Results
       var flags = [];

@@ -30,7 +30,7 @@ describe('Single Timeout (mocks)', function() {
 
       // Boot the mock
       co(function*() {
-        const server = yield mock.createServer(37019, 'localhost');
+        const server = yield mock.createServer();
 
         server.setMessageHandler(request => {
           var doc = request.document;
@@ -59,13 +59,13 @@ describe('Single Timeout (mocks)', function() {
         }, 5000);
 
         // Attempt to connect
-        var replset = new Server({
-          host: 'localhost',
-          port: '37019',
-          connectionTimeout: 5000,
-          socketTimeout: 1000,
-          size: 1
-        });
+        var replset = new Server(
+          Object.assign({}, server.address(), {
+            connectionTimeout: 5000,
+            socketTimeout: 1000,
+            size: 1
+          })
+        );
 
         // Not done
         var finished = false;
@@ -81,7 +81,7 @@ describe('Single Timeout (mocks)', function() {
                 _server.insert('test.test', [{ created: new Date() }], function(_err, _r) {
                   if (_r && !finished) {
                     finished = true;
-                    expect(_r.connection.port).to.equal('37019');
+                    expect(_r.connection.port).to.equal(server.address().port);
                     replset.destroy({ force: true });
                     done();
                   } else {
@@ -124,7 +124,7 @@ describe('Single Timeout (mocks)', function() {
       var serverIsMaster = [Object.assign({}, defaultFields)];
 
       co(function*() {
-        const mockServer = yield mock.createServer(37017, 'localhost', {
+        const mockServer = yield mock.createServer(0, 'localhost', {
           onRead: function(_server, connection) {
             // Force EPIPE error
             if (currentStep === 1) {
@@ -154,13 +154,13 @@ describe('Single Timeout (mocks)', function() {
         });
 
         // Attempt to connect
-        const server = new Server({
-          host: 'localhost',
-          port: '37017',
-          connectionTimeout: 3000,
-          socketTimeout: 2000,
-          size: 1
-        });
+        const server = new Server(
+          Object.assign({}, mockServer.address(), {
+            connectionTimeout: 3000,
+            socketTimeout: 2000,
+            size: 1
+          })
+        );
 
         var docs = [];
         // Create big insert message
@@ -278,7 +278,7 @@ describe('Single Timeout (mocks)', function() {
 
         // Boot the mock
         co(function*() {
-          const mockServer = yield mock.createServer(37019, 'localhost');
+          const mockServer = yield mock.createServer();
 
           mockServer.setMessageHandler(request => {
             if (currentStep === 1) {
@@ -295,13 +295,13 @@ describe('Single Timeout (mocks)', function() {
           });
 
           // Attempt to connect
-          const server = new Server({
-            host: 'localhost',
-            port: 37019,
-            connectionTimeout: 2000,
-            socketTimeout: 1000,
-            size: 1
-          });
+          const server = new Server(
+            Object.assign({}, mockServer.address(), {
+              connectionTimeout: 2000,
+              socketTimeout: 1000,
+              size: 1
+            })
+          );
 
           // Add event listeners
           server.once('connect', function() {

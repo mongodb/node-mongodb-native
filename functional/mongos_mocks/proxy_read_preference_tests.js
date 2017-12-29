@@ -30,7 +30,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
       var command = null;
       // Boot the mock
       co(function*() {
-        const mongos1 = yield mock.createServer(52013, 'localhost');
+        const mongos1 = yield mock.createServer();
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -52,7 +52,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
         });
 
         // Attempt to connect
-        var server = new Mongos([{ host: 'localhost', port: 52013 }], {
+        var server = new Mongos([mongos1.address()], {
           connectionTimeout: 3000,
           socketTimeout: 5000,
           haInterval: 1000,
@@ -111,7 +111,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
       var command = null;
       // Boot the mock
       co(function*() {
-        const mongos1 = yield mock.createServer(52014, 'localhost');
+        const mongos1 = yield mock.createServer();
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -132,7 +132,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
         });
 
         // Attempt to connect
-        var server = new Mongos([{ host: 'localhost', port: 52014 }], {
+        var server = new Mongos([mongos1.address()], {
           connectionTimeout: 3000,
           socketTimeout: 5000,
           haInterval: 1000,
@@ -191,7 +191,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
       var command = null;
       // Boot the mock
       co(function*() {
-        const mongos1 = yield mock.createServer(52015, 'localhost');
+        const mongos1 = yield mock.createServer();
 
         mongos1.setMessageHandler(request => {
           var doc = request.document;
@@ -204,7 +204,7 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
         });
 
         // Attempt to connect
-        var server = new Mongos([{ host: 'localhost', port: 52015 }], {
+        var server = new Mongos([mongos1.address()], {
           connectionTimeout: 3000,
           socketTimeout: 5000,
           haInterval: 1000,
