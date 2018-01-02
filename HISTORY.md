@@ -1,3 +1,26 @@
+<a name="2.1.18"></a>
+## [2.1.18](https://github.com/christkv/mongodb-core/compare/v2.1.17...v2.1.18) (2018-01-02)
+
+
+### Bug Fixes
+
+* **auth:** don't redeclare BSON variable in plain auth ([4fc77e3](https://github.com/christkv/mongodb-core/commit/4fc77e3))
+* **auth:** remove extra bson include ([4411d2c](https://github.com/christkv/mongodb-core/commit/4411d2c))
+* **connection:** accept incoming missed ssl options from mongo-native-driver ([fd543eb](https://github.com/christkv/mongodb-core/commit/fd543eb))
+* **connection:** added missed tls option ecdhCurve ([ca1d909](https://github.com/christkv/mongodb-core/commit/ca1d909))
+* **connection:** default `family` to undefined rather than 4 ([09916ae](https://github.com/christkv/mongodb-core/commit/09916ae))
+* **connection:** fixing leaky connection ([#234](https://github.com/christkv/mongodb-core/issues/234)) ([7633f10](https://github.com/christkv/mongodb-core/commit/7633f10))
+* **cursor:** check for autoReconnect option only for single server ([c841eb5](https://github.com/christkv/mongodb-core/commit/c841eb5))
+* **secondaries:** fixes connection with secondary readPreference ([5763f5c](https://github.com/christkv/mongodb-core/commit/5763f5c))
+* **timeout:** fixed compatibility with node <=0.12.x ([c7c72b2](https://github.com/christkv/mongodb-core/commit/c7c72b2)), closes [mongodb-js/mongodb-core#247](https://github.com/mongodb-js/mongodb-core/issues/247) [mongodb-js/mongodb-core#247](https://github.com/mongodb-js/mongodb-core/issues/247) [mongodb-js/mongodb-core#248](https://github.com/mongodb-js/mongodb-core/issues/248) [#248](https://github.com/christkv/mongodb-core/issues/248)
+
+
+### Features
+
+* **replicaset:** More verbose replica set errors emission: ([#231](https://github.com/christkv/mongodb-core/issues/231)) ([de6d220](https://github.com/christkv/mongodb-core/commit/de6d220))
+
+
+
 2.1.17 2017-10-11
 -----------------
 * fix a typo that completely broke SCRAM-SHA1 authentication
