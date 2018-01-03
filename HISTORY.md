@@ -1,3 +1,22 @@
+<a name="2.2.34"></a>
+## [2.2.34](https://github.com/mongodb/node-mongodb-native/compare/v2.2.33...v2.2.34) (2018-01-03)
+
+
+### Bug Fixes
+
+* **collection:** allow { upsert: 1 } for findOneAndUpdate() and update() ([#1580](https://github.com/mongodb/node-mongodb-native/issues/1580)) ([0f338c8](https://github.com/mongodb/node-mongodb-native/commit/0f338c8)), closes [Automattic/mongoose#5839](https://github.com/Automattic/mongoose/issues/5839)
+* **GridFS:** fix TypeError: doc.data.length is not a function ([811de0c](https://github.com/mongodb/node-mongodb-native/commit/811de0c))
+* **import:** adds missing import to lib/authenticate.js ([10db9a2](https://github.com/mongodb/node-mongodb-native/commit/10db9a2))
+* **list-collections:** ensure default of primary ReadPreference ([0935306](https://github.com/mongodb/node-mongodb-native/commit/0935306))
+
+
+### Features
+
+* **ssl:** adds missing ssl options ssl options for `ciphers` and `ecdhCurve` ([bd4fb53](https://github.com/mongodb/node-mongodb-native/commit/bd4fb53))
+* **url parser:** add dns seedlist support ([2d357bc](https://github.com/mongodb/node-mongodb-native/commit/2d357bc))
+* **core**: update mongodb-core to 2.1.18
+
+
 2.2.33 2017-10-12
 -----------------
 * update to mongodb-core 2.1.17
