@@ -7,7 +7,7 @@ describe('Changestream Examples', function() {
     return setupDatabase(this.configuration);
   });
 
-  it('has next', {
+  it('supports hasNext', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -20,9 +20,9 @@ describe('Changestream Examples', function() {
       client.connect(function(err, client) {
         const db = client.db(configuration.db);
         const collection = db.collection('changeStreamExample1a');
-        const changeStream = collection.watch();
 
         // Start Changestream Example 1
+        const changeStream = collection.watch();
         changeStream.next(function(err, next) {
           if (err) return console.log(err);
           expect(err).to.equal(null);
@@ -44,7 +44,7 @@ describe('Changestream Examples', function() {
     }
   });
 
-  it('uses an event emitter api', {
+  it('supports the EventEmitter api', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -57,9 +57,9 @@ describe('Changestream Examples', function() {
       client.connect(function(err, client) {
         const db = client.db(configuration.db);
         const collection = db.collection('changeStreamExample1b');
-        const changeStream = collection.watch();
 
         // Using event emitter API
+        const changeStream = collection.watch();
         changeStream.on('change', function(change) {
           expect(change).to.exist;
           client.close();
@@ -78,7 +78,7 @@ describe('Changestream Examples', function() {
     }
   });
 
-  it('streams a changestream', {
+  it('can stream a ChangeStream', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -110,7 +110,7 @@ describe('Changestream Examples', function() {
     }
   });
 
-  it('specifies a full document update', {
+  it('can specify a full document update', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -123,9 +123,9 @@ describe('Changestream Examples', function() {
       client.connect(function(err, client) {
         const db = client.db(configuration.db);
         const collection = db.collection('changeStreamExample1b');
-        const changeStream = collection.watch({ fullDocument: 'updateLookup' });
 
         // Start Changestream Example 2
+        const changeStream = collection.watch({ fullDocument: 'updateLookup' });
         changeStream.on('change', function(change) {
           expect(change).to.exist;
           client.close();
@@ -158,10 +158,10 @@ describe('Changestream Examples', function() {
       client.connect(function(err, client) {
         const db = client.db(configuration.db);
         const collection = db.collection('changeStreamExample3');
-        const changeStream = collection.watch();
         // Start Changestream Example 3
         let resumeToken;
 
+        const changeStream = collection.watch();
         changeStream.hasNext(function(err, change) {
           if (err) return console.log(err);
           expect(err).to.equal(null);
@@ -203,6 +203,44 @@ describe('Changestream Examples', function() {
               expect(err).to.equal(null);
               expect(result).to.exist;
             });
+          });
+        });
+      });
+    }
+  });
+
+  it('should support an aggregation pipeline as the first paramter of watch', {
+    metadata: { requires: { topology: ['replicaset'] } },
+    test: function(done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      client.connect(function(err, client) {
+        const db = client.db(configuration.db);
+        const collection = db.collection('changeStreamExample1a');
+
+        // Start Changestream Example 4
+        const pipeline = [
+          { $match: { 'fullDocument.username': 'alice' } },
+          { $addFields: { newField: 'this is an added field!' } }
+        ];
+
+        const changeStream = collection.watch(pipeline);
+        changeStream.next(function(err, next) {
+          expect(err).to.not.exist;
+          expect(next).to.exist;
+          expect(next.fullDocument.username).to.equal('alice');
+          expect(next.newField).to.exist;
+          expect(next.newField).to.equal('this is an added field!');
+
+          client.close();
+          done();
+        });
+        // End Changestream Example 4
+
+        setTimeout(function() {
+          collection.insertOne({ username: 'alice' }, function(err, result) {
+            expect(err).to.not.exist;
+            expect(result).to.exist;
           });
         });
       });
