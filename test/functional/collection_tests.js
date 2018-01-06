@@ -1556,4 +1556,28 @@ describe('Collection', function() {
       });
     }
   });
+
+  /**
+   * @ignore
+   */
+  it('should provide access to the database name', {
+    metadata: {
+      requires: { topology: ['single'] }
+    },
+
+    test: function() {
+      var self = this;
+      var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
+        poolSize: 1
+      });
+
+      return client
+        .connect()
+        .then(client => client.db('test_db').createCollection('test1'))
+        .then(coll => {
+          expect(coll.dbName).to.equal('test_db');
+          return client.close();
+        });
+    }
+  });
 });
