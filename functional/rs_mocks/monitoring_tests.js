@@ -2,7 +2,7 @@
 var expect = require('chai').expect,
   co = require('co'),
   Connection = require('../../../../lib/connection/connection'),
-  mock = require('../../../mock'),
+  mock = require('mongodb-mock-server'),
   ConnectionSpy = require('../shared').ConnectionSpy;
 
 var delay = function(timeout) {

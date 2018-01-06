@@ -1,7 +1,7 @@
 'use strict';
 var expect = require('chai').expect,
   Mongos = require('../../../../lib/topologies/mongos'),
-  mock = require('../../../mock'),
+  mock = require('mongodb-mock-server'),
   MongosFixture = require('../common').MongosFixture,
   ClientSession = require('../../../../lib/sessions').ClientSession,
   ServerSessionPool = require('../../../../lib/sessions').ServerSessionPool;

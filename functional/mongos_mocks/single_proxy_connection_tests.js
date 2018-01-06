@@ -2,7 +2,7 @@
 var expect = require('chai').expect,
   f = require('util').format,
   co = require('co'),
-  mock = require('../../../mock');
+  mock = require('mongodb-mock-server');
 
 describe('Mongos Single Proxy Connection (mocks)', function() {
   afterEach(() => mock.cleanup());

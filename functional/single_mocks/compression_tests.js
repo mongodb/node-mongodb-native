@@ -2,10 +2,7 @@
 var Server = require('../../../../lib/topologies/server'),
   expect = require('chai').expect,
   co = require('co'),
-  mock = require('../../../mock');
-
-// NOTE: eventually use `this.configuration.mongo.Server` instead of direct import when
-// https://github.com/malexandert/mongodb-test-runner/issues/3 is fixed
+  mock = require('mongodb-mock-server');
 
 describe('Single Compression (mocks)', function() {
   afterEach(() => mock.cleanup());

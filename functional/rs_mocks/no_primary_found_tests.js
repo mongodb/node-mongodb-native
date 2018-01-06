@@ -1,7 +1,7 @@
 'use strict';
 const co = require('co');
 const Connection = require('../../../../lib/connection/connection');
-const mock = require('../../../mock');
+const mock = require('mongodb-mock-server');
 const ConnectionSpy = require('../shared').ConnectionSpy;
 
 let test = {};

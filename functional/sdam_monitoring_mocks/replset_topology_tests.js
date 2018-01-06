@@ -1,7 +1,7 @@
 'use strict';
 var expect = require('chai').expect,
   co = require('co'),
-  mock = require('../../../mock');
+  mock = require('mongodb-mock-server');
 
 describe.skip('ReplSet SDAM Monitoring (mocks)', function() {
   afterEach(() => mock.cleanup());

@@ -1,7 +1,7 @@
 'use strict';
 
 const Server = require('../../..').Server,
-  mock = require('../../mock'),
+  mock = require('mongodb-mock-server'),
   expect = require('chai').expect,
   ServerSessionPool = require('../../../lib/sessions').ServerSessionPool,
   ServerSession = require('../../../lib/sessions').ServerSession,

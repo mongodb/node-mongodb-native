@@ -8,7 +8,7 @@ var expect = require('chai').expect,
   Query = require('../../../lib/connection/commands').Query,
   Bson = require('bson'),
   co = require('co'),
-  mock = require('../../mock');
+  mock = require('mongodb-mock-server');
 
 describe('Pool tests', function() {
   it.skip('should correctly connect pool to single server', {

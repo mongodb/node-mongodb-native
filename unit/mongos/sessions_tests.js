@@ -1,7 +1,7 @@
 'use strict';
 var Mongos = require('../../../../lib/topologies/mongos'),
   expect = require('chai').expect,
-  mock = require('../../../mock'),
+  mock = require('mongodb-mock-server'),
   genClusterTime = require('../common').genClusterTime;
 
 const test = {};

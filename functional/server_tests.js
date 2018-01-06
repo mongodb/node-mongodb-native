@@ -1,5 +1,4 @@
 'use strict';
-
 const expect = require('chai').expect;
 const f = require('util').format;
 const locateAuthMethod = require('./shared').locateAuthMethod;
@@ -7,7 +6,7 @@ const executeCommand = require('./shared').executeCommand;
 const Server = require('../../../lib/topologies/server');
 const Bson = require('bson');
 const Connection = require('../../../lib/connection/connection');
-const mock = require('../../mock');
+const mock = require('mongodb-mock-server');
 
 describe('Server tests', function() {
   it('should correctly connect server to single instance', {

@@ -2,7 +2,7 @@
 
 const bson = require('bson');
 const expect = require('chai').expect;
-const mock = require('../../mock');
+const mock = require('mongodb-mock-server');
 const Connection = require('../../../lib/connection/connection');
 
 describe('Connection', function() {

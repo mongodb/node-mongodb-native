@@ -3,7 +3,7 @@
 const expect = require('chai').expect;
 const ReplSet = require('../../../../lib/topologies/replset');
 const ReadPreference = require('../../../../lib/topologies/read_preference');
-const mock = require('../../../mock');
+const mock = require('mongodb-mock-server');
 const ReplSetFixture = require('../common').ReplSetFixture;
 
 describe('Secondaries (ReplSet)', function() {

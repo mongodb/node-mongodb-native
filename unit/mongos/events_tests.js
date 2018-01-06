@@ -2,7 +2,7 @@
 
 const expect = require('chai').expect;
 const Mongos = require('../../../../lib/topologies/mongos');
-const mock = require('../../../mock');
+const mock = require('mongodb-mock-server');
 const MongosFixture = require('../common').MongosFixture;
 
 const test = new MongosFixture();

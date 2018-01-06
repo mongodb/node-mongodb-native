@@ -1,6 +1,6 @@
 'use strict';
 
-const mock = require('../../mock');
+const mock = require('mongodb-mock-server');
 const ObjectId = require('bson').ObjectId;
 const Timestamp = require('bson').Timestamp;
 const Binary = require('bson').Binary;

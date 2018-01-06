@@ -23,7 +23,7 @@
 //       Long = configuration.require.BSON.Long,
 //       co = require('co'),
 //       f = require('util').format,
-//       mockupdb = require('../../../mock');
+//       mockupdb = require('mongodb-mock-server');
 
 //     // Set info level for debugging
 //     Logger.setLevel('info')
