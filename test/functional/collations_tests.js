@@ -2,7 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 var co = require('co');
-var mock = require('../mock');
+var mock = require('mongodb-mock-server');
 
 var defaultFields = {
   ismaster: true,

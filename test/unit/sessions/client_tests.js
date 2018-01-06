@@ -2,7 +2,7 @@
 
 const MongoClient = require('../../..').MongoClient;
 const expect = require('chai').expect;
-const mock = require('../../mock');
+const mock = require('mongodb-mock-server');
 
 const test = {};
 describe('Sessions', function() {

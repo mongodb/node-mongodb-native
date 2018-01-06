@@ -5,7 +5,7 @@ var MongoNetworkError = require('mongodb-core').MongoNetworkError;
 var setupDatabase = require('./shared').setupDatabase;
 var delay = require('./shared').delay;
 var co = require('co');
-var mock = require('../mock');
+var mock = require('mongodb-mock-server');
 
 // Define the pipeline processing changes
 var pipeline = [
