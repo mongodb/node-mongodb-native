@@ -1,7 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 var co = require('co');
-var mock = require('../mock');
+var mock = require('mongodb-mock-server');
 
 // Extend the object
 var extend = function(template, fields) {

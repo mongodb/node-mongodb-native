@@ -2,7 +2,7 @@
 const MongoClient = require('../../..').MongoClient,
   Timestamp = require('bson').Timestamp,
   expect = require('chai').expect,
-  mock = require('../../mock');
+  mock = require('mongodb-mock-server');
 
 const test = {};
 describe('Sessions', function() {
