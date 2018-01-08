@@ -29,7 +29,7 @@ npm init
 Next, install the driver dependency.
 
 ```
-npm install mongodb --save
+npm install mongodb@2.2 --save
 ```
 
 You should see **NPM** download a lot of files. Once it's done you'll find all the downloaded packages under the **node_modules** directory.
