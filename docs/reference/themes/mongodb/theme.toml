@@ -2,7 +2,7 @@ name = "MongoDB"
 license = "Creative Commons Attribution NonCommercial ShareAlike 3.0 Unported"
 licenselink = "http://creativecommons.org/licenses/by-nc-sa/3.0/"
 description = "A standalone mongodb docs theme, for individual driver homepages"
-homepage = "http://mongodb.github.io/mongo-java-driver"
+homepage = "http://mongodb.github.io/node-mongodb-native"
 
 [author]
   name = "MongoDB Node.js driver authors"
