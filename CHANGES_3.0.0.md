@@ -101,10 +101,6 @@ MongoClient.connect('mongodb://localhost:27017/test', (err, client) => {
 });
 ```
 
-`Collection.prototype.aggregate` now returns a cursor if a callback is provided. It used to return
-the resulting documents which is the same as calling `cursor.toArray()` on the cursor we now pass to
-the callback.
-
 ## Other Changes
 
 Below are more updates to the driver in the 3.0.0 release.
@@ -177,7 +173,72 @@ in on the options object . Additionally, `find` does not support individual opti
 `limit` as positional parameters. You must either pass in these parameters in the `options` object,
 or add them via `Cursor` methods like `Cursor.prototype.skip`.
 
-### Aggregation
+### `Collection.prototype.aggregate`
+
+`Collection.prototype.aggregate` no longer accepts variadic arguments. While this
+was originally added to improve compatibility with the mongo shell, it has never
+been a documented feature, and has led to more bugs and maintenance burden.
+Pipeline stages are now only accepted as an `Array` of stages as the first argument.
+
+2.x syntax:
+
+```js
+collection.prototype.aggregate(
+  {$match: {a: 1}},
+  {$project: {b: 1, _id: 0}},
+  function (err, result) {
+    ...
+  }
+);
+```
+
+3.x syntax
+
+```js
+collection.prototype.aggregate(
+  [
+    {$match: {a: 1}},
+    {$project: {b: 1, _id: 0}}
+  ],
+  function (err, cursor) {
+    ...
+  }
+);
+```
+
+`Collection.prototype.aggregate` now returns a cursor if a callback is provided. It used to return
+the resulting documents which is the same as calling `cursor.toArray()` on the cursor we now pass to
+the callback.
+
+2.x syntax
+
+```js
+collection.prototype.aggregate(
+  [
+    {$match: {a: 1}},
+    {$project: {b: 1, _id: 0}}
+  ],
+  function (err, result) {
+    console.log(result);
+  }
+);
+```
+
+3.x syntax
+
+```js
+collection.prototype.aggregate(
+  [
+    {$match: {a: 1}},
+    {$project: {b: 1, _id: 0}}
+  ],
+  function (err, cursor) {
+    cursor.toArray(function(err, result) {
+      console.log(result);
+    });
+  }
+);
+```
 
 Support added for `comment` in the aggregation command. Support also added for a `hint` field in the
 aggregation `options`.
