@@ -1730,11 +1730,13 @@ function simplePipeline(db, callback) {
         { '$unwind': '$categories'},
         { '$group': { '_id': &quot;$categories&quot;, 'Bronx restaurants': { '$sum': 1 } } }
       ],
-	  function(err, results) {
+    function(err, cursor) {
         assert.equal(err, null);
 
-        console.log(results)
-        callback(results);
+        cursor.toArray(function(err, documents) {
+          console.log(documents)
+          callback(documents);
+        });
       }
   );
 }
