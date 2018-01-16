@@ -9,8 +9,8 @@ const expect = require('chai').expect,
   ReadPreference = require('../../../lib/topologies/read_preference'),
   Server = require('../../../lib/topologies/server');
 
-const rsWithPrimaryPath = f('%s/../max-staleness/ReplicaSetWithPrimary', __dirname);
-const rsWithoutPrimaryPath = f('%s/../max-staleness/ReplicaSetNoPrimary', __dirname);
+const rsWithPrimaryPath = f('%s/../spec/max-staleness/ReplicaSetWithPrimary', __dirname);
+const rsWithoutPrimaryPath = f('%s/../spec/max-staleness/ReplicaSetNoPrimary', __dirname);
 
 describe('Max Staleness', function() {
   describe('ReplicaSet without primary', function() {

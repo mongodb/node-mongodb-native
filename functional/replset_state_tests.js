@@ -7,7 +7,7 @@ const expect = require('chai').expect,
   ReplSetState = require('../../../lib/topologies/replset_state');
 
 describe('ReplicaSet state', function() {
-  const path = f('%s/../topology_test_descriptions/rs', __dirname);
+  const path = f('%s/../spec/server-discovery-and-monitoring/rs', __dirname);
 
   fs
     .readdirSync(path)

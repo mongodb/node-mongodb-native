@@ -14,7 +14,7 @@ describe('A replicaset with no primary', function() {
 
     test: function(done) {
       var path = f(
-        '%s/../server-selection/tests/server_selection/ReplicaSetNoPrimary/read',
+        '%s/../spec/server-selection/tests/server_selection/ReplicaSetNoPrimary/read',
         __dirname
       );
       var entries = fs.readdirSync(path).filter(function(x) {
@@ -37,7 +37,7 @@ describe('A replicaset with a primary', function() {
 
     test: function(done) {
       var path = f(
-        '%s/../server-selection/tests/server_selection/ReplicaSetWithPrimary/read',
+        '%s/../spec/server-selection/tests/server_selection/ReplicaSetWithPrimary/read',
         __dirname
       );
       var entries = fs.readdirSync(path).filter(function(x) {

@@ -399,7 +399,7 @@ describe.skip('A replica set', function() {
     }
   });
 
-  // ../topology_test_descriptions/rs/member_reconfig.json
+  // ../spec/server-discovery-and-monitoring/rs/member_reconfig.json
   it('Member removed by reconfig', {
     metadata: {
       requires: {
@@ -475,7 +475,7 @@ describe.skip('A replica set', function() {
     }
   });
 
-  // ../topology_test_descriptions/rs/discovery.json
+  // ../spec/server-discovery-and-monitoring/rs/discovery.json
   it('Should not leak any connections after hammering the replicaset with a mix of operations', {
     metadata: { requires: { topology: 'replicaset' } },
 
