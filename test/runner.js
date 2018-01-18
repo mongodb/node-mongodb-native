@@ -273,7 +273,7 @@ var testFiles = [
   , '/test/functional/byo_promises_tests.js'
 
   // Functionality tests
-  , '/test/functional/dns_txt_records_tests.js'
+  , '/test/functional/mongodb_srv_tests.js'
   , '/test/functional/mongo_client_tests.js'
   , '/test/functional/collection_tests.js'
   , '/test/functional/db_tests.js'
