@@ -40,7 +40,7 @@ const password = encodeURIComponent('abc123');
 const authMechanism = 'DEFAULT';
 
 // Connection URL
-const url = f('mongodb://%s:%s@localhost:27017?authMechanism=%s',
+const url = f('mongodb://%s:%s@localhost:27017/?authMechanism=%s',
   user, password, authMechanism);
 
 // Use connect method to connect to the Server
@@ -66,7 +66,7 @@ const f = require('util').format;
 const assert = require('assert');
 
 // Connection URL
-const url = 'mongodb://dave:abc123@localhost:27017?authMechanism=SCRAM-SHA-1&authSource=myprojectdb';
+const url = 'mongodb://dave:abc123@localhost:27017/?authMechanism=SCRAM-SHA-1&authSource=myprojectdb';
 // Use connect method to connect to the Server
 MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
@@ -91,7 +91,7 @@ const f = require('util').format;
 const assert = require('assert');
 
 // Connection URL
-const url = 'mongodb://dave:abc123@localhost:27017?authMechanism=MONGODB-CR&authSource=myprojectdb';
+const url = 'mongodb://dave:abc123@localhost:27017/?authMechanism=MONGODB-CR&authSource=myprojectdb';
 // Use connect method to connect to the Server
 MongoClient.connect(url, function(err, client) {
   assert.equal(null, err);
