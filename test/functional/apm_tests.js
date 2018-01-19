@@ -28,16 +28,16 @@ describe('APM', function() {
       var callbackTriggered = false;
       var self = this;
 
-      var listener = require('../..').instrument(function(err) {
+      testListener = require('../..').instrument(function(err) {
         expect(err).to.be.null;
         callbackTriggered = true;
       });
 
-      listener.on('started', function(event) {
+      testListener.on('started', function(event) {
         if (event.commandName === 'insert') started.push(event);
       });
 
-      listener.on('succeeded', function(event) {
+      testListener.on('succeeded', function(event) {
         if (event.commandName === 'insert') succeeded.push(event);
       });
 
@@ -57,7 +57,7 @@ describe('APM', function() {
             expect(succeeded.length).to.equal(1);
             expect(callbackTriggered).to.be.true;
 
-            listener.uninstrument();
+            testListener.uninstrument();
             client.close();
             done();
           });
@@ -75,16 +75,16 @@ describe('APM', function() {
       var callbackTriggered = false;
       var self = this;
 
-      var listener = require('../..').instrument(function(err) {
+      testListener = require('../..').instrument(function(err) {
         expect(err).to.be.null;
         callbackTriggered = true;
       });
 
-      listener.on('started', function(event) {
+      testListener.on('started', function(event) {
         if (event.commandName === 'insert') started.push(event);
       });
 
-      listener.on('succeeded', function(event) {
+      testListener.on('succeeded', function(event) {
         if (event.commandName === 'insert') succeeded.push(event);
       });
 
@@ -103,7 +103,7 @@ describe('APM', function() {
             expect(err).to.be.null;
             cursor.close(); // <-- Will cause error in APM module.
 
-            listener.uninstrument();
+            testListener.uninstrument();
             client.close();
             done();
           });
@@ -192,17 +192,17 @@ describe('APM', function() {
           .then(function(r) {
             expect(r.insertedCount).to.equal(1);
 
-            var listener = require('../..').instrument(function(err) {
+            testListener = require('../..').instrument(function(err) {
               expect(err).to.be.null;
             });
 
-            listener.on('started', function(event) {
+            testListener.on('started', function(event) {
               if (event.commandName === 'listIndexes' || event.commandName === 'find') {
                 started.push(event);
               }
             });
 
-            listener.on('succeeded', function(event) {
+            testListener.on('succeeded', function(event) {
               if (event.commandName === 'listIndexes' || event.commandName === 'find') {
                 succeeded.push(event);
               }
@@ -223,7 +223,7 @@ describe('APM', function() {
                     // Ensure command was not sent to the primary
                     expect(started[0].connectionId.port).to.not.equal(started[1].connectionId.port);
 
-                    listener.uninstrument();
+                    testListener.uninstrument();
                     client.close();
                     done();
                   });
@@ -247,7 +247,7 @@ describe('APM', function() {
         var succeeded = [];
         var callbackTriggered = false;
 
-        var listener = require('../..').instrument(
+        testListener = require('../..').instrument(
           {
             operationIdGenerator: {
               next: function() {
@@ -269,11 +269,11 @@ describe('APM', function() {
           }
         );
 
-        listener.on('started', function(event) {
+        testListener.on('started', function(event) {
           if (event.commandName === 'insert') started.push(event);
         });
 
-        listener.on('succeeded', function(event) {
+        testListener.on('succeeded', function(event) {
           if (event.commandName === 'insert') succeeded.push(event);
         });
 
@@ -293,7 +293,7 @@ describe('APM', function() {
               expect(succeeded[0].duration).to.equal(0);
               expect(callbackTriggered).to.be.true;
 
-              listener.uninstrument();
+              testListener.uninstrument();
               client.close();
               done();
             });
@@ -313,8 +313,8 @@ describe('APM', function() {
       var succeeded = [];
       var failed = [];
 
-      var listener = require('../..').instrument();
-      listener.on('started', function(event) {
+      testListener = require('../..').instrument();
+      testListener.on('started', function(event) {
         if (
           event.commandName === 'find' ||
           event.commandName === 'getMore' ||
@@ -323,7 +323,7 @@ describe('APM', function() {
           started.push(event);
       });
 
-      listener.on('succeeded', function(event) {
+      testListener.on('succeeded', function(event) {
         if (
           event.commandName === 'find' ||
           event.commandName === 'getMore' ||
@@ -332,7 +332,7 @@ describe('APM', function() {
           succeeded.push(event);
       });
 
-      listener.on('failed', function(event) {
+      testListener.on('failed', function(event) {
         if (
           event.commandName === 'find' ||
           event.commandName === 'getMore' ||
@@ -387,7 +387,7 @@ describe('APM', function() {
                   expect(started[0].operationId).to.equal(started[1].operationId);
                   expect(started[0].operationId).to.equal(started[2].operationId);
 
-                  listener.uninstrument();
+                  testListener.uninstrument();
                   client.close();
                   done();
                 })
@@ -414,8 +414,8 @@ describe('APM', function() {
       var succeeded = [];
       var failed = [];
 
-      var listener = require('../..').instrument();
-      listener.on('started', function(event) {
+      testListener = require('../..').instrument();
+      testListener.on('started', function(event) {
         if (
           event.commandName === 'find' ||
           event.commandName === 'getMore' ||
@@ -424,7 +424,7 @@ describe('APM', function() {
           started.push(event);
       });
 
-      listener.on('succeeded', function(event) {
+      testListener.on('succeeded', function(event) {
         if (
           event.commandName === 'find' ||
           event.commandName === 'getMore' ||
@@ -433,7 +433,7 @@ describe('APM', function() {
           succeeded.push(event);
       });
 
-      listener.on('failed', function(event) {
+      testListener.on('failed', function(event) {
         if (
           event.commandName === 'find' ||
           event.commandName === 'getMore' ||
@@ -474,7 +474,7 @@ describe('APM', function() {
                 .catch(function() {
                   expect(failed).to.have.length(1);
 
-                  listener.uninstrument();
+                  testListener.uninstrument();
                   client.close();
                   done();
                 });
@@ -496,8 +496,8 @@ describe('APM', function() {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../..').instrument();
-      listener.on('started', function(event) {
+      testListener = require('../..').instrument();
+      testListener.on('started', function(event) {
         if (
           event.commandName === 'insert' ||
           event.commandName === 'update' ||
@@ -506,7 +506,7 @@ describe('APM', function() {
           started.push(event);
       });
 
-      listener.on('succeeded', function(event) {
+      testListener.on('succeeded', function(event) {
         if (
           event.commandName === 'insert' ||
           event.commandName === 'update' ||
@@ -536,7 +536,7 @@ describe('APM', function() {
             expect(succeeded[0].operationId).to.equal(succeeded[1].operationId);
             expect(succeeded[0].operationId).to.equal(succeeded[2].operationId);
 
-            listener.uninstrument();
+            testListener.uninstrument();
             client.close();
             done();
           })
@@ -557,8 +557,8 @@ describe('APM', function() {
       var succeeded = [];
       var failed = [];
 
-      var listener = require('../..').instrument();
-      listener.on('started', function(event) {
+      testListener = require('../..').instrument();
+      testListener.on('started', function(event) {
         if (
           event.commandName === 'find' ||
           event.commandName === 'getMore' ||
@@ -568,7 +568,7 @@ describe('APM', function() {
           started.push(event);
       });
 
-      listener.on('succeeded', function(event) {
+      testListener.on('succeeded', function(event) {
         if (
           event.commandName === 'find' ||
           event.commandName === 'getMore' ||
@@ -578,7 +578,7 @@ describe('APM', function() {
           succeeded.push(event);
       });
 
-      listener.on('failed', function(event) {
+      testListener.on('failed', function(event) {
         if (
           event.commandName === 'find' ||
           event.commandName === 'getMore' ||
@@ -619,7 +619,7 @@ describe('APM', function() {
                   expect(started[0].operationId).to.equal(succeeded[0].operationId);
 
                   // Remove instrumentation
-                  listener.uninstrument();
+                  testListener.uninstrument();
                   client.close();
                   done();
                 })
@@ -645,16 +645,16 @@ describe('APM', function() {
       var succeeded = [];
       var failed = [];
 
-      var listener = require('../..').instrument();
-      listener.on('started', function(event) {
+      testListener = require('../..').instrument();
+      testListener.on('started', function(event) {
         if (event.commandName === 'getnonce') started.push(event);
       });
 
-      listener.on('succeeded', function(event) {
+      testListener.on('succeeded', function(event) {
         if (event.commandName === 'getnonce') succeeded.push(event);
       });
 
-      listener.on('failed', function(event) {
+      testListener.on('failed', function(event) {
         if (event.commandName === 'getnonce') failed.push(event);
       });
 
@@ -674,7 +674,7 @@ describe('APM', function() {
           expect(succeeded[0].reply).to.eql({});
 
           // Remove instrumentation
-          listener.uninstrument();
+          testListener.uninstrument();
           client.close();
           done();
         });
@@ -691,15 +691,15 @@ describe('APM', function() {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../..').instrument(function(err) {
+      testListener = require('../..').instrument(function(err) {
         expect(err).to.not.exist;
       });
 
-      listener.on('started', function(event) {
+      testListener.on('started', function(event) {
         if (event.commandName === 'update') started.push(event);
       });
 
-      listener.on('succeeded', function(event) {
+      testListener.on('succeeded', function(event) {
         if (event.commandName === 'update') succeeded.push(event);
       });
 
@@ -718,7 +718,7 @@ describe('APM', function() {
             expect(started[0].command.update).to.equal('apm_test_u_1');
             expect(succeeded).to.have.length(1);
 
-            listener.uninstrument();
+            testListener.uninstrument();
             client.close();
             done();
           });
@@ -735,15 +735,15 @@ describe('APM', function() {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../..').instrument(function(err) {
+      testListener = require('../..').instrument(function(err) {
         expect(err).to.not.exist;
       });
 
-      listener.on('started', function(event) {
+      testListener.on('started', function(event) {
         if (event.commandName === 'update') started.push(event);
       });
 
-      listener.on('succeeded', function(event) {
+      testListener.on('succeeded', function(event) {
         if (event.commandName === 'update') succeeded.push(event);
       });
 
@@ -762,7 +762,7 @@ describe('APM', function() {
             expect(started[0].command.update).to.equal('apm_test_u_2');
             expect(succeeded).to.have.length(1);
 
-            listener.uninstrument();
+            testListener.uninstrument();
             client.close();
             done();
           });
@@ -779,15 +779,15 @@ describe('APM', function() {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../..').instrument(function(err) {
+      testListener = require('../..').instrument(function(err) {
         expect(err).to.not.exist;
       });
 
-      listener.on('started', function(event) {
+      testListener.on('started', function(event) {
         if (event.commandName === 'delete') started.push(event);
       });
 
-      listener.on('succeeded', function(event) {
+      testListener.on('succeeded', function(event) {
         if (event.commandName === 'delete') succeeded.push(event);
       });
 
@@ -806,7 +806,7 @@ describe('APM', function() {
             expect(started[0].command.delete).to.equal('apm_test_u_3');
             expect(succeeded).to.have.length(1);
 
-            listener.uninstrument();
+            testListener.uninstrument();
             client.close();
             done();
           });
@@ -874,16 +874,16 @@ describe('APM', function() {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../..').instrument(function(err) {
+      testListener = require('../..').instrument(function(err) {
         expect(err).to.not.exist;
       });
 
-      listener.on('started', function(event) {
+      testListener.on('started', function(event) {
         if (event.commandName === 'aggregate' || event.commandName === 'getMore')
           started.push(event);
       });
 
-      listener.on('succeeded', function(event) {
+      testListener.on('succeeded', function(event) {
         if (event.commandName === 'aggregate' || event.commandName === 'getMore')
           succeeded.push(event);
       });
@@ -929,7 +929,7 @@ describe('APM', function() {
           expect(cursors[0].id.toString()).to.equal(cursors[1].id.toString());
           expect(cursors[2].id.toString()).to.equal('0');
 
-          listener.uninstrument();
+          testListener.uninstrument();
           client.close();
         });
     }
@@ -944,15 +944,15 @@ describe('APM', function() {
       var started = [];
       var succeeded = [];
 
-      var listener = require('../..').instrument(function(err) {
+      testListener = require('../..').instrument(function(err) {
         expect(err).to.not.exist;
       });
 
-      listener.on('started', function(event) {
+      testListener.on('started', function(event) {
         if (event.commandName === 'listCollections') started.push(event);
       });
 
-      listener.on('succeeded', function(event) {
+      testListener.on('succeeded', function(event) {
         if (event.commandName === 'listCollections') succeeded.push(event);
       });
 
@@ -986,7 +986,7 @@ describe('APM', function() {
               // Check we have a cursor
               expect(cursors[0].id).to.exist;
 
-              listener.uninstrument();
+              testListener.uninstrument();
               client.close();
               done();
             });
@@ -1245,16 +1245,16 @@ describe('APM', function() {
         scenario.tests.forEach(test => {
           it(test.description, function(done) {
             var MongoClient = require('../..');
-            var listener = require('../../').instrument();
+            testListener = require('../../').instrument();
 
             MongoClient.connect(this.configuration.url(), function(err, client) {
               expect(err).to.not.exist;
               expect(client).to.exist;
 
-              executeOperation(client, listener, scenario, test, err => {
+              executeOperation(client, testListener, scenario, test, err => {
                 expect(err).to.not.exist;
 
-                listener.uninstrument();
+                testListener.uninstrument();
                 client.close();
                 done();
               });
