@@ -10,6 +10,7 @@ describe('Array Filter Update Example', function() {
   it('supports using array filters when updating one', {
     metadata: {
       requires: {
+        mongodb: '>=3.6.x',
         topology: ['single']
       }
     },
