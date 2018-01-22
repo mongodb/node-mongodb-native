@@ -2,7 +2,7 @@
 const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
 
-describe.only('Array Filter Update Example', function() {
+describe('Array Filter Update Example', function() {
   before(function() {
     return setupDatabase(this.configuration);
   });
