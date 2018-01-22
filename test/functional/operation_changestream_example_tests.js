@@ -10,6 +10,7 @@ describe('Changestream Examples', function() {
   it('supports hasNext', {
     metadata: {
       requires: {
+        mongodb: '>=3.6.x',
         topology: ['replicaset']
       }
     },
@@ -47,6 +48,7 @@ describe('Changestream Examples', function() {
   it('supports the EventEmitter api', {
     metadata: {
       requires: {
+        mongodb: '>=3.6.x',
         topology: ['replicaset']
       }
     },
@@ -81,6 +83,7 @@ describe('Changestream Examples', function() {
   it('can stream a ChangeStream', {
     metadata: {
       requires: {
+        mongodb: '>=3.6.x',
         topology: ['replicaset']
       }
     },
@@ -113,6 +116,7 @@ describe('Changestream Examples', function() {
   it('can specify a full document update', {
     metadata: {
       requires: {
+        mongodb: '>=3.6.x',
         topology: ['replicaset']
       }
     },
@@ -148,6 +152,7 @@ describe('Changestream Examples', function() {
   it('creates and uses a resume token', {
     metadata: {
       requires: {
+        mongodb: '>=3.6.x',
         topology: ['replicaset']
       }
     },
@@ -210,7 +215,7 @@ describe('Changestream Examples', function() {
   });
 
   it('should support an aggregation pipeline as the first paramter of watch', {
-    metadata: { requires: { topology: ['replicaset'] } },
+    metadata: { requires: { mongodb: '>=3.6.x', topology: ['replicaset'] } },
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
