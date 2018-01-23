@@ -85,8 +85,12 @@ function parseSrvConnectionString(uri, options, callback) {
     }
 
     dns.resolveTxt(result.host, (err, record) => {
-      if (err && err.code !== 'ENODATA') return callback(err);
-      if (err && err.code === 'ENODATA') record = null;
+      if (err) {
+        if (err.code !== 'ENODATA') {
+          return callback(err);
+        }
+        record = null;
+      }
 
       if (record) {
         if (record.length > 1) {
