@@ -46,7 +46,7 @@ function parseSrvConnectionString(uri, options, callback) {
   }
 
   if (result.port) {
-    return callback(new MongoParseError('Ports not accepted with `mongodb+srv` URIs'));
+    return callback(new MongoParseError(`Ports not accepted with '${PROTOCOL_MONGODB_SRV}' URIs`));
   }
 
   let srvAddress = `_mongodb._tcp.${result.host}`;
@@ -173,7 +173,9 @@ function parseQueryString(query) {
   return Object.keys(result).length ? result : null;
 }
 
-const SUPPORTED_PROTOCOLS = ['mongodb', 'mongodb+srv'];
+const PROTOCOL_MONGODB = 'mongodb';
+const PROTOCOL_MONGODB_SRV = 'mongodb+srv';
+const SUPPORTED_PROTOCOLS = [PROTOCOL_MONGODB, PROTOCOL_MONGODB_SRV];
 
 /**
  * Parses a MongoDB connection string
@@ -196,7 +198,7 @@ function parseConnectionString(uri, options, callback) {
     return callback(new MongoParseError('Invalid protocol provided'));
   }
 
-  if (protocol === 'mongodb+srv') {
+  if (protocol === PROTOCOL_MONGODB_SRV) {
     return parseSrvConnectionString(uri, options, callback);
   }
 
