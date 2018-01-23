@@ -34,7 +34,7 @@ function matchesParentDomain(srvAddress, parentDomain) {
  * @param {function} callback
  */
 function parseSrvConnectionString(uri, options, callback) {
-  const result = URL.parse(uri);
+  const result = URL.parse(uri, true);
 
   if (result.hostname.split('.').length < 3) {
     return callback(new MongoParseError('URI does not have hostname, domain name and tld'));
@@ -75,9 +75,7 @@ function parseSrvConnectionString(uri, options, callback) {
     let connectionStringOptions = [];
 
     // Default to SSL true
-    if (!options.ssl && !result.search) {
-      connectionStringOptions.push('ssl=true');
-    } else if (!options.ssl && result.search && !result.search.match('ssl')) {
+    if (!options.ssl && (!result.search || !result.query.hasOwnProperty('ssl'))) {
       connectionStringOptions.push('ssl=true');
     }
 
