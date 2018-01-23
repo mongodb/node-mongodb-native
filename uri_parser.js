@@ -2,17 +2,123 @@
 const URL = require('url');
 const qs = require('querystring');
 const punycode = require('punycode');
-
-const HOSTS_RX = /(mongodb(?:\+srv|)):\/\/(?: (?:[^:]*) (?: : ([^@]*) )? @ )?([^/?]*)(?:\/|)(.*)/;
-/*
-  This regular expression has the following cpature groups: [
-    protocol, username, password, hosts
-  ]
-*/
+const dns = require('dns');
 
 /**
+ * The following regular expression validates a connection string and breaks the
+ * provide string into the following capture groups: [protocol, username, password, hosts]
+ */
+const HOSTS_RX = /(mongodb(?:\+srv|)):\/\/(?: (?:[^:]*) (?: : ([^@]*) )? @ )?([^/?]*)(?:\/|)(.*)/;
+
+/**
+ * Determines whether a provided address matches the provided parent domain in order
+ * to avoid certain attack vectors.
  *
- * @param {*} value
+ * @param {String} srvAddress The address to check against a domain
+ * @param {String} parentDomain The domain to check the provided address against
+ * @return {Boolean} Whether the provided address matches the parent domain
+ */
+function matchesParentDomain(srvAddress, parentDomain) {
+  const regex = /^.*?\./;
+  const srv = `.${srvAddress.replace(regex, '')}`;
+  const parent = `.${parentDomain.replace(regex, '')}`;
+  return srv.endsWith(parent);
+}
+
+/**
+ * Lookup an `mongodb+srv` connection string, combine the parts and reparse it as a normal
+ * connection string.
+ *
+ * @param {string} uri The connection string to parse
+ * @param {object} options Optional user provided connection string options
+ * @param {function} callback
+ */
+function parseSrvConnectionString(uri, options, callback) {
+  const result = URL.parse(uri);
+
+  // Otherwise parse this as an SRV record
+  if (result.hostname.split('.').length < 3) {
+    return callback(new Error('URI does not have hostname, domain name and tld'));
+  }
+
+  result.domainLength = result.hostname.split('.').length;
+
+  if (result.pathname && result.pathname.match(',')) {
+    return callback(new Error('Invalid URI, cannot contain multiple hostnames'));
+  }
+
+  if (result.port) {
+    return callback(new Error('Ports not accepted with `mongodb+srv` URIs'));
+  }
+
+  let srvAddress = `_mongodb._tcp.${result.host}`;
+  dns.resolveSrv(srvAddress, (err, addresses) => {
+    if (err) return callback(err);
+
+    if (addresses.length === 0) {
+      return callback(new Error('No addresses found at host'));
+    }
+
+    for (let i = 0; i < addresses.length; i++) {
+      if (!matchesParentDomain(addresses[i].name, result.hostname, result.domainLength)) {
+        return callback(new Error('Server record does not share hostname with parent URI'));
+      }
+    }
+
+    let base = result.auth ? `mongodb://${result.auth}@` : `mongodb://`;
+    let connectionStrings = addresses.map(
+      (address, i) =>
+        i === 0 ? `${base}${address.name}:${address.port}` : `${address.name}:${address.port}`
+    );
+
+    let connectionString = connectionStrings.join(',') + '/';
+    let connectionStringOptions = [];
+
+    // Default to SSL true
+    if (!options.ssl && !result.search) {
+      connectionStringOptions.push('ssl=true');
+    } else if (!options.ssl && result.search && !result.search.match('ssl')) {
+      connectionStringOptions.push('ssl=true');
+    }
+
+    // Keep original uri options
+    if (result.search) {
+      connectionStringOptions.push(result.search.replace('?', ''));
+    }
+
+    dns.resolveTxt(result.host, (err, record) => {
+      if (err && err.code !== 'ENODATA') return callback(err);
+      if (err && err.code === 'ENODATA') record = null;
+
+      if (record) {
+        if (record.length > 1) {
+          return callback(new Error('Multiple text records not allowed'));
+        }
+
+        record = record[0];
+        record = record.length > 1 ? record.join('') : record[0];
+        if (!record.includes('authSource') && !record.includes('replicaSet')) {
+          return callback(new Error('Text record must only set `authSource` or `replicaSet`'));
+        }
+
+        connectionStringOptions.push(record);
+      }
+
+      // Add any options to the connection string
+      if (connectionStringOptions.length) {
+        connectionString += `?${connectionStringOptions.join('&')}`;
+      }
+
+      parseConnectionString(connectionString, callback);
+    });
+  });
+}
+
+/**
+ * Parses a query string item according to the connection string spec
+ *
+ * @param {Array|String} value The value to parse
+ * @return {Array|Object|String} The parsed value
  */
 function parseQueryStringItemValue(value) {
   if (Array.isArray(value)) {
@@ -38,12 +144,15 @@ function parseQueryStringItemValue(value) {
 }
 
 /**
+ * Parses a query string according the connection string spec.
  *
- * @param {*} query
+ * @param {String} query The query string to parse
+ * @return {Object} The parsed query string as an object
  */
 function parseQueryString(query) {
   const result = {};
   let parsedQueryString = qs.parse(query);
+
   for (const key in parsedQueryString) {
     const value = parsedQueryString[key];
     if (value === '' || value == null) {
@@ -65,12 +174,16 @@ function parseQueryString(query) {
 const SUPPORTED_PROTOCOLS = ['mongodb', 'mongodb+srv'];
 
 /**
- * Parses a MongoDB Connection string
+ * Parses a MongoDB connection string
  *
  * @param {*} uri the MongoDB connection string to parse
+ * @param {object} [options] Optional settings.
  * @param {parseCallback} callback
  */
-function parseConnectionString(uri, callback) {
+function parseConnectionString(uri, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
   const cap = uri.match(HOSTS_RX);
   if (!cap) {
     return callback(new Error('Invalid connection string'));
@@ -81,14 +194,19 @@ function parseConnectionString(uri, callback) {
     return callback(new Error('Invalid protocol provided'));
   }
 
+  if (protocol === 'mongodb+srv') {
+    return parseSrvConnectionString(uri, options, callback);
+  }
+
   const dbAndQuery = cap[4].split('?');
   const db = dbAndQuery.length > 0 ? dbAndQuery[0] : null;
   const query = dbAndQuery.length > 1 ? dbAndQuery[1] : null;
-  const options = parseQueryString(query);
-  if (options instanceof Error) {
-    return callback(options);
+  let parsedOptions = parseQueryString(query);
+  if (parsedOptions instanceof Error) {
+    return callback(parsedOptions);
   }
 
+  parsedOptions = Object.assign({}, parsedOptions, options);
   const auth = { username: null, password: null, db: db && db !== '' ? qs.unescape(db) : null };
   if (cap[4].split('?')[0].indexOf('@') !== -1) {
     return callback(new Error('Unescaped slash in userinfo section'));
@@ -163,7 +281,11 @@ function parseConnectionString(uri, callback) {
     return callback(new Error('No hostname or hostnames provided in connection string'));
   }
 
-  callback(null, { hosts: hosts, auth: auth.db || auth.username ? auth : null, options: options });
+  callback(null, {
+    hosts: hosts,
+    auth: auth.db || auth.username ? auth : null,
+    options: Object.keys(parsedOptions).length ? parsedOptions : null
+  });
 }
 
 module.exports = parseConnectionString;
