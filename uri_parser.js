@@ -36,13 +36,11 @@ function matchesParentDomain(srvAddress, parentDomain) {
 function parseSrvConnectionString(uri, options, callback) {
   const result = URL.parse(uri);
 
-  // Otherwise parse this as an SRV record
   if (result.hostname.split('.').length < 3) {
     return callback(new Error('URI does not have hostname, domain name and tld'));
   }
 
   result.domainLength = result.hostname.split('.').length;
-
   if (result.pathname && result.pathname.match(',')) {
     return callback(new Error('Invalid URI, cannot contain multiple hostnames'));
   }
@@ -147,7 +145,7 @@ function parseQueryStringItemValue(value) {
  * Parses a query string according the connection string spec.
  *
  * @param {String} query The query string to parse
- * @return {Object} The parsed query string as an object
+ * @return {Object|Error} The parsed query string as an object, or an error if one was encountered
  */
 function parseQueryString(query) {
   const result = {};
@@ -165,7 +163,7 @@ function parseQueryString(query) {
   // special cases for known deprecated options
   if (result.wtimeout && result.wtimeoutms) {
     delete result.wtimeout;
-    // TODO: emit a warning
+    console.warn('Unsupported option `wtimeout` specified');
   }
 
   return Object.keys(result).length ? result : null;
