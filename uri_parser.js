@@ -1,7 +1,6 @@
 'use strict';
 const URL = require('url');
 const qs = require('querystring');
-const punycode = require('punycode');
 const dns = require('dns');
 
 /**
@@ -248,7 +247,7 @@ function parseConnectionString(uri, options, callback) {
       }
 
       const result = {
-        host: punycode.toUnicode(parsedHost.hostname),
+        host: parsedHost.hostname,
         port: parsedHost.port ? parseInt(parsedHost.port) : null
       };
 
