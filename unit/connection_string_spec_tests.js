@@ -1,9 +1,9 @@
 'use strict';
 
-const parseConnectionString = require('../../../lib/uri_parser'),
-  fs = require('fs'),
-  f = require('util').format,
-  expect = require('chai').expect;
+const parseConnectionString = require('../../../lib/uri_parser');
+const fs = require('fs');
+const f = require('util').format;
+const expect = require('chai').expect;
 
 // NOTE: These are cases we could never check for unless we write out own
 //       url parser. The node parser simply won't let these through, so we
