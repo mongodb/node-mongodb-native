@@ -41,6 +41,11 @@ exports['mongodb+srv tests'] = {
           if (options.ssl) {
             test.equal(object.server_options.ssl, options.ssl);
           }
+
+          if (options.parsed_options) {
+            test.equal(object.auth.user, options.parsed_options.user);
+            test.equal(object.auth.password, options.parsed_options.password);
+          }
         }
       });
     });
