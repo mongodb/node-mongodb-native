@@ -1,0 +1,17 @@
+{
+  "uri": "mongodb+srv://auser:apass@test1.test.build.10gen.cc/?replicaSet=repl0",
+  "seeds": [
+    "localhost.test.build.10gen.cc:27017",
+    "localhost.test.build.10gen.cc:27018"
+  ],
+  "hosts": [
+    "localhost:27017",
+    "localhost:27018",
+    "localhost:27019"
+  ],
+  "parsed_options": {
+    "user": "auser",
+    "password": "apass"
+  },
+  "comment": "Should preserve auth credentials"
+}

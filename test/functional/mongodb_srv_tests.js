@@ -36,29 +36,18 @@ describe('DNS and TXT record tests', function() {
             if (test[1].options && test[1].options.ssl) {
               expect(object.server_options.ssl).to.equal(test[1].options.ssl);
             }
+            if (
+              test[1].parsed_options &&
+              test[1].parsed_options.user &&
+              test[1].parsed_options.password
+            ) {
+              expect(object.auth.user).to.equal(test[1].parsed_options.user);
+              expect(object.auth.password).to.equal(test[1].parsed_options.password);
+            }
           }
           done();
         });
       }
     });
-  });
-
-  it('preserves auth credentials in the connection string', {
-    metadata: {
-      requires: { topology: ['single'] }
-    },
-    test: function(done) {
-      let user = 'auser';
-      let password = 'apass';
-      let uri = `mongodb+srv://${user}:${password}@test18.test.build.10gen.cc/?replicaSet=repl0`;
-      parse(uri, function(err, object) {
-        expect(err).to.not.exist;
-        expect(object.auth.user).to.not.be.undefined;
-        expect(object.auth.user).to.equal(user);
-        expect(object.auth.password).to.not.be.undefined;
-        expect(object.auth.password).to.equal(password);
-        done();
-      });
-    }
   });
 });
