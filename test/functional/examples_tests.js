@@ -1193,7 +1193,7 @@ describe('Examples', function() {
     }
   });
 
-  it.only('supports array filters when updating', {
+  it('supports array filters when updating', {
     metadata: {
       requires: {
         mongodb: '>=3.6.x',
