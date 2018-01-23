@@ -4,6 +4,7 @@ const parseConnectionString = require('../../../lib/uri_parser');
 const fs = require('fs');
 const f = require('util').format;
 const expect = require('chai').expect;
+const punycode = require('punycode');
 
 // NOTE: These are cases we could never check for unless we write out own
 //       url parser. The node parser simply won't let these through, so we
@@ -56,6 +57,7 @@ describe('Connection String (spec)', function() {
 
               test.hosts = test.hosts.map(host => {
                 delete host.type;
+                host.host = punycode.toASCII(host.host);
                 return host;
               });
 
