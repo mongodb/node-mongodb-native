@@ -39,7 +39,7 @@ util.inherits(MongoError, Error);
  * @method
  * @param {Error|string|object} options The options used to create the error.
  * @return {MongoError} A MongoError instance
- * @deprecated Use new MongoError() instead.
+ * @deprecated Use `new MongoError()` instead.
  */
 MongoError.create = function(options) {
   return new MongoError(options);
@@ -60,7 +60,23 @@ var MongoNetworkError = function(message) {
 };
 util.inherits(MongoNetworkError, MongoError);
 
+/**
+ * An error used when attempting to parse a value (like a connection string)
+ *
+ * @class
+ * @param {Error|string|object} message The error message
+ * @property {string} message The error message
+ * @return {MongoParseError} A MongoNetworkError instance
+ * @extends {MongoError}
+ */
+const MongoParseError = function(message) {
+  MongoError.call(this, message);
+  this.name = 'MongoParseError';
+};
+util.inherits(MongoParseError, MongoError);
+
 module.exports = {
   MongoError: MongoError,
-  MongoNetworkError: MongoNetworkError
+  MongoNetworkError: MongoNetworkError,
+  MongoParseError: MongoParseError
 };

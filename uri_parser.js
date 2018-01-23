@@ -2,6 +2,7 @@
 const URL = require('url');
 const qs = require('querystring');
 const dns = require('dns');
+const MongoParseError = require('./error').MongoParseError;
 
 /**
  * The following regular expression validates a connection string and breaks the
@@ -36,16 +37,16 @@ function parseSrvConnectionString(uri, options, callback) {
   const result = URL.parse(uri);
 
   if (result.hostname.split('.').length < 3) {
-    return callback(new Error('URI does not have hostname, domain name and tld'));
+    return callback(new MongoParseError('URI does not have hostname, domain name and tld'));
   }
 
   result.domainLength = result.hostname.split('.').length;
   if (result.pathname && result.pathname.match(',')) {
-    return callback(new Error('Invalid URI, cannot contain multiple hostnames'));
+    return callback(new MongoParseError('Invalid URI, cannot contain multiple hostnames'));
   }
 
   if (result.port) {
-    return callback(new Error('Ports not accepted with `mongodb+srv` URIs'));
+    return callback(new MongoParseError('Ports not accepted with `mongodb+srv` URIs'));
   }
 
   let srvAddress = `_mongodb._tcp.${result.host}`;
@@ -53,12 +54,14 @@ function parseSrvConnectionString(uri, options, callback) {
     if (err) return callback(err);
 
     if (addresses.length === 0) {
-      return callback(new Error('No addresses found at host'));
+      return callback(new MongoParseError('No addresses found at host'));
     }
 
     for (let i = 0; i < addresses.length; i++) {
       if (!matchesParentDomain(addresses[i].name, result.hostname, result.domainLength)) {
-        return callback(new Error('Server record does not share hostname with parent URI'));
+        return callback(
+          new MongoParseError('Server record does not share hostname with parent URI')
+        );
       }
     }
 
@@ -89,13 +92,15 @@ function parseSrvConnectionString(uri, options, callback) {
 
       if (record) {
         if (record.length > 1) {
-          return callback(new Error('Multiple text records not allowed'));
+          return callback(new MongoParseError('Multiple text records not allowed'));
         }
 
         record = record[0];
         record = record.length > 1 ? record.join('') : record[0];
         if (!record.includes('authSource') && !record.includes('replicaSet')) {
-          return callback(new Error('Text record must only set `authSource` or `replicaSet`'));
+          return callback(
+            new MongoParseError('Text record must only set `authSource` or `replicaSet`')
+          );
         }
 
         connectionStringOptions.push(record);
@@ -153,7 +158,7 @@ function parseQueryString(query) {
   for (const key in parsedQueryString) {
     const value = parsedQueryString[key];
     if (value === '' || value == null) {
-      return new Error('Incomplete key value pair for option');
+      return new MongoParseError('Incomplete key value pair for option');
     }
 
     result[key.toLowerCase()] = parseQueryStringItemValue(value);
@@ -183,12 +188,12 @@ function parseConnectionString(uri, options, callback) {
 
   const cap = uri.match(HOSTS_RX);
   if (!cap) {
-    return callback(new Error('Invalid connection string'));
+    return callback(new MongoParseError('Invalid connection string'));
   }
 
   const protocol = cap[1];
   if (SUPPORTED_PROTOCOLS.indexOf(protocol) === -1) {
-    return callback(new Error('Invalid protocol provided'));
+    return callback(new MongoParseError('Invalid protocol provided'));
   }
 
   if (protocol === 'mongodb+srv') {
@@ -199,25 +204,25 @@ function parseConnectionString(uri, options, callback) {
   const db = dbAndQuery.length > 0 ? dbAndQuery[0] : null;
   const query = dbAndQuery.length > 1 ? dbAndQuery[1] : null;
   let parsedOptions = parseQueryString(query);
-  if (parsedOptions instanceof Error) {
+  if (parsedOptions instanceof MongoParseError) {
     return callback(parsedOptions);
   }
 
   parsedOptions = Object.assign({}, parsedOptions, options);
   const auth = { username: null, password: null, db: db && db !== '' ? qs.unescape(db) : null };
   if (cap[4].split('?')[0].indexOf('@') !== -1) {
-    return callback(new Error('Unescaped slash in userinfo section'));
+    return callback(new MongoParseError('Unescaped slash in userinfo section'));
   }
 
   const authorityParts = cap[3].split('@');
   if (authorityParts.length > 2) {
-    return callback(new Error('Unescaped at-sign in authority section'));
+    return callback(new MongoParseError('Unescaped at-sign in authority section'));
   }
 
   if (authorityParts.length > 1) {
     const authParts = authorityParts.shift().split(':');
     if (authParts.length > 2) {
-      return callback(new Error('Unescaped colon in authority section'));
+      return callback(new MongoParseError('Unescaped colon in authority section'));
     }
 
     auth.username = qs.unescape(authParts[0]);
@@ -231,7 +236,7 @@ function parseConnectionString(uri, options, callback) {
     .map(host => {
       let parsedHost = URL.parse(`mongodb://${host}`);
       if (parsedHost.path === '/:') {
-        hostParsingError = new Error('Double colon in host identifier');
+        hostParsingError = new MongoParseError('Double colon in host identifier');
         return null;
       }
 
@@ -242,7 +247,7 @@ function parseConnectionString(uri, options, callback) {
       }
 
       if (Number.isNaN(parsedHost.port)) {
-        hostParsingError = new Error('Invalid port (non-numeric string)');
+        hostParsingError = new MongoParseError('Invalid port (non-numeric string)');
         return;
       }
 
@@ -252,17 +257,17 @@ function parseConnectionString(uri, options, callback) {
       };
 
       if (result.port === 0) {
-        hostParsingError = new Error('Invalid port (zero) with hostname');
+        hostParsingError = new MongoParseError('Invalid port (zero) with hostname');
         return;
       }
 
       if (result.port > 65535) {
-        hostParsingError = new Error('Invalid port (larger than 65535) with hostname');
+        hostParsingError = new MongoParseError('Invalid port (larger than 65535) with hostname');
         return;
       }
 
       if (result.port < 0) {
-        hostParsingError = new Error('Invalid port (negative number)');
+        hostParsingError = new MongoParseError('Invalid port (negative number)');
         return;
       }
 
@@ -275,7 +280,7 @@ function parseConnectionString(uri, options, callback) {
   }
 
   if (hosts.length === 0 || hosts[0].host === '' || hosts[0].host === null) {
-    return callback(new Error('No hostname or hostnames provided in connection string'));
+    return callback(new MongoParseError('No hostname or hostnames provided in connection string'));
   }
 
   callback(null, {
