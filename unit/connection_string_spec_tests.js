@@ -5,6 +5,7 @@ const fs = require('fs');
 const f = require('util').format;
 const expect = require('chai').expect;
 const punycode = require('punycode');
+const MongoParseError = require('../../../lib/error').MongoParseError;
 
 // NOTE: These are cases we could never check for unless we write out own
 //       url parser. The node parser simply won't let these through, so we
@@ -45,6 +46,7 @@ describe('Connection String (spec)', function() {
           parseConnectionString(test.uri, function(err, result) {
             if (valid === false) {
               expect(err).to.exist;
+              expect(err).to.be.instanceOf(MongoParseError);
               expect(result).to.not.exist;
             } else {
               expect(err).to.not.exist;
