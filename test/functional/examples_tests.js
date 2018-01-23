@@ -1192,4 +1192,36 @@ describe('Examples', function() {
       });
     }
   });
+
+  it.only('supports array filters when updating', {
+    metadata: {
+      requires: {
+        mongodb: '>=3.6.x',
+        topology: ['single']
+      }
+    },
+
+    test: function(done) {
+      const configuration = this.configuration;
+      const MongoClient = configuration.newClient();
+
+      MongoClient.connect(function(err, client) {
+        const db = client.db(configuration.db);
+        const collection = db.collection('arrayFilterUpdateExample');
+
+        // 3. Exploiting the power of arrays
+        collection.updateOne(
+          { _id: 1 },
+          { $set: { 'a.$[i].b': 2 } },
+          { arrayFilters: [{ 'i.b': 0 }] },
+          function updated(err, result) {
+            assert.equal(err, null);
+            assert.equal(typeof result, 'object');
+            client.close();
+            done();
+          }
+        );
+      });
+    }
+  });
 });
