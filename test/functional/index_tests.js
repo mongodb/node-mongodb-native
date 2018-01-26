@@ -1123,7 +1123,8 @@ describe('Indexes', function() {
             db.collection('nonexisting', { strict: true }, function(err) {
               test.ok(err != null);
               db.collection('nonexisting', { strict: false }, function(err) {
-                test.ok(err != null);
+                // When set to false (default) it should not create an error
+                test.ok(err === null);
                 done();
               });
             });
