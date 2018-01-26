@@ -113,6 +113,40 @@ describe('Db', function() {
   /**
    * @ignore
    */
+  it('should callback with an error only when a MongoError', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+
+    test: function(done) {
+      let configuration = this.configuration;
+      let client = configuration.newClient(configuration.writeConcernMax(), {
+        poolSize: 1,
+        auto_reconnect: true
+      });
+
+      client.connect(function(err, client) {
+        let callbackCalled = 0;
+        test.equal(null, err);
+        let db = client.db(configuration.db);
+
+        try {
+          db.collection('collectionCallbackTest', function(e) {
+            callbackCalled++;
+            test.equal(null, e);
+            throw new Error('Erroring on purpose with a non MongoError');
+          });
+        } catch (e) {
+          test.equal(callbackCalled, 1);
+          done();
+        }
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
   it('shouldCorrectlyPerformAutomaticConnect', {
     metadata: { requires: { topology: 'single' } },
 
