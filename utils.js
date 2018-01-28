@@ -130,7 +130,7 @@ var handleCallback = function(callback, err, value1, value2) {
   } catch (err) {
     process.nextTick(function() {
       //throw err;
-      console.log('Collection Not found') // harkishen singh added this statement
+      console.log('Specified Collection Not found');// harkishen singh added this statement
     });
     return false;
   }
