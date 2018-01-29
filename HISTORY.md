@@ -1,3 +1,22 @@
+<a name="3.0.2"></a>
+## [3.0.2](https://github.com/mongodb/node-mongodb-native/compare/v3.0.1...v3.0.2) (2018-01-29)
+
+
+### Bug Fixes
+
+* **collection:** ensure dynamic require of `db` is wrapped in parentheses ([efa78f0](https://github.com/mongodb/node-mongodb-native/commit/efa78f0))
+* **db:** only callback with MongoError NODE-1293 ([#1652](https://github.com/mongodb/node-mongodb-native/issues/1652)) ([45bc722](https://github.com/mongodb/node-mongodb-native/commit/45bc722))
+* **topology base:** allow more than 10 event listeners ([#1630](https://github.com/mongodb/node-mongodb-native/issues/1630)) ([d9fb750](https://github.com/mongodb/node-mongodb-native/commit/d9fb750))
+* **url parser:** preserve auth creds when composing conn string  ([#1640](https://github.com/mongodb/node-mongodb-native/issues/1640)) ([eddca5e](https://github.com/mongodb/node-mongodb-native/commit/eddca5e))
+
+
+### Features
+
+* **bulk:** forward 'checkKeys' option for ordered and unordered bulk operations ([421a6b2](https://github.com/mongodb/node-mongodb-native/commit/421a6b2))
+* **collection:** expose `dbName` property of collection ([6fd05c1](https://github.com/mongodb/node-mongodb-native/commit/6fd05c1))
+
+
+
 <a name="3.0.1"></a>
 ## [3.0.1](https://github.com/mongodb/node-mongodb-native/compare/v3.0.0...v3.0.1) (2017-12-24)
 
