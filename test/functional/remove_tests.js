@@ -153,4 +153,38 @@ describe('Remove', function() {
       });
     }
   });
+
+  /**
+   * @ignore
+   */
+  it('should not error on empty remove', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+
+    // The actual test we wish to run
+    test: function(done) {
+      var self = this;
+      var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
+        poolSize: 1
+      });
+
+      client.connect(function(err, client) {
+        var db = client.db(self.configuration.db);
+        test.equal(null, err);
+        const collection = db.collection('remove_test');
+
+        collection.remove().then(
+          () => {
+            client.close();
+            done();
+          },
+          err => {
+            client.close();
+            done(err);
+          }
+        );
+      });
+    }
+  });
 });
