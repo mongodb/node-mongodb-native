@@ -1,6 +1,7 @@
 'use strict';
 
 var assert = require('assert');
+const expect = require('chai').expect;
 var co = require('co');
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
@@ -1221,6 +1222,45 @@ describe('Examples', function() {
             done();
           }
         );
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it('CausalConsistency', {
+    metadata: { requires: { topology: ['single'], mongodb: '>=3.6.0' } },
+
+    test: function(done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+
+      client.connect(function(err, client) {
+        const cleanup = e => {
+          client.close();
+          done(e);
+        };
+
+        if (err) return cleanup(err);
+
+        const db = client.db(configuration.db);
+        const collection = db.collection('causalConsistencyExample');
+        const session = client.startSession({ causalConsistency: true });
+
+        collection.insertOne({ darmok: 'jalad' }, { session });
+        collection.updateOne({ darmok: 'jalad' }, { $set: { darmok: 'tanagra' } }, { session });
+
+        collection.find({}, { session }).toArray(function(err, data) {
+          try {
+            expect(err).to.equal(null);
+            expect(data).to.exist;
+          } catch (e) {
+            return cleanup(e);
+          }
+
+          cleanup();
+        });
       });
     }
   });
