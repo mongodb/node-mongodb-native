@@ -67,11 +67,11 @@ The MongoDB driver depends on several other packages. These are:
 
 The `kerberos` package is a C++ extension that requires a build environment to be installed on your system. You must be able to build Node.js itself in order to compile and install the `kerberos` module. Furthermore, the `kerberos` module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operation system package manager for what libraries to install.
 
-**Windows already contains the SSPI API used for Kerberos authentication. However you will need to install a full compiler tool chain using Visual Studio C++ to correctly install the Kerberos extension.**
+**Windows already contains the SSPI API used for Kerberos authentication. However, you will need to install a full compiler tool chain using Visual Studio C++ to correctly install the Kerberos extension.**
 
 ### Diagnosing on UNIX
 
-If you don’t have the build essentials, this module won’t build. In the case of Linux, you will need gcc, g++, Node.js with all the headers and Python. The easiest way to figure out what’s missing is by trying to build the Kerberos project. You can do this by performing the following steps.
+If you don’t have the build-essentials, this module won’t build. In the case of Linux, you will need gcc, g++, Node.js with all the headers and Python. The easiest way to figure out what’s missing is by trying to build the Kerberos project. You can do this by performing the following steps.
 
 ```bash
 git clone https://github.com/mongodb-js/kerberos
