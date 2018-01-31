@@ -168,14 +168,6 @@ tests:
         auth: ~
         options: ~
     -
-        description: "Username with password containing an unescaped colon"
-        uri: "mongodb://alice:foo:bar@127.0.0.1"
-        valid: false
-        warning: ~
-        hosts: ~
-        auth: ~
-        options: ~
-    -
         description: "Username containing an unescaped at-sign"
         uri: "mongodb://alice@@127.0.0.1"
         valid: false
@@ -193,7 +185,7 @@ tests:
         options: ~
     -
         description: "Username containing an unescaped slash"
-        uri: "mongodb://alice/@127.0.0.1/db"
+        uri: "mongodb://alice/@localhost/db"
         valid: false
         warning: ~
         hosts: ~
@@ -201,7 +193,7 @@ tests:
         options: ~
     -
         description: "Username containing unescaped slash with password"
-        uri: "mongodb://alice/bob:foo@127.0.0.1/db"
+        uri: "mongodb://alice/bob:foo@localhost/db"
         valid: false
         warning: ~
         hosts: ~
@@ -209,7 +201,7 @@ tests:
         options: ~
     -
         description: "Username with password containing an unescaped slash"
-        uri: "mongodb://alice:foo/bar@127.0.0.1/db"
+        uri: "mongodb://alice:foo/bar@localhost/db"
         valid: false
         warning: ~
         hosts: ~
@@ -218,6 +210,30 @@ tests:
     -
         description: "Host with unescaped slash"
         uri: "mongodb:///tmp/mongodb-27017.sock/"
+        valid: false
+        warning: ~
+        hosts: ~
+        auth: ~
+        options: ~
+    -
+        description: "mongodb+srv with multiple service names"
+        uri: "mongodb+srv://test5.test.mongodb.com,test6.test.mongodb.com"
+        valid: false
+        warning: ~
+        hosts: ~
+        auth: ~
+        options: ~
+    -
+        description: "mongodb+srv with port number"
+        uri: "mongodb+srv://test7.test.mongodb.com:27018"
+        valid: false
+        warning: ~
+        hosts: ~
+        auth: ~
+        options: ~
+ -
+        description: "Username with password containing an unescaped percent sign"
+        uri: "mongodb://alice%foo:bar@127.0.0.1"
         valid: false
         warning: ~
         hosts: ~
