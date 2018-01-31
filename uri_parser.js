@@ -190,6 +190,13 @@ function parseConnectionString(uri, options, callback) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
+  // Check for bad uris before we parse
+  try {
+    URL.parse(uri);
+  } catch (e) {
+    return callback(new MongoParseError('URI malformed, cannot be parsed'));
+  }
+
   const cap = uri.match(HOSTS_RX);
   if (!cap) {
     return callback(new MongoParseError('Invalid connection string'));
