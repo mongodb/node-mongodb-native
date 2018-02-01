@@ -1181,37 +1181,59 @@ ReplSet.prototype.getServers = function() {
 
 //
 // Execute write operation
-var executeWriteOperation = function(self, op, ns, ops, options, callback) {
+function executeWriteOperation(args, options, callback) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
 
-  if (!options.retryWrites || !options.session || !isRetryableWritesSupported(self)) {
-    // No server returned we had an error
-    if (self.s.replicaSetState.primary == null) {
+  // TODO: once we drop Node 4, use destructuring either here or in arguments.
+  const self = args.self;
+  const op = args.op;
+  const ns = args.ns;
+  const ops = args.ops;
+
+  if (self.state === DESTROYED) return callback(new MongoError(f('topology was destroyed')));
+
+  const willRetryWrite =
+    !args.retrying && options.retryWrites && options.session && isRetryableWritesSupported(self);
+
+  if (!self.s.replicaSetState.hasPrimary()) {
+    if (self.s.disconnectHandler) {
+      // Not connected but we have a disconnecthandler
+      return self.s.disconnectHandler.add(op, ns, ops, options, callback);
+    } else if (!willRetryWrite) {
+      // No server returned we had an error
       return callback(new MongoError('no primary server found'));
     }
-
-    // Execute the command
-    return self.s.replicaSetState.primary[op](ns, ops, options, callback);
   }
 
-  // increment and assign txnNumber
-  options.txnNumber = getNextTransactionNumber(options.session);
-
-  self.s.replicaSetState.primary[op](ns, ops, options, (err, result) => {
+  const handler = (err, result) => {
     if (!err) return callback(null, result);
     if (!(err instanceof errors.MongoNetworkError) && !err.message.match(/not master/)) {
       return callback(err);
     }
 
-    if (self.s.replicaSetState.primary == null) {
-      return callback(new MongoError('no primary server found'));
+    // Per SDAM, remove primary from replicaset
+    self.s.replicaSetState.remove(self.s.replicaSetState.primary, { force: true });
+
+    if (willRetryWrite) {
+      const newArgs = Object.assign({}, args, { retrying: true });
+      return executeWriteOperation(newArgs, options, callback);
     }
 
-    // Re-execute the command
-    self.s.replicaSetState.primary[op](ns, ops, options, callback);
-  });
-};
+    return callback(err);
+  };
+
+  if (callback.operationId) {
+    handler.operationId = callback.operationId;
+  }
+
+  // increment and assign txnNumber
+  if (willRetryWrite) {
+    options.txnNumber = getNextTransactionNumber(options.session);
+  }
+
+  return self.s.replicaSetState.primary[op](ns, ops, options, handler);
+}
 
 /**
  * Insert one or more documents
@@ -1227,19 +1249,8 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
  * @param {opResultCallback} callback A callback function
  */
 ReplSet.prototype.insert = function(ns, ops, options, callback) {
-  if (typeof options === 'function') {
-    (callback = options), (options = {}), (options = options || {});
-  }
-
-  if (this.state === DESTROYED) return callback(new MongoError(f('topology was destroyed')));
-
-  // Not connected but we have a disconnecthandler
-  if (!this.s.replicaSetState.hasPrimary() && this.s.disconnectHandler != null) {
-    return this.s.disconnectHandler.add('insert', ns, ops, options, callback);
-  }
-
   // Execute write operation
-  executeWriteOperation(this, 'insert', ns, ops, options, callback);
+  executeWriteOperation({ self: this, op: 'insert', ns, ops }, options, callback);
 };
 
 /**
@@ -1256,19 +1267,8 @@ ReplSet.prototype.insert = function(ns, ops, options, callback) {
  * @param {opResultCallback} callback A callback function
  */
 ReplSet.prototype.update = function(ns, ops, options, callback) {
-  if (typeof options === 'function') {
-    (callback = options), (options = {}), (options = options || {});
-  }
-
-  if (this.state === DESTROYED) return callback(new MongoError(f('topology was destroyed')));
-
-  // Not connected but we have a disconnecthandler
-  if (!this.s.replicaSetState.hasPrimary() && this.s.disconnectHandler != null) {
-    return this.s.disconnectHandler.add('update', ns, ops, options, callback);
-  }
-
   // Execute write operation
-  executeWriteOperation(this, 'update', ns, ops, options, callback);
+  executeWriteOperation({ self: this, op: 'update', ns, ops }, options, callback);
 };
 
 /**
@@ -1285,19 +1285,8 @@ ReplSet.prototype.update = function(ns, ops, options, callback) {
  * @param {opResultCallback} callback A callback function
  */
 ReplSet.prototype.remove = function(ns, ops, options, callback) {
-  if (typeof options === 'function') {
-    (callback = options), (options = {}), (options = options || {});
-  }
-
-  if (this.state === DESTROYED) return callback(new MongoError(f('topology was destroyed')));
-
-  // Not connected but we have a disconnecthandler
-  if (!this.s.replicaSetState.hasPrimary() && this.s.disconnectHandler != null) {
-    return this.s.disconnectHandler.add('remove', ns, ops, options, callback);
-  }
-
   // Execute write operation
-  executeWriteOperation(this, 'remove', ns, ops, options, callback);
+  executeWriteOperation({ self: this, op: 'remove', ns, ops }, options, callback);
 };
 
 /**
