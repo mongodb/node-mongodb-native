@@ -75,7 +75,7 @@ function parseSrvConnectionString(uri, options, callback) {
     let connectionStringOptions = [];
 
     // Default to SSL true
-    if (!options.ssl && (!result.search || !result.query.hasOwnProperty('ssl'))) {
+    if (!options.ssl && (!result.search || result.query['ssl'] == null)) {
       connectionStringOptions.push('ssl=true');
     }
 
