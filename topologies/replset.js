@@ -1212,13 +1212,13 @@ function executeWriteOperation(args, options, callback) {
       return callback(err);
     }
 
-    // Per SDAM, remove primary from replicaset
-    self.s.replicaSetState.remove(self.s.replicaSetState.primary, { force: true });
-
     if (willRetryWrite) {
       const newArgs = Object.assign({}, args, { retrying: true });
       return executeWriteOperation(newArgs, options, callback);
     }
+
+    // Per SDAM, remove primary from replicaset
+    self.s.replicaSetState.remove(self.s.replicaSetState.primary, { force: true });
 
     return callback(err);
   };
