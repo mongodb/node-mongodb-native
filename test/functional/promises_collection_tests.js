@@ -8,6 +8,40 @@ describe('Promises (Collection)', function() {
     return setupDatabase(this.configuration);
   });
 
+  it('Should not throw an error when executing Collection.prototype.remove', {
+    metadata: {
+      requires: {
+        promises: true,
+        node: '>0.8.0',
+        topology: ['single']
+      }
+    },
+
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var MongoClient = configuration.require.MongoClient;
+      var url = configuration.url();
+      url =
+        url.indexOf('?') !== -1
+          ? f('%s&%s', url, 'maxPoolSize=100')
+          : f('%s?%s', url, 'maxPoolSize=100');
+
+      MongoClient.connect(url).then(function(client) {
+        test.equal(1, client.topology.connections().length);
+        var db = client.db(configuration.db);
+
+        db
+          .collection('remove')
+          .remove({})
+          .then(function() {
+            client.close();
+            done();
+          });
+      });
+    }
+  });
+
   it('Should correctly execute Collection.prototype.insertOne', {
     metadata: {
       requires: {
