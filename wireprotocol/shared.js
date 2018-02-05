@@ -18,7 +18,8 @@ var opcodes = {
   OP_GETMORE: 2005,
   OP_DELETE: 2006,
   OP_KILL_CURSORS: 2007,
-  OP_COMPRESSED: 2012
+  OP_COMPRESSED: 2012,
+  OP_MSG: 2013
 };
 
 var getReadPreference = function(cmd, options) {
