@@ -10,9 +10,11 @@ var inherits = require('util').inherits,
   parseHeader = require('../wireprotocol/shared').parseHeader,
   decompress = require('../wireprotocol/compression').decompress,
   Response = require('./commands').Response,
+  BinMsg = require('./msg').BinMsg,
   MongoNetworkError = require('../error').MongoNetworkError,
   Logger = require('./logger'),
   OP_COMPRESSED = require('../wireprotocol/shared').opcodes.OP_COMPRESSED,
+  OP_MSG = require('../wireprotocol/shared').opcodes.OP_MSG,
   MESSAGE_HEADER_SIZE = require('../wireprotocol/shared').MESSAGE_HEADER_SIZE,
   Buffer = require('safe-buffer').Buffer;
 
@@ -301,14 +303,22 @@ var emitMessageHandler = function(self, message) {
           'Decompressing a compressed message from the server failed. The message is corrupt.'
         );
       }
+      const ResponseConstructor = msgHeader.opCode === OP_MSG ? BinMsg : Response;
       self.messageHandler(
-        new Response(self.bson, message, msgHeader, decompressedMsgBody, self.responseOptions),
+        new ResponseConstructor(
+          self.bson,
+          message,
+          msgHeader,
+          decompressedMsgBody,
+          self.responseOptions
+        ),
         self
       );
     });
   } else {
+    const ResponseConstructor = msgHeader.opCode === OP_MSG ? BinMsg : Response;
     self.messageHandler(
-      new Response(
+      new ResponseConstructor(
         self.bson,
         message,
         msgHeader,
