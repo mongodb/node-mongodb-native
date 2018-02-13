@@ -378,11 +378,6 @@ function resolveClusterTime(topology, $clusterTime) {
 //       to share code.
 const SessionMixins = {
   endSessions: function(sessions, callback) {
-    if (this.isConnected()) {
-      if (typeof callback === 'function') callback();
-      return;
-    }
-
     if (!Array.isArray(sessions)) {
       sessions = [sessions];
     }
@@ -395,7 +390,7 @@ const SessionMixins = {
     //   Is it enough to use: ReadPreference.primaryPreferred ?
     this.command(
       'admin.$cmd',
-      { endSessions: sessions.map(s => s.id) },
+      { endSessions: sessions },
       { readPreference: ReadPreference.primaryPreferred },
       () => {
         // intentionally ignored, per spec
