@@ -364,7 +364,7 @@ function attemptReconnect(self) {
         // Count down the number of reconnects
         self.retriesLeft = self.retriesLeft - 1;
         // How many retries are left
-        if (self.retriesLeft === 0) {
+        if (self.retriesLeft <= 0) {
           // Destroy the instance
           self.destroy();
           // Emit close event
