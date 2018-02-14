@@ -1077,4 +1077,27 @@ describe('Server tests', function() {
       }
     });
   });
+
+  it('Should not try to reconnect forever if reconnectTries = 0', {
+    metadata: { requires: { topology: 'single' } },
+
+    test: function(done) {
+      // Attempt to connect
+      let server = new Server({
+        host: 'doesntexist',
+        bson: new Bson(),
+        reconnectTries: 0
+      });
+
+      // Add event listeners
+      server.on('error', function() {});
+
+      // Start connection
+      server.connect();
+
+      server.s.pool.on('reconnectFailed', function() {
+        done();
+      });
+    }
+  });
 });
