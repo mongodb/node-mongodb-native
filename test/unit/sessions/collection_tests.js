@@ -49,5 +49,30 @@ describe('Sessions', function() {
         });
       }
     });
+
+    it('does not mutate command options', {
+      metadata: { requires: { topology: 'single' } },
+
+      test: function() {
+        const options = Object.freeze({});
+        test.server.setMessageHandler(request => {
+          const doc = request.document;
+          if (doc.ismaster) {
+            request.reply(mock.DEFAULT_ISMASTER_36);
+          } else if (doc.count) {
+            request.reply({ ok: 1 });
+          }
+        });
+
+        return MongoClient.connect(`mongodb://${test.server.uri()}/test`).then(client => {
+          const coll = client.db('foo').collection('bar');
+
+          return coll.count({}, options).then(() => {
+            expect(options).to.deep.equal({});
+            return client.close();
+          });
+        });
+      }
+    });
   });
 });
