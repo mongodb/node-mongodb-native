@@ -1620,15 +1620,11 @@ describe('Operation (Generators)', function() {
         // Create a simple single field index
         yield collection.ensureIndex({ a: 1 }, configuration.writeConcernMax());
 
-        setTimeout(function() {
-          return co(function*() {
-            // List all of the indexes on the collection
-            var indexes = yield collection.indexes();
-            test.equal(3, indexes.length);
+        // List all of the indexes on the collection
+        var indexes = yield collection.indexes();
+        test.equal(3, indexes.length);
 
-            client.close();
-          });
-        }, 1000);
+        client.close();
       });
       // END
     }
@@ -1844,17 +1840,11 @@ describe('Operation (Generators)', function() {
         // BEGIN
         var collection = db.collection('simple_document_insert_collection_no_safe_with_generators');
         // Insert a single document
-        collection.insertOne({ hello: 'world_no_safe' });
+        yield collection.insertOne({ hello: 'world_no_safe' });
 
-        // Wait for a second before finishing up, to ensure we have written the item to disk
-        setTimeout(function() {
-          return co(function*() {
-            // Fetch the document
-            var item = yield collection.findOne({ hello: 'world_no_safe' });
-            test.equal('world_no_safe', item.hello);
-            client.close();
-          });
-        }, 100);
+        var item = yield collection.findOne({ hello: 'world_no_safe' });
+        test.equal('world_no_safe', item.hello);
+        client.close();
       });
       // END
     }
@@ -2477,17 +2467,12 @@ describe('Operation (Generators)', function() {
         // Fetch the collection
         var collection = db.collection('save_a_simple_document_with_generators');
         // Save a document with no safe option
-        collection.save({ hello: 'world' });
+        yield collection.save({ hello: 'world' });
 
-        // Wait for a second
-        setTimeout(function() {
-          return co(function*() {
-            // Find the saved document
-            var item = yield collection.findOne({ hello: 'world' });
-            test.equal('world', item.hello);
-            client.close();
-          });
-        }, 2000);
+        // Find the saved document
+        var item = yield collection.findOne({ hello: 'world' });
+        test.equal('world', item && item.hello);
+        client.close();
       });
       // END
     }
@@ -2591,19 +2576,14 @@ describe('Operation (Generators)', function() {
         yield collection.insertOne({ a: 1 }, configuration.writeConcernMax());
 
         // Update the document with an atomic operator
-        collection.updateOne({ a: 1 }, { $set: { b: 2 } });
+        yield collection.updateOne({ a: 1 }, { $set: { b: 2 } });
 
-        // Wait for a second then fetch the document
-        setTimeout(function() {
-          return co(function*() {
-            // Fetch the document that we modified
-            var item = yield collection.findOne({ a: 1 });
-            test.equal(1, item.a);
-            test.equal(2, item.b);
+        var item = yield collection.findOne({ a: 1 });
 
-            client.close();
-          });
-        }, 1000);
+        test.equal(1, item.a);
+        test.equal(2, item.b);
+
+        client.close();
       });
       // END
     }
@@ -2947,54 +2927,52 @@ describe('Operation (Generators)', function() {
           readPreference: ReadPreference.PRIMARY
         });
 
-        setTimeout(function() {
-          return co(function*() {
-            // Locate the entry
-            var collection = db.collection('test_eval_with_generators');
-            var item = yield collection.findOne();
-            test.equal(5, item.y);
-            tests_done();
+        yield new Promise(resolve => setTimeout(resolve, 1000));
 
-            // Evaluate a function with 2 parameters passed in
-            var result = yield db.eval('function (x, y) {return x + y;}', [2, 3]);
-            test.equal(5, result);
-            tests_done();
+        // Locate the entry
+        var collection = db.collection('test_eval_with_generators');
+        var item = yield collection.findOne();
+        test.equal(5, item.y);
+        tests_done();
 
-            // Evaluate a function with no parameters passed in
-            result = yield db.eval('function () {return 5;}');
-            test.equal(5, result);
-            tests_done();
+        // Evaluate a function with 2 parameters passed in
+        result = yield db.eval('function (x, y) {return x + y;}', [2, 3]);
+        test.equal(5, result);
+        tests_done();
 
-            // Evaluate a statement
-            result = yield db.eval('2 + 3;');
-            test.equal(5, result);
-            tests_done();
+        // Evaluate a function with no parameters passed in
+        result = yield db.eval('function () {return 5;}');
+        test.equal(5, result);
+        tests_done();
 
-            // Evaluate a statement using the code object
-            result = yield db.eval(new Code('2 + 3;'));
-            test.equal(5, result);
-            tests_done();
+        // Evaluate a statement
+        result = yield db.eval('2 + 3;');
+        test.equal(5, result);
+        tests_done();
 
-            // Evaluate a statement using the code object including a scope
-            result = yield db.eval(new Code('return i;', { i: 2 }));
-            test.equal(2, result);
-            tests_done();
+        // Evaluate a statement using the code object
+        result = yield db.eval(new Code('2 + 3;'));
+        test.equal(5, result);
+        tests_done();
 
-            // Evaluate a statement using the code object including a scope
-            result = yield db.eval(new Code('i + 3;', { i: 2 }));
-            test.equal(5, result);
-            tests_done();
+        // Evaluate a statement using the code object including a scope
+        result = yield db.eval(new Code('return i;', { i: 2 }));
+        test.equal(2, result);
+        tests_done();
 
-            try {
-              // Evaluate an illegal statement
-              yield db.eval('5 ++ 5;');
-            } catch (err) {
-              test.ok(err instanceof Error);
-              test.ok(err.message != null);
-              tests_done();
-            }
-          });
-        }, 1000);
+        // Evaluate a statement using the code object including a scope
+        result = yield db.eval(new Code('i + 3;', { i: 2 }));
+        test.equal(5, result);
+        tests_done();
+
+        try {
+          // Evaluate an illegal statement
+          yield db.eval('5 ++ 5;');
+        } catch (err) {
+          test.ok(err instanceof Error);
+          test.ok(err.message != null);
+          tests_done();
+        }
       });
       // END
     }
@@ -3621,26 +3599,23 @@ describe('Operation (Generators)', function() {
         yield db.dropDatabase();
 
         // Wait two seconds to let it replicate across
-        setTimeout(function() {
-          return co(function*() {
-            // Get the admin database
-            var dbs = yield db.admin().listDatabases();
-            // Grab the databases
-            dbs = dbs.databases;
-            // Did we find the db
-            var found = false;
+        yield new Promise(resolve => setTimeout(resolve, 2000));
+        // Get the admin database
+        var dbs = yield db.admin().listDatabases();
+        // Grab the databases
+        dbs = dbs.databases;
+        // Did we find the db
+        var found = false;
 
-            // Check if we have the db in the list
-            for (var i = 0; i < dbs.length; i++) {
-              if (dbs[i].name === 'integration_tests_to_drop') found = true;
-            }
+        // Check if we have the db in the list
+        for (var i = 0; i < dbs.length; i++) {
+          if (dbs[i].name === 'integration_tests_to_drop') found = true;
+        }
 
-            // We should not find the databases
-            if (process.env['JENKINS'] == null) test.equal(false, found);
+        // We should not find the databases
+        if (process.env['JENKINS'] == null) test.equal(false, found);
 
-            client.close();
-          });
-        }, 2000);
+        client.close();
       });
       // END
     }
@@ -6560,24 +6535,27 @@ describe('Operation (Generators)', function() {
 
         // Insert a document in the capped collection
         yield collection.insertMany(docs, configuration.writeConcernMax());
-        var total = 0;
 
-        // Get the cursor
-        var cursor = collection
-          .find({})
-          .addCursorFlag('tailable', true)
-          .addCursorFlag('awaitData', true);
+        yield new Promise(resolve => {
+          var total = 0;
+          // Get the cursor
+          var cursor = collection
+            .find({})
+            .addCursorFlag('tailable', true)
+            .addCursorFlag('awaitData', true);
 
-        cursor.on('data', function() {
-          total = total + 1;
+          cursor.on('data', function() {
+            total = total + 1;
 
-          if (total === 1000) {
-            cursor.kill();
-          }
-        });
+            if (total === 1000) {
+              cursor.kill();
+            }
+          });
 
-        cursor.on('end', function() {
-          client.close();
+          cursor.on('end', function() {
+            client.close();
+            resolve();
+          });
         });
       });
       // END
