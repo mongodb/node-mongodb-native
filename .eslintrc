@@ -7,7 +7,8 @@
     "mocha": true
   },
   "globals": {
-    "Promise": true
+    "Promise": true,
+    "Set": true
   },
   "parserOptions": {
     "ecmaVersion": 2017

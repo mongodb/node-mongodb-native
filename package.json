@@ -32,6 +32,7 @@
     "mongodb-test-runner": "^1.1.18",
     "prettier": "^1.5.3",
     "semver": "5.4.1",
+    "sinon": "^4.3.0",
     "worker-farm": "^1.5.0"
   },
   "author": "Christian Kvalheim",
