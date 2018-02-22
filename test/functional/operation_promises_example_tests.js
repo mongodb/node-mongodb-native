@@ -2538,8 +2538,14 @@ describe('Operation (Promises)', function() {
           })
           .then(function(count) {
             test.equal(2, count);
-            client.close();
-          });
+          })
+          .then(
+            () => client.close(),
+            e => {
+              client.close();
+              throw e;
+            }
+          );
       });
       // END
       /* eslint-enable */
