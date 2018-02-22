@@ -11,7 +11,15 @@ const ServerSessionPool = core.Sessions.ServerSessionPool;
 
   let activeSessions, pooledSessions, activeSessionsBeforeClose;
 
+  function getSessionLeakMetadata(currentTest) {
+    return (currentTest.metadata && currentTest.metadata.sessions) || {};
+  }
+
   beforeEach('Session Leak Before Each - setup session tracking', function() {
+    if (getSessionLeakMetadata(this.currentTest).skipLeakTests) {
+      return;
+    }
+
     activeSessions = new Set();
     pooledSessions = new Set();
     activeSessionsBeforeClose = new Set();
@@ -28,7 +36,9 @@ const ServerSessionPool = core.Sessions.ServerSessionPool;
     sandbox.stub(ServerSessionPool.prototype, 'release').callsFake(function(session) {
       const id = session.id;
       activeSessions.delete(id);
+      // console.log(`Active - ${JSON.stringify(id)} = ${activeSessions.size}`);
       pooledSessions.add(id);
+      // console.log(`Pooled + ${JSON.stringify(id)} = ${activeSessions.size}`);
       return _release.apply(this, arguments);
     });
 
@@ -52,7 +62,10 @@ const ServerSessionPool = core.Sessions.ServerSessionPool;
   });
 
   afterEach('Session Leak After Each - ensure no leaks', function() {
-    if (this.currentTest.state === 'failed') {
+    if (
+      this.currentTest.state === 'failed' ||
+      getSessionLeakMetadata(this.currentTest).skipLeakTests
+    ) {
       return;
     }
 
