@@ -70,9 +70,16 @@ describe('Cursor Streams', function() {
 
                 // When the stream is done
                 stream.on('end', function() {
-                  expect(data).to.have.length(3000);
-                  client.close();
-                  done();
+                  setTimeout(() => {
+                    let err;
+                    try {
+                      expect(data).to.have.length(3000);
+                    } catch (e) {
+                      err = e;
+                    }
+                    client.close();
+                    done(err);
+                  }, 1000);
                 });
               }
             });
@@ -139,9 +146,16 @@ describe('Cursor Streams', function() {
 
                 // When the stream is done
                 stream.on('end', function() {
-                  expect(data).to.have.length(10000);
-                  client.close();
-                  done();
+                  setTimeout(() => {
+                    let err;
+                    try {
+                      expect(data).to.have.length(10000);
+                    } catch (e) {
+                      err = e;
+                    }
+                    client.close();
+                    done(err);
+                  }, 1000);
                 });
               }
             });
