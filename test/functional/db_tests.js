@@ -98,11 +98,13 @@ describe('Db', function() {
           coll.findOne({}, null, function() {
             //e - errors b/c findOne needs a query selector
             test.equal(1, count);
+            client.close();
             done();
           });
         } catch (e) {
           process.nextTick(function() {
             test.equal(1, count);
+            client.close();
             done();
           });
         }
@@ -465,6 +467,7 @@ describe('Db', function() {
               return c.collectionName;
             });
             test.notEqual(-1, collections.indexOf('node972.test'));
+            client.close();
             done();
           });
         });
