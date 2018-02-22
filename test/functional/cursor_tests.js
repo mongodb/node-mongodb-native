@@ -2297,9 +2297,9 @@ describe('Cursor', function() {
 
               if (count === 0) {
                 var stream = collection.find({}, { tailable: true, awaitData: true }).stream();
-
+                // let index = 0;
                 stream.on('data', function() {
-                  // console.log("doc :: " + (index++));
+                  // console.log('doc :: ' + index++);
                 });
 
                 stream.on('error', function(err) {
@@ -2320,14 +2320,17 @@ describe('Cursor', function() {
 
                 // Just hammer the server
                 for (var i = 0; i < 100; i++) {
+                  const id = i;
                   process.nextTick(function() {
-                    collection.insert({ id: i }, function(err) {
+                    collection.insert({ id }, function(err) {
                       test.equal(null, err);
+
+                      if (id === 99) {
+                        setTimeout(() => client.close());
+                      }
                     });
                   });
                 }
-
-                setTimeout(() => client.close(), 800);
               }
             });
           }
