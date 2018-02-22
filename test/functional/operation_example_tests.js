@@ -8972,8 +8972,10 @@ describe('Operation Examples', function() {
 
                 // When the stream is done
                 stream.on('end', function() {
-                  client.close();
-                  done();
+                  setTimeout(() => {
+                    client.close();
+                    done();
+                  }, 1000);
                 });
               });
             });
