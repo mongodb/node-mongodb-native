@@ -3170,7 +3170,8 @@ describe('Operation Examples', function() {
    */
   it('shouldCorrectlyRenameCollection', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] },
+      sessions: { skipLeakTests: true }
     },
 
     // The actual test we wish to run
