@@ -1728,6 +1728,7 @@ describe('Cursor', function() {
                 test.equal(1, items.length);
                 test.equal(2, items[0].a);
                 test.equal(undefined, items[0].x);
+                client.close();
                 done();
               });
           });
