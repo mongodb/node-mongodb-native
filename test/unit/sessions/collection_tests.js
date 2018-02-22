@@ -44,6 +44,8 @@ describe('Sessions', function() {
             .then(() => {
               expect(findCommand.readConcern).to.have.keys(['level', 'afterClusterTime']);
               expect(findCommand.readConcern.afterClusterTime).to.eql(insertOperationTime);
+
+              session.endSession({ skipCommand: true });
               return client.close();
             });
         });
