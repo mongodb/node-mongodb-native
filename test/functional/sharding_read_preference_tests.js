@@ -42,6 +42,8 @@ describe('Sharding (Read Preference)', function() {
           // Set debug level for the driver
           Logger.setLevel('debug');
 
+          let gotMessage = false;
+
           // Get the current logger
           Logger.setCurrentLogger(function(message, options) {
             if (
@@ -49,7 +51,7 @@ describe('Sharding (Read Preference)', function() {
               options.className === 'Cursor' &&
               options.message.indexOf('"mode":"secondary"') !== -1
             ) {
-              done();
+              gotMessage = true;
             }
           });
 
@@ -59,11 +61,13 @@ describe('Sharding (Read Preference)', function() {
             function(err, item) {
               test.equal(null, err);
               test.equal(1, item.test);
+              test.ok(gotMessage);
 
               // Set error level for the driver
               Logger.setLevel('error');
               // Close db connection
               client.close();
+              done();
             }
           );
         });
@@ -106,6 +110,7 @@ describe('Sharding (Read Preference)', function() {
           // Set debug level for the driver
           Logger.setLevel('debug');
 
+          let gotMessage = false;
           // Get the current logger
           Logger.setCurrentLogger(function(message, options) {
             if (
@@ -113,7 +118,7 @@ describe('Sharding (Read Preference)', function() {
               options.className === 'Cursor' &&
               options.message.indexOf('"mode":"notsupported"') !== -1
             ) {
-              done();
+              gotMessage = true;
             }
           });
 
@@ -122,11 +127,13 @@ describe('Sharding (Read Preference)', function() {
             { readPreference: new ReadPreference('notsupported') },
             function(err) {
               test.ok(err != null);
+              test.ok(gotMessage);
 
               // Set error level for the driver
               Logger.setLevel('error');
               // Close db connection
               client.close();
+              done();
             }
           );
         });
@@ -169,6 +176,7 @@ describe('Sharding (Read Preference)', function() {
           // Set debug level for the driver
           Logger.setLevel('debug');
 
+          let gotMessage = false;
           // Get the current logger
           Logger.setCurrentLogger(function(message, options) {
             if (
@@ -178,7 +186,7 @@ describe('Sharding (Read Preference)', function() {
                 '{"mode":"secondary","tags":[{"dc":"sf","s":"1"},{"dc":"ma","s":"2"}]}'
               ) !== -1
             ) {
-              done();
+              gotMessage = true;
             }
           });
 
@@ -192,10 +200,12 @@ describe('Sharding (Read Preference)', function() {
             },
             function(err) {
               test.ok(err != null);
+              test.ok(gotMessage);
               // Set error level for the driver
               Logger.setLevel('error');
               // Close db connection
               client.close();
+              done();
             }
           );
         });
@@ -238,6 +248,7 @@ describe('Sharding (Read Preference)', function() {
           // Set debug level for the driver
           Logger.setLevel('debug');
 
+          let gotMessage = false;
           // Get the current logger
           Logger.setCurrentLogger(function(message, options) {
             if (
@@ -246,7 +257,7 @@ describe('Sharding (Read Preference)', function() {
               options.message.indexOf('{"mode":"secondary","tags":[{"loc":"ny"},{"loc":"sf"}]}') !==
                 -1
             ) {
-              done();
+              gotMessage = true;
             }
           });
 
@@ -261,10 +272,12 @@ describe('Sharding (Read Preference)', function() {
             function(err, item) {
               test.equal(null, err);
               test.equal(1, item.test);
+              test.ok(gotMessage);
               // Set error level for the driver
               Logger.setLevel('error');
               // Close db connection
               client.close();
+              done();
             }
           );
         });
