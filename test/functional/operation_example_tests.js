@@ -4352,12 +4352,14 @@ describe('Operation Examples', function() {
                 test.ok(result);
                 test.equal(null, err);
 
+                const oldClient = client;
                 // Authenticate
                 MongoClient.connect(
                   'mongodb://user:name@localhost:27017/integration_tests',
                   function(err, client) {
                     expect(err).to.exist;
                     expect(client).to.not.exist;
+                    oldClient.close();
                     done();
                   }
                 );
