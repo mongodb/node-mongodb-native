@@ -141,6 +141,13 @@ class ServerSessionPool {
     this.sessions = [];
   }
 
+  endAllPooledSessions() {
+    if (this.sessions.length) {
+      this.topology.endSessions(this.sessions.map(session => session.id));
+      this.sessions = [];
+    }
+  }
+
   /**
    * @returns {ServerSession}
    */
