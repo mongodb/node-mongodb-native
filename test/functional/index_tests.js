@@ -720,16 +720,16 @@ describe('Indexes', function() {
 
           collection.ensureIndex({ a: 1 }, configuration.writeConcernMax(), function(err) {
             test.equal(null, err);
-            collection.dropIndex('a_1').then(
-              () => {
+            collection
+              .dropIndex('a_1')
+              .then(() => {
                 client.close();
                 done();
-              },
-              err => {
+              })
+              .catch(err => {
                 client.close();
                 done(err);
-              }
-            );
+              });
           });
         });
       });
