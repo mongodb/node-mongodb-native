@@ -14,14 +14,17 @@ function getSessionLeakMetadata(currentTest) {
   return (currentTest.metadata && currentTest.metadata.sessions) || {};
 }
 
+beforeEach('Session Leak Before Each - Set up clean test environment', () => {
+  sandbox.restore();
+  activeSessions = new Set();
+  pooledSessions = new Set();
+  activeSessionsBeforeClose = new Set();
+});
+
 beforeEach('Session Leak Before Each - setup session tracking', function() {
   if (getSessionLeakMetadata(this.currentTest).skipLeakTests) {
     return;
   }
-
-  activeSessions = new Set();
-  pooledSessions = new Set();
-  activeSessionsBeforeClose = new Set();
 
   const _acquire = ServerSessionPool.prototype.acquire;
   sandbox.stub(ServerSessionPool.prototype, 'acquire').callsFake(function() {
@@ -86,11 +89,4 @@ afterEach('Session Leak After Each - ensure no leaks', function() {
   } catch (e) {
     this.test.error(e);
   }
-});
-
-afterEach('Session Leak After Each - restore sandbox', () => sandbox.restore());
-afterEach('Session Leak After Each - delete sets', () => {
-  activeSessions = undefined;
-  activeSessionsBeforeClose = undefined;
-  pooledSessions = undefined;
 });
