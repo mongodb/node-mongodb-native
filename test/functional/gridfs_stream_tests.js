@@ -81,6 +81,7 @@ describe('GridFS Stream', function() {
                     test.equal(error, null);
                     test.equal(indexes.length, 2);
                     test.equal(indexes[1].name, 'files_id_1_n_1');
+                    client.close();
                     done();
                   });
                 });
@@ -166,6 +167,7 @@ describe('GridFS Stream', function() {
                     test.equal(error, null);
                     test.equal(indexes.length, 2);
                     test.equal(indexes[1].name, 'files_id_1_n_1');
+                    client.close();
                     done();
                   });
                 });
@@ -237,6 +239,7 @@ describe('GridFS Stream', function() {
                 var hash = crypto.createHash('md5');
                 hash.update(license);
                 test.equal(docs[0].md5, hash.digest('hex'));
+                client.close();
                 done();
               });
             });
@@ -283,6 +286,7 @@ describe('GridFS Stream', function() {
         downloadStream.on('error', function(err) {
           test.equal('ENOENT', err.code);
 
+          client.close();
           client.close();
           done();
         });
@@ -333,6 +337,7 @@ describe('GridFS Stream', function() {
 
           downloadStream.on('end', function() {
             test.ok(gotData);
+            client.close();
             done();
           });
         });
@@ -401,6 +406,7 @@ describe('GridFS Stream', function() {
             // care that we got between 1 and 3, and got the right result
             test.ok(gotData >= 1 && gotData <= 3);
             test.equal(str, 'pache');
+            client.close();
             done();
           });
         });
@@ -459,6 +465,7 @@ describe('GridFS Stream', function() {
                 test.equal(error, null);
                 test.equal(docs.length, 0);
 
+                client.close();
                 done();
               });
             });
@@ -521,6 +528,7 @@ describe('GridFS Stream', function() {
                     // Fail if user tries to abort an aborted stream
                     uploadStream.abort().then(null, function(error) {
                       test.equal(error.toString(), 'Error: Cannot call abort() on a stream twice');
+                      client.close();
                       done();
                     });
                   });
@@ -582,6 +590,7 @@ describe('GridFS Stream', function() {
                     // Fail if user tries to abort an aborted stream
                     uploadStream.abort().then(null, function(error) {
                       test.equal(error.toString(), 'Error: Cannot call abort() on a stream twice');
+                      client.close();
                       done();
                     });
                   });
@@ -642,6 +651,7 @@ describe('GridFS Stream', function() {
           downloadStream.on('end', function() {
             test.equal(downloadStream.s.cursor, null);
             if (finished.close) {
+              client.close();
               return done();
             }
             finished.end = true;
@@ -649,6 +659,7 @@ describe('GridFS Stream', function() {
 
           downloadStream.on('close', function() {
             if (finished.end) {
+              client.close();
               return done();
             }
             finished.close = true;
@@ -712,6 +723,7 @@ describe('GridFS Stream', function() {
                 test.equal(error, null);
                 test.equal(docs.length, 0);
 
+                client.close();
                 done();
               });
             });
@@ -756,6 +768,7 @@ describe('GridFS Stream', function() {
           sort: { _id: 1 }
         });
 
+        client.close();
         done();
       });
       // END
@@ -811,6 +824,7 @@ describe('GridFS Stream', function() {
                 test.equal(error, null);
                 test.equal(docs.length, 0);
 
+                client.close();
                 done();
               });
             });
@@ -870,6 +884,7 @@ describe('GridFS Stream', function() {
                 test.equal(error, null);
                 test.equal(docs.length, 0);
 
+                client.close();
                 done();
               });
             });
@@ -918,6 +933,7 @@ describe('GridFS Stream', function() {
           bucket.find({}, { batchSize: 1 }).toArray(function(err, files) {
             test.equal(null, err);
             test.equal(1, files.length);
+            client.close();
             done();
           });
         });
@@ -965,6 +981,7 @@ describe('GridFS Stream', function() {
           // Rename the file
           bucket.rename(id, 'renamed_it.dat', function(err) {
             expect(err).to.not.exist;
+            client.close();
             done();
           });
         });
@@ -1009,6 +1026,7 @@ describe('GridFS Stream', function() {
             // As per spec, make sure we didn't actually fire a query
             // because the document length is 0
             test.equal(stream.s.cursor, null);
+            client.close();
             done();
           });
         });
@@ -1059,6 +1077,7 @@ describe('GridFS Stream', function() {
                       }
 
                       if (--num === 0) {
+                        client.close();
                         done();
                       }
                     });
@@ -1105,9 +1124,11 @@ describe('GridFS Stream', function() {
                 download.on('error', function(error) {
                   if (!testSpec.assert.error) {
                     test.ok(false);
+                    client.close();
                     done();
                   }
                   test.ok(error.toString().indexOf(testSpec.assert.error) !== -1);
+                  client.close();
                   done();
                 });
 
@@ -1115,10 +1136,12 @@ describe('GridFS Stream', function() {
                   var result = testSpec.assert.result;
                   if (!result) {
                     test.ok(false);
+                    client.close();
                     done();
                   }
 
                   test.equal(res.toString('hex'), result.$hex);
+                  client.close();
                   done();
                 });
               };
@@ -1282,6 +1305,7 @@ describe('GridFS Stream', function() {
                     // Fail if user tries to abort an aborted stream
                     uploadStream.abort().then(null, function(error) {
                       test.equal(error.toString(), 'Error: Cannot call abort() on a stream twice');
+                      client.close();
                       done();
                     });
                   });
@@ -1352,6 +1376,7 @@ describe('GridFS Stream', function() {
             // care that we got between 1 and 3, and got the right result
             test.ok(gotData >= 1 && gotData <= 3);
             test.equal(str, 'pache');
+            client.close();
             done();
           });
         });

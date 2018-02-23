@@ -60,6 +60,7 @@ describe('Sessions', function() {
           let session = client.startSession();
           expect(session).to.exist;
 
+          session.endSession({ skipCommand: true });
           client.close();
           done();
         });

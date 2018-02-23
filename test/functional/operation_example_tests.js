@@ -3170,7 +3170,8 @@ describe('Operation Examples', function() {
    */
   it('shouldCorrectlyRenameCollection', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] },
+      sessions: { skipLeakTests: true }
     },
 
     // The actual test we wish to run
@@ -4352,12 +4353,14 @@ describe('Operation Examples', function() {
                 test.ok(result);
                 test.equal(null, err);
 
+                const oldClient = client;
                 // Authenticate
                 MongoClient.connect(
                   'mongodb://user:name@localhost:27017/integration_tests',
                   function(err, client) {
                     expect(err).to.exist;
                     expect(client).to.not.exist;
+                    oldClient.close();
                     done();
                   }
                 );
@@ -8970,8 +8973,10 @@ describe('Operation Examples', function() {
 
                 // When the stream is done
                 stream.on('end', function() {
-                  client.close();
-                  done();
+                  setTimeout(() => {
+                    client.close();
+                    done();
+                  }, 1000);
                 });
               });
             });

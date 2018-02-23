@@ -1036,6 +1036,10 @@ describe('APM', function() {
         // Get the result
         result = results.successes.shift();
 
+        if (result.commandName === 'endSessions') {
+          result = results.successes.shift();
+        }
+
         // Validate the test
         expect(commandName).to.equal(result.commandName);
         // Do we have a getMore command
@@ -1053,6 +1057,10 @@ describe('APM', function() {
         // Get the result
         results.failures = filterSessionsCommands(results.failures);
         result = results.failures.shift();
+
+        if (result.commandName === 'endSessions') {
+          result = results.failures.shift();
+        }
 
         // Validate the test
         expect(commandName).to.equal(result.commandName);

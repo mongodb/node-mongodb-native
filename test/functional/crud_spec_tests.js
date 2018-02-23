@@ -39,6 +39,12 @@ describe('CRUD spec', function() {
       });
   });
 
+  afterEach(() => {
+    if (testContext.client) {
+      testContext.client.close();
+    }
+  });
+
   describe('read', function() {
     readScenarios.forEach(function(scenarioData) {
       var scenarioName = scenarioData[0];

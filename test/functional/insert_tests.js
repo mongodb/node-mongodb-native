@@ -1656,9 +1656,16 @@ describe('Insert', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldExecuteInsertWithNoCallbackAndWriteConcern');
-        collection.insert({ a: { b: { c: 1 } } });
-        client.close();
-        done();
+        collection.insert({ a: { b: { c: 1 } } }).then(
+          () => {
+            client.close();
+            done();
+          },
+          err => {
+            client.close();
+            done(err);
+          }
+        );
       });
     }
   });

@@ -2431,7 +2431,10 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyRenameCollectionWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: {
+      requires: { promises: true, topology: ['single'] },
+      sessions: { skipLeakTests: true }
+    },
 
     // The actual test we wish to run
     test: function() {
@@ -2538,8 +2541,14 @@ describe('Operation (Promises)', function() {
           })
           .then(function(count) {
             test.equal(2, count);
-            client.close();
-          });
+          })
+          .then(
+            () => client.close(),
+            e => {
+              client.close();
+              throw e;
+            }
+          );
       });
       // END
       /* eslint-enable */

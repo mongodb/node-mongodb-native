@@ -273,68 +273,6 @@ describe('Indexes', function() {
   /**
    * @ignore
    */
-  it('shouldThrowErrorOnAttemptingSafeCreateIndexWithNoCallback', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    // The actual test we wish to run
-    test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
-        var db = client.db(configuration.db);
-        db.createCollection('shouldThrowErrorOnAttemptingSafeUpdateWithNoCallback', function(
-          err,
-          collection
-        ) {
-          try {
-            // insert a doc
-            collection.createIndex({ a: 1 }, configuration.writeConcernMax());
-            test.ok(false);
-          } catch (err) {} // eslint-disable-line
-
-          client.close();
-          done();
-        });
-      });
-    }
-  });
-
-  /**
-   * @ignore
-   */
-  it('shouldThrowErrorOnAttemptingSafeEnsureIndexWithNoCallback', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    // The actual test we wish to run
-    test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
-        var db = client.db(configuration.db);
-        db.createCollection('shouldThrowErrorOnAttemptingSafeUpdateWithNoCallback', function(
-          err,
-          collection
-        ) {
-          try {
-            // insert a doc
-            collection.ensureIndex({ a: 1 }, configuration.writeConcernMax());
-            test.ok(false);
-          } catch (err) {} // eslint-disable-line
-
-          client.close();
-          done();
-        });
-      });
-    }
-  });
-
-  /**
-   * @ignore
-   */
   it('shouldCorrectlyHandleDistinctIndexes', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
@@ -782,10 +720,16 @@ describe('Indexes', function() {
 
           collection.ensureIndex({ a: 1 }, configuration.writeConcernMax(), function(err) {
             test.equal(null, err);
-            collection.dropIndex('a_1');
-
-            client.close();
-            done();
+            collection
+              .dropIndex('a_1')
+              .then(() => {
+                client.close();
+                done();
+              })
+              .catch(err => {
+                client.close();
+                done(err);
+              });
           });
         });
       });
@@ -1109,7 +1053,10 @@ describe('Indexes', function() {
    * @ignore
    */
   it('should correctly error out due to driver close', {
-    metadata: { requires: { topology: ['single'] } },
+    metadata: {
+      requires: { topology: ['single'] },
+      sessions: { skipLeakTests: true }
+    },
 
     // The actual test we wish to run
     test: function(done) {
@@ -1118,14 +1065,16 @@ describe('Indexes', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         client.close(function() {
-          db.createCollection('nonexisting', { w: 1 }, function(err) {
-            test.ok(err != null);
-            db.collection('nonexisting', { strict: true }, function(err) {
+          setTimeout(() => {
+            db.createCollection('nonexisting', { w: 1 }, function(err) {
               test.ok(err != null);
-              db.collection('nonexisting', { strict: false }, function(err) {
-                // When set to false (default) it should not create an error
-                test.ok(err === null);
-                done();
+              db.collection('nonexisting', { strict: true }, function(err) {
+                test.ok(err != null);
+                db.collection('nonexisting', { strict: false }, function(err) {
+                  // When set to false (default) it should not create an error
+                  test.ok(err === null);
+                  setTimeout(() => done());
+                });
               });
             });
           });

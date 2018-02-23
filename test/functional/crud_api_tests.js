@@ -830,7 +830,7 @@ describe('CRUD API', function() {
         test.equal(null, err);
 
         // Delete all items with no selector
-        db.collection('t6_1').deleteMany(function(err) {
+        db.collection('t6_1').deleteMany({}, function(err) {
           test.equal(null, err);
 
           client.close();
