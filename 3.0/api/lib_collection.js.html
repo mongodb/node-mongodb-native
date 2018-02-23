@@ -412,6 +412,8 @@
             
             <span class="subtitle">Typedefs</span>
             
+                <li data-name="Collection~aggregationCallback"><a href="Collection.html#~aggregationCallback">aggregationCallback</a></li>
+            
                 <li data-name="Collection~bulkWriteOpCallback"><a href="Collection.html#~bulkWriteOpCallback">bulkWriteOpCallback</a></li>
             
                 <li data-name="Collection~BulkWriteOpResult"><a href="Collection.html#~BulkWriteOpResult">BulkWriteOpResult</a></li>
@@ -1470,6 +1472,25 @@
         <li class="item" data-name="MongoNetworkError">
             <span class="title">
                 <a href="MongoNetworkError.html">MongoNetworkError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoParseError">
+            <span class="title">
+                <a href="MongoParseError.html">MongoParseError</a>
                 
             </span>
             <ul class="members itemMembers">
@@ -2694,6 +2715,7 @@ define.classMethod('insert', { callback: true, promise: true });
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
  * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
+ * @param {Array} [options.arrayFilters=null] optional list of array filters referenced in filtered positional operators
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @param {Collection~updateWriteOpCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
@@ -2819,6 +2841,7 @@ define.classMethod('replaceOne', { callback: true, promise: true });
  * @param {(number|string)} [options.w=null] The write concern.
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {Array} [options.arrayFilters=null] optional list of array filters referenced in filtered positional operators
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @param {Collection~updateWriteOpCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
@@ -2925,6 +2948,7 @@ var updateDocuments = function(self, selector, document, options, callback) {
  * @param {boolean} [options.multi=false] Update one/all documents with operation.
  * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
  * @param {object} [options.collation=null] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
+ * @param {Array} [options.arrayFilters=null] optional list of array filters referenced in filtered positional operators
  * @param {ClientSession} [options.session] optional session to use for this operation
  * @param {Collection~writeOpCallback} [callback] The command result callback
  * @throws {MongoError}
@@ -3106,6 +3130,9 @@ define.classMethod('removeMany', { callback: true, promise: true });
  * @deprecated use deleteOne, deleteMany or bulkWrite
  */
 Collection.prototype.remove = function(selector, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
   // Add ignoreUndfined
   if (this.s.options.ignoreUndefined) {
     options = shallowClone(options);
@@ -3169,6 +3196,13 @@ define.classMethod('save', { callback: true, promise: true });
  * @callback Collection~resultCallback
  * @param {MongoError} error An error instance representing the error during the execution.
  * @param {object} result The result object if the command was executed successfully.
+ */
+
+/**
+ * The callback format for an aggregation call
+ * @callback Collection~aggregationCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {AggregationCursor} cursor The cursor if the aggregation command was executed successfully.
  */
 
 /**
@@ -4263,7 +4297,7 @@ function decorateWithReadConcern(command, self, options) {
  * @param {object} [options.collation=null] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
  * @param {string} [options.comment] Add a comment to an aggregation command
  * @param {ClientSession} [options.session] optional session to use for this operation
- * @param {Collection~resultCallback} callback The command result callback
+ * @param {Collection~aggregationCallback} callback The command result callback
  * @return {(null|AggregationCursor)}
  */
 Collection.prototype.aggregate = function(pipeline, options, callback) {
@@ -4395,7 +4429,7 @@ define.classMethod('aggregate', { callback: true, promise: false });
  * @since 3.0.0
  * @param {Array} [pipeline=null] An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
  * @param {object} [options=null] Optional settings
- * @param {string} [options.fullDocument=none] Allowed values: ‘none’, ‘lookup’. When set to ‘lookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred.
+ * @param {string} [options.fullDocument='default'] Allowed values: ‘default’, ‘updateLookup’. When set to ‘updateLookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred.
  * @param {object} [options.resumeAfter=null] Specifies the logical starting point for the new change stream. This should be the _id field from a previously returned change stream document.
  * @param {number} [options.maxAwaitTimeMS] The maximum amount of time for the server to wait on new documents to satisfy a change stream query
  * @param {number} [options.batchSize=null] The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
@@ -4877,11 +4911,10 @@ var mapReduce = function(self, map, reduce, options, callback) {
     if (result.result != null &amp;&amp; typeof result.result === 'object') {
       var doc = result.result;
       // Return a collection from another db
-      collection = new (require('./db'))(
-        doc.db,
-        self.s.db.s.topology,
-        self.s.db.s.options
-      ).collection(doc.collection);
+      var Db = require('./db');
+      collection = new Db(doc.db, self.s.db.s.topology, self.s.db.s.options).collection(
+        doc.collection
+      );
     } else {
       // Create a collection object that wraps the result collection
       collection = self.s.db.collection(result.result);
@@ -5034,7 +5067,7 @@ module.exports = Collection;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Jan 16 2018 15:53:11 GMT-0500 (EST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Feb 23 2018 15:27:41 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>

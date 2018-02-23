@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Class: FindOperatorsUnordered</title>
+    <title>Class: MongoParseError</title>
     
     
     
@@ -1888,7 +1888,7 @@
             </td>
             <td valign='top'>        
                 <div class="main">
-                    <h1 class="page-title" data-filename="FindOperatorsUnordered.html">Class: FindOperatorsUnordered</h1>
+                    <h1 class="page-title" data-filename="MongoParseError.html">Class: MongoParseError</h1>
                     
 
 
@@ -1897,7 +1897,7 @@
     
 <header>
     <h2>
-    FindOperatorsUnordered
+    MongoParseError
     </h2>
     
 </header>  
@@ -1910,14 +1910,14 @@
         
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="FindOperatorsUnordered">
+        <h4 class="name" id="MongoParseError">
             
-            new FindOperatorsUnordered<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="FindOperatorsUnordered.html">FindOperatorsUnordered</a>}</span>
+            new MongoParseError<span class="signature">(message)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="MongoParseError.html">MongoParseError</a>}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_bulk_unordered.js.html">lib/bulk/unordered.js</a>, <a href="lib_bulk_unordered.js.html#line40">line 40</a>
+            <a href="node_modules_mongodb-core_lib_error.js.html">node_modules/mongodb-core/lib/error.js</a>, <a href="node_modules_mongodb-core_lib_error.js.html#line72">line 72</a>
         </div>
         
     </div>
@@ -1928,7 +1928,7 @@
     
     
     <div class="description">
-        <p>Create a FindOperatorsUnordered instance (INTERNAL TYPE, do not instantiate directly)</p>
+        <p>An error used when attempting to parse a value (like a connection string)</p>
     </div>
     
 
@@ -1936,6 +1936,57 @@
     
     
     
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>message</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Error</span>
+|
+
+<span class="param-type">string</span>
+|
+
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The error message</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
     
     
     
@@ -1968,13 +2019,13 @@
 	
         <tr>
             
-                <td class="name"><code>length</code></td>
+                <td class="name"><code>message</code></td>
             
             
             <td class="type">
             
                 
-<span class="param-type">number</span>
+<span class="param-type">string</span>
 
 
             
@@ -1984,7 +2035,7 @@
             
             
             
-            <td class="description last"><p>Get the number of operations in the bulk.</p></td>
+            <td class="description last"><p>The error message</p></td>
         </tr>
 	
 	
@@ -2029,7 +2080,7 @@
 
 
 <h5>Returns:</h5>
-FindOperatorsUnordered instance.
+MongoNetworkError instance
 <br />
 
     
@@ -2041,46 +2092,16 @@ FindOperatorsUnordered instance.
     </div>
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-        <h3 class="subsection-title">Methods</h3>
+        <h3 class="subsection-title">Extends</h3>
         
-        <dl>
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="remove">
-            
-            remove<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="FindOperatorsUnordered.html">FindOperatorsUnordered</a>}</span>
-        </h4>
+        <ul>
+            <li><a href="MongoError.html">MongoError</a></li>
+        </ul>
     
-        
-        <div class="tag-source">
-            <a href="lib_bulk_unordered.js.html">lib/bulk/unordered.js</a>, <a href="lib_bulk_unordered.js.html#line147">line 147</a>
-        </div>
-        
-    </div>
-
     
-</dt>
-<dd>
     
     
-    <div class="description">
-        <p>Add a remove operation to the bulk operation</p>
-    </div>
     
-
     
     
     
@@ -2088,655 +2109,6 @@ FindOperatorsUnordered instance.
     
     
     
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    <h5>Throws:</h5>
-    
-            
-
-    <div class="param-desc">
-    
-        
-<span class="param-type"><a href="MongoError.html">MongoError</a></span>
-
-
-    
-    </div>
-
-
-        
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="removeOne">
-            
-            removeOne<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="FindOperatorsUnordered.html">FindOperatorsUnordered</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_bulk_unordered.js.html">lib/bulk/unordered.js</a>, <a href="lib_bulk_unordered.js.html#line127">line 127</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Add a remove one operation to the bulk operation</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    <h5>Throws:</h5>
-    
-            
-
-    <div class="param-desc">
-    
-        
-<span class="param-type"><a href="MongoError.html">MongoError</a></span>
-
-
-    
-    </div>
-
-
-        
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="replaceOne">
-            
-            replaceOne<span class="signature">(updateDocument)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="FindOperatorsUnordered.html">FindOperatorsUnordered</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_bulk_unordered.js.html">lib/bulk/unordered.js</a>, <a href="lib_bulk_unordered.js.html#line104">line 104</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Add a replace one operation to the bulk operation</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>updateDocument</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>the new document to replace the existing one with</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    <h5>Throws:</h5>
-    
-            
-
-    <div class="param-desc">
-    
-        
-<span class="param-type"><a href="MongoError.html">MongoError</a></span>
-
-
-    
-    </div>
-
-
-        
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="update">
-            
-            update<span class="signature">(updateDocument)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="FindOperatorsUnordered.html">FindOperatorsUnordered</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_bulk_unordered.js.html">lib/bulk/unordered.js</a>, <a href="lib_bulk_unordered.js.html#line52">line 52</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Add a single update document to the bulk operation</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>updateDocument</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>update operations</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    <h5>Throws:</h5>
-    
-            
-
-    <div class="param-desc">
-    
-        
-<span class="param-type"><a href="MongoError.html">MongoError</a></span>
-
-
-    
-    </div>
-
-
-        
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="updateOne">
-            
-            updateOne<span class="signature">(updateDocument)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="FindOperatorsUnordered.html">FindOperatorsUnordered</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_bulk_unordered.js.html">lib/bulk/unordered.js</a>, <a href="lib_bulk_unordered.js.html#line78">line 78</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Add a single update one document to the bulk operation</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>updateDocument</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>update operations</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    <h5>Throws:</h5>
-    
-            
-
-    <div class="param-desc">
-    
-        
-<span class="param-type"><a href="MongoError.html">MongoError</a></span>
-
-
-    
-    </div>
-
-
-        
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="upsert">
-            
-            upsert<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="FindOperatorsUnordered.html">FindOperatorsUnordered</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_bulk_unordered.js.html">lib/bulk/unordered.js</a>, <a href="lib_bulk_unordered.js.html#line115">line 115</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Upsert modifier for update bulk operation</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    <h5>Throws:</h5>
-    
-            
-
-    <div class="param-desc">
-    
-        
-<span class="param-type"><a href="MongoError.html">MongoError</a></span>
-
-
-    
-    </div>
-
-
-        
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        </dl>
     
     
     

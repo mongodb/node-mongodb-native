@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Index</title>
+    <title>Class: MongoParseError</title>
     
     
     
@@ -990,38 +990,16 @@
             </td>
             <td valign='top'>        
                 <div class="main">
-                    <h1 class="page-title" data-filename="index.html">Index</h1>
+                    <h1 class="page-title" data-filename="MongoParseError.html">Class: MongoParseError</h1>
                     
 
 
-    
-
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
 
 <section>
     
 <header>
     <h2>
-    lib/cursor.js
+    MongoParseError
     </h2>
     
 </header>  
@@ -1032,12 +1010,140 @@
     
     
         
-            <div class="description"><p>The <strong>Cursor</strong> class is an internal class that embodies a cursor on MongoDB<br>allowing for iteration over the results returned from the underlying query.</p>
-<p><strong>CURSORS Cannot directly be instantiated</strong></p></div>
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="MongoParseError">
+            
+            new MongoParseError<span class="signature">(message)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="MongoParseError.html">MongoParseError</a>}</span>
+        </h4>
+    
         
+        <div class="tag-source">
+            <a href="lib_error.js.html">lib/error.js</a>, <a href="lib_error.js.html#line72">line 72</a>
+        </div>
         
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>An error used when attempting to parse a value (like a connection string)</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
         
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>message</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Error</span>
+|
+
+<span class="param-type">string</span>
+|
+
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The error message</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
 <dl class="details">
+    
+        
+        <h5 class="subsection-title">Properties:</h5>
+        
+        <dl>
+
+<table class="props">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>message</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>The error message</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table></dl>
+        
     
         
     
@@ -1061,192 +1167,38 @@
     
 </dl>
 
-        
-        
-            <h3>Example</h3>
-            
-
     
-    <pre class="prettyprint"><code><p>var Server = require('mongodb-core').Server<br>  , ReadPreference = require('mongodb-core').ReadPreference<br>  , assert = require('assert');</p>
-<p>var server = new Server({host: 'localhost', port: 27017});<br>// Wait for the connection event<br>server.on('connect', function(server) {<br>  assert.equal(null, err);</p>
-<p>  // Execute the write<br>  var cursor = _server.cursor('integration_tests.inserts_example4', {<br>      find: 'integration_tests.example4'<br>    , query: {a:1}<br>  }, {<br>    readPreference: new ReadPreference('secondary');<br>  });</p>
-<p>  // Get the first document<br>  cursor.next(function(err, doc) {<br>    assert.equal(null, err);<br>    server.destroy();<br>  });<br>});</p>
-<p>// Start connecting<br>server.connect();</p></code></pre>
     
 
-        
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+
+<h5>Returns:</h5>
+MongoNetworkError instance
+<br />
+
+    
+    
+    
+</dd>
+
     
     </div>
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</article>
-
-</section>  
-
-
-
-
-
-
-<section>
-    
-<header>
-    <h2>
-    lib/topologies/mongos.js
-    </h2>
-    
-</header>  
-
-<article>
-    <div class="container-overview">
-    
-    
-    
+        <h3 class="subsection-title">Extends</h3>
         
-            <div class="description"><p>The <strong>Mongos</strong> class is a class that represents a Mongos Proxy topology and is<br>used to construct connections.</p></div>
-        
-        
-        
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-        
-        
-            <h3>Example</h3>
-            
-
-    
-    <pre class="prettyprint"><code><p>var Mongos = require('mongodb-core').Mongos<br>  , ReadPreference = require('mongodb-core').ReadPreference<br>  , assert = require('assert');</p>
-<p>var server = new Mongos([{host: 'localhost', port: 30000}]);<br>// Wait for the connection event<br>server.on('connect', function(server) {<br>  server.destroy();<br>});</p>
-<p>// Start connecting<br>server.connect();</p></code></pre>
-    
-
-        
-    
-    </div>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</article>
-
-</section>  
-
-
-
-
-
-
-<section>
-    
-<header>
-    <h2>
-    lib/topologies/read_preference.js
-    </h2>
-    
-</header>  
-
-<article>
-    <div class="container-overview">
-    
-    
-    
-        
-            <div class="description"><p>The <strong>ReadPreference</strong> class is a class that represents a MongoDB ReadPreference and is<br>used to construct connections.</p></div>
-        
-        
-        
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-        
-        
-            <h3>Example</h3>
-            
-
-    
-    <pre class="prettyprint"><code><p>const ReplSet = require('mongodb-core').ReplSet,<br>  ReadPreference = require('mongodb-core').ReadPreference,<br>  assert = require('assert');</p>
-<p>const server = new ReplSet([{host: 'localhost', port: 30000}], {setName: 'rs'});<br>// Wait for the connection event<br>server.on('connect', function(server) {<br>  const cursor = server.cursor(<br>    'db.test',<br>    { find: 'db.test', query: {} },<br>    { readPreference: new ReadPreference('secondary') }<br>  );</p>
-<p>  cursor.next(function(err, doc) {<br>    server.destroy();<br>  });<br>});</p>
-<p>// Start connecting<br>server.connect();</p></code></pre>
-    
-
-        
-    
-    </div>
-    
+        <ul>
+            <li><a href="MongoError.html">MongoError</a></li>
+        </ul>
     
     
     

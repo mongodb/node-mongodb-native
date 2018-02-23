@@ -2085,6 +2085,7 @@ const dbName = 'myproject';
     console.log(&quot;Connected correctly to server&quot;);
 
     const db = client.db(dbName);
+    const col = db.collection('updates');
     let r;
 
     // Insert a single document

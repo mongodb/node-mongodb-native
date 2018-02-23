@@ -412,6 +412,8 @@
             
             <span class="subtitle">Typedefs</span>
             
+                <li data-name="Collection~aggregationCallback"><a href="Collection.html#~aggregationCallback">aggregationCallback</a></li>
+            
                 <li data-name="Collection~bulkWriteOpCallback"><a href="Collection.html#~bulkWriteOpCallback">bulkWriteOpCallback</a></li>
             
                 <li data-name="Collection~BulkWriteOpResult"><a href="Collection.html#~BulkWriteOpResult">BulkWriteOpResult</a></li>
@@ -1470,6 +1472,25 @@
         <li class="item" data-name="MongoNetworkError">
             <span class="title">
                 <a href="MongoNetworkError.html">MongoNetworkError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoParseError">
+            <span class="title">
+                <a href="MongoParseError.html">MongoParseError</a>
                 
             </span>
             <ul class="members itemMembers">
@@ -3023,7 +3044,7 @@ Db instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1338">line 1338</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1337">line 1337</a>
         </div>
         
     </div>
@@ -3577,7 +3598,7 @@ the new Admin db instance
     <div class="nameContainer">
         <h4 class="name" id="collection">
             
-            collection<span class="signature">(name, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Collection.html">Collection</a>}</span>
+            collection<span class="signature">(name, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Collection.html">Collection</a>}</span>
         </h4>
     
         
@@ -3593,7 +3614,7 @@ the new Admin db instance
     
     
     <div class="description">
-        <p>Fetch a specific collection (containing the actual collection information). If the application does not use strict mode you can<br>can use it without a callback in the following way: <code>var collection = db.collection('mycollection');</code></p>
+        <p>Fetch a specific collection (containing the actual collection information). If the application does not use strict mode you<br>can use it without a callback in the following way: <code>var collection = db.collection('mycollection');</code></p>
     </div>
     
 
@@ -4129,6 +4150,8 @@ the new Admin db instance
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -4200,7 +4223,7 @@ the new Collection instance if not in strict mode
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line945">line 945</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line944">line 944</a>
         </div>
         
     </div>
@@ -4717,7 +4740,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line612">line 612</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line611">line 611</a>
         </div>
         
     </div>
@@ -5743,7 +5766,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1045">line 1045</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1044">line 1044</a>
         </div>
         
     </div>
@@ -6513,7 +6536,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line858">line 858</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line857">line 857</a>
         </div>
         
     </div>
@@ -6755,7 +6778,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line899">line 899</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line898">line 898</a>
         </div>
         
     </div>
@@ -6969,7 +6992,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1135">line 1135</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1134">line 1134</a>
         </div>
         
     </div>
@@ -7705,7 +7728,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line809">line 809</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line808">line 808</a>
         </div>
         
     </div>
@@ -8042,7 +8065,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line991">line 991</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line990">line 990</a>
         </div>
         
     </div>
@@ -8345,7 +8368,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1548">line 1548</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1547">line 1547</a>
         </div>
         
     </div>
@@ -8684,7 +8707,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line679">line 679</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line678">line 678</a>
         </div>
         
     </div>
@@ -8989,7 +9012,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1486">line 1486</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1485">line 1485</a>
         </div>
         
     </div>
@@ -9205,7 +9228,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1514">line 1514</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1513">line 1513</a>
         </div>
         
     </div>
@@ -9419,7 +9442,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1426">line 1426</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1425">line 1425</a>
         </div>
         
     </div>
@@ -9794,7 +9817,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line832">line 832</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line831">line 831</a>
         </div>
         
     </div>
@@ -10126,7 +10149,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1443">line 1443</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1442">line 1442</a>
         </div>
         
     </div>
@@ -10368,7 +10391,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line632">line 632</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line631">line 631</a>
         </div>
         
     </div>
@@ -10636,7 +10659,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1740">line 1740</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1739">line 1739</a>
         </div>
         
     </div>
@@ -10997,7 +11020,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1744">line 1744</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1743">line 1743</a>
         </div>
         
     </div>
@@ -11079,7 +11102,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1764">line 1764</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1763">line 1763</a>
         </div>
         
     </div>
@@ -11161,7 +11184,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1791">line 1791</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1790">line 1790</a>
         </div>
         
     </div>
@@ -11247,7 +11270,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1782">line 1782</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1781">line 1781</a>
         </div>
         
     </div>
@@ -11329,7 +11352,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1753">line 1753</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1752">line 1752</a>
         </div>
         
     </div>
@@ -11415,7 +11438,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1773">line 1773</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1772">line 1772</a>
         </div>
         
     </div>
@@ -11516,7 +11539,7 @@ Promise if no callback passed
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Jan 16 2018 15:53:11 GMT-0500 (EST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Feb 23 2018 15:27:42 GMT-0500 (EST)
                     </footer>
                 </div>
             </td>
