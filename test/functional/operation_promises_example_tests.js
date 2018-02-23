@@ -2432,8 +2432,7 @@ describe('Operation (Promises)', function() {
    */
   it('shouldCorrectlyRenameCollectionWithPromises', {
     metadata: {
-      requires: { promises: true, topology: ['single'] },
-      sessions: { skipLeakTests: true }
+      requires: { promises: true, topology: ['single'] }
     },
 
     // The actual test we wish to run
