@@ -2337,8 +2337,7 @@ describe('Operation (Generators)', function() {
    */
   it('shouldCorrectlyRenameCollectionWithGenerators', {
     metadata: {
-      requires: { generators: true, topology: ['single'] },
-      sessions: { skipLeakTests: true }
+      requires: { generators: true, topology: ['single'] }
     },
 
     // The actual test we wish to run
