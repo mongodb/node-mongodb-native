@@ -1,3 +1,18 @@
+<a name="2.2.35"></a>
+## [2.2.35](https://github.com/mongodb/node-mongodb-native/compare/v2.2.34...v2.2.35) (2018-02-26)
+
+
+### Bug Fixes
+
+* **url parser:** preserve auth creds when composing conn string ([#1641](https://github.com/mongodb/node-mongodb-native/issues/1641)) ([ecedce6](https://github.com/mongodb/node-mongodb-native/commit/ecedce6))
+
+
+### Features
+
+* **core**: update mongodb-core to 2.1.19
+
+
+
 <a name="2.2.34"></a>
 ## [2.2.34](https://github.com/mongodb/node-mongodb-native/compare/v2.2.33...v2.2.34) (2018-01-03)
 
