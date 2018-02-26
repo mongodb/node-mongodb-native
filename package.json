@@ -1,12 +1,13 @@
 {
   "name": "mongodb-core",
-  "version": "2.1.18",
+  "version": "2.1.19",
   "description": "Core MongoDB driver functionality, no bells and whistles and meant for integration not end applications",
   "main": "index.js",
   "scripts": {
     "test": "node test/runner.js -t functional",
     "coverage": "node_modules/.bin/nyc node test/runner.js -t functional -l && node_modules/.bin/nyc report --reporter=text-lcov | node_modules/.bin/coveralls",
-    "lint": "eslint lib"
+    "lint": "eslint lib",
+    "changelog": "conventional-changelog -p angular -i HISTORY.md -s"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
   "devDependencies": {
     "request": "2.65.0",
     "co": "^4.5.4",
+    "conventional-changelog-cli": "^1.3.5",
     "coveralls": "^2.11.6",
     "es6-promise": "^3.0.2",
     "gleak": "0.5.0",

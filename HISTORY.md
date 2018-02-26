@@ -1,3 +1,13 @@
+<a name="2.1.19"></a>
+## [2.1.19](https://github.com/christkv/mongodb-core/compare/v2.1.18...v2.1.19) (2018-02-26)
+
+
+### Bug Fixes
+
+* **replset:** remove primary from topology on failure to connect ([2a246b5](https://github.com/christkv/mongodb-core/commit/2a246b5))
+
+
+
 <a name="2.1.18"></a>
 ## [2.1.18](https://github.com/christkv/mongodb-core/compare/v2.1.17...v2.1.18) (2018-01-02)
 
