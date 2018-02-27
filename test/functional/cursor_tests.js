@@ -4292,4 +4292,71 @@ describe('Cursor', function() {
       });
     }
   });
+
+  it(
+    'should return implicit session to pool when client-side cursor exhausts results on initial query',
+    {
+      metadata: {
+        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      },
+      test: function(done) {
+        const configuration = this.configuration;
+        const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+
+        client.connect(function(err, client) {
+          test.equal(null, err);
+
+          const db = client.db(configuration.db);
+          const collection = db.collection('cursur_session_tests');
+
+          collection.insertMany([{ a: 1, b: 2 }, { a: 3, b: 4 }], function(err) {
+            test.equal(null, err);
+            const cursor = collection.find({});
+            cursor.next(function() {
+              test.equal(client.topology.s.sessions.length, 0);
+              client.close();
+              done();
+            });
+          });
+        });
+      }
+    }
+  );
+
+  it(
+    'should return implicit session to pool when client-side cursor exhausts results after a getMore',
+    {
+      metadata: {
+        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      },
+      test: function(done) {
+        const configuration = this.configuration;
+        const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+
+        client.connect(function(err, client) {
+          test.equal(null, err);
+
+          const db = client.db(configuration.db);
+          const collection = db.collection('cursur_session_tests2');
+
+          collection.insertMany(
+            [{ a: 1, b: 2 }, { a: 3, b: 4 }, { a: 5, b: 6 }, { a: 7, b: 8 }],
+            function(err) {
+              test.equal(null, err);
+              const cursor = collection.find({}, { batchSize: 2 });
+              cursor.next(function() {
+                cursor.next(function() {
+                  cursor.next(function() {
+                    test.equal(client.topology.s.sessions.length, 0);
+                    client.close();
+                    done();
+                  });
+                });
+              });
+            }
+          );
+        });
+      }
+    }
+  );
 });
