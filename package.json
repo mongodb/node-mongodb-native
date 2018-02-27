@@ -16,7 +16,6 @@
     "mongodb-core": "3.0.5"
   },
   "devDependencies": {
-    "betterbenchmarks": "^0.1.0",
     "bluebird": "3.5.0",
     "bson": "^1.0.4",
     "chai": "^4.1.1",
