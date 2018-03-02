@@ -1124,10 +1124,12 @@ describe('GridFS Stream', function() {
                 download.on('error', function(error) {
                   if (!testSpec.assert.error) {
                     test.ok(false);
+                    download.abort();
                     client.close();
                     done();
                   }
                   test.ok(error.toString().indexOf(testSpec.assert.error) !== -1);
+                  download.abort();
                   client.close();
                   done();
                 });
@@ -1136,11 +1138,13 @@ describe('GridFS Stream', function() {
                   var result = testSpec.assert.result;
                   if (!result) {
                     test.ok(false);
+                    download.abort();
                     client.close();
                     done();
                   }
 
                   test.equal(res.toString('hex'), result.$hex);
+                  download.abort();
                   client.close();
                   done();
                 });
