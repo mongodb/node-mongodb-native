@@ -7,7 +7,11 @@ const Long = require('bson').Long;
 
 describe('Cursor', function() {
   before(function() {
-    return setupDatabase(this.configuration, ['cursorkilltest1']);
+    return setupDatabase(this.configuration, [
+      'cursorkilltest1',
+      'cursor_session_tests',
+      'cursor_session_tests2'
+    ]);
   });
 
   /**
@@ -2265,7 +2269,8 @@ describe('Cursor', function() {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] },
+      sessions: { skipLeakTests: true }
     },
 
     // The actual test we wish to run
@@ -2375,6 +2380,11 @@ describe('Cursor', function() {
               }
 
               if (err != null) {
+                // Even though cursor is exhausted, should not close session
+                // // unless cursor is manually closed, due to awaitdata / tailable
+                test.equal(client.topology.s.sessions.length, 1);
+                cursor.close();
+                test.equal(client.topology.s.sessions.length, 0);
                 client.close();
                 done();
               }
@@ -2462,6 +2472,12 @@ describe('Cursor', function() {
             cursor.addCursorFlag('awaitData', true);
             cursor.each(function(err) {
               if (err != null) {
+                // Even though cursor is exhausted, should not close session
+                // unless cursor is manually closed, due to awaitdata / tailable
+                test.equal(client.topology.s.sessions.length, 1);
+                cursor.close();
+                test.equal(client.topology.s.sessions.length, 0);
+
                 client.close();
                 done();
               } else {
@@ -2542,6 +2558,8 @@ describe('Cursor', function() {
             var cursor = collection.find({}, { tailable: true, awaitdata: true });
             cursor.each(function(err) {
               if (err != null) {
+                // kill cursor b/c cursor is tailable / awaitable
+                cursor.close();
                 client.close();
                 done();
               } else {
@@ -3055,10 +3073,13 @@ describe('Cursor', function() {
         collection.insert(docs, configuration.writeConcernMax(), function(err) {
           test.equal(null, err);
 
-          collection.find({}, { tailable: true }).each(function(err) {
+          const cursor = collection.find({}, { tailable: true });
+          cursor.each(function(err) {
             test.ok(err instanceof Error);
             test.ok(typeof err.code === 'number');
 
+            // Close cursor b/c we did not exhaust cursor
+            cursor.close();
             client.close();
             done();
           });
@@ -3314,13 +3335,13 @@ describe('Cursor', function() {
 
                 cursor.next(function(err) {
                   test.equal(null, err);
-                  client.close();
 
                   cursor.next(function(err) {
                     test.equal(null, err);
 
                     cursor.next(function(err) {
-                      test.ok(err != null);
+                      client.close();
+                      test.equal(null, err);
                       done();
                     });
                   });
@@ -3571,6 +3592,8 @@ describe('Cursor', function() {
             test.equal(null, err);
             test.equal(1, doc.a);
 
+            // Close cursor b/c we did not exhaust cursor
+            cursor.close();
             client.close();
             done();
           });
@@ -4307,11 +4330,12 @@ describe('Cursor', function() {
           test.equal(null, err);
 
           const db = client.db(configuration.db);
-          const collection = db.collection('cursur_session_tests');
+          const collection = db.collection('cursor_session_tests');
 
-          collection.insertMany([{ a: 1, b: 2 }, { a: 3, b: 4 }], function(err) {
+          collection.insertMany([{ a: 1, b: 2 }], function(err) {
             test.equal(null, err);
             const cursor = collection.find({});
+
             cursor.next(function() {
               test.equal(client.topology.s.sessions.length, 0);
               client.close();
@@ -4337,15 +4361,25 @@ describe('Cursor', function() {
           test.equal(null, err);
 
           const db = client.db(configuration.db);
-          const collection = db.collection('cursur_session_tests2');
+          const collection = db.collection('cursor_session_tests2');
 
-          collection.insertMany(
-            [{ a: 1, b: 2 }, { a: 3, b: 4 }, { a: 5, b: 6 }, { a: 7, b: 8 }],
-            function(err) {
-              test.equal(null, err);
-              const cursor = collection.find({}, { batchSize: 2 });
+          const docs = [
+            { a: 1, b: 2 },
+            { a: 3, b: 4 },
+            { a: 5, b: 6 },
+            { a: 7, b: 8 },
+            { a: 9, b: 10 }
+          ];
+
+          collection.insertMany(docs, function(err) {
+            test.equal(null, err);
+            const cursor = collection.find({}, { batchSize: 3 });
+            cursor.next(function() {
+              test.equal(client.topology.s.sessions.length, 1);
               cursor.next(function() {
+                test.equal(client.topology.s.sessions.length, 1);
                 cursor.next(function() {
+                  test.equal(client.topology.s.sessions.length, 1);
                   cursor.next(function() {
                     test.equal(client.topology.s.sessions.length, 0);
                     client.close();
@@ -4353,8 +4387,8 @@ describe('Cursor', function() {
                   });
                 });
               });
-            }
-          );
+            });
+          });
         });
       }
     }
