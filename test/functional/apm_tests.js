@@ -1014,6 +1014,10 @@ describe('APM', function() {
         // Get the result
         result = results.starts.shift();
 
+        if (result.commandName === 'endSessions') {
+          result = results.starts.shift();
+        }
+
         // Validate the test
         expect(commandName).to.equal(result.commandName);
         expect(databaseName).to.equal(result.databaseName);
