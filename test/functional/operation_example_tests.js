@@ -6089,16 +6089,16 @@ describe('Operation Examples', function() {
             test.equal(null, err);
 
             // Do normal ascending sort
-            collection
-              .find()
-              .batchSize(1)
-              .next(function(err, item) {
-                test.equal(null, err);
-                test.equal(1, item.a);
+            const cursor = collection.find().batchSize(1);
+            cursor.next(function(err, item) {
+              test.equal(null, err);
+              test.equal(1, item.a);
 
-                client.close();
-                done();
-              });
+              // Need to close cursor, since it was not exhausted
+              cursor.close();
+              client.close();
+              done();
+            });
           }
         );
       });
