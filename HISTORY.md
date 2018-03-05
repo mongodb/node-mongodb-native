@@ -1,3 +1,23 @@
+<a name="3.0.4"></a>
+## [3.0.4](https://github.com/mongodb/node-mongodb-native/compare/v3.0.2...v3.0.4) (2018-03-05)
+
+
+### Bug Fixes
+
+* **collection:** fix error when calling remove with no args ([#1657](https://github.com/mongodb/node-mongodb-native/issues/1657)) ([4c9b0f8](https://github.com/mongodb/node-mongodb-native/commit/4c9b0f8))
+* **executeOperation:** don't mutate options passed to commands ([934a43a](https://github.com/mongodb/node-mongodb-native/commit/934a43a))
+* **jsdoc:** mark db.collection callback as optional + typo fix ([#1658](https://github.com/mongodb/node-mongodb-native/issues/1658)) ([c519b9b](https://github.com/mongodb/node-mongodb-native/commit/c519b9b))
+* **sessions:** move active session tracking to topology base ([#1665](https://github.com/mongodb/node-mongodb-native/issues/1665)) ([b1f296f](https://github.com/mongodb/node-mongodb-native/commit/b1f296f))
+* **utils:** fixes executeOperation to clean up sessions ([04e6ef6](https://github.com/mongodb/node-mongodb-native/commit/04e6ef6))
+
+
+### Features
+
+* **default-db:** use dbName from uri if none provided ([23b1938](https://github.com/mongodb/node-mongodb-native/commit/23b1938))
+* **mongodb-core:** update to mongodb-core 3.0.4 ([1fdbaa5](https://github.com/mongodb/node-mongodb-native/commit/1fdbaa5))
+
+
+
 <a name="3.0.3"></a>
 ## [3.0.3](https://github.com/mongodb/node-mongodb-native/compare/v3.0.2...v3.0.3) (2018-02-23)
 
