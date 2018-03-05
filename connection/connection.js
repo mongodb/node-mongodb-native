@@ -573,7 +573,11 @@ function makeSSLConnection(self, _options) {
     // We are done emit connect
     self.emit('connect', self);
   });
+
+  // Set the options for the connection
+  connection.setKeepAlive(self.keepAlive, self.keepAliveInitialDelay);
   connection.setTimeout(self.connectionTimeout);
+  connection.setNoDelay(self.noDelay);
 
   return connection;
 }
