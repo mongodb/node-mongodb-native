@@ -8,7 +8,8 @@ var expect = require('chai').expect,
   Bson = require('bson');
 
 describe('Basic single server auth tests', function() {
-  it('should fail to authenticate server using scram-sha-1 using connect auth', {
+  // Skipped due to use of topology manager
+  it.skip('should fail to authenticate server using scram-sha-1 using connect auth', {
     metadata: { requires: { topology: 'auth' } },
 
     test: function(done) {
@@ -56,7 +57,8 @@ describe('Basic single server auth tests', function() {
     }
   });
 
-  it('should correctly authenticate server using scram-sha-1 using connect auth', {
+  // Skipped due to use of topology manager
+  it.skip('should correctly authenticate server using scram-sha-1 using connect auth', {
     metadata: { requires: { topology: 'auth' } },
 
     test: function(done) {
@@ -118,7 +120,8 @@ describe('Basic single server auth tests', function() {
     }
   });
 
-  it(
+  // Skipped due to use of topology manager
+  it.skip(
     'should correctly authenticate server using scram-sha-1 using connect auth and maintain auth on new connections',
     {
       metadata: { requires: { topology: 'auth' } },
@@ -217,7 +220,8 @@ describe('Basic single server auth tests', function() {
     }
   );
 
-  it('should correctly authenticate server using scram-sha-1 using auth method', {
+  // Skipped due to use of topology manager
+  it.skip('should correctly authenticate server using scram-sha-1 using auth method', {
     metadata: { requires: { topology: 'auth' } },
 
     test: function(done) {
@@ -327,7 +331,8 @@ describe('Basic single server auth tests', function() {
     }
   });
 
-  it('should correctly authenticate server using scram-sha-1 using connect auth then logout', {
+  // Skipped due to use of topology manager
+  it.skip('should correctly authenticate server using scram-sha-1 using connect auth then logout', {
     metadata: { requires: { topology: 'auth' } },
 
     test: function(done) {
@@ -414,7 +419,8 @@ describe('Basic single server auth tests', function() {
     }
   });
 
-  it('should correctly have server auth wait for logout to finish', {
+  // Skipped due to use of topology manager
+  it.skip('should correctly have server auth wait for logout to finish', {
     metadata: { requires: { topology: 'auth' } },
 
     test: function(done) {

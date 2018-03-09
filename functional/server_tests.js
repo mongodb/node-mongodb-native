@@ -332,7 +332,8 @@ describe('Server tests', function() {
     }
   });
 
-  it('should correctly recover with multiple restarts', {
+  // Skipped due to use of topology manager
+  it.skip('should correctly recover with multiple restarts', {
     metadata: {
       requires: { topology: ['single'] }
     },
@@ -880,7 +881,8 @@ describe('Server tests', function() {
     }
   });
 
-  it(
+  // Skipped due to use of topology manager
+  it.skip(
     'should correctly connect server specifying compression to single instance with authentication and insert documents',
     {
       metadata: { requires: { topology: ['auth', 'snappyCompression'] } },
@@ -949,7 +951,8 @@ describe('Server tests', function() {
     }
   );
 
-  it(
+  // Skipped due to use of topology manager
+  it.skip(
     'should fail to connect server specifying compression to single instance with incorrect authentication credentials',
     {
       metadata: { requires: { topology: ['auth', 'snappyCompression'] } },

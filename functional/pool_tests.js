@@ -247,7 +247,8 @@ describe('Pool tests', function() {
     }
   });
 
-  it('should correctly write ismaster operation to the server and handle timeout', {
+  // Skipped due to use of topology manager
+  it.skip('should correctly write ismaster operation to the server and handle timeout', {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
@@ -418,7 +419,8 @@ describe('Pool tests', function() {
     }
   });
 
-  it('should correctly recover from a longer server outage', {
+  // Skipped due to use of topology manager
+  it.skip('should correctly recover from a longer server outage', {
     metadata: {
       requires: { topology: 'single' },
       ignore: { travis: true }
@@ -548,7 +550,8 @@ describe('Pool tests', function() {
     }
   });
 
-  it('should correctly authenticate using scram-sha-1 using connect auth', {
+  // Skipped due to use of topology manager
+  it.skip('should correctly authenticate using scram-sha-1 using connect auth', {
     metadata: { requires: { topology: 'auth' } },
 
     test: function(done) {
@@ -611,7 +614,8 @@ describe('Pool tests', function() {
     }
   });
 
-  it(
+  // Skipped due to use of topology manager
+  it.skip(
     'should correctly authenticate using scram-sha-1 using connect auth and maintain auth on new connections',
     {
       metadata: { requires: { topology: 'auth' } },
@@ -819,7 +823,8 @@ describe('Pool tests', function() {
     }
   );
 
-  it('should correctly authenticate using scram-sha-1 using auth method', {
+  // Skipped due to use of topology manager
+  it.skip('should correctly authenticate using scram-sha-1 using auth method', {
     metadata: { requires: { topology: 'auth' } },
 
     test: function(done) {
@@ -944,7 +949,8 @@ describe('Pool tests', function() {
     }
   });
 
-  it('should correctly authenticate using scram-sha-1 using connect auth then logout', {
+  // Skipped due to use of topology manager
+  it.skip('should correctly authenticate using scram-sha-1 using connect auth then logout', {
     metadata: { requires: { topology: 'auth' } },
 
     test: function(done) {
@@ -1037,7 +1043,8 @@ describe('Pool tests', function() {
     }
   });
 
-  it('should correctly have auth wait for logout to finish', {
+  // Skipped due to use of topology manager
+  it.skip('should correctly have auth wait for logout to finish', {
     metadata: { requires: { topology: 'auth' } },
 
     test: function(done) {

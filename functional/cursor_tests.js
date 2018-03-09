@@ -381,7 +381,8 @@ describe('Cursor tests', function() {
     }
   });
 
-  it('Should fail cursor correctly after server restart', {
+  // Skipped due to usage of the topology manager
+  it.skip('Should fail cursor correctly after server restart', {
     metadata: {
       requires: { topology: ['single'] }
     },

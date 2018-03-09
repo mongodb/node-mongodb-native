@@ -23,7 +23,8 @@ describe('Client metadata tests', function() {
     }
   });
 
-  it('should correctly pass the configuration settings to replset', {
+  // Skipped due to use of topology manager
+  it.skip('should correctly pass the configuration settings to replset', {
     metadata: { requires: { topology: 'replicaset' } },
 
     test: function(done) {
