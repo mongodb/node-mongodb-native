@@ -14,7 +14,14 @@ function getTests() {
     .map(x => [path.basename(x[0], '.json'), JSON.parse(x[1])]);
 }
 
-describe('DNS and TXT record tests', function() {
+describe('mongodb+srv (spec)', function() {
+  it('should parse a default database', function(done) {
+    parse('mongodb+srv://test5.test.build.10gen.cc/somedb', (err, result) => {
+      expect(result.dbName).to.eql('somedb');
+      done();
+    });
+  });
+
   getTests().forEach(function(test) {
     if (!test[1].comment) test[1].comment = test[0];
 
