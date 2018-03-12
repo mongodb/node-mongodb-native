@@ -22,7 +22,7 @@ beforeEach('Session Leak Before Each - Set up clean test environment', () => {
 });
 
 beforeEach('Session Leak Before Each - setup session tracking', function() {
-  if (getSessionLeakMetadata(this.currentTest).skipLeakTests) {
+  if (!this.currentTest || getSessionLeakMetadata(this.currentTest).skipLeakTests) {
     return;
   }
 
