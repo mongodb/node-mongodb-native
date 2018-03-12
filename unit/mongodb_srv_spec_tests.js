@@ -5,6 +5,13 @@ const parseConnectionString = require('../../../lib/uri_parser');
 const expect = require('chai').expect;
 
 describe('mongodb+srv (spec)', function() {
+  it('should parse a default database', function(done) {
+    parseConnectionString('mongodb+srv://test5.test.build.10gen.cc/somedb', (err, result) => {
+      expect(result.auth.db).to.eql('somedb');
+      done();
+    });
+  });
+
   const specPath = path.join(__dirname, '../spec', 'initial-dns-seedlist-discovery');
   const testFiles = fs
     .readdirSync(specPath)
