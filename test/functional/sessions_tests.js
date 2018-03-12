@@ -27,7 +27,11 @@ describe('Sessions', function() {
   });
 
   it('should send endSessions for multiple sessions', {
-    metadata: { requires: { topology: ['single'], mongodb: '>3.6.0-rc0' } },
+    metadata: {
+      requires: { topology: ['single'], mongodb: '>3.6.0-rc0' },
+      // Skipping session leak tests b/c these are explicit sessions
+      sessions: { skipLeakTests: true }
+    },
     test: function(done) {
       var client = this.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
       client.connect((err, client) => {
@@ -35,7 +39,7 @@ describe('Sessions', function() {
 
         client.close(err => {
           expect(err).to.not.exist;
-          expect(test.commands.started).to.have.length(1);
+          expect(test.commands.started).to.have.length(2);
           expect(test.commands.started[0].commandName).to.equal('endSessions');
           expect(test.commands.started[0].command.endSessions).to.include.deep.members(sessions);
 
