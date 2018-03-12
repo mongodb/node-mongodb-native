@@ -4266,6 +4266,9 @@ describe('Cursor', function() {
                         cursorsUnknown: [],
                         cursorsKilled: [longId]
                       });
+
+                    cursor.close();
+                    client.close();
                   });
                 });
             });

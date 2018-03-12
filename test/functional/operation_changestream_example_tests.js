@@ -22,23 +22,26 @@ describe('Changestream Examples', function() {
         const db = client.db(configuration.db);
         const collection = db.collection('changeStreamExample1a');
 
-        // Start Changestream Example 1
-        const changeStream = collection.watch();
-        changeStream.next(function(err, next) {
-          if (err) return console.log(err);
-          expect(err).to.equal(null);
-          expect(next).to.exist;
-          client.close();
-          done();
-        });
-        // End Changestream Example 1
-
-        // Insert something
-        setTimeout(function() {
-          collection.insertOne({ a: 1 }, function(err, result) {
+        collection.insertOne({ b: 2 }, function() {
+          // Start Changestream Example 1
+          const changeStream = collection.watch();
+          changeStream.next(function(err, next) {
             if (err) return console.log(err);
             expect(err).to.equal(null);
-            expect(result).to.exist;
+            expect(next).to.exist;
+            changeStream.close();
+            client.close();
+            done();
+          });
+          // End Changestream Example 1
+
+          // Insert something
+          setTimeout(function() {
+            collection.insertOne({ a: 1 }, function(err, result) {
+              if (err) return console.log(err);
+              expect(err).to.equal(null);
+              expect(result).to.exist;
+            });
           });
         });
       });
@@ -64,6 +67,7 @@ describe('Changestream Examples', function() {
         const changeStream = collection.watch();
         changeStream.on('change', function(change) {
           expect(change).to.exist;
+          changeStream.close();
           client.close();
           done();
         });
@@ -98,6 +102,8 @@ describe('Changestream Examples', function() {
 
         changeStream.stream({ transform: JSON.stringify }).once('data', function(chunk) {
           expect(chunk).to.exist;
+          changeStream.close();
+          client.close();
           done();
         });
 
@@ -132,6 +138,7 @@ describe('Changestream Examples', function() {
         const changeStream = collection.watch({ fullDocument: 'updateLookup' });
         changeStream.on('change', function(change) {
           expect(change).to.exist;
+          changeStream.close();
           client.close();
           done();
         });
@@ -189,6 +196,7 @@ describe('Changestream Examples', function() {
                 if (err) return console.log(err);
                 expect(err).to.equal(null);
                 expect(next).to.exist;
+                newChangeStream.close();
                 client.close();
                 done();
               });
@@ -237,6 +245,7 @@ describe('Changestream Examples', function() {
           expect(next.newField).to.exist;
           expect(next.newField).to.equal('this is an added field!');
 
+          changeStream.close();
           client.close();
           done();
         });

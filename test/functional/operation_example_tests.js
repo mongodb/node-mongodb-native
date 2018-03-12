@@ -275,8 +275,8 @@ describe('Operation Examples', function() {
           cursor.toArray(function(err, docs) {
             test.equal(null, err);
             test.equal(2, docs.length);
-            done();
             client.close();
+            done();
           });
         });
       });
@@ -363,8 +363,11 @@ describe('Operation Examples', function() {
           cursor.next(function(err, docs) {
             test.ok(docs);
             test.equal(null, err);
-            done();
+
+            // Need to close cursor since batchsize = 1
+            cursor.close();
             client.close();
+            done();
           });
         });
       });

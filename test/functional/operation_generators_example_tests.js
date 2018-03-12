@@ -172,6 +172,7 @@ describe('Operation (Generators)', function() {
         );
         // Get all the aggregation results
         yield cursor.next();
+        cursor.close();
         client.close();
       });
       // END
@@ -2010,6 +2011,8 @@ describe('Operation (Generators)', function() {
         // Count the number of documents left (should not include the duplicates)
         var count = yield collection.count();
         test.equal(3, count);
+
+        client.close();
       }).catch(function(err) {
         console.log(err.stack);
       });
