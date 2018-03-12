@@ -71,8 +71,18 @@ function parseSrvConnectionString(uri, options, callback) {
         i === 0 ? `${base}${address.name}:${address.port}` : `${address.name}:${address.port}`
     );
 
-    let connectionString = connectionStrings.join(',') + '/';
+    let connectionString = `${connectionStrings.join(',')}/`;
     let connectionStringOptions = [];
+
+    // Add the default database if needed
+    if (result.path) {
+      let defaultDb = result.path.slice(1);
+      if (defaultDb.indexOf('?') !== -1) {
+        defaultDb = defaultDb.slice(0, defaultDb.indexOf('?'));
+      }
+
+      connectionString += defaultDb;
+    }
 
     // Default to SSL true
     if (!options.ssl && (!result.search || result.query['ssl'] == null)) {
