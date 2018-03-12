@@ -25,9 +25,14 @@ describe('Causal Consistency', function() {
     test.client = this.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
     return test.client.connect();
   });
+  afterEach(() => test.client.close());
 
   it('should not send `afterClusterTime` on first read operation in a causal session', {
-    metadata: { requires: { topology: ['replicaset'], mongodb: '>3.6.0-rc0' } },
+    metadata: {
+      requires: { topology: ['replicaset'], mongodb: '>3.6.0-rc0' },
+      // Skipping session leak tests b/c these are explicit sessions
+      sessions: { skipLeakTests: true }
+    },
 
     test: function() {
       const session = test.client.startSession({ causalConsistency: true });
@@ -47,7 +52,11 @@ describe('Causal Consistency', function() {
   });
 
   it('should update `operationTime` on session on first read', {
-    metadata: { requires: { topology: ['replicaset'], mongodb: '>3.6.0-rc0' } },
+    metadata: {
+      requires: { topology: ['replicaset'], mongodb: '>3.6.0-rc0' },
+      // Skipping session leak tests b/c these are explicit sessions
+      sessions: { skipLeakTests: true }
+    },
 
     test: function() {
       const session = test.client.startSession({ causalConsistency: true });
@@ -69,7 +78,11 @@ describe('Causal Consistency', function() {
 
   // TODO: this should be repeated for all potential read operations
   it('should include `afterClusterTime` on more than one read operation', {
-    metadata: { requires: { topology: ['replicaset'], mongodb: '>3.6.0-rc0' } },
+    metadata: {
+      requires: { topology: ['replicaset'], mongodb: '>3.6.0-rc0' },
+      // Skipping session leak tests b/c these are explicit sessions
+      sessions: { skipLeakTests: true }
+    },
 
     test: function() {
       const session = test.client.startSession({ causalConsistency: true });
@@ -99,7 +112,11 @@ describe('Causal Consistency', function() {
   it(
     'should not include `afterClusterTime` on read operations in a session without causal consistency',
     {
-      metadata: { requires: { topology: ['replicaset'], mongodb: '>3.6.0-rc0' } },
+      metadata: {
+        requires: { topology: ['replicaset'], mongodb: '>3.6.0-rc0' },
+        // Skipping session leak tests b/c these are explicit sessions
+        sessions: { skipLeakTests: true }
+      },
 
       test: function() {
         const session = test.client.startSession({ causalConsistency: false });
@@ -120,7 +137,11 @@ describe('Causal Consistency', function() {
 
   // TODO: this should be repeated for all potential read/write operations
   it('should include `afterClusterTime` on read operation after write operation', {
-    metadata: { requires: { topology: ['replicaset'], mongodb: '>3.6.0-rc0' } },
+    metadata: {
+      requires: { topology: ['replicaset'], mongodb: '>3.6.0-rc0' },
+      // Skipping session leak tests b/c these are explicit sessions
+      sessions: { skipLeakTests: true }
+    },
 
     test: function() {
       const session = test.client.startSession({ causalConsistency: true });
