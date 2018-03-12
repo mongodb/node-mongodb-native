@@ -748,7 +748,7 @@ describe('Change Streams', function() {
               // running = false;
               primaryServer.destroy();
 
-              mock.cleanup(primaryServer, () => done());
+              mock.cleanup(() => done());
             });
           })
           .catch(err => done(err));
@@ -846,7 +846,7 @@ describe('Change Streams', function() {
               assert.ifError(err);
               thisChangeStream.close();
 
-              mock.cleanup(primaryServer, () => done());
+              mock.cleanup(() => done());
             });
           });
         }
@@ -979,9 +979,7 @@ describe('Change Streams', function() {
             });
         })
         .catch(err => (finalError = err))
-        .then(() => {
-          mock.cleanup(primaryServer);
-        })
+        .then(() => mock.cleanup())
         .catch(err => (finalError = err))
         .then(() => done(finalError));
     }
@@ -1436,7 +1434,7 @@ describe('Change Streams', function() {
               thisChangeStream.close(function(err) {
                 assert.ifError(err);
 
-                mock.cleanup(primaryServer, () => done());
+                mock.cleanup(() => done());
               });
             });
           }
