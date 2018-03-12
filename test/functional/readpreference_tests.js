@@ -287,14 +287,12 @@ describe('ReadPreference', function() {
           return 1;
         };
 
-        try {
-          // Perform the map reduce
-          collection.mapReduce(map, reduce, { out: { append: 'test' } }, function() {});
-          test.fail();
-        } catch (err) {
+        // Perform the map reduce
+        collection.mapReduce(map, reduce, { out: { append: 'test' } }, function(err) {
+          test.notEqual(err, null);
           client.close();
           done();
-        }
+        });
       });
     }
   });

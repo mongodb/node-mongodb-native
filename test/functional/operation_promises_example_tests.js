@@ -150,6 +150,7 @@ describe('Operation (Promises)', function() {
         // Create a collection
         var collection = db.collection('aggregation_next_example_with_promise');
 
+        let cursor;
         // Insert the docs
         return collection
           .insertMany(docs, { w: 1 })
@@ -157,7 +158,7 @@ describe('Operation (Promises)', function() {
             test.ok(result);
 
             // Execute aggregate, notice the pipeline is expressed as an Array
-            var cursor = collection.aggregate(
+            cursor = collection.aggregate(
               [
                 {
                   $project: {
@@ -181,6 +182,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(docs) {
             test.ok(docs);
+            cursor.close();
             client.close();
           });
       });
@@ -2094,6 +2096,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(count) {
             test.equal(3, count);
+            client.close();
           });
       });
       // END

@@ -2733,6 +2733,7 @@ describe('Find', function() {
               cursors[0].next(function(err) {
                 test.equal(null, err);
 
+                cursors[0].close();
                 client.close();
                 done();
               });
@@ -2779,6 +2780,7 @@ describe('Find', function() {
 
             cursor.next(function(err) {
               test.ok(err !== null);
+              cursor.close();
               client.close();
               done();
             });

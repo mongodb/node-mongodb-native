@@ -540,6 +540,9 @@ describe('Aggregation', function() {
             expect(result._id.tags).to.equal('good');
             expect(result.authors).to.eql(['bob']);
 
+            // Since cursor will not be "exhausted", since batchSize is 1,
+            // we need to manually call close on the cursor
+            cursor.close();
             client.close();
             done();
           });
@@ -1131,6 +1134,7 @@ describe('Aggregation', function() {
 
                   // Return the command
                   db.command = cmd;
+                  cursor.close();
                   client.close();
                   done();
                 }
