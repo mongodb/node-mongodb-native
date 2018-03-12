@@ -14,7 +14,7 @@ var pipeline = [
   { $addFields: { comment: 'The documentKey field has been projected out of this document.' } }
 ];
 
-describe('Change Streams', function() {
+describe.skip('Change Streams', function() {
   before(function() {
     return setupDatabase(this.configuration, [
       'integration_tests',
