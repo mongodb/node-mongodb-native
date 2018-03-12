@@ -2382,9 +2382,7 @@ describe('Cursor', function() {
               if (err != null) {
                 // Even though cursor is exhausted, should not close session
                 // // unless cursor is manually closed, due to awaitdata / tailable
-                test.equal(client.topology.s.sessions.length, 1);
                 cursor.close();
-                test.equal(client.topology.s.sessions.length, 0);
                 client.close();
                 done();
               }
@@ -2474,10 +2472,7 @@ describe('Cursor', function() {
               if (err != null) {
                 // Even though cursor is exhausted, should not close session
                 // unless cursor is manually closed, due to awaitdata / tailable
-                test.equal(client.topology.s.sessions.length, 1);
                 cursor.close();
-                test.equal(client.topology.s.sessions.length, 0);
-
                 client.close();
                 done();
               } else {
@@ -4323,7 +4318,10 @@ describe('Cursor', function() {
     'should return implicit session to pool when client-side cursor exhausts results on initial query',
     {
       metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+        requires: {
+          topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+          mongodb: '>=3.6.0'
+        }
       },
       test: function(done) {
         const configuration = this.configuration;
@@ -4354,7 +4352,10 @@ describe('Cursor', function() {
     'should return implicit session to pool when client-side cursor exhausts results after a getMore',
     {
       metadata: {
-        requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+        requires: {
+          topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+          mongodb: '>=3.6.0'
+        }
       },
       test: function(done) {
         const configuration = this.configuration;
