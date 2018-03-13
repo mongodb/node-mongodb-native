@@ -39,7 +39,7 @@ describe('Sessions', function() {
 
         client.close(err => {
           expect(err).to.not.exist;
-          expect(test.commands.started).to.have.length(2);
+          expect(test.commands.started).to.have.length(1);
           expect(test.commands.started[0].commandName).to.equal('endSessions');
           expect(test.commands.started[0].command.endSessions).to.include.deep.members(sessions);
 

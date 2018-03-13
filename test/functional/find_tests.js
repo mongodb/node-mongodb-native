@@ -2733,6 +2733,8 @@ describe('Find', function() {
               cursors[0].next(function(err) {
                 test.equal(null, err);
 
+                // We need to close the cursor since it is not exhausted,
+                // and we need to end the implicit session
                 cursors[0].close();
                 client.close();
                 done();
@@ -2780,6 +2782,9 @@ describe('Find', function() {
 
             cursor.next(function(err) {
               test.ok(err !== null);
+
+              // We need to close the cursor since it is not exhausted,
+              // and we need to end the implicit session
               cursor.close();
               client.close();
               done();
