@@ -29,6 +29,9 @@ describe('Changestream Examples', function() {
             if (err) return console.log(err);
             expect(err).to.equal(null);
             expect(next).to.exist;
+
+            // Since changeStream has an implicit seession,
+            // we need to close the changeStream for unit testing purposes
             changeStream.close();
             client.close();
             done();
@@ -67,6 +70,9 @@ describe('Changestream Examples', function() {
         const changeStream = collection.watch();
         changeStream.on('change', function(change) {
           expect(change).to.exist;
+
+          // Since changeStream has an implicit seession,
+          // we need to close the changeStream for unit testing purposes
           changeStream.close();
           client.close();
           done();
@@ -102,6 +108,9 @@ describe('Changestream Examples', function() {
 
         changeStream.stream({ transform: JSON.stringify }).once('data', function(chunk) {
           expect(chunk).to.exist;
+
+          // Since changeStream has an implicit seession,
+          // we need to close the changeStream for unit testing purposes
           changeStream.close();
           client.close();
           done();
@@ -138,6 +147,9 @@ describe('Changestream Examples', function() {
         const changeStream = collection.watch({ fullDocument: 'updateLookup' });
         changeStream.on('change', function(change) {
           expect(change).to.exist;
+
+          // Since changeStream has an implicit seession,
+          // we need to close the changeStream for unit testing purposes
           changeStream.close();
           client.close();
           done();
@@ -196,6 +208,9 @@ describe('Changestream Examples', function() {
                 if (err) return console.log(err);
                 expect(err).to.equal(null);
                 expect(next).to.exist;
+
+                // Since changeStream has an implicit seession,
+                // we need to close the changeStream for unit testing purposes
                 newChangeStream.close();
                 client.close();
                 done();
@@ -245,6 +260,8 @@ describe('Changestream Examples', function() {
           expect(next.newField).to.exist;
           expect(next.newField).to.equal('this is an added field!');
 
+          // Since changeStream has an implicit seession,
+          // we need to close the changeStream for unit testing purposes
           changeStream.close();
           client.close();
           done();

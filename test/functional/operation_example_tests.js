@@ -364,7 +364,8 @@ describe('Operation Examples', function() {
             test.ok(docs);
             test.equal(null, err);
 
-            // Need to close cursor since batchsize = 1
+            // Need to close cursor since cursor is not
+            // exhausted, and implicit session is still open
             cursor.close();
             client.close();
             done();
@@ -6097,7 +6098,8 @@ describe('Operation Examples', function() {
               test.equal(null, err);
               test.equal(1, item.a);
 
-              // Need to close cursor, since it was not exhausted
+              // Need to close cursor, since it was not exhausted,
+              // and implicit session is still open
               cursor.close();
               client.close();
               done();

@@ -182,6 +182,9 @@ describe('Operation (Promises)', function() {
           })
           .then(function(docs) {
             test.ok(docs);
+
+            // Need to close cursor to close implicit session,
+            // since cursor is not exhausted
             cursor.close();
             client.close();
           });

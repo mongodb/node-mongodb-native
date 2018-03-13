@@ -1230,18 +1230,17 @@ describe('Examples', function() {
    * @ignore
    */
   it('CausalConsistency', {
-    metadata: { requires: { topology: ['single'], mongodb: '>=3.6.0' } },
+    metadata: {
+      requires: { topology: ['single'], mongodb: '>=3.6.0' },
+      sessions: { skipLeakTests: true }
+    },
 
     test: function(done) {
       const configuration = this.configuration;
       const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
 
       client.connect(function(err, client) {
-        let session;
         const cleanup = e => {
-          if (session) {
-            session.endSession();
-          }
           client.close();
           done(e);
         };
@@ -1250,7 +1249,7 @@ describe('Examples', function() {
 
         const db = client.db(configuration.db);
         const collection = db.collection('causalConsistencyExample');
-        session = client.startSession({ causalConsistency: true });
+        const session = client.startSession({ causalConsistency: true });
 
         collection.insertOne({ darmok: 'jalad' }, { session });
         collection.updateOne({ darmok: 'jalad' }, { $set: { darmok: 'tanagra' } }, { session });

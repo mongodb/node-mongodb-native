@@ -172,6 +172,9 @@ describe('Operation (Generators)', function() {
         );
         // Get all the aggregation results
         yield cursor.next();
+
+        // Closing cursor to close implicit session,
+        // since the cursor is not exhausted
         cursor.close();
         client.close();
       });
