@@ -8,7 +8,8 @@
   },
   "globals": {
     "Promise": true,
-    "Set": true
+    "Set": true,
+    "Symbol": true
   },
   "parserOptions": {
     "ecmaVersion": 2017
