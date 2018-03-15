@@ -27,6 +27,7 @@
     "istanbul": "^0.4.5",
     "jsdoc": "3.5.4",
     "mongodb-extended-json": "^1.10.0",
+    "mongodb-extjson": "^2.1.0",
     "mongodb-mock-server": "^1.0.0",
     "mongodb-test-runner": "^1.1.18",
     "prettier": "^1.5.3",
@@ -47,7 +48,8 @@
     "coverage": "istanbul cover mongodb-test-runner -- -t 60000  test/unit test/functional",
     "lint": "eslint lib test",
     "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",
-    "changelog": "conventional-changelog -p angular -i HISTORY.md -s"
+    "changelog": "conventional-changelog -p angular -i HISTORY.md -s",
+    "bench": "node test/driverBench/"
   },
   "homepage": "https://github.com/mongodb/node-mongodb-native"
 }
