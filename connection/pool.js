@@ -210,6 +210,7 @@ function stateTransition(self, newState) {
   // Get current state
   var legalStates = legalTransitions[self.state];
   if (legalStates && legalStates.indexOf(newState) !== -1) {
+    self.emit('stateChanged', self.state, newState);
     self.state = newState;
   } else {
     self.logger.error(
