@@ -322,13 +322,16 @@ describe('Sessions (Single)', function() {
 
         client.on('error', done);
         client.once('connect', () => {
-          client.command('admin.$cmd', { ping: 1 }, { session: session }, err => {
-            expect(err).to.not.exist;
-            expect(command.lsid).to.eql(session.id);
-            expect(session.serverSession.lastUse).to.not.eql(initialLastUse);
+          // we want to run this a little bit later just in case it runs immediately
+          setTimeout(() => {
+            client.command('admin.$cmd', { ping: 1 }, { session: session }, err => {
+              expect(err).to.not.exist;
+              expect(command.lsid).to.eql(session.id);
+              expect(session.serverSession.lastUse).to.not.eql(initialLastUse);
 
-            done();
-          });
+              done();
+            });
+          }, 250);
         });
 
         client.connect();

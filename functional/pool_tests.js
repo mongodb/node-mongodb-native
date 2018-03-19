@@ -140,6 +140,13 @@ describe('Pool tests', function() {
         bson: new Bson()
       });
 
+      pool.on('stateChanged', (oldState, newState) => {
+        if (newState !== 'destroyed') return;
+        expect(Object.keys(Connection.connections()).length).to.equal(0);
+        Connection.disableConnectionAccounting();
+        done();
+      });
+
       var messageHandler = function(err, result) {
         index = index + 1;
 
@@ -149,11 +156,7 @@ describe('Pool tests', function() {
         // Did we receive an answer for all the messages
         if (index === 100) {
           expect(pool.allConnections().length).to.equal(5);
-
-          pool.destroy();
-          expect(Object.keys(Connection.connections()).length).to.equal(0);
-          Connection.disableConnectionAccounting();
-          done();
+          pool.destroy(); // destroy pool, check for `destroyed` event above
         }
       };
 
