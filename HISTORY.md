@@ -1,3 +1,21 @@
+<a name="3.0.5"></a>
+## [3.0.5](https://github.com/mongodb/node-mongodb-native/compare/v3.0.4...v3.0.5) (2018-03-23)
+
+
+### Bug Fixes
+
+* **AggregationCursor:** adding session tracking to AggregationCursor ([baca5b7](https://github.com/mongodb/node-mongodb-native/commit/baca5b7))
+* **Collection:** fix session leak in parallelCollectonScan ([3331ec9](https://github.com/mongodb/node-mongodb-native/commit/3331ec9))
+* **comments:** adding fixes for PR comments ([ee110ac](https://github.com/mongodb/node-mongodb-native/commit/ee110ac))
+* **url_parser:** support a default database on mongodb+srv uris ([6d39b2a](https://github.com/mongodb/node-mongodb-native/commit/6d39b2a))
+
+
+### Features
+
+* **sessions:** adding implicit cursor session support ([a81245b](https://github.com/mongodb/node-mongodb-native/commit/a81245b))
+
+
+
 <a name="3.0.4"></a>
 ## [3.0.4](https://github.com/mongodb/node-mongodb-native/compare/v3.0.2...v3.0.4) (2018-03-05)
 
