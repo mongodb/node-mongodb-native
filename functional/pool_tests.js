@@ -374,6 +374,13 @@ describe('Pool tests', function() {
         }, 10);
       }
 
+      pool.on('stateChanged', (oldState, newState) => {
+        if (newState !== 'destroyed') return;
+        expect(Object.keys(Connection.connections()).length).to.equal(0);
+        Connection.disableConnectionAccounting();
+        done();
+      });
+
       var messageHandler = function(err) {
         if (err) errorCount = errorCount + 1;
         index = index + 1;
@@ -383,10 +390,6 @@ describe('Pool tests', function() {
             executed = true;
             expect(errorCount).to.be.at.least(0);
             pool.destroy();
-
-            expect(Object.keys(Connection.connections()).length).to.equal(0);
-            Connection.disableConnectionAccounting();
-            done();
           });
         }
       };
@@ -450,6 +453,16 @@ describe('Pool tests', function() {
       var stopped = false;
       var started = false;
 
+      pool.on('stateChanged', (oldState, newState) => {
+        if (newState !== 'destroyed') return;
+        expect(Object.keys(Connection.connections()).length).to.equal(0);
+        Connection.disableConnectionAccounting();
+        expect(stopped).to.be.true;
+        expect(started).to.be.true;
+        expect(reconnect).to.be.true;
+        done();
+      });
+
       var messageHandler = function(err) {
         if (err) errorCount = errorCount + 1;
         index = index + 1;
@@ -457,12 +470,6 @@ describe('Pool tests', function() {
         if (index === 500) {
           expect(errorCount).to.be.at.least(0);
           pool.destroy();
-          expect(Object.keys(Connection.connections()).length).to.equal(0);
-          Connection.disableConnectionAccounting();
-          expect(stopped).to.be.true;
-          expect(started).to.be.true;
-          expect(reconnect).to.be.true;
-          done();
         }
       };
 
@@ -539,13 +546,16 @@ describe('Pool tests', function() {
         });
       });
 
-      pool.on('timeout', function() {
-        expect(index).to.equal(0);
-
-        pool.destroy();
+      pool.on('stateChanged', (oldState, newState) => {
+        if (newState !== 'destroyed') return;
         expect(Object.keys(Connection.connections()).length).to.equal(0);
         Connection.disableConnectionAccounting();
         done();
+      });
+
+      pool.on('timeout', function() {
+        expect(index).to.equal(0);
+        pool.destroy();
       });
 
       // Start connection
@@ -588,6 +598,13 @@ describe('Pool tests', function() {
               });
 
               // Add event listeners
+              pool.on('stateChanged', (oldState, newState) => {
+                if (newState !== 'destroyed') return;
+                expect(Object.keys(Connection.connections()).length).to.equal(0);
+                Connection.disableConnectionAccounting();
+                done();
+              });
+
               pool.on('connect', function(_pool) {
                 executeCommand(
                   self.configuration,
@@ -601,9 +618,6 @@ describe('Pool tests', function() {
                     expect(dropUserErr).to.be.null;
 
                     _pool.destroy(true);
-                    expect(Object.keys(Connection.connections()).length).to.equal(0);
-                    Connection.disableConnectionAccounting();
-                    done();
                   }
                 );
               });
@@ -670,6 +684,13 @@ describe('Pool tests', function() {
 
                     var index = 0;
 
+                    pool.on('stateChanged', (oldState, newState) => {
+                      if (newState !== 'destroyed') return;
+                      expect(Object.keys(Connection.connections()).length).to.equal(0);
+                      Connection.disableConnectionAccounting();
+                      done();
+                    });
+
                     var messageHandler = function(handlerErr, handlerResult) {
                       index = index + 1;
 
@@ -679,11 +700,7 @@ describe('Pool tests', function() {
                       // Did we receive an answer for all the messages
                       if (index === 100) {
                         expect(pool.socketCount()).to.equal(5);
-
                         pool.destroy(true);
-                        expect(Object.keys(Connection.connections()).length).to.equal(0);
-                        Connection.disableConnectionAccounting();
-                        done();
                       }
                     };
 
@@ -878,6 +895,13 @@ describe('Pool tests', function() {
                   var index = 0;
                   var error = false;
 
+                  pool.on('stateChanged', (oldState, newState) => {
+                    if (newState !== 'destroyed') return;
+                    expect(Object.keys(Connection.connections()).length).to.equal(0);
+                    Connection.disableConnectionAccounting();
+                    done();
+                  });
+
                   var messageHandler = function(handlerErr, handlerResult) {
                     index = index + 1;
 
@@ -891,9 +915,6 @@ describe('Pool tests', function() {
 
                       pool.destroy(true);
                       // console.log('=================== ' + Object.keys(Connection.connections()).length)
-                      expect(Object.keys(Connection.connections()).length).to.equal(0);
-                      Connection.disableConnectionAccounting();
-                      done();
                     }
                   };
 
@@ -1001,6 +1022,13 @@ describe('Pool tests', function() {
                   });
 
                   // Add event listeners
+                  pool.on('stateChanged', (oldState, newState) => {
+                    if (newState !== 'destroyed') return;
+                    expect(Object.keys(Connection.connections()).length).to.equal(0);
+                    Connection.disableConnectionAccounting();
+                    done();
+                  });
+
                   pool.on('connect', function(_pool) {
                     var query = new Query(
                       new Bson(),
@@ -1027,9 +1055,6 @@ describe('Pool tests', function() {
                           expect(postLogoutWriteRes).to.not.exist;
 
                           _pool.destroy(true);
-                          expect(Object.keys(Connection.connections()).length).to.equal(0);
-                          Connection.disableConnectionAccounting();
-                          done();
                         });
                       });
                     });
@@ -1096,6 +1121,13 @@ describe('Pool tests', function() {
                   });
 
                   // Add event listeners
+                  pool.on('stateChanged', (oldState, newState) => {
+                    if (newState !== 'destroyed') return;
+                    expect(Object.keys(Connection.connections()).length).to.equal(0);
+                    Connection.disableConnectionAccounting();
+                    done();
+                  });
+
                   pool.on('connect', function(_pool) {
                     var query = new Query(
                       new Bson(),
@@ -1130,9 +1162,6 @@ describe('Pool tests', function() {
                           expect(postLogoutWriteErr).to.be.null;
 
                           _pool.destroy(true);
-                          expect(Object.keys(Connection.connections()).length).to.equal(0);
-                          Connection.disableConnectionAccounting();
-                          done();
                         });
                       });
                     });
@@ -1167,6 +1196,12 @@ describe('Pool tests', function() {
       });
 
       // Add event listeners
+      pool.on('stateChanged', (oldState, newState) => {
+        if (newState !== 'destroyed') return;
+        Connection.disableConnectionAccounting();
+        done();
+      });
+
       pool.on('connect', function(_pool) {
         // Execute ismaster should not cause cpu to start spinning
         var query = new Query(
@@ -1196,9 +1231,6 @@ describe('Pool tests', function() {
 
             con.destroy();
             _pool.destroy();
-
-            Connection.disableConnectionAccounting();
-            done();
           });
         });
       });
@@ -1218,6 +1250,15 @@ describe('Pool tests', function() {
         bson: new Bson()
       });
 
+      let writeErrorChecked = false;
+      pool.on('stateChanged', (oldState, newState) => {
+        if (newState !== 'destroyed') return;
+        expect(Object.keys(Connection.connections())).to.have.length(0);
+        Connection.disableConnectionAccounting();
+        expect(writeErrorChecked).to.be.true;
+        done();
+      });
+
       pool.on('connect', () => {
         var query = new Query(
           new Bson(),
@@ -1230,10 +1271,7 @@ describe('Pool tests', function() {
           expect(err).to.exist;
           expect(err).to.match(/Pool was force destroyed/);
           expect(result).to.not.exist;
-
-          expect(Object.keys(Connection.connections())).to.have.length(0);
-          Connection.disableConnectionAccounting();
-          done();
+          writeErrorChecked = true;
         });
 
         pool.destroy({ force: true });
@@ -1267,6 +1305,13 @@ describe('Pool tests', function() {
           { numberToSkip: 0, numberToReturn: 1 }
         );
 
+        pool.on('stateChanged', (oldState, newState) => {
+          if (newState !== 'destroyed') return;
+          expect(Object.keys(Connection.connections())).to.have.length(0);
+          Connection.disableConnectionAccounting();
+          done();
+        });
+
         pool.on('connect', function() {
           pool.write(query, { monitoring: true }, function() {});
 
@@ -1284,9 +1329,6 @@ describe('Pool tests', function() {
               expect(pool.inUseConnections).to.have.length(0);
 
               pool.destroy(true);
-              expect(Object.keys(Connection.connections())).to.have.length(0);
-              Connection.disableConnectionAccounting();
-              done();
             });
           }, 500);
         });
