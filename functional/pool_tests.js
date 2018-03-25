@@ -8,16 +8,27 @@ var expect = require('chai').expect,
   Query = require('../../../lib/connection/commands').Query,
   Bson = require('bson'),
   co = require('co'),
-  mock = require('mongodb-mock-server');
+  mock = require('mongodb-mock-server'),
+  ConnectionSpy = require('./shared').ConnectionSpy;
 
+const test = {};
 describe('Pool tests', function() {
-  it.skip('should correctly connect pool to single server', {
+  beforeEach(() => {
+    test.spy = new ConnectionSpy();
+    Connection.enableConnectionAccounting(test.spy);
+  });
+
+  afterEach(() => {
+    return mock.cleanup(test.spy).then(() => {
+      test.spy = undefined;
+      Connection.disableConnectionAccounting();
+    });
+  });
+
+  it('should correctly connect pool to single server', {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
-      // Enable connections accounting
-      Connection.enableConnectionAccounting();
-
       // Attempt to connect
       var pool = new Pool(null, {
         host: this.configuration.host,
@@ -27,10 +38,8 @@ describe('Pool tests', function() {
       });
 
       // Add event listeners
-      pool.on('connect', function(_pool) {
-        _pool.destroy();
-        expect(Object.keys(Connection.connections()).length).to.equal(0);
-        Connection.disableConnectionAccounting();
+      pool.on('connect', function() {
+        pool.destroy();
         done();
       });
 
@@ -43,9 +52,6 @@ describe('Pool tests', function() {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
-      // Enable connections accounting
-      Connection.enableConnectionAccounting();
-
       // Attempt to connect
       var pool = new Pool(null, {
         host: this.configuration.host,
@@ -57,8 +63,8 @@ describe('Pool tests', function() {
       let connection;
 
       // Add event listeners
-      pool.on('connect', function(_pool) {
-        var connections = _pool.allConnections();
+      pool.on('connect', function() {
+        var connections = pool.allConnections();
 
         process.nextTick(() => {
           // Now that we are in next tick, connection should still exist, but there
@@ -66,11 +72,7 @@ describe('Pool tests', function() {
           expect(connection.connection.listenerCount('connect')).to.equal(0);
           expect(connections).to.have.lengthOf(1);
 
-          _pool.destroy();
-
-          // Connection should be gone after destroy
-          expect(_pool.allConnections()).to.have.lengthOf(0);
-          Connection.disableConnectionAccounting();
+          pool.destroy();
           done();
         });
       });
@@ -90,9 +92,6 @@ describe('Pool tests', function() {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
-      // Enable connections accounting
-      Connection.enableConnectionAccounting();
-
       // Attempt to connect
       var pool = new Pool(null, {
         host: this.configuration.host,
@@ -101,19 +100,18 @@ describe('Pool tests', function() {
       });
 
       // Add event listeners
-      pool.on('connect', function(_pool) {
+      pool.on('connect', function() {
         var query = new Query(
           new Bson(),
           'system.$cmd',
           { ismaster: true },
           { numberToSkip: 0, numberToReturn: 1 }
         );
-        _pool.write(query, function(err, result) {
+
+        pool.write(query, function(err, result) {
           expect(err).to.be.null;
           expect(result.result.ismaster).to.be.true;
-          _pool.destroy();
-          expect(Object.keys(Connection.connections()).length).to.equal(0);
-          Connection.disableConnectionAccounting();
+          pool.destroy();
           done();
         });
       });
@@ -127,9 +125,6 @@ describe('Pool tests', function() {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
-      // Enable connections accounting
-      Connection.enableConnectionAccounting();
-
       // Index
       var index = 0;
 
@@ -138,13 +133,6 @@ describe('Pool tests', function() {
         host: this.configuration.host,
         port: this.configuration.port,
         bson: new Bson()
-      });
-
-      pool.on('stateChanged', (oldState, newState) => {
-        if (newState !== 'destroyed') return;
-        expect(Object.keys(Connection.connections()).length).to.equal(0);
-        Connection.disableConnectionAccounting();
-        done();
       });
 
       var messageHandler = function(err, result) {
@@ -156,12 +144,13 @@ describe('Pool tests', function() {
         // Did we receive an answer for all the messages
         if (index === 100) {
           expect(pool.allConnections().length).to.equal(5);
-          pool.destroy(); // destroy pool, check for `destroyed` event above
+          pool.destroy();
+          done();
         }
       };
 
       // Add event listeners
-      pool.on('connect', function(_pool) {
+      pool.on('connect', function() {
         for (var i = 0; i < 10; i++) {
           var query = new Query(
             new Bson(),
@@ -169,7 +158,7 @@ describe('Pool tests', function() {
             { ismaster: true },
             { numberToSkip: 0, numberToReturn: 1 }
           );
-          _pool.write(query, messageHandler);
+          pool.write(query, messageHandler);
 
           query = new Query(
             new Bson(),
@@ -177,7 +166,7 @@ describe('Pool tests', function() {
             { ismaster: true },
             { numberToSkip: 0, numberToReturn: 1 }
           );
-          _pool.write(query, messageHandler);
+          pool.write(query, messageHandler);
 
           query = new Query(
             new Bson(),
@@ -185,7 +174,7 @@ describe('Pool tests', function() {
             { ismaster: true },
             { numberToSkip: 0, numberToReturn: 1 }
           );
-          _pool.write(query, messageHandler);
+          pool.write(query, messageHandler);
 
           query = new Query(
             new Bson(),
@@ -193,7 +182,7 @@ describe('Pool tests', function() {
             { ismaster: true },
             { numberToSkip: 0, numberToReturn: 1 }
           );
-          _pool.write(query, messageHandler);
+          pool.write(query, messageHandler);
 
           query = new Query(
             new Bson(),
@@ -201,7 +190,7 @@ describe('Pool tests', function() {
             { ismaster: true },
             { numberToSkip: 0, numberToReturn: 1 }
           );
-          _pool.write(query, messageHandler);
+          pool.write(query, messageHandler);
 
           query = new Query(
             new Bson(),
@@ -209,7 +198,7 @@ describe('Pool tests', function() {
             { ismaster: true },
             { numberToSkip: 0, numberToReturn: 1 }
           );
-          _pool.write(query, messageHandler);
+          pool.write(query, messageHandler);
 
           query = new Query(
             new Bson(),
@@ -217,7 +206,7 @@ describe('Pool tests', function() {
             { ismaster: true },
             { numberToSkip: 0, numberToReturn: 1 }
           );
-          _pool.write(query, messageHandler);
+          pool.write(query, messageHandler);
 
           query = new Query(
             new Bson(),
@@ -225,7 +214,7 @@ describe('Pool tests', function() {
             { ismaster: true },
             { numberToSkip: 0, numberToReturn: 1 }
           );
-          _pool.write(query, messageHandler);
+          pool.write(query, messageHandler);
 
           query = new Query(
             new Bson(),
@@ -233,7 +222,7 @@ describe('Pool tests', function() {
             { ismaster: true },
             { numberToSkip: 0, numberToReturn: 1 }
           );
-          _pool.write(query, messageHandler);
+          pool.write(query, messageHandler);
 
           query = new Query(
             new Bson(),
@@ -241,7 +230,7 @@ describe('Pool tests', function() {
             { ismaster: true },
             { numberToSkip: 0, numberToReturn: 1 }
           );
-          _pool.write(query, messageHandler);
+          pool.write(query, messageHandler);
         }
       });
 
@@ -251,7 +240,7 @@ describe('Pool tests', function() {
   });
 
   // Skipped due to use of topology manager
-  it.skip('should correctly write ismaster operation to the server and handle timeout', {
+  it('should correctly write ismaster operation to the server and handle timeout', {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
@@ -267,14 +256,15 @@ describe('Pool tests', function() {
       });
 
       // Add event listeners
-      pool.on('connect', function(_pool) {
+      pool.on('connect', function() {
         var query = new Query(
           new Bson(),
           'system.$cmd',
           { ismaster: true },
           { numberToSkip: 0, numberToReturn: 1 }
         );
-        _pool.write(query, function() {});
+
+        pool.write(query, function() {});
       });
 
       pool.on('timeout', function() {
@@ -291,9 +281,6 @@ describe('Pool tests', function() {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
-      // Enable connections accounting
-      Connection.enableConnectionAccounting();
-
       // Attempt to connect
       var pool = new Pool(null, {
         host: this.configuration.host,
@@ -311,7 +298,6 @@ describe('Pool tests', function() {
         if (index === 500) {
           expect(errorCount).to.be.at.least(250);
           pool.destroy();
-          Connection.disableConnectionAccounting();
           done();
         }
       };
@@ -349,9 +335,6 @@ describe('Pool tests', function() {
     test: function(done) {
       var self = this;
 
-      // Enable connections accounting
-      Connection.enableConnectionAccounting();
-
       // Attempt to connect
       var pool = new Pool(null, {
         host: this.configuration.host,
@@ -374,13 +357,6 @@ describe('Pool tests', function() {
         }, 10);
       }
 
-      pool.on('stateChanged', (oldState, newState) => {
-        if (newState !== 'destroyed') return;
-        expect(Object.keys(Connection.connections()).length).to.equal(0);
-        Connection.disableConnectionAccounting();
-        done();
-      });
-
       var messageHandler = function(err) {
         if (err) errorCount = errorCount + 1;
         index = index + 1;
@@ -390,6 +366,7 @@ describe('Pool tests', function() {
             executed = true;
             expect(errorCount).to.be.at.least(0);
             pool.destroy();
+            done();
           });
         }
       };
@@ -435,9 +412,6 @@ describe('Pool tests', function() {
     test: function(done) {
       var self = this;
 
-      // Enable connections accounting
-      Connection.enableConnectionAccounting();
-
       // Attempt to connect
       var pool = new Pool(null, {
         host: this.configuration.host,
@@ -453,16 +427,6 @@ describe('Pool tests', function() {
       var stopped = false;
       var started = false;
 
-      pool.on('stateChanged', (oldState, newState) => {
-        if (newState !== 'destroyed') return;
-        expect(Object.keys(Connection.connections()).length).to.equal(0);
-        Connection.disableConnectionAccounting();
-        expect(stopped).to.be.true;
-        expect(started).to.be.true;
-        expect(reconnect).to.be.true;
-        done();
-      });
-
       var messageHandler = function(err) {
         if (err) errorCount = errorCount + 1;
         index = index + 1;
@@ -470,6 +434,10 @@ describe('Pool tests', function() {
         if (index === 500) {
           expect(errorCount).to.be.at.least(0);
           pool.destroy();
+          expect(stopped).to.be.true;
+          expect(started).to.be.true;
+          expect(reconnect).to.be.true;
+          done();
         }
       };
 
@@ -517,9 +485,6 @@ describe('Pool tests', function() {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
-      Connection.enableConnectionAccounting();
-
-      // Attempt to connect
       var pool = new Pool(null, {
         host: this.configuration.host,
         port: this.configuration.port,
@@ -531,31 +496,24 @@ describe('Pool tests', function() {
       var index = 0;
 
       // Add event listeners
-      pool.on('connect', function(_pool) {
-        // console.log('============================== 3')
+      pool.on('connect', function() {
         var query = new Query(
           new Bson(),
           'system.$cmd',
           { ismaster: true },
           { numberToSkip: 0, numberToReturn: 1 }
         );
-        _pool.write(query, { immediateRelease: true }, function(err) {
-          console.log('============================== 4');
-          console.dir(err);
+
+        pool.write(query, { immediateRelease: true }, function(err) {
+          expect(err).to.not.exist;
           index = index + 1;
         });
-      });
-
-      pool.on('stateChanged', (oldState, newState) => {
-        if (newState !== 'destroyed') return;
-        expect(Object.keys(Connection.connections()).length).to.equal(0);
-        Connection.disableConnectionAccounting();
-        done();
       });
 
       pool.on('timeout', function() {
         expect(index).to.equal(0);
         pool.destroy();
+        done();
       });
 
       // Start connection
@@ -564,14 +522,11 @@ describe('Pool tests', function() {
   });
 
   // Skipped due to use of topology manager
-  it.skip('should correctly authenticate using scram-sha-1 using connect auth', {
+  it('should correctly authenticate using scram-sha-1 using connect auth', {
     metadata: { requires: { topology: 'auth' } },
 
     test: function(done) {
       var self = this;
-
-      // Enable connections accounting
-      Connection.enableConnectionAccounting();
 
       // Restart instance
       self.configuration.manager.restart(true).then(function() {
@@ -598,14 +553,7 @@ describe('Pool tests', function() {
               });
 
               // Add event listeners
-              pool.on('stateChanged', (oldState, newState) => {
-                if (newState !== 'destroyed') return;
-                expect(Object.keys(Connection.connections()).length).to.equal(0);
-                Connection.disableConnectionAccounting();
-                done();
-              });
-
-              pool.on('connect', function(_pool) {
+              pool.on('connect', function() {
                 executeCommand(
                   self.configuration,
                   'admin',
@@ -617,7 +565,8 @@ describe('Pool tests', function() {
                     expect(dropUserRes).to.exist;
                     expect(dropUserErr).to.be.null;
 
-                    _pool.destroy(true);
+                    pool.destroy(true);
+                    done();
                   }
                 );
               });
@@ -639,9 +588,6 @@ describe('Pool tests', function() {
 
       test: function(done) {
         var self = this;
-
-        // Enable connections accounting
-        Connection.enableConnectionAccounting();
 
         // Restart instance
         self.configuration.manager.restart(true).then(function() {
@@ -684,13 +630,6 @@ describe('Pool tests', function() {
 
                     var index = 0;
 
-                    pool.on('stateChanged', (oldState, newState) => {
-                      if (newState !== 'destroyed') return;
-                      expect(Object.keys(Connection.connections()).length).to.equal(0);
-                      Connection.disableConnectionAccounting();
-                      done();
-                    });
-
                     var messageHandler = function(handlerErr, handlerResult) {
                       index = index + 1;
 
@@ -701,11 +640,12 @@ describe('Pool tests', function() {
                       if (index === 100) {
                         expect(pool.socketCount()).to.equal(5);
                         pool.destroy(true);
+                        done();
                       }
                     };
 
                     // Add event listeners
-                    pool.on('connect', function(_pool) {
+                    pool.on('connect', function() {
                       for (var i = 0; i < 10; i++) {
                         process.nextTick(function() {
                           var query = new Query(
@@ -714,7 +654,8 @@ describe('Pool tests', function() {
                             { insert: 'test', documents: [{ a: 1 }] },
                             { numberToSkip: 0, numberToReturn: 1 }
                           );
-                          _pool.write(
+
+                          pool.write(
                             query,
                             { command: true, requestId: query.requestId },
                             messageHandler
@@ -726,7 +667,8 @@ describe('Pool tests', function() {
                             { insert: 'test', documents: [{ a: 1 }] },
                             { numberToSkip: 0, numberToReturn: 1 }
                           );
-                          _pool.write(
+
+                          pool.write(
                             query,
                             { command: true, requestId: query.requestId },
                             messageHandler
@@ -738,7 +680,8 @@ describe('Pool tests', function() {
                             { insert: 'test', documents: [{ a: 1 }] },
                             { numberToSkip: 0, numberToReturn: 1 }
                           );
-                          _pool.write(
+
+                          pool.write(
                             query,
                             { command: true, requestId: query.requestId },
                             messageHandler
@@ -750,7 +693,8 @@ describe('Pool tests', function() {
                             { insert: 'test', documents: [{ a: 1 }] },
                             { numberToSkip: 0, numberToReturn: 1 }
                           );
-                          _pool.write(
+
+                          pool.write(
                             query,
                             { command: true, requestId: query.requestId },
                             messageHandler
@@ -762,7 +706,8 @@ describe('Pool tests', function() {
                             { insert: 'test', documents: [{ a: 1 }] },
                             { numberToSkip: 0, numberToReturn: 1 }
                           );
-                          _pool.write(
+
+                          pool.write(
                             query,
                             { command: true, requestId: query.requestId },
                             messageHandler
@@ -774,7 +719,8 @@ describe('Pool tests', function() {
                             { insert: 'test', documents: [{ a: 1 }] },
                             { numberToSkip: 0, numberToReturn: 1 }
                           );
-                          _pool.write(
+
+                          pool.write(
                             query,
                             { command: true, requestId: query.requestId },
                             messageHandler
@@ -786,7 +732,8 @@ describe('Pool tests', function() {
                             { insert: 'test', documents: [{ a: 1 }] },
                             { numberToSkip: 0, numberToReturn: 1 }
                           );
-                          _pool.write(
+
+                          pool.write(
                             query,
                             { command: true, requestId: query.requestId },
                             messageHandler
@@ -798,7 +745,8 @@ describe('Pool tests', function() {
                             { insert: 'test', documents: [{ a: 1 }] },
                             { numberToSkip: 0, numberToReturn: 1 }
                           );
-                          _pool.write(
+
+                          pool.write(
                             query,
                             { command: true, requestId: query.requestId },
                             messageHandler
@@ -810,7 +758,8 @@ describe('Pool tests', function() {
                             { insert: 'test', documents: [{ a: 1 }] },
                             { numberToSkip: 0, numberToReturn: 1 }
                           );
-                          _pool.write(
+
+                          pool.write(
                             query,
                             { command: true, requestId: query.requestId },
                             messageHandler
@@ -822,7 +771,8 @@ describe('Pool tests', function() {
                             { insert: 'test', documents: [{ a: 1 }] },
                             { numberToSkip: 0, numberToReturn: 1 }
                           );
-                          _pool.write(
+
+                          pool.write(
                             query,
                             { command: true, requestId: query.requestId },
                             messageHandler
@@ -895,13 +845,6 @@ describe('Pool tests', function() {
                   var index = 0;
                   var error = false;
 
-                  pool.on('stateChanged', (oldState, newState) => {
-                    if (newState !== 'destroyed') return;
-                    expect(Object.keys(Connection.connections()).length).to.equal(0);
-                    Connection.disableConnectionAccounting();
-                    done();
-                  });
-
                   var messageHandler = function(handlerErr, handlerResult) {
                     index = index + 1;
 
@@ -914,12 +857,12 @@ describe('Pool tests', function() {
                       expect(error).to.be.false;
 
                       pool.destroy(true);
-                      // console.log('=================== ' + Object.keys(Connection.connections()).length)
+                      done();
                     }
                   };
 
                   // Add event listeners
-                  pool.on('connect', function(_pool) {
+                  pool.on('connect', function() {
                     pool.auth(method, 'test', 'admin', 'admin', function(authErr, authRes) {
                       expect(authRes).to.exist;
                       expect(authErr).to.not.exist;
@@ -931,7 +874,8 @@ describe('Pool tests', function() {
                           { insert: 'test', documents: [{ a: 1 }] },
                           { numberToSkip: 0, numberToReturn: 1 }
                         );
-                        _pool.write(
+
+                        pool.write(
                           query,
                           { command: true, requestId: query.requestId },
                           messageHandler
@@ -950,9 +894,8 @@ describe('Pool tests', function() {
                         { ismaster: true },
                         { numberToSkip: 0, numberToReturn: 1 }
                       );
-                      _pool.write(query, { command: true, requestId: query.requestId }, function(
-                        e
-                      ) {
+
+                      pool.write(query, { command: true, requestId: query.requestId }, function(e) {
                         if (e) error = e;
                       });
                     };
@@ -980,9 +923,6 @@ describe('Pool tests', function() {
     test: function(done) {
       var self = this;
 
-      // Enable connections accounting
-      Connection.enableConnectionAccounting();
-
       // Restart instance
       self.configuration.manager.restart(true).then(function() {
         locateAuthMethod(self.configuration, function(err, method) {
@@ -1022,21 +962,15 @@ describe('Pool tests', function() {
                   });
 
                   // Add event listeners
-                  pool.on('stateChanged', (oldState, newState) => {
-                    if (newState !== 'destroyed') return;
-                    expect(Object.keys(Connection.connections()).length).to.equal(0);
-                    Connection.disableConnectionAccounting();
-                    done();
-                  });
-
-                  pool.on('connect', function(_pool) {
+                  pool.on('connect', function() {
                     var query = new Query(
                       new Bson(),
                       'test.$cmd',
                       { insert: 'test', documents: [{ a: 1 }] },
                       { numberToSkip: 0, numberToReturn: 1 }
                     );
-                    _pool.write(query, { command: true, requestId: query.requestId }, function(
+
+                    pool.write(query, { command: true, requestId: query.requestId }, function(
                       loginErr,
                       loginRes
                     ) {
@@ -1044,17 +978,18 @@ describe('Pool tests', function() {
                       expect(loginRes).to.exist;
 
                       // Logout pool
-                      _pool.logout('test', function(logoutErr) {
+                      pool.logout('test', function(logoutErr) {
                         expect(logoutErr).to.be.null;
 
-                        _pool.write(query, { command: true, requestId: query.requestId }, function(
+                        pool.write(query, { command: true, requestId: query.requestId }, function(
                           postLogoutWriteErr,
                           postLogoutWriteRes
                         ) {
                           expect(postLogoutWriteErr).to.not.be.null;
                           expect(postLogoutWriteRes).to.not.exist;
 
-                          _pool.destroy(true);
+                          pool.destroy(true);
+                          done();
                         });
                       });
                     });
@@ -1078,9 +1013,6 @@ describe('Pool tests', function() {
     test: function(done) {
       var self = this;
 
-      // Enable connections accounting
-      Connection.enableConnectionAccounting();
-
       // Restart instance
       self.configuration.manager.restart(true).then(function() {
         locateAuthMethod(self.configuration, function(err, method) {
@@ -1121,29 +1053,20 @@ describe('Pool tests', function() {
                   });
 
                   // Add event listeners
-                  pool.on('stateChanged', (oldState, newState) => {
-                    if (newState !== 'destroyed') return;
-                    expect(Object.keys(Connection.connections()).length).to.equal(0);
-                    Connection.disableConnectionAccounting();
-                    done();
-                  });
-
-                  pool.on('connect', function(_pool) {
+                  pool.on('connect', function() {
                     var query = new Query(
                       new Bson(),
                       'test.$cmd',
                       { insert: 'test', documents: [{ a: 1 }] },
                       { numberToSkip: 0, numberToReturn: 1 }
                     );
-                    _pool.write(query, { requestId: query.requestId }, function(
-                      loginErr,
-                      loginRes
-                    ) {
+
+                    pool.write(query, { requestId: query.requestId }, function(loginErr, loginRes) {
                       expect(loginRes).to.exist;
                       expect(loginErr).to.be.null;
 
                       // Logout pool
-                      _pool.logout('test', function(logoutErr) {
+                      pool.logout('test', function(logoutErr) {
                         expect(logoutErr).to.be.null;
                       });
 
@@ -1154,14 +1077,15 @@ describe('Pool tests', function() {
                         expect(testMethodRes).to.exist;
                         expect(testMethodErr).to.be.null;
 
-                        _pool.write(query, { requestId: query.requestId }, function(
+                        pool.write(query, { requestId: query.requestId }, function(
                           postLogoutWriteErr,
                           postLogoutWriteRes
                         ) {
                           expect(postLogoutWriteRes).to.exist;
                           expect(postLogoutWriteErr).to.be.null;
 
-                          _pool.destroy(true);
+                          pool.destroy(true);
+                          done();
                         });
                       });
                     });
@@ -1196,13 +1120,7 @@ describe('Pool tests', function() {
       });
 
       // Add event listeners
-      pool.on('stateChanged', (oldState, newState) => {
-        if (newState !== 'destroyed') return;
-        Connection.disableConnectionAccounting();
-        done();
-      });
-
-      pool.on('connect', function(_pool) {
+      pool.on('connect', function() {
         // Execute ismaster should not cause cpu to start spinning
         var query = new Query(
           new Bson(),
@@ -1210,7 +1128,8 @@ describe('Pool tests', function() {
           { ismaster: true },
           { numberToSkip: 0, numberToReturn: 1 }
         );
-        _pool.write(query, function(initalQueryErr, initalQueryRes) {
+
+        pool.write(query, function(initalQueryErr, initalQueryRes) {
           expect(initalQueryRes).to.exist;
           expect(initalQueryErr).to.be.null;
 
@@ -1225,12 +1144,14 @@ describe('Pool tests', function() {
             { ismaster: true },
             { numberToSkip: 0, numberToReturn: 1 }
           );
-          _pool.write(query, function(secondQueryErr, secondQueryRes) {
+
+          pool.write(query, function(secondQueryErr, secondQueryRes) {
             expect(secondQueryRes).to.exist;
             expect(secondQueryErr).to.be.null;
 
             con.destroy();
-            _pool.destroy();
+            pool.destroy();
+            done();
           });
         });
       });
@@ -1250,15 +1171,6 @@ describe('Pool tests', function() {
         bson: new Bson()
       });
 
-      let writeErrorChecked = false;
-      pool.on('stateChanged', (oldState, newState) => {
-        if (newState !== 'destroyed') return;
-        expect(Object.keys(Connection.connections())).to.have.length(0);
-        Connection.disableConnectionAccounting();
-        expect(writeErrorChecked).to.be.true;
-        done();
-      });
-
       pool.on('connect', () => {
         var query = new Query(
           new Bson(),
@@ -1271,7 +1183,7 @@ describe('Pool tests', function() {
           expect(err).to.exist;
           expect(err).to.match(/Pool was force destroyed/);
           expect(result).to.not.exist;
-          writeErrorChecked = true;
+          done();
         });
 
         pool.destroy({ force: true });
@@ -1305,13 +1217,6 @@ describe('Pool tests', function() {
           { numberToSkip: 0, numberToReturn: 1 }
         );
 
-        pool.on('stateChanged', (oldState, newState) => {
-          if (newState !== 'destroyed') return;
-          expect(Object.keys(Connection.connections())).to.have.length(0);
-          Connection.disableConnectionAccounting();
-          done();
-        });
-
         pool.on('connect', function() {
           pool.write(query, { monitoring: true }, function() {});
 
@@ -1329,6 +1234,7 @@ describe('Pool tests', function() {
               expect(pool.inUseConnections).to.have.length(0);
 
               pool.destroy(true);
+              done();
             });
           }, 500);
         });
