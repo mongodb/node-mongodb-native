@@ -759,19 +759,12 @@ describe('Server tests', function() {
       // Add event listeners
       server.on('connect', function() {
         var left = 5;
-        var start = new Date().getTime();
-
         var leftDecrement = function(err, r) {
           expect(err).to.not.exist;
           expect(r).to.exist;
 
           left = left - 1;
-
           if (left === 0) {
-            var total = new Date().getTime() - start;
-            expect(total).to.be.at.least(5 * 100);
-            expect(total).to.be.at.most(1000);
-
             server.destroy();
             done();
           }
