@@ -173,6 +173,23 @@ in on the options object . Additionally, `find` does not support individual opti
 `limit` as positional parameters. You must either pass in these parameters in the `options` object,
 or add them via `Cursor` methods like `Cursor.prototype.skip`.
 
+2.x syntax:
+
+```js
+const cursor = coll.find({ a: 42 }, { someField: 1 });
+```
+
+3.x syntax:
+
+```
+const cursor = coll.find({ a: 42 }).project({ someField: 1 });
+
+/* OR */
+
+const cursor = coll.find({ a: 42 }, { projection: { someField: 1 } });
+```
+
+
 ### `Collection.prototype.aggregate`
 
 `Collection.prototype.aggregate` no longer accepts variadic arguments. While this
