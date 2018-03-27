@@ -1399,7 +1399,7 @@ describe('Find', function() {
             { _id: self._id, 'plays.uuid': _uuid },
             [],
             { $set: { 'plays.$.active': true } },
-            { new: true, fields: { plays: 0, results: 0 }, safe: true },
+            { new: true, fields: { plays: 0, results: 0 } },
             function(err) {
               test.equal(null, err);
               client.close();
@@ -1641,7 +1641,7 @@ describe('Find', function() {
                   },
                   [],
                   { $push: { transactions: transaction } },
-                  { new: true, safe: true },
+                  { new: true },
                   function(err) {
                     test.equal(null, err);
                     client.close();

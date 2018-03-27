@@ -44,12 +44,13 @@
     "url": "https://github.com/mongodb/node-mongodb-native/issues"
   },
   "scripts": {
-    "test": "npm run lint && mongodb-test-runner -t 60000 test/unit test/functional",
-    "coverage": "istanbul cover mongodb-test-runner -- -t 60000  test/unit test/functional",
+    "test": "npm run lint && npm run test-runner -- -t 60000 test/unit test/functional",
+    "coverage": "istanbul cover npm run test-runner -- -t 60000  test/unit test/functional",
     "lint": "eslint lib test",
     "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",
     "changelog": "conventional-changelog -p angular -i HISTORY.md -s",
-    "bench": "node test/driverBench/"
+    "bench": "node test/driverBench/",
+    "test-runner": "MONGO_DRIVER_VALIDATION_LEVEL=error mongodb-test-runner"
   },
   "homepage": "https://github.com/mongodb/node-mongodb-native"
 }

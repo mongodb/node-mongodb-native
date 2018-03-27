@@ -1152,7 +1152,8 @@ describe('Collection', function() {
    */
   it('should throw error due to illegal update', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] },
+      sessions: { skipLeakTests: true }
     },
 
     // The actual test we wish to run

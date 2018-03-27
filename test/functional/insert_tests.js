@@ -1170,7 +1170,7 @@ describe('Insert', function() {
                   { str: 'String' },
                   [['a', 1]],
                   { $set: { f: function() {} } },
-                  { new: true, safe: true, serializeFunctions: true },
+                  { new: true, serializeFunctions: true },
                   function(err, result) {
                     test.ok(result.value.f._bsontype === 'Code');
                     client.close();
@@ -1442,19 +1442,13 @@ describe('Insert', function() {
         );
 
         // Upsert a new doc
-        collection.update({ a: 1 }, { a: 1 }, { upsert: true, w: 1, fullResult: true }, function(
-          err,
-          result
-        ) {
+        collection.update({ a: 1 }, { a: 1 }, { upsert: true, w: 1 }, function(err, result) {
           if (result.result.updatedExisting) test.equal(false, result.result.updatedExisting);
           test.equal(1, result.result.n);
           test.ok(result.result.upserted != null);
 
           // Upsert an existing doc
-          collection.update({ a: 1 }, { a: 1 }, { upsert: true, w: 1, fullResult: true }, function(
-            err,
-            result
-          ) {
+          collection.update({ a: 1 }, { a: 1 }, { upsert: true, w: 1 }, function(err, result) {
             if (result.updatedExisting) test.equal(true, result.updatedExisting);
             test.equal(1, result.result.n);
             client.close();

@@ -2279,7 +2279,7 @@ describe('Operation (Generators)', function() {
         yield collection.insertMany([{ a: 1 }, { b: 2 }], { w: 1 });
 
         // Remove all the document
-        collection.removeMany();
+        yield collection.removeMany();
 
         // Fetch all results
         var items = yield collection.find().toArray();

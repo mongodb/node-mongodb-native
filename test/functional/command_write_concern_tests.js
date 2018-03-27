@@ -365,7 +365,6 @@ describe('Command Write Concern', function() {
             db.collection('indexOptionDefault').createIndex(
               { a: 1 },
               {
-                indexOptionDefaults: true,
                 w: 2,
                 wtimeout: 1000
               },

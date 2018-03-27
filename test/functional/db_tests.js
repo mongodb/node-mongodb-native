@@ -270,20 +270,20 @@ describe('Db', function() {
           db.createCollection('test_resave_dbref', function(err, collection) {
             test.equal(null, err);
 
-            collection.insert({ name: 'parent' }, { safe: true }, function(err, r) {
+            collection.insert({ name: 'parent' }, function(err, r) {
               test.equal(null, err);
               test.ok(r.ops.length === 1 && r.ops[0]._id != null);
               var parent = r.ops[0];
               var child = { name: 'child', parent: new DBRef('test_resave_dbref', parent._id) };
 
-              collection.insert(child, { safe: true }, function(err) {
+              collection.insert(child, function(err) {
                 test.equal(null, err);
 
                 collection.findOne({ name: 'child' }, function(err, child) {
                   //Child deserialized
                   test.ok(child != null);
 
-                  collection.save(child, { save: true }, function(err) {
+                  collection.save(child, function(err) {
                     test.equal(null, err);
 
                     collection.findOne(

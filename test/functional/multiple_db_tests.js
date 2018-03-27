@@ -95,7 +95,7 @@ describe('Multiple Databases', function() {
             collection
           ) {
             // Insert a dummy document
-            collection.insert({ a: 20 }, { safe: true }, function(err) {
+            collection.insert({ a: 20 }, function(err) {
               test.equal(null, err);
 
               // Query it
@@ -108,7 +108,7 @@ describe('Multiple Databases', function() {
                   collection
                 ) {
                   // Insert a dummy document
-                  collection.insert({ b: 20 }, { safe: true }, function(err) {
+                  collection.insert({ b: 20 }, function(err) {
                     test.equal(null, err);
 
                     // Query it
