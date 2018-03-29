@@ -5,7 +5,7 @@ const ReplSet = require('../../../../lib/topologies/replset');
 const mock = require('mongodb-mock-server');
 const ReplSetFixture = require('../common').ReplSetFixture;
 
-describe('Step Down (ReplSet)', function() {
+describe.only('Step Down (ReplSet)', function() {
   class MyFixture extends ReplSetFixture {
     constructor() {
       super();
@@ -81,9 +81,19 @@ describe('Step Down (ReplSet)', function() {
   }
 
   let test;
-  before(() => (test = new MyFixture()));
+  beforeEach(() => (test = new MyFixture()));
   afterEach(() => mock.cleanup());
   beforeEach(() => test.setup());
+
+  function makeReplicaSet() {
+    return new ReplSet([test.primaryServer.address(), test.firstSecondaryServer.address()], {
+      setName: 'rs',
+      connectionTimeout: 3000,
+      socketTimeout: 0,
+      haInterval: 100,
+      size: 1
+    });
+  }
 
   it('Should only issue a "not master" error once', {
     metadata: {
@@ -92,16 +102,7 @@ describe('Step Down (ReplSet)', function() {
       }
     },
     test: function(done) {
-      const replSet = new ReplSet(
-        [test.primaryServer.address(), test.firstSecondaryServer.address()],
-        {
-          setName: 'rs',
-          connectionTimeout: 3000,
-          socketTimeout: 0,
-          haInterval: 100,
-          size: 1
-        }
-      );
+      const replSet = makeReplicaSet();
 
       replSet.on('error', done);
       replSet.on('connect', () => {
@@ -160,6 +161,54 @@ describe('Step Down (ReplSet)', function() {
             });
           });
         });
+      });
+      replSet.connect();
+    }
+  });
+
+  it('Should only attempt to remove primary once', {
+    metadata: {
+      requires: {
+        topology: 'single'
+      }
+    },
+    test: function(done) {
+      const replSet = makeReplicaSet();
+
+      replSet.on('error', done);
+      replSet.on('connect', () => {
+        const cleanupAndDone = e => {
+          replSet.destroy();
+          done(e);
+        };
+
+        test.nextState();
+
+        let counter = 2;
+
+        function handler(err, result) {
+          counter -= 1;
+          try {
+            expect(err).to.exist;
+            expect(err.message).to.match(/not master/);
+            expect(result).to.not.exist;
+          } catch (e) {
+            return cleanupAndDone(e);
+          }
+
+          if (counter <= 0) {
+            cleanupAndDone();
+          }
+        }
+
+        // Should issue a "not master", since primary has stepped down
+        // This one will attempt to remove the primary
+        replSet.insert('foo.bar', [{ b: 2 }], handler);
+
+        // Should issue a "not master", since primary has stepped down
+        // This one will not attempt to remove the primary, as it has
+        // already been removed
+        replSet.insert('foo.bar', [{ c: 3 }], handler);
       });
       replSet.connect();
     }
