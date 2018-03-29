@@ -1218,7 +1218,9 @@ function executeWriteOperation(args, options, callback) {
     }
 
     // Per SDAM, remove primary from replicaset
-    self.s.replicaSetState.remove(self.s.replicaSetState.primary, { force: true });
+    if (self.s.replicaSetState.primary) {
+      self.s.replicaSetState.remove(self.s.replicaSetState.primary, { force: true });
+    }
 
     return callback(err);
   };
