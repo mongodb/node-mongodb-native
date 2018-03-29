@@ -5,7 +5,7 @@ const ReplSet = require('../../../../lib/topologies/replset');
 const mock = require('mongodb-mock-server');
 const ReplSetFixture = require('../common').ReplSetFixture;
 
-describe.only('Step Down (ReplSet)', function() {
+describe('Step Down (ReplSet)', function() {
   class MyFixture extends ReplSetFixture {
     constructor() {
       super();
