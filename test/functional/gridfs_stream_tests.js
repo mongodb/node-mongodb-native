@@ -1,7 +1,7 @@
 'use strict';
 
 const crypto = require('crypto'),
-  ejson = require('mongodb-extended-json'),
+  EJSON = require('mongodb-extjson'),
   fs = require('fs'),
   test = require('./shared').assert,
   setupDatabase = require('./shared').setupDatabase,
@@ -1113,8 +1113,9 @@ describe('GridFS Stream', function() {
               var _runTest = function() {
                 var bucket = new GridFSBucket(db, { bucketName: BUCKET_NAME });
                 var res = new Buffer(0);
+
                 var download = bucket.openDownloadStream(
-                  ejson.deserialize(testSpec.act.arguments.id)
+                  EJSON.parse(JSON.stringify(testSpec.act.arguments.id), { relaxed: true })
                 );
 
                 download.on('data', function(chunk) {
@@ -1224,7 +1225,7 @@ describe('GridFS Stream', function() {
   }
 
   function deflateTestDoc(doc) {
-    var ret = ejson.deserialize(doc);
+    var ret = EJSON.parse(JSON.stringify(doc), { relaxed: true });
     convert$hexToBuffer(ret);
     return ret;
   }
