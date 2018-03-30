@@ -1,0 +1,478 @@
+{
+  "data": [
+    {
+      "_id": 1
+    },
+    {
+      "_id": 2
+    }
+  ],
+  "tests": [
+    {
+      "description": "count",
+      "skipReason": "transactions not yet supported on a secondary, SERVER-34004",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "count",
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": 1
+        },
+        {
+          "name": "count",
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": 1
+        },
+        {
+          "name": "count",
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": 1
+        },
+        {
+          "name": "count",
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": 1
+        },
+        {
+          "name": "count",
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": 1
+        },
+        {
+          "name": "count",
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": 1
+        },
+        {
+          "name": "count",
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": 1
+        },
+        {
+          "name": "count",
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": 1
+        },
+        {
+          "name": "commitTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "distinct",
+      "skipReason": "transactions not yet supported on a secondary, SERVER-34004",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "distinct",
+          "arguments": {
+            "fieldName": "_id",
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": [
+            1,
+            2
+          ]
+        },
+        {
+          "name": "distinct",
+          "arguments": {
+            "fieldName": "_id",
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": [
+            1,
+            2
+          ]
+        },
+        {
+          "name": "distinct",
+          "arguments": {
+            "fieldName": "_id",
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": [
+            1,
+            2
+          ]
+        },
+        {
+          "name": "distinct",
+          "arguments": {
+            "fieldName": "_id",
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": [
+            1,
+            2
+          ]
+        },
+        {
+          "name": "distinct",
+          "arguments": {
+            "fieldName": "_id",
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": [
+            1,
+            2
+          ]
+        },
+        {
+          "name": "distinct",
+          "arguments": {
+            "fieldName": "_id",
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": [
+            1,
+            2
+          ]
+        },
+        {
+          "name": "distinct",
+          "arguments": {
+            "fieldName": "_id",
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": [
+            1,
+            2
+          ]
+        },
+        {
+          "name": "distinct",
+          "arguments": {
+            "fieldName": "_id",
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": [
+            1,
+            2
+          ]
+        },
+        {
+          "name": "commitTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "find",
+      "skipReason": "transactions not yet supported on a secondary (SERVER-34004) or with find (SERVER-33213)",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": [
+            {
+              "_id": 2
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": [
+            {
+              "_id": 2
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": [
+            {
+              "_id": 2
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": [
+            {
+              "_id": 2
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": [
+            {
+              "_id": 2
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": [
+            {
+              "_id": 2
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": [
+            {
+              "_id": 2
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 2
+            },
+            "readPreference": {
+              "mode": "nearest",
+              "maxStalenessMS": 120000
+            },
+            "session": "session0"
+          },
+          "result": [
+            {
+              "_id": 2
+            }
+          ]
+        },
+        {
+          "name": "commitTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
