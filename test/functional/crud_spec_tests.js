@@ -1,42 +1,29 @@
 'use strict';
 
-var fs = require('fs');
-var path = require('path');
-var semver = require('semver');
-var test = require('./shared').assert;
+const fs = require('fs');
+const path = require('path');
+const test = require('./shared').assert;
 
 function findScenarios(type) {
   return fs
     .readdirSync(path.join(__dirname, 'spec', 'crud', type))
-    .filter(x => {
-      return x.indexOf('json') !== -1;
-    })
-    .map(x => {
-      return [x, fs.readFileSync(path.join(__dirname, 'spec', 'crud', type, x), 'utf8')];
-    })
-    .map(x => {
-      return [path.basename(x[0], '.json'), JSON.parse(x[1])];
-    });
+    .filter(x => x.indexOf('json') !== -1)
+    .map(x => [x, fs.readFileSync(path.join(__dirname, 'spec', 'crud', type, x), 'utf8')])
+    .map(x => [path.basename(x[0], '.json'), JSON.parse(x[1])]);
 }
 
-var readScenarios = findScenarios('read');
-var writeScenarios = findScenarios('write');
+const readScenarios = findScenarios('read');
+const writeScenarios = findScenarios('write');
 
-var testContext = {};
+const testContext = {};
 describe('CRUD spec', function() {
   beforeEach(function() {
-    var configuration = this.configuration;
-    var MongoClient = configuration.require.MongoClient;
-    return MongoClient.connect(configuration.url())
-      .then(function(client) {
-        testContext.client = client;
-        testContext.db = client.db(configuration.db);
-
-        return testContext.db.admin().command({ buildInfo: true });
-      })
-      .then(function(buildInfo) {
-        testContext.mongodbVersion = buildInfo.version.split('-').shift();
-      });
+    const configuration = this.configuration;
+    const MongoClient = configuration.require.MongoClient;
+    return MongoClient.connect(configuration.url()).then(client => {
+      testContext.client = client;
+      testContext.db = client.db(configuration.db);
+    });
   });
 
   afterEach(() => {
@@ -46,28 +33,22 @@ describe('CRUD spec', function() {
   });
 
   describe('read', function() {
-    readScenarios.forEach(function(scenarioData) {
-      var scenarioName = scenarioData[0];
-      var scenario = scenarioData[1];
+    readScenarios.forEach(scenarioData => {
+      const scenarioName = scenarioData[0];
+      const scenario = scenarioData[1];
       scenario.name = scenarioName;
 
       describe(scenarioName, function() {
-        scenario.tests.forEach(function(scenarioTest) {
-          beforeEach(function() {
-            return testContext.db.dropDatabase();
-          });
-
+        scenario.tests.forEach(scenarioTest => {
+          beforeEach(() => testContext.db.dropDatabase());
           it(scenarioTest.description, {
-            metadata: { requires: { topology: 'single' } },
-            test: function() {
-              if (
-                !!scenario.minServerVersion &&
-                !semver.satisfies(testContext.mongodbVersion, '>=' + scenario.minServerVersion)
-              ) {
-                this.skip();
-                return;
+            metadata: {
+              requires: {
+                topology: ['single', 'replicaset', 'sharded'],
+                mongodb: `>=${scenario.minServerVersion}`
               }
-
+            },
+            test: function() {
               return executeScenario(scenario, scenarioTest, this.configuration, testContext);
             }
           });
@@ -77,28 +58,23 @@ describe('CRUD spec', function() {
   });
 
   describe('write', function() {
-    writeScenarios.forEach(function(scenarioData) {
-      var scenarioName = scenarioData[0];
-      var scenario = scenarioData[1];
+    writeScenarios.forEach(scenarioData => {
+      const scenarioName = scenarioData[0];
+      const scenario = scenarioData[1];
       scenario.name = scenarioName;
 
       describe(scenarioName, function() {
-        beforeEach(function() {
-          return testContext.db.dropDatabase();
-        });
+        beforeEach(() => testContext.db.dropDatabase());
 
-        scenario.tests.forEach(function(scenarioTest) {
+        scenario.tests.forEach(scenarioTest => {
           it(scenarioTest.description, {
-            metadata: { requires: { topology: 'single' } },
-            test: function() {
-              if (
-                !!scenario.minServerVersion &&
-                !semver.satisfies(testContext.mongodbVersion, '>=' + scenario.minServerVersion)
-              ) {
-                this.skip();
-                return;
+            metadata: {
+              requires: {
+                topology: ['single', 'replicaset', 'sharded'],
+                mongodb: `>=${scenario.minServerVersion}`
               }
-
+            },
+            test: function() {
               return executeScenario(scenario, scenarioTest, this.configuration, testContext);
             }
           });
@@ -108,24 +84,24 @@ describe('CRUD spec', function() {
   });
 
   function executeAggregateTest(scenarioTest, db, collection) {
-    var options = {};
+    const options = {};
     if (scenarioTest.operation.arguments.collation) {
       options.collation = scenarioTest.operation.arguments.collation;
     }
 
-    var pipeline = scenarioTest.operation.arguments.pipeline;
+    const pipeline = scenarioTest.operation.arguments.pipeline;
     return collection
       .aggregate(pipeline, options)
       .toArray()
-      .then(function(results) {
+      .then(results => {
         if (scenarioTest.outcome.collection) {
           return db
             .collection(scenarioTest.outcome.collection.name)
             .find({})
             .toArray()
-            .then(function(collectionResults) {
-              test.deepEqual(collectionResults, scenarioTest.outcome.result);
-            });
+            .then(collectionResults =>
+              test.deepEqual(collectionResults, scenarioTest.outcome.result)
+            );
         }
 
         test.deepEqual(results, scenarioTest.outcome.result);
@@ -134,62 +110,58 @@ describe('CRUD spec', function() {
   }
 
   function executeCountTest(scenarioTest, db, collection) {
-    var args = scenarioTest.operation.arguments;
-    var filter = args.filter;
-    var options = Object.assign({}, args);
+    const args = scenarioTest.operation.arguments;
+    const filter = args.filter;
+    const options = Object.assign({}, args);
     delete options.filter;
 
-    return collection.count(filter, options).then(function(result) {
-      test.equal(result, scenarioTest.outcome.result);
-    });
+    return collection
+      .count(filter, options)
+      .then(result => test.equal(result, scenarioTest.outcome.result));
   }
 
   function executeDistinctTest(scenarioTest, db, collection) {
-    var args = scenarioTest.operation.arguments;
-    var fieldName = args.fieldName;
-    var options = Object.assign({}, args);
-    var filter = args.filter || {};
+    const args = scenarioTest.operation.arguments;
+    const fieldName = args.fieldName;
+    const options = Object.assign({}, args);
+    const filter = args.filter || {};
     delete options.fieldName;
     delete options.filter;
 
-    return collection.distinct(fieldName, filter, options).then(function(result) {
-      test.deepEqual(result, scenarioTest.outcome.result);
-    });
+    return collection
+      .distinct(fieldName, filter, options)
+      .then(result => test.deepEqual(result, scenarioTest.outcome.result));
   }
 
   function executeFindTest(scenarioTest, db, collection) {
-    var args = scenarioTest.operation.arguments;
-    var filter = args.filter;
-    var options = Object.assign({}, args);
+    const args = scenarioTest.operation.arguments;
+    const filter = args.filter;
+    const options = Object.assign({}, args);
     delete options.filter;
 
     return collection
       .find(filter, options)
       .toArray()
-      .then(function(results) {
-        test.deepEqual(results, scenarioTest.outcome.result);
-      });
+      .then(results => test.deepEqual(results, scenarioTest.outcome.result));
   }
 
   function executeDeleteTest(scenarioTest, db, collection) {
     // Unpack the scenario test
-    var args = scenarioTest.operation.arguments;
-    var filter = args.filter;
-    var options = Object.assign({}, args);
+    const args = scenarioTest.operation.arguments;
+    const filter = args.filter;
+    const options = Object.assign({}, args);
     delete options.filter;
 
-    return collection[scenarioTest.operation.name](filter, options).then(function(result) {
-      Object.keys(scenarioTest.outcome.result).forEach(function(resultName) {
-        test.equal(result[resultName], scenarioTest.outcome.result[resultName]);
-      });
+    return collection[scenarioTest.operation.name](filter, options).then(result => {
+      Object.keys(scenarioTest.outcome.result).forEach(resultName =>
+        test.equal(result[resultName], scenarioTest.outcome.result[resultName])
+      );
 
       if (scenarioTest.outcome.collection) {
         return collection
           .find({})
           .toArray()
-          .then(function(results) {
-            test.deepEqual(results, scenarioTest.outcome.collection.data);
-          });
+          .then(results => test.deepEqual(results, scenarioTest.outcome.collection.data));
       }
     });
   }
@@ -201,57 +173,55 @@ describe('CRUD spec', function() {
     delete options.document;
     delete options.documents;
 
-    return collection[scenarioTest.operation.name](documents, options).then(function(result) {
-      Object.keys(scenarioTest.outcome.result).forEach(function(resultName) {
-        test.deepEqual(result[resultName], scenarioTest.outcome.result[resultName]);
-      });
+    return collection[scenarioTest.operation.name](documents, options).then(result => {
+      Object.keys(scenarioTest.outcome.result).forEach(resultName =>
+        test.deepEqual(result[resultName], scenarioTest.outcome.result[resultName])
+      );
 
       if (scenarioTest.outcome.collection) {
         return collection
           .find({})
           .toArray()
-          .then(function(results) {
-            test.deepEqual(results, scenarioTest.outcome.collection.data);
-          });
+          .then(results => test.deepEqual(results, scenarioTest.outcome.collection.data));
       }
     });
   }
 
   function executeBulkTest(scenarioTest, db, collection) {
     const args = scenarioTest.operation.arguments;
-    const operations = args.requests.map(function(operation) {
+    const operations = args.requests.map(operation => {
       let op = {};
       op[operation.name] = operation['arguments'];
       return op;
     });
     const options = Object.assign({}, args.options);
 
-    collection.bulkWrite(operations, options).then(function(result) {
-      Object.keys(scenarioTest.outcome.result).forEach(function(resultName) {
-        test.deepEqual(result[resultName], scenarioTest.outcome.result[resultName]);
-      });
-    });
+    collection
+      .bulkWrite(operations, options)
+      .then(result =>
+        Object.keys(scenarioTest.outcome.result).forEach(resultName =>
+          test.deepEqual(result[resultName], scenarioTest.outcome.result[resultName])
+        )
+      );
 
     return collection
       .find({})
       .toArray()
-      .then(function(results) {
-        test.deepEqual(results, scenarioTest.outcome.collection.data);
-      });
+      .then(results => test.deepEqual(results, scenarioTest.outcome.collection.data));
   }
 
   function executeReplaceTest(scenarioTest, db, collection) {
-    var args = scenarioTest.operation.arguments;
-    var filter = args.filter;
-    var replacement = args.replacement;
-    var options = Object.assign({}, args);
+    const args = scenarioTest.operation.arguments;
+    const filter = args.filter;
+    const replacement = args.replacement;
+    const options = Object.assign({}, args);
     delete options.filter;
     delete options.replacement;
-    var opName = scenarioTest.operation.name;
+    const opName = scenarioTest.operation.name;
 
     // Get the results
-    return collection[opName](filter, replacement, options).then(function(result) {
-      Object.keys(scenarioTest.outcome.result).forEach(function(resultName) {
+    return collection[opName](filter, replacement, options).then(result => {
+      Object.keys(scenarioTest.outcome.result).forEach(resultName => {
         if (resultName === 'upsertedId') {
           test.equal(result[resultName]._id, scenarioTest.outcome.result[resultName]);
         } else {
@@ -263,23 +233,21 @@ describe('CRUD spec', function() {
         return collection
           .find({})
           .toArray()
-          .then(function(results) {
-            test.deepEqual(results, scenarioTest.outcome.collection.data);
-          });
+          .then(results => test.deepEqual(results, scenarioTest.outcome.collection.data));
       }
     });
   }
 
   function executeUpdateTest(scenarioTest, db, collection) {
-    var args = scenarioTest.operation.arguments;
-    var filter = args.filter;
-    var update = args.update;
-    var options = Object.assign({}, args);
+    const args = scenarioTest.operation.arguments;
+    const filter = args.filter;
+    const update = args.update;
+    const options = Object.assign({}, args);
     delete options.filter;
     delete options.update;
 
-    return collection[scenarioTest.operation.name](filter, update, options).then(function(result) {
-      Object.keys(scenarioTest.outcome.result).forEach(function(resultName) {
+    return collection[scenarioTest.operation.name](filter, update, options).then(result => {
+      Object.keys(scenarioTest.outcome.result).forEach(resultName => {
         if (resultName === 'upsertedId') {
           test.equal(result[resultName]._id, scenarioTest.outcome.result[resultName]);
         } else {
@@ -291,18 +259,16 @@ describe('CRUD spec', function() {
         return collection
           .find({})
           .toArray()
-          .then(function(results) {
-            test.deepEqual(results, scenarioTest.outcome.collection.data);
-          });
+          .then(results => test.deepEqual(results, scenarioTest.outcome.collection.data));
       }
     });
   }
 
   function executeFindOneTest(scenarioTest, db, collection) {
-    var args = scenarioTest.operation.arguments;
-    var filter = args.filter;
-    var second = args.update || args.replacement;
-    var options = Object.assign({}, args);
+    const args = scenarioTest.operation.arguments;
+    const filter = args.filter;
+    const second = args.update || args.replacement;
+    const options = Object.assign({}, args);
     if (options.returnDocument) {
       options.returnOriginal = options.returnDocument === 'After' ? false : true;
     }
@@ -312,13 +278,13 @@ describe('CRUD spec', function() {
     delete options.replacement;
     delete options.returnDocument;
 
-    var opName = scenarioTest.operation.name;
-    var findPromise =
+    const opName = scenarioTest.operation.name;
+    const findPromise =
       opName === 'findOneAndDelete'
         ? collection[opName](filter, options)
         : collection[opName](filter, second, options);
 
-    return findPromise.then(function(result) {
+    return findPromise.then(result => {
       if (scenarioTest.outcome.result) {
         test.deepEqual(result.value, scenarioTest.outcome.result);
       }
@@ -327,15 +293,13 @@ describe('CRUD spec', function() {
         return collection
           .find({})
           .toArray()
-          .then(function(results) {
-            test.deepEqual(results, scenarioTest.outcome.collection.data);
-          });
+          .then(results => test.deepEqual(results, scenarioTest.outcome.collection.data));
       }
     });
   }
 
   function executeScenario(scenario, scenarioTest, configuration, context) {
-    var collection = context.db.collection(
+    const collection = context.db.collection(
       'crud_spec_tests_' + scenario.name + '_' + scenarioTest.operation.name
     );
 
