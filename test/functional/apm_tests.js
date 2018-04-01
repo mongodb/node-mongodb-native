@@ -1,67 +1,62 @@
 'use strict';
 
-var path = require('path'),
-  fs = require('fs'),
-  expect = require('chai').expect,
-  setupDatabase = require('./shared').setupDatabase;
+const MongoClient = require('../..');
+const path = require('path');
+const fs = require('fs');
+const expect = require('chai').expect;
+const setupDatabase = require('./shared').setupDatabase;
+const EJSON = require('mongodb-extjson');
+
+function filterForCommands(commands, bag) {
+  commands = Array.isArray(commands) ? commands : [commands];
+  return function(event) {
+    if (commands.indexOf(event.commandName) !== -1) bag.push(event);
+  };
+}
+
+function filterOutCommands(commands, bag) {
+  commands = Array.isArray(commands) ? commands : [commands];
+  return function(event) {
+    if (commands.indexOf(event.commandName) === -1) bag.push(event);
+  };
+}
+
+function ignoreNsNotFound(err) {
+  if (!err.message.match(/ns not found/)) throw err;
+}
 
 describe('APM', function() {
-  let testListener = undefined;
   before(function() {
-    return setupDatabase(this.configuration);
-  });
-
-  afterEach(function() {
-    if (testListener) {
-      testListener.uninstrument();
-      testListener = undefined;
-    }
+    setupDatabase(this.configuration);
   });
 
   it('should correctly receive the APM events for an insert', {
-    metadata: { requires: { topology: ['single', 'replicaset'] } },
+    metadata: { requires: { topology: ['single', 'replicaset', 'sharded'] } },
 
     // The actual test we wish to run
-    test: function(done) {
-      var started = [];
-      var succeeded = [];
-      var callbackTriggered = false;
-      var self = this;
+    test: function() {
+      const started = [];
+      const succeeded = [];
+      const client = this.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      client.on('commandStarted', filterForCommands('insert', started));
+      client.on('commandSucceeded', filterForCommands('insert', succeeded));
 
-      testListener = require('../..').instrument(function(err) {
-        expect(err).to.be.null;
-        callbackTriggered = true;
-      });
-
-      testListener.on('started', function(event) {
-        if (event.commandName === 'insert') started.push(event);
-      });
-
-      testListener.on('succeeded', function(event) {
-        if (event.commandName === 'insert') succeeded.push(event);
-      });
-
-      var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-      client.connect(function(err, client) {
-        var db = client.db(self.configuration.db);
-        expect(err).to.be.null;
-
-        db
-          .collection('apm_test')
-          .insertOne({ a: 1 })
-          .then(function(r) {
-            expect(r.insertedCount).to.equal(1);
-            expect(started.length).to.equal(1);
-            expect(started[0].commandName).to.equal('insert');
-            expect(started[0].command.insert).to.equal('apm_test');
-            expect(succeeded.length).to.equal(1);
-            expect(callbackTriggered).to.be.true;
-
-            testListener.uninstrument();
-            client.close();
-            done();
-          });
-      });
+      return client
+        .connect()
+        .then(client =>
+          client
+            .db(this.configuration.db)
+            .collection('apm_test')
+            .insertOne({ a: 1 })
+        )
+        .then(r => {
+          expect(r.insertedCount).to.equal(1);
+          expect(started.length).to.equal(1);
+          expect(started[0].commandName).to.equal('insert');
+          expect(started[0].command.insert).to.equal('apm_test');
+          expect(succeeded.length).to.equal(1);
+          return client.close();
+        });
     }
   });
 
@@ -69,104 +64,62 @@ describe('APM', function() {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
     // The actual test we wish to run
-    test: function(done) {
-      var started = [];
-      var succeeded = [];
-      var callbackTriggered = false;
-      var self = this;
+    test: function() {
+      const started = [];
+      const succeeded = [];
+      const self = this;
 
-      testListener = require('../..').instrument(function(err) {
-        expect(err).to.be.null;
-        callbackTriggered = true;
-      });
+      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      client.on('commandStarted', filterForCommands('insert', started));
+      client.on('commandSucceeded', filterForCommands('insert', succeeded));
 
-      testListener.on('started', function(event) {
-        if (event.commandName === 'insert') started.push(event);
-      });
-
-      testListener.on('succeeded', function(event) {
-        if (event.commandName === 'insert') succeeded.push(event);
-      });
-
-      var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-      client.connect(function(err, client) {
-        expect(err).to.not.exist;
-
-        var db = client.db(self.configuration.db);
-        var collection = db.collection('apm_test_cursor');
-        collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }]).then(function(r) {
+      return client.connect().then(client => {
+        const db = client.db(self.configuration.db);
+        const collection = db.collection('apm_test_cursor');
+        return collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }]).then(r => {
           expect(r.insertedCount).to.equal(3);
-          expect(callbackTriggered).to.be.true;
-
-          var cursor = collection.find({});
-          cursor.count(function(err) {
-            expect(err).to.be.null;
+          const cursor = collection.find({});
+          return cursor.count().then(() => {
             cursor.close(); // <-- Will cause error in APM module.
-
-            testListener.uninstrument();
-            client.close();
-            done();
+            return client.close();
           });
         });
       });
     }
   });
 
-  it.skip('should correctly receive the APM events for a listCollections command', {
+  it('should correctly receive the APM events for a listCollections command', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.0.0' } },
 
     // The actual test we wish to run
-    test: function(done) {
-      var self = this;
-      var ReadPreference = self.configuration.require.ReadPreference;
-      var started = [];
-      var succeeded = [];
+    test: function() {
+      const self = this;
+      const ReadPreference = self.configuration.require.ReadPreference;
+      const started = [];
+      const succeeded = [];
 
-      var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-      client.connect(function(err, client) {
-        expect(err).to.be.null;
-        var db = client.db(self.configuration.db);
+      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      client.on('commandStarted', filterForCommands('listCollections', started));
+      client.on('commandSucceeded', filterForCommands('listCollections', succeeded));
 
-        db
+      return client.connect().then(client => {
+        const db = client.db(self.configuration.db);
+
+        return db
           .collection('apm_test_list_collections')
           .insertOne({ a: 1 }, self.configuration.writeConcernMax())
-          .then(function(r) {
+          .then(r => {
             expect(r.insertedCount).to.equal(1);
-
-            testListener = require('../..').instrument(function(err) {
-              expect(err).to.be.null;
-            });
-
-            var listener = testListener;
-
-            listener.on('started', function(event) {
-              if (event.commandName === 'listCollections' || event.commandName === 'find') {
-                started.push(event);
-              }
-            });
-
-            listener.on('succeeded', function(event) {
-              if (event.commandName === 'listCollections' || event.commandName === 'find') {
-                succeeded.push(event);
-              }
-            });
-
-            db
-              .listCollections({}, { readPreference: ReadPreference.PRIMARY })
-              .toArray(function(err) {
-                expect(err).to.be.null;
-
-                db
-                  .listCollections({}, { readPreference: ReadPreference.SECONDARY })
-                  .toArray(function(err) {
-                    expect(err).to.be.null;
-                    // Ensure command was not sent to the primary
-                    expect(started[0].connectionId.port).to.not.equal(started[1].connectionId.port);
-
-                    client.close();
-                    done();
-                  });
-              });
+            return db.listCollections({}, { readPreference: ReadPreference.PRIMARY }).toArray();
+          })
+          .then(() =>
+            db.listCollections({}, { readPreference: ReadPreference.SECONDARY }).toArray()
+          )
+          .then(() => {
+            // Ensure command was not sent to the primary
+            console.dir(started);
+            expect(started[0].connectionId).to.not.equal(started[1].connectionId);
+            return client.close();
           });
       });
     }
@@ -177,114 +130,102 @@ describe('APM', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var self = this;
-      var ReadPreference = self.configuration.require.ReadPreference;
-      var started = [];
-      var succeeded = [];
+      const self = this;
+      const ReadPreference = self.configuration.require.ReadPreference;
+      const started = [];
+      const succeeded = [];
 
-      var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-      client.on('fullsetup', function(client) {
-        var db = client.db(self.configuration.db);
+      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      const desiredEvents = ['listIndexes', 'find'];
+      client.on('commandStarted', filterForCommands(desiredEvents, started));
+      client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
+
+      client.on('fullsetup', client => {
+        const db = client.db(self.configuration.db);
 
         db
           .collection('apm_test_list_collections')
           .insertOne({ a: 1 }, self.configuration.writeConcernMax())
-          .then(function(r) {
+          .then(r => {
             expect(r.insertedCount).to.equal(1);
 
-            testListener = require('../..').instrument(function(err) {
-              expect(err).to.be.null;
-            });
-
-            testListener.on('started', function(event) {
-              if (event.commandName === 'listIndexes' || event.commandName === 'find') {
-                started.push(event);
-              }
-            });
-
-            testListener.on('succeeded', function(event) {
-              if (event.commandName === 'listIndexes' || event.commandName === 'find') {
-                succeeded.push(event);
-              }
-            });
-
-            db
+            return db
               .collection('apm_test_list_collections')
               .listIndexes({ readPreference: ReadPreference.PRIMARY })
-              .toArray(function(err) {
-                expect(err).to.be.null;
-
-                db
-                  .collection('apm_test_list_collections')
-                  .listIndexes({ readPreference: ReadPreference.SECONDARY })
-                  .toArray(function(err) {
-                    expect(err).to.be.null;
-
-                    // Ensure command was not sent to the primary
-                    expect(started[0].connectionId.port).to.not.equal(started[1].connectionId.port);
-
-                    testListener.uninstrument();
-                    client.close();
-                    done();
-                  });
-              });
+              .toArray();
+          })
+          .then(() =>
+            db
+              .collection('apm_test_list_collections')
+              .listIndexes({ readPreference: ReadPreference.SECONDARY })
+              .toArray()
+          )
+          .then(() => {
+            // Ensure command was not sent to the primary
+            expect(started[0].connectionId).to.not.equal(started[1].connectionId);
+            client.close();
+            done();
           });
       });
 
-      client.connect(function() {});
+      client.connect();
     }
   });
 
-  it(
+  it.skip(
     'should correctly receive the APM events for an insert using custom operationId and time generator',
     {
       metadata: { requires: { topology: ['single', 'replicaset'] } },
 
       // The actual test we wish to run
-      test: function(done) {
-        var self = this;
-        var started = [];
-        var succeeded = [];
-        var callbackTriggered = false;
+      test: function() {
+        const self = this;
+        const started = [];
+        const succeeded = [];
+        const callbackTriggered = false;
 
-        testListener = require('../..').instrument(
-          {
-            operationIdGenerator: {
-              next: function() {
-                return 10000;
-              }
-            },
-            timestampGenerator: {
-              current: function() {
-                return 1;
-              },
-              duration: function(start, end) {
-                return end - start;
-              }
-            }
-          },
-          function(err) {
-            expect(err).to.be.null;
-            callbackTriggered = true;
-          }
+        // testListener = require('../..').instrument(
+        //   {
+        //     operationIdGenerator: {
+        //       next: function() {
+        //         return 10000;
+        //       }
+        //     },
+        //     timestampGenerator: {
+        //       current: function() {
+        //         return 1;
+        //       },
+        //       duration: function(start, end) {
+        //         return end - start;
+        //       }
+        //     }
+        //   },
+        //   function(err) {
+        //     expect(err).to.be.null;
+        //     callbackTriggered = true;
+        //   }
+        // );
+
+        // testListener.on('started', function(event) {
+        //   if (event.commandName === 'insert') started.push(event);
+        // });
+
+        // testListener.on('succeeded', function(event) {
+        //   if (event.commandName === 'insert') succeeded.push(event);
+        // });
+
+        const client = self.configuration.newClient(
+          { w: 1 },
+          { poolSize: 1, auto_reconnect: false }
         );
 
-        testListener.on('started', function(event) {
-          if (event.commandName === 'insert') started.push(event);
-        });
+        return client.connect().then(client => {
+          const db = client.db(self.configuration.db);
 
-        testListener.on('succeeded', function(event) {
-          if (event.commandName === 'insert') succeeded.push(event);
-        });
-
-        var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-        client.connect(function(err, client) {
-          var db = client.db(self.configuration.db);
-
-          db
+          return db
             .collection('apm_test_1')
             .insertOne({ a: 1 })
-            .then(function() {
+            .then(() => {
               expect(started).to.have.length(1);
               expect(succeeded).to.have.length(1);
               expect(started[0].commandName).to.equal('insert');
@@ -293,9 +234,8 @@ describe('APM', function() {
               expect(succeeded[0].duration).to.equal(0);
               expect(callbackTriggered).to.be.true;
 
-              testListener.uninstrument();
-              client.close();
-              done();
+              // testListener.uninstrument();
+              return client.close();
             });
         });
       }
@@ -306,99 +246,72 @@ describe('APM', function() {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
     // The actual test we wish to run
-    test: function(done) {
-      var self = this;
-      var ReadPreference = self.configuration.require.ReadPreference;
-      var started = [];
-      var succeeded = [];
-      var failed = [];
+    test: function() {
+      const self = this;
+      const ReadPreference = self.configuration.require.ReadPreference;
+      const started = [];
+      const succeeded = [];
+      const failed = [];
 
-      testListener = require('../..').instrument();
-      testListener.on('started', function(event) {
-        if (
-          event.commandName === 'find' ||
-          event.commandName === 'getMore' ||
-          event.commandName === 'killCursors'
-        )
-          started.push(event);
-      });
+      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
 
-      testListener.on('succeeded', function(event) {
-        if (
-          event.commandName === 'find' ||
-          event.commandName === 'getMore' ||
-          event.commandName === 'killCursors'
-        )
-          succeeded.push(event);
-      });
+      const desiredEvents = ['find', 'getMore', 'killCursors'];
+      client.on('commandStarted', filterForCommands(desiredEvents, started));
+      client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
+      client.on('commandFailed', filterForCommands(desiredEvents, failed));
 
-      testListener.on('failed', function(event) {
-        if (
-          event.commandName === 'find' ||
-          event.commandName === 'getMore' ||
-          event.commandName === 'killCursors'
-        )
-          failed.push(event);
-      });
-
-      var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-      client.connect(function(err, client) {
-        var db = client.db(self.configuration.db);
-        expect(err).to.be.null;
+      return client.connect().then(client => {
+        const db = client.db(self.configuration.db);
 
         // Drop the collection
-        db.collection('apm_test_2').drop(function() {
-          // Insert test documents
-          db
-            .collection('apm_test_2')
-            .insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }], { w: 1 })
-            .then(function(r) {
-              expect(r.insertedCount).to.equal(6);
+        return db
+          .collection('apm_test_2')
+          .drop()
+          .catch(ignoreNsNotFound)
+          .then(() => {
+            // Insert test documents
+            return db
+              .collection('apm_test_2')
+              .insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }], { w: 1 });
+          })
+          .then(r => {
+            expect(r.insertedCount).to.equal(6);
 
-              db
-                .collection('apm_test_2')
-                .find({ a: 1 })
-                .project({ _id: 1, a: 1 })
-                .hint({ _id: 1 })
-                .skip(1)
-                .limit(100)
-                .batchSize(2)
-                .comment('some comment')
-                .maxScan(1000)
-                .maxTimeMS(5000)
-                .setReadPreference(ReadPreference.PRIMARY)
-                .addCursorFlag('noCursorTimeout', true)
-                .toArray()
-                .then(function(docs) {
-                  // Assert basic documents
-                  expect(docs).to.have.length(5);
-                  expect(started).to.have.length(3);
-                  expect(succeeded).to.have.length(3);
-                  expect(failed).to.have.length(0);
+            return db
+              .collection('apm_test_2')
+              .find({ a: 1 })
+              .project({ _id: 1, a: 1 })
+              .hint({ _id: 1 })
+              .skip(1)
+              .limit(100)
+              .batchSize(2)
+              .comment('some comment')
+              .maxScan(1000)
+              .maxTimeMS(5000)
+              .setReadPreference(ReadPreference.PRIMARY)
+              .addCursorFlag('noCursorTimeout', true)
+              .toArray();
+          })
+          .then(docs => {
+            // Assert basic documents
+            expect(docs).to.have.length(5);
+            expect(started).to.have.length(3);
+            expect(succeeded).to.have.length(3);
+            expect(failed).to.have.length(0);
 
-                  // Success messages
-                  expect(succeeded[0].reply).to.not.be.null;
-                  expect(succeeded[0].operationId).to.equal(succeeded[1].operationId);
-                  expect(succeeded[0].operationId).to.equal(succeeded[2].operationId);
-                  expect(succeeded[1].reply).to.not.be.null;
-                  expect(succeeded[2].reply).to.not.be.null;
+            // Success messages
+            expect(succeeded[0].reply).to.not.be.null;
+            expect(succeeded[0].operationId).to.equal(succeeded[1].operationId);
+            expect(succeeded[0].operationId).to.equal(succeeded[2].operationId);
+            expect(succeeded[1].reply).to.not.be.null;
+            expect(succeeded[2].reply).to.not.be.null;
 
-                  // Started
-                  expect(started[0].operationId).to.equal(started[1].operationId);
-                  expect(started[0].operationId).to.equal(started[2].operationId);
+            // Started
+            expect(started[0].operationId).to.equal(started[1].operationId);
+            expect(started[0].operationId).to.equal(started[2].operationId);
 
-                  testListener.uninstrument();
-                  client.close();
-                  done();
-                })
-                .catch(function(err) {
-                  done(err);
-                });
-            })
-            .catch(function(e) {
-              done(e);
-            });
-        });
+            return client.close();
+          });
       });
     }
   });
@@ -407,82 +320,57 @@ describe('APM', function() {
     metadata: { requires: { topology: ['single', 'replicaset'], mongodb: '>=2.6.0' } },
 
     // The actual test we wish to run
-    test: function(done) {
-      var self = this;
-      var ReadPreference = self.configuration.require.ReadPreference;
-      var started = [];
-      var succeeded = [];
-      var failed = [];
+    test: function() {
+      const self = this;
+      const ReadPreference = self.configuration.require.ReadPreference;
+      const started = [];
+      const succeeded = [];
+      const failed = [];
 
-      testListener = require('../..').instrument();
-      testListener.on('started', function(event) {
-        if (
-          event.commandName === 'find' ||
-          event.commandName === 'getMore' ||
-          event.commandName === 'killCursors'
-        )
-          started.push(event);
-      });
+      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      const desiredEvents = ['find', 'getMore', 'killCursors'];
+      client.on('commandStarted', filterForCommands(desiredEvents, started));
+      client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
+      client.on('commandFailed', filterForCommands(desiredEvents, failed));
 
-      testListener.on('succeeded', function(event) {
-        if (
-          event.commandName === 'find' ||
-          event.commandName === 'getMore' ||
-          event.commandName === 'killCursors'
-        )
-          succeeded.push(event);
-      });
-
-      testListener.on('failed', function(event) {
-        if (
-          event.commandName === 'find' ||
-          event.commandName === 'getMore' ||
-          event.commandName === 'killCursors'
-        )
-          failed.push(event);
-      });
-
-      var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-      client.connect(function(err, client) {
-        var db = client.db(self.configuration.db);
-        expect(err).to.be.null;
+      return client.connect().then(client => {
+        const db = client.db(self.configuration.db);
 
         // Drop the collection
-        db.collection('apm_test_2').drop(function() {
-          // Insert test documents
-          db
-            .collection('apm_test_2')
-            .insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }])
-            .then(function(r) {
-              expect(r.insertedCount).to.equal(6);
-
-              db
-                .collection('apm_test_2')
-                .find({ $illegalfield: 1 })
-                .project({ _id: 1, a: 1 })
-                .hint({ _id: 1 })
-                .skip(1)
-                .limit(100)
-                .batchSize(2)
-                .comment('some comment')
-                .maxScan(1000)
-                .maxTimeMS(5000)
-                .setReadPreference(ReadPreference.PRIMARY)
-                .addCursorFlag('noCursorTimeout', true)
-                .toArray()
-                .then(function() {})
-                .catch(function() {
-                  expect(failed).to.have.length(1);
-
-                  testListener.uninstrument();
-                  client.close();
-                  done();
-                });
-            })
-            .catch(function(e) {
-              done(e);
-            });
-        });
+        return db
+          .collection('apm_test_2')
+          .drop()
+          .catch(ignoreNsNotFound)
+          .then(() => {
+            // Insert test documents
+            return db
+              .collection('apm_test_2')
+              .insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }]);
+          })
+          .then(r => {
+            expect(r.insertedCount).to.equal(6);
+            return db
+              .collection('apm_test_2')
+              .find({ $illegalfield: 1 })
+              .project({ _id: 1, a: 1 })
+              .hint({ _id: 1 })
+              .skip(1)
+              .limit(100)
+              .batchSize(2)
+              .comment('some comment')
+              .maxScan(1000)
+              .maxTimeMS(5000)
+              .setReadPreference(ReadPreference.PRIMARY)
+              .addCursorFlag('noCursorTimeout', true)
+              .toArray();
+          })
+          .then(() => {
+            throw new Error('this should not happen');
+          })
+          .catch(() => {
+            expect(failed).to.have.length(1);
+            return client.close();
+          });
       });
     }
   });
@@ -491,34 +379,19 @@ describe('APM', function() {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
     // The actual test we wish to run
-    test: function(done) {
-      var self = this;
-      var started = [];
-      var succeeded = [];
+    test: function() {
+      const self = this;
+      const started = [];
+      const succeeded = [];
 
-      testListener = require('../..').instrument();
-      testListener.on('started', function(event) {
-        if (
-          event.commandName === 'insert' ||
-          event.commandName === 'update' ||
-          event.commandName === 'delete'
-        )
-          started.push(event);
-      });
+      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      const desiredEvents = ['insert', 'update', 'delete'];
+      client.on('commandStarted', filterForCommands(desiredEvents, started));
+      client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
 
-      testListener.on('succeeded', function(event) {
-        if (
-          event.commandName === 'insert' ||
-          event.commandName === 'update' ||
-          event.commandName === 'delete'
-        )
-          succeeded.push(event);
-      });
-
-      var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-      client.connect(function(err, client) {
-        var db = client.db(self.configuration.db);
-        db
+      return client.connect().then(client => {
+        const db = client.db(self.configuration.db);
+        return db
           .collection('apm_test_3')
           .bulkWrite(
             [
@@ -528,20 +401,14 @@ describe('APM', function() {
             ],
             { ordered: true }
           )
-          .then(function() {
+          .then(() => {
             expect(started).to.have.length(3);
             expect(succeeded).to.have.length(3);
             expect(started[0].operationId).to.equal(started[1].operationId);
             expect(started[0].operationId).to.equal(started[2].operationId);
             expect(succeeded[0].operationId).to.equal(succeeded[1].operationId);
             expect(succeeded[0].operationId).to.equal(succeeded[2].operationId);
-
-            testListener.uninstrument();
-            client.close();
-            done();
-          })
-          .catch(function(err) {
-            done(err);
+            return client.close();
           });
       });
     }
@@ -550,87 +417,47 @@ describe('APM', function() {
   it('should correctly receive the APM explain command', {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
-    // The actual test we wish to run
-    test: function(done) {
-      var self = this;
-      var started = [];
-      var succeeded = [];
-      var failed = [];
+    test: function() {
+      const self = this;
+      const started = [];
+      const succeeded = [];
+      const failed = [];
 
-      testListener = require('../..').instrument();
-      testListener.on('started', function(event) {
-        if (
-          event.commandName === 'find' ||
-          event.commandName === 'getMore' ||
-          event.commandName === 'killCursors' ||
-          event.commandName === 'explain'
-        )
-          started.push(event);
-      });
+      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      const desiredEvents = ['find', 'getMore', 'killCursors', 'explain'];
+      client.on('commandStarted', filterForCommands(desiredEvents, started));
+      client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
+      client.on('commandFailed', filterForCommands(desiredEvents, failed));
 
-      testListener.on('succeeded', function(event) {
-        if (
-          event.commandName === 'find' ||
-          event.commandName === 'getMore' ||
-          event.commandName === 'killCursors' ||
-          event.commandName === 'explain'
-        )
-          succeeded.push(event);
-      });
+      return client.connect().then(client => {
+        const db = client.db(self.configuration.db);
 
-      testListener.on('failed', function(event) {
-        if (
-          event.commandName === 'find' ||
-          event.commandName === 'getMore' ||
-          event.commandName === 'killCursors' ||
-          event.commandName === 'explain'
-        )
-          failed.push(event);
-      });
-
-      var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-      client.connect(function(err, client) {
-        var db = client.db(self.configuration.db);
-        expect(err).to.be.null;
-
-        // Drop the collection
-        db.collection('apm_test_2').drop(function() {
-          // Insert test documents
-          db
-            .collection('apm_test_2')
-            .insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }], { w: 1 })
-            .then(function(r) {
-              expect(r.insertedCount).to.equal(6);
-
-              db
-                .collection('apm_test_2')
-                .find({ a: 1 })
-                .explain()
-                .then(function(explain) {
-                  expect(explain).to.not.be.null;
-
-                  expect(started).to.have.length(1);
-                  expect(started[0].commandName).to.equal('explain');
-                  expect(started[0].command.explain.find).to.equal('apm_test_2');
-                  expect(succeeded).to.have.length(1);
-                  expect(succeeded[0].commandName).to.equal('explain');
-
-                  // Started
-                  expect(started[0].operationId).to.equal(succeeded[0].operationId);
-
-                  // Remove instrumentation
-                  testListener.uninstrument();
-                  client.close();
-                  done();
-                })
-                .catch(function(err) {
-                  done(err);
-                });
-            })
-            .catch(function(e) {
-              done(e);
-            });
-        });
+        return db
+          .collection('apm_test_2')
+          .drop()
+          .catch(ignoreNsNotFound)
+          .then(() =>
+            db
+              .collection('apm_test_2')
+              .insertMany([{ a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }, { a: 1 }], { w: 1 })
+          )
+          .then(r => {
+            expect(r.insertedCount).to.equal(6);
+            return db
+              .collection('apm_test_2')
+              .find({ a: 1 })
+              .explain();
+          })
+          .then(explain => {
+            expect(explain).to.not.be.null;
+            expect(started).to.have.length(1);
+            expect(started[0].commandName).to.equal('explain');
+            expect(started[0].command.explain.find).to.equal('apm_test_2');
+            expect(succeeded).to.have.length(1);
+            expect(succeeded[0].commandName).to.equal('explain');
+            expect(started[0].operationId).to.equal(succeeded[0].operationId);
+            return client.close();
+          });
       });
     }
   });
@@ -639,46 +466,30 @@ describe('APM', function() {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
     // The actual test we wish to run
-    test: function(done) {
-      var self = this;
-      var started = [];
-      var succeeded = [];
-      var failed = [];
+    test: function() {
+      const self = this;
+      const started = [];
+      const succeeded = [];
+      const failed = [];
 
-      testListener = require('../..').instrument();
-      testListener.on('started', function(event) {
-        if (event.commandName === 'getnonce') started.push(event);
-      });
+      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      const desiredEvents = ['getnonce'];
+      client.on('commandStarted', filterForCommands(desiredEvents, started));
+      client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
+      client.on('commandFailed', filterForCommands(desiredEvents, failed));
 
-      testListener.on('succeeded', function(event) {
-        if (event.commandName === 'getnonce') succeeded.push(event);
-      });
-
-      testListener.on('failed', function(event) {
-        if (event.commandName === 'getnonce') failed.push(event);
-      });
-
-      var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-      client.connect(function(err, client) {
-        var db = client.db(self.configuration.db);
-        expect(err).to.be.null;
-
-        db.command({ getnonce: true }, function(err, r) {
-          expect(err).to.be.null;
+      return client
+        .connect()
+        .then(client => client.db(self.configuration.db).command({ getnonce: true }))
+        .then(r => {
           expect(r).to.exist;
           expect(started).to.have.length(1);
           expect(succeeded).to.have.length(1);
           expect(failed).to.have.length(0);
-
           expect(started[0].commandObj).to.eql({ getnonce: true });
           expect(succeeded[0].reply).to.eql({});
-
-          // Remove instrumentation
-          testListener.uninstrument();
-          client.close();
-          done();
+          return client.close();
         });
-      });
     }
   });
 
@@ -686,43 +497,32 @@ describe('APM', function() {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
     // The actual test we wish to run
-    test: function(done) {
-      var self = this;
-      var started = [];
-      var succeeded = [];
+    test: function() {
+      const self = this;
+      const started = [];
+      const succeeded = [];
 
-      testListener = require('../..').instrument(function(err) {
-        expect(err).to.not.exist;
-      });
+      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      const desiredEvents = ['update'];
+      client.on('commandStarted', filterForCommands(desiredEvents, started));
+      client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
 
-      testListener.on('started', function(event) {
-        if (event.commandName === 'update') started.push(event);
-      });
-
-      testListener.on('succeeded', function(event) {
-        if (event.commandName === 'update') succeeded.push(event);
-      });
-
-      var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-      client.connect(function(err, client) {
-        var db = client.db(self.configuration.db);
-        expect(err).to.be.null;
-
-        db
-          .collection('apm_test_u_1')
-          .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true })
-          .then(function(r) {
-            expect(r).to.exist;
-            expect(started).to.have.length(1);
-            expect(started[0].commandName).to.equal('update');
-            expect(started[0].command.update).to.equal('apm_test_u_1');
-            expect(succeeded).to.have.length(1);
-
-            testListener.uninstrument();
-            client.close();
-            done();
-          });
-      });
+      return client
+        .connect()
+        .then(client =>
+          client
+            .db(self.configuration.db)
+            .collection('apm_test_u_1')
+            .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true })
+        )
+        .then(r => {
+          expect(r).to.exist;
+          expect(started).to.have.length(1);
+          expect(started[0].commandName).to.equal('update');
+          expect(started[0].command.update).to.equal('apm_test_u_1');
+          expect(succeeded).to.have.length(1);
+          return client.close();
+        });
     }
   });
 
@@ -730,43 +530,32 @@ describe('APM', function() {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
     // The actual test we wish to run
-    test: function(done) {
-      var self = this;
-      var started = [];
-      var succeeded = [];
+    test: function() {
+      const self = this;
+      const started = [];
+      const succeeded = [];
 
-      testListener = require('../..').instrument(function(err) {
-        expect(err).to.not.exist;
-      });
+      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      const desiredEvents = ['update'];
+      client.on('commandStarted', filterForCommands(desiredEvents, started));
+      client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
 
-      testListener.on('started', function(event) {
-        if (event.commandName === 'update') started.push(event);
-      });
-
-      testListener.on('succeeded', function(event) {
-        if (event.commandName === 'update') succeeded.push(event);
-      });
-
-      var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-      client.connect(function(err, client) {
-        var db = client.db(self.configuration.db);
-        expect(err).to.be.null;
-
-        db
-          .collection('apm_test_u_2')
-          .updateMany({ a: 1 }, { $set: { b: 1 } }, { upsert: true })
-          .then(function(r) {
-            expect(r).to.exist;
-            expect(started).to.have.length(1);
-            expect(started[0].commandName).to.equal('update');
-            expect(started[0].command.update).to.equal('apm_test_u_2');
-            expect(succeeded).to.have.length(1);
-
-            testListener.uninstrument();
-            client.close();
-            done();
-          });
-      });
+      return client
+        .connect()
+        .then(client =>
+          client
+            .db(self.configuration.db)
+            .collection('apm_test_u_2')
+            .updateMany({ a: 1 }, { $set: { b: 1 } }, { upsert: true })
+        )
+        .then(r => {
+          expect(r).to.exist;
+          expect(started).to.have.length(1);
+          expect(started[0].commandName).to.equal('update');
+          expect(started[0].command.update).to.equal('apm_test_u_2');
+          expect(succeeded).to.have.length(1);
+          return client.close();
+        });
     }
   });
 
@@ -774,43 +563,32 @@ describe('APM', function() {
     metadata: { requires: { topology: ['single', 'replicaset'] } },
 
     // The actual test we wish to run
-    test: function(done) {
-      var self = this;
-      var started = [];
-      var succeeded = [];
+    test: function() {
+      const self = this;
+      const started = [];
+      const succeeded = [];
 
-      testListener = require('../..').instrument(function(err) {
-        expect(err).to.not.exist;
-      });
+      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      const desiredEvents = ['delete'];
+      client.on('commandStarted', filterForCommands(desiredEvents, started));
+      client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
 
-      testListener.on('started', function(event) {
-        if (event.commandName === 'delete') started.push(event);
-      });
-
-      testListener.on('succeeded', function(event) {
-        if (event.commandName === 'delete') succeeded.push(event);
-      });
-
-      var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-      client.connect(function(err, client) {
-        var db = client.db(self.configuration.db);
-        expect(err).to.be.null;
-
-        db
-          .collection('apm_test_u_3')
-          .deleteOne({ a: 1 })
-          .then(function(r) {
-            expect(r).to.exist;
-            expect(started).to.have.length(1);
-            expect(started[0].commandName).to.equal('delete');
-            expect(started[0].command.delete).to.equal('apm_test_u_3');
-            expect(succeeded).to.have.length(1);
-
-            testListener.uninstrument();
-            client.close();
-            done();
-          });
-      });
+      return client
+        .connect()
+        .then(client =>
+          client
+            .db(self.configuration.db)
+            .collection('apm_test_u_3')
+            .deleteOne({ a: 1 })
+        )
+        .then(r => {
+          expect(r).to.exist;
+          expect(started).to.have.length(1);
+          expect(started[0].commandName).to.equal('delete');
+          expect(started[0].command.delete).to.equal('apm_test_u_3');
+          expect(succeeded).to.have.length(1);
+          return client.close();
+        });
     }
   });
 
@@ -818,49 +596,39 @@ describe('APM', function() {
     metadata: { requires: { topology: ['single', 'replicaset'], mongodb: '<=3.0.x' } },
 
     // The actual test we wish to run
-    test: function(done) {
-      var self = this;
-      testListener = require('../..').instrument(function(err) {
-        expect(err).to.not.exist;
-      });
+    test: function() {
+      const self = this;
+      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
 
-      var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-      client.connect(function(err, client) {
-        var db = client.db(self.configuration.db);
-        var admindb = db.admin();
-        var cursorCountBefore;
-        var cursorCountAfter;
+      return client.connect().then(client => {
+        const db = client.db(self.configuration.db);
+        const admindb = db.admin();
+        let cursorCountBefore;
+        let cursorCountAfter;
 
-        var collection = db.collection('apm_killcursor_tests');
+        const collection = db.collection('apm_killcursor_tests');
 
         // make sure collection has records (more than 2)
-        collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }], function(err, r) {
-          expect(r).to.exist;
-          expect(err).to.be.null;
-
-          admindb.serverStatus(function(err, result) {
-            expect(err).to.be.null;
-
+        return collection
+          .insertMany([{ a: 1 }, { a: 2 }, { a: 3 }])
+          .then(r => {
+            expect(r).to.exist;
+            return admindb.serverStatus();
+          })
+          .then(result => {
             cursorCountBefore = result.cursors.clientCursors_size;
-
-            var cursor = collection.find({}).limit(2);
-            cursor.toArray(function(err, r) {
+            let cursor = collection.find({}).limit(2);
+            return cursor.toArray().then(r => {
               expect(r).to.exist;
-              expect(err).to.be.null;
-              cursor.close();
-
-              admindb.serverStatus(function(err, result) {
-                expect(err).to.be.null;
-
-                cursorCountAfter = result.cursors.clientCursors_size;
-                expect(cursorCountBefore).to.equal(cursorCountAfter);
-
-                client.close();
-                done();
-              });
+              return cursor.close();
             });
+          })
+          .then(() => admindb.serverStatus())
+          .then(result => {
+            cursorCountAfter = result.cursors.clientCursors_size;
+            expect(cursorCountBefore).to.equal(cursorCountAfter);
+            return client.close();
           });
-        });
       });
     }
   });
@@ -870,157 +638,117 @@ describe('APM', function() {
 
     // The actual test we wish to run
     test: function() {
-      var self = this;
-      var started = [];
-      var succeeded = [];
-
-      testListener = require('../..').instrument(function(err) {
-        expect(err).to.not.exist;
-      });
-
-      testListener.on('started', function(event) {
-        if (event.commandName === 'aggregate' || event.commandName === 'getMore')
-          started.push(event);
-      });
-
-      testListener.on('succeeded', function(event) {
-        if (event.commandName === 'aggregate' || event.commandName === 'getMore')
-          succeeded.push(event);
-      });
+      const self = this;
+      const started = [];
+      const succeeded = [];
 
       // Generate docs
-      var docs = [];
-      for (var i = 0; i < 2500; i++) {
-        docs.push({ a: i });
-      }
+      const docs = [];
+      for (let i = 0; i < 2500; i++) docs.push({ a: i });
 
-      var db;
-      var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-      return client
-        .connect()
-        .then(function() {
-          db = client.db(self.configuration.db);
-          return db
-            .collection('apm_test_u_4')
-            .drop()
-            .catch(function() {});
-        })
-        .then(function() {
-          return db.collection('apm_test_u_4').insertMany(docs);
-        })
-        .then(function(r) {
-          expect(r).to.exist;
-          return db
-            .collection('apm_test_u_4')
-            .aggregate([{ $match: {} }])
-            .toArray();
-        })
-        .then(function(r) {
-          expect(r).to.exist;
-          expect(started).to.have.length(3);
-          expect(succeeded).to.have.length(3);
+      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      const desiredEvents = ['aggregate', 'getMore'];
+      client.on('commandStarted', filterForCommands(desiredEvents, started));
+      client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
 
-          var cursors = succeeded.map(function(x) {
-            return x.reply.cursor;
+      return client.connect().then(() => {
+        const db = client.db(self.configuration.db);
+        return db
+          .collection('apm_test_u_4')
+          .drop()
+          .catch(ignoreNsNotFound)
+          .then(() => db.collection('apm_test_u_4').insertMany(docs))
+          .then(r => {
+            expect(r).to.exist;
+            return db
+              .collection('apm_test_u_4')
+              .aggregate([{ $match: {} }])
+              .toArray();
+          })
+          .then(r => {
+            expect(r).to.exist;
+            expect(started).to.have.length(3);
+            expect(succeeded).to.have.length(3);
+            const cursors = succeeded.map(x => x.reply.cursor);
+
+            // Check we have a cursor
+            expect(cursors[0].id).to.exist;
+            expect(cursors[0].id.toString()).to.equal(cursors[1].id.toString());
+            expect(cursors[2].id.toString()).to.equal('0');
+
+            return client.close();
           });
-
-          // Check we have a cursor
-          expect(cursors[0].id).to.exist;
-          expect(cursors[0].id.toString()).to.equal(cursors[1].id.toString());
-          expect(cursors[2].id.toString()).to.equal('0');
-
-          testListener.uninstrument();
-          client.close();
-        });
+      });
     }
   });
 
   it('should correcly decorate the apm result for listCollections with cursorId', {
     metadata: { requires: { topology: ['single', 'replicaset'], mongodb: '>=3.0.0' } },
+    test: function() {
+      const self = this;
+      const started = [];
+      const succeeded = [];
 
-    // The actual test we wish to run
-    test: function(done) {
-      var self = this;
-      var started = [];
-      var succeeded = [];
+      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      const desiredEvents = ['listCollections'];
+      client.on('commandStarted', filterForCommands(desiredEvents, started));
+      client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
 
-      testListener = require('../..').instrument(function(err) {
-        expect(err).to.not.exist;
-      });
+      return client.connect().then(client => {
+        const db = client.db(self.configuration.db);
 
-      testListener.on('started', function(event) {
-        if (event.commandName === 'listCollections') started.push(event);
-      });
-
-      testListener.on('succeeded', function(event) {
-        if (event.commandName === 'listCollections') succeeded.push(event);
-      });
-
-      var client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-      client.connect(function(err, client) {
-        var db = client.db(self.configuration.db);
-        expect(err).to.be.null;
-
-        var promises = [];
-
-        for (var i = 0; i < 20; i++) {
+        const promises = [];
+        for (let i = 0; i < 20; i++) {
           promises.push(db.collection('_mass_collection_' + i).insertOne({ a: 1 }));
         }
 
-        Promise.all(promises).then(function(r) {
-          expect(r).to.exist;
+        return Promise.all(promises)
+          .then(r => {
+            expect(r).to.exist;
 
-          db
-            .listCollections()
-            .batchSize(10)
-            .toArray()
-            .then(function(r) {
-              expect(r).to.exist;
-              expect(started).to.have.length(1);
-              expect(succeeded).to.have.length(1);
+            return db
+              .listCollections()
+              .batchSize(10)
+              .toArray();
+          })
+          .then(r => {
+            expect(r).to.exist;
+            expect(started).to.have.length(1);
+            expect(succeeded).to.have.length(1);
 
-              var cursors = succeeded.map(function(x) {
-                return x.reply.cursor;
-              });
+            const cursors = succeeded.map(x => x.reply.cursor);
+            expect(cursors[0].id).to.exist;
 
-              // Check we have a cursor
-              expect(cursors[0].id).to.exist;
-
-              testListener.uninstrument();
-              client.close();
-              done();
-            });
-        });
+            return client.close();
+          });
       });
     }
   });
 
   describe('spec tests', function() {
     before(function() {
-      return setupDatabase(this.configuration);
+      setupDatabase(this.configuration);
     });
 
-    var filterSessionsCommands = x => x.filter(y => y.commandName !== 'endSessions');
-    var validateExpecations = function(expectation, results) {
-      var obj, databaseName, commandName, reply, result;
+    function validateExpecations(expectation, results) {
+      let obj, databaseName, commandName, reply, result;
       if (expectation.command_started_event) {
         // Get the command
         obj = expectation.command_started_event;
         // Unpack the expectation
-        var command = obj.command;
+        const command = obj.command;
         databaseName = obj.database_name;
         commandName = obj.command_name;
 
         // Get the result
         result = results.starts.shift();
 
-        if (result.commandName === 'endSessions') {
-          result = results.starts.shift();
-        }
-
         // Validate the test
-        expect(commandName).to.equal(result.commandName);
-        expect(databaseName).to.equal(result.databaseName);
+        expect(result.commandName).to.equal(commandName);
+        expect(result.databaseName).to.equal(databaseName);
+
+        // strip sessions data
+        delete result.command.lsid;
 
         // Do we have a getMore command or killCursor command
         if (commandName === 'getMore') {
@@ -1028,7 +756,7 @@ describe('APM', function() {
         } else if (commandName === 'killCursors') {
           // eslint-disable-line
         } else {
-          expect(command).to.eql(result.command);
+          expect(result.command).to.deep.include(command);
         }
       } else if (expectation.command_succeeded_event) {
         obj = expectation.command_succeeded_event;
@@ -1045,7 +773,7 @@ describe('APM', function() {
         }
 
         // Validate the test
-        expect(commandName).to.equal(result.commandName);
+        expect(result.commandName).to.equal(commandName);
         // Do we have a getMore command
         if (commandName.toLowerCase() === 'getmore' || commandName.toLowerCase() === 'find') {
           reply.cursor.id = result.reply.cursor.id;
@@ -1059,99 +787,70 @@ describe('APM', function() {
         commandName = obj.command_name;
 
         // Get the result
-        results.failures = filterSessionsCommands(results.failures);
+        results.failures = results.failures;
         result = results.failures.shift();
 
-        if (result.commandName === 'endSessions') {
-          result = results.failures.shift();
-        }
-
         // Validate the test
-        expect(commandName).to.equal(result.commandName);
+        expect(result.commandName).to.equal(commandName);
       }
-    };
+    }
 
-    var executeOperation = function(client, listener, scenario, test, callback) {
-      var successes = [];
-      var failures = [];
-      var starts = [];
-
+    function executeOperation(client, scenario, test) {
       // Get the operation
-      var operation = test.operation;
+      const operation = test.operation;
       // Get the command name
-      var commandName = operation.name;
+      const commandName = operation.name;
       // Get the arguments
-      var args = operation.arguments || {};
+      const args = operation.arguments || {};
       // Get the database instance
-      var db = client.db(scenario.database_name);
+      const db = client.db(scenario.database_name);
       // Get the collection
-      var collection = db.collection(scenario.collection_name);
+      const collection = db.collection(scenario.collection_name);
       // Parameters
-      var params = [];
+      const params = [];
       // Options
-      var options = null;
+      let options = null;
       // Get the data
-      var data = scenario.data;
+      const data = scenario.data;
+      // Command Monitoring context
+      const monitoringResults = {
+        successes: [],
+        failures: [],
+        starts: []
+      };
 
       // Drop the collection
-      collection.drop(function() {
-        // No need to check for error, in case the collection doesn't exist already
-
-        // Insert the data
-        collection.insertMany(data, function(err, r) {
-          expect(err).to.be.null;
+      return collection
+        .drop()
+        .catch(err => {
+          // potentially skip this error
+          if (!err.message.match(/ns not found/)) throw err;
+        })
+        .then(() => collection.insertMany(data))
+        .then(r => {
           expect(data).to.have.length(r.insertedCount);
 
           // Set up the listeners
-          listener.on('started', function(event) {
-            starts.push(event);
-          });
-
-          listener.on('succeeded', function(event) {
-            successes.push(event);
-          });
-
-          listener.on('failed', function(event) {
-            failures.push(event);
-          });
-
-          // Cleanup the listeners
-          var cleanUpListeners = function(_listener) {
-            _listener.removeAllListeners('started');
-            _listener.removeAllListeners('succeeded');
-            _listener.removeAllListeners('failed');
-          };
+          client.on('commandStarted', filterOutCommands('endSessions', monitoringResults.starts));
+          client.on('commandFailed', filterOutCommands('endSessions', monitoringResults.failures));
+          client.on(
+            'commandSucceeded',
+            filterOutCommands('endSessions', monitoringResults.successes)
+          );
 
           // Unpack the operation
-          if (args.filter) {
-            params.push(args.filter);
-          }
-
-          if (args.deletes) {
-            params.push(args.deletes);
-          }
-
-          if (args.document) {
-            params.push(args.document);
-          }
-
-          if (args.documents) {
-            params.push(args.documents);
-          }
-
-          if (args.update) {
-            params.push(args.update);
-          }
-
-          if (args.requests) {
-            params.push(args.requests);
-          }
+          if (args.filter) params.push(args.filter);
+          if (args.deletes) params.push(args.deletes);
+          if (args.document) params.push(args.document);
+          if (args.documents) params.push(args.documents);
+          if (args.update) params.push(args.update);
+          if (args.requests) params.push(args.requests);
 
           if (args.writeConcern) {
             if (options == null) {
               options = args.writeConcern;
             } else {
-              for (var name in args.writeConcern) {
+              for (let name in args.writeConcern) {
                 options[name] = args.writeConcern[name];
               }
             }
@@ -1175,7 +874,7 @@ describe('APM', function() {
 
           // Find command is special needs to executed using toArray
           if (operation.name === 'find') {
-            var cursor = collection[commandName]();
+            let cursor = collection[commandName]();
 
             // Set the options
             if (args.filter) cursor = cursor.filter(args.filter);
@@ -1186,94 +885,65 @@ describe('APM', function() {
 
             // Set any modifiers
             if (args.modifiers) {
-              for (var modifier in args.modifiers) {
+              for (let modifier in args.modifiers) {
                 cursor.addQueryModifier(modifier, args.modifiers[modifier]);
               }
             }
 
             // Execute find
-            cursor.toArray(function() {
-              // Validate the expectations
-              test.expectations.forEach(function(x) {
-                validateExpecations(x, {
-                  successes: successes,
-                  failures: failures,
-                  starts: starts
-                });
-              });
-
-              // Cleanup listeners
-              cleanUpListeners(listener);
-
-              // Finish the operation
-              callback();
-            });
-          } else {
-            // Add options if they exists
-            if (options) params.push(options);
-            // Add callback function
-            params.push(function() {
-              // Validate the expectations
-              test.expectations.forEach(function(x) {
-                validateExpecations(x, {
-                  successes: successes,
-                  failures: failures,
-                  starts: starts
-                });
-              });
-
-              // Cleanup listeners
-              cleanUpListeners(listener);
-
-              // Finish the operation
-              callback();
-            });
-
-            // Execute the operation
-            collection[commandName].apply(collection, params);
+            return cursor
+              .toArray()
+              .catch(() => {} /* ignore */)
+              .then(() =>
+                test.expectations.forEach(expectation =>
+                  validateExpecations(expectation, monitoringResults)
+                )
+              );
           }
-        });
-      });
-    };
 
-    var scenarios = fs
+          // Add options if they exists
+          if (options) params.push(options);
+
+          // Execute the operation
+          const promise = collection[commandName].apply(collection, params);
+          return promise
+            .catch(() => {} /* ignore */)
+            .then(() =>
+              test.expectations.forEach(expectation =>
+                validateExpecations(expectation, monitoringResults)
+              )
+            );
+        });
+    }
+
+    fs
       .readdirSync(__dirname + '/spec/apm')
       .filter(x => x.indexOf('.json') !== -1)
-      .map(function(x) {
-        var r = null;
+      .map(x =>
+        Object.assign(
+          { title: path.basename(x, '.json') },
+          EJSON.parse(fs.readFileSync(__dirname + '/spec/apm/' + x), { relaxed: true })
+        )
+      )
+      .forEach(scenario => {
+        describe(scenario.title, function() {
+          scenario.tests.forEach(test => {
+            const requirements = { topology: ['single', 'replicaset', 'sharded'] };
+            if (test.ignore_if_server_version_greater_than) {
+              requirements.mongodb = `>${scenario.ignore_if_server_version_greater_than}`;
+            }
 
-        try {
-          r = JSON.parse(fs.readFileSync(__dirname + '/spec/apm/' + x));
-        } catch (err) {
-          console.dir(err);
-        }
-
-        r.title = path.basename(x, '.json');
-        return r;
-      });
-
-    scenarios.forEach(scenario => {
-      describe(scenario.title, function() {
-        scenario.tests.forEach(test => {
-          it(test.description, function(done) {
-            var MongoClient = require('../..');
-            testListener = require('../../').instrument();
-
-            MongoClient.connect(this.configuration.url(), function(err, client) {
-              expect(err).to.not.exist;
-              expect(client).to.exist;
-
-              executeOperation(client, testListener, scenario, test, err => {
-                expect(err).to.not.exist;
-
-                testListener.uninstrument();
-                client.close();
-                done();
-              });
+            it(test.description, {
+              metadata: { requires: requirements },
+              test: function() {
+                return MongoClient.connect(this.configuration.url()).then(client => {
+                  expect(client).to.exist;
+                  return executeOperation(client, scenario, test).then(() => client.close());
+                });
+              }
             });
           });
         });
       });
-    });
   });
 });
