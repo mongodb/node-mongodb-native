@@ -41,7 +41,7 @@
         {
           "command_succeeded_event": {
             "reply": {
-              "ok": 1.0,
+              "ok": 1,
               "n": 1
             },
             "command_name": "insert"
@@ -82,7 +82,7 @@
         {
           "command_succeeded_event": {
             "reply": {
-              "ok": 1.0,
+              "ok": 1,
               "n": 0,
               "writeErrors": [
                 {
@@ -131,7 +131,7 @@
         {
           "command_succeeded_event": {
             "reply": {
-              "ok": 1.0,
+              "ok": 1,
               "n": 1
             },
             "command_name": "insert"
