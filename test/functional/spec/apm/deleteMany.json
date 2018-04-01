@@ -52,7 +52,7 @@
         {
           "command_succeeded_event": {
             "reply": {
-              "ok": 1.0,
+              "ok": 1,
               "n": 2
             },
             "command_name": "delete"
@@ -96,7 +96,7 @@
         {
           "command_succeeded_event": {
             "reply": {
-              "ok": 1.0,
+              "ok": 1,
               "n": 0,
               "writeErrors": [
                 {

@@ -42,17 +42,15 @@ tests:
       arguments:
         filter: { _id: { $gt: 1 } }
         sort: { _id: 1 }
-        skip: 2
+        skip: {"$numberLong": "2"}
         modifiers:
           $comment: "test"
           $hint: { _id: 1 }
           $max: { _id: 6 }
-          $maxScan: 5000
           $maxTimeMS: 6000
           $min: { _id: 0 }
           $returnKey: false
           $showDiskLoc: false
-          $snapshot: false
     expectations:
       -
         command_started_event:
@@ -60,16 +58,14 @@ tests:
             find: *collection_name
             filter: { _id:  { $gt: 1 } }
             sort: { _id: 1 }
-            skip: 2
+            skip: {"$numberLong": "2"}
             comment: "test"
             hint: { _id: 1 }
             max: { _id: 6 }
-            maxScan: 5000
             maxTimeMS: 6000
             min: { _id: 0 }
             returnKey: false
             showRecordId: false
-            snapshot: false
           command_name: "find"
           database_name: *database_name
       -
@@ -90,7 +86,7 @@ tests:
       arguments:
         filter: { _id: { $gte: 1 }}
         sort: { _id: 1 }
-        batchSize: 3
+        batchSize: {"$numberLong": "3"}
     expectations:
       -
         command_started_event:
@@ -98,7 +94,7 @@ tests:
             find: *collection_name
             filter: { _id: { $gte : 1 }}
             sort: { _id: 1 }
-            batchSize: 3
+            batchSize: {"$numberLong": "3"}
           command_name: "find"
           database_name: *database_name
       -
@@ -118,7 +114,7 @@ tests:
           command:
             getMore: { $numberLong: "42" }
             collection: *collection_name
-            batchSize: 3
+            batchSize: {"$numberLong": "3"}
           command_name: "getMore"
           database_name: *database_name
       -
@@ -140,8 +136,8 @@ tests:
       arguments:
         filter: { _id: { $gte: 1 }}
         sort: { _id: 1 }
-        batchSize: 3
-        limit: 4
+        batchSize: {"$numberLong": "3"}
+        limit: {"$numberLong": "4"}
     expectations:
       -
         command_started_event:
@@ -149,8 +145,8 @@ tests:
             find: *collection_name
             filter: { _id: { $gte : 1 }}
             sort: { _id: 1 }
-            batchSize: 3
-            limit: 4
+            batchSize: {"$numberLong": "3"}
+            limit: {"$numberLong": "4"}
           command_name: "find"
           database_name: *database_name
       -
@@ -170,7 +166,7 @@ tests:
           command:
             getMore: { $numberLong: "42" }
             collection: *collection_name
-            batchSize: 1
+            batchSize: { $numberLong: "1" }
           command_name: "getMore"
           database_name: *database_name
       -
@@ -201,13 +197,15 @@ tests:
   -
     description: "A successful find event with a getmore and the server kills the cursor"
     ignore_if_server_version_less_than: "3.1"
+    ignore_if_topology_type:
+      - "sharded"
     operation:
       name: "find"
       arguments:
         filter: { _id: { $gte: 1 }}
         sort: { _id: 1 }
-        batchSize: 3
-        limit: 4
+        batchSize: {"$numberLong": "3"}
+        limit: {"$numberLong": "4"}
     expectations:
       -
         command_started_event:
@@ -215,8 +213,8 @@ tests:
             find: *collection_name
             filter: { _id: { $gte : 1 }}
             sort: { _id: 1 }
-            batchSize: 3
-            limit: 4
+            batchSize: {"$numberLong": "3"}
+            limit: {"$numberLong": "4"}
           command_name: "find"
           database_name: *database_name
       -
@@ -236,7 +234,7 @@ tests:
           command:
             getMore: { $numberLong: "42" }
             collection: *collection_name
-            batchSize: 3
+            batchSize: { $numberLong: "1" }
           command_name: "getMore"
           database_name: *database_name
       -
