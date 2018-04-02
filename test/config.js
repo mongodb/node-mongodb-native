@@ -58,18 +58,17 @@ class NativeConfiguration extends ConfigurationBase {
     if (keys.indexOf('sslOnNormalPorts') !== -1) serverOptions.ssl = true;
 
     // Fall back
-    // const dbHost = (serverOptions && serverOptions.host) || 'localhost';
-    // const dbPort = (serverOptions && serverOptions.port) || this.options.port || 27017;
+    const dbHost = (serverOptions && serverOptions.host) || 'localhost';
+    const dbPort = (serverOptions && serverOptions.port) || this.options.port || 27017;
 
-    // // Default topology
-    // const DbTopology = this.options.topology ? this.options.topology : this.mongo.Server;
-    // const topology =
-    //   DbTopology === this.mongo.Server
-    //     ? new DbTopology(dbHost, dbPort, serverOptions, this.mongo)
-    //     : new DbTopology([new this.mongo.Server(dbHost, dbPort, serverOptions)], serverOptions);
+    // Default topology
+    const DbTopology = this.options.topology ? this.options.topology : this.mongo.Server;
 
     // Return a new MongoClient instance
-    return new this.mongo.MongoClient(this.url(), Object.assign({}, dbOptions, serverOptions));
+    return new this.mongo.MongoClient(
+      new DbTopology(dbHost, dbPort, serverOptions, this.mongo),
+      dbOptions
+    );
   }
 
   url(username, password) {
