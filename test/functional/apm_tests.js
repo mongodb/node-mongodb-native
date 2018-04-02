@@ -1,6 +1,6 @@
 'use strict';
 
-const MongoClient = require('../..');
+const MongoClient = require('../..').MongoClient;
 const path = require('path');
 const fs = require('fs');
 const expect = require('chai').expect;
@@ -37,7 +37,11 @@ describe('APM', function() {
     test: function() {
       const started = [];
       const succeeded = [];
-      const client = this.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      const client = this.configuration.newClient(
+        { w: 1 },
+        { poolSize: 1, auto_reconnect: false, enableCommandMonitoring: true }
+      );
+
       client.on('commandStarted', filterForCommands('insert', started));
       client.on('commandSucceeded', filterForCommands('insert', succeeded));
 
@@ -68,8 +72,11 @@ describe('APM', function() {
       const started = [];
       const succeeded = [];
       const self = this;
+      const client = this.configuration.newClient(
+        { w: 1 },
+        { poolSize: 1, auto_reconnect: false, enableCommandMonitoring: true }
+      );
 
-      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
       client.on('commandStarted', filterForCommands('insert', started));
       client.on('commandSucceeded', filterForCommands('insert', succeeded));
 
@@ -97,8 +104,11 @@ describe('APM', function() {
       const ReadPreference = self.configuration.require.ReadPreference;
       const started = [];
       const succeeded = [];
+      const client = self.configuration.newClient(
+        { w: 1 },
+        { poolSize: 1, auto_reconnect: false, enableCommandMonitoring: true }
+      );
 
-      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
       client.on('commandStarted', filterForCommands('listCollections', started));
       client.on('commandSucceeded', filterForCommands('listCollections', succeeded));
 
@@ -116,8 +126,9 @@ describe('APM', function() {
             db.listCollections({}, { readPreference: ReadPreference.SECONDARY }).toArray()
           )
           .then(() => {
+            expect(started).to.have.lengthOf(2);
+
             // Ensure command was not sent to the primary
-            console.dir(started);
             expect(started[0].connectionId).to.not.equal(started[1].connectionId);
             return client.close();
           });
@@ -134,8 +145,11 @@ describe('APM', function() {
       const ReadPreference = self.configuration.require.ReadPreference;
       const started = [];
       const succeeded = [];
+      const client = self.configuration.newClient(
+        { w: 1 },
+        { poolSize: 1, auto_reconnect: false, enableCommandMonitoring: true }
+      );
 
-      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
       const desiredEvents = ['listIndexes', 'find'];
       client.on('commandStarted', filterForCommands(desiredEvents, started));
       client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
@@ -161,6 +175,8 @@ describe('APM', function() {
               .toArray()
           )
           .then(() => {
+            expect(started).to.have.lengthOf(2);
+
             // Ensure command was not sent to the primary
             expect(started[0].connectionId).to.not.equal(started[1].connectionId);
             client.close();
@@ -216,7 +232,7 @@ describe('APM', function() {
 
         const client = self.configuration.newClient(
           { w: 1 },
-          { poolSize: 1, auto_reconnect: false }
+          { poolSize: 1, auto_reconnect: false, enableCommandMonitoring: true }
         );
 
         return client.connect().then(client => {
@@ -252,8 +268,10 @@ describe('APM', function() {
       const started = [];
       const succeeded = [];
       const failed = [];
-
-      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      const client = self.configuration.newClient(
+        { w: 1 },
+        { poolSize: 1, auto_reconnect: false, enableCommandMonitoring: true }
+      );
 
       const desiredEvents = ['find', 'getMore', 'killCursors'];
       client.on('commandStarted', filterForCommands(desiredEvents, started));
@@ -326,8 +344,11 @@ describe('APM', function() {
       const started = [];
       const succeeded = [];
       const failed = [];
+      const client = self.configuration.newClient(
+        { w: 1 },
+        { poolSize: 1, auto_reconnect: false, enableCommandMonitoring: true }
+      );
 
-      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
       const desiredEvents = ['find', 'getMore', 'killCursors'];
       client.on('commandStarted', filterForCommands(desiredEvents, started));
       client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
@@ -383,8 +404,11 @@ describe('APM', function() {
       const self = this;
       const started = [];
       const succeeded = [];
+      const client = self.configuration.newClient(
+        { w: 1 },
+        { poolSize: 1, auto_reconnect: false, enableCommandMonitoring: true }
+      );
 
-      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
       const desiredEvents = ['insert', 'update', 'delete'];
       client.on('commandStarted', filterForCommands(desiredEvents, started));
       client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
@@ -422,8 +446,11 @@ describe('APM', function() {
       const started = [];
       const succeeded = [];
       const failed = [];
+      const client = self.configuration.newClient(
+        { w: 1 },
+        { poolSize: 1, auto_reconnect: false, enableCommandMonitoring: true }
+      );
 
-      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
       const desiredEvents = ['find', 'getMore', 'killCursors', 'explain'];
       client.on('commandStarted', filterForCommands(desiredEvents, started));
       client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
@@ -471,8 +498,11 @@ describe('APM', function() {
       const started = [];
       const succeeded = [];
       const failed = [];
+      const client = self.configuration.newClient(
+        { w: 1 },
+        { poolSize: 1, auto_reconnect: false, enableCommandMonitoring: true }
+      );
 
-      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
       const desiredEvents = ['getnonce'];
       client.on('commandStarted', filterForCommands(desiredEvents, started));
       client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
@@ -501,8 +531,11 @@ describe('APM', function() {
       const self = this;
       const started = [];
       const succeeded = [];
+      const client = self.configuration.newClient(
+        { w: 1 },
+        { poolSize: 1, auto_reconnect: false, enableCommandMonitoring: true }
+      );
 
-      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
       const desiredEvents = ['update'];
       client.on('commandStarted', filterForCommands(desiredEvents, started));
       client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
@@ -534,8 +567,11 @@ describe('APM', function() {
       const self = this;
       const started = [];
       const succeeded = [];
+      const client = self.configuration.newClient(
+        { w: 1 },
+        { poolSize: 1, auto_reconnect: false, enableCommandMonitoring: true }
+      );
 
-      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
       const desiredEvents = ['update'];
       client.on('commandStarted', filterForCommands(desiredEvents, started));
       client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
@@ -567,8 +603,11 @@ describe('APM', function() {
       const self = this;
       const started = [];
       const succeeded = [];
+      const client = self.configuration.newClient(
+        { w: 1 },
+        { poolSize: 1, auto_reconnect: false, enableCommandMonitoring: true }
+      );
 
-      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
       const desiredEvents = ['delete'];
       client.on('commandStarted', filterForCommands(desiredEvents, started));
       client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
@@ -598,7 +637,10 @@ describe('APM', function() {
     // The actual test we wish to run
     test: function() {
       const self = this;
-      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      const client = self.configuration.newClient(
+        { w: 1 },
+        { poolSize: 1, auto_reconnect: false, enableCommandMonitoring: true }
+      );
 
       return client.connect().then(client => {
         const db = client.db(self.configuration.db);
@@ -646,7 +688,11 @@ describe('APM', function() {
       const docs = [];
       for (let i = 0; i < 2500; i++) docs.push({ a: i });
 
-      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      const client = self.configuration.newClient(
+        { w: 1 },
+        { poolSize: 1, auto_reconnect: false, enableCommandMonitoring: true }
+      );
+
       const desiredEvents = ['aggregate', 'getMore'];
       client.on('commandStarted', filterForCommands(desiredEvents, started));
       client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
@@ -688,8 +734,11 @@ describe('APM', function() {
       const self = this;
       const started = [];
       const succeeded = [];
+      const client = self.configuration.newClient(
+        { w: 1 },
+        { poolSize: 1, auto_reconnect: false, enableCommandMonitoring: true }
+      );
 
-      const client = self.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
       const desiredEvents = ['listCollections'];
       client.on('commandStarted', filterForCommands(desiredEvents, started));
       client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
@@ -936,7 +985,9 @@ describe('APM', function() {
             it(test.description, {
               metadata: { requires: requirements },
               test: function() {
-                return MongoClient.connect(this.configuration.url()).then(client => {
+                return MongoClient.connect(this.configuration.url(), {
+                  enableCommandMonitoring: true
+                }).then(client => {
                   expect(client).to.exist;
                   return executeOperation(client, scenario, test).then(() => client.close());
                 });
