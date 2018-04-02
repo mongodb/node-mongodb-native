@@ -469,10 +469,18 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
   if (cmd.max) findCmd.max = cmd.max;
 
   // If we have returnKey set
-  if (cmd.returnKey) findCmd.returnKey = cmd.returnKey;
+  if (cmd.returnKey) {
+    findCmd.returnKey = cmd.returnKey;
+  } else {
+    findCmd.returnKey = false;
+  }
 
   // If we have showDiskLoc set
-  if (cmd.showDiskLoc) findCmd.showRecordId = cmd.showDiskLoc;
+  if (cmd.showDiskLoc) {
+    findCmd.showRecordId = cmd.showDiskLoc;
+  } else {
+    findCmd.showRecordId = false;
+  }
 
   // If we have snapshot set
   if (cmd.snapshot) findCmd.snapshot = cmd.snapshot;
