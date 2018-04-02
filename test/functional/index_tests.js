@@ -983,30 +983,31 @@ describe('Indexes', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
+      var started = [];
+      var succeeded = [];
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+
+      var listener = require('../..').instrument(function(err) {
+        test.equal(null, err);
+      });
+
+      listener.on('started', function(event) {
+        console.log(event);
+        if (event.commandName === 'createIndexes') started.push(event);
+      });
+
+      listener.on('succeeded', function(event) {
+        if (event.commandName === 'createIndexes') succeeded.push(event);
+      });
+
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        var started = [],
-          succeeded = [];
-
-        var listener = require('../..').instrument(function(err) {
-          test.equal(null, err);
-        });
-
-        listener.on('started', function(event) {
-          if (event.commandName === 'createIndexes') started.push(event);
-        });
-
-        listener.on('succeeded', function(event) {
-          if (event.commandName === 'createIndexes') succeeded.push(event);
-        });
 
         db
           .collection('partialIndexes')
           .createIndex({ a: 1 }, { partialFilterExpression: { a: 1 } }, function(err) {
             test.equal(null, err);
             test.deepEqual({ a: 1 }, started[0].command.indexes[0].partialFilterExpression);
-
             listener.uninstrument();
             client.close();
             done();
