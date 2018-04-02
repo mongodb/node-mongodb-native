@@ -1,11 +1,11 @@
 'use strict';
 
 // Core module
-var core = require('mongodb-core'),
-  Instrumentation = require('./lib/apm');
+const core = require('mongodb-core');
+const Instrumentation = require('./lib/apm');
 
 // Set up the connect function
-var connect = require('./lib/mongo_client').connect;
+const connect = require('./lib/mongo_client').connect;
 
 // Expose error class
 connect.MongoError = core.MongoError;
@@ -55,7 +55,10 @@ connect.instrument = function(options, callback) {
     options = {};
   }
 
-  return new Instrumentation(core, options, callback);
+  // return new Instrumentation(core, options, callback);
+  const instrumentation = new Instrumentation();
+  instrumentation.instrument(connect.MongoClient, callback);
+  return instrumentation;
 };
 
 // Set our exports to be the connect function
