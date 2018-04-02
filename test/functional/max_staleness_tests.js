@@ -65,7 +65,7 @@ describe('Max Staleness', function() {
             .toArray(function(err) {
               expect(err).to.not.exist;
               expect(test.checkCommand).to.eql({
-                $query: { find: 'test', filter: {} },
+                $query: { find: 'test', filter: {}, returnKey: false, showRecordId: false },
                 $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
               });
 
@@ -104,7 +104,7 @@ describe('Max Staleness', function() {
           .toArray(function(err) {
             expect(err).to.not.exist;
             expect(test.checkCommand).to.eql({
-              $query: { find: 'test', filter: {} },
+              $query: { find: 'test', filter: {}, returnKey: false, showRecordId: false },
               $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
             });
 
@@ -143,7 +143,7 @@ describe('Max Staleness', function() {
             .toArray(function(err) {
               expect(err).to.not.exist;
               expect(test.checkCommand).to.eql({
-                $query: { find: 'test', filter: {} },
+                $query: { find: 'test', filter: {}, returnKey: false, showRecordId: false },
                 $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
               });
 
@@ -181,7 +181,7 @@ describe('Max Staleness', function() {
           .toArray(function(err) {
             expect(err).to.not.exist;
             expect(test.checkCommand).to.eql({
-              $query: { find: 'test', filter: {} },
+              $query: { find: 'test', filter: {}, returnKey: false, showRecordId: false },
               $readPreference: { mode: 'secondary', maxStalenessSeconds: 250 }
             });
 
