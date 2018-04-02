@@ -111,6 +111,7 @@ var handlers = ['connect', 'close', 'error', 'timeout', 'parseError'];
  * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
  * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
  * @param {boolean} [options.domainsEnabled=false] Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit.
+ * @param {boolean} [options.enableCommandMonitoring=false] Enable command monitoring for this topology
  * @return {Mongos} A cursor instance
  * @fires Mongos#connect
  * @fires Mongos#reconnect
@@ -177,7 +178,8 @@ var Mongos = function(seedlist, options) {
     // Client info
     clientInfo: createClientInfo(options),
     // Authentication context
-    authenticationContexts: []
+    authenticationContexts: [],
+    enableCommandMonitoring: typeof options.enableCommandMonitoring === 'boolean' ? options.enableCommandMonitoring : false,
   };
 
   // Set the client info
@@ -467,6 +469,12 @@ function connectProxies(self, servers) {
       server.once('parseError', handleInitialConnectEvent(self, 'parseError'));
       server.once('error', handleInitialConnectEvent(self, 'error'));
       server.once('connect', handleInitialConnectEvent(self, 'connect'));
+
+      // Command Monitoring events
+      server.on('commandStarted', event => self.emit('commandStarted', event));
+      server.on('commandSucceeded', event => self.emit('commandSucceeded', event));
+      server.on('commandFailed', event => self.emit('commandFailed', event));
+
       // Start connection
       server.connect(self.s.connectOptions);
     }, timeoutInterval);
@@ -638,6 +646,11 @@ function reconnectProxies(self, proxies, callback) {
       server.once('timeout', _handleEvent(self, 'timeout'));
       server.once('error', _handleEvent(self, 'error'));
       server.once('parseError', _handleEvent(self, 'parseError'));
+
+      // Command Monitoring events
+      server.on('commandStarted', event => self.emit('commandStarted', event));
+      server.on('commandSucceeded', event => self.emit('commandSucceeded', event));
+      server.on('commandFailed', event => self.emit('commandFailed', event));
 
       // Connect to proxy
       server.connect(self.s.connectOptions);
@@ -1446,6 +1459,28 @@ function emitTopologyDescriptionChanged(self) {
  * A topology serverHeartbeatSucceeded SDAM change event
  *
  * @event Mongos#serverHeartbeatSucceeded
+ * @type {object}
+ */
+
+
+/**
+ * An event emitted indicating a command was started, if command monitoring is enabled
+ *
+ * @event Mongos#commandStarted
+ * @type {object}
+ */
+
+/**
+ * An event emitted indicating a command succeeded, if command monitoring is enabled
+ *
+ * @event Mongos#commandSucceeded
+ * @type {object}
+ */
+
+ /**
+ * An event emitted indicating a command failed, if command monitoring is enabled
+ *
+ * @event Mongos#commandFailed
  * @type {object}
  */
 

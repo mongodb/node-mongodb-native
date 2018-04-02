@@ -98,6 +98,7 @@ var handlers = ['connect', 'close', 'error', 'timeout', 'parseError'];
  * @param {number} [options.pingInterval=5000] Ping interval to check the response time to the different servers
  * @param {number} [options.localThresholdMS=15] Cutoff latency point in MS for Replicaset member selection
  * @param {boolean} [options.domainsEnabled=false] Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit.
+ * @param {boolean} [options.enableCommandMonitoring=false] Enable command monitoring for this topology
  * @return {ReplSet} A cursor instance
  * @fires ReplSet#connect
  * @fires ReplSet#ha
@@ -197,7 +198,8 @@ var ReplSet = function(seedlist, options) {
     // Client info
     clientInfo: createClientInfo(options),
     // Authentication context
-    authenticationContexts: []
+    authenticationContexts: [],
+    enableCommandMonitoring: typeof options.enableCommandMonitoring === 'boolean' ? options.enableCommandMonitoring : false,
   };
 
   // Add handler for topology change
@@ -402,15 +404,15 @@ function connectNewServers(self, servers, callback) {
       server.once('parseError', _handleEvent(self, 'parseError'));
 
       // SDAM Monitoring events
-      server.on('serverOpening', function(e) {
-        self.emit('serverOpening', e);
-      });
-      server.on('serverDescriptionChanged', function(e) {
-        self.emit('serverDescriptionChanged', e);
-      });
-      server.on('serverClosed', function(e) {
-        self.emit('serverClosed', e);
-      });
+      server.on('serverOpening', e => self.emit('serverOpening', e));
+      server.on('serverDescriptionChanged', e => self.emit('serverDescriptionChanged', e));
+      server.on('serverClosed', e => self.emit('serverClosed', e));
+
+      // Command Monitoring events
+      server.on('commandStarted', event => self.emit('commandStarted', event));
+      server.on('commandSucceeded', event => self.emit('commandSucceeded', event));
+      server.on('commandFailed', event => self.emit('commandFailed', event));
+
       server.connect(self.s.connectOptions);
     }, i);
   }
@@ -934,16 +936,17 @@ function connectServers(self, servers) {
       server.once('parseError', handleInitialConnectEvent(self, 'parseError'));
       server.once('error', handleInitialConnectEvent(self, 'error'));
       server.once('connect', handleInitialConnectEvent(self, 'connect'));
+
       // SDAM Monitoring events
-      server.on('serverOpening', function(e) {
-        self.emit('serverOpening', e);
-      });
-      server.on('serverDescriptionChanged', function(e) {
-        self.emit('serverDescriptionChanged', e);
-      });
-      server.on('serverClosed', function(e) {
-        self.emit('serverClosed', e);
-      });
+      server.on('serverOpening', e => self.emit('serverOpening', e));
+      server.on('serverDescriptionChanged', e => self.emit('serverDescriptionChanged', e));
+      server.on('serverClosed', e => self.emit('serverClosed', e));
+
+      // Command Monitoring events
+      server.on('commandStarted', event => self.emit('commandStarted', event));
+      server.on('commandSucceeded', event => self.emit('commandSucceeded', event));
+      server.on('commandFailed', event => self.emit('commandFailed', event));
+
       // Start connection
       server.connect(self.s.connectOptions);
     }, timeoutInterval);
@@ -1670,6 +1673,27 @@ ReplSet.prototype.cursor = function(ns, cmd, options) {
  * A topology serverHeartbeatSucceeded SDAM change event
  *
  * @event ReplSet#serverHeartbeatSucceeded
+ * @type {object}
+ */
+
+/**
+ * An event emitted indicating a command was started, if command monitoring is enabled
+ *
+ * @event ReplSet#commandStarted
+ * @type {object}
+ */
+
+/**
+ * An event emitted indicating a command succeeded, if command monitoring is enabled
+ *
+ * @event ReplSet#commandSucceeded
+ * @type {object}
+ */
+
+ /**
+ * An event emitted indicating a command failed, if command monitoring is enabled
+ *
+ * @event ReplSet#commandFailed
  * @type {object}
  */
 
