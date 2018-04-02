@@ -178,8 +178,7 @@ var Mongos = function(seedlist, options) {
     // Client info
     clientInfo: createClientInfo(options),
     // Authentication context
-    authenticationContexts: [],
-    enableCommandMonitoring: typeof options.enableCommandMonitoring === 'boolean' ? options.enableCommandMonitoring : false,
+    authenticationContexts: []
   };
 
   // Set the client info
@@ -1462,7 +1461,6 @@ function emitTopologyDescriptionChanged(self) {
  * @type {object}
  */
 
-
 /**
  * An event emitted indicating a command was started, if command monitoring is enabled
  *
@@ -1477,7 +1475,7 @@ function emitTopologyDescriptionChanged(self) {
  * @type {object}
  */
 
- /**
+/**
  * An event emitted indicating a command failed, if command monitoring is enabled
  *
  * @event Mongos#commandFailed

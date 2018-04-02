@@ -1231,20 +1231,29 @@ Pool.prototype.write = function(commands, options, cb) {
 
   // If command monitoring is enabled we need to modify the callback here
   if (self.options.enableCommandMonitoring) {
-   // NOTE: there is only ever a single command, for some legay reason I am unaware of we
-   //       treat this as a potential array of commands
+    // NOTE: there is only ever a single command, for some legay reason I am unaware of we
+    //       treat this as a potential array of commands
     const command = commands[0];
     this.emit('commandStarted', new apm.CommandStartedEvent(this, command));
 
     operation.started = Date.now();
     operation.cb = (err, reply) => {
       if (err) {
-        self.emit('commandFailed', new apm.CommandFailedEvent(this, command, err, operation.started));
+        self.emit(
+          'commandFailed',
+          new apm.CommandFailedEvent(this, command, err, operation.started)
+        );
       } else {
         if (reply.result.ok === 0) {
-          self.emit('commandFailed', new apm.CommandFailedEvent(this, command, reply.result, operation.started));
+          self.emit(
+            'commandFailed',
+            new apm.CommandFailedEvent(this, command, reply.result, operation.started)
+          );
         } else {
-          self.emit('commandSucceeded', new apm.CommandSucceededEvent(this, command, reply, operation.started));
+          self.emit(
+            'commandSucceeded',
+            new apm.CommandSucceededEvent(this, command, reply, operation.started)
+          );
         }
       }
 

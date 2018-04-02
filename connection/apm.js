@@ -14,13 +14,12 @@ const SENSITIVE_COMMANDS = [
 ];
 
 // helper methods
-function extractCommand(command) { return command.query ? command.query : command; }
-function extractCommandName(command) { return Object.keys(command)[0]; }
-function calculateDuration(started) { return Date.now() - started; }
-function generateConnectionId(pool) { return `${pool.options.host}:${pool.options.port}`; }
-function maybeRedact(commandName, result) {
-  return SENSITIVE_COMMANDS.indexOf(commandName) !== -1 ? {} : result;
-}
+const extractCommand = command => (command.query ? command.query : command);
+const extractCommandName = command => Object.keys(command)[0];
+const calculateDuration = started => Date.now() - started;
+const generateConnectionId = pool => `${pool.options.host}:${pool.options.port}`;
+const maybeRedact = (commandName, result) =>
+  SENSITIVE_COMMANDS.indexOf(commandName) !== -1 ? {} : result;
 
 /** An event indicating the start of a given command */
 class CommandStartedEvent {
@@ -30,7 +29,7 @@ class CommandStartedEvent {
    * @param {Pool} pool the pool that originated the command
    * @param {Object} command the command
    */
-  constructor (pool, command) {
+  constructor(pool, command) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
 
@@ -48,7 +47,7 @@ class CommandStartedEvent {
       connectionId: generateConnectionId(pool)
     });
   }
-};
+}
 
 /** An event indicating the success of a given command */
 class CommandSucceededEvent {
@@ -72,7 +71,7 @@ class CommandSucceededEvent {
       connectionId: generateConnectionId(pool)
     });
   }
-};
+}
 
 /** An event indicating the failure of a given command */
 class CommandFailedEvent {
@@ -96,7 +95,7 @@ class CommandFailedEvent {
       connectionId: generateConnectionId(pool)
     });
   }
-};
+}
 
 module.exports = {
   CommandStartedEvent,
