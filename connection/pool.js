@@ -16,6 +16,8 @@ var inherits = require('util').inherits,
   uncompressibleCommands = require('../wireprotocol/compression').uncompressibleCommands,
   resolveClusterTime = require('../topologies/shared').resolveClusterTime;
 
+const apm = require('./apm');
+
 var MongoCR = require('../auth/mongocr'),
   X509 = require('../auth/x509'),
   Plain = require('../auth/plain'),
@@ -1225,6 +1227,29 @@ Pool.prototype.write = function(commands, options, cb) {
         Object.assign(command, sessionOptions);
       }
     });
+  }
+
+  // If command monitoring is enabled we need to modify the callback here
+  if (self.options.enableCommandMonitoring) {
+   // NOTE: there is only ever a single command, for some legay reason I am unaware of we
+   //       treat this as a potential array of commands
+    const command = commands[0];
+    this.emit('commandStarted', new apm.CommandStartedEvent(this, command));
+
+    operation.started = Date.now();
+    operation.cb = (err, reply) => {
+      if (err) {
+        self.emit('commandFailed', new apm.CommandFailedEvent(this, command, err, operation.started));
+      } else {
+        if (reply.result.ok === 0) {
+          self.emit('commandFailed', new apm.CommandFailedEvent(this, command, reply.result, operation.started));
+        } else {
+          self.emit('commandSucceeded', new apm.CommandSucceededEvent(this, command, reply, operation.started));
+        }
+      }
+
+      cb(err, reply);
+    };
   }
 
   // Prepare the operation buffer
