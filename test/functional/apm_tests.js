@@ -1,6 +1,7 @@
 'use strict';
 
 const MongoClient = require('../..').MongoClient;
+const instrument = require('../..').instrument;
 const path = require('path');
 const fs = require('fs');
 const expect = require('chai').expect;
@@ -28,6 +29,116 @@ function ignoreNsNotFound(err) {
 describe('APM', function() {
   before(function() {
     setupDatabase(this.configuration);
+  });
+
+  it(
+    'should support legacy `instrument`/`uninstrument` methods with MongoClient.prototype.connect',
+    {
+      metadata: { requires: { topology: ['single', 'replicaset', 'sharded'] } },
+
+      // The actual test we wish to run
+      test: function() {
+        let started = [];
+        let succeeded = [];
+
+        const instrumentation = instrument();
+        instrumentation.on('started', filterForCommands('insert', started));
+        instrumentation.on('succeeded', filterForCommands('insert', succeeded));
+
+        let client = this.configuration.newClient(
+          { w: 1 },
+          { poolSize: 1, auto_reconnect: false, enableCommandMonitoring: true }
+        );
+
+        return client
+          .connect()
+          .then(client =>
+            client
+              .db(this.configuration.db)
+              .collection('apm_test')
+              .insertOne({ a: 1 })
+          )
+          .then(r => {
+            expect(r.insertedCount).to.equal(1);
+            expect(started.length).to.equal(1);
+            expect(started[0].commandName).to.equal('insert');
+            expect(started[0].command.insert).to.equal('apm_test');
+            expect(succeeded.length).to.equal(1);
+            instrumentation.uninstrument();
+            return client.close();
+          })
+          .then(() => {
+            started = [];
+            succeeded = [];
+            client = this.configuration.newClient(
+              { w: 1 },
+              { poolSize: 1, auto_reconnect: false, enableCommandMonitoring: true }
+            );
+
+            return client.connect();
+          })
+          .then(() =>
+            client
+              .db(this.configuration.db)
+              .collection('apm_test')
+              .insertOne({ a: 1 })
+          )
+          .then(r => {
+            expect(r.insertedCount).to.equal(1);
+            expect(started.length).to.equal(0);
+            expect(succeeded.length).to.equal(0);
+            return client.close();
+          });
+      }
+    }
+  );
+
+  it('should support legacy `instrument`/`uninstrument` methods with MongoClient.connect', {
+    metadata: { requires: { topology: ['single', 'replicaset', 'sharded'] } },
+
+    // The actual test we wish to run
+    test: function() {
+      let started = [];
+      let succeeded = [];
+
+      const instrumentation = instrument();
+      instrumentation.on('started', filterForCommands('insert', started));
+      instrumentation.on('succeeded', filterForCommands('insert', succeeded));
+
+      const uri = this.configuration.url();
+      return MongoClient.connect(uri, { enableCommandMonitoring: true }).then(client => {
+        return client
+          .db(this.configuration.db)
+          .collection('apm_test')
+          .insertOne({ a: 1 })
+          .then(r => {
+            expect(r.insertedCount).to.equal(1);
+            expect(started.length).to.equal(1);
+            expect(started[0].commandName).to.equal('insert');
+            expect(started[0].command.insert).to.equal('apm_test');
+            expect(succeeded.length).to.equal(1);
+            instrumentation.uninstrument();
+            return client.close();
+          })
+          .then(() => {
+            started = [];
+            succeeded = [];
+            return MongoClient.connect(uri, { enableCommandMonitoring: true });
+          })
+          .then(newClient => {
+            return newClient
+              .db(this.configuration.db)
+              .collection('apm_test')
+              .insertOne({ a: 1 })
+              .then(r => {
+                expect(r.insertedCount).to.equal(1);
+                expect(started.length).to.equal(0);
+                expect(succeeded.length).to.equal(0);
+                return newClient.close();
+              });
+          });
+      });
+    }
   });
 
   it('should correctly receive the APM events for an insert', {
