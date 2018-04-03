@@ -315,7 +315,8 @@ GetMore.prototype.toBin = function() {
 /**************************************************************
  * KILLCURSOR
  **************************************************************/
-var KillCursor = function(bson, cursorIds) {
+var KillCursor = function(bson, ns, cursorIds) {
+  this.ns = ns;
   this.requestId = _requestId++;
   this.cursorIds = cursorIds;
 };
