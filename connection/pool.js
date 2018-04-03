@@ -1244,7 +1244,7 @@ Pool.prototype.write = function(commands, options, cb) {
           new apm.CommandFailedEvent(this, command, err, operation.started)
         );
       } else {
-        if (reply && reply.result && reply.result.ok === 0) {
+        if (reply && reply.result && (reply.result.ok === 0 || reply.result.$err)) {
           self.emit(
             'commandFailed',
             new apm.CommandFailedEvent(this, command, reply.result, operation.started)
@@ -1257,7 +1257,7 @@ Pool.prototype.write = function(commands, options, cb) {
         }
       }
 
-      cb(err, reply);
+      if (typeof cb === 'function') cb(err, reply);
     };
   }
 
