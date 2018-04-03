@@ -216,41 +216,33 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   var numberToSkip = cursorState.skip || 0;
   // Build actual find command
   var findCmd = {};
-  // Using special modifier
-  var usesSpecialModifier = false;
 
   // We have a Mongos topology, check if we need to add a readPreference
   if (topology.type === 'mongos' && readPreference) {
     findCmd['$readPreference'] = readPreference.toJSON();
-    usesSpecialModifier = true;
   }
 
   // Add special modifiers to the query
-  if (cmd.sort) (findCmd['orderby'] = cmd.sort), (usesSpecialModifier = true);
-  if (cmd.hint) (findCmd['$hint'] = cmd.hint), (usesSpecialModifier = true);
-  if (cmd.snapshot) (findCmd['$snapshot'] = cmd.snapshot), (usesSpecialModifier = true);
-  if (cmd.returnKey) (findCmd['$returnKey'] = cmd.returnKey), (usesSpecialModifier = true);
-  if (cmd.maxScan) (findCmd['$maxScan'] = cmd.maxScan), (usesSpecialModifier = true);
-  if (cmd.min) (findCmd['$min'] = cmd.min), (usesSpecialModifier = true);
-  if (cmd.max) (findCmd['$max'] = cmd.max), (usesSpecialModifier = true);
-  if (cmd.showDiskLoc) (findCmd['$showDiskLoc'] = cmd.showDiskLoc), (usesSpecialModifier = true);
-  if (cmd.comment) (findCmd['$comment'] = cmd.comment), (usesSpecialModifier = true);
-  if (cmd.maxTimeMS) (findCmd['$maxTimeMS'] = cmd.maxTimeMS), (usesSpecialModifier = true);
+  if (typeof cmd.sort !== 'undefined') findCmd['$orderby'] = cmd.sort;
+  if (typeof cmd.hint !== 'undefined') findCmd['$hint'] = cmd.hint;
+  if (typeof cmd.snapshot !== 'undefined') findCmd['$snapshot'] = cmd.snapshot;
+  if (typeof cmd.returnKey !== 'undefined') findCmd['$returnKey'] = cmd.returnKey;
+  if (typeof cmd.maxScan !== 'undefined') findCmd['$maxScan'] = cmd.maxScan;
+  if (typeof cmd.min !== 'undefined') findCmd['$min'] = cmd.min;
+  if (typeof cmd.max !== 'undefined') findCmd['$max'] = cmd.max;
+  if (typeof cmd.showDiskLoc !== 'undefined') findCmd['$showDiskLoc'] = cmd.showDiskLoc;
+  if (typeof cmd.comment !== 'undefined') findCmd['$comment'] = cmd.comment;
+  if (typeof cmd.maxTimeMS !== 'undefined') findCmd['$maxTimeMS'] = cmd.maxTimeMS;
 
   if (cmd.explain) {
     // nToReturn must be 0 (match all) or negative (match N and close cursor)
     // nToReturn > 0 will give explain results equivalent to limit(0)
     numberToReturn = -Math.abs(cmd.limit || 0);
-    usesSpecialModifier = true;
     findCmd['$explain'] = true;
   }
 
-  // If we have a special modifier
-  if (usesSpecialModifier) {
-    findCmd['$query'] = cmd.query;
-  } else {
-    findCmd = cmd.query;
-  }
+  // Add the query
+  findCmd['$query'] = cmd.query;
 
   // Throw on majority readConcern passed in
   if (cmd.readConcern && cmd.readConcern.level !== 'local') {

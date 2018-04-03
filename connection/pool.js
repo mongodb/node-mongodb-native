@@ -1244,7 +1244,7 @@ Pool.prototype.write = function(commands, options, cb) {
           new apm.CommandFailedEvent(this, command, err, operation.started)
         );
       } else {
-        if (reply.result.ok === 0) {
+        if (reply && reply.result && reply.result.ok === 0) {
           self.emit(
             'commandFailed',
             new apm.CommandFailedEvent(this, command, reply.result, operation.started)

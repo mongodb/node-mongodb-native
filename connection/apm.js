@@ -1,4 +1,7 @@
 'use strict';
+// const KillCursor = require('../connection/commands').KillCursor;
+const GetMore = require('../connection/commands').GetMore;
+// const Query = require('../connection/commands').Query;
 
 /** Commands that we want to redact because of the sensitive nature of their contents */
 const SENSITIVE_COMMANDS = [
@@ -14,12 +17,87 @@ const SENSITIVE_COMMANDS = [
 ];
 
 // helper methods
-const extractCommand = command => (command.query ? command.query : command);
 const extractCommandName = command => Object.keys(command)[0];
 const calculateDuration = started => Date.now() - started;
 const generateConnectionId = pool => `${pool.options.host}:${pool.options.port}`;
 const maybeRedact = (commandName, result) =>
   SENSITIVE_COMMANDS.indexOf(commandName) !== -1 ? {} : result;
+
+const LEGACY_FIND_QUERY_MAP = {
+  $query: 'filter',
+  $orderby: 'sort',
+  $hint: 'hint',
+  $comment: 'comment',
+  $maxScan: 'maxScan',
+  $max: 'max',
+  $min: 'min',
+  $returnKey: 'returnKey',
+  $showDiskLoc: 'showRecordId',
+  $maxTimeMS: 'maxTimeMS',
+  $snapshot: 'snapshot'
+};
+
+const LEGACY_FIND_OPTIONS_MAP = {
+  numberToSkip: 'skip',
+  numberToReturn: 'batchSize',
+  returnFieldsSelector: 'projection'
+};
+
+const OP_QUERY_KEYS = [
+  'tailable',
+  'oplogReplay',
+  'noCursorTimeout',
+  'awaitData',
+  'partial',
+  'exhaust'
+];
+
+/**
+ * Extract the actual command from the query, possibly upconverting if it's a legacy
+ * format
+ *
+ * @param {Object} command the command
+ */
+const extractCommand = command => {
+  if (command instanceof GetMore) {
+    return {
+      getMore: command.cursorId,
+      collection: command.ns.split('.')[1],
+      batchSize: command.numberToReturn
+    };
+  }
+
+  if (command.query && typeof command.query.$query !== 'undefined') {
+    // upconvert legacy find command
+    const result = { find: command.ns.split('.')[1] };
+    Object.keys(LEGACY_FIND_QUERY_MAP).forEach(key => {
+      if (typeof command.query[key] !== 'undefined')
+        result[LEGACY_FIND_QUERY_MAP[key]] = command.query[key];
+    });
+
+    Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
+      if (typeof command.options[key] !== 'undefined')
+        result[LEGACY_FIND_OPTIONS_MAP[key]] = command.options[key];
+    });
+
+    OP_QUERY_KEYS.forEach(key => {
+      if (command[key]) result[key] = command[key];
+    });
+
+    return result;
+  }
+
+  /*
+  else if (command instanceof KillCursor) {
+    return {
+      killCursors
+    }
+    killCursors: parts.join('.'),
+    cursors: [cursorId]
+  }*/
+
+  return command.query ? command.query : command;
+};
 
 /** An event indicating the start of a given command */
 class CommandStartedEvent {
