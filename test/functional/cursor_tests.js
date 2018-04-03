@@ -4252,16 +4252,8 @@ describe('Cursor', function() {
                       );
                     }
 
-                    expect(response)
-                      .to.be.an('object')
-                      .and.to.deep.include({
-                        ok: 1,
-                        cursorsAlive: [],
-                        cursorsNotFound: [],
-                        cursorsUnknown: [],
-                        cursorsKilled: [longId]
-                      });
-
+                    expect(response.ok).to.equal(1);
+                    expect(response.cursorsKilled[0].equals(longId)).to.be.ok;
                     cursor.close();
                     client.close();
                   });
