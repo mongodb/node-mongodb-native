@@ -1,24 +1,24 @@
 'use strict';
 
-var inherits = require('util').inherits,
-  f = require('util').format,
-  EventEmitter = require('events').EventEmitter,
-  ReadPreference = require('./read_preference'),
-  BasicCursor = require('../cursor'),
-  retrieveBSON = require('../connection/utils').retrieveBSON,
-  Logger = require('../connection/logger'),
-  MongoError = require('../error').MongoError,
-  errors = require('../error'),
-  Server = require('./server'),
-  ReplSetState = require('./replset_state'),
-  clone = require('./shared').clone,
-  Timeout = require('./shared').Timeout,
-  Interval = require('./shared').Interval,
-  createClientInfo = require('./shared').createClientInfo,
-  SessionMixins = require('./shared').SessionMixins,
-  isRetryableWritesSupported = require('./shared').isRetryableWritesSupported,
-  getNextTransactionNumber = require('./shared').getNextTransactionNumber,
-  relayEvents = require('./shared').relayEvents;
+const inherits = require('util').inherits;
+const f = require('util').format;
+const EventEmitter = require('events').EventEmitter;
+const ReadPreference = require('./read_preference');
+const BasicCursor = require('../cursor');
+const retrieveBSON = require('../connection/utils').retrieveBSON;
+const Logger = require('../connection/logger');
+const MongoError = require('../error').MongoError;
+const errors = require('../error');
+const Server = require('./server');
+const ReplSetState = require('./replset_state');
+const clone = require('./shared').clone;
+const Timeout = require('./shared').Timeout;
+const Interval = require('./shared').Interval;
+const createClientInfo = require('./shared').createClientInfo;
+const SessionMixins = require('./shared').SessionMixins;
+const isRetryableWritesSupported = require('./shared').isRetryableWritesSupported;
+const incrementTransactionNumber = require('./shared').incrementTransactionNumber;
+const relayEvents = require('./shared').relayEvents;
 
 var MongoCR = require('../auth/mongocr'),
   X509 = require('../auth/x509'),
@@ -1230,7 +1230,7 @@ function executeWriteOperation(args, options, callback) {
 
   // increment and assign txnNumber
   if (willRetryWrite) {
-    options.txnNumber = getNextTransactionNumber(options.session);
+    incrementTransactionNumber(options.session);
   }
 
   return self.s.replicaSetState.primary[op](ns, ops, options, handler);

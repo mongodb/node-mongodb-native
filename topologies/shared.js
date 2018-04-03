@@ -425,9 +425,8 @@ const isRetryableWritesSupported = function(topology) {
  *
  * @param {ClientSession} session
  */
-const getNextTransactionNumber = function(session) {
+const incrementTransactionNumber = function(session) {
   session.serverSession.txnNumber++;
-  return BSON.Long.fromNumber(session.serverSession.txnNumber);
 };
 
 /**
@@ -454,5 +453,5 @@ module.exports.diff = diff;
 module.exports.Interval = Interval;
 module.exports.Timeout = Timeout;
 module.exports.isRetryableWritesSupported = isRetryableWritesSupported;
-module.exports.getNextTransactionNumber = getNextTransactionNumber;
+module.exports.incrementTransactionNumber = incrementTransactionNumber;
 module.exports.relayEvents = relayEvents;

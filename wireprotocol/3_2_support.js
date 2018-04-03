@@ -1,14 +1,14 @@
 'use strict';
 
-var Query = require('../connection/commands').Query,
-  retrieveBSON = require('../connection/utils').retrieveBSON,
-  f = require('util').format,
-  MongoError = require('../error').MongoError,
-  MongoNetworkError = require('../error').MongoNetworkError,
-  getReadPreference = require('./shared').getReadPreference;
+const Query = require('../connection/commands').Query;
+const retrieveBSON = require('../connection/utils').retrieveBSON;
+const f = require('util').format;
+const MongoError = require('../error').MongoError;
+const MongoNetworkError = require('../error').MongoNetworkError;
+const getReadPreference = require('./shared').getReadPreference;
 
-var BSON = retrieveBSON(),
-  Long = BSON.Long;
+const BSON = retrieveBSON();
+const Long = BSON.Long;
 
 var WireProtocol = function(legacyWireProtocol) {
   this.legacyWireProtocol = legacyWireProtocol;
@@ -57,8 +57,20 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
   }
 
   // optionally add a `txnNumber` if retryable writes are being attempted
-  if (typeof options.txnNumber !== 'undefined') {
-    writeCommand.txnNumber = options.txnNumber;
+  if (options.session && options.session.serverSession) {
+    const serverSession = options.session.serverSession;
+    if (serverSession.txnNumber) {
+      writeCommand.txnNumber = BSON.Long.fromNumber(serverSession.txnNumber);
+    }
+
+    if (typeof serverSession.stmtId !== 'undefined') {
+      writeCommand.stmtId = serverSession.stmtId;
+
+      if (serverSession.stmtId === 0) {
+        writeCommand.startTransaction = true;
+        writeCommand.autocommit = false;
+      }
+    }
   }
 
   // Options object

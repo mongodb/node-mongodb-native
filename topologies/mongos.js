@@ -1,23 +1,22 @@
 'use strict';
 
-const inherits = require('util').inherits,
-  f = require('util').format,
-  EventEmitter = require('events').EventEmitter,
-  BasicCursor = require('../cursor'),
-  Logger = require('../connection/logger'),
-  retrieveBSON = require('../connection/utils').retrieveBSON,
-  MongoError = require('../error').MongoError,
-  errors = require('../error'),
-  Server = require('./server'),
-  clone = require('./shared').clone,
-  diff = require('./shared').diff,
-  cloneOptions = require('./shared').cloneOptions,
-  createClientInfo = require('./shared').createClientInfo,
-  SessionMixins = require('./shared').SessionMixins,
-  isRetryableWritesSupported = require('./shared').isRetryableWritesSupported,
-  getNextTransactionNumber = require('./shared').getNextTransactionNumber,
-  relayEvents = require('./shared').relayEvents;
-
+const inherits = require('util').inherits;
+const f = require('util').format;
+const EventEmitter = require('events').EventEmitter;
+const BasicCursor = require('../cursor');
+const Logger = require('../connection/logger');
+const retrieveBSON = require('../connection/utils').retrieveBSON;
+const MongoError = require('../error').MongoError;
+const errors = require('../error');
+const Server = require('./server');
+const clone = require('./shared').clone;
+const diff = require('./shared').diff;
+const cloneOptions = require('./shared').cloneOptions;
+const createClientInfo = require('./shared').createClientInfo;
+const SessionMixins = require('./shared').SessionMixins;
+const isRetryableWritesSupported = require('./shared').isRetryableWritesSupported;
+const incrementTransactionNumber = require('./shared').incrementTransactionNumber;
+const relayEvents = require('./shared').relayEvents;
 const BSON = retrieveBSON();
 
 /**
@@ -909,7 +908,7 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
   }
 
   // increment and assign txnNumber
-  options.txnNumber = getNextTransactionNumber(options.session);
+  incrementTransactionNumber(options.session);
 
   server[op](ns, ops, options, (err, result) => {
     if (!err) return callback(null, result);

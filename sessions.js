@@ -1,15 +1,37 @@
 'use strict';
 
-const retrieveBSON = require('./connection/utils').retrieveBSON,
-  EventEmitter = require('events'),
-  BSON = retrieveBSON(),
-  Binary = BSON.Binary,
-  uuidV4 = require('./utils').uuidV4;
+const retrieveBSON = require('./connection/utils').retrieveBSON;
+const EventEmitter = require('events');
+const BSON = retrieveBSON();
+const Binary = BSON.Binary;
+const uuidV4 = require('./utils').uuidV4;
+const MongoError = require('./error').MongoError;
 
-/**
- *
- */
+function assertAlive(session, callback) {
+  if (session.serverSession == null) {
+    const error = new MongoError('Cannot use a session that has ended');
+    if (typeof callback === 'function') {
+      return callback(error, null);
+    }
+
+    throw error;
+  }
+};
+
+/** A class representing a client session on the server */
 class ClientSession extends EventEmitter {
+
+  /**
+   * Create a client session.
+   * WARNING: not meant to be instantiated directly
+   *
+   * @param {Topology} topology The current client's topology
+   * @param {ServerSessionPool} sessionPool The server session pool
+   * @param {Object} [options] Optional settings
+   * @param {Boolean} [options.causalConsistency] Whether causal consistency should be enabled on this session
+   * @param {Boolean} [options.autoStartTransaction=false] When enabled this session automatically starts a transaction with the provided defaultTransactionOptions.
+   * @param {Object} [options.defaultTransactionOptions] The default TransactionOptions to use for transactions started on this session.
+   */
   constructor(topology, sessionPool, options) {
     super();
 
@@ -42,10 +64,20 @@ class ClientSession extends EventEmitter {
 
     this.explicit = !!options.explicit;
     this.owner = options.owner;
+    this.transactionOptions = null;
+    this.defaultTransactionOptions = options.defaultTransactionOptions || {};
+
+    if (options.autoStartTransaction) {
+      this.startTransaction();
+    }
   }
 
   /**
+   * Ends this session on the server
    *
+   * @param {Object} [options] Optional settings
+   * @param {Boolean} [options.skipCommand] Skip sending the actual endSessions command to the server
+   * @param {Function} [callback] Optional callback for completion of this operation
    */
   endSession(options, callback) {
     if (typeof options === 'function') (callback = options), (options = {});
@@ -54,6 +86,10 @@ class ClientSession extends EventEmitter {
     if (this.hasEnded) {
       if (typeof callback === 'function') callback(null, null);
       return;
+    }
+
+    if (this.serverSession && this.inTransaction()) {
+      this.abortTransaction();  // pass in callback?
     }
 
     if (!options.skipCommand) {
@@ -98,6 +134,98 @@ class ClientSession extends EventEmitter {
 
     return this.id.id.buffer.equals(session.id.id.buffer);
   }
+
+  /**
+   * @returns whether this session is current in a transaction or not
+   */
+  inTransaction() {
+    return this.transactionOptions != null;
+  }
+
+  /**
+   * Starts a new transaction with the given options.
+   *
+   * @param {Object} options Optional settings
+   * @param {ReadConcern} [options.readConcern] The readConcern to use for this transaction
+   * @param {WriteConcern} [options.writeConcern] The writeConcern to use for this transaction
+   */
+  startTransaction(options) {
+    assertAlive(this);
+    if (this.inTransaction()) {
+      throw new MongoError('Transaction already started');
+    }
+
+    // increment txnNumber and reset stmtId to zero.
+    this.serverSession.txnNumber += 1;
+    this.serverSession.stmtId = 0;
+
+    // set transaction options, we will use this to determine if we are in a transaction
+    this.transactionOptions = options || this.defaultTransactionOptions;
+  }
+
+  /**
+   * Commits the currently active transaction in this session.
+   *
+   * @param {Function} [callback] optional callback for completion of this operation
+   * @return {Promise} A promise is returned if no callback is provided
+   */
+  commitTransaction(callback) {
+    if (typeof callback === 'function') {
+      endTransaction(this, 'commitTransaction', callback);
+      return;
+    }
+
+    return new Promise((resolve, reject) => {
+      endTransaction(this, 'commitTransaction', (err, reply) => err ? reject(err) : resolve(reply));
+    });
+  }
+
+  /**
+   * Aborts the currently active transaction in this session.
+   *
+   * @param {Function} [callback] optional callback for completion of this operation
+   * @return {Promise} A promise is returned if no callback is provided
+   */
+  abortTransaction(callback) {
+    if (typeof callback === 'function') {
+      endTransaction(this, 'abortTransaction', callback);
+      return;
+    }
+
+    return new Promise((resolve, reject) => {
+      endTransaction(this, 'abortTransaction', (err, reply) => err ? reject(err) : resolve(reply));
+    });
+
+  }
+}
+
+function endTransaction(clientSession, commandName, callback) {
+  assertAlive(clientSession, callback);
+
+  if (!clientSession.inTransaction()) {
+    callback(new MongoError('No transaction started'));
+    return;
+  }
+
+  if (clientSession.serverSession.stmtId === 0) {
+    // The server transaction was never started.
+    callback(null, null);
+    return;
+  }
+
+  // send the command
+  clientSession.topology.command('admin.$cmd', { [commandName]: 1 }, {
+    writeConcern: clientSession.transactionOptions.writeConcern
+  }, (err, reply) => {
+    // reset internal transaction state
+    if (clientSession.options.autoStartTransaction) {
+      clientSession.startTransaction();
+    } else {
+      clientSession.transactionOptions = null;
+    }
+
+    callback(err, reply);
+  });
 }
 
 Object.defineProperty(ClientSession.prototype, 'id', {
