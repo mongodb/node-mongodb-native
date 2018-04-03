@@ -1,7 +1,6 @@
 'use strict';
 // const KillCursor = require('../connection/commands').KillCursor;
 const GetMore = require('../connection/commands').GetMore;
-// const Query = require('../connection/commands').Query;
 
 /** Commands that we want to redact because of the sensitive nature of their contents */
 const SENSITIVE_COMMANDS = [
@@ -84,6 +83,14 @@ const extractCommand = command => {
       if (command[key]) result[key] = command[key];
     });
 
+    if (typeof command.numberToReturn !== 'undefined') {
+      result.limit = command.numberToReturn;
+    }
+
+    if (command.query.$explain) {
+      return { explain: result };
+    }
+
     return result;
   }
 
@@ -97,6 +104,33 @@ const extractCommand = command => {
   }*/
 
   return command.query ? command.query : command;
+};
+
+const extractReply = (command, reply) => {
+  if (command instanceof GetMore) {
+    return {
+      ok: 1,
+      cursor: {
+        id: reply.message.cursorId,
+        ns: command.ns,
+        nextBatch: reply.message.documents
+      }
+    };
+  }
+
+  // is this a legacy find command?
+  if (command.query && typeof command.query.$query !== 'undefined') {
+    return {
+      ok: 1,
+      cursor: {
+        id: reply.message.cursorId,
+        ns: command.ns,
+        firstBatch: reply.message.documents
+      }
+    };
+  }
+
+  return reply.result;
 };
 
 /** An event indicating the start of a given command */
@@ -144,7 +178,7 @@ class CommandSucceededEvent {
     Object.assign(this, {
       duration: calculateDuration(started),
       commandName,
-      reply: maybeRedact(commandName, reply.result),
+      reply: maybeRedact(commandName, extractReply(command, reply)),
       requestId: command.requestId,
       connectionId: generateConnectionId(pool)
     });
