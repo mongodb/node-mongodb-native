@@ -1091,6 +1091,8 @@ describe('APM', function() {
             const requirements = { topology: ['single', 'replicaset', 'sharded'] };
             if (test.ignore_if_server_version_greater_than) {
               requirements.mongodb = `>${scenario.ignore_if_server_version_greater_than}`;
+            } else if (test.ignore_if_server_version_less_than) {
+              requirements.mongodb = `<${scenario.ignore_if_server_version_less_than}`;
             }
 
             it(test.description, {
