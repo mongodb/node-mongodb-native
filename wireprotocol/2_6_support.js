@@ -87,7 +87,7 @@ WireProtocol.prototype.remove = function(pool, ismaster, ns, bson, ops, options,
 WireProtocol.prototype.killCursor = function(bson, ns, cursorState, pool, callback) {
   var cursorId = cursorState.cursorId;
   // Create a kill cursor command
-  var killCursor = new KillCursor(bson, [cursorId]);
+  var killCursor = new KillCursor(bson, ns, [cursorId]);
 
   // Build killCursor options
   const options = {
@@ -104,7 +104,11 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorState, pool, callba
     try {
       pool.write(killCursor, options, callback);
     } catch (err) {
-      callback(err, null);
+      if (typeof callback === 'function') {
+        callback(err, null);
+      } else {
+        console.warn(err);
+      }
     }
   }
 
@@ -223,16 +227,16 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   }
 
   // Add special modifiers to the query
-  if (typeof cmd.sort !== 'undefined') findCmd['$orderby'] = cmd.sort;
-  if (typeof cmd.hint !== 'undefined') findCmd['$hint'] = cmd.hint;
-  if (typeof cmd.snapshot !== 'undefined') findCmd['$snapshot'] = cmd.snapshot;
+  if (cmd.sort) findCmd['$orderby'] = cmd.sort;
+  if (cmd.hint) findCmd['$hint'] = cmd.hint;
+  if (cmd.snapshot) findCmd['$snapshot'] = cmd.snapshot;
   if (typeof cmd.returnKey !== 'undefined') findCmd['$returnKey'] = cmd.returnKey;
-  if (typeof cmd.maxScan !== 'undefined') findCmd['$maxScan'] = cmd.maxScan;
-  if (typeof cmd.min !== 'undefined') findCmd['$min'] = cmd.min;
-  if (typeof cmd.max !== 'undefined') findCmd['$max'] = cmd.max;
+  if (cmd.maxScan) findCmd['$maxScan'] = cmd.maxScan;
+  if (cmd.min) findCmd['$min'] = cmd.min;
+  if (cmd.max) findCmd['$max'] = cmd.max;
   if (typeof cmd.showDiskLoc !== 'undefined') findCmd['$showDiskLoc'] = cmd.showDiskLoc;
-  if (typeof cmd.comment !== 'undefined') findCmd['$comment'] = cmd.comment;
-  if (typeof cmd.maxTimeMS !== 'undefined') findCmd['$maxTimeMS'] = cmd.maxTimeMS;
+  if (cmd.comment) findCmd['$comment'] = cmd.comment;
+  if (cmd.maxTimeMS) findCmd['$maxTimeMS'] = cmd.maxTimeMS;
 
   if (cmd.explain) {
     // nToReturn must be 0 (match all) or negative (match N and close cursor)
