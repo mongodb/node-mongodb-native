@@ -7,9 +7,8 @@ const MongoClient = require('../../lib/mongo_client');
 const ServerSessionPool = core.Sessions.ServerSessionPool;
 
 const sandbox = sinon.createSandbox();
-
 let activeSessions, pooledSessions, activeSessionsBeforeClose;
-
+const sessionId = session => JSON.parse(JSON.stringify(session.id));
 function getSessionLeakMetadata(currentTest) {
   return (currentTest.metadata && currentTest.metadata.sessions) || {};
 }
@@ -29,28 +28,29 @@ beforeEach('Session Leak Before Each - setup session tracking', function() {
   const _acquire = ServerSessionPool.prototype.acquire;
   sandbox.stub(ServerSessionPool.prototype, 'acquire').callsFake(function() {
     const session = _acquire.apply(this, arguments);
-    activeSessions.add(session.id);
-    // console.log(`Active + ${JSON.stringify(session.id)} = ${activeSessions.size}`);
+    activeSessions.add(sessionId(session.id));
     return session;
   });
 
   const _release = ServerSessionPool.prototype.release;
   sandbox.stub(ServerSessionPool.prototype, 'release').callsFake(function(session) {
-    const id = session.id;
-    activeSessions.delete(id);
-    // console.log(`Active - ${JSON.stringify(id)} = ${activeSessions.size}`);
-    pooledSessions.add(id);
-    // console.log(`Pooled + ${JSON.stringify(id)} = ${activeSessions.size}`);
+    activeSessions.delete(sessionId(session.id));
+    pooledSessions.add(sessionId(session.id));
+
     return _release.apply(this, arguments);
+  });
+
+  const _endAllPooledSessions = ServerSessionPool.prototype.endAllPooledSessions;
+  sandbox.stub(ServerSessionPool.prototype, 'endAllPooledSessions').callsFake(function() {
+    pooledSessions.clear();
+    return _endAllPooledSessions.apply(this, arguments);
   });
 
   [core.Server, core.ReplSet, core.Mongos].forEach(topology => {
     const _endSessions = topology.prototype.endSessions;
     sandbox.stub(topology.prototype, 'endSessions').callsFake(function(sessions) {
       sessions = Array.isArray(sessions) ? sessions : [sessions];
-
-      sessions.forEach(id => pooledSessions.delete(id));
-
+      sessions.forEach(session => pooledSessions.delete(sessionId(session)));
       return _endSessions.apply(this, arguments);
     });
   });
@@ -58,7 +58,6 @@ beforeEach('Session Leak Before Each - setup session tracking', function() {
   const _close = MongoClient.prototype.close;
   sandbox.stub(MongoClient.prototype, 'close').callsFake(function() {
     activeSessionsBeforeClose = new Set(activeSessions);
-
     return _close.apply(this, arguments);
   });
 });
