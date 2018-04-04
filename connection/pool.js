@@ -1572,7 +1572,7 @@ function _execute(self) {
 
           // if the command is designated noResponse, call the callback immeditely
           if (workItem.noResponse && typeof workItem.cb === 'function') {
-            workItem.cb(null, { result: { ok: 1 } });
+            workItem.cb(null, null);
           }
 
           if (writeSuccessful && workItem.immediateRelease && self.authenticating) {
