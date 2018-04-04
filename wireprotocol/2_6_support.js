@@ -271,6 +271,7 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   var query = new Query(bson, ns, findCmd, {
     numberToSkip: numberToSkip,
     numberToReturn: numberToReturn,
+    pre32Limit: typeof cmd.limit !== 'undefined' ? cmd.limit : undefined,
     checkKeys: false,
     returnFieldSelector: cmd.fields,
     serializeFunctions: serializeFunctions,

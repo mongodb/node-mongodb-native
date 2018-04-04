@@ -53,6 +53,9 @@ var Query = function(bson, ns, query, options) {
   this.returnFieldSelector = options.returnFieldSelector || null;
   this.requestId = Query.getRequestId();
 
+  // special case for pre-3.2 find commands, delete ASAP
+  this.pre32Limit = options.pre32Limit || null;
+
   // Serialization option
   this.serializeFunctions =
     typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
