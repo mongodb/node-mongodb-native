@@ -1570,6 +1570,11 @@ function _execute(self) {
             writeSuccessful = connection.write(buffer);
           }
 
+          // if the command is designated noResponse, call the callback immeditely
+          if (workItem.noResponse) {
+            workItem.cb(null, { result: { ok: 1 } });
+          }
+
           if (writeSuccessful && workItem.immediateRelease && self.authenticating) {
             removeConnection(self, connection);
             self.nonAuthenticatedConnections.push(connection);
