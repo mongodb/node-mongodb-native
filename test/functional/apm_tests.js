@@ -4,9 +4,10 @@ const MongoClient = require('../..').MongoClient;
 const instrument = require('../..').instrument;
 const path = require('path');
 const fs = require('fs');
-const expect = require('chai').expect;
 const setupDatabase = require('./shared').setupDatabase;
 const EJSON = require('mongodb-extjson');
+const chai = require('chai');
+const expect = chai.expect;
 
 function filterForCommands(commands, bag) {
   commands = Array.isArray(commands) ? commands : [commands];
@@ -890,68 +891,79 @@ describe('APM', function() {
       setupDatabase(this.configuration);
     });
 
+    // TODO: The worst part about this custom validation method is that it does not
+    //       provide the rich context of failure location that chai gives us out of
+    //       the box. I investigated extending chai, however their internal implementation
+    //       does not reuse other internal methods, so we'd have to bring lodash in.
+    //       It may be worth seeing if we can improve on this, as we might need the
+    //       behavior in other future YAML tests.
+    const maybeLong = val => (typeof val.equals === 'function' ? val.toNumber() : val);
+    function apmExpect(actual, expected, parentKey) {
+      Object.keys(expected).forEach(key => {
+        expect(actual).to.include.key(key);
+
+        if (Array.isArray(expected[key])) {
+          expect(actual[key]).to.be.instanceOf(Array);
+          expect(actual[key]).to.have.lengthOf(expected[key].length);
+          for (let i = 0; i < expected[key].length; ++i) {
+            apmExpect(actual[key][i], expected[key][i], key);
+          }
+
+          return;
+        }
+
+        if (expected[key] === 42 || expected[key] === '42' || expected[key] === '') {
+          if (key === 'code' && expected[key] === 42) {
+            expect(actual[key]).to.be.greaterThan(0);
+          }
+
+          if (key === 'errmsg' && expected[key] === '') {
+            expect(actual[key]).to.have.lengthOf.at.least(1); // >= 1
+          }
+
+          if (key === 'getmore' || (parentKey === 'cursor' && key === 'id')) {
+            expect(maybeLong(actual[key])).to.be.greaterThan(0);
+          }
+
+          return;
+        }
+
+        // cheap isPlainObject clone
+        if (Object.prototype.toString.call(expected[key]) === '[object Object]') {
+          apmExpect(actual[key], expected[key], key);
+          return;
+        }
+
+        // otherwise compare the values
+        expect(maybeLong(actual[key])).to.deep.equal(expected[key]);
+      });
+    }
+
+    function validateCommandStartedEvent(expected, event) {
+      expect(event.commandName).to.equal(expected.command_name);
+      expect(event.databaseName).to.equal(expected.database_name);
+      apmExpect(event.command, expected.command);
+    }
+
+    function validateCommandSucceededEvent(expected, event) {
+      expect(event.commandName).to.equal(expected.command_name);
+      apmExpect(event.reply, expected.reply);
+    }
+
+    function validateCommandFailedEvent(expected, event) {
+      expect(event.commandName).to.equal(expected.command_name);
+    }
+
     function validateExpecations(expectation, results) {
-      let obj, databaseName, commandName, reply, result;
       if (expectation.command_started_event) {
-        // Get the command
-        obj = expectation.command_started_event;
-        // Unpack the expectation
-        const command = obj.command;
-        databaseName = obj.database_name;
-        commandName = obj.command_name;
-
-        // Get the result
-        result = results.starts.shift();
-
-        // Validate the test
-        expect(result.commandName).to.equal(commandName);
-        expect(result.databaseName).to.equal(databaseName);
-
-        // strip sessions data
-        delete result.command.lsid;
-
-        // Do we have a getMore command or killCursor command
-        if (commandName === 'getMore') {
-          expect(result.command.getMore.isZero()).to.be.false;
-        } else if (commandName === 'killCursors') {
-          // eslint-disable-line
-        } else {
-          expect(result.command).to.deep.include(command);
-        }
+        validateCommandStartedEvent(expectation.command_started_event, results.starts.shift());
       } else if (expectation.command_succeeded_event) {
-        obj = expectation.command_succeeded_event;
-        // Unpack the expectation
-        reply = obj.reply;
-        databaseName = obj.database_name;
-        commandName = obj.command_name;
-
-        // Get the result
-        result = results.successes.shift();
-
-        if (result.commandName === 'endSessions') {
-          result = results.successes.shift();
-        }
-
-        // Validate the test
-        expect(result.commandName).to.equal(commandName);
-        // Do we have a getMore command
-        if (commandName.toLowerCase() === 'getmore' || commandName.toLowerCase() === 'find') {
-          reply.cursor.id = result.reply.cursor.id;
-          expect(result.reply).to.deep.include(reply);
-        }
+        validateCommandSucceededEvent(
+          expectation.command_succeeded_event,
+          results.successes.shift()
+        );
       } else if (expectation.command_failed_event) {
-        obj = expectation.command_failed_event;
-        // Unpack the expectation
-        reply = obj.reply;
-        databaseName = obj.database_name;
-        commandName = obj.command_name;
-
-        // Get the result
-        results.failures = results.failures;
-        result = results.failures.shift();
-
-        // Validate the test
-        expect(result.commandName).to.equal(commandName);
+        validateCommandFailedEvent(expectation.command_failed_event, results.failures.shift());
       }
     }
 
@@ -1090,9 +1102,9 @@ describe('APM', function() {
           scenario.tests.forEach(test => {
             const requirements = { topology: ['single', 'replicaset', 'sharded'] };
             if (test.ignore_if_server_version_greater_than) {
-              requirements.mongodb = `>${scenario.ignore_if_server_version_greater_than}`;
+              requirements.mongodb = `<${test.ignore_if_server_version_greater_than}`;
             } else if (test.ignore_if_server_version_less_than) {
-              requirements.mongodb = `<${scenario.ignore_if_server_version_less_than}`;
+              requirements.mongodb = `>${test.ignore_if_server_version_less_than}`;
             }
 
             it(test.description, {
