@@ -992,7 +992,6 @@ describe('Indexes', function() {
       });
 
       listener.on('started', function(event) {
-        console.log(event);
         if (event.commandName === 'createIndexes') started.push(event);
       });
 
