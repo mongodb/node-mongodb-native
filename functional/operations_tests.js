@@ -462,8 +462,8 @@ describe('Operation tests', function() {
                 // Kill the cursor
                 cursor.kill(function() {
                   cursor.next(function(secondCursorErr, secondCursorD) {
-                    expect(secondCursorErr).to.be.null;
-                    expect(secondCursorD).to.be.null;
+                    expect(secondCursorErr).to.not.exist;
+                    expect(secondCursorD).to.not.exist;
                     // Destroy the server connection
                     _server.destroy();
                     // Finish the test
@@ -521,8 +521,8 @@ describe('Operation tests', function() {
                 // Kill the cursor
                 cursor.kill(function() {
                   cursor.next(function(secondCursorErr, secondCursorD) {
-                    expect(secondCursorErr).to.be.null;
-                    expect(secondCursorD).to.be.null;
+                    expect(secondCursorErr).to.not.exist;
+                    expect(secondCursorD).to.not.exist;
                     // Destroy the server connection
                     _server.destroy();
                     // Finish the test

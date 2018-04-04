@@ -296,72 +296,7 @@ describe('Cursor tests', function() {
                 cursor.kill(function() {
                   // Should error out
                   cursor.next(function(thirdCursorErr, thirdCursorD) {
-                    expect(thirdCursorErr).to.exist;
-                    expect(thirdCursorD).to.not.exist;
-
-                    // Destroy the server connection
-                    _server.destroy();
-                    // Finish the test
-                    done();
-                  });
-                });
-              });
-            });
-          }
-        );
-      });
-
-      // Start connection
-      server.connect();
-    }
-  });
-
-  it('Should force a getMore call to happen then call killCursor', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
-    },
-
-    test: function(done) {
-      // Attempt to connect
-      var server = new Server({
-        host: this.configuration.host,
-        port: this.configuration.port,
-        bson: new Bson()
-      });
-
-      var ns = f('%s.cursor4', this.configuration.db);
-      // Add event listeners
-      server.on('connect', function(_server) {
-        // Execute the write
-        _server.insert(
-          ns,
-          [{ a: 1 }, { a: 2 }, { a: 3 }],
-          {
-            writeConcern: { w: 1 },
-            ordered: true
-          },
-          function(err, results) {
-            expect(err).to.be.null;
-            expect(results.result.n).to.equal(3);
-
-            // Execute find
-            var cursor = _server.cursor(ns, { find: ns, query: {}, batchSize: 2 });
-
-            // Execute next
-            cursor.next(function(nextCursorErr, nextCursorD) {
-              expect(nextCursorErr).to.be.null;
-              expect(nextCursorD.a).to.equal(1);
-
-              // Get the next item
-              cursor.next(function(secondCursorErr, secondCursorD) {
-                expect(secondCursorErr).to.be.null;
-                expect(secondCursorD.a).to.equal(2);
-
-                // Kill cursor
-                cursor.kill(function() {
-                  // Should error out
-                  cursor.next(function(thirdCursorErr, thirdCursorD) {
-                    expect(thirdCursorErr).to.exist;
+                    expect(thirdCursorErr).to.not.exist;
                     expect(thirdCursorD).to.not.exist;
 
                     // Destroy the server connection
