@@ -353,29 +353,6 @@ Cursor.prototype._getmore = function(callback) {
   );
 };
 
-Cursor.prototype._killcursor = function(callback) {
-  // Set cursor to dead
-  this.cursorState.dead = true;
-  this.cursorState.killed = true;
-  // Remove documents
-  this.cursorState.documents = [];
-
-  // If no cursor id just return
-  if (
-    this.cursorState.cursorId == null ||
-    this.cursorState.cursorId.isZero() ||
-    this.cursorState.init === false
-  ) {
-    if (callback) callback(null, null);
-    return;
-  }
-
-  // Default pool
-  var pool = this.server.s.pool;
-  // Execute command
-  this.server.wireProtocolHandler.killCursor(this.bson, this.ns, this.cursorState, pool, callback);
-};
-
 /**
  * Clone the cursor
  * @method
@@ -466,7 +443,26 @@ Cursor.prototype.readBufferedDocuments = function(number) {
  * @param {resultCallback} callback A callback function
  */
 Cursor.prototype.kill = function(callback) {
-  this._killcursor(callback);
+  // Set cursor to dead
+  this.cursorState.dead = true;
+  this.cursorState.killed = true;
+  // Remove documents
+  this.cursorState.documents = [];
+
+  // If no cursor id just return
+  if (
+    this.cursorState.cursorId == null ||
+    this.cursorState.cursorId.isZero() ||
+    this.cursorState.init === false
+  ) {
+    if (callback) callback(null, null);
+    return;
+  }
+
+  // Default pool
+  var pool = this.server.s.pool;
+  // Execute command
+  this.server.wireProtocolHandler.killCursor(this.bson, this.ns, this.cursorState, pool, callback);
 };
 
 /**
