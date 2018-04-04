@@ -296,8 +296,8 @@ describe('Cursor tests', function() {
                 cursor.kill(function() {
                   // Should error out
                   cursor.next(function(thirdCursorErr, thirdCursorD) {
-                    expect(thirdCursorErr).to.be.null;
-                    expect(thirdCursorD).to.be.null;
+                    expect(thirdCursorErr).to.exist;
+                    expect(thirdCursorD).to.not.exist;
 
                     // Destroy the server connection
                     _server.destroy();
@@ -361,8 +361,8 @@ describe('Cursor tests', function() {
                 cursor.kill(function() {
                   // Should error out
                   cursor.next(function(thirdCursorErr, thirdCursorD) {
-                    expect(thirdCursorErr).to.be.null;
-                    expect(thirdCursorD).to.be.null;
+                    expect(thirdCursorErr).to.exist;
+                    expect(thirdCursorD).to.not.exist;
 
                     // Destroy the server connection
                     _server.destroy();
