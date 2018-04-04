@@ -1,5 +1,5 @@
 'use strict';
-// const KillCursor = require('../connection/commands').KillCursor;
+const KillCursor = require('../connection/commands').KillCursor;
 const GetMore = require('../connection/commands').GetMore;
 
 /** Commands that we want to redact because of the sensitive nature of their contents */
@@ -66,6 +66,13 @@ const extractCommand = command => {
     };
   }
 
+  if (command instanceof KillCursor) {
+    return {
+      killCursors: command.ns.split('.')[1],
+      cursors: command.cursorIds
+    };
+  }
+
   if (command.query && typeof command.query.$query !== 'undefined') {
     // upconvert legacy find command
     const result = { find: command.ns.split('.')[1] };
@@ -83,8 +90,8 @@ const extractCommand = command => {
       if (command[key]) result[key] = command[key];
     });
 
-    if (typeof command.numberToReturn !== 'undefined') {
-      result.limit = command.numberToReturn;
+    if (typeof command.pre32Limit !== 'undefined') {
+      result.limit = command.pre32Limit;
     }
 
     if (command.query.$explain) {
@@ -93,15 +100,6 @@ const extractCommand = command => {
 
     return result;
   }
-
-  /*
-  else if (command instanceof KillCursor) {
-    return {
-      killCursors
-    }
-    killCursors: parts.join('.'),
-    cursors: [cursorId]
-  }*/
 
   return command.query ? command.query : command;
 };
@@ -115,6 +113,13 @@ const extractReply = (command, reply) => {
         ns: command.ns,
         nextBatch: reply.message.documents
       }
+    };
+  }
+
+  if (command instanceof KillCursor) {
+    return {
+      ok: 1,
+      cursorsUnknown: command.cursorIds
     };
   }
 
