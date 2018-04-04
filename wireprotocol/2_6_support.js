@@ -111,9 +111,6 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorState, pool, callba
       }
     }
   }
-
-  // Callback
-  if (typeof callback === 'function') callback(null, null);
 };
 
 WireProtocol.prototype.getMore = function(
