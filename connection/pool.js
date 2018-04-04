@@ -1571,7 +1571,7 @@ function _execute(self) {
           }
 
           // if the command is designated noResponse, call the callback immeditely
-          if (workItem.noResponse) {
+          if (workItem.noResponse && typeof workItem.cb === 'function') {
             workItem.cb(null, { result: { ok: 1 } });
           }
 
