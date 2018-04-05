@@ -101,6 +101,17 @@ MongoClient.connect('mongodb://localhost:27017/test', (err, client) => {
 });
 ```
 
+The database specified in the connection string will be set as the default database of the
+returned client. The default database is now used if no parameter is passed to
+`MongoClient.prototype.db`, for example:
+
+```js
+MongoClient.connect('mongodb://localhost:27017/test')
+  .then(client => client.db().collection('foo').insert({ a: 42 })
+  .then(() => ...)
+  .catc(err => ...);
+```
+
 ## Other Changes
 
 Below are more updates to the driver in the 3.0.0 release.
