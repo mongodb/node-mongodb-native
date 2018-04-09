@@ -1,3 +1,21 @@
+<a name="3.0.6"></a>
+## [3.0.6](https://github.com/mongodb/node-mongodb-native/compare/v3.0.5...v3.0.6) (2018-04-09)
+
+
+### Bug Fixes
+
+* **db:** ensure `dropDatabase` always uses primary read preference ([e62e5c9](https://github.com/mongodb/node-mongodb-native/commit/e62e5c9))
+* **driverBench:** driverBench has default options object now ([c557817](https://github.com/mongodb/node-mongodb-native/commit/c557817))
+
+
+### Features
+
+* **command-monitoring:** support enabling command monitoring ([5903680](https://github.com/mongodb/node-mongodb-native/commit/5903680))
+* **core:** update to mongodb-core v3.0.6 ([cfdd0ae](https://github.com/mongodb/node-mongodb-native/commit/cfdd0ae))
+* **driverBench:** Implementing DriverBench ([d10fbad](https://github.com/mongodb/node-mongodb-native/commit/d10fbad))
+
+
+
 <a name="3.0.5"></a>
 ## [3.0.5](https://github.com/mongodb/node-mongodb-native/compare/v3.0.4...v3.0.5) (2018-03-23)
 
