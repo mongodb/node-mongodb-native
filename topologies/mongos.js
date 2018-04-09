@@ -112,7 +112,7 @@ var handlers = ['connect', 'close', 'error', 'timeout', 'parseError'];
  * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
  * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
  * @param {boolean} [options.domainsEnabled=false] Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit.
- * @param {boolean} [options.enableCommandMonitoring=false] Enable command monitoring for this topology
+ * @param {boolean} [options.monitorCommands=false] Enable command monitoring for this topology
  * @return {Mongos} A cursor instance
  * @fires Mongos#connect
  * @fires Mongos#reconnect

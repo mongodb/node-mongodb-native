@@ -99,7 +99,7 @@ var handlers = ['connect', 'close', 'error', 'timeout', 'parseError'];
  * @param {number} [options.pingInterval=5000] Ping interval to check the response time to the different servers
  * @param {number} [options.localThresholdMS=15] Cutoff latency point in MS for Replicaset member selection
  * @param {boolean} [options.domainsEnabled=false] Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit.
- * @param {boolean} [options.enableCommandMonitoring=false] Enable command monitoring for this topology
+ * @param {boolean} [options.monitorCommands=false] Enable command monitoring for this topology
  * @return {ReplSet} A cursor instance
  * @fires ReplSet#connect
  * @fires ReplSet#ha

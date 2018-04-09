@@ -1230,7 +1230,7 @@ Pool.prototype.write = function(commands, options, cb) {
   }
 
   // If command monitoring is enabled we need to modify the callback here
-  if (self.options.enableCommandMonitoring) {
+  if (self.options.monitorCommands) {
     // NOTE: there is only ever a single command, for some legacy reason I am unaware of we
     //       treat this as a potential array of commands
     const command = commands[0];
