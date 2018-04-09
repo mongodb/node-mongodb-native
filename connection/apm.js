@@ -1,6 +1,7 @@
 'use strict';
 const KillCursor = require('../connection/commands').KillCursor;
 const GetMore = require('../connection/commands').GetMore;
+const process = require('process');
 
 /** Commands that we want to redact because of the sensitive nature of their contents */
 const SENSITIVE_COMMANDS = new Set([
@@ -17,7 +18,11 @@ const SENSITIVE_COMMANDS = new Set([
 
 // helper methods
 const extractCommandName = command => Object.keys(command)[0];
-const calculateDuration = started => Date.now() - started;
+const calculateDurationInMs = started => {
+  const hrtime = process.hrtime(started);
+  return ((hrtime[0] * 1e9) + hrtime[1]) / 1e6;
+}
+
 const generateConnectionId = pool => `${pool.options.host}:${pool.options.port}`;
 const maybeRedact = (commandName, result) =>
   SENSITIVE_COMMANDS.has(commandName) ? {} : result;
@@ -174,14 +179,14 @@ class CommandSucceededEvent {
    * @param {Pool} pool the pool that originated the command
    * @param {Object} command the command
    * @param {Object} reply the reply for this command from the server
-   * @param {Number} started a timestamp of when the command was first sent to calculate duration
+   * @param {Array} started a high resolution tuple timestamp of when the command was first sent, to calculate duration
    */
   constructor(pool, command, reply, started) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
 
     Object.assign(this, {
-      duration: calculateDuration(started),
+      duration: calculateDurationInMs(started),
       commandName,
       reply: maybeRedact(commandName, extractReply(command, reply)),
       requestId: command.requestId,
@@ -198,14 +203,14 @@ class CommandFailedEvent {
    * @param {Pool} pool the pool that originated the command
    * @param {Object} command the command
    * @param {MongoError|Object} error the generated error or a server error response
-   * @param {Number} started a timestamp of when the command was first sent to calculate duration
+   * @param {Array} started a high resolution tuple timestamp of when the command was first sent, to calculate duration
    */
   constructor(pool, command, error, started) {
     const cmd = extractCommand(command);
     const commandName = extractCommandName(cmd);
 
     Object.assign(this, {
-      duration: calculateDuration(started),
+      duration: calculateDurationInMs(started),
       commandName,
       failure: maybeRedact(commandName, error),
       requestId: command.requestId,

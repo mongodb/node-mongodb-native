@@ -1236,7 +1236,7 @@ Pool.prototype.write = function(commands, options, cb) {
     const command = commands[0];
     this.emit('commandStarted', new apm.CommandStartedEvent(this, command));
 
-    operation.started = Date.now();
+    operation.started = process.hrtime();
     operation.cb = (err, reply) => {
       if (err) {
         self.emit(
