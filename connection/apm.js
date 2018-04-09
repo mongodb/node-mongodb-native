@@ -164,7 +164,7 @@ class CommandStartedEvent {
     Object.assign(this, {
       command: cmd,
       databaseName: command.ns.split('.')[0],
-      commandName: extractCommandName(cmd),
+      commandName,
       requestId: command.requestId,
       connectionId: generateConnectionId(pool)
     });
