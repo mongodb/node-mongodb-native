@@ -55,7 +55,6 @@ connect.instrument = function(options, callback) {
     options = {};
   }
 
-  // return new Instrumentation(core, options, callback);
   const instrumentation = new Instrumentation();
   instrumentation.instrument(connect.MongoClient, callback);
   return instrumentation;
