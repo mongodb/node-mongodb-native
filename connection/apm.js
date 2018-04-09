@@ -23,6 +23,9 @@ const calculateDurationInMs = started => {
   return ((hrtime[0] * 1e9) + hrtime[1]) / 1e6;
 }
 
+const namespace = command => command.ns;
+const databaseName = command => command.ns.split('.')[0];
+const collectionName = command => command.ns.split('.')[1];
 const generateConnectionId = pool => `${pool.options.host}:${pool.options.port}`;
 const maybeRedact = (commandName, result) =>
   SENSITIVE_COMMANDS.has(commandName) ? {} : result;
@@ -66,21 +69,21 @@ const extractCommand = command => {
   if (command instanceof GetMore) {
     return {
       getMore: command.cursorId,
-      collection: command.ns.split('.')[1],
+      collection: collectionName(command),
       batchSize: command.numberToReturn
     };
   }
 
   if (command instanceof KillCursor) {
     return {
-      killCursors: command.ns.split('.')[1],
+      killCursors: collectionName(command),
       cursors: command.cursorIds
     };
   }
 
-  if (command.query && typeof command.query.$query !== 'undefined') {
+  if (command.query && command.query.$query) {
     // upconvert legacy find command
-    const result = { find: command.ns.split('.')[1] };
+    const result = { find: collectionName(command) };
     Object.keys(LEGACY_FIND_QUERY_MAP).forEach(key => {
       if (typeof command.query[key] !== 'undefined')
         result[LEGACY_FIND_QUERY_MAP[key]] = command.query[key];
@@ -115,7 +118,7 @@ const extractReply = (command, reply) => {
       ok: 1,
       cursor: {
         id: reply.message.cursorId,
-        ns: command.ns,
+        ns: namespace(command),
         nextBatch: reply.message.documents
       }
     };
@@ -134,7 +137,7 @@ const extractReply = (command, reply) => {
       ok: 1,
       cursor: {
         id: reply.message.cursorId,
-        ns: command.ns,
+        ns: namespace(command),
         firstBatch: reply.message.documents
       }
     };
@@ -163,7 +166,7 @@ class CommandStartedEvent {
 
     Object.assign(this, {
       command: cmd,
-      databaseName: command.ns.split('.')[0],
+      databaseName: databaseName(command),
       commandName,
       requestId: command.requestId,
       connectionId: generateConnectionId(pool)
