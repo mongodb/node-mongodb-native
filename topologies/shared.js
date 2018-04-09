@@ -430,6 +430,16 @@ const getNextTransactionNumber = function(session) {
   return BSON.Long.fromNumber(session.serverSession.txnNumber);
 };
 
+/**
+ * Relays events for a given listener and emitter
+ *
+ * @param {EventEmitter} listener the EventEmitter to listen to the events for
+ * @param {EventEmitter} emitter the EventEmitter to relay the events on
+ */
+function relayEvents(listener, emitter, events) {
+  events.forEach(eventName => listener.on(eventName, event => emitter.emit(eventName, event)));
+}
+
 module.exports.SessionMixins = SessionMixins;
 module.exports.resolveClusterTime = resolveClusterTime;
 module.exports.inquireServerState = inquireServerState;
@@ -445,3 +455,4 @@ module.exports.Interval = Interval;
 module.exports.Timeout = Timeout;
 module.exports.isRetryableWritesSupported = isRetryableWritesSupported;
 module.exports.getNextTransactionNumber = getNextTransactionNumber;
+module.exports.relayEvents = relayEvents;

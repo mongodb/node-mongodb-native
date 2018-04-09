@@ -17,7 +17,8 @@ var inherits = require('util').inherits,
   createClientInfo = require('./shared').createClientInfo,
   SessionMixins = require('./shared').SessionMixins,
   isRetryableWritesSupported = require('./shared').isRetryableWritesSupported,
-  getNextTransactionNumber = require('./shared').getNextTransactionNumber;
+  getNextTransactionNumber = require('./shared').getNextTransactionNumber,
+  relayEvents = require('./shared').relayEvents;
 
 var MongoCR = require('../auth/mongocr'),
   X509 = require('../auth/x509'),
@@ -408,9 +409,7 @@ function connectNewServers(self, servers, callback) {
       server.on('serverClosed', e => self.emit('serverClosed', e));
 
       // Command Monitoring events
-      server.on('commandStarted', event => self.emit('commandStarted', event));
-      server.on('commandSucceeded', event => self.emit('commandSucceeded', event));
-      server.on('commandFailed', event => self.emit('commandFailed', event));
+      relayEvents(server, self, ['commandStarted', 'commandSucceeded', 'commandFailed']);
 
       server.connect(self.s.connectOptions);
     }, i);
@@ -942,9 +941,7 @@ function connectServers(self, servers) {
       server.on('serverClosed', e => self.emit('serverClosed', e));
 
       // Command Monitoring events
-      server.on('commandStarted', event => self.emit('commandStarted', event));
-      server.on('commandSucceeded', event => self.emit('commandSucceeded', event));
-      server.on('commandFailed', event => self.emit('commandFailed', event));
+      relayEvents(server, self, ['commandStarted', 'commandSucceeded', 'commandFailed']);
 
       // Start connection
       server.connect(self.s.connectOptions);

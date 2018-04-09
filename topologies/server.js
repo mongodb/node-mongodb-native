@@ -18,7 +18,8 @@ var inherits = require('util').inherits,
   createClientInfo = require('./shared').createClientInfo,
   createCompressionInfo = require('./shared').createCompressionInfo,
   resolveClusterTime = require('./shared').resolveClusterTime,
-  SessionMixins = require('./shared').SessionMixins;
+  SessionMixins = require('./shared').SessionMixins,
+  relayEvents = require('./shared').relayEvents;
 
 // Used for filtering out fields for loggin
 var debugFields = [
@@ -557,9 +558,7 @@ Server.prototype.connect = function(options) {
   self.s.pool.on('reconnectFailed', eventHandler(self, 'reconnectFailed'));
 
   // Set up listeners for command monitoring
-  self.s.pool.on('commandStarted', event => self.emit('commandStarted', event));
-  self.s.pool.on('commandSucceeded', event => self.emit('commandSucceeded', event));
-  self.s.pool.on('commandFailed', event => self.emit('commandFailed', event));
+  relayEvents(self.s.pool, self, ['commandStarted', 'commandSucceeded', 'commandFailed']);
 
   // Emit toplogy opening event if not in topology
   if (!self.s.inTopology) {

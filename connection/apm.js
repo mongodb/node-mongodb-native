@@ -20,15 +20,14 @@ const SENSITIVE_COMMANDS = new Set([
 const extractCommandName = command => Object.keys(command)[0];
 const calculateDurationInMs = started => {
   const hrtime = process.hrtime(started);
-  return ((hrtime[0] * 1e9) + hrtime[1]) / 1e6;
-}
+  return (hrtime[0] * 1e9 + hrtime[1]) / 1e6;
+};
 
 const namespace = command => command.ns;
 const databaseName = command => command.ns.split('.')[0];
 const collectionName = command => command.ns.split('.')[1];
 const generateConnectionId = pool => `${pool.options.host}:${pool.options.port}`;
-const maybeRedact = (commandName, result) =>
-  SENSITIVE_COMMANDS.has(commandName) ? {} : result;
+const maybeRedact = (commandName, result) => (SENSITIVE_COMMANDS.has(commandName) ? {} : result);
 
 const LEGACY_FIND_QUERY_MAP = {
   $query: 'filter',

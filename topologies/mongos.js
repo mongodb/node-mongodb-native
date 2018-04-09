@@ -15,7 +15,8 @@ const inherits = require('util').inherits,
   createClientInfo = require('./shared').createClientInfo,
   SessionMixins = require('./shared').SessionMixins,
   isRetryableWritesSupported = require('./shared').isRetryableWritesSupported,
-  getNextTransactionNumber = require('./shared').getNextTransactionNumber;
+  getNextTransactionNumber = require('./shared').getNextTransactionNumber,
+  relayEvents = require('./shared').relayEvents;
 
 const BSON = retrieveBSON();
 
@@ -470,9 +471,7 @@ function connectProxies(self, servers) {
       server.once('connect', handleInitialConnectEvent(self, 'connect'));
 
       // Command Monitoring events
-      server.on('commandStarted', event => self.emit('commandStarted', event));
-      server.on('commandSucceeded', event => self.emit('commandSucceeded', event));
-      server.on('commandFailed', event => self.emit('commandFailed', event));
+      relayEvents(server, self, ['commandStarted', 'commandSucceeded', 'commandFailed']);
 
       // Start connection
       server.connect(self.s.connectOptions);
@@ -647,9 +646,7 @@ function reconnectProxies(self, proxies, callback) {
       server.once('parseError', _handleEvent(self, 'parseError'));
 
       // Command Monitoring events
-      server.on('commandStarted', event => self.emit('commandStarted', event));
-      server.on('commandSucceeded', event => self.emit('commandSucceeded', event));
-      server.on('commandFailed', event => self.emit('commandFailed', event));
+      relayEvents(server, self, ['commandStarted', 'commandSucceeded', 'commandFailed']);
 
       // Connect to proxy
       server.connect(self.s.connectOptions);
