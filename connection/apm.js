@@ -3,7 +3,7 @@ const KillCursor = require('../connection/commands').KillCursor;
 const GetMore = require('../connection/commands').GetMore;
 
 /** Commands that we want to redact because of the sensitive nature of their contents */
-const SENSITIVE_COMMANDS = [
+const SENSITIVE_COMMANDS = new Set([
   'authenticate',
   'saslStart',
   'saslContinue',
@@ -13,14 +13,14 @@ const SENSITIVE_COMMANDS = [
   'copydbgetnonce',
   'copydbsaslstart',
   'copydb'
-];
+]);
 
 // helper methods
 const extractCommandName = command => Object.keys(command)[0];
 const calculateDuration = started => Date.now() - started;
 const generateConnectionId = pool => `${pool.options.host}:${pool.options.port}`;
 const maybeRedact = (commandName, result) =>
-  SENSITIVE_COMMANDS.indexOf(commandName) !== -1 ? {} : result;
+  SENSITIVE_COMMANDS.has(commandName) ? {} : result;
 
 const LEGACY_FIND_QUERY_MAP = {
   $query: 'filter',
@@ -151,7 +151,7 @@ class CommandStartedEvent {
     const commandName = extractCommandName(cmd);
 
     // NOTE: remove in major revision, this is not spec behavior
-    if (SENSITIVE_COMMANDS.indexOf(commandName) !== -1) {
+    if (SENSITIVE_COMMANDS.has(commandName)) {
       this.commandObj = {};
       this.commandObj[commandName] = true;
     }
