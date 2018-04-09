@@ -54,7 +54,7 @@ var Query = function(bson, ns, query, options) {
   this.requestId = Query.getRequestId();
 
   // special case for pre-3.2 find commands, delete ASAP
-  if (options.pre32Limit) this.pre32Limit = options.pre32Limit;
+  this.pre32Limit = options.pre32Limit;
 
   // Serialization option
   this.serializeFunctions =
