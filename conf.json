@@ -49,7 +49,6 @@
       "outputSourceFiles" : true
     },
     "applicationName": "Node.js MongoDB Driver API",
-    "disqus": true,
     "googleAnalytics": "UA-29229787-1",
     "openGraph": {
       "title": "",
