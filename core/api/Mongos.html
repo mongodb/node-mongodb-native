@@ -576,6 +576,12 @@
             
                 <li data-name="Mongos#event:all"><a href="Mongos.html#event:all">all</a></li>
             
+                <li data-name="Mongos#event:commandFailed"><a href="Mongos.html#event:commandFailed">commandFailed</a></li>
+            
+                <li data-name="Mongos#event:commandStarted"><a href="Mongos.html#event:commandStarted">commandStarted</a></li>
+            
+                <li data-name="Mongos#event:commandSucceeded"><a href="Mongos.html#event:commandSucceeded">commandSucceeded</a></li>
+            
                 <li data-name="Mongos#event:connect"><a href="Mongos.html#event:connect">connect</a></li>
             
                 <li data-name="Mongos#event:fullsetup"><a href="Mongos.html#event:fullsetup">fullsetup</a></li>
@@ -742,6 +748,12 @@
             <span class="subtitle">Events</span>
             
                 <li data-name="ReplSet#event:all"><a href="ReplSet.html#event:all">all</a></li>
+            
+                <li data-name="ReplSet#event:commandFailed"><a href="ReplSet.html#event:commandFailed">commandFailed</a></li>
+            
+                <li data-name="ReplSet#event:commandStarted"><a href="ReplSet.html#event:commandStarted">commandStarted</a></li>
+            
+                <li data-name="ReplSet#event:commandSucceeded"><a href="ReplSet.html#event:commandSucceeded">commandSucceeded</a></li>
             
                 <li data-name="ReplSet#event:connect"><a href="ReplSet.html#event:connect">connect</a></li>
             
@@ -1019,7 +1031,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line131">line 131</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line133">line 133</a>
         </div>
         
     </div>
@@ -1913,6 +1925,42 @@
         </tr>
 	
 	
+	
+        <tr>
+            
+                <td class="name"><code>options.monitorCommands</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Enable command monitoring for this topology</p></td>
+        </tr>
+	
+	
 	</tbody>
 </table>
     
@@ -2097,7 +2145,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1102">line 1102</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1111">line 1111</a>
         </div>
         
     </div>
@@ -2304,7 +2352,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1038">line 1038</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1047">line 1047</a>
         </div>
         
     </div>
@@ -2671,7 +2719,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line283">line 283</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line285">line 285</a>
         </div>
         
     </div>
@@ -2802,7 +2850,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1278">line 1278</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1287">line 1287</a>
         </div>
         
     </div>
@@ -2878,7 +2926,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1083">line 1083</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1092">line 1092</a>
         </div>
         
     </div>
@@ -3337,7 +3385,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line835">line 835</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line844">line 844</a>
         </div>
         
     </div>
@@ -3468,7 +3516,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1268">line 1268</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1277">line 1277</a>
         </div>
         
     </div>
@@ -3544,7 +3592,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1257">line 1257</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1266">line 1266</a>
         </div>
         
     </div>
@@ -3620,7 +3668,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line937">line 937</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line946">line 946</a>
         </div>
         
     </div>
@@ -4025,7 +4073,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line870">line 870</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line879">line 879</a>
         </div>
         
     </div>
@@ -4101,7 +4149,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line879">line 879</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line888">line 888</a>
         </div>
         
     </div>
@@ -4177,7 +4225,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line810">line 810</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line819">line 819</a>
         </div>
         
     </div>
@@ -4253,7 +4301,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1198">line 1198</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1207">line 1207</a>
         </div>
         
     </div>
@@ -4392,7 +4440,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1005">line 1005</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1014">line 1014</a>
         </div>
         
     </div>
@@ -4797,7 +4845,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line818">line 818</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line827">line 827</a>
         </div>
         
     </div>
@@ -4868,7 +4916,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line971">line 971</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line980">line 980</a>
         </div>
         
     </div>
@@ -5281,7 +5329,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1364">line 1364</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1373">line 1373</a>
         </div>
         
     </div>
@@ -5355,6 +5403,249 @@ cursor instance
             
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="event:commandFailed">
+            
+            commandFailed
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1475">line 1475</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>An event emitted indicating a command failed, if command monitoring is enabled</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:commandStarted">
+            
+            commandStarted
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1461">line 1461</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>An event emitted indicating a command was started, if command monitoring is enabled</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:commandSucceeded">
+            
+            commandSucceeded
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1468">line 1468</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>An event emitted indicating a command succeeded, if command monitoring is enabled</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="event:connect">
             
             connect
@@ -5362,7 +5653,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1343">line 1343</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1352">line 1352</a>
         </div>
         
     </div>
@@ -5443,7 +5734,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1357">line 1357</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1366">line 1366</a>
         </div>
         
     </div>
@@ -5524,7 +5815,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1380">line 1380</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1389">line 1389</a>
         </div>
         
     </div>
@@ -5673,7 +5964,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1371">line 1371</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1380">line 1380</a>
         </div>
         
     </div>
@@ -5822,7 +6113,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1350">line 1350</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1359">line 1359</a>
         </div>
         
     </div>
@@ -5903,7 +6194,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1396">line 1396</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1405">line 1405</a>
         </div>
         
     </div>
@@ -5984,7 +6275,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1403">line 1403</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1412">line 1412</a>
         </div>
         
     </div>
@@ -6065,7 +6356,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1438">line 1438</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1447">line 1447</a>
         </div>
         
     </div>
@@ -6146,7 +6437,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1431">line 1431</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1440">line 1440</a>
         </div>
         
     </div>
@@ -6227,7 +6518,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1445">line 1445</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1454">line 1454</a>
         </div>
         
     </div>
@@ -6308,7 +6599,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1389">line 1389</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1398">line 1398</a>
         </div>
         
     </div>
@@ -6389,7 +6680,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1417">line 1417</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1426">line 1426</a>
         </div>
         
     </div>
@@ -6470,7 +6761,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1424">line 1424</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1433">line 1433</a>
         </div>
         
     </div>
@@ -6551,7 +6842,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1410">line 1410</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1419">line 1419</a>
         </div>
         
     </div>
@@ -6651,7 +6942,7 @@ cursor instance
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Feb 23 2018 15:27:47 GMT-0500 (EST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Apr 11 2018 10:26:01 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

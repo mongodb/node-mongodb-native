@@ -26,7 +26,7 @@
     
     
     <script>
-    var config = {"monospaceLinks":true,"cleverLinks":true,"default":{"outputSourceFiles":true},"applicationName":"Node.js MongoDB Driver API","disqus":true,"googleAnalytics":"UA-29229787-1","openGraph":{"title":"","type":"website","image":"","site_name":"","url":""},"meta":{"title":"","description":"","keyword":""},"linenums":true};
+    var config = {"monospaceLinks":true,"cleverLinks":true,"default":{"outputSourceFiles":true},"applicationName":"Node.js MongoDB Driver API","googleAnalytics":"UA-29229787-1","openGraph":{"title":"","type":"website","image":"","site_name":"","url":""},"meta":{"title":"","description":"","keyword":""},"linenums":true};
     </script>
     
 
@@ -859,6 +859,31 @@
             </ul>
         </li>
     
+        <li class="item" data-name="Decimal128">
+            <span class="title">
+                <a href="Decimal128.html">Decimal128</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Decimal128#toString"><a href="Decimal128.html#toString">toString</a></li>
+            
+                <li data-name="Decimal128.fromString"><a href="Decimal128.html#.fromString">fromString</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="Double">
             <span class="title">
                 <a href="Double.html">Double</a>
@@ -1221,6 +1246,29 @@
             </ul>
         </li>
     
+        <li class="item" data-name="Int32">
+            <span class="title">
+                <a href="Int32.html">Int32</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Int32#valueOf"><a href="Int32.html#valueOf">valueOf</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="Logger">
             <span class="title">
                 <a href="Logger.html">Logger</a>
@@ -1527,6 +1575,12 @@
             
                 <li data-name="Mongos#event:close"><a href="Mongos.html#event:close">close</a></li>
             
+                <li data-name="Mongos#event:commandFailed"><a href="Mongos.html#event:commandFailed">commandFailed</a></li>
+            
+                <li data-name="Mongos#event:commandStarted"><a href="Mongos.html#event:commandStarted">commandStarted</a></li>
+            
+                <li data-name="Mongos#event:commandSucceeded"><a href="Mongos.html#event:commandSucceeded">commandSucceeded</a></li>
+            
                 <li data-name="Mongos#event:connect"><a href="Mongos.html#event:connect">connect</a></li>
             
                 <li data-name="Mongos#event:error"><a href="Mongos.html#event:error">error</a></li>
@@ -1634,6 +1688,12 @@
             
                 <li data-name="ReplSet#event:close"><a href="ReplSet.html#event:close">close</a></li>
             
+                <li data-name="ReplSet#event:commandFailed"><a href="ReplSet.html#event:commandFailed">commandFailed</a></li>
+            
+                <li data-name="ReplSet#event:commandStarted"><a href="ReplSet.html#event:commandStarted">commandStarted</a></li>
+            
+                <li data-name="ReplSet#event:commandSucceeded"><a href="ReplSet.html#event:commandSucceeded">commandSucceeded</a></li>
+            
                 <li data-name="ReplSet#event:connect"><a href="ReplSet.html#event:connect">connect</a></li>
             
                 <li data-name="ReplSet#event:error"><a href="ReplSet.html#event:error">error</a></li>
@@ -1674,6 +1734,12 @@
             <span class="subtitle">Events</span>
             
                 <li data-name="Server#event:close"><a href="Server.html#event:close">close</a></li>
+            
+                <li data-name="Server#event:commandFailed"><a href="Server.html#event:commandFailed">commandFailed</a></li>
+            
+                <li data-name="Server#event:commandStarted"><a href="Server.html#event:commandStarted">commandStarted</a></li>
+            
+                <li data-name="Server#event:commandSucceeded"><a href="Server.html#event:commandSucceeded">commandSucceeded</a></li>
             
                 <li data-name="Server#event:connect"><a href="Server.html#event:connect">connect</a></li>
             
@@ -2091,13 +2157,32 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
 inherits(Cursor, Readable);
 
 // Map core cursor _next method so we can apply mapping
-CoreCursor.prototype._next = CoreCursor.prototype.next;
+Cursor.prototype._next = function() {
+  if (this._initImplicitSession) {
+    this._initImplicitSession();
+  }
+  return CoreCursor.prototype.next.apply(this, arguments);
+};
 
 for (var name in CoreCursor.prototype) {
   Cursor.prototype[name] = CoreCursor.prototype[name];
 }
 
 var define = (Cursor.define = new Define('Cursor', Cursor, true));
+
+Cursor.prototype._initImplicitSession = function() {
+  if (!this.s.session &amp;&amp; this.s.topology.hasSessionSupport()) {
+    this.s.session = this.s.topology.startSession({ owner: this });
+    this.cursorState.session = this.s.session;
+  }
+};
+
+Cursor.prototype._endSession = function() {
+  const didCloseCursor = CoreCursor.prototype._endSession.apply(this, arguments);
+  if (didCloseCursor) {
+    this.s.session = undefined;
+  }
+};
 
 /**
  * Check if there is any document still available in the cursor
@@ -2826,7 +2911,11 @@ var toArray = function(self, callback) {
   // Fetch all the documents
   var fetchDocs = function() {
     self._next(function(err, doc) {
-      if (err) return handleCallback(callback, err);
+      if (err) {
+        return self._endSession
+          ? self._endSession(() => handleCallback(callback, err))
+          : handleCallback(callback, err);
+      }
       if (doc == null) {
         return self.close({ skipKillCursors: true }, () => handleCallback(callback, null, items));
       }
@@ -2882,17 +2971,21 @@ Cursor.prototype.count = function(applySkipLimit, opts, callback) {
   if (typeof opts === 'function') (callback = opts), (opts = {});
   opts = opts || {};
 
-  return executeOperation(this.s.topology, count, [this, applySkipLimit, opts, callback], {
-    skipSessions: true
-  });
-};
-
-var count = function(self, applySkipLimit, opts, callback) {
   if (typeof applySkipLimit === 'function') {
     callback = applySkipLimit;
     applySkipLimit = true;
   }
 
+  if (this.s.session) {
+    opts = Object.assign({}, opts, { session: this.s.session });
+  }
+
+  return executeOperation(this.s.topology, count, [this, applySkipLimit, opts, callback], {
+    skipSessions: !!this.s.session
+  });
+};
+
+var count = function(self, applySkipLimit, opts, callback) {
   if (applySkipLimit) {
     if (typeof self.cursorSkip() === 'number') opts.skip = self.cursorSkip();
     if (typeof self.cursorLimit() === 'number') opts.limit = self.cursorLimit();
@@ -2977,7 +3070,7 @@ Cursor.prototype.close = function(options, callback) {
   };
 
   if (this.s.session) {
-    return this.s.session.endSession(() => completeClose());
+    return this._endSession(() => completeClose());
   }
 
   return completeClose();
@@ -3208,27 +3301,8 @@ module.exports = Cursor;
 
 
 
-                    
-                    <!-- disqus code -->
-                    <div id="disqus_thread"></div>
-                    <script type="text/javascript">
-                        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-                        var disqus_shortname = 'nodejsmongodbdriver'; // required: replace example with your forum shortname
-
-                        /* * * DON'T EDIT BELOW THIS LINE * * */
-                        (function() {
-                            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-                            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-                            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-                        })();
-                    </script>
-                    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-                    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>                    
-                    <!-- // disqus code -->
-                    
-
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Feb 23 2018 15:27:41 GMT-0500 (EST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Apr 11 2018 10:25:55 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

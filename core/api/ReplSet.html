@@ -576,6 +576,12 @@
             
                 <li data-name="Mongos#event:all"><a href="Mongos.html#event:all">all</a></li>
             
+                <li data-name="Mongos#event:commandFailed"><a href="Mongos.html#event:commandFailed">commandFailed</a></li>
+            
+                <li data-name="Mongos#event:commandStarted"><a href="Mongos.html#event:commandStarted">commandStarted</a></li>
+            
+                <li data-name="Mongos#event:commandSucceeded"><a href="Mongos.html#event:commandSucceeded">commandSucceeded</a></li>
+            
                 <li data-name="Mongos#event:connect"><a href="Mongos.html#event:connect">connect</a></li>
             
                 <li data-name="Mongos#event:fullsetup"><a href="Mongos.html#event:fullsetup">fullsetup</a></li>
@@ -742,6 +748,12 @@
             <span class="subtitle">Events</span>
             
                 <li data-name="ReplSet#event:all"><a href="ReplSet.html#event:all">all</a></li>
+            
+                <li data-name="ReplSet#event:commandFailed"><a href="ReplSet.html#event:commandFailed">commandFailed</a></li>
+            
+                <li data-name="ReplSet#event:commandStarted"><a href="ReplSet.html#event:commandStarted">commandStarted</a></li>
+            
+                <li data-name="ReplSet#event:commandSucceeded"><a href="ReplSet.html#event:commandSucceeded">commandSucceeded</a></li>
             
                 <li data-name="ReplSet#event:connect"><a href="ReplSet.html#event:connect">connect</a></li>
             
@@ -1019,7 +1031,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line119">line 119</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line121">line 121</a>
         </div>
         
     </div>
@@ -2053,6 +2065,42 @@
         </tr>
 	
 	
+	
+        <tr>
+            
+                <td class="name"><code>options.monitorCommands</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Enable command monitoring for this topology</p></td>
+        </tr>
+	
+	
 	</tbody>
 </table>
     
@@ -2239,7 +2287,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1365">line 1365</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1366">line 1366</a>
         </div>
         
     </div>
@@ -2446,7 +2494,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1304">line 1304</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1305">line 1305</a>
         </div>
         
     </div>
@@ -2813,7 +2861,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line973">line 973</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line972">line 972</a>
         </div>
         
     </div>
@@ -2944,7 +2992,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1090">line 1090</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1089">line 1089</a>
         </div>
         
     </div>
@@ -3020,7 +3068,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1547">line 1547</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1548">line 1548</a>
         </div>
         
     </div>
@@ -3479,7 +3527,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1020">line 1020</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1019">line 1019</a>
         </div>
         
     </div>
@@ -3610,7 +3658,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1168">line 1168</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1167">line 1167</a>
         </div>
         
     </div>
@@ -3738,7 +3786,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1153">line 1153</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1152">line 1152</a>
         </div>
         
     </div>
@@ -3866,7 +3914,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1178">line 1178</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1177">line 1177</a>
         </div>
         
     </div>
@@ -3942,7 +3990,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1251">line 1251</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1252">line 1252</a>
         </div>
         
     </div>
@@ -4347,7 +4395,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1106">line 1106</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1105">line 1105</a>
         </div>
         
     </div>
@@ -4475,7 +4523,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1143">line 1143</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1142">line 1142</a>
         </div>
         
     </div>
@@ -4551,7 +4599,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1069">line 1069</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1068">line 1068</a>
         </div>
         
     </div>
@@ -4627,7 +4675,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1473">line 1473</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1474">line 1474</a>
         </div>
         
     </div>
@@ -4766,7 +4814,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1287">line 1287</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1288">line 1288</a>
         </div>
         
     </div>
@@ -5171,7 +5219,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1053">line 1053</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1052">line 1052</a>
         </div>
         
     </div>
@@ -5242,7 +5290,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1269">line 1269</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1270">line 1270</a>
         </div>
         
     </div>
@@ -5655,7 +5703,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1579">line 1579</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1580">line 1580</a>
         </div>
         
     </div>
@@ -5729,6 +5777,249 @@ cursor instance
             
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="event:commandFailed">
+            
+            commandFailed
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1689">line 1689</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>An event emitted indicating a command failed, if command monitoring is enabled</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:commandStarted">
+            
+            commandStarted
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1675">line 1675</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>An event emitted indicating a command was started, if command monitoring is enabled</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:commandSucceeded">
+            
+            commandSucceeded
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1682">line 1682</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>An event emitted indicating a command succeeded, if command monitoring is enabled</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="event:connect">
             
             connect
@@ -5736,7 +6027,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1558">line 1558</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1559">line 1559</a>
         </div>
         
     </div>
@@ -5817,7 +6108,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1586">line 1586</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1587">line 1587</a>
         </div>
         
     </div>
@@ -5898,7 +6189,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1572">line 1572</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1573">line 1573</a>
         </div>
         
     </div>
@@ -5979,7 +6270,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1602">line 1602</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1603">line 1603</a>
         </div>
         
     </div>
@@ -6128,7 +6419,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1593">line 1593</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1594">line 1594</a>
         </div>
         
     </div>
@@ -6277,7 +6568,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1565">line 1565</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1566">line 1566</a>
         </div>
         
     </div>
@@ -6358,7 +6649,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1618">line 1618</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1619">line 1619</a>
         </div>
         
     </div>
@@ -6439,7 +6730,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1625">line 1625</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1626">line 1626</a>
         </div>
         
     </div>
@@ -6520,7 +6811,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1660">line 1660</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1661">line 1661</a>
         </div>
         
     </div>
@@ -6601,7 +6892,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1653">line 1653</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1654">line 1654</a>
         </div>
         
     </div>
@@ -6682,7 +6973,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1667">line 1667</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1668">line 1668</a>
         </div>
         
     </div>
@@ -6763,7 +7054,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1611">line 1611</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1612">line 1612</a>
         </div>
         
     </div>
@@ -6844,7 +7135,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1639">line 1639</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1640">line 1640</a>
         </div>
         
     </div>
@@ -6925,7 +7216,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1646">line 1646</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1647">line 1647</a>
         </div>
         
     </div>
@@ -7006,7 +7297,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1632">line 1632</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1633">line 1633</a>
         </div>
         
     </div>
@@ -7106,7 +7397,7 @@ cursor instance
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Feb 23 2018 15:27:47 GMT-0500 (EST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Apr 11 2018 10:26:01 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

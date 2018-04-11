@@ -576,6 +576,12 @@
             
                 <li data-name="Mongos#event:all"><a href="Mongos.html#event:all">all</a></li>
             
+                <li data-name="Mongos#event:commandFailed"><a href="Mongos.html#event:commandFailed">commandFailed</a></li>
+            
+                <li data-name="Mongos#event:commandStarted"><a href="Mongos.html#event:commandStarted">commandStarted</a></li>
+            
+                <li data-name="Mongos#event:commandSucceeded"><a href="Mongos.html#event:commandSucceeded">commandSucceeded</a></li>
+            
                 <li data-name="Mongos#event:connect"><a href="Mongos.html#event:connect">connect</a></li>
             
                 <li data-name="Mongos#event:fullsetup"><a href="Mongos.html#event:fullsetup">fullsetup</a></li>
@@ -742,6 +748,12 @@
             <span class="subtitle">Events</span>
             
                 <li data-name="ReplSet#event:all"><a href="ReplSet.html#event:all">all</a></li>
+            
+                <li data-name="ReplSet#event:commandFailed"><a href="ReplSet.html#event:commandFailed">commandFailed</a></li>
+            
+                <li data-name="ReplSet#event:commandStarted"><a href="ReplSet.html#event:commandStarted">commandStarted</a></li>
+            
+                <li data-name="ReplSet#event:commandSucceeded"><a href="ReplSet.html#event:commandSucceeded">commandSucceeded</a></li>
             
                 <li data-name="ReplSet#event:connect"><a href="ReplSet.html#event:connect">connect</a></li>
             
@@ -1019,7 +1031,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line106">line 106</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line108">line 108</a>
         </div>
         
     </div>
@@ -2053,6 +2065,42 @@
         </tr>
 	
 	
+	
+        <tr>
+            
+                <td class="name"><code>options.monitorCommands</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Enable command monitoring for this topology</p></td>
+        </tr>
+	
+	
 	</tbody>
 </table>
     
@@ -2237,7 +2285,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line888">line 888</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line893">line 893</a>
         </div>
         
     </div>
@@ -2444,7 +2492,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line660">line 660</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line665">line 665</a>
         </div>
         
     </div>
@@ -2849,7 +2897,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line534">line 534</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line536">line 536</a>
         </div>
         
     </div>
@@ -2980,7 +3028,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line937">line 937</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line942">line 942</a>
         </div>
         
     </div>
@@ -3056,7 +3104,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line859">line 859</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line864">line 864</a>
         </div>
         
     </div>
@@ -3515,7 +3563,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line968">line 968</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line973">line 973</a>
         </div>
         
     </div>
@@ -3718,7 +3766,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line926">line 926</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line931">line 931</a>
         </div>
         
     </div>
@@ -3839,7 +3887,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line955">line 955</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line960">line 960</a>
         </div>
         
     </div>
@@ -3915,7 +3963,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line582">line 582</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line587">line 587</a>
         </div>
         
     </div>
@@ -3991,7 +4039,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line946">line 946</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line951">line 951</a>
         </div>
         
     </div>
@@ -4067,7 +4115,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line731">line 731</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line736">line 736</a>
         </div>
         
     </div>
@@ -4438,7 +4486,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line619">line 619</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line624">line 624</a>
         </div>
         
     </div>
@@ -4514,7 +4562,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line629">line 629</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line634">line 634</a>
         </div>
         
     </div>
@@ -4590,7 +4638,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line602">line 602</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line607">line 607</a>
         </div>
         
     </div>
@@ -4666,7 +4714,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line876">line 876</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line881">line 881</a>
         </div>
         
     </div>
@@ -4805,7 +4853,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line813">line 813</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line818">line 818</a>
         </div>
         
     </div>
@@ -5176,7 +5224,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line610">line 610</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line615">line 615</a>
         </div>
         
     </div>
@@ -5247,7 +5295,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line770">line 770</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line775">line 775</a>
         </div>
         
     </div>
@@ -5626,7 +5674,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1081">line 1081</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1086">line 1086</a>
         </div>
         
     </div>
@@ -5707,7 +5755,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1018">line 1018</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1023">line 1023</a>
         </div>
         
     </div>
@@ -5788,7 +5836,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1095">line 1095</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1100">line 1100</a>
         </div>
         
     </div>
@@ -5869,7 +5917,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1088">line 1088</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1093">line 1093</a>
         </div>
         
     </div>
@@ -5950,7 +5998,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1025">line 1025</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1030">line 1030</a>
         </div>
         
     </div>
@@ -6031,7 +6079,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1074">line 1074</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1079">line 1079</a>
         </div>
         
     </div>
@@ -6112,7 +6160,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1039">line 1039</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1044">line 1044</a>
         </div>
         
     </div>
@@ -6193,7 +6241,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1046">line 1046</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1051">line 1051</a>
         </div>
         
     </div>
@@ -6274,7 +6322,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1032">line 1032</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1037">line 1037</a>
         </div>
         
     </div>
@@ -6355,7 +6403,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1060">line 1060</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1065">line 1065</a>
         </div>
         
     </div>
@@ -6436,7 +6484,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1067">line 1067</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1072">line 1072</a>
         </div>
         
     </div>
@@ -6517,7 +6565,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1053">line 1053</a>
+            <a href="lib_topologies_server.js.html">lib/topologies/server.js</a>, <a href="lib_topologies_server.js.html#line1058">line 1058</a>
         </div>
         
     </div>
@@ -6617,7 +6665,7 @@ cursor instance
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Feb 23 2018 15:27:47 GMT-0500 (EST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Apr 11 2018 10:26:01 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

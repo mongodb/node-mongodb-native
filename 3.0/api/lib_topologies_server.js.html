@@ -26,7 +26,7 @@
     
     
     <script>
-    var config = {"monospaceLinks":true,"cleverLinks":true,"default":{"outputSourceFiles":true},"applicationName":"Node.js MongoDB Driver API","disqus":true,"googleAnalytics":"UA-29229787-1","openGraph":{"title":"","type":"website","image":"","site_name":"","url":""},"meta":{"title":"","description":"","keyword":""},"linenums":true};
+    var config = {"monospaceLinks":true,"cleverLinks":true,"default":{"outputSourceFiles":true},"applicationName":"Node.js MongoDB Driver API","googleAnalytics":"UA-29229787-1","openGraph":{"title":"","type":"website","image":"","site_name":"","url":""},"meta":{"title":"","description":"","keyword":""},"linenums":true};
     </script>
     
 
@@ -859,6 +859,31 @@
             </ul>
         </li>
     
+        <li class="item" data-name="Decimal128">
+            <span class="title">
+                <a href="Decimal128.html">Decimal128</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Decimal128#toString"><a href="Decimal128.html#toString">toString</a></li>
+            
+                <li data-name="Decimal128.fromString"><a href="Decimal128.html#.fromString">fromString</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="Double">
             <span class="title">
                 <a href="Double.html">Double</a>
@@ -1221,6 +1246,29 @@
             </ul>
         </li>
     
+        <li class="item" data-name="Int32">
+            <span class="title">
+                <a href="Int32.html">Int32</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Int32#valueOf"><a href="Int32.html#valueOf">valueOf</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="Logger">
             <span class="title">
                 <a href="Logger.html">Logger</a>
@@ -1527,6 +1575,12 @@
             
                 <li data-name="Mongos#event:close"><a href="Mongos.html#event:close">close</a></li>
             
+                <li data-name="Mongos#event:commandFailed"><a href="Mongos.html#event:commandFailed">commandFailed</a></li>
+            
+                <li data-name="Mongos#event:commandStarted"><a href="Mongos.html#event:commandStarted">commandStarted</a></li>
+            
+                <li data-name="Mongos#event:commandSucceeded"><a href="Mongos.html#event:commandSucceeded">commandSucceeded</a></li>
+            
                 <li data-name="Mongos#event:connect"><a href="Mongos.html#event:connect">connect</a></li>
             
                 <li data-name="Mongos#event:error"><a href="Mongos.html#event:error">error</a></li>
@@ -1634,6 +1688,12 @@
             
                 <li data-name="ReplSet#event:close"><a href="ReplSet.html#event:close">close</a></li>
             
+                <li data-name="ReplSet#event:commandFailed"><a href="ReplSet.html#event:commandFailed">commandFailed</a></li>
+            
+                <li data-name="ReplSet#event:commandStarted"><a href="ReplSet.html#event:commandStarted">commandStarted</a></li>
+            
+                <li data-name="ReplSet#event:commandSucceeded"><a href="ReplSet.html#event:commandSucceeded">commandSucceeded</a></li>
+            
                 <li data-name="ReplSet#event:connect"><a href="ReplSet.html#event:connect">connect</a></li>
             
                 <li data-name="ReplSet#event:error"><a href="ReplSet.html#event:error">error</a></li>
@@ -1674,6 +1734,12 @@
             <span class="subtitle">Events</span>
             
                 <li data-name="Server#event:close"><a href="Server.html#event:close">close</a></li>
+            
+                <li data-name="Server#event:commandFailed"><a href="Server.html#event:commandFailed">commandFailed</a></li>
+            
+                <li data-name="Server#event:commandStarted"><a href="Server.html#event:commandStarted">commandStarted</a></li>
+            
+                <li data-name="Server#event:commandSucceeded"><a href="Server.html#event:commandSucceeded">commandSucceeded</a></li>
             
                 <li data-name="Server#event:connect"><a href="Server.html#event:connect">connect</a></li>
             
@@ -1958,7 +2024,8 @@ var legalOptionNames = [
   'promoteValues',
   'promoteBuffers',
   'compression',
-  'promiseLibrary'
+  'promiseLibrary',
+  'monitorCommands'
 ];
 
 /**
@@ -1992,12 +2059,16 @@ var legalOptionNames = [
  * @param {number} [options.monitoring=true] Triggers the server instance to call ismaster
  * @param {number} [options.haInterval=10000] The interval of calling ismaster when monitoring is enabled.
  * @param {boolean} [options.domainsEnabled=false] Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit.
+ * @param {boolean} [options.monitorCommands=false] Enable command monitoring for this topology
  * @fires Server#connect
  * @fires Server#close
  * @fires Server#error
  * @fires Server#timeout
  * @fires Server#parseError
  * @fires Server#reconnect
+ * @fires Server#commandStarted
+ * @fires Server#commandSucceeded
+ * @fires Server#commandFailed
  * @property {string} parserType the parser type used (c++ or js).
  * @return {Server} a Server instance.
  */
@@ -2046,7 +2117,9 @@ class Server extends TopologyBase {
         cursorFactory: Cursor,
         reconnect: reconnect,
         emitError: typeof options.emitError === 'boolean' ? options.emitError : true,
-        size: typeof options.poolSize === 'number' ? options.poolSize : 5
+        size: typeof options.poolSize === 'number' ? options.poolSize : 5,
+        monitorCommands:
+          typeof options.monitorCommands === 'boolean' ? options.monitorCommands : false
       }
     );
 
@@ -2218,7 +2291,10 @@ class Server extends TopologyBase {
       'serverClosed',
       'topologyOpening',
       'topologyClosed',
-      'topologyDescriptionChanged'
+      'topologyDescriptionChanged',
+      'commandStarted',
+      'commandSucceeded',
+      'commandFailed'
     ].forEach(function(e) {
       self.s.coreTopology.removeAllListeners(e);
     });
@@ -2242,6 +2318,9 @@ class Server extends TopologyBase {
     self.s.coreTopology.on('topologyOpening', relay('topologyOpening'));
     self.s.coreTopology.on('topologyClosed', relay('topologyClosed'));
     self.s.coreTopology.on('topologyDescriptionChanged', relay('topologyDescriptionChanged'));
+    self.s.coreTopology.on('commandStarted', relay('commandStarted'));
+    self.s.coreTopology.on('commandSucceeded', relay('commandSucceeded'));
+    self.s.coreTopology.on('commandFailed', relay('commandFailed'));
     self.s.coreTopology.on('attemptReconnect', relay('attemptReconnect'));
     self.s.coreTopology.on('monitoring', relay('monitoring'));
 
@@ -2344,6 +2423,27 @@ define.classMethod('connections', { callback: false, promise: false, returns: [A
  * @type {object}
  */
 
+/**
+ * An event emitted indicating a command was started, if command monitoring is enabled
+ *
+ * @event Server#commandStarted
+ * @type {object}
+ */
+
+/**
+ * An event emitted indicating a command succeeded, if command monitoring is enabled
+ *
+ * @event Server#commandSucceeded
+ * @type {object}
+ */
+
+/**
+ * An event emitted indicating a command failed, if command monitoring is enabled
+ *
+ * @event Server#commandFailed
+ * @type {object}
+ */
+
 module.exports = Server;
 </code></pre>
         </article>
@@ -2354,27 +2454,8 @@ module.exports = Server;
 
 
 
-                    
-                    <!-- disqus code -->
-                    <div id="disqus_thread"></div>
-                    <script type="text/javascript">
-                        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-                        var disqus_shortname = 'nodejsmongodbdriver'; // required: replace example with your forum shortname
-
-                        /* * * DON'T EDIT BELOW THIS LINE * * */
-                        (function() {
-                            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-                            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-                            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-                        })();
-                    </script>
-                    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-                    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>                    
-                    <!-- // disqus code -->
-                    
-
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Feb 23 2018 15:27:41 GMT-0500 (EST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Apr 11 2018 10:25:55 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>
