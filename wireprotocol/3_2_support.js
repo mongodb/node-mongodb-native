@@ -6,6 +6,7 @@ const f = require('util').format;
 const MongoError = require('../error').MongoError;
 const MongoNetworkError = require('../error').MongoNetworkError;
 const getReadPreference = require('./shared').getReadPreference;
+const incrementStatementId = require('../topologies/shared').incrementStatementId;
 
 const BSON = retrieveBSON();
 const Long = BSON.Long;
@@ -21,41 +22,42 @@ var WireProtocol = function(legacyWireProtocol) {
  * @param {ClientSession} session the session tracking transaction state
  */
 function decorateWithTransactionsData(command, session) {
-  if (!session) {
+  if (!session || !session.inTransaction()) {
     return;
   }
 
-  if (session.transactionOptions) {
-    if (session.transactionOptions.writeConcern) {
-      if (command.writeConcern) {
-        command.writeConcern = Object.assign(session.transactionOptions.writeConcern, command.writeConcern);
-      } else {
-        command.writeConcern = Object.assign({}, session.transactionOptions.writeConcern);
-      }
+  if (session.transactionOptions.writeConcern) {
+    if (command.writeConcern) {
+      command.writeConcern = Object.assign(
+        session.transactionOptions.writeConcern,
+        command.writeConcern
+      );
+    } else {
+      command.writeConcern = Object.assign({}, session.transactionOptions.writeConcern);
     }
   }
 
-  if (session.serverSession) {
-    const serverSession = session.serverSession;
-    if (serverSession.txnNumber) {
-      command.txnNumber = BSON.Long.fromNumber(serverSession.txnNumber);
+  const serverSession = session.serverSession;
+  if (serverSession.txnNumber) {
+    command.txnNumber = BSON.Long.fromNumber(serverSession.txnNumber);
+  }
+
+  command.stmtId = serverSession.stmtId;
+  command.autocommit = false;
+
+  if (serverSession.stmtId === 0) {
+    command.startTransaction = true;
+    command.readConcern = { level: 'snapshot' };
+
+    if (session.supports.causalConsistency && session.operationTime) {
+      Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
     }
-
-    if (typeof serverSession.stmtId !== 'undefined') {
-      command.stmtId = serverSession.stmtId;
-      command.autocommit = false;
-
-      if (serverSession.stmtId === 0) {
-        command.startTransaction = true;
-        command.readConcern = { level: 'snapshot' };
-
-        if (
-          session.supports.causalConsistency &&
-          session.operationTime
-        ) {
-          Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
-        }
-      }
+  } else {
+    // Drivers MUST add this readConcern to the first command in a transaction and MUST NOT
+    // automatically add any readConcern to subsequent commands. Drivers MUST ignore all other
+    // readConcerns.
+    if (command.readConcern) {
+      delete command.readConcern;
     }
   }
 }
@@ -349,6 +351,11 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
 
   // optionally decorate query with transaction data
   decorateWithTransactionsData(query.query, options.session);
+
+  // We need to increment the statement id if we're in a transaction
+  if (options.session && options.session.inTransaction()) {
+    incrementStatementId(options.session);
+  }
 
   return query;
 };

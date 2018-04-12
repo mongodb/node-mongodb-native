@@ -1,11 +1,8 @@
 'use strict';
 
-const os = require('os'),
-  f = require('util').format,
-  ReadPreference = require('./read_preference'),
-  retrieveBSON = require('../connection/utils').retrieveBSON;
-
-const BSON = retrieveBSON();
+const os = require('os');
+const f = require('util').format;
+const ReadPreference = require('./read_preference');
 
 /**
  * Emit event if it exists
@@ -427,7 +424,7 @@ const isRetryableWritesSupported = function(topology) {
  */
 function incrementTransactionNumber(session) {
   session.serverSession.txnNumber++;
-};
+}
 
 /**
  * Increment the statement id on the ServerSession contained by the provided ClientSession
@@ -438,7 +435,7 @@ function incrementTransactionNumber(session) {
 function incrementStatementId(session, operationCount) {
   operationCount = operationCount || 1;
   session.serverSession.stmtId += operationCount;
-};
+}
 
 /**
  * Relays events for a given listener and emitter

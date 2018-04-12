@@ -1361,11 +1361,6 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
 
   // Execute the command
   server.command(ns, cmd, options, callback);
-
-  // We need to increment the statement id if we're in a transaction
-  if (options.session && options.session.inTransaction()) {
-    incrementStatementId(options.session);
-  }
 };
 
 /**
