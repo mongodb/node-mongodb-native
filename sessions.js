@@ -4,7 +4,6 @@ const retrieveBSON = require('./connection/utils').retrieveBSON;
 const EventEmitter = require('events');
 const BSON = retrieveBSON();
 const Binary = BSON.Binary;
-const Long = BSON.Long;
 const uuidV4 = require('./utils').uuidV4;
 const MongoError = require('./error').MongoError;
 
@@ -12,16 +11,18 @@ function assertAlive(session, callback) {
   if (session.serverSession == null) {
     const error = new MongoError('Cannot use a session that has ended');
     if (typeof callback === 'function') {
-      return callback(error, null);
+      callback(error, null);
+      return false;
     }
 
     throw error;
   }
-};
+
+  return true;
+}
 
 /** A class representing a client session on the server */
 class ClientSession extends EventEmitter {
-
   /**
    * Create a client session.
    * WARNING: not meant to be instantiated directly
@@ -51,7 +52,8 @@ class ClientSession extends EventEmitter {
     this.serverSession = sessionPool.acquire();
 
     this.supports = {
-      causalConsistency: typeof options.causalConsistency !== 'undefined' ? options.causalConsistency : true
+      causalConsistency:
+        typeof options.causalConsistency !== 'undefined' ? options.causalConsistency : true
     };
 
     options = options || {};
@@ -91,7 +93,7 @@ class ClientSession extends EventEmitter {
     }
 
     if (this.serverSession && this.inTransaction()) {
-      this.abortTransaction();  // pass in callback?
+      this.abortTransaction(); // pass in callback?
     }
 
     if (!options.skipCommand) {
@@ -154,7 +156,7 @@ class ClientSession extends EventEmitter {
   startTransaction(options) {
     assertAlive(this);
     if (this.inTransaction()) {
-      throw new MongoError('Transaction already started');
+      throw new MongoError('Transaction already in progress');
     }
 
     // increment txnNumber and reset stmtId to zero.
@@ -178,7 +180,11 @@ class ClientSession extends EventEmitter {
     }
 
     return new Promise((resolve, reject) => {
-      endTransaction(this, 'commitTransaction', (err, reply) => err ? reject(err) : resolve(reply));
+      endTransaction(
+        this,
+        'commitTransaction',
+        (err, reply) => (err ? reject(err) : resolve(reply))
+      );
     });
   }
 
@@ -195,14 +201,20 @@ class ClientSession extends EventEmitter {
     }
 
     return new Promise((resolve, reject) => {
-      endTransaction(this, 'abortTransaction', (err, reply) => err ? reject(err) : resolve(reply));
+      endTransaction(
+        this,
+        'abortTransaction',
+        (err, reply) => (err ? reject(err) : resolve(reply))
+      );
     });
-
   }
 }
 
 function endTransaction(clientSession, commandName, callback) {
-  assertAlive(clientSession, callback);
+  if (!assertAlive(clientSession, callback)) {
+    // checking result in case callback was called
+    return;
+  }
 
   if (!clientSession.inTransaction()) {
     callback(new MongoError('No transaction started'));
@@ -216,19 +228,24 @@ function endTransaction(clientSession, commandName, callback) {
   }
 
   // send the command
-  clientSession.topology.command('admin.$cmd', { [commandName]: 1 }, {
-    writeConcern: clientSession.transactionOptions.writeConcern,
-    session: clientSession
-  }, (err, reply) => {
-    // reset internal transaction state
-    if (clientSession.autoStartTransaction) {
-      clientSession.startTransaction();
-    } else {
+  clientSession.topology.command(
+    'admin.$cmd',
+    { [commandName]: 1 },
+    {
+      writeConcern: clientSession.transactionOptions.writeConcern,
+      session: clientSession
+    },
+    (err, reply) => {
+      // reset internal transaction state
       clientSession.transactionOptions = null;
-    }
 
-    callback(err, reply);
-  });
+      if (clientSession.autoStartTransaction) {
+        clientSession.startTransaction();
+      }
+
+      callback(err, reply);
+    }
+  );
 }
 
 Object.defineProperty(ClientSession.prototype, 'id', {
