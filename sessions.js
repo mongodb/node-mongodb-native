@@ -4,6 +4,7 @@ const retrieveBSON = require('./connection/utils').retrieveBSON;
 const EventEmitter = require('events');
 const BSON = retrieveBSON();
 const Binary = BSON.Binary;
+const Long = BSON.Long;
 const uuidV4 = require('./utils').uuidV4;
 const MongoError = require('./error').MongoError;
 
@@ -50,7 +51,7 @@ class ClientSession extends EventEmitter {
     this.serverSession = sessionPool.acquire();
 
     this.supports = {
-      causalConsistency: !!options.causalConsistency
+      causalConsistency: typeof options.causalConsistency !== 'undefined' ? options.causalConsistency : true
     };
 
     options = options || {};
@@ -61,13 +62,14 @@ class ClientSession extends EventEmitter {
     }
 
     this.operationTime = null;
-
     this.explicit = !!options.explicit;
     this.owner = options.owner;
     this.transactionOptions = null;
     this.defaultTransactionOptions = options.defaultTransactionOptions || {};
+    this.autoStartTransaction = options.autoStartTransaction;
 
-    if (options.autoStartTransaction) {
+    // immediately start the transaction if autoStart has been chosen
+    if (this.autoStartTransaction) {
       this.startTransaction();
     }
   }
@@ -215,10 +217,11 @@ function endTransaction(clientSession, commandName, callback) {
 
   // send the command
   clientSession.topology.command('admin.$cmd', { [commandName]: 1 }, {
-    writeConcern: clientSession.transactionOptions.writeConcern
+    writeConcern: clientSession.transactionOptions.writeConcern,
+    session: clientSession
   }, (err, reply) => {
     // reset internal transaction state
-    if (clientSession.options.autoStartTransaction) {
+    if (clientSession.autoStartTransaction) {
       clientSession.startTransaction();
     } else {
       clientSession.transactionOptions = null;
