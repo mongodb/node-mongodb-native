@@ -425,8 +425,19 @@ const isRetryableWritesSupported = function(topology) {
  *
  * @param {ClientSession} session
  */
-const incrementTransactionNumber = function(session) {
+function incrementTransactionNumber(session) {
   session.serverSession.txnNumber++;
+};
+
+/**
+ * Increment the statement id on the ServerSession contained by the provided ClientSession
+ *
+ * @param {ClientSession} session the client sessions
+ * @param {Number} [operationCount] the number of operations performed
+ */
+function incrementStatementId(session, operationCount) {
+  operationCount = operationCount || 1;
+  session.serverSession.stmtId += operationCount;
 };
 
 /**
@@ -454,4 +465,5 @@ module.exports.Interval = Interval;
 module.exports.Timeout = Timeout;
 module.exports.isRetryableWritesSupported = isRetryableWritesSupported;
 module.exports.incrementTransactionNumber = incrementTransactionNumber;
+module.exports.incrementStatementId = incrementStatementId;
 module.exports.relayEvents = relayEvents;
