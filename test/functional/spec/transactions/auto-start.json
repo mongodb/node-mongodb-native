@@ -576,7 +576,7 @@
               "readConcern": null,
               "lsid": "session0",
               "txnNumber": {
-                "$numberLong": "2"
+                "$numberLong": "1"
               },
               "stmtId": 0,
               "startTransaction": true,
@@ -593,7 +593,7 @@
               "commitTransaction": 1,
               "lsid": "session0",
               "txnNumber": {
-                "$numberLong": "2"
+                "$numberLong": "1"
               },
               "stmtId": 1,
               "startTransaction": null,
