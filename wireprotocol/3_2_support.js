@@ -14,6 +14,52 @@ var WireProtocol = function(legacyWireProtocol) {
   this.legacyWireProtocol = legacyWireProtocol;
 };
 
+/**
+ * Optionally decorate a command with transactions specific keys
+ *
+ * @param {Object} command the command to decorate
+ * @param {ClientSession} session the session tracking transaction state
+ */
+function decorateWithTransactionsData(command, session) {
+  if (!session) {
+    return;
+  }
+
+  if (session.transactionOptions) {
+    if (session.transactionOptions.writeConcern) {
+      if (command.writeConcern) {
+        command.writeConcern = Object.assign(session.transactionOptions.writeConcern, command.writeConcern);
+      } else {
+        command.writeConcern = Object.assign({}, session.transactionOptions.writeConcern);
+      }
+    }
+  }
+
+  if (session.serverSession) {
+    const serverSession = session.serverSession;
+    if (serverSession.txnNumber) {
+      command.txnNumber = BSON.Long.fromNumber(serverSession.txnNumber);
+    }
+
+    if (typeof serverSession.stmtId !== 'undefined') {
+      command.stmtId = serverSession.stmtId;
+      command.autocommit = false;
+
+      if (serverSession.stmtId === 0) {
+        command.startTransaction = true;
+        command.readConcern = { level: 'snapshot' };
+
+        if (
+          session.supports.causalConsistency &&
+          session.operationTime
+        ) {
+          Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
+        }
+      }
+    }
+  }
+}
+
 //
 // Execute a write operation
 var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callback) {
@@ -56,22 +102,8 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
     writeCommand.bypassDocumentValidation = options.bypassDocumentValidation;
   }
 
-  // optionally add a `txnNumber` if retryable writes are being attempted
-  if (options.session && options.session.serverSession) {
-    const serverSession = options.session.serverSession;
-    if (serverSession.txnNumber) {
-      writeCommand.txnNumber = BSON.Long.fromNumber(serverSession.txnNumber);
-    }
-
-    if (typeof serverSession.stmtId !== 'undefined') {
-      writeCommand.stmtId = serverSession.stmtId;
-
-      if (serverSession.stmtId === 0) {
-        writeCommand.startTransaction = true;
-        writeCommand.autocommit = false;
-      }
-    }
-  }
+  // optionally decorate command with transactions data
+  decorateWithTransactionsData(writeCommand, options.session);
 
   // Options object
   var opts = { command: true };
@@ -205,6 +237,9 @@ WireProtocol.prototype.getMore = function(
     batchSize: Math.abs(batchSize)
   };
 
+  // optionally decorate command with transactions data
+  decorateWithTransactionsData(getMoreCmd, options.session);
+
   if (cursorState.cmd.tailable && typeof cursorState.cmd.maxAwaitTimeMS === 'number') {
     getMoreCmd.maxTimeMS = cursorState.cmd.maxAwaitTimeMS;
   }
@@ -296,22 +331,26 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
     typeof options.wireProtocolCommand === 'boolean' ? options.wireProtocolCommand : true;
 
   // Establish type of command
+  let query;
   if (cmd.find && wireProtocolCommand) {
     // Create the find command
-    var query = executeFindCommand(bson, ns, cmd, cursorState, topology, options);
+    query = executeFindCommand(bson, ns, cmd, cursorState, topology, options);
     // Mark the cmd as virtual
     cmd.virtual = false;
     // Signal the documents are in the firstBatch value
     query.documentsReturnedIn = 'firstBatch';
-    // Return the query
-    return query;
   } else if (cursorState.cursorId != null) {
     return;
   } else if (cmd) {
-    return setupCommand(bson, ns, cmd, cursorState, topology, options);
+    query = setupCommand(bson, ns, cmd, cursorState, topology, options);
   } else {
     throw new MongoError(f('command %s does not return a cursor', JSON.stringify(cmd)));
   }
+
+  // optionally decorate query with transaction data
+  decorateWithTransactionsData(query.query, options.session);
+
+  return query;
 };
 
 // // Command
@@ -533,6 +572,9 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
     };
   }
 
+  // optionally decorate query with transaction data
+  decorateWithTransactionsData(findCmd, options.session);
+
   // Build Query object
   var query = new Query(bson, commandns, findCmd, {
     numberToSkip: 0,
@@ -582,6 +624,9 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
       $readPreference: readPreference.toJSON()
     };
   }
+
+  // optionally decorate query with transaction data
+  decorateWithTransactionsData(finalCmd, options.session);
 
   // Build Query object
   var query = new Query(bson, f('%s.$cmd', parts.shift()), finalCmd, {
