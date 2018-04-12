@@ -1321,6 +1321,14 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
   // Establish readPreference
   var readPreference = options.readPreference ? options.readPreference : ReadPreference.primary;
 
+  if (
+    options.session &&
+    options.session.inTransaction() &&
+    !readPreference.equals(ReadPreference.primary)
+  ) {
+    return callback(new MongoError('Read preference in a transaction must be primary'));
+  }
+
   // If the readPreference is primary and we have no primary, store it
   if (
     readPreference.preference === 'primary' &&
