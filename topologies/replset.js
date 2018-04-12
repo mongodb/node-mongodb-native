@@ -18,6 +18,7 @@ const createClientInfo = require('./shared').createClientInfo;
 const SessionMixins = require('./shared').SessionMixins;
 const isRetryableWritesSupported = require('./shared').isRetryableWritesSupported;
 const incrementTransactionNumber = require('./shared').incrementTransactionNumber;
+const incrementStatementId = require('./shared').incrementStatementId;
 const relayEvents = require('./shared').relayEvents;
 
 var MongoCR = require('../auth/mongocr'),
@@ -1190,7 +1191,9 @@ function executeWriteOperation(args, options, callback) {
   const ns = args.ns;
   const ops = args.ops;
 
-  if (self.state === DESTROYED) return callback(new MongoError(f('topology was destroyed')));
+  if (self.state === DESTROYED) {
+    return callback(new MongoError(f('topology was destroyed')));
+  }
 
   const willRetryWrite =
     !args.retrying && options.retryWrites && options.session && isRetryableWritesSupported(self);
@@ -1233,7 +1236,12 @@ function executeWriteOperation(args, options, callback) {
     incrementTransactionNumber(options.session);
   }
 
-  return self.s.replicaSetState.primary[op](ns, ops, options, handler);
+  self.s.replicaSetState.primary[op](ns, ops, options, handler);
+
+  // We need to increment the statement id if we're in a transaction
+  if (options.session && options.session.inTransaction()) {
+    incrementStatementId(options.session, ops.length);
+  }
 }
 
 /**
@@ -1353,6 +1361,11 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
 
   // Execute the command
   server.command(ns, cmd, options, callback);
+
+  // We need to increment the statement id if we're in a transaction
+  if (options.session && options.session.inTransaction()) {
+    incrementStatementId(options.session);
+  }
 };
 
 /**
