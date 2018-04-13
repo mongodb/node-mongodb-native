@@ -1,7 +1,8 @@
 'use strict';
 
-var MongoClient = require('../../').MongoClient,
-  expect = require('chai').expect;
+const Promise = require('bluebird');
+const MongoClient = require('../../').MongoClient;
+const expect = require('chai').expect;
 
 function connectToDb(url, db, options, callback) {
   if (typeof options === 'function') {
@@ -23,24 +24,20 @@ function setupDatabase(configuration, dbsToClean) {
   });
 
   dbsToClean.push(configDbName);
-  return client.connect().then(function() {
-    var cleanPromises = [];
-    dbsToClean.forEach(function(dbName) {
-      var cleanPromise = client
-        .db(dbName)
-        .command({
-          dropAllUsersFromDatabase: 1,
-          writeConcern: { w: 1 }
-        })
-        .then(function() {
-          return client.db(dbName).dropDatabase();
-        });
 
-      cleanPromises.push(cleanPromise);
-    });
-
-    return Promise.all(cleanPromises);
-  });
+  return client
+    .connect()
+    .then(() =>
+      dbsToClean.reduce(
+        (result, dbName) =>
+          result
+            .then(() =>
+              client.db(dbName).command({ dropAllUsersFromDatabase: 1, writeConcern: { w: 1 } })
+            )
+            .then(() => client.db(dbName).dropDatabase({ writeConcern: { w: 1 } })),
+        Promise.resolve()
+      )
+    );
 }
 
 var assert = {
