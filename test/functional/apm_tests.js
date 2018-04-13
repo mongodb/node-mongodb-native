@@ -29,7 +29,7 @@ function ignoreNsNotFound(err) {
 
 describe('APM', function() {
   before(function() {
-    setupDatabase(this.configuration);
+    return setupDatabase(this.configuration);
   });
 
   it(
