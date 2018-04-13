@@ -1196,7 +1196,11 @@ function executeWriteOperation(args, options, callback) {
   }
 
   const willRetryWrite =
-    !args.retrying && options.retryWrites && options.session && isRetryableWritesSupported(self);
+    !args.retrying &&
+    options.retryWrites &&
+    options.session &&
+    isRetryableWritesSupported(self) &&
+    !options.session.inTransaction();
 
   if (!self.s.replicaSetState.hasPrimary()) {
     if (self.s.disconnectHandler) {
