@@ -224,6 +224,13 @@ function endTransaction(clientSession, commandName, callback) {
 
   if (clientSession.serverSession.stmtId === 0) {
     // The server transaction was never started.
+
+    // reset internal transaction state
+    clientSession.transactionOptions = null;
+    if (clientSession.autoStartTransaction) {
+      clientSession.startTransaction();
+    }
+
     callback(null, null);
     return;
   }
@@ -243,7 +250,6 @@ function endTransaction(clientSession, commandName, callback) {
     (err, reply) => {
       // reset internal transaction state
       clientSession.transactionOptions = null;
-
       if (clientSession.autoStartTransaction) {
         clientSession.startTransaction();
       }
