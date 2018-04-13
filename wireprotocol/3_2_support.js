@@ -22,7 +22,18 @@ var WireProtocol = function(legacyWireProtocol) {
  * @param {ClientSession} session the session tracking transaction state
  */
 function decorateWithTransactionsData(command, session) {
-  if (!session || !session.inTransaction()) {
+  if (!session) {
+    return;
+  }
+
+  // first apply non-transaction-specific sessions data
+  const serverSession = session.serverSession;
+  if (serverSession.txnNumber) {
+    command.txnNumber = BSON.Long.fromNumber(serverSession.txnNumber);
+  }
+
+  // now try to apply tansaction-specific data
+  if (!session.inTransaction()) {
     return;
   }
 
@@ -36,11 +47,6 @@ function decorateWithTransactionsData(command, session) {
     } else {
       command.writeConcern = Object.assign({}, session.transactionOptions.writeConcern);
     }
-  }
-
-  const serverSession = session.serverSession;
-  if (serverSession.txnNumber) {
-    command.txnNumber = BSON.Long.fromNumber(serverSession.txnNumber);
   }
 
   command.stmtId = serverSession.stmtId;
