@@ -29,6 +29,7 @@ function decorateWithTransactionsData(command, session) {
   if (session.transactionOptions.writeConcern) {
     if (command.writeConcern) {
       command.writeConcern = Object.assign(
+        {},
         session.transactionOptions.writeConcern,
         command.writeConcern
       );

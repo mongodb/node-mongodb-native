@@ -34,7 +34,7 @@ class ClientSession extends EventEmitter {
    * @param {Boolean} [options.autoStartTransaction=false] When enabled this session automatically starts a transaction with the provided defaultTransactionOptions.
    * @param {Object} [options.defaultTransactionOptions] The default TransactionOptions to use for transactions started on this session.
    */
-  constructor(topology, sessionPool, options) {
+  constructor(topology, sessionPool, options, clientOptions) {
     super();
 
     if (topology == null) {
@@ -50,6 +50,7 @@ class ClientSession extends EventEmitter {
     this.sessionPool = sessionPool;
     this.hasEnded = false;
     this.serverSession = sessionPool.acquire();
+    this.clientOptions = clientOptions;
 
     this.supports = {
       causalConsistency:
@@ -67,8 +68,8 @@ class ClientSession extends EventEmitter {
     this.explicit = !!options.explicit;
     this.owner = options.owner;
     this.transactionOptions = null;
-    this.defaultTransactionOptions = options.defaultTransactionOptions || {};
     this.autoStartTransaction = options.autoStartTransaction;
+    this.defaultTransactionOptions = Object.assign({}, options.defaultTransactionOptions);
 
     // immediately start the transaction if autoStart has been chosen
     if (this.autoStartTransaction) {
@@ -164,7 +165,7 @@ class ClientSession extends EventEmitter {
     this.serverSession.stmtId = 0;
 
     // set transaction options, we will use this to determine if we are in a transaction
-    this.transactionOptions = options || this.defaultTransactionOptions;
+    this.transactionOptions = Object.assign({}, options || this.defaultTransactionOptions);
   }
 
   /**
@@ -227,14 +228,18 @@ function endTransaction(clientSession, commandName, callback) {
     return;
   }
 
+  const command = { [commandName]: 1 };
+  if (clientSession.transactionOptions.writeConcern) {
+    Object.assign(command, { writeConcern: clientSession.transactionOptions.writeConcern });
+  } else if (clientSession.clientOptions.w) {
+    Object.assign(command, { writeConcern: { w: parseInt(clientSession.clientOptions.w, 10) } });
+  }
+
   // send the command
   clientSession.topology.command(
     'admin.$cmd',
-    { [commandName]: 1 },
-    {
-      writeConcern: clientSession.transactionOptions.writeConcern,
-      session: clientSession
-    },
+    command,
+    { session: clientSession },
     (err, reply) => {
       // reset internal transaction state
       clientSession.transactionOptions = null;
