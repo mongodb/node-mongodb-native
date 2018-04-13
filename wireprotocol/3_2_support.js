@@ -329,6 +329,11 @@ WireProtocol.prototype.getMore = function(
     queryOptions.session = cursorState.session;
   }
 
+  // We need to increment the statement id if we're in a transaction
+  if (options.session && options.session.inTransaction()) {
+    incrementStatementId(options.session);
+  }
+
   // Write out the getMore command
   connection.write(query, queryOptions, queryCallback);
 };
