@@ -1,6 +1,5 @@
 'use strict';
 
-const Promise = require('bluebird');
 const MongoClient = require('../../').MongoClient;
 const expect = require('chai').expect;
 
