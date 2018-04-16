@@ -7,7 +7,7 @@ const MongoError = require('../error').MongoError;
 const MongoNetworkError = require('../error').MongoNetworkError;
 const getReadPreference = require('./shared').getReadPreference;
 const incrementStatementId = require('../topologies/shared').incrementStatementId;
-
+const ReadPreference = require('../topologies/read_preference');
 const BSON = retrieveBSON();
 const Long = BSON.Long;
 
@@ -43,6 +43,12 @@ function decorateWithTransactionsData(command, session) {
   if (serverSession.stmtId === 0) {
     command.startTransaction = true;
     command.readConcern = { level: 'snapshot' };
+
+    if (session.transactionOptions.readConcern) {
+      Object.assign(command, { readConcern: session.transactionOptions.readConcern });
+    } else if (session.clientOptions.readConcern) {
+      Object.assign(command, { readConcern: session.clientOptions.readConcern });
+    }
 
     if (session.supports.causalConsistency && session.operationTime) {
       Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
@@ -422,6 +428,7 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
   options = options || {};
   // Get the readPreference
   var readPreference = getReadPreference(cmd, options);
+
   // Set the optional batchSize
   cursorState.batchSize = cmd.batchSize || cursorState.batchSize;
 
