@@ -34,6 +34,10 @@ var getReadPreference = function(cmd, options) {
     throw new MongoError('readPreference must be a ReadPreference instance');
   }
 
+  if (options.session && options.session.inTransaction() && !readPreference.equals(ReadPreference.primary)) {
+    throw new MongoError('read preference in a transaction must be primary');
+  }
+
   return readPreference;
 };
 
