@@ -37,18 +37,6 @@ function decorateWithTransactionsData(command, session) {
     return;
   }
 
-  if (session.transactionOptions.writeConcern) {
-    if (command.writeConcern) {
-      command.writeConcern = Object.assign(
-        {},
-        session.transactionOptions.writeConcern,
-        command.writeConcern
-      );
-    } else {
-      command.writeConcern = Object.assign({}, session.transactionOptions.writeConcern);
-    }
-  }
-
   command.stmtId = serverSession.stmtId;
   command.autocommit = false;
 

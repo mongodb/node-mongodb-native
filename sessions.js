@@ -244,7 +244,7 @@ function endTransaction(clientSession, commandName, callback) {
   if (clientSession.transactionOptions.writeConcern) {
     Object.assign(command, { writeConcern: clientSession.transactionOptions.writeConcern });
   } else if (clientSession.clientOptions.w) {
-    Object.assign(command, { writeConcern: { w: parseInt(clientSession.clientOptions.w, 10) } });
+    Object.assign(command, { writeConcern: { w: clientSession.clientOptions.w } });
   }
 
   function commandHandler(e, r) {
