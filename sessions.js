@@ -211,6 +211,11 @@ class ClientSession extends EventEmitter {
   }
 }
 
+function isRetryableError(error) {
+  if (error.codeName === 'NoSuchTransaction') return false;
+  return true;
+}
+
 function endTransaction(clientSession, commandName, callback) {
   if (!assertAlive(clientSession, callback)) {
     // checking result in case callback was called
@@ -242,19 +247,32 @@ function endTransaction(clientSession, commandName, callback) {
     Object.assign(command, { writeConcern: { w: parseInt(clientSession.clientOptions.w, 10) } });
   }
 
+  function commandHandler(e, r) {
+    // reset internal transaction state
+    clientSession.transactionOptions = null;
+    if (clientSession.autoStartTransaction) {
+      clientSession.startTransaction();
+    }
+
+    callback(e, r);
+  }
+
   // send the command
   clientSession.topology.command(
     'admin.$cmd',
     command,
     { session: clientSession },
     (err, reply) => {
-      // reset internal transaction state
-      clientSession.transactionOptions = null;
-      if (clientSession.autoStartTransaction) {
-        clientSession.startTransaction();
+      if (err && isRetryableError(err)) {
+        return clientSession.topology.command(
+          'admin.$cmd',
+          command,
+          { session: clientSession },
+          (_err, _reply) => commandHandler(null, _reply)
+        );
       }
 
-      callback(err, reply);
+      commandHandler(null, reply);
     }
   );
 }
