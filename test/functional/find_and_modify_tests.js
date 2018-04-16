@@ -25,11 +25,11 @@ describe('Find and Modify', function() {
       });
 
       listener.on('started', function(event) {
-        if (event.commandName === 'findandmodify') started.push(event);
+        if (event.commandName === 'findAndModify') started.push(event);
       });
 
       listener.on('succeeded', function(event) {
-        if (event.commandName === 'findandmodify') succeeded.push(event);
+        if (event.commandName === 'findAndModify') succeeded.push(event);
       });
 
       var configuration = this.configuration;
@@ -89,11 +89,11 @@ describe('Find and Modify', function() {
       });
 
       listener.on('started', function(event) {
-        if (event.commandName === 'findandmodify') started.push(event);
+        if (event.commandName === 'findAndModify') started.push(event);
       });
 
       listener.on('succeeded', function(event) {
-        if (event.commandName === 'findandmodify') succeeded.push(event);
+        if (event.commandName === 'findAndModify') succeeded.push(event);
       });
 
       var configuration = this.configuration;
@@ -155,11 +155,11 @@ describe('Find and Modify', function() {
       });
 
       listener.on('started', function(event) {
-        if (event.commandName === 'findandmodify') started.push(event);
+        if (event.commandName === 'findAndModify') started.push(event);
       });
 
       listener.on('succeeded', function(event) {
-        if (event.commandName === 'findandmodify') succeeded.push(event);
+        if (event.commandName === 'findAndModify') succeeded.push(event);
       });
 
       var url = configuration.url();
