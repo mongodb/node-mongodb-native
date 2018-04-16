@@ -264,8 +264,9 @@ tests:
       - name: startTransaction
         arguments:
           session: session0
-          writeConcern:
-            w: majority
+          options:
+            writeConcern:
+              w: majority
       - name: bulkWrite
         arguments:
           requests:
@@ -294,7 +295,6 @@ tests:
               - _id: 1
             ordered: true
             readConcern:
-              level: "snapshot"
             lsid: session0
             txnNumber:
               $numberLong: "1"
