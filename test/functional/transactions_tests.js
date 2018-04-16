@@ -58,7 +58,8 @@ function findPlaceholders(value, parent) {
         result.push({ path: key, type: 'string' });
       }
 
-      delete parent[0][parent[1]]; // NOTE: fix this, it just passes the current example
+      // NOTE: fix this, it just passes the current example
+      delete parent[0][parent[1]];
     } else if (value[key] === '') {
       result.push({ path: key, type: 'string' });
     }
@@ -101,37 +102,37 @@ describe('Transactions (spec)', function() {
   });
 
   testSuites.forEach(testSuite => {
-    describe(testSuite.name, function() {
-      beforeEach(() => {
-        const db = testContext.client.db();
-        const coll = db.collection(testContext.collectionName);
+    describe(testSuite.name, {
+      metadata: { requires: { topology: ['replicaset', 'mongos'], mongodb: '>=3.7.x' } },
+      test: function() {
+        beforeEach(() => {
+          const db = testContext.client.db();
+          const coll = db.collection(testContext.collectionName);
 
-        return coll
-          .drop()
-          .catch(err => {
-            if (!err.message.match(/ns not found/)) throw err;
-          })
-          .then(() => db.createCollection(testContext.collectionName, { w: 'majority' }))
-          .then(() => {
-            if (testSuite.data && Array.isArray(testSuite.data) && testSuite.data.length > 0) {
-              return coll.insert(testSuite.data, { w: 'majority' });
-            }
-          });
-      });
-
-      testSuite.tests.forEach(testData => {
-        afterEach(() => {
-          if (testContext.testClient) {
-            return testContext.testClient.close().then(() => {
-              delete testContext.testClient;
+          return coll
+            .drop()
+            .catch(err => {
+              if (!err.message.match(/ns not found/)) throw err;
+            })
+            .then(() => db.createCollection(testContext.collectionName, { w: 'majority' }))
+            .then(() => {
+              if (testSuite.data && Array.isArray(testSuite.data) && testSuite.data.length > 0) {
+                return coll.insert(testSuite.data, { w: 'majority' });
+              }
             });
-          }
         });
 
-        const maybeSkipIt = testData.skipReason ? it.skip : it;
-        maybeSkipIt(testData.description, {
-          metadata: { requires: { topology: 'replicaset' } },
-          test: function() {
+        testSuite.tests.forEach(testData => {
+          afterEach(() => {
+            if (testContext.testClient) {
+              return testContext.testClient.close().then(() => {
+                delete testContext.testClient;
+              });
+            }
+          });
+
+          const maybeSkipIt = testData.skipReason ? it.skip : it;
+          maybeSkipIt(testData.description, function() {
             const commandEvents = [];
             const clientOptions = translateClientOptions(
               Object.assign({ monitorCommands: true }, testData.clientOptions)
@@ -242,9 +243,9 @@ describe('Transactions (spec)', function() {
                   }
                 });
             });
-          }
+          });
         });
-      });
+      }
     });
   });
 });
