@@ -1159,7 +1159,7 @@ describe('Command Write Concern', function() {
           var doc = request.document;
           if (doc.ismaster) {
             request.reply(primary[0]);
-          } else if (doc.findandmodify) {
+          } else if (doc.findAndModify) {
             commandResult = doc;
             request.reply({ ok: 1, result: {} });
           } else if (doc.endSessions) {
