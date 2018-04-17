@@ -15,7 +15,6 @@ const cloneOptions = require('./shared').cloneOptions;
 const createClientInfo = require('./shared').createClientInfo;
 const SessionMixins = require('./shared').SessionMixins;
 const isRetryableWritesSupported = require('./shared').isRetryableWritesSupported;
-const incrementTransactionNumber = require('./shared').incrementTransactionNumber;
 const relayEvents = require('./shared').relayEvents;
 const BSON = retrieveBSON();
 
@@ -908,7 +907,7 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
   }
 
   // increment and assign txnNumber
-  incrementTransactionNumber(options.session);
+  options.session.incrementTransactionNumber();
 
   server[op](ns, ops, options, (err, result) => {
     if (!err) return callback(null, result);
