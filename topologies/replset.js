@@ -17,8 +17,6 @@ const Interval = require('./shared').Interval;
 const createClientInfo = require('./shared').createClientInfo;
 const SessionMixins = require('./shared').SessionMixins;
 const isRetryableWritesSupported = require('./shared').isRetryableWritesSupported;
-const incrementTransactionNumber = require('./shared').incrementTransactionNumber;
-const incrementStatementId = require('./shared').incrementStatementId;
 const relayEvents = require('./shared').relayEvents;
 
 var MongoCR = require('../auth/mongocr'),
@@ -1244,7 +1242,7 @@ function executeWriteOperation(args, options, callback) {
 
   // increment and assign txnNumber
   if (willRetryWrite) {
-    incrementTransactionNumber(options.session);
+    options.session.incrementTransactionNumber();
   }
 
   // optionally autostart transaction if requested
@@ -1254,7 +1252,7 @@ function executeWriteOperation(args, options, callback) {
 
   // We need to increment the statement id if we're in a transaction
   if (options.session && options.session.inTransaction()) {
-    incrementStatementId(options.session, ops.length);
+    options.session.incrementStatementId(ops.length);
   }
 }
 

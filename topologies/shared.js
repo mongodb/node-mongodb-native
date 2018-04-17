@@ -418,26 +418,6 @@ const isRetryableWritesSupported = function(topology) {
 };
 
 /**
- * Increment the transaction number on the ServerSession contained by the provided ClientSession
- *
- * @param {ClientSession} session
- */
-function incrementTransactionNumber(session) {
-  session.serverSession.txnNumber++;
-}
-
-/**
- * Increment the statement id on the ServerSession contained by the provided ClientSession
- *
- * @param {ClientSession} session the client sessions
- * @param {Number} [operationCount] the number of operations performed
- */
-function incrementStatementId(session, operationCount) {
-  operationCount = operationCount || 1;
-  session.serverSession.stmtId += operationCount;
-}
-
-/**
  * Relays events for a given listener and emitter
  *
  * @param {EventEmitter} listener the EventEmitter to listen to the events for
@@ -461,6 +441,4 @@ module.exports.diff = diff;
 module.exports.Interval = Interval;
 module.exports.Timeout = Timeout;
 module.exports.isRetryableWritesSupported = isRetryableWritesSupported;
-module.exports.incrementTransactionNumber = incrementTransactionNumber;
-module.exports.incrementStatementId = incrementStatementId;
 module.exports.relayEvents = relayEvents;

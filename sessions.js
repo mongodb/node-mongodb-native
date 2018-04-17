@@ -34,6 +34,7 @@ class ClientSession extends EventEmitter {
    * @param {Boolean} [options.causalConsistency] Whether causal consistency should be enabled on this session
    * @param {Boolean} [options.autoStartTransaction=false] When enabled this session automatically starts a transaction with the provided defaultTransactionOptions.
    * @param {Object} [options.defaultTransactionOptions] The default TransactionOptions to use for transactions started on this session.
+   * @param {Object} [clientOptions] Optional settings provided when creating a client in the porcelain driver
    */
   constructor(topology, sessionPool, options, clientOptions) {
     super();
@@ -134,6 +135,23 @@ class ClientSession extends EventEmitter {
     }
 
     return this.id.id.buffer.equals(session.id.id.buffer);
+  }
+
+  /**
+   * Increment the transaction number on the internal ServerSession
+   */
+  incrementTransactionNumber() {
+    this.serverSession.txnNumber++;
+  }
+
+  /**
+   * Increment the statement id on the internal ServerSession
+   *
+   * @param {Number} [operationCount] the number of operations performed
+   */
+  incrementStatementId(operationCount) {
+    operationCount = operationCount || 1;
+    this.serverSession.stmtId += operationCount;
   }
 
   /**
@@ -265,7 +283,7 @@ function endTransaction(clientSession, commandName, callback) {
   const command = { [commandName]: 1 };
   if (clientSession.transactionOptions.writeConcern) {
     Object.assign(command, { writeConcern: clientSession.transactionOptions.writeConcern });
-  } else if (clientSession.clientOptions.w) {
+  } else if (clientSession.clientOptions && clientSession.clientOptions.w) {
     Object.assign(command, { writeConcern: { w: clientSession.clientOptions.w } });
   }
 

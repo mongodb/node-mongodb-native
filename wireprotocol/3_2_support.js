@@ -6,7 +6,6 @@ const f = require('util').format;
 const MongoError = require('../error').MongoError;
 const MongoNetworkError = require('../error').MongoNetworkError;
 const getReadPreference = require('./shared').getReadPreference;
-const incrementStatementId = require('../topologies/shared').incrementStatementId;
 const BSON = retrieveBSON();
 const Long = BSON.Long;
 
@@ -41,15 +40,14 @@ function decorateWithTransactionsData(command, session) {
 
   if (serverSession.stmtId === 0) {
     command.startTransaction = true;
-    command.readConcern = { level: 'snapshot' };
 
-    if (session.transactionOptions.readConcern) {
-      Object.assign(command, { readConcern: session.transactionOptions.readConcern });
-    } else if (session.clientOptions.readConcern) {
-      Object.assign(command, { readConcern: session.clientOptions.readConcern });
+    const readConcern = session.transactionOptions.readConcern || session.clientOptions.readConcern;
+    if (readConcern) {
+      command.readConcern = readConcern;
     }
 
     if (session.supports.causalConsistency && session.operationTime) {
+      command.readConcern = command.readConcern || {};
       Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
     }
   } else {
@@ -318,7 +316,7 @@ WireProtocol.prototype.getMore = function(
 
   // We need to increment the statement id if we're in a transaction
   if (options.session && options.session.inTransaction()) {
-    incrementStatementId(options.session);
+    options.session.incrementStatementId();
   }
 
   // Write out the getMore command
@@ -353,7 +351,7 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
 
   // We need to increment the statement id if we're in a transaction
   if (options.session && options.session.inTransaction()) {
-    incrementStatementId(options.session);
+    options.session.incrementStatementId();
   }
 
   return query;
