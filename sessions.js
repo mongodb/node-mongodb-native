@@ -70,11 +70,6 @@ class ClientSession extends EventEmitter {
     this.transactionOptions = null;
     this.autoStartTransaction = options.autoStartTransaction;
     this.defaultTransactionOptions = Object.assign({}, options.defaultTransactionOptions);
-
-    // immediately start the transaction if autoStart has been chosen
-    if (this.autoStartTransaction) {
-      this.startTransaction();
-    }
   }
 
   /**
@@ -216,6 +211,10 @@ function isRetryableError(error) {
   return true;
 }
 
+function resetTransactionState(clientSession) {
+  clientSession.transactionOptions = null;
+}
+
 function endTransaction(clientSession, commandName, callback) {
   if (!assertAlive(clientSession, callback)) {
     // checking result in case callback was called
@@ -223,19 +222,17 @@ function endTransaction(clientSession, commandName, callback) {
   }
 
   if (!clientSession.inTransaction()) {
-    callback(new MongoError('No transaction started'));
-    return;
+    if (clientSession.autoStartTransaction) {
+      clientSession.startTransaction();
+    } else {
+      callback(new MongoError('No transaction started'));
+      return;
+    }
   }
 
   if (clientSession.serverSession.stmtId === 0) {
     // The server transaction was never started.
-
-    // reset internal transaction state
-    clientSession.transactionOptions = null;
-    if (clientSession.autoStartTransaction) {
-      clientSession.startTransaction();
-    }
-
+    resetTransactionState(clientSession);
     callback(null, null);
     return;
   }
@@ -248,12 +245,7 @@ function endTransaction(clientSession, commandName, callback) {
   }
 
   function commandHandler(e, r) {
-    // reset internal transaction state
-    clientSession.transactionOptions = null;
-    if (clientSession.autoStartTransaction) {
-      clientSession.startTransaction();
-    }
-
+    resetTransactionState(clientSession);
     callback(e, r);
   }
 
