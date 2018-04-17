@@ -315,7 +315,7 @@ function testOperation(operation, obj, context) {
   const args = [];
   if (operation.arguments) {
     Object.keys(operation.arguments).forEach(key => {
-      if (['filter', 'fieldName', 'document', 'documents'].includes(key)) {
+      if (['filter', 'fieldName', 'document', 'documents', 'pipeline'].includes(key)) {
         return args.unshift(operation.arguments[key]);
       }
 
@@ -356,7 +356,7 @@ function testOperation(operation, obj, context) {
   }
 
   let opPromise;
-  if (operation.name === 'find') {
+  if (operation.name === 'find' || operation.name === 'aggregate') {
     // `find` creates a cursor, so we need to call `toArray` on it
     const cursor = obj[operation.name].apply(obj, args);
     opPromise = cursor.toArray();
