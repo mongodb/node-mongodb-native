@@ -1,3 +1,8 @@
+<a name="3.0.7"></a>
+## [3.0.7](https://github.com/mongodb/node-mongodb-native/compare/v3.0.6...v3.0.7) (2018-04-17)
+
+
+
 <a name="3.0.6"></a>
 ## [3.0.6](https://github.com/mongodb/node-mongodb-native/compare/v3.0.5...v3.0.6) (2018-04-09)
 
