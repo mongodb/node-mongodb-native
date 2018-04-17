@@ -7,7 +7,6 @@ const MongoError = require('../error').MongoError;
 const MongoNetworkError = require('../error').MongoNetworkError;
 const getReadPreference = require('./shared').getReadPreference;
 const incrementStatementId = require('../topologies/shared').incrementStatementId;
-const ReadPreference = require('../topologies/read_preference');
 const BSON = retrieveBSON();
 const Long = BSON.Long;
 
@@ -166,9 +165,6 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorState, pool, callba
     returnFieldSelector: null
   });
 
-  // Set query flags
-  query.slaveOk = true;
-
   // Kill cursor callback
   var killCursorCallback = function(err, result) {
     if (err) {
@@ -254,9 +250,6 @@ WireProtocol.prototype.getMore = function(
     checkKeys: false,
     returnFieldSelector: null
   });
-
-  // Set query flags
-  query.slaveOk = true;
 
   // Query callback
   var queryCallback = function(err, result) {
