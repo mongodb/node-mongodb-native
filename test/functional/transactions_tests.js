@@ -332,6 +332,11 @@ function testOperation(operation, obj, context) {
         return;
       }
 
+      if (key === 'options') {
+        Object.assign(opOptions, operation.arguments[key]);
+        return;
+      }
+
       opOptions[key] = operation.arguments[key];
     });
   }
