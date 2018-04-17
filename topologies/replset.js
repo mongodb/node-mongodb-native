@@ -1179,6 +1179,13 @@ ReplSet.prototype.getServers = function() {
   return this.s.replicaSetState.allServers();
 };
 
+function ensureTransactionAutostart(session) {
+  if (!session) return;
+  if (!session.inTransaction() && session.autoStartTransaction) {
+    session.startTransaction();
+  }
+}
+
 //
 // Execute write operation
 function executeWriteOperation(args, options, callback) {
@@ -1239,6 +1246,9 @@ function executeWriteOperation(args, options, callback) {
   if (willRetryWrite) {
     incrementTransactionNumber(options.session);
   }
+
+  // optionally autostart transaction if requested
+  ensureTransactionAutostart(options.session);
 
   self.s.replicaSetState.primary[op](ns, ops, options, handler);
 
@@ -1324,6 +1334,9 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
 
   // Establish readPreference
   var readPreference = options.readPreference ? options.readPreference : ReadPreference.primary;
+
+  // optionally autostart transaction if requested
+  ensureTransactionAutostart(options.session);
 
   if (
     options.session &&
