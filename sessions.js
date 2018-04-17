@@ -249,6 +249,10 @@ function endTransaction(clientSession, commandName, callback) {
     callback(e, r);
   }
 
+  function transactionError(err) {
+    return commandName === 'commitTransaction' ? err : null;
+  }
+
   // send the command
   clientSession.topology.command(
     'admin.$cmd',
@@ -260,11 +264,11 @@ function endTransaction(clientSession, commandName, callback) {
           'admin.$cmd',
           command,
           { session: clientSession },
-          (_err, _reply) => commandHandler(null, _reply)
+          (_err, _reply) => commandHandler(transactionError(_err), _reply)
         );
       }
 
-      commandHandler(null, reply);
+      commandHandler(transactionError(err), reply);
     }
   );
 }
