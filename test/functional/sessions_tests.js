@@ -50,7 +50,7 @@ describe('Sessions', function() {
     }
   });
 
-  describe.only('withSession', {
+  describe('withSession', {
     metadata: { requires: { mongodb: '>3.6.0' } },
     test: function() {
       [
