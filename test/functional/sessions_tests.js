@@ -64,18 +64,18 @@ describe('Sessions', function() {
               .toArray();
           }
         },
-        {
-          nodeVersion: '>=8.x',
-          description: 'should support async operations',
-          operation: client => session =>
-            async function() {
-              await client
-                .db('test')
-                .collection('foo')
-                .find({}, { session })
-                .toArray();
-            }
-        },
+        // {
+        //   nodeVersion: '>=8.x',
+        //   description: 'should support async operations',
+        //   operation: client => session =>
+        //     async function() {
+        //       await client
+        //         .db('test')
+        //         .collection('foo')
+        //         .find({}, { session })
+        //         .toArray();
+        //     }
+        // },
         {
           description: 'should support operations that return rejected promises',
           operation: (/* client */) => (/* session */) => {
@@ -143,38 +143,53 @@ describe('Sessions', function() {
           }
         }
       ].forEach(testCase => {
-        const metadata = {};
-        if (testCase.nodeVersion) metadata.requires = { node: testCase.nodeVersion };
-        it(testCase.description, {
-          metadata: metadata,
-          test: function() {
-            const client = this.configuration.newClient(
-              { w: 1 },
-              { poolSize: 1, auto_reconnect: false }
-            );
+        it(testCase.description, function() {
+          const client = this.configuration.newClient(
+            { w: 1 },
+            { poolSize: 1, auto_reconnect: false }
+          );
 
-            return client.connect().then(client => {
-              let promise;
-              if (testCase.callback) {
-                promise = new Promise(resolve => {
-                  client.withSession(testCase.operation(client), {}, testCase.callback(resolve));
-                });
-              } else {
-                promise = client.withSession(testCase.operation(client));
-              }
+          return client.connect().then(client => {
+            return client
+              .withSession(testCase.operation(client))
+              .catch(() => expect(client.topology.s.sessionPool.sessions).to.have.length(1))
+              .then(() => expect(client.topology.s.sessionPool.sessions).to.have.length(1))
+              .then(() => client.close())
+              .then(() => {
+                // verify that the `endSessions` command was sent
+                const lastCommand = test.commands.started[test.commands.started.length - 1];
+                expect(lastCommand.commandName).to.equal('endSessions');
+                expect(client.topology.s.sessionPool.sessions).to.have.length(0);
+              });
+          });
+        });
+      });
 
-              return promise
-                .catch(() => expect(client.topology.s.sessionPool.sessions).to.have.length(1))
-                .then(() => expect(client.topology.s.sessionPool.sessions).to.have.length(1))
-                .then(() => client.close())
-                .then(() => {
-                  // verify that the `endSessions` command was sent
-                  const lastCommand = test.commands.started[test.commands.started.length - 1];
-                  expect(lastCommand.commandName).to.equal('endSessions');
-                  expect(client.topology.s.sessionPool.sessions).to.have.length(0);
-                });
+      it('supports passing options to ClientSession', function() {
+        const client = this.configuration.newClient(
+          { w: 1 },
+          { poolSize: 1, auto_reconnect: false }
+        );
+
+        return client.connect().then(client => {
+          const promise = client.withSession({ causalConsistency: false }, session => {
+            expect(session.supports.causalConsistency).to.be.false;
+            return client
+              .db('test')
+              .collection('foo')
+              .find({}, { session })
+              .toArray();
+          });
+
+          return promise
+            .then(() => expect(client.topology.s.sessionPool.sessions).to.have.length(1))
+            .then(() => client.close())
+            .then(() => {
+              // verify that the `endSessions` command was sent
+              const lastCommand = test.commands.started[test.commands.started.length - 1];
+              expect(lastCommand.commandName).to.equal('endSessions');
+              expect(client.topology.s.sessionPool.sessions).to.have.length(0);
             });
-          }
         });
       });
     }
