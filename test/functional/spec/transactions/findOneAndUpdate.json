@@ -1,0 +1,413 @@
+{
+  "data": [
+    {
+      "_id": 1
+    },
+    {
+      "_id": 2
+    },
+    {
+      "_id": 3
+    }
+  ],
+  "tests": [
+    {
+      "description": "findOneAndUpdate",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {
+              "_id": 3
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "returnDocument": "Before",
+            "session": "session0"
+          },
+          "result": {
+            "_id": 3
+          }
+        },
+        {
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {
+              "_id": 4
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "upsert": true,
+            "returnDocument": "After",
+            "session": "session0"
+          },
+          "result": {
+            "_id": 4,
+            "x": 1
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "startTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {
+              "_id": 3
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "returnDocument": "Before",
+            "session": "session0"
+          },
+          "result": {
+            "_id": 3,
+            "x": 1
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "startTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {
+              "_id": 3
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "returnDocument": "Before",
+            "session": "session0"
+          },
+          "result": {
+            "_id": 3,
+            "x": 2
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "findAndModify": "test",
+              "query": {
+                "_id": 3
+              },
+              "update": {
+                "$inc": {
+                  "x": 1
+                }
+              },
+              "new": false,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "stmtId": 0,
+              "startTransaction": true,
+              "autocommit": false,
+              "readConcern": null,
+              "writeConcern": null
+            },
+            "command_name": "findAndModify",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "findAndModify": "test",
+              "query": {
+                "_id": 4
+              },
+              "update": {
+                "$inc": {
+                  "x": 1
+                }
+              },
+              "new": true,
+              "upsert": true,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "stmtId": 1,
+              "startTransaction": null,
+              "autocommit": false,
+              "readConcern": null,
+              "writeConcern": null
+            },
+            "command_name": "findAndModify",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "stmtId": 2,
+              "startTransaction": null,
+              "autocommit": false,
+              "readConcern": null,
+              "writeConcern": null
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "findAndModify": "test",
+              "query": {
+                "_id": 3
+              },
+              "update": {
+                "$inc": {
+                  "x": 1
+                }
+              },
+              "new": false,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "2"
+              },
+              "stmtId": 0,
+              "startTransaction": true,
+              "autocommit": false,
+              "readConcern": {
+                "afterClusterTime": 42
+              },
+              "writeConcern": null
+            },
+            "command_name": "findAndModify",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "2"
+              },
+              "stmtId": 1,
+              "startTransaction": null,
+              "autocommit": false,
+              "readConcern": null,
+              "writeConcern": null
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "findAndModify": "test",
+              "query": {
+                "_id": 3
+              },
+              "update": {
+                "$inc": {
+                  "x": 1
+                }
+              },
+              "new": false,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "3"
+              },
+              "stmtId": 0,
+              "startTransaction": true,
+              "autocommit": false,
+              "readConcern": {
+                "afterClusterTime": 42
+              },
+              "writeConcern": null
+            },
+            "command_name": "findAndModify",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "abortTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "3"
+              },
+              "stmtId": 1,
+              "startTransaction": null,
+              "autocommit": false,
+              "readConcern": null,
+              "writeConcern": null
+            },
+            "command_name": "abortTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 3,
+              "x": 2
+            },
+            {
+              "_id": 4,
+              "x": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "operation writeConcern ignored for findOneAndUpdate",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "arguments": {
+            "session": "session0",
+            "options": {
+              "writeConcern": {
+                "w": "majority"
+              }
+            }
+          }
+        },
+        {
+          "name": "findOneAndUpdate",
+          "arguments": {
+            "filter": {
+              "_id": 3
+            },
+            "update": {
+              "$inc": {
+                "x": 1
+              }
+            },
+            "returnDocument": "Before",
+            "session": "session0",
+            "writeConcern": {
+              "w": "majority"
+            }
+          },
+          "result": {
+            "_id": 3
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "findAndModify": "test",
+              "query": {
+                "_id": 3
+              },
+              "update": {
+                "$inc": {
+                  "x": 1
+                }
+              },
+              "new": false,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "stmtId": 0,
+              "startTransaction": true,
+              "autocommit": false,
+              "readConcern": null,
+              "writeConcern": null
+            },
+            "command_name": "findAndModify",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "stmtId": 1,
+              "startTransaction": null,
+              "autocommit": false,
+              "readConcern": null,
+              "writeConcern": {
+                "w": "majority"
+              }
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        }
+      ]
+    }
+  ]
+}

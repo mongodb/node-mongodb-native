@@ -1,0 +1,209 @@
+{
+  "data": [],
+  "tests": [
+    {
+      "description": "one transaction",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1
+            },
+            "session": "session0"
+          },
+          "result": {
+            "insertedId": 1
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "session": "session0"
+          },
+          "result": [
+            {
+              "_id": 1
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "session": "session1"
+          },
+          "result": []
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "result": []
+        },
+        {
+          "name": "commitTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "session": "session1"
+          },
+          "result": [
+            {
+              "_id": 1
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "result": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "two transactions",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "startTransaction",
+          "arguments": {
+            "session": "session1"
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1
+            },
+            "session": "session0"
+          },
+          "result": {
+            "insertedId": 1
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "session": "session0"
+          },
+          "result": [
+            {
+              "_id": 1
+            }
+          ]
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "session": "session1"
+          },
+          "result": []
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "result": []
+        },
+        {
+          "name": "commitTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "session": "session1"
+          },
+          "result": []
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "result": [
+            {
+              "_id": 1
+            }
+          ]
+        },
+        {
+          "name": "commitTransaction",
+          "arguments": {
+            "session": "session1"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

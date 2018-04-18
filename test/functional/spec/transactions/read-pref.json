@@ -1,0 +1,307 @@
+{
+  "data": [],
+  "tests": [
+    {
+      "description": "primary",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1
+            },
+            "session": "session0"
+          },
+          "result": {
+            "insertedId": 1
+          }
+        },
+        {
+          "name": "count",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            },
+            "readPreference": {
+              "mode": "primary"
+            },
+            "session": "session0"
+          },
+          "result": 1
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "session": "session0"
+          },
+          "result": [
+            {
+              "_id": 1
+            }
+          ]
+        },
+        {
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$project": {
+                  "_id": 1
+                }
+              }
+            ],
+            "batchSize": 3,
+            "session": "session0"
+          },
+          "result": [
+            {
+              "_id": 1
+            }
+          ]
+        },
+        {
+          "name": "commitTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "write and read",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "_id": 1
+            },
+            "session": "session0"
+          },
+          "result": {
+            "insertedId": 1
+          }
+        },
+        {
+          "name": "count",
+          "arguments": {
+            "readPreference": {
+              "mode": "secondary"
+            },
+            "session": "session0"
+          },
+          "result": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "readPreference": {
+              "mode": "secondary"
+            },
+            "session": "session0"
+          },
+          "result": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
+        },
+        {
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$project": {
+                  "_id": 1
+                }
+              }
+            ],
+            "readPreference": {
+              "mode": "secondary"
+            },
+            "session": "session0"
+          },
+          "result": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "non-primary readPreference",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "count",
+          "arguments": {
+            "readPreference": {
+              "mode": "secondary"
+            },
+            "session": "session0"
+          },
+          "result": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "readPreference": {
+              "mode": "secondary"
+            },
+            "session": "session0"
+          },
+          "result": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
+        },
+        {
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$project": {
+                  "_id": 1
+                }
+              }
+            ],
+            "readPreference": {
+              "mode": "secondary"
+            },
+            "session": "session0"
+          },
+          "result": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": []
+        }
+      }
+    },
+    {
+      "description": "conflict",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        },
+        {
+          "name": "count",
+          "arguments": {
+            "readPreference": {
+              "mode": "primary"
+            },
+            "session": "session0"
+          },
+          "result": 0
+        },
+        {
+          "name": "count",
+          "arguments": {
+            "readPreference": {
+              "mode": "secondary"
+            },
+            "session": "session0"
+          },
+          "result": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
+        },
+        {
+          "name": "find",
+          "arguments": {
+            "session": "session0",
+            "readPreference": {
+              "mode": "secondary"
+            }
+          },
+          "result": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
+        },
+        {
+          "name": "aggregate",
+          "arguments": {
+            "pipeline": [
+              {
+                "$project": {
+                  "_id": 1
+                }
+              }
+            ],
+            "readPreference": {
+              "mode": "secondary"
+            },
+            "session": "session0"
+          },
+          "result": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "arguments": {
+            "session": "session0"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": []
+        }
+      }
+    }
+  ]
+}
