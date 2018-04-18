@@ -389,9 +389,6 @@
               },
               "readConcern": null,
               "lsid": "session0",
-              "readConcern": {
-                "level": "snapshot"
-              },
               "txnNumber": {
                 "$numberLong": "1"
               },
