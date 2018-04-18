@@ -78,7 +78,6 @@ class ClientSession extends EventEmitter {
    * Ends this session on the server
    *
    * @param {Object} [options] Optional settings
-   * @param {Boolean} [options.skipCommand] Skip sending the actual endSessions command to the server
    * @param {Function} [callback] Optional callback for completion of this operation
    */
   endSession(options, callback) {
@@ -92,11 +91,6 @@ class ClientSession extends EventEmitter {
 
     if (this.serverSession && this.inTransaction()) {
       this.abortTransaction(); // pass in callback?
-    }
-
-    if (!options.skipCommand) {
-      // send the `endSessions` command
-      this.topology.endSessions(this.id);
     }
 
     // mark the session as ended, and emit a signal
