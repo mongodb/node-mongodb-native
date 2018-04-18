@@ -186,8 +186,6 @@ tests:
               batchSize: 3
             readConcern:
             lsid: session0
-            readConcern:
-              level: "snapshot"
             txnNumber:
               $numberLong: "1"
             stmtId: 0
