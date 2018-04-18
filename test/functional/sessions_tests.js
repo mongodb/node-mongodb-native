@@ -93,54 +93,6 @@ describe('Sessions', function() {
           operation: (/* client */) => (/* session */) => {
             throw new Error('something went wrong!');
           }
-        },
-        {
-          description: 'should support operations that return promises with a callback',
-          operation: client => session => {
-            return client
-              .db('test')
-              .collection('foo')
-              .find({}, { session })
-              .toArray();
-          },
-          callback: resolve => (err, res) => {
-            expect(err).to.not.exist;
-            expect(res).to.exist;
-            resolve();
-          }
-        },
-        {
-          description: 'should support operations that return rejected promises and a callback',
-          operation: (/* client */) => (/* session */) => {
-            return Promise.reject(new Error('something awful'));
-          },
-          callback: resolve => (err, res) => {
-            expect(err).to.exist;
-            expect(res).to.not.exist;
-            resolve();
-          }
-        },
-        {
-          description: "should support operations that don't return promises with a callback",
-          operation: (/* client */) => (/* session */) => {
-            setTimeout(() => {});
-          },
-          callback: resolve => (err, res) => {
-            expect(err).to.exist;
-            expect(res).to.not.exist;
-            resolve();
-          }
-        },
-        {
-          description: 'should support operations that throw exceptions with a callback',
-          operation: (/* client */) => (/* session */) => {
-            throw new Error('something went wrong!');
-          },
-          callback: resolve => (err, res) => {
-            expect(err).to.exist;
-            expect(res).to.not.exist;
-            resolve();
-          }
         }
       ].forEach(testCase => {
         it(testCase.description, function() {
