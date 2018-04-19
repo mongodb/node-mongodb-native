@@ -18,7 +18,7 @@
       
       <guid>/node-mongodb-native/3.0/reference/management/</guid>
       <description> Management The driver provides two mechanisms for examining its state:
- Logging: Comprehensive logging of all operations. Application Performance Monitoring: The Application Performance Monitoring API is an API developers to tap into the commands issues to MongoDB to record performance metrics and/or inspect the commands sent to MongoDB.  </description>
+ Logging: Comprehensive logging of all operations. Application Performance Monitoring: The Application Performance Monitoring API is an API that allows developers to tap into the commands issued to MongoDB to record performance metrics and/or inspect the commands sent to MongoDB.  </description>
     </item>
     
     <item>

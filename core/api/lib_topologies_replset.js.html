@@ -1011,25 +1011,24 @@
         <article>
             <pre class="prettyprint source linenums"><code>'use strict';
 
-var inherits = require('util').inherits,
-  f = require('util').format,
-  EventEmitter = require('events').EventEmitter,
-  ReadPreference = require('./read_preference'),
-  BasicCursor = require('../cursor'),
-  retrieveBSON = require('../connection/utils').retrieveBSON,
-  Logger = require('../connection/logger'),
-  MongoError = require('../error').MongoError,
-  errors = require('../error'),
-  Server = require('./server'),
-  ReplSetState = require('./replset_state'),
-  clone = require('./shared').clone,
-  Timeout = require('./shared').Timeout,
-  Interval = require('./shared').Interval,
-  createClientInfo = require('./shared').createClientInfo,
-  SessionMixins = require('./shared').SessionMixins,
-  isRetryableWritesSupported = require('./shared').isRetryableWritesSupported,
-  getNextTransactionNumber = require('./shared').getNextTransactionNumber,
-  relayEvents = require('./shared').relayEvents;
+const inherits = require('util').inherits;
+const f = require('util').format;
+const EventEmitter = require('events').EventEmitter;
+const ReadPreference = require('./read_preference');
+const BasicCursor = require('../cursor');
+const retrieveBSON = require('../connection/utils').retrieveBSON;
+const Logger = require('../connection/logger');
+const MongoError = require('../error').MongoError;
+const errors = require('../error');
+const Server = require('./server');
+const ReplSetState = require('./replset_state');
+const clone = require('./shared').clone;
+const Timeout = require('./shared').Timeout;
+const Interval = require('./shared').Interval;
+const createClientInfo = require('./shared').createClientInfo;
+const SessionMixins = require('./shared').SessionMixins;
+const isRetryableWritesSupported = require('./shared').isRetryableWritesSupported;
+const relayEvents = require('./shared').relayEvents;
 
 var MongoCR = require('../auth/mongocr'),
   X509 = require('../auth/x509'),
@@ -2189,6 +2188,13 @@ ReplSet.prototype.getServers = function() {
   return this.s.replicaSetState.allServers();
 };
 
+function ensureTransactionAutostart(session) {
+  if (!session) return;
+  if (!session.inTransaction() &amp;&amp; session.autoStartTransaction) {
+    session.startTransaction();
+  }
+}
+
 //
 // Execute write operation
 function executeWriteOperation(args, options, callback) {
@@ -2201,10 +2207,16 @@ function executeWriteOperation(args, options, callback) {
   const ns = args.ns;
   const ops = args.ops;
 
-  if (self.state === DESTROYED) return callback(new MongoError(f('topology was destroyed')));
+  if (self.state === DESTROYED) {
+    return callback(new MongoError(f('topology was destroyed')));
+  }
 
   const willRetryWrite =
-    !args.retrying &amp;&amp; options.retryWrites &amp;&amp; options.session &amp;&amp; isRetryableWritesSupported(self);
+    !args.retrying &amp;&amp;
+    options.retryWrites &amp;&amp;
+    options.session &amp;&amp;
+    isRetryableWritesSupported(self) &amp;&amp;
+    !options.session.inTransaction();
 
   if (!self.s.replicaSetState.hasPrimary()) {
     if (self.s.disconnectHandler) {
@@ -2241,10 +2253,18 @@ function executeWriteOperation(args, options, callback) {
 
   // increment and assign txnNumber
   if (willRetryWrite) {
-    options.txnNumber = getNextTransactionNumber(options.session);
+    options.session.incrementTransactionNumber();
   }
 
-  return self.s.replicaSetState.primary[op](ns, ops, options, handler);
+  // optionally autostart transaction if requested
+  ensureTransactionAutostart(options.session);
+
+  self.s.replicaSetState.primary[op](ns, ops, options, handler);
+
+  // We need to increment the statement id if we're in a transaction
+  if (options.session &amp;&amp; options.session.inTransaction()) {
+    options.session.incrementStatementId(ops.length);
+  }
 }
 
 /**
@@ -2324,6 +2344,17 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
   // Establish readPreference
   var readPreference = options.readPreference ? options.readPreference : ReadPreference.primary;
 
+  // optionally autostart transaction if requested
+  ensureTransactionAutostart(options.session);
+
+  if (
+    options.session &amp;&amp;
+    options.session.inTransaction() &amp;&amp;
+    !readPreference.equals(ReadPreference.primary)
+  ) {
+    return callback(new MongoError('Read preference in a transaction must be primary'));
+  }
+
   // If the readPreference is primary and we have no primary, store it
   if (
     readPreference.preference === 'primary' &amp;&amp;
@@ -2393,7 +2424,7 @@ ReplSet.prototype.auth = function(mechanism, db) {
 
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected
-  if (self.s.disconnectHandler != null) {
+  if (!this.isConnected() &amp;&amp; self.s.disconnectHandler != null) {
     if (!self.s.replicaSetState.hasPrimary() &amp;&amp; !self.s.options.secondaryOnlyConnectionAllowed) {
       return self.s.disconnectHandler.add('auth', db, allArgs, {}, callback);
     } else if (
@@ -2734,7 +2765,7 @@ module.exports = ReplSet;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Apr 11 2018 20:13:30 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Apr 19 2018 14:44:45 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

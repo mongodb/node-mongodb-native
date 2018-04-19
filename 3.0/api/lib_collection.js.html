@@ -1963,28 +1963,27 @@
         <article>
             <pre class="prettyprint source linenums"><code>'use strict';
 
-var checkCollectionName = require('./utils').checkCollectionName,
-  ObjectID = require('mongodb-core').BSON.ObjectID,
-  Long = require('mongodb-core').BSON.Long,
-  Code = require('mongodb-core').BSON.Code,
-  f = require('util').format,
-  AggregationCursor = require('./aggregation_cursor'),
-  MongoError = require('mongodb-core').MongoError,
-  shallowClone = require('./utils').shallowClone,
-  isObject = require('./utils').isObject,
-  toError = require('./utils').toError,
-  normalizeHintField = require('./utils').normalizeHintField,
-  handleCallback = require('./utils').handleCallback,
-  decorateCommand = require('./utils').decorateCommand,
-  formattedOrderClause = require('./utils').formattedOrderClause,
-  ReadPreference = require('mongodb-core').ReadPreference,
-  CommandCursor = require('./command_cursor'),
-  Define = require('./metadata'),
-  Cursor = require('./cursor'),
-  unordered = require('./bulk/unordered'),
-  ordered = require('./bulk/ordered'),
-  ChangeStream = require('./change_stream'),
-  executeOperation = require('./utils').executeOperation;
+const checkCollectionName = require('./utils').checkCollectionName;
+const ObjectID = require('mongodb-core').BSON.ObjectID;
+const Long = require('mongodb-core').BSON.Long;
+const Code = require('mongodb-core').BSON.Code;
+const f = require('util').format;
+const AggregationCursor = require('./aggregation_cursor');
+const MongoError = require('mongodb-core').MongoError;
+const shallowClone = require('./utils').shallowClone;
+const isObject = require('./utils').isObject;
+const toError = require('./utils').toError;
+const normalizeHintField = require('./utils').normalizeHintField;
+const handleCallback = require('./utils').handleCallback;
+const decorateCommand = require('./utils').decorateCommand;
+const formattedOrderClause = require('./utils').formattedOrderClause;
+const ReadPreference = require('mongodb-core').ReadPreference;
+const CommandCursor = require('./command_cursor');
+const unordered = require('./bulk/unordered');
+const ordered = require('./bulk/ordered');
+const ChangeStream = require('./change_stream');
+const executeOperation = require('./utils').executeOperation;
+const applyWriteConcern = require('./utils').applyWriteConcern;
 
 /**
  * @fileOverview The **Collection** class is an internal class that embodies a MongoDB collection
@@ -2103,8 +2102,6 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
     readConcern: options.readConcern
   };
 };
-
-var define = (Collection.define = new Define('Collection', Collection, false));
 
 Object.defineProperty(Collection.prototype, 'dbName', {
   enumerable: true,
@@ -2344,8 +2341,6 @@ Collection.prototype.find = function(query, options, callback) {
   return this.s.topology.cursor(this.s.namespace, findCommand, newOptions);
 };
 
-define.classMethod('find', { callback: false, promise: false, returns: [Cursor] });
-
 /**
  * Inserts a single document into MongoDB. If documents passed in do not contain the **_id** field,
  * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
@@ -2411,8 +2406,6 @@ var mapInserManyResults = function(docs, r) {
   return finalResult;
 };
 
-define.classMethod('insertOne', { callback: true, promise: true });
-
 /**
  * Inserts an array of documents into MongoDB. If documents passed in do not contain the **_id** field,
  * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
@@ -2476,8 +2469,6 @@ Collection.prototype.insertMany = function(docs, options, callback) {
     resultMutator: result => mapInserManyResults(docs, result)
   });
 };
-
-define.classMethod('insertMany', { callback: true, promise: true });
 
 /**
  * @typedef {Object} Collection~BulkWriteOpResult
@@ -2577,7 +2568,12 @@ var bulkWrite = function(self, operations, options, callback) {
   }
 
   // Final options for write concern
-  var finalOptions = writeConcern(shallowClone(options), self.s.db, self, options);
+  var finalOptions = applyWriteConcern(
+    shallowClone(options),
+    { db: self.s.db, collection: self },
+    options
+  );
+
   var writeCon = finalOptions.writeConcern ? finalOptions.writeConcern : {};
   var capabilities = self.s.topology.capabilities();
 
@@ -2630,7 +2626,11 @@ var insertDocuments = function(self, docs, options, callback) {
   docs = Array.isArray(docs) ? docs : [docs];
 
   // Get the write concern options
-  var finalOptions = writeConcern(shallowClone(options), self.s.db, self, options);
+  var finalOptions = applyWriteConcern(
+    shallowClone(options),
+    { db: self.s.db, collection: self },
+    options
+  );
 
   // If keep going set unordered
   if (finalOptions.keepGoing === true) finalOptions.ordered = false;
@@ -2663,8 +2663,6 @@ var insertDocuments = function(self, docs, options, callback) {
     handleCallback(callback, null, result);
   });
 };
-
-define.classMethod('bulkWrite', { callback: true, promise: true });
 
 /**
  * @typedef {Object} Collection~WriteOpResult
@@ -2746,8 +2744,6 @@ Collection.prototype.insert = function(docs, options, callback) {
 
   return this.insertMany(docs, options, callback);
 };
-
-define.classMethod('insert', { callback: true, promise: true });
 
 /**
  * @typedef {Object} Collection~updateWriteOpResult
@@ -2841,8 +2837,6 @@ var updateOne = function(self, filter, update, options, callback) {
   });
 };
 
-define.classMethod('updateOne', { callback: true, promise: true });
-
 /**
  * Replace a document on MongoDB
  * @method
@@ -2894,8 +2888,6 @@ var replaceOne = function(self, filter, doc, options, callback) {
     if (callback) callback(null, r);
   });
 };
-
-define.classMethod('replaceOne', { callback: true, promise: true });
 
 /**
  * Update multiple documents on MongoDB
@@ -2954,8 +2946,6 @@ var updateMany = function(self, filter, update, options, callback) {
   });
 };
 
-define.classMethod('updateMany', { callback: true, promise: true });
-
 var updateDocuments = function(self, selector, document, options, callback) {
   if ('function' === typeof options) (callback = options), (options = null);
   if (options == null) options = {};
@@ -2968,7 +2958,11 @@ var updateDocuments = function(self, selector, document, options, callback) {
     return callback(toError('document must be a valid JavaScript object'));
 
   // Get the write concern options
-  var finalOptions = writeConcern(shallowClone(options), self.s.db, self, options);
+  var finalOptions = applyWriteConcern(
+    shallowClone(options),
+    { db: self.s.db, collection: self },
+    options
+  );
 
   // Do we return the actual result document
   // Either use override on the function, or go back to default on either the collection
@@ -3040,8 +3034,6 @@ Collection.prototype.update = function(selector, document, options, callback) {
   ]);
 };
 
-define.classMethod('update', { callback: true, promise: true });
-
 /**
  * @typedef {Object} Collection~deleteWriteOpResult
  * @property {Object} result The raw result returned from MongoDB, field will vary depending on server version.
@@ -3094,11 +3086,7 @@ var deleteOne = function(self, filter, options, callback) {
   });
 };
 
-define.classMethod('deleteOne', { callback: true, promise: true });
-
 Collection.prototype.removeOne = Collection.prototype.deleteOne;
-
-define.classMethod('removeOne', { callback: true, promise: true });
 
 /**
  * Delete multiple documents on MongoDB
@@ -3150,7 +3138,11 @@ var removeDocuments = function(self, selector, options, callback) {
   options = options || {};
 
   // Get the write concern options
-  var finalOptions = writeConcern(shallowClone(options), self.s.db, self, options);
+  var finalOptions = applyWriteConcern(
+    shallowClone(options),
+    { db: self.s.db, collection: self },
+    options
+  );
 
   // If selector is null set empty
   if (selector == null) selector = {};
@@ -3175,11 +3167,7 @@ var removeDocuments = function(self, selector, options, callback) {
   });
 };
 
-define.classMethod('deleteMany', { callback: true, promise: true });
-
 Collection.prototype.removeMany = Collection.prototype.deleteMany;
-
-define.classMethod('removeMany', { callback: true, promise: true });
 
 /**
  * Remove documents.
@@ -3207,8 +3195,6 @@ Collection.prototype.remove = function(selector, options, callback) {
 
   return executeOperation(this.s.topology, removeDocuments, [this, selector, options, callback]);
 };
-
-define.classMethod('remove', { callback: true, promise: true });
 
 /**
  * Save a document. Simple full document replacement function. Not recommended for efficiency, use atomic
@@ -3239,7 +3225,11 @@ Collection.prototype.save = function(doc, options, callback) {
 
 var save = function(self, doc, options, callback) {
   // Get the write concern options
-  var finalOptions = writeConcern(shallowClone(options), self.s.db, self, options);
+  var finalOptions = applyWriteConcern(
+    shallowClone(options),
+    { db: self.s.db, collection: self },
+    options
+  );
   // Establish if we need to perform an insert or update
   if (doc._id != null) {
     finalOptions.upsert = true;
@@ -3254,8 +3244,6 @@ var save = function(self, doc, options, callback) {
     handleCallback(callback, null, r);
   });
 };
-
-define.classMethod('save', { callback: true, promise: true });
 
 /**
  * The callback format for results
@@ -3327,8 +3315,6 @@ var findOne = function(self, query, options, callback) {
   });
 };
 
-define.classMethod('findOne', { callback: true, promise: true });
-
 /**
  * The callback format for the collection method, must be used if strict is specified
  * @callback Collection~collectionResultCallback
@@ -3364,7 +3350,7 @@ var rename = function(self, newName, options, callback) {
   var cmd = { renameCollection: renameCollection, to: toCollection, dropTarget: dropTarget };
 
   // Decorate command with writeConcern if supported
-  decorateWithWriteConcern(cmd, self, options);
+  applyWriteConcern(cmd, { db: self.s.db, collection: self }, options);
 
   // Execute against admin
   self.s.db.admin().command(cmd, options, function(err, doc) {
@@ -3390,8 +3376,6 @@ var rename = function(self, newName, options, callback) {
   });
 };
 
-define.classMethod('rename', { callback: true, promise: true });
-
 /**
  * Drop the collection from the database, removing it permanently. New accesses will create a new collection.
  *
@@ -3411,8 +3395,6 @@ Collection.prototype.drop = function(options, callback) {
     callback
   ]);
 };
-
-define.classMethod('drop', { callback: true, promise: true });
 
 /**
  * Returns the options of the collection.
@@ -3444,8 +3426,6 @@ var options = function(self, opts, callback) {
   });
 };
 
-define.classMethod('options', { callback: true, promise: true });
-
 /**
  * Returns if the collection is a capped collection
  *
@@ -3468,8 +3448,6 @@ var isCapped = function(self, options, callback) {
     handleCallback(callback, null, document &amp;&amp; document.capped);
   });
 };
-
-define.classMethod('isCapped', { callback: true, promise: true });
 
 /**
  * Creates an index on the db and collection collection.
@@ -3504,8 +3482,6 @@ Collection.prototype.createIndex = function(fieldOrSpec, options, callback) {
 var createIndex = function(self, fieldOrSpec, options, callback) {
   self.s.db.createIndex(self.s.name, fieldOrSpec, options, callback);
 };
-
-define.classMethod('createIndex', { callback: true, promise: true });
 
 /**
  * Creates multiple indexes in the collection, this method is only supported for
@@ -3562,8 +3538,6 @@ var createIndexes = function(self, indexSpecs, options, callback) {
   );
 };
 
-define.classMethod('createIndexes', { callback: true, promise: true });
-
 /**
  * Drops an index from this collection.
  * @method
@@ -3593,7 +3567,7 @@ var dropIndex = function(self, indexName, options, callback) {
   var cmd = { dropIndexes: self.s.name, index: indexName };
 
   // Decorate command with writeConcern if supported
-  decorateWithWriteConcern(cmd, self, options);
+  applyWriteConcern(cmd, { db: self.s.db, collection: self }, options);
 
   // Execute command
   self.s.db.command(cmd, options, function(err, result) {
@@ -3602,8 +3576,6 @@ var dropIndex = function(self, indexName, options, callback) {
     handleCallback(callback, null, result);
   });
 };
-
-define.classMethod('dropIndex', { callback: true, promise: true });
 
 /**
  * Drops all indexes from this collection.
@@ -3630,8 +3602,6 @@ var dropIndexes = function(self, options, callback) {
   });
 };
 
-define.classMethod('dropIndexes', { callback: true, promise: true });
-
 /**
  * Drops all indexes from this collection.
  * @method
@@ -3640,8 +3610,6 @@ define.classMethod('dropIndexes', { callback: true, promise: true });
  * @return {Promise} returns Promise if no [callback] passed
  */
 Collection.prototype.dropAllIndexes = Collection.prototype.dropIndexes;
-
-define.classMethod('dropAllIndexes', { callback: true, promise: true });
 
 /**
  * Reindex all indexes on the collection
@@ -3670,8 +3638,6 @@ var reIndex = function(self, options, callback) {
     handleCallback(callback, null, result.ok ? true : false);
   });
 };
-
-define.classMethod('reIndex', { callback: true, promise: true });
 
 /**
  * Get the list of all indexes information for the collection.
@@ -3724,8 +3690,6 @@ Collection.prototype.listIndexes = function(options) {
   return cursor;
 };
 
-define.classMethod('listIndexes', { callback: false, promise: false, returns: [CommandCursor] });
-
 /**
  * Ensures that an index exists, if it does not it creates it
  * @method
@@ -3759,8 +3723,6 @@ Collection.prototype.ensureIndex = function(fieldOrSpec, options, callback) {
 var ensureIndex = function(self, fieldOrSpec, options, callback) {
   self.s.db.ensureIndex(self.s.name, fieldOrSpec, options, callback);
 };
-
-define.classMethod('ensureIndex', { callback: true, promise: true });
 
 /**
  * Checks if one or more indexes exist on the collection, fails on first non-existing index
@@ -3797,8 +3759,6 @@ var indexExists = function(self, indexes, options, callback) {
   });
 };
 
-define.classMethod('indexExists', { callback: true, promise: true });
-
 /**
  * Retrieves this collections index info.
  * @method
@@ -3819,8 +3779,6 @@ Collection.prototype.indexInformation = function(options, callback) {
 var indexInformation = function(self, options, callback) {
   self.s.db.indexInformation(self.s.name, options, callback);
 };
-
-define.classMethod('indexInformation', { callback: true, promise: true });
 
 /**
  * The callback format for results
@@ -3888,8 +3846,6 @@ var count = function(self, query, options, callback) {
   });
 };
 
-define.classMethod('count', { callback: true, promise: true });
-
 /**
  * The distinct command returns returns a list of distinct values for the given key across a collection.
  * @method
@@ -3948,8 +3904,6 @@ var distinct = function(self, key, query, options, callback) {
   });
 };
 
-define.classMethod('distinct', { callback: true, promise: true });
-
 /**
  * Retrieve all the indexes on the collection.
  * @method
@@ -3969,8 +3923,6 @@ var indexes = function(self, options, callback) {
   options = Object.assign({}, { full: true }, options);
   self.s.db.indexInformation(self.s.name, options, callback);
 };
-
-define.classMethod('indexes', { callback: true, promise: true });
 
 /**
  * Get all the collection statistics.
@@ -4006,8 +3958,6 @@ var stats = function(self, options, callback) {
   // Execute the command
   self.s.db.command(commandObject, options, callback);
 };
-
-define.classMethod('stats', { callback: true, promise: true });
 
 /**
  * @typedef {Object} Collection~findAndModifyWriteOpResult
@@ -4056,8 +4006,6 @@ var findOneAndDelete = function(self, filter, options, callback) {
   self.findAndModify(filter, options.sort, null, finalOptions, callback);
 };
 
-define.classMethod('findOneAndDelete', { callback: true, promise: true });
-
 /**
  * Find a document and replace it in one atomic operation, requires a write lock for the duration of the operation.
  *
@@ -4104,8 +4052,6 @@ var findOneAndReplace = function(self, filter, replacement, options, callback) {
   // Execute findAndModify
   self.findAndModify(filter, options.sort, replacement, finalOptions, callback);
 };
-
-define.classMethod('findOneAndReplace', { callback: true, promise: true });
 
 /**
  * Find a document and update it in one atomic operation, requires a write lock for the duration of the operation.
@@ -4154,8 +4100,6 @@ var findOneAndUpdate = function(self, filter, update, options, callback) {
   // Execute findAndModify
   self.findAndModify(filter, options.sort, update, finalOptions, callback);
 };
-
-define.classMethod('findOneAndUpdate', { callback: true, promise: true });
 
 /**
  * Find and update a document.
@@ -4244,7 +4188,7 @@ var findAndModify = function(self, query, sort, doc, options, callback) {
   options.checkKeys = false;
 
   // Get the write concern settings
-  var finalOptions = writeConcern(options, self.s.db, self, options);
+  var finalOptions = applyWriteConcern(options, { db: self.s.db, collection: self }, options);
 
   // Decorate the findAndModify command with the write Concern
   if (finalOptions.writeConcern) {
@@ -4265,8 +4209,6 @@ var findAndModify = function(self, query, sort, doc, options, callback) {
     return handleCallback(callback, null, result);
   });
 };
-
-define.classMethod('findAndModify', { callback: true, promise: true });
 
 /**
  * Find and remove a document.
@@ -4297,22 +4239,6 @@ var findAndRemove = function(self, query, sort, options, callback) {
   // Execute the callback
   self.findAndModify(query, sort, null, options, callback);
 };
-
-define.classMethod('findAndRemove', { callback: true, promise: true });
-
-function decorateWithWriteConcern(command, self, options) {
-  // Do we support collation 3.4 and higher
-  var capabilities = self.s.topology.capabilities();
-  // Do we support write concerns 3.4 and higher
-  if (capabilities &amp;&amp; capabilities.commandsTakeWriteConcern) {
-    // Get the write concern settings
-    var finalOptions = writeConcern(shallowClone(options), self.s.db, self, options);
-    // Add the write concern to the command
-    if (finalOptions.writeConcern) {
-      command.writeConcern = finalOptions.writeConcern;
-    }
-  }
-}
 
 function decorateWithCollation(command, self, options) {
   // Do we support collation 3.4 and higher
@@ -4420,8 +4346,12 @@ Collection.prototype.aggregate = function(pipeline, options, callback) {
   }
 
   // Decorate command with writeConcern if out has been specified
-  if (pipeline.length > 0 &amp;&amp; pipeline[pipeline.length - 1]['$out']) {
-    decorateWithWriteConcern(command, self, options);
+  if (
+    pipeline.length > 0 &amp;&amp;
+    pipeline[pipeline.length - 1]['$out'] &amp;&amp;
+    self.s.topology.capabilities().commandsTakeWriteConcern
+  ) {
+    applyWriteConcern(command, { db: self.s.db, collection: self }, options);
   }
 
   // Have we specified collation
@@ -4463,7 +4393,8 @@ Collection.prototype.aggregate = function(pipeline, options, callback) {
     throw toError('cursor options must be an object');
   }
 
-  options.cursor = options.cursor || { batchSize: 1000 };
+  options.cursor = options.cursor || {};
+  if (options.batchSize) options.cursor.batchSize = options.batchSize;
   command.cursor = options.cursor;
 
   // promiseLibrary
@@ -4486,8 +4417,6 @@ Collection.prototype.aggregate = function(pipeline, options, callback) {
 
   return handleCallback(callback, null, this.s.topology.cursor(this.s.namespace, command, options));
 };
-
-define.classMethod('aggregate', { callback: true, promise: false });
 
 /**
  * Create a new Change Stream, watching for new changes (insertions, updates, replacements, deletions, and invalidations) in this collection.
@@ -4516,8 +4445,6 @@ Collection.prototype.watch = function(pipeline, options) {
 
   return new ChangeStream(this, pipeline, options);
 };
-
-define.classMethod('watch', { callback: false, promise: false });
 
 /**
  * The callback format for results
@@ -4597,8 +4524,6 @@ var parallelCollectionScan = function(self, options, callback) {
   });
 };
 
-define.classMethod('parallelCollectionScan', { callback: true, promise: true });
-
 /**
  * Execute a geo search using a geo haystack index on a collection.
  *
@@ -4648,8 +4573,6 @@ var geoHaystackSearch = function(self, x, y, options, callback) {
     handleCallback(callback, null, res);
   });
 };
-
-define.classMethod('geoHaystackSearch', { callback: true, promise: true });
 
 /**
  * Group function helper
@@ -4820,8 +4743,6 @@ var group = function(self, keys, condition, initial, reduce, finalize, command, 
   }
 };
 
-define.classMethod('group', { callback: true, promise: true });
-
 /**
  * Functions that are passed as scope args must
  * be converted to Code instances.
@@ -4933,7 +4854,7 @@ var mapReduce = function(self, map, reduce, options, callback) {
     // Force readPreference to primary
     options.readPreference = 'primary';
     // Decorate command with writeConcern if supported
-    decorateWithWriteConcern(mapCommandHash, self, options);
+    applyWriteConcern(mapCommandHash, { db: self.s.db, collection: self }, options);
   } else {
     decorateWithReadConcern(mapCommandHash, self, options);
   }
@@ -4996,8 +4917,6 @@ var mapReduce = function(self, map, reduce, options, callback) {
   });
 };
 
-define.classMethod('mapReduce', { callback: true, promise: true });
-
 /**
  * Initiate a Out of order batch write operation. All operations will be buffered into insert/update/remove commands executed out of order.
  *
@@ -5015,12 +4934,6 @@ Collection.prototype.initializeUnorderedBulkOp = function(options) {
   return unordered(this.s.topology, this, options);
 };
 
-define.classMethod('initializeUnorderedBulkOp', {
-  callback: false,
-  promise: false,
-  returns: [ordered.UnorderedBulkOperation]
-});
-
 /**
  * Initiate an In order bulk write operation, operations will be serially executed in the order they are added, creating a new operation for each switch in types.
  *
@@ -5037,41 +4950,6 @@ Collection.prototype.initializeOrderedBulkOp = function(options) {
   options = options || {};
   options.promiseLibrary = this.s.promiseLibrary;
   return ordered(this.s.topology, this, options);
-};
-
-define.classMethod('initializeOrderedBulkOp', {
-  callback: false,
-  promise: false,
-  returns: [ordered.OrderedBulkOperation]
-});
-
-// Get write concern
-var writeConcern = function(target, db, col, options) {
-  if (options.w != null || options.j != null || options.fsync != null) {
-    var opts = {};
-    if (options.w != null) opts.w = options.w;
-    if (options.wtimeout != null) opts.wtimeout = options.wtimeout;
-    if (options.j != null) opts.j = options.j;
-    if (options.fsync != null) opts.fsync = options.fsync;
-    target.writeConcern = opts;
-  } else if (
-    col.writeConcern.w != null ||
-    col.writeConcern.j != null ||
-    col.writeConcern.fsync != null
-  ) {
-    target.writeConcern = col.writeConcern;
-  } else if (
-    db.writeConcern.w != null ||
-    db.writeConcern.j != null ||
-    db.writeConcern.fsync != null
-  ) {
-    target.writeConcern = db.writeConcern;
-  }
-
-  // NOTE: there is probably a much better place for this
-  if (db.s.options.retryWrites) target.retryWrites = true;
-
-  return target;
 };
 
 // Figure out the read preference
@@ -5114,7 +4992,7 @@ module.exports = Collection;
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Apr 11 2018 20:13:23 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Apr 19 2018 14:44:39 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

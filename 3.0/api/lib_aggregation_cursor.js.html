@@ -1963,11 +1963,10 @@
         <article>
             <pre class="prettyprint source linenums"><code>'use strict';
 
-var inherits = require('util').inherits,
-  MongoError = require('mongodb-core').MongoError,
-  Readable = require('stream').Readable,
-  Define = require('./metadata'),
-  CoreCursor = require('./cursor');
+const inherits = require('util').inherits;
+const MongoError = require('mongodb-core').MongoError;
+const Readable = require('stream').Readable;
+const CoreCursor = require('./cursor');
 
 /**
  * @fileOverview The **AggregationCursor** class is an internal class that embodies an aggregation cursor on MongoDB
@@ -2094,8 +2093,6 @@ for (var name in CoreCursor.prototype) {
   AggregationCursor.prototype[name] = CoreCursor.prototype[name];
 }
 
-var define = (AggregationCursor.define = new Define('AggregationCursor', AggregationCursor, true));
-
 /**
  * Set the batch size for the cursor.
  * @method
@@ -2113,8 +2110,6 @@ AggregationCursor.prototype.batchSize = function(value) {
   return this;
 };
 
-define.classMethod('batchSize', { callback: false, promise: false, returns: [AggregationCursor] });
-
 /**
  * Add a geoNear stage to the aggregation pipeline
  * @method
@@ -2125,8 +2120,6 @@ AggregationCursor.prototype.geoNear = function(document) {
   this.s.cmd.pipeline.push({ $geoNear: document });
   return this;
 };
-
-define.classMethod('geoNear', { callback: false, promise: false, returns: [AggregationCursor] });
 
 /**
  * Add a group stage to the aggregation pipeline
@@ -2139,8 +2132,6 @@ AggregationCursor.prototype.group = function(document) {
   return this;
 };
 
-define.classMethod('group', { callback: false, promise: false, returns: [AggregationCursor] });
-
 /**
  * Add a limit stage to the aggregation pipeline
  * @method
@@ -2152,8 +2143,6 @@ AggregationCursor.prototype.limit = function(value) {
   return this;
 };
 
-define.classMethod('limit', { callback: false, promise: false, returns: [AggregationCursor] });
-
 /**
  * Add a match stage to the aggregation pipeline
  * @method
@@ -2164,8 +2153,6 @@ AggregationCursor.prototype.match = function(document) {
   this.s.cmd.pipeline.push({ $match: document });
   return this;
 };
-
-define.classMethod('match', { callback: false, promise: false, returns: [AggregationCursor] });
 
 /**
  * Add a maxTimeMS stage to the aggregation pipeline
@@ -2180,8 +2167,6 @@ AggregationCursor.prototype.maxTimeMS = function(value) {
   return this;
 };
 
-define.classMethod('maxTimeMS', { callback: false, promise: false, returns: [AggregationCursor] });
-
 /**
  * Add a out stage to the aggregation pipeline
  * @method
@@ -2192,8 +2177,6 @@ AggregationCursor.prototype.out = function(destination) {
   this.s.cmd.pipeline.push({ $out: destination });
   return this;
 };
-
-define.classMethod('out', { callback: false, promise: false, returns: [AggregationCursor] });
 
 /**
  * Add a project stage to the aggregation pipeline
@@ -2206,8 +2189,6 @@ AggregationCursor.prototype.project = function(document) {
   return this;
 };
 
-define.classMethod('project', { callback: false, promise: false, returns: [AggregationCursor] });
-
 /**
  * Add a lookup stage to the aggregation pipeline
  * @method
@@ -2218,8 +2199,6 @@ AggregationCursor.prototype.lookup = function(document) {
   this.s.cmd.pipeline.push({ $lookup: document });
   return this;
 };
-
-define.classMethod('lookup', { callback: false, promise: false, returns: [AggregationCursor] });
 
 /**
  * Add a redact stage to the aggregation pipeline
@@ -2232,8 +2211,6 @@ AggregationCursor.prototype.redact = function(document) {
   return this;
 };
 
-define.classMethod('redact', { callback: false, promise: false, returns: [AggregationCursor] });
-
 /**
  * Add a skip stage to the aggregation pipeline
  * @method
@@ -2244,8 +2221,6 @@ AggregationCursor.prototype.skip = function(value) {
   this.s.cmd.pipeline.push({ $skip: value });
   return this;
 };
-
-define.classMethod('skip', { callback: false, promise: false, returns: [AggregationCursor] });
 
 /**
  * Add a sort stage to the aggregation pipeline
@@ -2258,8 +2233,6 @@ AggregationCursor.prototype.sort = function(document) {
   return this;
 };
 
-define.classMethod('sort', { callback: false, promise: false, returns: [AggregationCursor] });
-
 /**
  * Add a unwind stage to the aggregation pipeline
  * @method
@@ -2271,21 +2244,7 @@ AggregationCursor.prototype.unwind = function(field) {
   return this;
 };
 
-define.classMethod('unwind', { callback: false, promise: false, returns: [AggregationCursor] });
-
 AggregationCursor.prototype.get = AggregationCursor.prototype.toArray;
-
-// Inherited methods
-define.classMethod('toArray', { callback: true, promise: true });
-define.classMethod('each', { callback: true, promise: false });
-define.classMethod('forEach', { callback: true, promise: false });
-define.classMethod('hasNext', { callback: true, promise: true });
-define.classMethod('next', { callback: true, promise: true });
-define.classMethod('close', { callback: true, promise: true });
-define.classMethod('isClosed', { callback: false, promise: false, returns: [Boolean] });
-define.classMethod('rewind', { callback: false, promise: false });
-define.classMethod('bufferedCount', { callback: false, promise: false, returns: [Number] });
-define.classMethod('readBufferedDocuments', { callback: false, promise: false, returns: [Array] });
 
 /**
  * Get the next available document from the cursor, returns null if no more documents are available.
@@ -2409,7 +2368,7 @@ module.exports = AggregationCursor;
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Apr 11 2018 20:13:23 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Apr 19 2018 14:44:39 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>
