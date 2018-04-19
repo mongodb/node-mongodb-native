@@ -4,6 +4,11 @@ var Mongos = require('../../../../lib/topologies/mongos'),
   mock = require('mongodb-mock-server'),
   genClusterTime = require('../common').genClusterTime;
 
+const sessions = require('../../../../lib/sessions');
+const ServerSessionPool = sessions.ServerSessionPool;
+const ClientSession = sessions.ClientSession;
+const ReadPreference = require('../../../../lib/topologies/read_preference');
+
 const test = {};
 describe('Sessions (Mongos)', function() {
   afterEach(() => mock.cleanup());
@@ -161,4 +166,65 @@ describe('Sessions (Mongos)', function() {
       mongos.connect();
     }
   });
+
+  it(
+    'should ensure that lsid is received within the query object of a find request when read preference is not primary',
+    {
+      metadata: { requires: { topology: 'single' } },
+      test: function(done) {
+        const clusterTime = genClusterTime(Date.now());
+        test.server.setMessageHandler(request => {
+          const doc = request.document;
+          if (doc.ismaster) {
+            request.reply(
+              Object.assign({}, mock.DEFAULT_ISMASTER_36, {
+                msg: 'isdbgrid',
+                $clusterTime: clusterTime
+              })
+            );
+          } else if (doc.$query) {
+            try {
+              expect(doc.$readPreference).to.deep.equal({ mode: 'primaryPreferred' });
+              expect(doc)
+                .to.haveOwnProperty('$query')
+                .to.haveOwnProperty('lsid')
+                .that.is.an('object');
+              done();
+            } catch (e) {
+              done(e);
+            }
+          } else {
+            done('YOU HAVE FAILED. WE WILL FIND ANOTHER WAY. RELEASING CONTROL');
+          }
+        });
+
+        const mongos = new Mongos([test.server.address()], {
+          connectionTimeout: 30000,
+          socketTimeout: 30000,
+          haInterval: 500,
+          size: 1
+        });
+
+        mongos.on('error', done);
+        mongos.once('connect', () => {
+          const namespace = 'testdb.testcollection';
+          const findCommand = {
+            find: namespace
+          };
+          const pool = new ServerSessionPool(mongos);
+          const session = new ClientSession(mongos, pool);
+          const readPreference = new ReadPreference('primaryPreferred');
+
+          const cursor = mongos.cursor('testdb.testcollection', findCommand, {
+            session,
+            readPreference
+          });
+
+          cursor.next(() => {});
+        });
+
+        mongos.connect();
+      }
+    }
+  );
 });
