@@ -1222,7 +1222,11 @@ Pool.prototype.write = function(commands, options, cb) {
     // decorate the commands with session-specific details
     commands.forEach(command => {
       if (command instanceof Query) {
-        Object.assign(command.query, sessionOptions);
+        if (command.query.$query) {
+          Object.assign(command.query.$query, sessionOptions);
+        } else {
+          Object.assign(command.query, sessionOptions);
+        }
       } else {
         Object.assign(command, sessionOptions);
       }
