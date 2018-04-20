@@ -10,13 +10,17 @@ phases: [
                 ["a:27017", {
 
                     ok: 1,
-                    ismaster: true
+                    ismaster: true,
+                    minWireVersion: 0,
+                    maxWireVersion: 6
                 }],
 
                 ["a:27017", {
 
                     ok: 0,
-                    ismaster: true
+                    ismaster: true,
+                    minWireVersion: 0,
+                    maxWireVersion: 6
                 }]
         ],
 
@@ -30,8 +34,8 @@ phases: [
                     setName:
                 }
             },
-
             topologyType: "Single",
+            logicalSessionTimeoutMinutes: null,
             setName:
         }
     }

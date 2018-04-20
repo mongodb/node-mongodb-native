@@ -14,7 +14,9 @@ phases: [
                     setName: "rs",
                     hosts: ["A:27017"],
                     passives: ["B:27017"],
-                    arbiters: ["C:27017"]
+                    arbiters: ["C:27017"],
+                    minWireVersion: 0,
+                    maxWireVersion: 6
                 }]
         ],
 
@@ -41,8 +43,8 @@ phases: [
                 }
 
             },
-
             topologyType: "ReplicaSetWithPrimary",
+            logicalSessionTimeoutMinutes: null,
             setName: "rs"
         }
     }

@@ -1,61 +1,67 @@
 {
-    "description": "New primary with wrong setName", 
-    "phases": [
-        {
-            "outcome": {
-                "servers": {
-                    "a:27017": {
-                        "setName": "rs", 
-                        "type": "RSPrimary"
-                    }, 
-                    "b:27017": {
-                        "setName": null, 
-                        "type": "Unknown"
-                    }
-                }, 
-                "setName": "rs", 
-                "topologyType": "ReplicaSetWithPrimary"
-            }, 
-            "responses": [
-                [
-                    "a:27017", 
-                    {
-                        "hosts": [
-                            "a:27017", 
-                            "b:27017"
-                        ], 
-                        "ismaster": true, 
-                        "ok": 1, 
-                        "setName": "rs"
-                    }
-                ]
-            ]
-        }, 
-        {
-            "outcome": {
-                "servers": {
-                    "a:27017": {
-                        "setName": "rs", 
-                        "type": "RSPrimary"
-                    }
-                }, 
-                "setName": "rs", 
-                "topologyType": "ReplicaSetWithPrimary"
-            }, 
-            "responses": [
-                [
-                    "b:27017", 
-                    {
-                        "hosts": [
-                            "a:27017"
-                        ], 
-                        "ismaster": true, 
-                        "ok": 1, 
-                        "setName": "wrong"
-                    }
-                ]
-            ]
-        }
-    ], 
-    "uri": "mongodb://a/?replicaSet=rs"
+  "description": "New primary with wrong setName",
+  "uri": "mongodb://a/?replicaSet=rs",
+  "phases": [
+    {
+      "responses": [
+        [
+          "a:27017",
+          {
+            "ok": 1,
+            "ismaster": true,
+            "hosts": [
+              "a:27017",
+              "b:27017"
+            ],
+            "setName": "rs",
+            "minWireVersion": 0,
+            "maxWireVersion": 6
+          }
+        ]
+      ],
+      "outcome": {
+        "servers": {
+          "a:27017": {
+            "type": "RSPrimary",
+            "setName": "rs"
+          },
+          "b:27017": {
+            "type": "Unknown",
+            "setName": null
+          }
+        },
+        "topologyType": "ReplicaSetWithPrimary",
+        "logicalSessionTimeoutMinutes": null,
+        "setName": "rs"
+      }
+    },
+    {
+      "responses": [
+        [
+          "b:27017",
+          {
+            "ok": 1,
+            "ismaster": true,
+            "hosts": [
+              "a:27017"
+            ],
+            "setName": "wrong",
+            "minWireVersion": 0,
+            "maxWireVersion": 6
+          }
+        ]
+      ],
+      "outcome": {
+        "servers": {
+          "a:27017": {
+            "type": "RSPrimary",
+            "setName": "rs"
+          }
+        },
+        "topologyType": "ReplicaSetWithPrimary",
+        "logicalSessionTimeoutMinutes": null,
+        "setName": "rs"
+      }
+    }
+  ]
 }

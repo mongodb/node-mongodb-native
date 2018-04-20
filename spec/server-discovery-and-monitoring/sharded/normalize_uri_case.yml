@@ -24,8 +24,8 @@ phases: [
                     setName:
                 }
             },
-
             topologyType: "Unknown",
+            logicalSessionTimeoutMinutes: null,
             setName:
         }
     }

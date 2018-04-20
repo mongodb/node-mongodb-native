@@ -20,8 +20,8 @@ phases: [
                     setName:
                 }
             },
-
             topologyType: "Single",
+            logicalSessionTimeoutMinutes: null,
             setName:
         }
     }

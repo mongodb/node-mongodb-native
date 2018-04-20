@@ -13,7 +13,9 @@ phases: [
                 hosts: ["a:27017", "b:27017"],
                 setName: "rs",
                 setVersion: 1,
-                electionId: {"$oid": "000000000000000000000001"}
+                electionId: {"$oid": "000000000000000000000001"},
+                minWireVersion: 0,
+                maxWireVersion: 6
             }],
             ["b:27017", {
                 ok: 1,
@@ -21,7 +23,9 @@ phases: [
                 hosts: ["a:27017", "b:27017"],
                 setName: "rs",
                 setVersion: 1,
-                electionId: {"$oid": "000000000000000000000001"}
+                electionId: {"$oid": "000000000000000000000001"},
+                minWireVersion: 0,
+                maxWireVersion: 6
             }]
         ],
 
@@ -42,6 +46,7 @@ phases: [
                 }
             },
             topologyType: "ReplicaSetWithPrimary",
+            logicalSessionTimeoutMinutes: null,
             setName: "rs",
         }
     }

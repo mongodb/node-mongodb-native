@@ -12,7 +12,9 @@ phases: [
                     ok: 1,
                     ismaster: true,
                     setName: "rs",
-                    hosts: ["b:27017"]
+                    hosts: ["b:27017"],
+                    minWireVersion: 0,
+                    maxWireVersion: 6
                 }]
         ],
 
@@ -26,8 +28,8 @@ phases: [
                     setName:
                 }
             },
-
             topologyType: "ReplicaSetNoPrimary",
+            logicalSessionTimeoutMinutes: null,
             setName: "rs"
         }
     }

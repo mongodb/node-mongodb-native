@@ -1,33 +1,36 @@
 {
-    "description": "Wrong setName", 
-    "phases": [
-        {
-            "outcome": {
-                "servers": {
-                    "a:27017": {
-                        "setName": null, 
-                        "type": "Unknown"
-                    }
-                }, 
-                "setName": "rs", 
-                "topologyType": "ReplicaSetNoPrimary"
-            }, 
-            "responses": [
-                [
-                    "b:27017", 
-                    {
-                        "hosts": [
-                            "b:27017", 
-                            "c:27017"
-                        ], 
-                        "ismaster": false, 
-                        "ok": 1, 
-                        "secondary": true, 
-                        "setName": "wrong"
-                    }
-                ]
-            ]
-        }
-    ], 
-    "uri": "mongodb://a,b/?replicaSet=rs"
+  "description": "Wrong setName",
+  "uri": "mongodb://a,b/?replicaSet=rs",
+  "phases": [
+    {
+      "responses": [
+        [
+          "b:27017",
+          {
+            "ok": 1,
+            "ismaster": false,
+            "secondary": true,
+            "hosts": [
+              "b:27017",
+              "c:27017"
+            ],
+            "setName": "wrong",
+            "minWireVersion": 0,
+            "maxWireVersion": 6
+          }
+        ]
+      ],
+      "outcome": {
+        "servers": {
+          "a:27017": {
+            "type": "Unknown",
+            "setName": null
+          }
+        },
+        "topologyType": "ReplicaSetNoPrimary",
+        "logicalSessionTimeoutMinutes": null,
+        "setName": "rs"
+      }
+    }
+  ]
 }

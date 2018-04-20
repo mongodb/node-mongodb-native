@@ -1,23 +1,26 @@
 {
-    "description": "Unexpected mongos", 
-    "phases": [
-        {
-            "outcome": {
-                "servers": {}, 
-                "setName": "rs", 
-                "topologyType": "ReplicaSetNoPrimary"
-            }, 
-            "responses": [
-                [
-                    "b:27017", 
-                    {
-                        "ismaster": true, 
-                        "msg": "isdbgrid", 
-                        "ok": 1
-                    }
-                ]
-            ]
-        }
-    ], 
-    "uri": "mongodb://b/?replicaSet=rs"
+  "description": "Unexpected mongos",
+  "uri": "mongodb://b/?replicaSet=rs",
+  "phases": [
+    {
+      "responses": [
+        [
+          "b:27017",
+          {
+            "ok": 1,
+            "ismaster": true,
+            "msg": "isdbgrid",
+            "minWireVersion": 0,
+            "maxWireVersion": 6
+          }
+        ]
+      ],
+      "outcome": {
+        "servers": {},
+        "topologyType": "ReplicaSetNoPrimary",
+        "logicalSessionTimeoutMinutes": null,
+        "setName": "rs"
+      }
+    }
+  ]
 }

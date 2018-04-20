@@ -1,26 +1,29 @@
 {
-    "description": "Primary wrong setName", 
-    "phases": [
-        {
-            "outcome": {
-                "servers": {}, 
-                "setName": "rs", 
-                "topologyType": "ReplicaSetNoPrimary"
-            }, 
-            "responses": [
-                [
-                    "a:27017", 
-                    {
-                        "hosts": [
-                            "a:27017"
-                        ], 
-                        "ismaster": true, 
-                        "ok": 1, 
-                        "setName": "wrong"
-                    }
-                ]
-            ]
-        }
-    ], 
-    "uri": "mongodb://a/?replicaSet=rs"
+  "description": "Primary wrong setName",
+  "uri": "mongodb://a/?replicaSet=rs",
+  "phases": [
+    {
+      "responses": [
+        [
+          "a:27017",
+          {
+            "ok": 1,
+            "ismaster": true,
+            "hosts": [
+              "a:27017"
+            ],
+            "setName": "wrong",
+            "minWireVersion": 0,
+            "maxWireVersion": 6
+          }
+        ]
+      ],
+      "outcome": {
+        "servers": {},
+        "topologyType": "ReplicaSetNoPrimary",
+        "logicalSessionTimeoutMinutes": null,
+        "setName": "rs"
+      }
+    }
+  ]
 }

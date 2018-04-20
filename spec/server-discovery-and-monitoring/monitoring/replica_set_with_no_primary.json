@@ -14,7 +14,8 @@
             "setVersion": 1,
             "primary": "b:27017",
             "hosts": [
-              "a:27017", "b:27017"
+              "a:27017",
+              "b:27017"
             ],
             "minWireVersion": 0,
             "maxWireVersion": 4
@@ -83,7 +84,8 @@
                 "address": "a:27017",
                 "arbiters": [],
                 "hosts": [
-                  "a:27017", "b:27017"
+                  "a:27017",
+                  "b:27017"
                 ],
                 "passives": [],
                 "primary": "b:27017",
@@ -122,7 +124,8 @@
                     "address": "a:27017",
                     "arbiters": [],
                     "hosts": [
-                      "a:27017", "b:27017"
+                      "a:27017",
+                      "b:27017"
                     ],
                     "passives": [],
                     "primary": "b:27017",

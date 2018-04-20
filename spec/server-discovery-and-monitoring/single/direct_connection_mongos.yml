@@ -11,7 +11,9 @@ phases: [
 
                     ok: 1,
                     ismaster: true,
-                    msg: "isdbgrid"
+                    msg: "isdbgrid",
+                    minWireVersion: 0,
+                    maxWireVersion: 6
                 }]
         ],
 
@@ -25,8 +27,8 @@ phases: [
                     setName:
                 }
             },
-
             topologyType: "Single",
+            logicalSessionTimeoutMinutes: null,
             setName:
         }
     }

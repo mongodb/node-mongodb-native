@@ -1,104 +1,104 @@
 {
-    "description": "Monitoring a standalone connection", 
-    "phases": [
-        {
-            "outcome": {
-                "events": [
-                    {
-                        "topology_opening_event": {
-                            "topologyId": "42"
-                        }
-                    }, 
-                    {
-                        "topology_description_changed_event": {
-                            "newDescription": {
-                                "servers": [
-                                    {
-                                        "address": "a:27017", 
-                                        "arbiters": [], 
-                                        "hosts": [], 
-                                        "passives": [], 
-                                        "type": "Unknown"
-                                    }
-                                ], 
-                                "topologyType": "Single"
-                            }, 
-                            "previousDescription": {
-                                "servers": [], 
-                                "topologyType": "Unknown"
-                            }, 
-                            "topologyId": "42"
-                        }
-                    }, 
-                    {
-                        "server_opening_event": {
-                            "address": "a:27017", 
-                            "topologyId": "42"
-                        }
-                    }, 
-                    {
-                        "server_description_changed_event": {
-                            "address": "a:27017", 
-                            "newDescription": {
-                                "address": "a:27017", 
-                                "arbiters": [], 
-                                "hosts": [], 
-                                "passives": [], 
-                                "type": "Standalone"
-                            }, 
-                            "previousDescription": {
-                                "address": "a:27017", 
-                                "arbiters": [], 
-                                "hosts": [], 
-                                "passives": [], 
-                                "type": "Unknown"
-                            }, 
-                            "topologyId": "42"
-                        }
-                    }, 
-                    {
-                        "topology_description_changed_event": {
-                            "newDescription": {
-                                "servers": [
-                                    {
-                                        "address": "a:27017", 
-                                        "arbiters": [], 
-                                        "hosts": [], 
-                                        "passives": [], 
-                                        "type": "Standalone"
-                                    }
-                                ], 
-                                "topologyType": "Single"
-                            }, 
-                            "previousDescription": {
-                                "servers": [
-                                    {
-                                        "address": "a:27017", 
-                                        "arbiters": [], 
-                                        "hosts": [], 
-                                        "passives": [], 
-                                        "type": "Unknown"
-                                    }
-                                ], 
-                                "topologyType": "Single"
-                            }, 
-                            "topologyId": "42"
-                        }
-                    }
+  "description": "Monitoring a standalone connection",
+  "uri": "mongodb://a:27017",
+  "phases": [
+    {
+      "responses": [
+        [
+          "a:27017",
+          {
+            "ok": 1,
+            "ismaster": true,
+            "minWireVersion": 0,
+            "maxWireVersion": 4
+          }
+        ]
+      ],
+      "outcome": {
+        "events": [
+          {
+            "topology_opening_event": {
+              "topologyId": "42"
+            }
+          },
+          {
+            "topology_description_changed_event": {
+              "topologyId": "42",
+              "previousDescription": {
+                "topologyType": "Unknown",
+                "servers": []
+              },
+              "newDescription": {
+                "topologyType": "Single",
+                "servers": [
+                  {
+                    "address": "a:27017",
+                    "arbiters": [],
+                    "hosts": [],
+                    "passives": [],
+                    "type": "Unknown"
+                  }
                 ]
-            }, 
-            "responses": [
-                [
-                    "a:27017", 
-                    {
-                        "ismaster": true, 
-                        "maxWireVersion": 4, 
-                        "minWireVersion": 0, 
-                        "ok": 1
-                    }
+              }
+            }
+          },
+          {
+            "server_opening_event": {
+              "topologyId": "42",
+              "address": "a:27017"
+            }
+          },
+          {
+            "server_description_changed_event": {
+              "topologyId": "42",
+              "address": "a:27017",
+              "previousDescription": {
+                "address": "a:27017",
+                "arbiters": [],
+                "hosts": [],
+                "passives": [],
+                "type": "Unknown"
+              },
+              "newDescription": {
+                "address": "a:27017",
+                "arbiters": [],
+                "hosts": [],
+                "passives": [],
+                "type": "Standalone"
+              }
+            }
+          },
+          {
+            "topology_description_changed_event": {
+              "topologyId": "42",
+              "previousDescription": {
+                "topologyType": "Single",
+                "servers": [
+                  {
+                    "address": "a:27017",
+                    "arbiters": [],
+                    "hosts": [],
+                    "passives": [],
+                    "type": "Unknown"
+                  }
                 ]
-            ]
-        }
-    ], 
-    "uri": "mongodb://a:27017"
+              },
+              "newDescription": {
+                "topologyType": "Single",
+                "servers": [
+                  {
+                    "address": "a:27017",
+                    "arbiters": [],
+                    "hosts": [],
+                    "passives": [],
+                    "type": "Standalone"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
 }

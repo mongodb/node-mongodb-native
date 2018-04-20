@@ -1,59 +1,64 @@
 {
-    "description": "RSOther discovered", 
-    "phases": [
-        {
-            "outcome": {
-                "servers": {
-                    "a:27017": {
-                        "setName": "rs", 
-                        "type": "RSOther"
-                    }, 
-                    "b:27017": {
-                        "setName": "rs", 
-                        "type": "RSOther"
-                    }, 
-                    "c:27017": {
-                        "setName": null, 
-                        "type": "Unknown"
-                    }, 
-                    "d:27017": {
-                        "setName": null, 
-                        "type": "Unknown"
-                    }
-                }, 
-                "setName": "rs", 
-                "topologyType": "ReplicaSetNoPrimary"
-            }, 
-            "responses": [
-                [
-                    "a:27017", 
-                    {
-                        "hidden": true, 
-                        "hosts": [
-                            "c:27017", 
-                            "d:27017"
-                        ], 
-                        "ismaster": false, 
-                        "ok": 1, 
-                        "secondary": true, 
-                        "setName": "rs"
-                    }
-                ], 
-                [
-                    "b:27017", 
-                    {
-                        "hosts": [
-                            "c:27017", 
-                            "d:27017"
-                        ], 
-                        "ismaster": false, 
-                        "ok": 1, 
-                        "secondary": false, 
-                        "setName": "rs"
-                    }
-                ]
-            ]
-        }
-    ], 
-    "uri": "mongodb://a,b/?replicaSet=rs"
+  "description": "RSOther discovered",
+  "uri": "mongodb://a,b/?replicaSet=rs",
+  "phases": [
+    {
+      "responses": [
+        [
+          "a:27017",
+          {
+            "ok": 1,
+            "ismaster": false,
+            "secondary": true,
+            "hidden": true,
+            "hosts": [
+              "c:27017",
+              "d:27017"
+            ],
+            "setName": "rs",
+            "minWireVersion": 0,
+            "maxWireVersion": 6
+          }
+        ],
+        [
+          "b:27017",
+          {
+            "ok": 1,
+            "ismaster": false,
+            "secondary": false,
+            "hosts": [
+              "c:27017",
+              "d:27017"
+            ],
+            "setName": "rs",
+            "minWireVersion": 0,
+            "maxWireVersion": 6
+          }
+        ]
+      ],
+      "outcome": {
+        "servers": {
+          "a:27017": {
+            "type": "RSOther",
+            "setName": "rs"
+          },
+          "b:27017": {
+            "type": "RSOther",
+            "setName": "rs"
+          },
+          "c:27017": {
+            "type": "Unknown",
+            "setName": null
+          },
+          "d:27017": {
+            "type": "Unknown",
+            "setName": null
+          }
+        },
+        "topologyType": "ReplicaSetNoPrimary",
+        "logicalSessionTimeoutMinutes": null,
+        "setName": "rs"
+      }
+    }
+  ]
 }

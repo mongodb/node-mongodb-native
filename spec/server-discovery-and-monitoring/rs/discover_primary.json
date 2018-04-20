@@ -1,36 +1,39 @@
 {
-    "description": "Replica set discovery from primary", 
-    "phases": [
-        {
-            "outcome": {
-                "servers": {
-                    "a:27017": {
-                        "setName": "rs", 
-                        "type": "RSPrimary"
-                    }, 
-                    "b:27017": {
-                        "setName": null, 
-                        "type": "Unknown"
-                    }
-                }, 
-                "setName": "rs", 
-                "topologyType": "ReplicaSetWithPrimary"
-            }, 
-            "responses": [
-                [
-                    "a:27017", 
-                    {
-                        "hosts": [
-                            "a:27017", 
-                            "b:27017"
-                        ], 
-                        "ismaster": true, 
-                        "ok": 1, 
-                        "setName": "rs"
-                    }
-                ]
-            ]
-        }
-    ], 
-    "uri": "mongodb://a/?replicaSet=rs"
+  "description": "Replica set discovery from primary",
+  "uri": "mongodb://a/?replicaSet=rs",
+  "phases": [
+    {
+      "responses": [
+        [
+          "a:27017",
+          {
+            "ok": 1,
+            "ismaster": true,
+            "setName": "rs",
+            "hosts": [
+              "a:27017",
+              "b:27017"
+            ],
+            "minWireVersion": 0,
+            "maxWireVersion": 6
+          }
+        ]
+      ],
+      "outcome": {
+        "servers": {
+          "a:27017": {
+            "type": "RSPrimary",
+            "setName": "rs"
+          },
+          "b:27017": {
+            "type": "Unknown",
+            "setName": null
+          }
+        },
+        "topologyType": "ReplicaSetWithPrimary",
+        "logicalSessionTimeoutMinutes": null,
+        "setName": "rs"
+      }
+    }
+  ]
 }

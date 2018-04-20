@@ -11,7 +11,9 @@ phases: [
 
                     ok: 1,
                     ismaster: true,
-                    msg: "isdbgrid"
+                    msg: "isdbgrid",
+                    minWireVersion: 0,
+                    maxWireVersion: 6
                 }],
 
                 ["b:27017", {
@@ -19,7 +21,9 @@ phases: [
                     ok: 1,
                     ismaster: true,
                     hosts: ["b:27017"],
-                    setName: "rs"
+                    setName: "rs",
+                    minWireVersion: 0,
+                    maxWireVersion: 6
                 }]
         ],
 
@@ -33,8 +37,8 @@ phases: [
                     setName:
                 }
             },
-
             topologyType: "Sharded",
+            logicalSessionTimeoutMinutes: null,
             setName:
         }
     }
