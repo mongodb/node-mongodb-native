@@ -1,10 +1,13 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const expect = require('chai').expect;
+const chai = require('chai');
+const expect = chai.expect;
 const Topology = require('../../../lib/sdam/topology').Topology;
 const ServerDescription = require('../../../lib/sdam/server_description').ServerDescription;
+const monitoring = require('../../../lib/sdam/monitoring');
 const parse = require('../../../lib/uri_parser');
+chai.use(require('chai-subset'));
 
 const specDir = path.join(__dirname, '..', 'spec', 'server-discovery-and-monitoring');
 function collectTests() {
@@ -28,15 +31,23 @@ function collectTests() {
   return tests;
 }
 
+const SKIPPED_TESTS = new Set([
+  'Monitoring a replica set with non member' // reenable once `Server` is integrated into new `Topology`
+]);
+
 describe('Server Discovery and Monitoring (spec)', function() {
   const specTests = collectTests();
 
   Object.keys(specTests).forEach(specTestName => {
-    (specTestName === 'monitoring' ? describe.skip : describe)(specTestName, () => {
+    describe(specTestName, () => {
       specTests[specTestName].forEach(testData => {
         it(testData.description, {
           metadata: { requires: { topology: 'single' } },
           test: function(done) {
+            if (SKIPPED_TESTS.has(testData.description)) {
+              return this.skip();
+            }
+
             executeSDAMTest(testData, done);
           }
         });
@@ -45,23 +56,97 @@ describe('Server Discovery and Monitoring (spec)', function() {
   });
 });
 
-const OUTCOME_TRANSLATIONS = {
-  topologyType: 'type'
-};
+const OUTCOME_TRANSLATIONS = new Map();
+OUTCOME_TRANSLATIONS.set('topologyType', 'type');
 
 function translateOutcomeKey(key) {
-  if (OUTCOME_TRANSLATIONS.hasOwnProperty(key)) {
-    return OUTCOME_TRANSLATIONS[key];
+  if (OUTCOME_TRANSLATIONS.has(key)) {
+    return OUTCOME_TRANSLATIONS.get(key);
   }
 
   return key;
+}
+
+function convertOutcomeEvents(events) {
+  return events.map(event => {
+    const eventType = Object.keys(event)[0];
+    const args = [];
+    Object.keys(event[eventType]).forEach(key => {
+      let argument = event[eventType][key];
+      if (argument.servers) {
+        argument.servers = argument.servers.reduce((result, server) => {
+          result[server.address] = normalizeServerDescription(server);
+          return result;
+        }, {});
+      }
+
+      Object.keys(argument).forEach(key => {
+        if (OUTCOME_TRANSLATIONS.has(key)) {
+          argument[OUTCOME_TRANSLATIONS.get(key)] = argument[key];
+          delete argument[key];
+        }
+      });
+
+      args.push(argument);
+    });
+
+    // convert snake case to camelCase with capital first letter
+    let eventClass = eventType.replace(/_\w/g, c => c[1].toUpperCase());
+    eventClass = eventClass.charAt(0).toUpperCase() + eventClass.slice(1);
+    args.unshift(null);
+    const eventConstructor = monitoring[eventClass];
+    const eventInstance = new (Function.prototype.bind.apply(eventConstructor, args))();
+    return eventInstance;
+  });
+}
+
+function replacePlaceholders(actual, expected) {
+  Object.keys(expected).forEach(key => {
+    if (expected[key] === 42 || expected[key] === '42') {
+      expect(actual).to.have.any.keys(key);
+      expect(actual[key]).to.exist;
+      actual[key] = expected[key];
+    }
+  });
+
+  return actual;
+}
+
+function normalizeServerDescription(serverDescription) {
+  if (serverDescription.type === 'PossiblePrimary') {
+    // Some single-threaded drivers care a lot about ordering potential primary
+    // servers, in order to speed up selection. We don't care, so we'll just mark
+    // it as `Unknown`.
+    serverDescription.type = 'Unknown';
+  }
+
+  return serverDescription;
 }
 
 function executeSDAMTest(testData, done) {
   parse(testData.uri, (err, parsedUri) => {
     if (err) return done(err);
 
+    // create the topology
     const topology = new Topology(parsedUri.hosts, parsedUri.options);
+
+    // listen for SDAM monitoring events
+    const events = [];
+    [
+      'serverOpening',
+      'serverClosed',
+      'serverDescriptionChanged',
+      'topologyOpening',
+      'topologyClosed',
+      'topologyDescriptionChanged',
+      'serverHeartbeatStarted',
+      'serverHeartbeatSucceeded',
+      'serverHeartbeatFailed'
+    ].forEach(eventName => {
+      topology.on(eventName, event => events.push(event));
+    });
+
+    // connect the topology
     topology.connect(testData.uri);
 
     testData.phases.forEach(phase => {
@@ -83,17 +168,22 @@ function executeSDAMTest(testData, done) {
 
           Object.keys(expectedServers).forEach(serverName => {
             expect(actualServers).to.include.keys(serverName);
-            const expectedServer = expectedServers[serverName];
+            const expectedServer = normalizeServerDescription(expectedServers[serverName]);
             const actualServer = actualServers[serverName];
-            if (expectedServer.type === 'PossiblePrimary') {
-              // Some single-threaded drivers care a lot about ordering potential primary
-              // servers, in order to speed up selection. We don't care, so we'll just mark
-              // it as `Unknown`.
-              expectedServer.type = 'Unknown';
-            }
-
             expect(actualServer).to.deep.include(expectedServer);
           });
+
+          return;
+        }
+
+        if (key === 'events') {
+          const expectedEvents = convertOutcomeEvents(outcomeValue);
+          expect(events).to.have.length(expectedEvents.length);
+          for (let i = 0; i < events.length; ++i) {
+            const expectedEvent = expectedEvents[i];
+            const actualEvent = replacePlaceholders(events[i], expectedEvent);
+            expect(actualEvent).to.containSubset(expectedEvent);
+          }
 
           return;
         }
