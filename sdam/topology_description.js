@@ -2,6 +2,7 @@
 const assert = require('assert');
 const ServerType = require('./server_description').ServerType;
 const ServerDescription = require('./server_description').ServerDescription;
+const ReadPreference = require('../topologies/read_preference');
 
 // contstants related to compatability checks
 const MIN_SUPPORTED_SERVER_VERSION = '2.6';
@@ -194,6 +195,27 @@ class TopologyDescription {
       maxElectionId,
       {}
     );
+  }
+
+  /**
+   * Determines if the topology has a readable server available. See the table in the
+   * following section for behaviour rules.
+   *
+   * @param {ReadPreference} [readPreference] An optional read preference for determining if a readable server is present
+   * @return {Boolean} Whether there is a readable server in this topology
+   */
+  hasReadableServer(/* readPreference */) {
+    // To be implemented when server selection is implemented
+  }
+
+  /**
+   * Determines if the topology has a writable server available. See the table in the
+   * following section for behaviour rules.
+   *
+   * @return {Boolean} Whether there is a writable server in this topology
+   */
+  hasWritableServer() {
+    return this.hasReadableServer(ReadPreference.primary);
   }
 }
 
