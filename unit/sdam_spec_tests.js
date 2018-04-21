@@ -32,7 +32,7 @@ describe('Server Discovery and Monitoring (spec)', function() {
   const specTests = collectTests();
 
   Object.keys(specTests).forEach(specTestName => {
-    describe(specTestName, () => {
+    (specTestName === 'monitoring' ? describe.skip : describe)(specTestName, () => {
       specTests[specTestName].forEach(testData => {
         it(testData.description, {
           metadata: { requires: { topology: 'single' } },
