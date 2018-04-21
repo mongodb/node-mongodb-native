@@ -2,8 +2,8 @@
 const fs = require('fs');
 const path = require('path');
 const expect = require('chai').expect;
-const Topology = require('../../../lib/topology').Topology;
-const ServerDescription = require('../../../lib/topology').ServerDescription;
+const Topology = require('../../../lib/sdam/topology').Topology;
+const ServerDescription = require('../../../lib/sdam/server_description').ServerDescription;
 const parse = require('../../../lib/uri_parser');
 
 const specDir = path.join(__dirname, '..', 'spec', 'server-discovery-and-monitoring');
