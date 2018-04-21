@@ -163,30 +163,40 @@ class TopologyDescription {
     this.maxElectionId = maxElectionId || null;
     this.servers = serverDescriptions || {};
     this.stale = false;
-    this.compatible = false;
+    this.compatible = true;
     this.compatibilityError = null;
     this.logicalSessionTimeoutMinutes = null;
 
     // determine server compatibility
-    for (const serverDescription in this.servers) {
-      if (serverDescription.maxWireVersion > MAX_SUPPORTED_WIRE_VERSION) {
+    for (const serverAddress in this.servers) {
+      const serverDescription = this.servers[serverAddress];
+      if (serverDescription.minWireVersion > MAX_SUPPORTED_WIRE_VERSION) {
         this.compatible = false;
         this.compatibilityError = `Server at ${serverDescription.address} requires wire version ${
           serverDescription.minWireVersion
         }, but this version of the driver only supports up to ${MAX_SUPPORTED_WIRE_VERSION}.`;
-        break;
       }
 
-      if (serverDescription.minWireVersion < MIN_SUPPORTED_WIRE_VERSION) {
+      if (serverDescription.maxWireVersion < MIN_SUPPORTED_WIRE_VERSION) {
         this.compatible = false;
         this.compatibilityError = `Server at ${serverDescription.address} reports wire version ${
           serverDescription.maxWireVersion
-        }, but this version of the driver requires at least ${
-          this.s.minWireVersion
-        } (MongoDB ${MIN_SUPPORTED_SERVER_VERSION}).`;
+        }, but this version of the driver requires at least ${MIN_SUPPORTED_WIRE_VERSION} (MongoDB ${MIN_SUPPORTED_SERVER_VERSION}).`;
         break;
       }
     }
+
+    // Whenever a client updates the TopologyDescription from an ismaster response, it MUST set
+    // TopologyDescription.logicalSessionTimeoutMinutes to the smallest logicalSessionTimeoutMinutes
+    // value among ServerDescriptions of all data-bearing server types. If any have a null
+    // logicalSessionTimeoutMinutes, then TopologyDescription.logicalSessionTimeoutMinutes MUST be
+    // set to null.
+    const readableServers = Object.values(this.servers).filter(s => s.isReadable);
+    this.logicalSessionTimeoutMinutes = readableServers.reduce((result, server) => {
+      if (server.logicalSessionTimeoutMinutes == null) return null;
+      if (result == null) return server.logicalSessionTimeoutMinutes;
+      return Math.min(result, server.logicalSessionTimeoutMinutes);
+    }, null);
   }
 
   /**
@@ -389,6 +399,20 @@ class ServerDescription {
 
   get allHosts() {
     return this.hosts.concat(this.arbiters).concat(this.passives);
+  }
+
+  /**
+   * @return {Boolean} Is this server available for reads
+   */
+  get isReadable() {
+    return this.type === ServerType.RSSecondary || this.isWritable;
+  }
+
+  /**
+   * @return {Boolean} Is this server available for writes
+   */
+  get isWritable() {
+    return [ServerType.RSPrimary, ServerType.Standalone, ServerType.Mongos].includes(this.type);
   }
 }
 
