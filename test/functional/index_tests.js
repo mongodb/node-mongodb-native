@@ -1272,7 +1272,7 @@ describe('Indexes', function() {
   /**
    * @ignore
    */
-  it('should correctly fail detect error code 85 when peforming createIndex', {
+  it('should correctly fail detect error code 85 when performing createIndex', {
     metadata: {
       requires: {
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
@@ -1307,6 +1307,40 @@ describe('Indexes', function() {
             );
           }
         );
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it('should correctly fail by detecting error code 86 when performing createIndex', {
+    metadata: {
+      requires: {
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+        mongodb: '>=3.0.0'
+      }
+    },
+
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      client.connect(function(err, client) {
+        var db = client.db(configuration.db);
+        var collection = db.collection('messed_up_options');
+
+        collection.createIndex({ 'b.one': 1, 'b.two': 1 }, { name: 'test' }, function(err) {
+          test.equal(null, err);
+
+          collection.createIndex({ 'b.one': -1, 'b.two': -1 }, { name: 'test' }, function(err) {
+            test.ok(err);
+            test.equal(86, err.code);
+
+            client.close();
+            done();
+          });
+        });
       });
     }
   });
