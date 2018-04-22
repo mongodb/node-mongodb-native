@@ -75,7 +75,10 @@ class TopologyDescription {
     // value among ServerDescriptions of all data-bearing server types. If any have a null
     // logicalSessionTimeoutMinutes, then TopologyDescription.logicalSessionTimeoutMinutes MUST be
     // set to null.
-    const readableServers = Object.values(this.servers).filter(s => s.isReadable);
+    const readableServers = Object.keys(this.servers)
+      .map(s => this.servers[s])
+      .filter(s => s.isReadable);
+
     this.logicalSessionTimeoutMinutes = readableServers.reduce((result, server) => {
       if (server.logicalSessionTimeoutMinutes == null) return null;
       if (result == null) return server.logicalSessionTimeoutMinutes;
