@@ -109,7 +109,7 @@ function parseSrvConnectionString(uri, options, callback) {
 
         record = record[0];
         record = record.length > 1 ? record.join('') : record[0];
-        if (!record.includes('authSource') && !record.includes('replicaSet')) {
+        if (record.indexOf('authSource') === -1 && record.indexOf('replicaSet') === -1) {
           return callback(
             new MongoParseError('Text record must only set `authSource` or `replicaSet`')
           );

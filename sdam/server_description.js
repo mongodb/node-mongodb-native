@@ -66,7 +66,9 @@ class ServerDescription {
    * @return {Boolean} Is this server available for writes
    */
   get isWritable() {
-    return [ServerType.RSPrimary, ServerType.Standalone, ServerType.Mongos].includes(this.type);
+    return (
+      [ServerType.RSPrimary, ServerType.Standalone, ServerType.Mongos].indexOf(this.type) !== -1
+    );
   }
 }
 
