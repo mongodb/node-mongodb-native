@@ -12,7 +12,7 @@ describe('Mongos server selection tests', function() {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
-      var path = f('%s/../spec/server-selection/tests/server_selection/Sharded/read', __dirname);
+      var path = f('%s/../spec/server-selection/server_selection/Sharded/read', __dirname);
       console.dir(path);
       var entries = fs.readdirSync(path).filter(function(x) {
         return x.indexOf('.json') !== -1;
