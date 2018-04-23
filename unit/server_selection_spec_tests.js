@@ -56,7 +56,18 @@ describe('Server Selection (spec)', function() {
             const maybeIt = test.name.match(/Possible/) ? it.skip : it;
 
             maybeIt(test.name, function(done) {
-              executeServerSelectionTest(test, done);
+              executeServerSelectionTest(test, { checkLatencyWindow: false }, done);
+            });
+          });
+        });
+
+        describe(subType + ' (within latency window)', function() {
+          specTests[topologyType][subType].forEach(test => {
+            // NOTE: node does not support PossiblePrimary
+            const maybeIt = test.name.match(/Possible/) ? it.skip : it;
+
+            maybeIt(test.name, function(done) {
+              executeServerSelectionTest(test, { checkLatencyWindow: true }, done);
             });
           });
         });
@@ -125,7 +136,7 @@ function readPreferenceFromDefinition(definition) {
   return new ReadPreference(mode, tags, options);
 }
 
-function executeServerSelectionTest(testDefinition, done) {
+function executeServerSelectionTest(testDefinition, options, done) {
   const topologyDescription = testDefinition.topology_description;
   const seedData = topologyDescription.servers.reduce(
     (result, seed) => {
@@ -140,24 +151,13 @@ function executeServerSelectionTest(testDefinition, done) {
     heartbeatFrequencyMS: testDefinition.heartbeatFrequencyMS
   };
 
-  // "Eligible servers" is defined in the server selection spec as
-  // the set of servers matching both the ReadPreference's mode
-  // and tag sets.
-  const latencyTopology = new Topology(seedData.seedlist, topologyOptions);
-  latencyTopology.connect();
-
-  // "In latency window" is defined in the server selection
-  // spec as the subset of suitable_servers that falls within the
-  // allowable latency window.
-  topologyOptions.localThresholdMS = 1000000;
-  const suitableTopology = new Topology(seedData.seedlist, topologyOptions);
-  suitableTopology.connect();
+  const topology = new Topology(seedData.seedlist, topologyOptions);
+  topology.connect();
 
   // Update topologies with server descriptions.
   topologyDescription.servers.forEach(server => {
     const serverDescription = serverDescriptionFromDefinition(server, seedData.hosts);
-    suitableTopology.update(serverDescription);
-    latencyTopology.update(serverDescription);
+    topology.update(serverDescription);
   });
 
   let selector;
@@ -171,25 +171,28 @@ function executeServerSelectionTest(testDefinition, done) {
   }
 
   // expectations
-  const suitableServers = testDefinition.suitable_servers.map(s =>
-    serverDescriptionFromDefinition(s)
-  );
+  let expectedServers;
+  if (options.checkLatencyWindow) {
+    expectedServers = testDefinition.in_latency_window.map(s => serverDescriptionFromDefinition(s));
+  } else {
+    expectedServers = testDefinition.suitable_servers.map(s => serverDescriptionFromDefinition(s));
+  }
 
   // default to serverSelectionTimeoutMS of `0` for unit tests
-  suitableTopology.selectServer(selector, { serverSelectionTimeoutMS: 0 }, (err, server) => {
+  topology.selectServer(selector, { serverSelectionTimeoutMS: 0 }, (err, server) => {
     if (err) {
-      if (suitableServers.length === 0 && err instanceof MongoTimeoutError) return done();
+      if (expectedServers.length === 0 && err instanceof MongoTimeoutError) return done();
       return done(err);
     }
 
-    if (suitableServers.length === 0 && server !== null) {
+    if (expectedServers.length === 0 && server !== null) {
       return done(new Error('Found server, but expected none!'));
     }
 
     const selectedServerDescription = server.description;
 
     try {
-      const expectedServerArray = suitableServers.filter(
+      const expectedServerArray = expectedServers.filter(
         s => s.address === selectedServerDescription.address
       );
 
