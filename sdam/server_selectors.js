@@ -10,10 +10,10 @@ function writableServerSelector() {
       topologyDescription.type === TopologyType.Sharded ||
       topologyDescription.type === TopologyType.Single
     ) {
-      return servers;
+      return latencyWindowReducer(topologyDescription, servers);
     }
 
-    return servers.filter(s => s.isWritable);
+    return latencyWindowReducer(topologyDescription, servers.filter(s => s.isWritable));
   };
 }
 
@@ -84,8 +84,18 @@ function tagSetReducer(readPreference, servers) {
   return [];
 }
 
-function latencyWindowReducer(readPreference, servers) {
-  return servers;
+function latencyWindowReducer(topologyDescription, servers) {
+  const low = servers.reduce(
+    (min, server) =>
+      min === -1 ? server.roundTripTime : server.roundTripTime < min ? server.roundTripTime : min,
+    -1
+  );
+  const high = low + topologyDescription.localThresholdMS;
+
+  return servers.reduce((result, server) => {
+    if (server.roundTripTime <= high && server.roundTripTime >= low) result.push(server);
+    return result;
+  }, []);
 }
 
 // filters
@@ -112,7 +122,7 @@ function readPreferenceServerSelector(readPreference) {
       topologyDescription.type === TopologyType.Sharded ||
       topologyDescription.type === TopologyType.Unknown
     ) {
-      return servers;
+      return latencyWindowReducer(topologyDescription, servers);
     }
 
     if (readPreference.mode === ReadPreference.PRIMARY) {
@@ -121,7 +131,7 @@ function readPreferenceServerSelector(readPreference) {
 
     if (readPreference.mode === ReadPreference.SECONDARY) {
       return latencyWindowReducer(
-        readPreference,
+        topologyDescription,
         tagSetReducer(
           readPreference,
           maxStalenessReducer(readPreference, topologyDescription, servers.filter(secondaryFilter))
@@ -129,7 +139,7 @@ function readPreferenceServerSelector(readPreference) {
       );
     } else if (readPreference.mode === ReadPreference.NEAREST) {
       return latencyWindowReducer(
-        readPreference,
+        topologyDescription,
         tagSetReducer(
           readPreference,
           maxStalenessReducer(readPreference, topologyDescription, servers.filter(nearestFilter))
@@ -137,7 +147,7 @@ function readPreferenceServerSelector(readPreference) {
       );
     } else if (readPreference.mode === ReadPreference.SECONDARY_PREFERRED) {
       const result = latencyWindowReducer(
-        readPreference,
+        topologyDescription,
         tagSetReducer(
           readPreference,
           maxStalenessReducer(readPreference, topologyDescription, servers.filter(secondaryFilter))
@@ -152,7 +162,7 @@ function readPreferenceServerSelector(readPreference) {
       }
 
       return latencyWindowReducer(
-        readPreference,
+        topologyDescription,
         tagSetReducer(
           readPreference,
           maxStalenessReducer(readPreference, topologyDescription, servers.filter(secondaryFilter))

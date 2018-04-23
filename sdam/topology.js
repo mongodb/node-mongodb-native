@@ -82,9 +82,8 @@ class Topology extends EventEmitter {
         null,
         options
       ),
-      serverSelectionTimeoutMS:
-        options.serverSelectionTimeoutMS || DEFAULT_SERVER_SELECTION_TIMEOUT,
-      heartbeatFrequencyMS: options.heartbeatFrequencyMS || DEFAULT_HEARTBEAT_FREQUENCY,
+      serverSelectionTimeoutMS: options.serverSelectionTimeoutMS,
+      heartbeatFrequencyMS: options.heartbeatFrequencyMS,
       ServerClass: options.ServerClass || null /* eventually our Server class, but null for now */
     };
   }

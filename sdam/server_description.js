@@ -31,7 +31,7 @@ class ServerDescription {
 
     this.address = address;
     this.error = null;
-    this.roundTripTime = options.roundTripTime;
+    this.roundTripTime = options.roundTripTime || 0;
     this.lastWriteDate = ismaster && ismaster.lastWrite ? ismaster.lastWrite.lasteWriteDate : null;
     this.opTime = ismaster && ismaster.lastWrite ? ismaster.lastWrite.opTime : null;
     this.type = parseServerType(ismaster);

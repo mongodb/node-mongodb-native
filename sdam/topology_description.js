@@ -45,6 +45,7 @@ class TopologyDescription {
     this.compatibilityError = null;
     this.logicalSessionTimeoutMinutes = null;
     this.heartbeatFrequencyMS = options.heartbeatFrequencyMS || 0;
+    this.localThresholdMS = options.localThresholdMS || 0;
     this.options = options;
 
     // determine server compatibility
