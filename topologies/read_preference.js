@@ -41,17 +41,15 @@
  * @return {ReadPreference}
  */
 const ReadPreference = function(mode, tags, options) {
+  if (tags && !Array.isArray(tags) && typeof tags === 'object')
+    (options = tags), (tags = undefined);
+
   this.mode = mode;
   this.tags = tags;
-  this.options = options;
+  this.options = options || {};
 
-  // Add the maxStalenessSeconds value to the read Preference
-  if (this.options && this.options.maxStalenessSeconds != null) {
-    this.options = options;
-    this.maxStalenessSeconds =
-      this.options.maxStalenessSeconds >= 0 ? this.options.maxStalenessSeconds : null;
-  } else if (tags && typeof tags === 'object') {
-    (this.options = tags), (tags = null);
+  if (this.options.maxStalenessSeconds != null && this.options.maxStalenessSeconds > 0) {
+    this.maxStalenessSeconds = this.options.maxStalenessSeconds;
   }
 };
 
