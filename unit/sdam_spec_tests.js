@@ -112,6 +112,24 @@ function replacePlaceholders(actual, expected) {
   return actual;
 }
 
+function convertES6Maps(actual) {
+  ['previousDescription', 'newDescription'].forEach(key => {
+    if (actual[key] && actual[key].servers) {
+      const servers = actual[key].servers;
+      if (servers instanceof Map) {
+        let obj = Object.create(null);
+        for (const serverEntry of servers.entries()) {
+          obj[serverEntry[0]] = serverEntry[1];
+        }
+
+        actual[key].servers = obj;
+      }
+    }
+  });
+
+  return actual;
+}
+
 function normalizeServerDescription(serverDescription) {
   if (serverDescription.type === 'PossiblePrimary') {
     // Some single-threaded drivers care a lot about ordering potential primary
@@ -169,7 +187,7 @@ function executeSDAMTest(testData, done) {
           Object.keys(expectedServers).forEach(serverName => {
             expect(actualServers).to.include.keys(serverName);
             const expectedServer = normalizeServerDescription(expectedServers[serverName]);
-            const actualServer = actualServers[serverName];
+            const actualServer = actualServers.get(serverName);
             expect(actualServer).to.deep.include(expectedServer);
           });
 
@@ -181,7 +199,7 @@ function executeSDAMTest(testData, done) {
           expect(events).to.have.length(expectedEvents.length);
           for (let i = 0; i < events.length; ++i) {
             const expectedEvent = expectedEvents[i];
-            const actualEvent = replacePlaceholders(events[i], expectedEvent);
+            const actualEvent = convertES6Maps(replacePlaceholders(events[i], expectedEvent));
             expect(actualEvent).to.containSubset(expectedEvent);
           }
 
