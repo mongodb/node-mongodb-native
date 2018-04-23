@@ -66,7 +66,7 @@ util.inherits(MongoNetworkError, MongoError);
  * @class
  * @param {Error|string|object} message The error message
  * @property {string} message The error message
- * @return {MongoParseError} A MongoNetworkError instance
+ * @return {MongoParseError} A MongoParseError instance
  * @extends {MongoError}
  */
 const MongoParseError = function(message) {
@@ -75,8 +75,24 @@ const MongoParseError = function(message) {
 };
 util.inherits(MongoParseError, MongoError);
 
+/**
+ * An error signifying a timeout event
+ *
+ * @class
+ * @param {Error|string|object} message The error message
+ * @property {string} message The error message
+ * @return {MongoTimeoutError} A MongoTimeoutError instance
+ * @extends {MongoError}
+ */
+const MongoTimeoutError = function(message) {
+  MongoError.call(this, message);
+  this.name = 'MongoTimeoutError';
+};
+util.inherits(MongoTimeoutError, MongoError);
+
 module.exports = {
-  MongoError: MongoError,
-  MongoNetworkError: MongoNetworkError,
-  MongoParseError: MongoParseError
+  MongoError,
+  MongoNetworkError,
+  MongoParseError,
+  MongoTimeoutError
 };
