@@ -1,7 +1,7 @@
 'use strict';
 const KillCursor = require('../connection/commands').KillCursor;
 const GetMore = require('../connection/commands').GetMore;
-const process = require('process');
+const calculateDurationInMs = require('../utils').calculateDurationInMs;
 
 /** Commands that we want to redact because of the sensitive nature of their contents */
 const SENSITIVE_COMMANDS = new Set([
@@ -18,11 +18,6 @@ const SENSITIVE_COMMANDS = new Set([
 
 // helper methods
 const extractCommandName = command => Object.keys(command)[0];
-const calculateDurationInMs = started => {
-  const hrtime = process.hrtime(started);
-  return (hrtime[0] * 1e9 + hrtime[1]) / 1e6;
-};
-
 const namespace = command => command.ns;
 const databaseName = command => command.ns.split('.')[0];
 const collectionName = command => command.ns.split('.')[1];
