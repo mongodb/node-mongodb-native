@@ -45,15 +45,14 @@ class TopologyDescription {
     this.setName = setName || null;
     this.maxSetVersion = maxSetVersion || null;
     this.maxElectionId = maxElectionId || null;
-    this.servers = serverDescriptions || {};
+    this.servers = serverDescriptions || new Map();
     this.stale = false;
     this.compatible = true;
     this.compatibilityError = null;
     this.logicalSessionTimeoutMinutes = null;
 
     // determine server compatibility
-    for (const serverAddress in this.servers) {
-      const serverDescription = this.servers[serverAddress];
+    for (const serverDescription of this.servers.values()) {
       if (serverDescription.minWireVersion > MAX_SUPPORTED_WIRE_VERSION) {
         this.compatible = false;
         this.compatibilityError = `Server at ${serverDescription.address} requires wire version ${
@@ -75,10 +74,7 @@ class TopologyDescription {
     // value among ServerDescriptions of all data-bearing server types. If any have a null
     // logicalSessionTimeoutMinutes, then TopologyDescription.logicalSessionTimeoutMinutes MUST be
     // set to null.
-    const readableServers = Object.keys(this.servers)
-      .map(s => this.servers[s])
-      .filter(s => s.isReadable);
-
+    const readableServers = Array.from(this.servers.values()).filter(s => s.isReadable);
     this.logicalSessionTimeoutMinutes = readableServers.reduce((result, server) => {
       if (server.logicalSessionTimeoutMinutes == null) return null;
       if (result == null) return server.logicalSessionTimeoutMinutes;
@@ -103,10 +99,10 @@ class TopologyDescription {
     let maxElectionId = this.maxElectionId;
 
     const serverType = serverDescription.type;
-    let serverDescriptions = Object.assign({}, this.servers);
+    let serverDescriptions = new Map(this.servers);
 
     // update the actual server description
-    serverDescriptions[address] = serverDescription;
+    serverDescriptions.set(address, serverDescription);
 
     if (topologyType === TopologyType.Single) {
       // once we are defined as single, that never changes
@@ -122,7 +118,7 @@ class TopologyDescription {
 
     if (topologyType === TopologyType.Unknown) {
       if (serverType === ServerType.Standalone) {
-        delete serverDescriptions[address];
+        serverDescriptions.delete(address);
       } else {
         topologyType = topologyTypeForServerType(serverType);
       }
@@ -130,13 +126,13 @@ class TopologyDescription {
 
     if (topologyType === TopologyType.Sharded) {
       if ([ServerType.Mongos, ServerType.Unknown].indexOf(serverType) === -1) {
-        delete serverDescriptions[address];
+        serverDescriptions.delete(address);
       }
     }
 
     if (topologyType === TopologyType.ReplicaSetNoPrimary) {
       if ([ServerType.Mongos, ServerType.Unknown].indexOf(serverType) >= 0) {
-        delete serverDescriptions[address];
+        serverDescriptions.delete(address);
       }
 
       if (serverType === ServerType.RSPrimary) {
@@ -162,7 +158,7 @@ class TopologyDescription {
 
     if (topologyType === TopologyType.ReplicaSetWithPrimary) {
       if ([ServerType.Standalone, ServerType.Mongos].indexOf(serverType) >= 0) {
-        delete serverDescriptions[address];
+        serverDescriptions.delete(address);
         topologyType = checkHasPrimary(serverDescriptions);
       } else if (serverType === ServerType.RSPrimary) {
         const result = updateRsFromPrimary(
@@ -237,7 +233,7 @@ function updateRsFromPrimary(
 ) {
   setName = setName || serverDescription.setName;
   if (setName !== serverDescription.setName) {
-    delete serverDescriptions[serverDescription.address];
+    serverDescriptions.delete(serverDescription.address);
     return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
   }
 
@@ -247,8 +243,9 @@ function updateRsFromPrimary(
     if (maxSetVersion != null && maxElectionIdOID != null) {
       if (maxSetVersion > serverDescription.setVersion || maxElectionIdOID > electionIdOID) {
         // this primary is stale, we must remove it
-        serverDescriptions[serverDescription.address] = new ServerDescription(
-          serverDescription.address
+        serverDescriptions.set(
+          serverDescription.address,
+          new ServerDescription(serverDescription.address)
         );
 
         return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
@@ -266,12 +263,12 @@ function updateRsFromPrimary(
   }
 
   // We've heard from the primary. Is it the same primary as before?
-  for (const address in serverDescriptions) {
-    const server = serverDescriptions[address];
+  for (const address of serverDescriptions.keys()) {
+    const server = serverDescriptions.get(address);
 
     if (server.type === ServerType.RSPrimary && server.address !== serverDescription.address) {
       // Reset old primary's type to Unknown.
-      serverDescriptions[address] = new ServerDescription(server.address);
+      serverDescriptions.set(address, new ServerDescription(server.address));
 
       // There can only be one primary
       break;
@@ -280,16 +277,16 @@ function updateRsFromPrimary(
 
   // Discover new hosts from this primary's response.
   serverDescription.allHosts.forEach(address => {
-    if (!serverDescriptions.hasOwnProperty(address)) {
-      serverDescriptions[address] = new ServerDescription(address);
+    if (!serverDescriptions.has(address)) {
+      serverDescriptions.set(address, new ServerDescription(address));
     }
   });
 
   // Remove hosts not in the response.
-  const currentAddresses = Object.keys(serverDescriptions);
+  const currentAddresses = Array.from(serverDescriptions.keys());
   const responseAddresses = serverDescription.allHosts;
   currentAddresses.filter(addr => responseAddresses.indexOf(addr) === -1).forEach(address => {
-    delete serverDescriptions[address];
+    serverDescriptions.delete(address);
   });
 
   return [checkHasPrimary(serverDescriptions), setName, maxSetVersion, maxElectionId];
@@ -299,9 +296,9 @@ function updateRsWithPrimaryFromMember(serverDescriptions, setName, serverDescri
   assert.ok(setName, 'setName is required');
 
   if (setName !== serverDescription.setName) {
-    delete serverDescriptions[serverDescription.address];
+    serverDescriptions.delete(serverDescription.address);
   } else if (serverDescription.me && serverDescription.address !== serverDescription.me) {
-    delete serverDescriptions[serverDescription.address];
+    serverDescriptions.delete(serverDescription.address);
   }
 
   return checkHasPrimary(serverDescriptions);
@@ -312,26 +309,26 @@ function updateRsNoPrimaryFromMember(serverDescriptions, setName, serverDescript
 
   setName = setName || serverDescription.setName;
   if (setName !== serverDescription.setName) {
-    delete serverDescriptions[serverDescription.address];
+    serverDescriptions.delete(serverDescription.address);
     return [topologyType, setName];
   }
 
   serverDescription.allHosts.forEach(address => {
-    if (!serverDescriptions.hasOwnProperty(address)) {
-      serverDescriptions[address] = new ServerDescription(address);
+    if (!serverDescriptions.has(address)) {
+      serverDescriptions.set(address, new ServerDescription(address));
     }
   });
 
   if (serverDescription.me && serverDescription.address !== serverDescription.me) {
-    delete serverDescriptions[serverDescription.address];
+    serverDescriptions.delete(serverDescription.address);
   }
 
   return [topologyType, setName];
 }
 
 function checkHasPrimary(serverDescriptions) {
-  for (const addr in serverDescriptions) {
-    if (serverDescriptions[addr].type === ServerType.RSPrimary) {
+  for (const addr of serverDescriptions.keys()) {
+    if (serverDescriptions.get(addr).type === ServerType.RSPrimary) {
       return TopologyType.ReplicaSetWithPrimary;
     }
   }

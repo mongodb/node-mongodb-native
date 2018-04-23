@@ -43,9 +43,9 @@ class Topology extends EventEmitter {
     const topologyId = globalTopologyCounter++;
     const serverDescriptions = seedlist.reduce((result, seed) => {
       const address = seed.port ? `${seed.host}:${seed.port}` : `${seed.host}:27017`;
-      result[address] = new ServerDescription(address);
+      result.set(address, new ServerDescription(address));
       return result;
-    }, {});
+    }, new Map());
 
     this.s = {
       // the id of this topology
@@ -94,7 +94,7 @@ class Topology extends EventEmitter {
     );
 
     // emit ServerOpeningEvents for each server in our topology
-    Object.keys(this.s.description.servers).forEach(serverAddress => {
+    Array.from(this.s.description.servers.keys()).forEach(serverAddress => {
       // publish an open event for each ServerDescription created
       this.emit('serverOpening', new monitoring.ServerOpeningEvent(this.s.id, serverAddress));
     });
@@ -126,7 +126,7 @@ class Topology extends EventEmitter {
   update(serverDescription) {
     // these will be used for monitoring events later
     const previousTopologyDescription = this.s.description;
-    const previousServerDescription = this.s.description.servers[serverDescription.address];
+    const previousServerDescription = this.s.description.servers.get(serverDescription.address);
 
     // first update the TopologyDescription
     this.s.description = this.s.description.update(serverDescription);
@@ -138,7 +138,7 @@ class Topology extends EventEmitter {
         this.s.id,
         serverDescription.address,
         previousServerDescription,
-        this.s.description.servers[serverDescription.address]
+        this.s.description.servers.get(serverDescription.address)
       )
     );
 
