@@ -1,20 +1,20 @@
 {
-    "error": true,
-    "read_preference": {
-        "maxStalenessSeconds": 1,
-        "mode": "Nearest"
-    },
-    "topology_description": {
-        "servers": [
-            {
-                "address": "a:27017",
-                "type": "Unknown"
-            },
-            {
-                "address": "b:27017",
-                "type": "Unknown"
-            }
-        ],
-        "type": "ReplicaSetNoPrimary"
-    }
+  "topology_description": {
+    "type": "ReplicaSetNoPrimary",
+    "servers": [
+      {
+        "address": "a:27017",
+        "type": "Unknown"
+      },
+      {
+        "address": "b:27017",
+        "type": "Unknown"
+      }
+    ]
+  },
+  "read_preference": {
+    "mode": "Nearest",
+    "maxStalenessSeconds": 1
+  },
+  "error": true
 }
