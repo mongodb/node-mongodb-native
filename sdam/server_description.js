@@ -23,11 +23,15 @@ class ServerDescription {
    * Create a ServerDescription
    * @param {String} address The address of the server
    * @param {Object} [ismaster] An optional ismaster response for this server
+   * @param {Object} [options] Optional settings
+   * @param {Number} [options.roundTripTime] The round trip time to ping this server (in ms)
    */
-  constructor(address, ismaster) {
+  constructor(address, ismaster, options) {
+    options = options || {};
+
     this.address = address;
     this.error = null;
-    this.roundTripTime = null;
+    this.roundTripTime = options.roundTripTime;
     this.lastWriteDate = ismaster && ismaster.lastWrite ? ismaster.lastWrite.lasteWriteDate : null;
     this.opTime = ismaster && ismaster.lastWrite ? ismaster.lastWrite.opTime : null;
     this.type = parseServerType(ismaster);

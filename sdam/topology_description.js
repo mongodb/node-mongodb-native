@@ -29,18 +29,12 @@ class TopologyDescription {
    * @param {number} maxSetVersion
    * @param {ObjectId} maxElectionId
    */
-  constructor(
-    topologyType,
-    serverDescriptions,
-    setName,
-    maxSetVersion,
-    maxElectionId
-    /*, options */
-  ) {
+  constructor(topologyType, serverDescriptions, setName, maxSetVersion, maxElectionId, options) {
+    options = options || {};
+
     // TODO: consider assigning all these values to a temporary value `s` which
     //       we use `Object.freeze` on, ensuring the internal state of this type
     //       is immutable.
-
     this.type = topologyType || TopologyType.Unknown;
     this.setName = setName || null;
     this.maxSetVersion = maxSetVersion || null;
@@ -50,6 +44,8 @@ class TopologyDescription {
     this.compatible = true;
     this.compatibilityError = null;
     this.logicalSessionTimeoutMinutes = null;
+    this.heartbeatFrequencyMS = options.heartbeatFrequencyMS || 0;
+    this.options = options;
 
     // determine server compatibility
     for (const serverDescription of this.servers.values()) {
@@ -112,7 +108,7 @@ class TopologyDescription {
         setName,
         maxSetVersion,
         maxElectionId,
-        {}
+        this.options
       );
     }
 
@@ -192,7 +188,7 @@ class TopologyDescription {
       setName,
       maxSetVersion,
       maxElectionId,
-      {}
+      this.options
     );
   }
 

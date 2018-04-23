@@ -4,9 +4,17 @@ const ServerDescription = require('./server_description').ServerDescription;
 const TopologyDescription = require('./topology_description').TopologyDescription;
 const TopologyType = require('./topology_description').TopologyType;
 const monitoring = require('./monitoring');
+const calculateDurationInMs = require('../utils').calculateDurationInMs;
+const MongoTimeoutError = require('../error').MongoTimeoutError;
+const MongoError = require('../error').MongoError;
 
 // Global state
 let globalTopologyCounter = 0;
+
+// Constants
+const DEFAULT_LOCAL_THRESHOLD_MS = 15;
+const DEFAULT_HEARTBEAT_FREQUENCY = 10000;
+const DEFAULT_SERVER_SELECTION_TIMEOUT = 30000;
 
 /**
  * A container of server instances representing a connection to a MongoDB topology.
@@ -27,11 +35,22 @@ class Topology extends EventEmitter {
    *
    * @param {Array|String} seedlist a string list, or array of Server instances to connect to
    * @param {Object} [options] Optional settings
+   * @param {Number} [options.localThresholdMS=15] The size of the latency window for selecting among multiple suitable servers
+   * @param {Number} [options.serverSelectionTimeoutMS=30000] How long to block for server selection before throwing an error
+   * @param {Number} [options.heartbeatFrequencyMS=10000] The frequency with which topology updates are scheduled
    */
   constructor(seedlist, options) {
     super();
     seedlist = seedlist || [];
-    options = options || {};
+    options = Object.assign(
+      {},
+      {
+        localThresholdMS: DEFAULT_LOCAL_THRESHOLD_MS,
+        serverSelectionTimeoutMS: DEFAULT_SERVER_SELECTION_TIMEOUT,
+        heartbeatFrequencyMS: DEFAULT_HEARTBEAT_FREQUENCY
+      },
+      options
+    );
 
     const topologyType =
       seedlist.length === 1 && !options.replicaset
@@ -62,7 +81,11 @@ class Topology extends EventEmitter {
         null,
         null,
         options
-      )
+      ),
+      serverSelectionTimeoutMS:
+        options.serverSelectionTimeoutMS || DEFAULT_SERVER_SELECTION_TIMEOUT,
+      heartbeatFrequencyMS: options.heartbeatFrequencyMS || DEFAULT_HEARTBEAT_FREQUENCY,
+      ServerClass: options.ServerClass || null /* eventually our Server class, but null for now */
     };
   }
 
@@ -111,17 +134,33 @@ class Topology extends EventEmitter {
   /**
    * Selects a server according to the selection predicate provided
    *
-   * @param {function} [predicate] An optional predicate to select servers by, defaults to a random selection within a latency window
+   * @param {function} [selector] An optional selector to select servers by, defaults to a random selection within a latency window
    * @return {Server} An instance of a `Server` meeting the criteria of the predicate provided
    */
-  selectServer(/* predicate */) {
-    return;
+  selectServer(selector, options, callback) {
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = Object.assign(
+      {},
+      { serverSelectionTimeoutMS: this.s.serverSelectionTimeoutMS },
+      options
+    );
+
+    selectServers(
+      this,
+      selector,
+      options.serverSelectionTimeoutMS,
+      process.hrtime(),
+      (err, servers) => {
+        if (err) return callback(err, null);
+        callback(null, randomSelection(servers));
+      }
+    );
   }
 
   /**
-   * Update the topology with a ServerDescription
+   * Update the internal TopologyDescription with a ServerDescription
    *
-   * @param {object} serverDescription the server to update
+   * @param {object} serverDescription The server to update in the internal list of server descriptions
    */
   update(serverDescription) {
     // these will be used for monitoring events later
@@ -151,6 +190,44 @@ class Topology extends EventEmitter {
       )
     );
   }
+}
+
+function randomSelection(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
+class FakeServer {
+  constructor(description) {
+    this.description = description;
+  }
+}
+
+/**
+ *
+ * @param {*} topology
+ * @param {*} selector
+ * @param {*} options
+ * @param {*} callback
+ */
+function selectServers(topology, selector, timeout, start, callback) {
+  if (!topology.description.compatible) {
+    return callback(new MongoError(topology.description.compatibilityError));
+  }
+
+  const serverDescriptions = Array.from(topology.description.servers.values());
+  let descriptions = selector(topology.description, serverDescriptions);
+  if (descriptions.length) {
+    // TODO: obviously return the actual server in the future
+    const servers = descriptions.map(d => new FakeServer(d));
+    return callback(null, servers);
+  }
+
+  const duration = calculateDurationInMs(process.hrtime(start));
+  if (duration > timeout) {
+    return callback(new MongoTimeoutError(`Server selection timed out after ${timeout} ms`));
+  }
+
+  // TODO: loop this, add monitoring
 }
 
 /**
