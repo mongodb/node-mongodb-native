@@ -41,8 +41,20 @@
  * @return {ReadPreference}
  */
 const ReadPreference = function(mode, tags, options) {
-  if (tags && !Array.isArray(tags) && typeof tags === 'object')
-    (options = tags), (tags = undefined);
+  // TODO(major): tags MUST be an array of tagsets
+  if (tags && !Array.isArray(tags)) {
+    console.warn(
+      'ReadPreference tags must be an array, this will change in the next major version'
+    );
+
+    if (typeof tags.maxStalenessSeconds !== 'undefined') {
+      // this is likely an options object
+      options = tags;
+      tags = undefined;
+    } else {
+      tags = [tags];
+    }
+  }
 
   this.mode = mode;
   this.tags = tags;
