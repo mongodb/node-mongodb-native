@@ -46,10 +46,28 @@ const ReadPreference = function(mode, tags, options) {
 
   this.mode = mode;
   this.tags = tags;
-  this.options = options || {};
 
-  if (this.options.maxStalenessSeconds != null && this.options.maxStalenessSeconds > 0) {
-    this.maxStalenessSeconds = this.options.maxStalenessSeconds;
+  options = options || {};
+  if (options.maxStalenessSeconds != null) {
+    if (options.maxStalenessSeconds <= 0) {
+      throw new TypeError('maxStalenessSeconds must be a positive integer');
+    }
+
+    this.maxStalenessSeconds = options.maxStalenessSeconds;
+
+    // NOTE: The minimum required wire version is 5 for this read preference. If the existing
+    //       topology has a lower value then a MongoError will be thrown during server selection.
+    this.minWireVersion = 5;
+  }
+
+  if (this.mode === ReadPreference.PRIMARY || this.mode === true) {
+    if (this.tags && Array.isArray(this.tags) && this.tags.length > 0) {
+      throw new TypeError('Primary read preference cannot be combined with tags');
+    }
+
+    if (this.maxStalenessSeconds) {
+      throw new TypeError('Primary read preference cannot be combined with maxStalenessSeconds');
+    }
   }
 };
 
