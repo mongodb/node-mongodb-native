@@ -80,6 +80,19 @@ class TopologyDescription {
   }
 
   /**
+   * @returns The minimum reported wire version of all known servers
+   */
+  get commonWireVersion() {
+    return Array.from(this.servers.values())
+      .filter(server => server.type !== ServerType.Unknown)
+      .reduce(
+        (min, server) =>
+          min == null ? server.maxWireVersion : Math.min(min, server.maxWireVersion),
+        null
+      );
+  }
+
+  /**
    * Returns a copy of this description updated with a given ServerDescription
    *
    * @param {ServerDescription} serverDescription
