@@ -149,7 +149,6 @@ The next example shows a complete `find` operation that results in multiple `get
     },
     "batchSize": 2,
     "comment": "some comment",
-    "maxScan": 1000,
     "maxTimeMS": 5000,
     "noCursorTimeout": true
   },

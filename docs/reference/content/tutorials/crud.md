@@ -695,8 +695,7 @@ collection.find({}).addCursorFlag('awaitData', true)           // Set cursor as 
 collection.find({}).addCursorFlag('exhaust', true)             // Set cursor as exhaust
 collection.find({}).addCursorFlag('partial', true)             // Set cursor as partial
 collection.find({}).addQueryModifier('$orderby', {a:1})        // Set $orderby {a:1}
-collection.find({}).max(10)                                    // Set the cursor maxScan
-collection.find({}).maxScan(10)                                // Set the cursor maxScan
+collection.find({}).max(10)                                    // Set the cursor max
 collection.find({}).maxTimeMS(1000)                            // Set the cursor maxTimeMS
 collection.find({}).min(100)                                   // Set the cursor min
 collection.find({}).returnKey(10)                              // Set the cursor returnKey
@@ -710,7 +709,7 @@ collection.find({}).hint('a_1')                                // Set the cursor
 All options are chainable, so you can combine settings in the following way:
 
 ```js
-collection.find({}).maxTimeMS(1000).maxScan(100).skip(1).toArray(..)
+collection.find({}).maxTimeMS(1000).skip(1).toArray(..)
 ```
 
 More information can be found in the [Cursor API documentation](/node-mongodb-native/2.0/api/Cursor.html).
