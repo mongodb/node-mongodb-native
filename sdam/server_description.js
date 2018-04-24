@@ -32,7 +32,7 @@ class ServerDescription {
     this.address = address;
     this.error = null;
     this.roundTripTime = options.roundTripTime || 0;
-    this.lastWriteDate = ismaster && ismaster.lastWrite ? ismaster.lastWrite.lasteWriteDate : null;
+    this.lastWriteDate = ismaster && ismaster.lastWrite ? ismaster.lastWrite.lastWriteDate : null;
     this.opTime = ismaster && ismaster.lastWrite ? ismaster.lastWrite.opTime : null;
     this.type = parseServerType(ismaster);
     this.minWireVersion = (ismaster && ismaster.minWireVersion) || 0;
@@ -46,7 +46,7 @@ class ServerDescription {
     this.setVersion = (ismaster && ismaster.setVersion) || null;
     this.electionId = (ismaster && ismaster.electionId) || null;
     this.primary = (ismaster && ismaster.primary) || null;
-    this.lastUpdateTime = null;
+    this.lastUpdateTime = Date.now();
     this.logicalSessionTimeoutMinutes = (ismaster && ismaster.logicalSessionTimeoutMinutes) || null;
 
     // normalize case for hosts
