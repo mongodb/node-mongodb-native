@@ -140,7 +140,8 @@ function executeEntry(entry, path, callback) {
       expect(foundWindow).to.not.be.null;
     }
   } catch (err) {
-    callback(err, null);
+    if (file.error) return callback(null, null);
+    return callback(err, null);
   }
 
   callback(null, null);

@@ -98,7 +98,12 @@ function executeEntry(file, path) {
     });
 
     // Create read preference
-    var rp = new ReadPreference(convert(readPreference.mode), readPreference.tag_sets);
+    var rp;
+    if (convert(readPreference.mode) !== 'primary' && readPreference.tag_sets) {
+      rp = new ReadPreference(convert(readPreference.mode), readPreference.tag_sets);
+    } else {
+      rp = new ReadPreference(convert(readPreference.mode));
+    }
 
     // Perform a pickServer
     var server = replset.pickServer(rp);
