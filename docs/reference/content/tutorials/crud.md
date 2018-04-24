@@ -701,7 +701,6 @@ collection.find({}).min(100)                                   // Set the cursor
 collection.find({}).returnKey(10)                              // Set the cursor returnKey
 collection.find({}).setReadPreference(ReadPreference.PRIMARY)  // Set the cursor readPreference
 collection.find({}).showRecordId(true)                         // Set the cursor showRecordId
-collection.find({}).snapshot(true)                             // Set the cursor snapshot
 collection.find({}).sort([['a', 1]])                           // Sets the sort order of the cursor query
 collection.find({}).hint('a_1')                                // Set the cursor hint
 ```
