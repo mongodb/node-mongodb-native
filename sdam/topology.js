@@ -6,7 +6,6 @@ const TopologyType = require('./topology_description').TopologyType;
 const monitoring = require('./monitoring');
 const calculateDurationInMs = require('../utils').calculateDurationInMs;
 const MongoTimeoutError = require('../error').MongoTimeoutError;
-const MongoError = require('../error').MongoError;
 
 // Global state
 let globalTopologyCounter = 0;
@@ -209,12 +208,17 @@ class FakeServer {
  * @param {*} callback
  */
 function selectServers(topology, selector, timeout, start, callback) {
-  if (!topology.description.compatible) {
-    return callback(new MongoError(topology.description.compatibilityError));
+  const serverDescriptions = Array.from(topology.description.servers.values());
+  let descriptions;
+
+  try {
+    descriptions = selector
+      ? selector(topology.description, serverDescriptions)
+      : serverDescriptions;
+  } catch (e) {
+    return callback(e, null);
   }
 
-  const serverDescriptions = Array.from(topology.description.servers.values());
-  let descriptions = selector(topology.description, serverDescriptions);
   if (descriptions.length) {
     // TODO: obviously return the actual server in the future
     const servers = descriptions.map(d => new FakeServer(d));
