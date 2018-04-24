@@ -12,7 +12,6 @@ title = "Authentication"
 
 The Node.js driver supports all MongoDB [authentication mechanisms](http://docs.mongodb.org/manual/core/authentication/), including those only available in the MongoDB [Enterprise Edition](http://docs.mongodb.org/manual/administration/install-enterprise/).
 
-
 ## DEFAULT
 
 {{% note %}}
@@ -78,6 +77,10 @@ MongoClient.connect(url, function(err, client) {
 
 
 ## MONGODB-CR
+
+{{% warning %}}
+MONGODB-CR was deprecated starting in MongoDB 3.6, and is no longer supported as of MongoDB 4.0
+{{% /warning %}}
 
 To explicitly connect to MongoDB using [MONGODB-CR](https://docs.mongodb.org/manual/core/security-mongodb-cr/), specify `MONGODB-CR` as the mechanism in the [URI connection string](https://docs.mongodb.org/manual/reference/connection-string/).
 

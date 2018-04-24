@@ -735,7 +735,7 @@ describe('Url Parser', function() {
           parse('mongodb://kdc.10gen.com/test?authMechanism=NONE', {}, function(err) {
             expect(err).to.exist;
             expect(err.message).to.equal(
-              'Only DEFAULT, GSSAPI, PLAIN, MONGODB-X509, SCRAM-SHA-1 or MONGODB-CR is supported by authMechanism'
+              'Only DEFAULT, GSSAPI, PLAIN, MONGODB-X509, or SCRAM-SHA-1 is supported by authMechanism'
             );
             parse(
               'mongodb://dev1%4010GEN.ME:test@kdc.10gen.com/test?authMechanism=GSSAPI',
