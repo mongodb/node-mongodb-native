@@ -7,13 +7,14 @@ const ServerType = require('../../../lib/sdam/server_description').ServerType;
 const ServerSelectors = require('../../../lib/sdam/server_selectors');
 const MongoTimeoutError = require('../../../lib/error').MongoTimeoutError;
 const ReadPreference = require('../../../lib/topologies/read_preference');
+const EJSON = require('mongodb-extjson');
 
 const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
 
-const specDir = path.join(__dirname, '..', 'spec', 'server-selection', 'server_selection');
-function collectTests() {
+const selectionSpecDir = path.join(__dirname, '..', 'spec', 'server-selection', 'server_selection');
+function collectSelectionTests(specDir) {
   const testTypes = fs
     .readdirSync(specDir)
     .filter(d => fs.statSync(path.join(specDir, d)).isDirectory());
@@ -28,8 +29,9 @@ function collectTests() {
           .readdirSync(path.join(specDir, testType, subType))
           .filter(f => path.extname(f) === '.json')
           .map(f => {
-            const subTypeData = JSON.parse(
-              fs.readFileSync(path.join(specDir, testType, subType, f))
+            const subTypeData = EJSON.parse(
+              fs.readFileSync(path.join(specDir, testType, subType, f)),
+              { relaxed: true }
             );
             subTypeData.name = path.basename(f, '.json');
             subTypeData.type = testType;
@@ -45,7 +47,7 @@ function collectTests() {
 }
 
 describe('Server Selection (spec)', function() {
-  const specTests = collectTests();
+  const specTests = collectSelectionTests(selectionSpecDir);
 
   Object.keys(specTests).forEach(topologyType => {
     describe(topologyType, function() {
@@ -70,6 +72,47 @@ describe('Server Selection (spec)', function() {
               executeServerSelectionTest(test, { checkLatencyWindow: true }, done);
             });
           });
+        });
+      });
+    });
+  });
+});
+
+const maxStalenessDir = path.join(__dirname, '..', 'spec', 'max-staleness');
+function collectStalenessTests(specDir) {
+  const testTypes = fs
+    .readdirSync(specDir)
+    .filter(d => fs.statSync(path.join(specDir, d)).isDirectory());
+
+  const tests = {};
+  testTypes.forEach(testType => {
+    tests[testType] = fs
+      .readdirSync(path.join(specDir, testType))
+      .filter(f => path.extname(f) === '.json')
+      .map(f => {
+        const result = EJSON.parse(fs.readFileSync(path.join(specDir, testType, f)), {
+          relaxed: true
+        });
+        result.description = path.basename(f, '.json');
+        result.type = testType;
+        return result;
+      });
+  });
+
+  return tests;
+}
+
+describe('Max Staleness (spec)', function() {
+  const specTests = collectStalenessTests(maxStalenessDir);
+
+  Object.keys(specTests).forEach(specTestName => {
+    describe(specTestName, () => {
+      specTests[specTestName].forEach(testData => {
+        it(testData.description, {
+          metadata: { requires: { topology: 'single' } },
+          test: function(done) {
+            executeServerSelectionTest(testData, { checkLatencyWindow: false }, done);
+          }
         });
       });
     });
@@ -119,18 +162,33 @@ function serverDescriptionFromDefinition(definition, hosts) {
     }
   });
 
+  fakeIsMaster.lastWrite = definition.lastWrite;
+
   // default max wire version is `6`
   fakeIsMaster.maxWireVersion = fakeIsMaster.maxWireVersion || 6;
 
-  return new ServerDescription(definition.address, fakeIsMaster, {
+  const serverDescription = new ServerDescription(definition.address, fakeIsMaster, {
     roundTripTime: definition.avg_rtt_ms
   });
+
+  // source of flakiness, if we don't need it then remove it
+  if (typeof definition.lastUpdateTime !== 'undefined') {
+    serverDescription.lastUpdateTime = definition.lastUpdateTime;
+  } else {
+    delete serverDescription.lastUpdateTime;
+  }
+
+  return serverDescription;
 }
 
 function readPreferenceFromDefinition(definition) {
-  const mode = definition.mode.charAt(0).toLowerCase() + definition.mode.slice(1);
+  const mode = definition.mode
+    ? definition.mode.charAt(0).toLowerCase() + definition.mode.slice(1)
+    : 'primary';
+
   const options = {};
-  if (definition.maxStalenessSeconds) options.maxStalenessSeconds = definition.maxStalenessSeconds;
+  if (typeof definition.maxStalenessSeconds !== 'undefined')
+    options.maxStalenessSeconds = definition.maxStalenessSeconds;
   const tags = definition.tag_sets || [];
 
   return new ReadPreference(mode, tags, options);
@@ -163,24 +221,43 @@ function executeServerSelectionTest(testDefinition, options, done) {
   let selector;
   if (testDefinition.operation === 'write') {
     selector = ServerSelectors.writableServerSelector();
-  } else if (testDefinition.operation === 'read') {
-    const readPreference = readPreferenceFromDefinition(testDefinition.read_preference);
-    selector = ServerSelectors.readPreferenceServerSelector(readPreference);
-  } else {
-    return done('invalid operation: ', testDefinition.operation);
+  } else if (testDefinition.operation === 'read' || testDefinition.read_preference) {
+    try {
+      const readPreference = readPreferenceFromDefinition(testDefinition.read_preference);
+      selector = ServerSelectors.readPreferenceServerSelector(readPreference);
+    } catch (e) {
+      if (testDefinition.error) return done();
+      return done(e);
+    }
   }
 
   // expectations
   let expectedServers;
-  if (options.checkLatencyWindow) {
-    expectedServers = testDefinition.in_latency_window.map(s => serverDescriptionFromDefinition(s));
-  } else {
-    expectedServers = testDefinition.suitable_servers.map(s => serverDescriptionFromDefinition(s));
+  if (!testDefinition.error) {
+    if (options.checkLatencyWindow) {
+      expectedServers = testDefinition.in_latency_window.map(s =>
+        serverDescriptionFromDefinition(s)
+      );
+    } else {
+      expectedServers = testDefinition.suitable_servers.map(s =>
+        serverDescriptionFromDefinition(s)
+      );
+    }
   }
 
   // default to serverSelectionTimeoutMS of `0` for unit tests
   topology.selectServer(selector, { serverSelectionTimeoutMS: 0 }, (err, server) => {
+    // are we expecting an error?
+    if (testDefinition.error) {
+      if (!err) {
+        return done(new Error('Expected an error, but found none!'));
+      }
+
+      return done();
+    }
+
     if (err) {
+      // this is another expected error case
       if (expectedServers.length === 0 && err instanceof MongoTimeoutError) return done();
       return done(err);
     }
