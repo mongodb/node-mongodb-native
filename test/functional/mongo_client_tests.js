@@ -435,6 +435,28 @@ describe('MongoClient', function() {
   /**
    * @ignore
    */
+  it('Should fail due to wrong uri user:password@localhost, with new url parser', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var MongoClient = configuration.require.MongoClient;
+
+      MongoClient.connect('user:password@localhost:27017/test', { useNewUrlParser: true }, function(
+        err
+      ) {
+        test.equal(err.message, 'Invalid connection string');
+        done();
+      });
+    }
+  });
+
+  /**
+   * @ignore
+   */
   it('correctly error out when no socket available on MongoClient.connect', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
