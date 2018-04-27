@@ -1978,12 +1978,12 @@
     <div class="nameContainer">
         <h4 class="name" id="MongoClient">
             
-            new MongoClient<span class="signature">(url, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="MongoClient.html">MongoClient</a>}</span>
+            new MongoClient<span class="signature">(url, <span class="optional">options</span>, <span class="optional">minSize</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="MongoClient.html">MongoClient</a>}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line206">line 206</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line207">line 207</a>
         </div>
         
     </div>
@@ -4128,6 +4128,36 @@
 	
         <tr>
             
+                <td class="name"><code>minSize</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>If present, the connection pool will be initialized with minSize connections, and will never dip below minSize connections</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>callback</code></td>
             
             
@@ -4231,12 +4261,12 @@ MongoClient instance
     <div class="nameContainer">
         <h4 class="name" id=".connect">
             
-            <span class="type-signature static">static</span>MongoClient.connect<span class="signature">(url, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise.&lt;<a href="MongoClient.html">MongoClient</a>>}</span>
+            <span class="type-signature static">static</span>MongoClient.connect<span class="signature">(url, <span class="optional">options</span>, <span class="optional">minSize</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise.&lt;<a href="MongoClient.html">MongoClient</a>>}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line471">line 471</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line473">line 473</a>
         </div>
         
     </div>
@@ -6347,6 +6377,36 @@ MongoClient instance
 	
         <tr>
             
+                <td class="name"><code>minSize</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>If present, the connection pool will be initialized with minSize connections, and will never dip below minSize connections</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>callback</code></td>
             
             
@@ -6437,7 +6497,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line308">line 308</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line309">line 309</a>
         </div>
         
     </div>
@@ -6597,7 +6657,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line251">line 251</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line252">line 252</a>
         </div>
         
     </div>
@@ -6731,7 +6791,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line351">line 351</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line352">line 352</a>
         </div>
         
     </div>
@@ -6995,7 +7055,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line394">line 394</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line395">line 395</a>
         </div>
         
     </div>
@@ -7259,7 +7319,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line282">line 282</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line283">line 283</a>
         </div>
         
     </div>
@@ -7493,7 +7553,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line489">line 489</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line491">line 491</a>
         </div>
         
     </div>
@@ -7631,7 +7691,7 @@ newly established session
     
         
         <div class="tag-source">
-            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line233">line 233</a>
+            <a href="lib_mongo_client.js.html">lib/mongo_client.js</a>, <a href="lib_mongo_client.js.html#line234">line 234</a>
         </div>
         
     </div>
@@ -7772,7 +7832,7 @@ newly established session
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Apr 19 2018 14:59:12 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Fri Apr 27 2018 15:57:49 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>
