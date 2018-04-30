@@ -59,6 +59,7 @@ class Topology extends EventEmitter {
           : TopologyType.Unknown;
 
     const topologyId = globalTopologyCounter++;
+
     const serverDescriptions = seedlist.reduce((result, seed) => {
       const address = seed.port ? `${seed.host}:${seed.port}` : `${seed.host}:27017`;
       result.set(address, new ServerDescription(address));
@@ -114,7 +115,7 @@ class Topology extends EventEmitter {
       )
     );
 
-    // emit ServerOpeningEvents for each server in our topology
+    // emit `ServerOpeningEvent`s for each server in our topology
     Array.from(this.s.description.servers.keys()).forEach(serverAddress => {
       // publish an open event for each ServerDescription created
       this.emit('serverOpening', new monitoring.ServerOpeningEvent(this.s.id, serverAddress));
@@ -160,7 +161,7 @@ class Topology extends EventEmitter {
    *
    * @param {object} serverDescription The server to update in the internal list of server descriptions
    */
-  update(serverDescription) {
+  serverUpdateHandler(serverDescription) {
     // these will be used for monitoring events later
     const previousTopologyDescription = this.s.description;
     const previousServerDescription = this.s.description.servers.get(serverDescription.address);
@@ -187,6 +188,119 @@ class Topology extends EventEmitter {
         this.s.description
       )
     );
+  }
+
+  /**
+   * Authenticate using a specified mechanism
+   *
+   * @param {String} mechanism The auth mechanism used for authentication
+   * @param {String} db The db we are authenticating against
+   * @param {Object} options Optional settings for the authenticating mechanism
+   * @param {authResultCallback} callback A callback function
+   */
+  auth(mechanism, db, options, callback) {
+    callback(null, null);
+  }
+
+  /**
+   * Logout from a database
+   *
+   * @param {String} db The db we are logging out from
+   * @param {authResultCallback} callback A callback function
+   */
+  logout(db, callback) {
+    callback(null, null);
+  }
+
+  // Basic operation support. Eventually this should be moved into command construction
+  // during the command refactor.
+
+  /**
+   * Insert one or more documents
+   *
+   * @param {String} ns The full qualified namespace for this operation
+   * @param {Array} ops An array of documents to insert
+   * @param {Boolean} [options.ordered=true] Execute in order or out of order
+   * @param {Object} [options.writeConcern] Write concern for the operation
+   * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized
+   * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields
+   * @param {ClientSession} [options.session] Session to use for the operation
+   * @param {boolean} [options.retryWrites] Enable retryable writes for this operation
+   * @param {opResultCallback} callback A callback function
+   */
+  insert(ns, ops, options, callback) {
+    callback(null, null);
+  }
+
+  /**
+   * Perform one or more update operations
+   *
+   * @param {string} ns The fully qualified namespace for this operation
+   * @param {array} ops An array of updates
+   * @param {boolean} [options.ordered=true] Execute in order or out of order
+   * @param {object} [options.writeConcern] Write concern for the operation
+   * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized
+   * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields
+   * @param {ClientSession} [options.session] Session to use for the operation
+   * @param {boolean} [options.retryWrites] Enable retryable writes for this operation
+   * @param {opResultCallback} callback A callback function
+   */
+  update(ns, ops, options, callback) {
+    callback(null, null);
+  }
+
+  /**
+   * Perform one or more remove operations
+   *
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {array} ops An array of removes
+   * @param {boolean} [options.ordered=true] Execute in order or out of order
+   * @param {object} [options.writeConcern={}] Write concern for the operation
+   * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
+   * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+   * @param {ClientSession} [options.session=null] Session to use for the operation
+   * @param {boolean} [options.retryWrites] Enable retryable writes for this operation
+   * @param {opResultCallback} callback A callback function
+   */
+  remove(ns, ops, options, callback) {
+    callback(null, null);
+  }
+
+  /**
+   * Execute a command
+   *
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {object} cmd The command hash
+   * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+   * @param {Connection} [options.connection] Specify connection object to execute command against
+   * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
+   * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+   * @param {ClientSession} [options.session=null] Session to use for the operation
+   * @param {opResultCallback} callback A callback function
+   */
+  command(ns, cmd, options, callback) {
+    callback(null, null);
+  }
+
+  /**
+   * Create a new cursor
+   *
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {object|Long} cmd Can be either a command returning a cursor or a cursorId
+   * @param {object} [options] Options for the cursor
+   * @param {object} [options.batchSize=0] Batchsize for the operation
+   * @param {array} [options.documents=[]] Initial documents list for cursor
+   * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+   * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
+   * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+   * @param {ClientSession} [options.session=null] Session to use for the operation
+   * @param {object} [options.topology] The internal topology of the created cursor
+   * @returns {Cursor}
+   */
+  cursor(/* ns, cmd, options */) {
+    //
   }
 }
 
