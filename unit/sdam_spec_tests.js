@@ -170,7 +170,7 @@ function executeSDAMTest(testData, done) {
     testData.phases.forEach(phase => {
       // simulate each ismaster response
       phase.responses.forEach(response =>
-        topology.update(new ServerDescription(response[0], response[1]))
+        topology.serverUpdateHandler(new ServerDescription(response[0], response[1]))
       );
 
       // then verify the resulting outcome

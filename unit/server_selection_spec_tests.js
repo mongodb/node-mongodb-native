@@ -215,7 +215,7 @@ function executeServerSelectionTest(testDefinition, options, done) {
   // Update topologies with server descriptions.
   topologyDescription.servers.forEach(server => {
     const serverDescription = serverDescriptionFromDefinition(server, seedData.hosts);
-    topology.update(serverDescription);
+    topology.serverUpdateHandler(serverDescription);
   });
 
   let selector;
