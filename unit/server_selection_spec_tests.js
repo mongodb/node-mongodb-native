@@ -138,6 +138,8 @@ function normalizeSeed(seed) {
 }
 
 function serverDescriptionFromDefinition(definition, hosts) {
+  hosts = hosts || [];
+
   const serverType = definition.type;
   if (serverType === ServerType.Unknown) {
     return new ServerDescription(definition.address);
