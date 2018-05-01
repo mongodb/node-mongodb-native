@@ -13,6 +13,27 @@ const ServerType = {
   Unknown: 'Unknown'
 };
 
+const WRITABLE_SERVER_TYPES = new Set([
+  ServerType.RSPrimary,
+  ServerType.Standalone,
+  ServerType.Mongos
+]);
+
+const ISMASTER_FIELDS = [
+  'minWireVersion',
+  'maxWireVersion',
+  'me',
+  'hosts',
+  'passives',
+  'arbiters',
+  'tags',
+  'setName',
+  'setVersion',
+  'electionId',
+  'primary',
+  'logicalSessionTimeoutMinutes'
+];
+
 /**
  * The client's view of a single server, based on the most recent ismaster outcome.
  *
@@ -28,26 +49,30 @@ class ServerDescription {
    */
   constructor(address, ismaster, options) {
     options = options || {};
+    ismaster = Object.assign(
+      {
+        minWireVersion: 0,
+        maxWireVersion: 0,
+        hosts: [],
+        passives: [],
+        arbiters: [],
+        tags: []
+      },
+      ismaster
+    );
 
     this.address = address;
     this.error = null;
     this.roundTripTime = options.roundTripTime || 0;
-    this.lastWriteDate = ismaster && ismaster.lastWrite ? ismaster.lastWrite.lastWriteDate : null;
-    this.opTime = ismaster && ismaster.lastWrite ? ismaster.lastWrite.opTime : null;
-    this.type = parseServerType(ismaster);
-    this.minWireVersion = (ismaster && ismaster.minWireVersion) || 0;
-    this.maxWireVersion = (ismaster && ismaster.maxWireVersion) || 0;
-    this.me = (ismaster && ismaster.me) || null;
-    this.hosts = (ismaster && ismaster.hosts) || [];
-    this.passives = (ismaster && ismaster.passives) || [];
-    this.arbiters = (ismaster && ismaster.arbiters) || [];
-    this.tags = (ismaster && ismaster.tags) || [];
-    this.setName = (ismaster && ismaster.setName) || null;
-    this.setVersion = (ismaster && ismaster.setVersion) || null;
-    this.electionId = (ismaster && ismaster.electionId) || null;
-    this.primary = (ismaster && ismaster.primary) || null;
     this.lastUpdateTime = Date.now();
-    this.logicalSessionTimeoutMinutes = (ismaster && ismaster.logicalSessionTimeoutMinutes) || null;
+    this.lastWriteDate = ismaster.lastWrite ? ismaster.lastWrite.lastWriteDate : null;
+    this.opTime = ismaster.lastWrite ? ismaster.lastWrite.opTime : null;
+    this.type = parseServerType(ismaster);
+
+    // direct mappings
+    ISMASTER_FIELDS.forEach(field => {
+      if (typeof ismaster[field] !== 'undefined') this[field] = ismaster[field];
+    });
 
     // normalize case for hosts
     this.hosts = this.hosts.map(host => host.toLowerCase());
@@ -70,9 +95,7 @@ class ServerDescription {
    * @return {Boolean} Is this server available for writes
    */
   get isWritable() {
-    return (
-      [ServerType.RSPrimary, ServerType.Standalone, ServerType.Mongos].indexOf(this.type) !== -1
-    );
+    return WRITABLE_SERVER_TYPES.has(this.type);
   }
 }
 
