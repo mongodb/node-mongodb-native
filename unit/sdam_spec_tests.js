@@ -91,6 +91,20 @@ function convertOutcomeEvents(events) {
   });
 }
 
+// iterates through expectation building a path of keys that should not exist (null), and
+// removes them from the expectation (NOTE: this mutates the expectation)
+function findOmittedFields(expected) {
+  const result = [];
+  Object.keys(expected).forEach(key => {
+    if (expected[key] == null) {
+      result.push(key);
+      delete expected[key];
+    }
+  });
+
+  return result;
+}
+
 function replacePlaceholders(actual, expected) {
   Object.keys(expected).forEach(key => {
     if (expected[key] === 42 || expected[key] === '42') {
@@ -178,8 +192,14 @@ function executeSDAMTest(testData, done) {
           Object.keys(expectedServers).forEach(serverName => {
             expect(actualServers).to.include.keys(serverName);
             const expectedServer = normalizeServerDescription(expectedServers[serverName]);
+            const omittedFields = findOmittedFields(expectedServer);
+
             const actualServer = actualServers.get(serverName);
             expect(actualServer).to.deep.include(expectedServer);
+
+            if (omittedFields.length) {
+              expect(actualServer).to.not.have.all.keys(omittedFields);
+            }
           });
 
           return;
