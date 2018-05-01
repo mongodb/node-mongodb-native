@@ -6,6 +6,7 @@ const TopologyType = require('./topology_description').TopologyType;
 const monitoring = require('./monitoring');
 const calculateDurationInMs = require('../utils').calculateDurationInMs;
 const MongoTimeoutError = require('../error').MongoTimeoutError;
+const Server = require('./server');
 
 // Global state
 let globalTopologyCounter = 0;
@@ -115,19 +116,23 @@ class Topology extends EventEmitter {
       )
     );
 
-    // emit `ServerOpeningEvent`s for each server in our topology
-    Array.from(this.s.description.servers.keys()).forEach(serverAddress => {
-      // publish an open event for each ServerDescription created
-      this.emit('serverOpening', new monitoring.ServerOpeningEvent(this.s.id, serverAddress));
-    });
+    connectServers(this, Array.from(this.s.description.servers.keys()));
   }
 
   /**
    * Close this topology
    */
-  close() {
+  close(callback) {
+    this.s.servers.forEach(server => {
+      server.destroy();
+    });
+
     // emit an event for close
     this.emit('topologyClosed', new monitoring.TopologyClosedEvent(this.s.id));
+
+    if (typeof callback === 'function') {
+      callback(null, null);
+    }
   }
 
   /**
@@ -162,6 +167,10 @@ class Topology extends EventEmitter {
    * @param {object} serverDescription The server to update in the internal list of server descriptions
    */
   serverUpdateHandler(serverDescription) {
+    if (!this.s.description.hasServer(serverDescription.address)) {
+      return;
+    }
+
     // these will be used for monitoring events later
     const previousTopologyDescription = this.s.description;
     const previousServerDescription = this.s.description.servers.get(serverDescription.address);
@@ -179,6 +188,9 @@ class Topology extends EventEmitter {
         this.s.description.servers.get(serverDescription.address)
       )
     );
+
+    // update server list from updated descriptions
+    updateServers(this);
 
     this.emit(
       'topologyDescriptionChanged',
@@ -308,12 +320,6 @@ function randomSelection(array) {
   return array[Math.floor(Math.random() * array.length)];
 }
 
-class FakeServer {
-  constructor(description) {
-    this.description = description;
-  }
-}
-
 /**
  *
  * @param {*} topology
@@ -335,7 +341,7 @@ function selectServers(topology, selector, timeout, start, callback) {
 
   if (descriptions.length) {
     // TODO: obviously return the actual server in the future
-    const servers = descriptions.map(d => new FakeServer(d));
+    const servers = descriptions.map(d => new Server(d));
     return callback(null, servers);
   }
 
@@ -345,6 +351,39 @@ function selectServers(topology, selector, timeout, start, callback) {
   }
 
   // TODO: loop this, add monitoring
+}
+
+function connectServers(topology, servers) {
+  const serverInstances = servers.reduce((servers, serverAddress) => {
+    // publish an open event for each ServerDescription created
+    topology.emit('serverOpening', new monitoring.ServerOpeningEvent(topology.s.id, serverAddress));
+
+    const server = new Server();
+    servers.set(serverAddress, server);
+    server.connect();
+    return servers;
+  }, new Map());
+
+  topology.s.servers = serverInstances;
+}
+
+function updateServers(topology) {
+  // TODO: implement code to add NEW servers
+
+  // for all servers no longer known, remove their descriptions and destroy their instances
+  for (const entry of topology.s.servers) {
+    const serverAddress = entry[0];
+    if (topology.description.hasServer(serverAddress)) {
+      continue;
+    }
+
+    const server = topology.s.servers.get(serverAddress);
+    topology.s.servers.delete(serverAddress);
+
+    server.destroy(() =>
+      topology.emit('serverClosed', new monitoring.ServerClosedEvent(topology.s.id, serverAddress))
+    );
+  }
 }
 
 /**
