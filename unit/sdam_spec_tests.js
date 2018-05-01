@@ -15,7 +15,6 @@ function collectTests() {
     .readdirSync(specDir)
     .filter(d => fs.statSync(path.join(specDir, d)).isDirectory());
 
-  // const testTypes = ['rs'];
   const tests = {};
   testTypes.forEach(testType => {
     tests[testType] = fs
@@ -31,10 +30,6 @@ function collectTests() {
   return tests;
 }
 
-const SKIPPED_TESTS = new Set([
-  'Monitoring a replica set with non member' // reenable once `Server` is integrated into new `Topology`
-]);
-
 describe('Server Discovery and Monitoring (spec)', function() {
   const specTests = collectTests();
 
@@ -44,10 +39,6 @@ describe('Server Discovery and Monitoring (spec)', function() {
         it(testData.description, {
           metadata: { requires: { topology: 'single' } },
           test: function(done) {
-            if (SKIPPED_TESTS.has(testData.description)) {
-              return this.skip();
-            }
-
             executeSDAMTest(testData, done);
           }
         });
