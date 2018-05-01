@@ -226,6 +226,16 @@ class TopologyDescription {
   hasWritableServer() {
     return this.hasReadableServer(ReadPreference.primary);
   }
+
+  /**
+   * Determines if the topology has a definition for the provided address
+   *
+   * @param {String} address
+   * @return {Boolean} Whether the topology knows about this server
+   */
+  hasServer(address) {
+    return this.servers.has(address);
+  }
 }
 
 function topologyTypeForServerType(serverType) {
