@@ -2,8 +2,12 @@
 const EventEmitter = require('events');
 
 class Server extends EventEmitter {
-  constructor() {
+  constructor(description) {
     super();
+
+    this.s = {
+      description
+    };
   }
 
   get description() {
