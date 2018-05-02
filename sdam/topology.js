@@ -12,9 +12,11 @@ const Server = require('./server');
 let globalTopologyCounter = 0;
 
 // Constants
-const DEFAULT_LOCAL_THRESHOLD_MS = 15;
-const DEFAULT_HEARTBEAT_FREQUENCY = 10000;
-const DEFAULT_SERVER_SELECTION_TIMEOUT = 30000;
+const TOPOLOGY_DEFAULTS = {
+  localThresholdMS: 15,
+  serverSelectionTimeoutMS: 10000,
+  heartbeatFrequencyMS: 30000
+};
 
 /**
  * A container of server instances representing a connection to a MongoDB topology.
@@ -42,23 +44,9 @@ class Topology extends EventEmitter {
   constructor(seedlist, options) {
     super();
     seedlist = seedlist || [];
-    options = Object.assign(
-      {},
-      {
-        localThresholdMS: DEFAULT_LOCAL_THRESHOLD_MS,
-        serverSelectionTimeoutMS: DEFAULT_SERVER_SELECTION_TIMEOUT,
-        heartbeatFrequencyMS: DEFAULT_HEARTBEAT_FREQUENCY
-      },
-      options
-    );
+    options = Object.assign({}, TOPOLOGY_DEFAULTS, options);
 
-    const topologyType =
-      seedlist.length === 1 && !options.replicaset
-        ? TopologyType.Single
-        : options.replicaset
-          ? TopologyType.ReplicaSetNoPrimary
-          : TopologyType.Unknown;
-
+    const topologyType = topologyTypeFromSeedlist(seedlist, options);
     const topologyId = globalTopologyCounter++;
 
     const serverDescriptions = seedlist.reduce((result, seed) => {
@@ -314,6 +302,12 @@ class Topology extends EventEmitter {
   cursor(/* ns, cmd, options */) {
     //
   }
+}
+
+function topologyTypeFromSeedlist(seedlist, options) {
+  if (seedlist.length === 1 && !options.replicaset) return TopologyType.Single;
+  if (options.replicaset) return TopologyType.ReplicaSetNoPrimary;
+  return TopologyType.Unknown;
 }
 
 function randomSelection(array) {
