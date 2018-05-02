@@ -98,7 +98,7 @@ function executeEntry(file, path) {
     });
 
     // Create read preference
-    var rp;
+    let rp;
     if (convert(readPreference.mode) !== 'primary' && readPreference.tag_sets) {
       rp = new ReadPreference(convert(readPreference.mode), readPreference.tag_sets);
     } else {
