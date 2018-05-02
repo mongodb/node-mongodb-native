@@ -107,10 +107,10 @@ function tagSetReducer(readPreference, servers) {
 
 function latencyWindowReducer(topologyDescription, servers) {
   const low = servers.reduce(
-    (min, server) =>
-      min === -1 ? server.roundTripTime : server.roundTripTime < min ? server.roundTripTime : min,
+    (min, server) => (min === -1 ? server.roundTripTime : Math.min(server.roundTripTime, min)),
     -1
   );
+
   const high = low + topologyDescription.localThresholdMS;
 
   return servers.reduce((result, server) => {
@@ -162,7 +162,7 @@ function readPreferenceServerSelector(readPreference) {
     }
 
     if (readPreference.mode === ReadPreference.PRIMARY) {
-      return servers.filter(s => s.type === ServerType.RSPrimary);
+      return servers.filter(primaryFilter);
     }
 
     if (readPreference.mode === ReadPreference.SECONDARY) {
