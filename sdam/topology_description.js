@@ -1,5 +1,4 @@
 'use strict';
-const assert = require('assert');
 const ServerType = require('./server_description').ServerType;
 const ServerDescription = require('./server_description').ServerDescription;
 const ReadPreference = require('../topologies/read_preference');
@@ -313,11 +312,14 @@ function updateRsFromPrimary(
 }
 
 function updateRsWithPrimaryFromMember(serverDescriptions, setName, serverDescription) {
-  assert.ok(setName, 'setName is required');
+  if (setName == null) {
+    throw new TypeError('setName is required');
+  }
 
-  if (setName !== serverDescription.setName) {
-    serverDescriptions.delete(serverDescription.address);
-  } else if (serverDescription.me && serverDescription.address !== serverDescription.me) {
+  if (
+    setName !== serverDescription.setName ||
+    (serverDescription.me && serverDescription.address !== serverDescription.me)
+  ) {
     serverDescriptions.delete(serverDescription.address);
   }
 
