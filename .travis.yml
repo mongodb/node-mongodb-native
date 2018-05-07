@@ -23,7 +23,10 @@ jobs:
 
     - stage: tests
       node_js: 6
-      env: MONGODB_VERSION=3.4.x
+      env: MONGODB_VERSION=3.6.x
     - stage: tests
       node_js: 8
-      env: MONGODB_VERSION=3.4.x
+      env: MONGODB_VERSION=3.6.x
+    - stage: tests
+      node_js: 10
+      env: MONGODB_VERSION=3.6.x
