@@ -1199,8 +1199,8 @@ describe('GridFS Stream', function() {
   });
 
   function testResultDoc(test, specDoc, resDoc, result) {
-    var specKeys = Object.keys(specDoc);
-    var resKeys = Object.keys(resDoc);
+    var specKeys = Object.keys(specDoc).sort();
+    var resKeys = Object.keys(resDoc).sort();
 
     test.ok(specKeys.length === resKeys.length);
 
