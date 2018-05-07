@@ -34,7 +34,6 @@ describe('Decimal128', function() {
             test.ok(!err);
             test.ok(domainInstance === process.domain);
             domainInstance.exit();
-            domainInstance.dispose();
             client.close();
             done();
           });
@@ -72,7 +71,6 @@ describe('Decimal128', function() {
               test.ok(!err);
               test.ok(domainInstance === process.domain);
               domainInstance.exit();
-              domainInstance.dispose();
               client.close();
               done();
             });
@@ -109,7 +107,6 @@ describe('Decimal128', function() {
             test.ok(!err);
             test.ok(domainInstance === process.domain);
             domainInstance.exit();
-            domainInstance.dispose();
             client.close();
             done();
           });
@@ -147,7 +144,6 @@ describe('Decimal128', function() {
             test.ok(err != null);
             test.ok(process.domain === domainInstance);
             domainInstance.exit();
-            domainInstance.dispose();
             client.close();
             done();
           });
@@ -189,7 +185,6 @@ describe('Decimal128', function() {
             test.ok(err != null);
             test.ok(process.domain === domainInstance);
             domainInstance.exit();
-            domainInstance.dispose();
             client.close();
             done();
           });

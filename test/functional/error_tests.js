@@ -215,7 +215,6 @@ describe.skip('Errors', function() {
       var d = domain.create();
       d.on('error', function(err) {
         test.ok(err !== null);
-        d.dispose();
         done();
       });
 
@@ -362,7 +361,6 @@ describe.skip('Errors', function() {
       d.on('error', function(err) {
         test.ok(err !== null);
         client.close();
-        d.dispose();
         done();
       });
 
