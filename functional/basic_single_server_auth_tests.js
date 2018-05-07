@@ -8,7 +8,57 @@ var expect = require('chai').expect,
   Bson = require('bson');
 
 // Skipped due to use of topology manager
-describe.skip('Basic single server auth tests', function() {
+describe('Basic single server auth tests', function() {
+  it('should correctly authenticate server using scram-sha-256 using connect auth', {
+    metadata: { requires: { topology: 'auth', mongodb: '>=3.7.3' } },
+    test: function(done) {
+      const config = this.configuration;
+      const method = 'scram-sha-256';
+      const user = 'user';
+      const password = 'pencil';
+      const createUserCommand = {
+        createUser: user,
+        pwd: password,
+        roles: [{ role: 'root', db: 'admin' }],
+        digestPassword: true
+      };
+      const dropUserCommand = { dropUser: user };
+      const auth = [method, 'admin', user, password];
+
+      const createUser = cb => executeCommand(config, 'admin', createUserCommand, cb);
+      const dropUser = cb => executeCommand(config, 'admin', dropUserCommand, { auth }, cb);
+
+      const cleanup = err => {
+        executeCommand(config, 'admin', dropUserCommand, {}, () => done(err));
+      };
+
+      createUser((cmdErr, r) => {
+        expect(cmdErr).to.be.null;
+        expect(r).to.exist;
+
+        const server = new Server({
+          host: this.configuration.host,
+          port: this.configuration.port,
+          bson: new Bson()
+        });
+
+        server.on('connect', _server => {
+          dropUser((dropUserErr, dropUserRes) => {
+            expect(dropUserErr).to.be.null;
+            expect(dropUserRes).to.exist;
+
+            _server.destroy({ force: true });
+            done();
+          });
+        });
+
+        server.on('error', cleanup);
+
+        server.connect({ auth });
+      });
+    }
+  });
+
   it('should fail to authenticate server using scram-sha-1 using connect auth', {
     metadata: { requires: { topology: 'auth' } },
 
@@ -329,7 +379,8 @@ describe.skip('Basic single server auth tests', function() {
     }
   });
 
-  it('should correctly authenticate server using scram-sha-1 using connect auth then logout', {
+  // This test is broken, we should fix it at some point
+  it.skip('should correctly authenticate server using scram-sha-1 using connect auth then logout', {
     metadata: { requires: { topology: 'auth' } },
 
     test: function(done) {
