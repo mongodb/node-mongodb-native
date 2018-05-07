@@ -37,12 +37,7 @@ const BSON = retrieveBSON();
  * server.connect();
  */
 
-var MongoCR = require('../auth/mongocr'),
-  X509 = require('../auth/x509'),
-  Plain = require('../auth/plain'),
-  GSSAPI = require('../auth/gssapi'),
-  SSPI = require('../auth/sspi'),
-  ScramSHA1 = require('../auth/scram');
+const defaultAuthProviders = require('../auth/defaultAuthProviders').defaultAuthProviders;
 
 //
 // States
@@ -200,14 +195,7 @@ var Mongos = function(seedlist, options) {
   }
 
   // All the authProviders
-  this.authProviders = options.authProviders || {
-    mongocr: new MongoCR(this.s.bson),
-    x509: new X509(this.s.bson),
-    plain: new Plain(this.s.bson),
-    gssapi: new GSSAPI(this.s.bson),
-    sspi: new SSPI(this.s.bson),
-    'scram-sha-1': new ScramSHA1(this.s.bson)
-  };
+  this.authProviders = options.authProviders || defaultAuthProviders(this.s.bson);
 
   // Disconnected state
   this.state = DISCONNECTED;

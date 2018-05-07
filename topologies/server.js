@@ -21,6 +21,57 @@ var inherits = require('util').inherits,
   SessionMixins = require('./shared').SessionMixins,
   relayEvents = require('./shared').relayEvents;
 
+function getSaslSupportedMechs(options) {
+  if (!options) {
+    return {};
+  }
+
+  const authArray = options.auth || [];
+  const authMechanism = authArray[0] || options.authMechanism;
+  const authSource = authArray[1] || options.authSource || options.dbName || 'admin';
+  const user = authArray[2] || options.user;
+
+  if (typeof authMechanism === 'string' && authMechanism.toUpperCase() !== 'DEFAULT') {
+    return {};
+  }
+
+  if (!user) {
+    return {};
+  }
+
+  return { saslSupportedMechs: `${authSource}.${user}` };
+}
+
+function getDefaultAuthMechanism(ismaster) {
+  if (ismaster) {
+    // If ismaster contains saslSupportedMechs, use scram-sha-256
+    // if it is available, else scram-sha-1
+    if (Array.isArray(ismaster.saslSupportedMechs)) {
+      return ismaster.saslSupportedMechs.indexOf('SCRAM-SHA-256') >= 0
+        ? 'scram-sha-256'
+        : 'scram-sha-1';
+    }
+
+    // Fallback to legacy selection method. If wire version >= 3, use scram-sha-1
+    if (ismaster.maxWireVersion >= 3) {
+      return 'scram-sha-1';
+    }
+  }
+
+  // Default for wireprotocol < 3
+  return 'mongocr';
+}
+
+function extractIsMasterError(err, result) {
+  if (err) {
+    return err;
+  }
+
+  if (result && result.result && result.result.ok === 0) {
+    return new MongoError(result.result);
+  }
+}
+
 // Used for filtering out fields for loggin
 var debugFields = [
   'reconnect',
@@ -344,7 +395,10 @@ var eventHandler = function(self, event) {
       var query = new Query(
         self.s.bson,
         'admin.$cmd',
-        { ismaster: true, client: self.clientInfo, compression: compressors },
+        Object.assign(
+          { ismaster: true, client: self.clientInfo, compression: compressors },
+          getSaslSupportedMechs(self.s.options)
+        ),
         queryOptions
       );
       // Get start time
@@ -358,9 +412,12 @@ var eventHandler = function(self, event) {
         function(err, result) {
           // Set initial lastIsMasterMS
           self.lastIsMasterMS = new Date().getTime() - start;
-          if (err) {
+
+          const serverError = extractIsMasterError(err, result);
+
+          if (serverError) {
             self.destroy();
-            return self.emit('error', err);
+            return self.emit('error', serverError);
           }
 
           if (!isSupportedServer(result.result)) {
@@ -893,12 +950,8 @@ Server.prototype.logout = function(dbName, callback) {
 Server.prototype.auth = function(mechanism, db) {
   var self = this;
 
-  // If we have the default mechanism we pick mechanism based on the wire
-  // protocol max version. If it's >= 3 then scram-sha1 otherwise mongodb-cr
-  if (mechanism === 'default' && self.ismaster && self.ismaster.maxWireVersion >= 3) {
-    mechanism = 'scram-sha-1';
-  } else if (mechanism === 'default') {
-    mechanism = 'mongocr';
+  if (mechanism === 'default') {
+    mechanism = getDefaultAuthMechanism(self.ismaster);
   }
 
   // Slice all the arguments off

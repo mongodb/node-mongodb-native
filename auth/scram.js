@@ -6,6 +6,14 @@ var f = require('util').format,
   Query = require('../connection/commands').Query,
   MongoError = require('../error').MongoError;
 
+let saslprep;
+
+try {
+  saslprep = require('saslprep');
+} catch (e) {
+  // don't do anything;
+}
+
 var BSON = retrieveBSON(),
   Binary = BSON.Binary;
 
@@ -26,14 +34,15 @@ AuthSession.prototype.equal = function(session) {
 var id = 0;
 
 /**
- * Creates a new ScramSHA1 authentication mechanism
+ * Creates a new ScramSHA authentication mechanism
  * @class
- * @return {ScramSHA1} A cursor instance
+ * @return {ScramSHA} A cursor instance
  */
-var ScramSHA1 = function(bson) {
+var ScramSHA = function(bson, cryptoMethod) {
   this.bson = bson;
   this.authStore = [];
   this.id = id++;
+  this.cryptoMethod = cryptoMethod || 'sha1';
 };
 
 var parsePayload = function(payload) {
@@ -60,21 +69,32 @@ var passwordDigest = function(username, password) {
 };
 
 // XOR two buffers
-var xor = function(a, b) {
+function xor(a, b) {
   if (!Buffer.isBuffer(a)) a = new Buffer(a);
   if (!Buffer.isBuffer(b)) b = new Buffer(b);
-  var res = [];
-  if (a.length > b.length) {
-    for (var i = 0; i < b.length; i++) {
-      res.push(a[i] ^ b[i]);
-    }
-  } else {
-    for (i = 0; i < a.length; i++) {
-      res.push(a[i] ^ b[i]);
-    }
+  const length = Math.max(a.length, b.length);
+  const res = [];
+
+  for (let i = 0; i < length; i += 1) {
+    res.push(a[i] ^ b[i]);
   }
-  return new Buffer(res);
-};
+
+  return new Buffer(res).toString('base64');
+}
+
+function H(method, text) {
+  return crypto
+    .createHash(method)
+    .update(text)
+    .digest();
+}
+
+function HMAC(method, key, text) {
+  return crypto
+    .createHmac(method, key)
+    .update(text)
+    .digest();
+}
 
 var _hiCache = {};
 var _hiCacheCount = 0;
@@ -83,15 +103,26 @@ var _hiCachePurge = function() {
   _hiCacheCount = 0;
 };
 
-var hi = function(data, salt, iterations) {
+const hiLengthMap = {
+  sha256: 32,
+  sha1: 20
+};
+
+function HI(data, salt, iterations, cryptoMethod) {
   // omit the work if already generated
-  var key = [data, salt.toString('base64'), iterations].join('_');
+  const key = [data, salt.toString('base64'), iterations].join('_');
   if (_hiCache[key] !== undefined) {
     return _hiCache[key];
   }
 
   // generate the salt
-  var saltedData = crypto.pbkdf2Sync(data, salt, iterations, 20, 'sha1');
+  const saltedData = crypto.pbkdf2Sync(
+    data,
+    salt,
+    iterations,
+    hiLengthMap[cryptoMethod],
+    cryptoMethod
+  );
 
   // cache a copy to speed up the next lookup, but prevent unbounded cache growth
   if (_hiCacheCount >= 200) {
@@ -101,7 +132,7 @@ var hi = function(data, salt, iterations) {
   _hiCache[key] = saltedData;
   _hiCacheCount += 1;
   return saltedData;
-};
+}
 
 /**
  * Authenticate
@@ -114,7 +145,7 @@ var hi = function(data, salt, iterations) {
  * @param {authResultCallback} callback The callback to return the result from the authentication
  * @return {object}
  */
-ScramSHA1.prototype.auth = function(server, connections, db, username, password, callback) {
+ScramSHA.prototype.auth = function(server, connections, db, username, password, callback) {
   var self = this;
   // Total connections
   var count = connections.length;
@@ -124,6 +155,25 @@ ScramSHA1.prototype.auth = function(server, connections, db, username, password,
   var numberOfValidConnections = 0;
   var errorObject = null;
 
+  const cryptoMethod = this.cryptoMethod;
+  let mechanism = 'SCRAM-SHA-1';
+  let processedPassword;
+
+  if (cryptoMethod === 'sha256') {
+    mechanism = 'SCRAM-SHA-256';
+
+    let saslprepFn = (server.s && server.s.saslprep) || saslprep;
+
+    if (saslprepFn) {
+      processedPassword = saslprepFn(password);
+    } else {
+      console.warn('Warning: no saslprep library specified. Passwords will not be sanitized');
+      processedPassword = password;
+    }
+  } else {
+    processedPassword = passwordDigest(username, password);
+  }
+
   // Execute MongoCR
   var executeScram = function(connection) {
     // Clean up the user
@@ -132,13 +182,21 @@ ScramSHA1.prototype.auth = function(server, connections, db, username, password,
     // Create a random nonce
     var nonce = crypto.randomBytes(24).toString('base64');
     // var nonce = 'MsQUY9iw0T9fx2MUEz6LZPwGuhVvWAhc'
-    var firstBare = f('n=%s,r=%s', username, nonce);
+
+    // NOTE: This is done b/c Javascript uses UTF-16, but the server is hashing in UTF-8.
+    // Since the username is not sasl-prep-d, we need to do this here.
+    const firstBare = Buffer.concat([
+      Buffer.from('n=', 'utf8'),
+      Buffer.from(username, 'utf8'),
+      Buffer.from(',r=', 'utf8'),
+      Buffer.from(nonce, 'utf8')
+    ]);
 
     // Build command structure
     var cmd = {
       saslStart: 1,
-      mechanism: 'SCRAM-SHA-1',
-      payload: new Binary(f('n,,%s', firstBare)),
+      mechanism: mechanism,
+      payload: new Binary(Buffer.concat([Buffer.from('n,,', 'utf8'), firstBare])),
       autoAuthorize: 1
     };
 
@@ -220,38 +278,42 @@ ScramSHA1.prototype.auth = function(server, connections, db, username, password,
 
         // Set up start of proof
         var withoutProof = f('c=biws,r=%s', rnonce);
-        var passwordDig = passwordDigest(username, password);
-        var saltedPassword = hi(passwordDig, new Buffer(salt, 'base64'), iterations);
-
-        // Create the client key
-        var hmac = crypto.createHmac('sha1', saltedPassword);
-        hmac.update(new Buffer('Client Key'));
-        var clientKey = new Buffer(hmac.digest('base64'), 'base64');
-
-        // Create the stored key
-        var hash = crypto.createHash('sha1');
-        hash.update(clientKey);
-        var storedKey = new Buffer(hash.digest('base64'), 'base64');
-
-        // Create the authentication message
-        var authMsg = [firstBare, r.result.payload.value().toString('base64'), withoutProof].join(
-          ','
+        var saltedPassword = HI(
+          processedPassword,
+          new Buffer(salt, 'base64'),
+          iterations,
+          cryptoMethod
         );
 
+        if (iterations && iterations < 4096) {
+          const error = new MongoError(`Server returned an invalid iteration count ${iterations}`);
+          return callback(error, false);
+        }
+
+        // Create the client key
+        const clientKey = HMAC(cryptoMethod, saltedPassword, 'Client Key');
+
+        // Create the stored key
+        const storedKey = H(cryptoMethod, clientKey);
+
+        // Create the authentication message
+        const authMessage = [
+          firstBare,
+          r.result.payload.value().toString('base64'),
+          withoutProof
+        ].join(',');
+
         // Create client signature
-        hmac = crypto.createHmac('sha1', storedKey);
-        hmac.update(new Buffer(authMsg));
-        var clientSig = new Buffer(hmac.digest('base64'), 'base64');
+        const clientSignature = HMAC(cryptoMethod, storedKey, authMessage);
 
         // Create client proof
-        var clientProof = f('p=%s', new Buffer(xor(clientKey, clientSig)).toString('base64'));
+        const clientProof = f('p=%s', xor(clientKey, clientSignature));
 
         // Create client final
-        var clientFinal = [withoutProof, clientProof].join(',');
+        const clientFinal = [withoutProof, clientProof].join(',');
 
-        //
         // Create continue message
-        var cmd = {
+        const cmd = {
           saslContinue: 1,
           conversationId: r.result.conversationId,
           payload: new Binary(new Buffer(clientFinal))
@@ -326,7 +388,7 @@ var addAuthSession = function(authStore, session) {
  * @param {string} db Name of database we are removing authStore details about
  * @return {object}
  */
-ScramSHA1.prototype.logout = function(dbName) {
+ScramSHA.prototype.logout = function(dbName) {
   this.authStore = this.authStore.filter(function(x) {
     return x.db !== dbName;
   });
@@ -340,7 +402,7 @@ ScramSHA1.prototype.logout = function(dbName) {
  * @param {authResultCallback} callback The callback to return the result from the authentication
  * @return {object}
  */
-ScramSHA1.prototype.reauthenticate = function(server, connections, callback) {
+ScramSHA.prototype.reauthenticate = function(server, connections, callback) {
   var authStore = this.authStore.slice(0);
   var count = authStore.length;
   // No connections
@@ -364,4 +426,16 @@ ScramSHA1.prototype.reauthenticate = function(server, connections, callback) {
   }
 };
 
-module.exports = ScramSHA1;
+class ScramSHA1 extends ScramSHA {
+  constructor(bson) {
+    super(bson, 'sha1');
+  }
+}
+
+class ScramSHA256 extends ScramSHA {
+  constructor(bson) {
+    super(bson, 'sha256');
+  }
+}
+
+module.exports = { ScramSHA1, ScramSHA256 };

@@ -18,12 +18,7 @@ var inherits = require('util').inherits,
 
 const apm = require('./apm');
 
-var MongoCR = require('../auth/mongocr'),
-  X509 = require('../auth/x509'),
-  Plain = require('../auth/plain'),
-  GSSAPI = require('../auth/gssapi'),
-  SSPI = require('../auth/sspi'),
-  ScramSHA1 = require('../auth/scram');
+const defaultAuthProviders = require('../auth/defaultAuthProviders').defaultAuthProviders;
 
 var DISCONNECTED = 'disconnected';
 var CONNECTING = 'connecting';
@@ -147,14 +142,7 @@ var Pool = function(topology, options) {
   this.queue = [];
 
   // All the authProviders
-  this.authProviders = options.authProviders || {
-    mongocr: new MongoCR(options.bson),
-    x509: new X509(options.bson),
-    plain: new Plain(options.bson),
-    gssapi: new GSSAPI(options.bson),
-    sspi: new SSPI(options.bson),
-    'scram-sha-1': new ScramSHA1(options.bson)
-  };
+  this.authProviders = options.authProviders || defaultAuthProviders(options.bson);
 
   // Contains the reconnect connection
   this.reconnectConnection = null;
@@ -824,7 +812,7 @@ Pool.prototype.auth = function(mechanism) {
 
     // Authenticate the connections
     for (var i = 0; i < connections.length; i++) {
-      authenticate(self, args, connections[i], function(err) {
+      authenticate(self, args, connections[i], function(err, result) {
         connectionsCount = connectionsCount - 1;
 
         // Store the error
@@ -850,9 +838,9 @@ Pool.prototype.auth = function(mechanism) {
               );
             }
 
-            return cb(error);
+            return cb(error, result);
           }
-          cb(null);
+          cb(null, result);
         }
       });
     }
@@ -869,12 +857,12 @@ Pool.prototype.auth = function(mechanism) {
   // Wait for loggout to finish
   waitForLogout(self, function() {
     // Authenticate all live connections
-    authenticateLiveConnections(self, args, function(err) {
+    authenticateLiveConnections(self, args, function(err, result) {
       // Credentials correctly stored in auth provider if successful
       // Any new connections will now reauthenticate correctly
       self.authenticating = false;
       // Return after authentication connections
-      callback(err);
+      callback(err, result);
     });
   });
 };
