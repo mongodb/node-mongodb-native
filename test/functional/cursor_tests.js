@@ -2252,7 +2252,7 @@ describe('Cursor', function() {
               test.ok(/Aditya/.test(contents));
               test.ok(/Bob/.test(contents));
               test.ok(/Joe/.test(contents));
-              fs.unlink(filename);
+              fs.unlinkSync(filename);
               client.close();
               done();
             }
