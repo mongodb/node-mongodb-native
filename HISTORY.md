@@ -1,3 +1,14 @@
+<a name="3.0.8"></a>
+## [3.0.8](https://github.com/mongodb/node-mongodb-native/compare/v3.0.7...v3.0.8) (2018-05-08)
+
+
+### Bug Fixes
+
+* **aggregte:** support user-provided `batchSize` ([0a5b5e8](https://github.com/mongodb/node-mongodb-native/commit/0a5b5e8))
+* **mongo-client:** pass arguments to ctor when new keyword is used ([8165f7a](https://github.com/mongodb/node-mongodb-native/commit/8165f7a))
+
+
+
 <a name="3.0.7"></a>
 ## [3.0.7](https://github.com/mongodb/node-mongodb-native/compare/v3.0.6...v3.0.7) (2018-04-17)
 

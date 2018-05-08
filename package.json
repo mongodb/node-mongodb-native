@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "3.0.7",
+  "version": "3.0.8",
   "description": "The official MongoDB driver for Node.js",
   "main": "index.js",
   "repository": {
@@ -13,7 +13,7 @@
     "official"
   ],
   "dependencies": {
-    "mongodb-core": "3.0.7"
+    "mongodb-core": "3.0.8"
   },
   "devDependencies": {
     "bluebird": "3.5.0",
