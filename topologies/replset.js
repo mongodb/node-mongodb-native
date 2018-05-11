@@ -1231,6 +1231,7 @@ function executeWriteOperation(args, options, callback) {
   // increment and assign txnNumber
   if (willRetryWrite) {
     options.session.incrementTransactionNumber();
+    options.willRetryWrite = willRetryWrite;
   }
 
   // optionally autostart transaction if requested

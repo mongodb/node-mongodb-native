@@ -895,6 +895,7 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
   }
 
   // increment and assign txnNumber
+  options.willRetryWrite = true;
   options.session.incrementTransactionNumber();
 
   server[op](ns, ops, options, (err, result) => {

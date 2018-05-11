@@ -18,20 +18,23 @@ var WireProtocol = function(legacyWireProtocol) {
  *
  * @param {Object} command the command to decorate
  * @param {ClientSession} session the session tracking transaction state
+ * @param {boolean} [isRetryableWrite=false] if true, will be decorated for retryable writes
  */
-function decorateWithTransactionsData(command, session) {
+function decorateWithTransactionsData(command, session, isRetryableWrite) {
   if (!session) {
     return;
   }
 
   // first apply non-transaction-specific sessions data
   const serverSession = session.serverSession;
-  if (serverSession.txnNumber) {
+  const inTransaction = session.inTransaction();
+
+  if (serverSession.txnNumber && (isRetryableWrite || inTransaction)) {
     command.txnNumber = BSON.Long.fromNumber(serverSession.txnNumber);
   }
 
   // now try to apply tansaction-specific data
-  if (!session.inTransaction()) {
+  if (!inTransaction) {
     return;
   }
 
@@ -103,7 +106,7 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
   }
 
   // optionally decorate command with transactions data
-  decorateWithTransactionsData(writeCommand, options.session);
+  decorateWithTransactionsData(writeCommand, options.session, options.willRetryWrite);
 
   // Options object
   var opts = { command: true };
