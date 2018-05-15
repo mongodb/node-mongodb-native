@@ -109,7 +109,7 @@ returned client. The default database is now used if no parameter is passed to
 MongoClient.connect('mongodb://localhost:27017/test')
   .then(client => client.db().collection('foo').insert({ a: 42 })
   .then(() => ...)
-  .catc(err => ...);
+  .catch(err => ...);
 ```
 
 ## Other Changes
