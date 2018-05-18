@@ -1027,17 +1027,17 @@ describe('CRUD API', function() {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: [] }
     },
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      let configuration = this.configuration;
+      let client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         expect(err).to.not.exist;
-        var db = client.db(configuration.db);
-        var col = db.collection('t21_1');
+        let db = client.db(configuration.db);
+        let col = db.collection('t21_1');
         col.insertOne({ a: 1, b: 2, c: 3 }, function(err, r) {
           expect(err).to.not.exist;
           expect(r.insertedCount).to.equal(1);
