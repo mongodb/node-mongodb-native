@@ -1023,42 +1023,33 @@ describe('CRUD API', function() {
     }
   });
 
-  it('should correctly throw error if update doc for findOneAndUpdate lacks atomic operator', {
-    // Add a tag that our runner can trigger on
-    // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: {
-      requires: { topology: [] }
-    },
-
-    // The actual test we wish to run
-    test: function(done) {
-      let configuration = this.configuration;
-      let client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
+  it('should correctly throw error if update doc for findOneAndUpdate lacks atomic operator', function(done) {
+    let configuration = this.configuration;
+    let client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+    client.connect(function(err, client) {
+      expect(err).to.not.exist;
+      let db = client.db(configuration.db);
+      let col = db.collection('t21_1');
+      col.insertOne({ a: 1, b: 2, c: 3 }, function(err, r) {
         expect(err).to.not.exist;
-        let db = client.db(configuration.db);
-        let col = db.collection('t21_1');
-        col.insertOne({ a: 1, b: 2, c: 3 }, function(err, r) {
-          expect(err).to.not.exist;
-          expect(r.insertedCount).to.equal(1);
+        expect(r.insertedCount).to.equal(1);
 
-          // empty update document
-          col.findOneAndUpdate({ a: 1 }, {}, function(err, r) {
+        // empty update document
+        col.findOneAndUpdate({ a: 1 }, {}, function(err, r) {
+          expect(err).to.exist;
+          expect(r).to.not.exist;
+
+          // update document non empty but still lacks atomic operator
+          col.findOneAndUpdate({ a: 1 }, { b: 5 }, function(err, r) {
             expect(err).to.exist;
             expect(r).to.not.exist;
 
-            // update document non empty but still lacks atomic operator
-            col.findOneAndUpdate({ a: 1 }, { b: 5 }, function(err, r) {
-              expect(err).to.exist;
-              expect(r).to.not.exist;
-
-              client.close();
-              done();
-            });
+            client.close();
+            done();
           });
         });
       });
-    }
+    });
   });
 
   it('should correctly throw error if update doc for updateOne lacks atomic operator', {
