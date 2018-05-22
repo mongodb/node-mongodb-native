@@ -29,6 +29,8 @@ out/
 performance/
 public/
 .coverage_data/
+.coveralls.yml
+.eslintrc
 docs/public
 .nyc_output/
 typings/
