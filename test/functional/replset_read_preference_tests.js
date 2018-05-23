@@ -713,7 +713,7 @@ describe('ReplSet (ReadPreference)', function() {
                 cursor.setReadPreference(ReadPreference.PRIMARY);
                 test.ok(false);
               } catch (err) {
-                // console.log(err.stack)
+                console.log(err.stack);
               }
 
               test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference);

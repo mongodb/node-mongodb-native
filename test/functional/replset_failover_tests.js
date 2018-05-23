@@ -217,7 +217,6 @@ describe('ReplSet (Failover)', function() {
           });
 
           client.once('fullsetup', function() {
-            // console.log("fullsetup")
             configuration.manager.secondaries().then(function(managers) {
               leftServer = managers[0];
 

@@ -6608,10 +6608,6 @@ describe('Operation (Generators)', function() {
           });
         }
 
-        // count just to make sure we're getting something back
-        var count = yield collection.count();
-        console.log('counting %d docs.', count);
-
         var options = {
           maxTimeMS: 10000,
           allowDiskUse: true

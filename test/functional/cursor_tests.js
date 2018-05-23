@@ -2303,9 +2303,7 @@ describe('Cursor', function() {
               if (count === 0) {
                 var stream = collection.find({}, { tailable: true, awaitData: true }).stream();
                 // let index = 0;
-                stream.on('data', function() {
-                  // console.log('doc :: ' + index++);
-                });
+                stream.on('data', function() {});
 
                 stream.on('error', function(err) {
                   expect(err).to.exist;
