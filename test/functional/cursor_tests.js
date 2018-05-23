@@ -2501,15 +2501,10 @@ describe('Cursor', function() {
         var options = { capped: true, size: 8};
         db.createCollection('should_not_await_data_when_false', options, function(err, collection) {
           collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
-            console.log("------------ 0")
             // should not timeout
             collection.find({}, {tailable:true, awaitdata:false}).each(function(err, result) {
-              console.log("------------ 2")
-              console.dir(err)
-              console.dir(result)
               test.ok(err != null);
             });
-            console.log("------------ 1")
 
             client.close();
             done();

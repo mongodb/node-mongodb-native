@@ -83,7 +83,7 @@ var setUp = function(configuration, options, callback) {
         }, 10000);
       })
       .catch(function(e) {
-        console.dir(e);
+        test.ok(e != null);
       });
   });
 };

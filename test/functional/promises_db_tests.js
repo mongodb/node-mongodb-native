@@ -155,7 +155,7 @@ describe('Promises (Db)', function() {
             done();
           })
           .catch(function(err) {
-            console.log(err.stack);
+            test.ok(err != null);
           });
       });
     }
@@ -298,7 +298,7 @@ describe('Promises (Db)', function() {
             done();
           })
           .catch(function(e) {
-            console.dir(e);
+            test.ok(e != null);
           });
       });
     }

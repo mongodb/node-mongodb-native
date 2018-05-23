@@ -548,8 +548,7 @@ describe('Authentication', function() {
             callback(null, replicasetManager);
           }, 10000);
         })
-        .catch(function(e) {
-          console.log(e.stack);
+        .catch(function() {
           process.exit(0);
         });
     });

@@ -84,7 +84,7 @@ describe('Promises (Collection)', function() {
               done();
             })
             .catch(function(err) {
-              console.log(err.stack);
+              test.ok(err != null);
             });
         });
       });
@@ -132,7 +132,7 @@ describe('Promises (Collection)', function() {
               done();
             })
             .catch(function(err) {
-              console.log(err.stack);
+              test.ok(err != null);
             });
         });
       });
@@ -182,7 +182,7 @@ describe('Promises (Collection)', function() {
                 done();
               })
               .catch(function(err) {
-                console.log(err.stack);
+                test.ok(err != null);
               });
           });
         });

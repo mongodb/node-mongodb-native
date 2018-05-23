@@ -3,6 +3,7 @@ var format = require('util').format;
 var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const expect = require('chai').expect;
 
 var restartAndDone = function(configuration, done) {
   configuration.manager.restart(9, { waitMS: 5000 }).then(function() {
@@ -343,14 +344,10 @@ describe('ReplSet (Failover)', function() {
 
                           // Run second check
                           collection.save({ a: 80 }, { w: 1 }, function(err) {
-                            if (err != null) {
-                              console.dir(err);
-                            }
+                            expect(err).to.not.exist;
 
                             collection.find().toArray(function(err, items) {
-                              if (err != null) {
-                                console.dir(err);
-                              }
+                              expect(err).to.not.exist;
 
                               // Ensure we have the correct values
                               test.equal(7, items.length);
@@ -612,8 +609,6 @@ describe('ReplSet (Failover)', function() {
             primary.stop(9).then(function() {
               // // Execute createIndex
               // db.collection('t').createIndex({'accessControl.get': 1}, {background: true}, function(err, r) {
-              //   console.dir(err)
-              //   console.dir(r)
 
               //   test.ok(err != null);
               //   test.ok(err.message.indexOf('key accessControl.get must not contain') == -1);
@@ -625,9 +620,7 @@ describe('ReplSet (Failover)', function() {
             setTimeout(function() {
               // Execute createIndex
               db.collection('t').createIndex({'accessControl.get': 1}, {background: true}, function(err, r) {
-                console.dir(err)
-                console.dir(r)
-
+ 
                 test.ok(err != null);
                 test.ok(err.message.indexOf('key accessControl.get must not contain') == -1);
 

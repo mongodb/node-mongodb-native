@@ -270,8 +270,7 @@ describe.skip('Errors', function() {
     test: function(done) {
       var client = null;
 
-      process.once('uncaughtException', function(err) {
-        console.log(err);
+      process.once('uncaughtException', function() {
         client.close();
         done();
       });

@@ -1,6 +1,7 @@
 'use strict';
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
+const test = require('./shared').assert;
+const setupDatabase = require('./shared').setupDatabase;
+const expect = require('chai').expect;
 
 describe('Find', function() {
   before(function() {
@@ -705,6 +706,7 @@ describe('Find', function() {
           collection.insert(doc, configuration.writeConcernMax(), function(err) {
             test.equal(null, err);
             collection.findOne({ _id: doc._id }, { w: 1, fields: undefined }, function(err, doc) {
+              expect(err).to.not.exist;
               test.equal(2, doc.comments.length);
               test.equal('number 1', doc.comments[0].title);
               test.equal('number 2', doc.comments[1].title);
