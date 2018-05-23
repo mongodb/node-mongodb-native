@@ -1188,8 +1188,7 @@ describe('Bulk', function() {
     metadata: {
       requires: {
         mongodb: '>=2.6.0',
-        topology: 'single',
-        node: '>0.10.0'
+        topology: 'single'
       }
     },
 
@@ -1418,8 +1417,7 @@ describe('Bulk', function() {
     metadata: {
       requires: {
         mongodb: '>=2.6.0',
-        topology: 'single',
-        node: '>0.10.0'
+        topology: 'single'
       }
     },
 
@@ -1456,7 +1454,7 @@ describe('Bulk', function() {
   it(
     'should return an error instead of throwing when no operations are provided for ordered bulk operation execute',
     {
-      metadata: { requires: { mongodb: '>=2.6.0', topology: 'single', node: '>0.10.0' } },
+      metadata: { requires: { mongodb: '>=2.6.0', topology: 'single' } },
       test: function(done) {
         var self = this;
         var client = self.configuration.newClient({ w: 1 }, { poolSize: 1 });
@@ -1476,7 +1474,7 @@ describe('Bulk', function() {
   it(
     'should return an error instead of throwing when no operations are provided for unordered bulk operation execute',
     {
-      metadata: { requires: { mongodb: '>=2.6.0', topology: 'single', node: '>0.10.0' } },
+      metadata: { requires: { mongodb: '>=2.6.0', topology: 'single' } },
       test: function(done) {
         var self = this;
         var client = self.configuration.newClient({ w: 1 }, { poolSize: 1 });
@@ -1497,7 +1495,7 @@ describe('Bulk', function() {
   it(
     'should return an error instead of throwing when an empty bulk operation is submitted (with promise)',
     {
-      metadata: { requires: { promises: true, node: '>0.12.0' } },
+      metadata: { requires: { promises: true } },
       test: function() {
         var self = this;
         var client = self.configuration.newClient({ w: 1 }, { poolSize: 1 });

@@ -12,7 +12,6 @@ describe('Promises (Collection)', function() {
     metadata: {
       requires: {
         promises: true,
-        node: '>0.8.0',
         topology: ['single']
       }
     },

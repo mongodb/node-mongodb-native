@@ -202,7 +202,6 @@ describe.skip('Errors', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
-        node: '>0.10.0',
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
     },
@@ -260,7 +259,6 @@ describe.skip('Errors', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
-        node: '>0.10.0',
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
     },
@@ -344,7 +342,6 @@ describe.skip('Errors', function() {
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
       requires: {
-        node: '>0.10.0',
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
     },
