@@ -2,6 +2,8 @@
 
 var util = require('util');
 
+const mongoErrorContextSymbol = Symbol('mongoErrorContextSymbol');
+
 /**
  * Creates a new MongoError
  * @class
@@ -31,6 +33,8 @@ function MongoError(message) {
       Error.captureStackTrace(this, this.constructor);
     }
   }
+
+  this[mongoErrorContextSymbol] = this[mongoErrorContextSymbol] || {};
 }
 util.inherits(MongoError, Error);
 
@@ -94,5 +98,6 @@ module.exports = {
   MongoError,
   MongoNetworkError,
   MongoParseError,
-  MongoTimeoutError
+  MongoTimeoutError,
+  mongoErrorContextSymbol
 };

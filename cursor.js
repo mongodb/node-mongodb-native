@@ -1,10 +1,11 @@
 'use strict';
 
-var Logger = require('./connection/logger'),
-  retrieveBSON = require('./connection/utils').retrieveBSON,
-  MongoError = require('./error').MongoError,
-  MongoNetworkError = require('./error').MongoNetworkError,
-  f = require('util').format;
+const Logger = require('./connection/logger');
+const retrieveBSON = require('./connection/utils').retrieveBSON;
+const MongoError = require('./error').MongoError;
+const MongoNetworkError = require('./error').MongoNetworkError;
+const mongoErrorContextSymbol = require('./error').mongoErrorContextSymbol;
+const f = require('util').format;
 
 var BSON = retrieveBSON(),
   Long = BSON.Long;
@@ -709,7 +710,13 @@ var nextFunction = function(self, callback) {
 
     // Execute the next get more
     self._getmore(function(err, doc, connection) {
-      if (err) return handleCallback(callback, err);
+      if (err) {
+        if (err instanceof MongoError) {
+          err[mongoErrorContextSymbol].isGetMore = true;
+        }
+
+        return handleCallback(callback, err);
+      }
 
       if (self.cursorState.cursorId && self.cursorState.cursorId.isZero() && self._endSession) {
         self._endSession();
