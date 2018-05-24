@@ -270,6 +270,7 @@ describe.skip('Errors', function() {
     test: function(done) {
       var client = null;
 
+      // TODO: check exception and fix test
       process.once('uncaughtException', function() {
         client.close();
         done();
