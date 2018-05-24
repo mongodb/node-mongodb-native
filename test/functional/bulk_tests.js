@@ -1492,31 +1492,25 @@ describe('Bulk', function() {
     }
   );
 
-  it(
-    'should return an error instead of throwing when an empty bulk operation is submitted (with promise)',
-    {
-      metadata: { requires: { promises: true } },
-      test: function() {
-        var self = this;
-        var client = self.configuration.newClient({ w: 1 }, { poolSize: 1 });
+  it('should return an error instead of throwing when an empty bulk operation is submitted (with promise)', function() {
+    var self = this;
+    var client = self.configuration.newClient({ w: 1 }, { poolSize: 1 });
 
-        return client
-          .connect()
-          .then(function() {
-            var db = client.db(self.configuration.db);
-            return db.collection('doesnt_matter').insertMany([]);
-          })
-          .then(function() {
-            test.equal(false, true); // this should not happen!
-          })
-          .catch(function(err) {
-            test.equal(err instanceof Error, true);
-            test.equal(err.message, 'Invalid Operation, no operations specified');
-          })
-          .then(function() {
-            client.close();
-          });
-      }
-    }
-  );
+    return client
+      .connect()
+      .then(function() {
+        var db = client.db(self.configuration.db);
+        return db.collection('doesnt_matter').insertMany([]);
+      })
+      .then(function() {
+        test.equal(false, true); // this should not happen!
+      })
+      .catch(function(err) {
+        test.equal(err instanceof Error, true);
+        test.equal(err.message, 'Invalid Operation, no operations specified');
+      })
+      .then(function() {
+        client.close();
+      });
+  });
 });

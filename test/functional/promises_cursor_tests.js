@@ -11,7 +11,6 @@ describe('Promises (Cursor)', function() {
   it('Should correctly execute Collection.prototype.insertOne as promise', {
     metadata: {
       requires: {
-        promises: true,
         topology: ['single']
       }
     },
