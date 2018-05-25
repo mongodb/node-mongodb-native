@@ -158,7 +158,6 @@ describe('Decimal128', function() {
   it('shouldStayInCorrectDomainForQueuedWriteCommand', {
     metadata: {
       requires: {
-        node: '>=0.10.x',
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
     },

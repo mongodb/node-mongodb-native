@@ -1188,8 +1188,7 @@ describe('Bulk', function() {
     metadata: {
       requires: {
         mongodb: '>=2.6.0',
-        topology: 'single',
-        node: '>0.10.0'
+        topology: 'single'
       }
     },
 
@@ -1418,8 +1417,7 @@ describe('Bulk', function() {
     metadata: {
       requires: {
         mongodb: '>=2.6.0',
-        topology: 'single',
-        node: '>0.10.0'
+        topology: 'single'
       }
     },
 
@@ -1456,7 +1454,7 @@ describe('Bulk', function() {
   it(
     'should return an error instead of throwing when no operations are provided for ordered bulk operation execute',
     {
-      metadata: { requires: { mongodb: '>=2.6.0', topology: 'single', node: '>0.10.0' } },
+      metadata: { requires: { mongodb: '>=2.6.0', topology: 'single' } },
       test: function(done) {
         var self = this;
         var client = self.configuration.newClient({ w: 1 }, { poolSize: 1 });
@@ -1476,7 +1474,7 @@ describe('Bulk', function() {
   it(
     'should return an error instead of throwing when no operations are provided for unordered bulk operation execute',
     {
-      metadata: { requires: { mongodb: '>=2.6.0', topology: 'single', node: '>0.10.0' } },
+      metadata: { requires: { mongodb: '>=2.6.0', topology: 'single' } },
       test: function(done) {
         var self = this;
         var client = self.configuration.newClient({ w: 1 }, { poolSize: 1 });
@@ -1494,31 +1492,25 @@ describe('Bulk', function() {
     }
   );
 
-  it(
-    'should return an error instead of throwing when an empty bulk operation is submitted (with promise)',
-    {
-      metadata: { requires: { promises: true, node: '>0.12.0' } },
-      test: function() {
-        var self = this;
-        var client = self.configuration.newClient({ w: 1 }, { poolSize: 1 });
+  it('should return an error instead of throwing when an empty bulk operation is submitted (with promise)', function() {
+    var self = this;
+    var client = self.configuration.newClient({ w: 1 }, { poolSize: 1 });
 
-        return client
-          .connect()
-          .then(function() {
-            var db = client.db(self.configuration.db);
-            return db.collection('doesnt_matter').insertMany([]);
-          })
-          .then(function() {
-            test.equal(false, true); // this should not happen!
-          })
-          .catch(function(err) {
-            test.equal(err instanceof Error, true);
-            test.equal(err.message, 'Invalid Operation, no operations specified');
-          })
-          .then(function() {
-            client.close();
-          });
-      }
-    }
-  );
+    return client
+      .connect()
+      .then(function() {
+        var db = client.db(self.configuration.db);
+        return db.collection('doesnt_matter').insertMany([]);
+      })
+      .then(function() {
+        test.equal(false, true); // this should not happen!
+      })
+      .catch(function(err) {
+        test.equal(err instanceof Error, true);
+        test.equal(err.message, 'Invalid Operation, no operations specified');
+      })
+      .then(function() {
+        client.close();
+      });
+  });
 });

@@ -12,7 +12,6 @@ describe('MongoClient', function() {
   it('Should Correctly Do MongoClient with bufferMaxEntries:0 and ordered execution', {
     metadata: {
       requires: {
-        node: '>0.8.0',
         topology: ['single', 'ssl', 'wiredtiger']
       }
     },
@@ -59,7 +58,6 @@ describe('MongoClient', function() {
   it('Should Correctly Do MongoClient with bufferMaxEntries:0 and unordered execution', {
     metadata: {
       requires: {
-        node: '>0.8.0',
         topology: ['single', 'ssl', 'wiredtiger']
       }
     },
@@ -109,7 +107,6 @@ describe('MongoClient', function() {
   it('Should correctly pass through extra db options', {
     metadata: {
       requires: {
-        node: '>0.8.0',
         topology: ['single']
       }
     },
@@ -166,7 +163,6 @@ describe('MongoClient', function() {
   it('Should correctly pass through extra server options', {
     metadata: {
       requires: {
-        node: '>0.8.0',
         topology: ['single']
       }
     },
@@ -205,7 +201,6 @@ describe('MongoClient', function() {
   it('Should correctly pass through extra replicaset options', {
     metadata: {
       requires: {
-        node: '>0.8.0',
         topology: ['replicaset']
       }
     },
@@ -259,7 +254,6 @@ describe('MongoClient', function() {
   it('Should correctly pass through extra sharded options', {
     metadata: {
       requires: {
-        node: '>0.8.0',
         topology: ['sharded']
       }
     },
@@ -306,7 +300,6 @@ describe('MongoClient', function() {
   it('Should correctly set MaxPoolSize on single server', {
     metadata: {
       requires: {
-        node: '>0.8.0',
         topology: ['single']
       }
     },
@@ -334,7 +327,6 @@ describe('MongoClient', function() {
   it('Should correctly set MaxPoolSize on replicaset server', {
     metadata: {
       requires: {
-        node: '>0.8.0',
         topology: ['replicaset']
       }
     },
@@ -388,7 +380,6 @@ describe('MongoClient', function() {
   it('Should correctly set MaxPoolSize on sharded server', {
     metadata: {
       requires: {
-        node: '>0.8.0',
         topology: ['sharded']
       }
     },
@@ -585,7 +576,6 @@ describe('MongoClient', function() {
   it('should fail dure to garbage connection string', {
     metadata: {
       requires: {
-        node: '>0.8.0',
         topology: ['single']
       }
     },
@@ -604,7 +594,6 @@ describe('MongoClient', function() {
   it('Should fail to connect due to instances not being mongos proxies', {
     metadata: {
       requires: {
-        node: '>0.8.0',
         topology: ['replicaset']
       }
     },
@@ -627,7 +616,6 @@ describe('MongoClient', function() {
   it('Should correctly pass through appname', {
     metadata: {
       requires: {
-        node: '>0.8.0',
         topology: ['single', 'replicaset', 'sharded']
       }
     },
@@ -656,7 +644,6 @@ describe('MongoClient', function() {
   it('Should correctly pass through appname in options', {
     metadata: {
       requires: {
-        node: '>0.8.0',
         topology: ['single', 'replicaset', 'sharded']
       }
     },
@@ -680,7 +667,6 @@ describe('MongoClient', function() {
   it('Should correctly pass through socketTimeoutMS and connectTimeoutMS', {
     metadata: {
       requires: {
-        node: '>0.8.0',
         topology: ['single', 'replicaset', 'sharded']
       }
     },
@@ -717,7 +703,6 @@ describe('MongoClient', function() {
   it('Should correctly pass through socketTimeoutMS and connectTimeoutMS from uri', {
     metadata: {
       requires: {
-        node: '>0.8.0',
         topology: ['single']
       }
     },
@@ -747,7 +732,6 @@ describe('MongoClient', function() {
   it('Should open a new MongoClient connection', {
     metadata: {
       requires: {
-        node: '>0.8.0',
         topology: ['single']
       }
     },
@@ -777,7 +761,6 @@ describe('MongoClient', function() {
   it('Should open a new MongoClient connection using promise', {
     metadata: {
       requires: {
-        node: '>0.8.0',
         topology: ['single']
       }
     },

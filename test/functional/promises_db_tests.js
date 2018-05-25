@@ -11,8 +11,6 @@ describe('Promises (Db)', function() {
   it('Should correctly connect with MongoClient.connect using Promise', {
     metadata: {
       requires: {
-        promises: true,
-        node: '>0.8.0',
         topology: ['single']
       }
     },
@@ -39,8 +37,6 @@ describe('Promises (Db)', function() {
   it('Should correctly connect using Db.open and promise', {
     metadata: {
       requires: {
-        promises: true,
-        node: '>0.8.0',
         topology: ['single']
       }
     },
@@ -59,8 +55,6 @@ describe('Promises (Db)', function() {
   it('Should correctly execute ismaster using Promise', {
     metadata: {
       requires: {
-        promises: true,
-        node: '>0.8.0',
         topology: ['single']
       }
     },
@@ -93,8 +87,6 @@ describe('Promises (Db)', function() {
   it('Should correctly catch command error using Promise', {
     metadata: {
       requires: {
-        promises: true,
-        node: '>0.8.0',
         topology: ['single']
       }
     },
@@ -128,8 +120,6 @@ describe('Promises (Db)', function() {
   it('Should correctly createCollecton using Promise', {
     metadata: {
       requires: {
-        promises: true,
-        node: '>0.8.0',
         topology: ['single']
       }
     },
@@ -164,8 +154,6 @@ describe('Promises (Db)', function() {
   it('Should correctly execute stats using Promise', {
     metadata: {
       requires: {
-        promises: true,
-        node: '>0.8.0',
         topology: ['single']
       }
     },
@@ -197,8 +185,6 @@ describe('Promises (Db)', function() {
   it('Should correctly execute eval using Promise', {
     metadata: {
       requires: {
-        promises: true,
-        node: '>0.8.0',
         topology: ['single']
       }
     },
@@ -230,8 +216,6 @@ describe('Promises (Db)', function() {
   it('Should correctly rename and drop collection using Promise', {
     metadata: {
       requires: {
-        promises: true,
-        node: '>0.8.0',
         topology: ['single']
       }
     },
@@ -274,8 +258,6 @@ describe('Promises (Db)', function() {
   it('Should correctly drop database using Promise', {
     metadata: {
       requires: {
-        promises: true,
-        node: '>0.8.0',
         topology: ['single']
       }
     },
@@ -310,8 +292,6 @@ describe('Promises (Db)', function() {
   it('Should correctly createCollections and call collections with Promise', {
     metadata: {
       requires: {
-        promises: true,
-        node: '>0.8.0',
         topology: ['single']
       }
     },
@@ -350,8 +330,6 @@ describe('Promises (Db)', function() {
   it('Should correctly execute executeDbAdminCommand using Promise', {
     metadata: {
       requires: {
-        promises: true,
-        node: '>0.8.0',
         topology: ['single']
       }
     },
@@ -383,8 +361,6 @@ describe('Promises (Db)', function() {
   it('Should correctly execute creatIndex using Promise', {
     metadata: {
       requires: {
-        promises: true,
-        node: '>0.8.0',
         topology: ['single']
       }
     },
@@ -417,8 +393,6 @@ describe('Promises (Db)', function() {
   it('Should correctly execute ensureIndex using Promise', {
     metadata: {
       requires: {
-        promises: true,
-        node: '>0.8.0',
         topology: ['single']
       }
     },
@@ -451,8 +425,6 @@ describe('Promises (Db)', function() {
   it('Should correctly execute createCollection using passed down bluebird Promise', {
     metadata: {
       requires: {
-        promises: true,
-        node: '>0.8.0',
         topology: ['single']
       }
     },

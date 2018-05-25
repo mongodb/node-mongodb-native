@@ -33,7 +33,7 @@ describe('Operation (Promises)', function() {
   it('aggregationExample2WithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { promises: true, mongodb: '>2.1.0', topology: ['single'] } },
+    metadata: { requires: { mongodb: '>2.1.0', topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -116,7 +116,7 @@ describe('Operation (Promises)', function() {
   it('Aggregation Cursor next Test With Promises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { promises: true, mongodb: '>2.1.0', topology: ['single'] } },
+    metadata: { requires: { mongodb: '>2.1.0', topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -201,7 +201,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyDoSimpleCountExamplesWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -252,7 +252,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCreateComplexIndexOnTwoFieldsWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -315,7 +315,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -374,7 +374,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyHandleDistinctIndexesWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -431,7 +431,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyDropCollectionWithDropFunctionWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -491,7 +491,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('dropAllIndexesExample1WithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -534,7 +534,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyCreateAndDropIndexWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -590,7 +590,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCreateComplexEnsureIndexWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -656,7 +656,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('ensureIndexExampleWithCompountIndexWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -712,7 +712,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldPerformASimpleQueryWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -761,7 +761,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldPerformASimpleExplainQueryWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -810,7 +810,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldPerformASimpleLimitSkipQueryWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -873,7 +873,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldPerformSimpleFindAndModifyOperationsWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -958,7 +958,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldPerformSimpleFindAndRemoveWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -1015,7 +1015,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldPerformASimpleLimitSkipFindOneQueryWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -1068,7 +1068,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single', 'replicaset'] } },
+    metadata: { requires: { topology: ['single', 'replicaset'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -1127,7 +1127,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyExecuteGroupFunctionWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -1335,7 +1335,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldPerformSimpleMapReduceFunctionsWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -1405,7 +1405,7 @@ describe('Operation (Promises)', function() {
   it('shouldPerformMapReduceFunctionInlineWithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { promises: true, mongodb: '>1.7.6', topology: ['single'] } },
+    metadata: { requires: { mongodb: '>1.7.6', topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -1470,7 +1470,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldPerformMapReduceWithContextWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -1562,7 +1562,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it.skip('shouldPerformMapReduceInContextObjectsWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -1654,7 +1654,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyRetriveACollectionsIndexesWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -1708,7 +1708,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyExecuteIndexExistsWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -1769,7 +1769,7 @@ describe('Operation (Promises)', function() {
    */
   it('shouldCorrectlyShowTheResultsFromIndexInformationWithPromises', {
     metadata: {
-      requires: { promises: true, topology: ['single', 'replicaset'] }
+      requires: { topology: ['single', 'replicaset'] }
     },
 
     // The actual test we wish to run
@@ -1836,7 +1836,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyShowAllTheResultsFromIndexInformationWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -1898,7 +1898,7 @@ describe('Operation (Promises)', function() {
   it('shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafeWithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
@@ -1940,7 +1940,7 @@ describe('Operation (Promises)', function() {
   it('shouldCorrectlyPerformABatchDocumentInsertSafeWithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -1989,7 +1989,7 @@ describe('Operation (Promises)', function() {
   it('shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafeWithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -2044,7 +2044,7 @@ describe('Operation (Promises)', function() {
   it('Should correctly execute insert with keepGoing option on mongod >= 1.9.1 With Promises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { promises: true, mongodb: '>1.9.1', topology: ['single'] } },
+    metadata: { requires: { mongodb: '>1.9.1', topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -2114,7 +2114,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyExecuteIsCappedWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -2157,7 +2157,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyRetriveCollectionOptionsWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -2204,7 +2204,7 @@ describe('Operation (Promises)', function() {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { promises: true, mongodb: '>2.5.5', topology: ['single', 'replicaset'] }
+      requires: { mongodb: '>2.5.5', topology: ['single', 'replicaset'] }
     },
 
     // The actual test we wish to run
@@ -2280,7 +2280,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyIndexAndForceReindexOnCollectionWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -2341,7 +2341,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldRemoveAllDocumentsNoSafeWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -2391,7 +2391,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldRemoveSubsetOfDocumentsSafeModeWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -2438,7 +2438,7 @@ describe('Operation (Promises)', function() {
    */
   it('shouldCorrectlyRenameCollectionWithPromises', {
     metadata: {
-      requires: { promises: true, topology: ['single'] }
+      requires: { topology: ['single'] }
     },
 
     // The actual test we wish to run
@@ -2568,7 +2568,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlySaveASimpleDocumentWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -2612,7 +2612,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlySaveASimpleDocumentModifyItAndResaveItWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -2676,7 +2676,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyUpdateASimpleDocumentWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -2726,7 +2726,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyUpsertASimpleDocumentWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -2773,7 +2773,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyUpdateMultipleDocumentsWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -2828,7 +2828,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyReturnACollectionsStatsWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -2873,7 +2873,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyCreateAndDropAllIndexWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -2946,7 +2946,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyFailOnRetryDueToAppCloseOfDbWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -2998,7 +2998,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyExecuteEvalFunctionsWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -3107,7 +3107,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunctionWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -3163,7 +3163,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallbackWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -3198,7 +3198,7 @@ describe('Operation (Promises)', function() {
    */
   it('shouldCorrectlyRetrievelistCollectionsWithPromises', {
     metadata: {
-      requires: { promises: true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] }
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] }
     },
 
     // The actual test we wish to run
@@ -3251,7 +3251,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyRetrievelistCollectionsWiredTigerWithPromises', {
-    metadata: { requires: { promises: true, topology: ['wiredtiger'] } },
+    metadata: { requires: { topology: ['wiredtiger'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -3299,7 +3299,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyAccessACollectionWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -3360,7 +3360,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyRetrieveAllCollectionsWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -3397,7 +3397,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyAddUserToDbWithPromises', {
-    metadata: { requires: { promises: true, topology: 'single' } },
+    metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
     test: function() {
@@ -3442,7 +3442,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyAddAndRemoveUserWithPromises', {
-    metadata: { requires: { promises: true, topology: 'single', mongodb: '<=3.4.x' } },
+    metadata: { requires: { topology: 'single', mongodb: '<=3.4.x' } },
 
     // The actual test we wish to run
     test: function() {
@@ -3502,7 +3502,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyCreateACollectionWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -3550,7 +3550,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyExecuteACommandAgainstTheServerWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -3615,7 +3615,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyCreateDropAndVerifyThatCollectionIsGoneWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -3652,7 +3652,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyRenameACollectionWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -3732,7 +3732,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCreateOnDbComplexIndexOnTwoFieldsWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -3798,7 +3798,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCreateComplexEnsureIndexDbWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -3864,7 +3864,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyDropTheDatabaseWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -3934,7 +3934,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyRetrieveDbStatsWithPromisesWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -3967,7 +3967,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -4025,7 +4025,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('Should correctly connect with default replicasetNoOption With Promises', {
-    metadata: { requires: { promises: true, topology: 'replicaset' } },
+    metadata: { requires: { topology: 'replicaset' } },
 
     // The actual test we wish to run
     test: function() {
@@ -4074,7 +4074,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyRetrieveBuildInfoWithPromises', {
-    metadata: { requires: { promises: true, topology: 'single' } },
+    metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
     test: function() {
@@ -4113,7 +4113,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyRetrieveBuildInfoUsingCommandWithPromises', {
-    metadata: { requires: { promises: true, topology: 'single' } },
+    metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
     test: function() {
@@ -4152,7 +4152,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlySetDefaultProfilingLevelWithPromises', {
-    metadata: { requires: { promises: true, topology: 'single' } },
+    metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
     test: function() {
@@ -4203,7 +4203,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyChangeProfilingLevelWithPromises', {
-    metadata: { requires: { promises: true, topology: 'single' } },
+    metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
     test: function() {
@@ -4286,7 +4286,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlySetAndExtractProfilingInfoWithPromises', {
-    metadata: { requires: { promises: true, topology: 'single' } },
+    metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
     test: function() {
@@ -4354,7 +4354,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyCallValidateCollectionWithPromises', {
-    metadata: { requires: { promises: true, topology: 'single' } },
+    metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
     test: function() {
@@ -4403,7 +4403,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyPingTheMongoDbInstanceWithPromises', {
-    metadata: { requires: { promises: true, topology: 'single' } },
+    metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
     test: function() {
@@ -4442,7 +4442,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyAddAUserToAdminDbWithPromises', {
-    metadata: { requires: { promises: true, topology: 'single' } },
+    metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
     test: function() {
@@ -4487,7 +4487,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyAddAUserAndRemoveItFromAdminDbWithPromises', {
-    metadata: { requires: { promises: true, topology: 'single' } },
+    metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
     test: function() {
@@ -4534,7 +4534,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyListAllAvailableDatabasesWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -4573,7 +4573,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyRetrieveServerInfoWithPromises', {
-    metadata: { requires: { promises: true, topology: 'single' } },
+    metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
     test: function() {
@@ -4641,7 +4641,7 @@ describe('Operation (Promises)', function() {
   it('shouldCorrectlyExecuteToArrayWithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -4693,7 +4693,7 @@ describe('Operation (Promises)', function() {
   it('shouldCorrectlyUseCursorCountFunctionWithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -4744,7 +4744,7 @@ describe('Operation (Promises)', function() {
   it('shouldCorrectlyPerformNextOnCursorWithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -4795,7 +4795,7 @@ describe('Operation (Promises)', function() {
   it('shouldCorrectlyPerformSimpleExplainCursorWithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -4846,7 +4846,7 @@ describe('Operation (Promises)', function() {
   it('shouldStreamDocumentsUsingTheCloseFunctionWithPromises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -4914,7 +4914,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('Should correctly connect to a replicaset With Promises', {
-    metadata: { requires: { promises: true, topology: 'replicaset' } },
+    metadata: { requires: { topology: 'replicaset' } },
 
     // The actual test we wish to run
     test: function() {
@@ -4964,7 +4964,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('Should connect to mongos proxies using connectiong string With Promises', {
-    metadata: { requires: { promises: true, topology: 'mongos' } },
+    metadata: { requires: { topology: 'mongos' } },
 
     // The actual test we wish to run
     test: function() {
@@ -5013,7 +5013,7 @@ describe('Operation (Promises)', function() {
   it('Should correctly connect using MongoClient to a single server using connect With Promises', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { promises: true, topology: 'single' } },
+    metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
     test: function() {
@@ -5060,7 +5060,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyExecuteGridStoreExistsByObjectIdWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -5126,7 +5126,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyExecuteGridStoreListWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -5257,7 +5257,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyReadlinesAndPutLinesWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -5310,7 +5310,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyUnlinkWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -5397,7 +5397,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyWriteAndReadJpgImageWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -5466,7 +5466,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingFilenameWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -5521,7 +5521,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingObjectIDWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -5579,7 +5579,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -5639,7 +5639,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandleWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -5706,7 +5706,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffersWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -5768,7 +5768,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingCloseWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -5821,7 +5821,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkItWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -5890,7 +5890,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlinesWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -5956,7 +5956,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlinesWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -6028,7 +6028,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyPutACoupleOfLinesInGridStoreReadWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -6084,7 +6084,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlySeekWithBufferWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -6209,7 +6209,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyRewingAndTruncateOnWriteWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -6290,7 +6290,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyExecuteGridstoreTellWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -6357,7 +6357,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyRetrieveSingleCharacterUsingGetCWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -6415,7 +6415,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyRetrieveSingleCharacterUsingGetCWithPromises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -6508,7 +6508,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('Should correctly execute ordered batch with no errors using write commands With Promises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -6576,7 +6576,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('Should correctly execute unordered batch with no errors With Promises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -6650,7 +6650,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('Should correctly execute insertOne operation With Promises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -6689,7 +6689,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('Should correctly execute insertMany operation With Promises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -6728,7 +6728,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('Should correctly execute updateOne operation With Promises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -6768,7 +6768,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('Should correctly execute updateMany operation With Promises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -6821,7 +6821,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('Should correctly execute removeOne operation With Promises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -6867,7 +6867,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('Should correctly execute removeMany operation With Promises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -6915,7 +6915,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('Should correctly execute bulkWrite operation With Promises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -6973,7 +6973,7 @@ describe('Operation (Promises)', function() {
    * Duplicate key error
    */
   it('Should correctly handle duplicate key error with bulkWrite', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -7009,7 +7009,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('Should correctly execute findOneAndDelete operation With Promises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -7056,7 +7056,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('Should correctly execute findOneAndReplace operation With Promises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -7112,7 +7112,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('Should correctly execute findOneAndUpdate operation With Promises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function() {
@@ -7169,7 +7169,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('Should correctly add capped collection options to cursor With Promises', {
-    metadata: { requires: { promises: true, topology: ['single'] } },
+    metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
     test: function(done) {

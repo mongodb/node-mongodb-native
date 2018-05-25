@@ -251,7 +251,6 @@ describe('Promote Values', function() {
   it('Should correctly promoteValues when calling getMore on queries', {
     metadata: {
       requires: {
-        node: '>0.8.0',
         topology: ['single', 'ssl', 'wiredtiger']
       }
     },

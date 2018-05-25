@@ -293,8 +293,7 @@ describe('Aggregation', function() {
     metadata: {
       requires: {
         mongodb: '>2.1.0',
-        topology: 'single',
-        node: '>0.10.0'
+        topology: 'single'
       }
     },
 
@@ -379,8 +378,7 @@ describe('Aggregation', function() {
     metadata: {
       requires: {
         mongodb: '>2.5.3',
-        topology: 'single',
-        node: '>0.10.0'
+        topology: 'single'
       }
     },
 
@@ -470,8 +468,7 @@ describe('Aggregation', function() {
     metadata: {
       requires: {
         mongodb: '>2.5.3',
-        topology: 'single',
-        node: '>0.10.0'
+        topology: 'single'
       }
     },
 
@@ -872,8 +869,7 @@ describe('Aggregation', function() {
     metadata: {
       requires: {
         mongodb: '>2.5.3',
-        topology: 'single',
-        node: '>0.10.0'
+        topology: 'single'
       }
     },
 
@@ -1020,8 +1016,7 @@ describe('Aggregation', function() {
       metadata: {
         requires: {
           mongodb: '>=2.6.0',
-          topology: 'single',
-          node: '>0.10.0'
+          topology: 'single'
         }
       },
 
@@ -1197,8 +1192,7 @@ describe('Aggregation', function() {
     metadata: {
       requires: {
         mongodb: '>=2.6.0',
-        topology: 'single',
-        node: '>0.10.0'
+        topology: 'single'
       }
     },
 
@@ -1269,8 +1263,7 @@ describe('Aggregation', function() {
     metadata: {
       requires: {
         mongodb: '>=2.6.0',
-        topology: 'single',
-        node: '>0.10.0'
+        topology: 'single'
       }
     },
 
