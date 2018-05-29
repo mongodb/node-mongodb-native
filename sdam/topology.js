@@ -6,10 +6,14 @@ const TopologyType = require('./topology_description').TopologyType;
 const monitoring = require('./monitoring');
 const calculateDurationInMs = require('../utils').calculateDurationInMs;
 const MongoTimeoutError = require('../error').MongoTimeoutError;
+const MongoNetworkError = require('../error').MongoNetworkError;
 const Server = require('./server');
 const relayEvents = require('../utils').relayEvents;
 const ReadPreference = require('../topologies/read_preference');
 const readPreferenceServerSelector = require('./server_selectors').readPreferenceServerSelector;
+const writableServerSelector = require('./server_selectors').writableServerSelector;
+const isRetryableWritesSupported = require('../topologies/shared').isRetryableWritesSupported;
+const BasicCursor = require('../cursor');
 
 // Global state
 let globalTopologyCounter = 0;
@@ -84,7 +88,9 @@ class Topology extends EventEmitter {
         options
       ),
       serverSelectionTimeoutMS: options.serverSelectionTimeoutMS,
-      heartbeatFrequencyMS: options.heartbeatFrequencyMS
+      heartbeatFrequencyMS: options.heartbeatFrequencyMS,
+      // allow users to override the cursor factory
+      Cursor: options.cursorFactory || BasicCursor
     };
   }
 
@@ -93,6 +99,17 @@ class Topology extends EventEmitter {
    */
   get description() {
     return this.s.description;
+  }
+
+  /**
+   * All raw connections
+   * @method
+   * @return {Connection[]}
+   */
+  connections() {
+    return Array.from(this.s.servers.values()).reduce((result, server) => {
+      return result.concat(server.s.pool.allConnections());
+    }, []);
   }
 
   /**
@@ -239,7 +256,7 @@ class Topology extends EventEmitter {
    * @param {opResultCallback} callback A callback function
    */
   insert(ns, ops, options, callback) {
-    callback(null, null);
+    executeWriteOperation({ topology: this, op: 'insert', ns, ops }, options, callback);
   }
 
   /**
@@ -256,7 +273,7 @@ class Topology extends EventEmitter {
    * @param {opResultCallback} callback A callback function
    */
   update(ns, ops, options, callback) {
-    callback(null, null);
+    executeWriteOperation({ topology: this, op: 'update', ns, ops }, options, callback);
   }
 
   /**
@@ -273,7 +290,7 @@ class Topology extends EventEmitter {
    * @param {opResultCallback} callback A callback function
    */
   remove(ns, ops, options, callback) {
-    callback(null, null);
+    executeWriteOperation({ topology: this, op: 'remove', ns, ops }, options, callback);
   }
 
   /**
@@ -321,8 +338,12 @@ class Topology extends EventEmitter {
    * @param {object} [options.topology] The internal topology of the created cursor
    * @returns {Cursor}
    */
-  cursor(/* ns, cmd, options */) {
-    //
+  cursor(ns, cmd, options) {
+    options = options || {};
+    const topology = options.topology || this;
+    const CursorClass = options.cursorFactory || this.s.Cursor;
+
+    return new CursorClass(this.s.bson, ns, cmd, options, topology, this.s.options);
   }
 }
 
@@ -388,7 +409,7 @@ function connectServers(topology, serverDescriptions) {
       new monitoring.ServerOpeningEvent(topology.s.id, serverDescription.address)
     );
 
-    const server = new Server(serverDescription, {});
+    const server = new Server(serverDescription, topology.s.options);
     relayEvents(server, topology, [
       'serverHeartbeatStarted',
       'serverHeartbeatSucceeded',
@@ -418,7 +439,7 @@ function updateServers(topology, currentServerDescription) {
         new monitoring.ServerOpeningEvent(topology.s.id, serverDescription.address)
       );
 
-      const server = new Server(serverDescription, {});
+      const server = new Server(serverDescription, topology.s.options);
       relayEvents(server, topology, [
         'serverHeartbeatStarted',
         'serverHeartbeatSucceeded',
@@ -450,8 +471,72 @@ function updateServers(topology, currentServerDescription) {
 
 function serverConnectEventHandler(server, topology) {
   return function(/* ismaster */) {
-    topology.emit('connect');
+    topology.emit('connect', server);
   };
+}
+
+function executeWriteOperation(args, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  // TODO: once we drop Node 4, use destructuring either here or in arguments.
+  const topology = args.topology;
+  const op = args.op;
+  const ns = args.ns;
+  const ops = args.ops;
+
+  // if (topology.state === DESTROYED) {
+  //   return callback(new MongoError(`topology was destroyed`));
+  // }
+
+  const willRetryWrite =
+    !args.retrying &&
+    options.retryWrites &&
+    options.session &&
+    isRetryableWritesSupported(topology) &&
+    !options.session.inTransaction();
+
+  topology.selectServer(writableServerSelector(), (err, server) => {
+    if (err) {
+      callback(err, null);
+      return;
+    }
+
+    const handler = (err, result) => {
+      if (!err) return callback(null, result);
+      if (!(err instanceof MongoNetworkError) && !err.message.match(/not master/)) {
+        return callback(err);
+      }
+
+      if (willRetryWrite) {
+        const newArgs = Object.assign({}, args, { retrying: true });
+        return executeWriteOperation(newArgs, options, callback);
+      }
+
+      return callback(err);
+    };
+
+    if (callback.operationId) {
+      handler.operationId = callback.operationId;
+    }
+
+    // increment and assign txnNumber
+    if (willRetryWrite) {
+      options.session.incrementTransactionNumber();
+      options.willRetryWrite = willRetryWrite;
+    }
+
+    // optionally autostart transaction if requested
+    // ensureTransactionAutostart(options.session);
+
+    // execute the write operation
+    server[op](ns, ops, options, handler);
+
+    // we need to increment the statement id if we're in a transaction
+    if (options.session && options.session.inTransaction()) {
+      options.session.incrementStatementId(ops.length);
+    }
+  });
 }
 
 /**

@@ -11,7 +11,7 @@ const BSON = require('../connection/utils').retrieveBSON();
 const createClientInfo = require('../topologies/shared').createClientInfo;
 const Logger = require('../connection/logger');
 const ServerDescription = require('./server_description').ServerDescription;
-const ReadPreference = require('../topologies/read_preference').ReadPreference;
+const ReadPreference = require('../topologies/read_preference');
 
 /**
  *
@@ -181,6 +181,113 @@ class Server extends EventEmitter {
 
     // write the operation to the pool
     this.s.pool.write(query, writeOptions, callback);
+  }
+
+  /**
+   * Insert one or more documents
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {array} ops An array of documents to insert
+   * @param {boolean} [options.ordered=true] Execute in order or out of order
+   * @param {object} [options.writeConcern={}] Write concern for the operation
+   * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
+   * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+   * @param {ClientSession} [options.session=null] Session to use for the operation
+   * @param {opResultCallback} callback A callback function
+   */
+  insert(ns, ops, options, callback) {
+    if (typeof options === 'function') {
+      (callback = options), (options = {}), (options = options || {});
+    }
+
+    const error = basicWriteValidations(this, options);
+    if (error) {
+      callback(error);
+      return;
+    }
+
+    // Check if we have collation support
+    if (this.description.maxWireVersion < 5 && options.collation) {
+      callback(new MongoError(`server ${this.name} does not support collation`));
+      return;
+    }
+
+    // Setup the docs as an array
+    ops = Array.isArray(ops) ? ops : [ops];
+
+    // Execute write
+    return this.s.wireProtocolHandler.insert(this.s.pool, ns, this.s.bson, ops, options, callback);
+  }
+
+  /**
+   * Perform one or more update operations
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {array} ops An array of updates
+   * @param {boolean} [options.ordered=true] Execute in order or out of order
+   * @param {object} [options.writeConcern={}] Write concern for the operation
+   * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
+   * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+   * @param {ClientSession} [options.session=null] Session to use for the operation
+   * @param {opResultCallback} callback A callback function
+   */
+  update(ns, ops, options, callback) {
+    if (typeof options === 'function') {
+      (callback = options), (options = {}), (options = options || {});
+    }
+
+    const error = basicWriteValidations(this, options);
+    if (error) {
+      callback(error, null);
+      return;
+    }
+
+    // Check if we have collation support
+    if (this.description.maxWireVersion < 5 && options.collation) {
+      callback(new MongoError(`server ${this.name} does not support collation`));
+      return;
+    }
+
+    // Setup the docs as an array
+    ops = Array.isArray(ops) ? ops : [ops];
+
+    // Execute write
+    return this.s.wireProtocolHandler.update(this.s.pool, ns, this.s.bson, ops, options, callback);
+  }
+
+  /**
+   * Perform one or more remove operations
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {array} ops An array of removes
+   * @param {boolean} [options.ordered=true] Execute in order or out of order
+   * @param {object} [options.writeConcern={}] Write concern for the operation
+   * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
+   * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+   * @param {ClientSession} [options.session=null] Session to use for the operation
+   * @param {opResultCallback} callback A callback function
+   */
+  remove(ns, ops, options, callback) {
+    if (typeof options === 'function') {
+      (callback = options), (options = {}), (options = options || {});
+    }
+
+    const error = basicWriteValidations(this, options);
+    if (error) {
+      callback(error, null);
+      return;
+    }
+
+    // Check if we have collation support
+    if (this.description.maxWireVersion < 5 && options.collation) {
+      callback(new MongoError(`server ${this.name} does not support collation`));
+      return;
+    }
+
+    // Setup the docs as an array
+    ops = Array.isArray(ops) ? ops : [ops];
+    // Execute write
+    return this.s.wireProtocolHandler.remove(this.s.pool, ns, this.s.bson, ops, options, callback);
   }
 }
 
