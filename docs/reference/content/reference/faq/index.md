@@ -13,7 +13,7 @@ title = "Frequently Asked Questions"
 | Setting | Default Value MongoClient.connect | Description |
 | :----------| :------------- | :------------- |
 | connectTimeoutMS | 30000 | The connectTimeoutMS sets the number of milliseconds a socket stays inactive before closing during the connection phase of the driver. That is to say, when the application initiates a connection, when a replica set connects to new members, or when a replica set reconnects to members. A value of 10000 milliseconds would mean the driver would wait up to 10 seconds for a response from a MongoDB server.|
-| socketTimeoutMS | 360000 | The socketTimeoutMS sets the number of milliseconds a socket stays inactive after the driver has successfully connected before closing. If the value is set to 360000 milliseconds, the socket closes if there is no activity during a 30 seconds window.|
+| socketTimeoutMS | 360000 | The socketTimeoutMS sets the number of milliseconds a socket stays inactive after the driver has successfully connected before closing. If the value is set to 360000 milliseconds, the socket closes if there is no activity during a 6 minutes window.|
 | maxTimeMS | N/A | The maxTimeMS setting specifies how long MongoDB should run an operation before cancelling it. If the maxTimeMS is set to 10000 milliseconds, any operation that runs over that limit returns a timeout error.|
 
 #### Fail fast during connection
