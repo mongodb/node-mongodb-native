@@ -8,6 +8,8 @@ const calculateDurationInMs = require('../utils').calculateDurationInMs;
 const MongoTimeoutError = require('../error').MongoTimeoutError;
 const Server = require('./server');
 const relayEvents = require('../utils').relayEvents;
+const ReadPreference = require('../topologies/read_preference');
+const readPreferenceServerSelector = require('./server_selectors').readPreferenceServerSelector;
 
 // Global state
 let globalTopologyCounter = 0;
@@ -288,7 +290,19 @@ class Topology extends EventEmitter {
    * @param {opResultCallback} callback A callback function
    */
   command(ns, cmd, options, callback) {
-    callback(null, null);
+    if (typeof options === 'function') {
+      (callback = options), (options = {}), (options = options || {});
+    }
+
+    const readPreference = options.readPreference ? options.readPreference : ReadPreference.primary;
+    this.selectServer(readPreferenceServerSelector(readPreference), (err, server) => {
+      if (err) {
+        callback(err, null);
+        return;
+      }
+
+      server.command(ns, cmd, options, callback);
+    });
   }
 
   /**
@@ -375,13 +389,13 @@ function connectServers(topology, serverDescriptions) {
     );
 
     const server = new Server(serverDescription, {});
-    relayEvents(this.s.pool, this, [
+    relayEvents(server, topology, [
       'serverHeartbeatStarted',
       'serverHeartbeatSucceeded',
       'serverHeartbeatFailed'
     ]);
 
-    server.on('descriptionReceived', topology.serverUpdateHandler);
+    server.on('descriptionReceived', topology.serverUpdateHandler.bind(topology));
     server.on('connect', serverConnectEventHandler(server, topology));
     servers.set(serverDescription.address, server);
     server.connect();
@@ -405,13 +419,13 @@ function updateServers(topology, currentServerDescription) {
       );
 
       const server = new Server(serverDescription, {});
-      relayEvents(this.s.pool, this, [
+      relayEvents(server, topology, [
         'serverHeartbeatStarted',
         'serverHeartbeatSucceeded',
         'serverHeartbeatFailed'
       ]);
 
-      server.on('descriptionReceived', topology.serverUpdateHandler);
+      server.on('descriptionReceived', topology.serverUpdateHandler.bind(topology));
       server.on('connect', serverConnectEventHandler(server, topology));
       topology.s.servers.set(serverDescription.address, server);
       server.connect();
