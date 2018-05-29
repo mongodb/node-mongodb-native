@@ -72,15 +72,15 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
 // Needs to support legacy mass insert as well as ordered/unordered legacy
 // emulation
 //
-WireProtocol.prototype.insert = function(pool, ismaster, ns, bson, ops, options, callback) {
+WireProtocol.prototype.insert = function(pool, ns, bson, ops, options, callback) {
   executeWrite(pool, bson, 'insert', 'documents', ns, ops, options, callback);
 };
 
-WireProtocol.prototype.update = function(pool, ismaster, ns, bson, ops, options, callback) {
+WireProtocol.prototype.update = function(pool, ns, bson, ops, options, callback) {
   executeWrite(pool, bson, 'update', 'updates', ns, ops, options, callback);
 };
 
-WireProtocol.prototype.remove = function(pool, ismaster, ns, bson, ops, options, callback) {
+WireProtocol.prototype.remove = function(pool, ns, bson, ops, options, callback) {
   executeWrite(pool, bson, 'delete', 'deletes', ns, ops, options, callback);
 };
 

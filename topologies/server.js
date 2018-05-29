@@ -810,15 +810,7 @@ Server.prototype.insert = function(ns, ops, options, callback) {
   ops = Array.isArray(ops) ? ops : [ops];
 
   // Execute write
-  return self.wireProtocolHandler.insert(
-    self.s.pool,
-    self.ismaster,
-    ns,
-    self.s.bson,
-    ops,
-    options,
-    callback
-  );
+  return self.wireProtocolHandler.insert(self.s.pool, ns, self.s.bson, ops, options, callback);
 };
 
 /**
@@ -853,15 +845,7 @@ Server.prototype.update = function(ns, ops, options, callback) {
   // Setup the docs as an array
   ops = Array.isArray(ops) ? ops : [ops];
   // Execute write
-  return self.wireProtocolHandler.update(
-    self.s.pool,
-    self.ismaster,
-    ns,
-    self.s.bson,
-    ops,
-    options,
-    callback
-  );
+  return self.wireProtocolHandler.update(self.s.pool, ns, self.s.bson, ops, options, callback);
 };
 
 /**
@@ -896,15 +880,7 @@ Server.prototype.remove = function(ns, ops, options, callback) {
   // Setup the docs as an array
   ops = Array.isArray(ops) ? ops : [ops];
   // Execute write
-  return self.wireProtocolHandler.remove(
-    self.s.pool,
-    self.ismaster,
-    ns,
-    self.s.bson,
-    ops,
-    options,
-    callback
-  );
+  return self.wireProtocolHandler.remove(self.s.pool, ns, self.s.bson, ops, options, callback);
 };
 
 /**
