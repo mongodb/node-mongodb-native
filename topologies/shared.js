@@ -417,16 +417,6 @@ const isRetryableWritesSupported = function(topology) {
   return true;
 };
 
-/**
- * Relays events for a given listener and emitter
- *
- * @param {EventEmitter} listener the EventEmitter to listen to the events for
- * @param {EventEmitter} emitter the EventEmitter to relay the events on
- */
-function relayEvents(listener, emitter, events) {
-  events.forEach(eventName => listener.on(eventName, event => emitter.emit(eventName, event)));
-}
-
 module.exports.SessionMixins = SessionMixins;
 module.exports.resolveClusterTime = resolveClusterTime;
 module.exports.inquireServerState = inquireServerState;
@@ -441,4 +431,3 @@ module.exports.diff = diff;
 module.exports.Interval = Interval;
 module.exports.Timeout = Timeout;
 module.exports.isRetryableWritesSupported = isRetryableWritesSupported;
-module.exports.relayEvents = relayEvents;

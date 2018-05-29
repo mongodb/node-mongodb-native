@@ -19,7 +19,7 @@ var inherits = require('util').inherits,
   createCompressionInfo = require('./shared').createCompressionInfo,
   resolveClusterTime = require('./shared').resolveClusterTime,
   SessionMixins = require('./shared').SessionMixins,
-  relayEvents = require('./shared').relayEvents;
+  relayEvents = require('../utils').relayEvents;
 
 function getSaslSupportedMechs(options) {
   if (!options) {

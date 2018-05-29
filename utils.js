@@ -23,7 +23,18 @@ const calculateDurationInMs = started => {
   return (hrtime[0] * 1e9 + hrtime[1]) / 1e6;
 };
 
+/**
+ * Relays events for a given listener and emitter
+ *
+ * @param {EventEmitter} listener the EventEmitter to listen to the events from
+ * @param {EventEmitter} emitter the EventEmitter to relay the events to
+ */
+function relayEvents(listener, emitter, events) {
+  events.forEach(eventName => listener.on(eventName, event => emitter.emit(eventName, event)));
+}
+
 module.exports = {
   uuidV4,
-  calculateDurationInMs
+  calculateDurationInMs,
+  relayEvents
 };
