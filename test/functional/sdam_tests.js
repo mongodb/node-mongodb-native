@@ -45,8 +45,6 @@ describe('SDAM', function() {
       client.on('fullsetup', function(topology) {
         topology.close(true);
 
-        // console.log(JSON.stringify(operations.topologyDescriptionChanged, null, 2));
-
         for (var name in operations) {
           test.ok(operations[name].length > 0);
         }
@@ -98,8 +96,6 @@ describe('SDAM', function() {
       client.on('fullsetup', function(topology) {
         setTimeout(function() {
           topology.close();
-
-          // console.log(JSON.stringify(operations, null, 2));
 
           for (var name in operations) {
             test.ok(operations[name].length > 0);

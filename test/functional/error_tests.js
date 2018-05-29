@@ -267,8 +267,8 @@ describe.skip('Errors', function() {
     test: function(done) {
       var client = null;
 
-      process.once('uncaughtException', function(err) {
-        console.log(err);
+      // TODO: check exception and fix test
+      process.once('uncaughtException', function() {
         client.close();
         done();
       });

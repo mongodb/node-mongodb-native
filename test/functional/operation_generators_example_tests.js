@@ -2016,8 +2016,6 @@ describe('Operation (Generators)', function() {
         test.equal(3, count);
 
         client.close();
-      }).catch(function(err) {
-        console.log(err.stack);
       });
       // END
     }
@@ -3225,8 +3223,6 @@ describe('Operation (Generators)', function() {
         } catch (err) {} // eslint-disable-line
 
         client.close();
-      }).catch(function(err) {
-        console.log(err.stack);
       });
       // END
     }
@@ -4618,8 +4614,6 @@ describe('Operation (Generators)', function() {
         test.equal(false, result);
 
         client.close();
-      }).catch(function(e) {
-        console.dir(e);
       });
       // END
     }
@@ -6607,9 +6601,7 @@ describe('Operation (Generators)', function() {
           });
         }
 
-        // count just to make sure we're getting something back
-        var count = yield collection.count();
-        console.log('counting %d docs.', count);
+        yield collection.count();
 
         var options = {
           maxTimeMS: 10000,

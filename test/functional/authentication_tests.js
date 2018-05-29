@@ -376,10 +376,7 @@ describe('Authentication', function() {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
-          // console.log("------------------- 0")
-
           db.admin().addUser('admin', 'admin', function(err) {
-            // console.log("------------------- 1")
             test.equal(null, err);
 
             // Attempt to save a document
@@ -400,13 +397,11 @@ describe('Authentication', function() {
 
             // Execute the operations
             batch.execute(function(err) {
-              // console.log("------------------- 2")
               test.ok(err != null);
               test.ok(err.code != null);
               test.ok(err.errmsg != null);
 
               configuration.manager.restart(true).then(function() {
-                // console.log("------------------- 3")
                 client.close();
                 done();
               });
@@ -534,7 +529,6 @@ describe('Authentication', function() {
       }
     ];
 
-    // console.log("--------------------- setup 0")
     // Merge in any node start up options
     for (var i = 0; i < nodes.length; i++) {
       for (var name in rsOptions.server) {
@@ -544,24 +538,18 @@ describe('Authentication', function() {
 
     // Create a manager
     var replicasetManager = new ReplSetManager('mongod', nodes, rsOptions.client);
-    // console.log("--------------------- setup 1")
     // Purge the set
     replicasetManager.purge().then(function() {
-      // console.log("--------------------- setup 2")
       // Start the server
       replicasetManager
         .start()
         .then(function() {
-          // console.log("--------------------- setup 3")
           setTimeout(function() {
-            // console.log("--------------------- setup 4")
             callback(null, replicasetManager);
           }, 10000);
         })
-        .catch(function(e) {
-          console.log(e.stack);
+        .catch(function() {
           process.exit(0);
-          // // console.dir(e);
         });
     });
   };
@@ -982,12 +970,10 @@ describe('Authentication', function() {
           test.equal(null, err);
           var p_db = client.db(configuration.db);
 
-          // console.log("------------------------------------------- 0")
           // Add a user
           p_db.admin().addUser('admin', 'admin', { w: 3, wtimeout: 25000 }, function(err) {
             test.equal(null, err);
             client.close();
-            // console.log("------------------------------------------- 1")
 
             new MongoClient(
               new ReplSet([new Server('localhost', 31000), new Server('localhost', 31001)], {
@@ -998,8 +984,6 @@ describe('Authentication', function() {
             ).connect(function(err, client) {
               test.equal(null, err);
               var p_db = client.db(configuration.db);
-
-              // console.log("------------------------------------------- 2")
 
               p_db.admin().addUser('me', 'secret', { w: 3, wtimeout: 25000 }, function(err) {
                 test.equal(null, err);
@@ -1019,60 +1003,42 @@ describe('Authentication', function() {
                   test.equal(null, err);
                   var db = client.db(configuration.db);
 
-                  // console.log("------------------------------------------- 4")
                   db.collection('test').insert({ a: 1 }, function(err) {
-                    // console.log("------------------------------------------- 5")
                     test.equal(null, err);
 
                     // Logout
                     client.logout(function() {
-                      // console.log("------------------------------------------- 6")
-
                       // Should fail
                       db.collection('test').findOne(function(err) {
-                        // console.log("------------------------------------------- 7")
                         test.ok(err != null);
 
                         // Connect
                         MongoClient.connect(config, function(err, client) {
                           test.equal(null, err);
                           var db = client.db(configuration.db);
-                          // console.log("------------------------------------------- 8")
-                          // // console.dir(err)
 
                           replicasetManager
                             .secondaries()
                             .then(function(managers) {
-                              // console.log("------------------------------------------- 9")
                               // Shutdown the first secondary
                               managers[0]
                                 .stop()
                                 .then(function() {
-                                  // console.log("------------------------------------------- 10")
-
                                   // Shutdown the second secondary
                                   managers[1]
                                     .stop()
                                     .then(function() {
-                                      // console.log("------------------------------------------- 11")
-
                                       // Let's restart a secondary
                                       managers[0]
                                         .start()
                                         .then(function() {
-                                          // console.log("------------------------------------------- 12")
-
                                           // Let's restart a secondary
                                           managers[1]
                                             .start()
                                             .then(function() {
                                               client.topology.once('joined', function() {
-                                                // console.log("------------------------------------------- 13")
-                                                // // console.dir(err)
                                                 // Should fail
                                                 db.collection('test').findOne(function(err) {
-                                                  // console.log("------------------------------------------- 14")
-                                                  // // console.dir(err)
                                                   test.equal(null, err);
 
                                                   client.close();
@@ -1314,7 +1280,6 @@ describe('Authentication', function() {
           test.ok(client != null);
           var db_p = client.db(configuration.db);
 
-          // console.log("-------------------------------------------------- 0")
           db_p
             .admin()
             .addUser('me', 'secret', { w: 3, wtimeout: 25000 }, function runWhatever(err) {
@@ -1332,18 +1297,14 @@ describe('Authentication', function() {
                 var db_p = client.db(configuration.db);
 
                 db_p.collection('test').insert({ a: 1 }, { w: 1 }, function(err) {
-                  // console.log("-------------------------------------------------- 3")
                   test.equal(null, err);
 
                   db_p.addUser('test', 'test', { w: 3, wtimeout: 25000 }, function(err, result) {
-                    // console.log("-------------------------------------------------- 4")
                     test.equal(null, err);
                     test.ok(result != null);
 
                     client.topology.on('joined', function(t) {
-                      // console.log("-------------------------------------------------- joined 5 :: " + t + " :: " + s.name)
                       if (t === 'primary') {
-                        // console.log("-------------------------------------------------- 6")
                         var counter = 10;
                         var errors = 0;
 
@@ -1353,8 +1314,6 @@ describe('Authentication', function() {
                             .find({ a: 1 })
                             .setReadPreference(ReadPreference.SECONDARY)
                             .toArray(function(err) {
-                              // console.log("-------------------------------------------------- 7")
-                              // console.dir(err)
                               counter = counter - 1;
 
                               if (err != null) {

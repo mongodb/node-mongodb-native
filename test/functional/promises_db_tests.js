@@ -145,7 +145,7 @@ describe('Promises (Db)', function() {
             done();
           })
           .catch(function(err) {
-            console.log(err.stack);
+            test.ok(err != null);
           });
       });
     }
@@ -237,13 +237,10 @@ describe('Promises (Db)', function() {
           test.ok(col != null);
           var db = client.db(configuration.db);
 
-          // console.log("--- 0")
           db.renameCollection('promiseCollection1', 'promiseCollection2').then(function(col) {
-            // console.log("--- 1")
             test.ok(col != null);
 
             db.dropCollection('promiseCollection2').then(function(r) {
-              // console.log("--- 2")
               test.ok(r);
 
               client.close();
@@ -283,7 +280,7 @@ describe('Promises (Db)', function() {
             done();
           })
           .catch(function(e) {
-            console.dir(e);
+            test.ok(e != null);
           });
       });
     }

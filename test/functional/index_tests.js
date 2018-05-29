@@ -1213,9 +1213,6 @@ describe('Indexes', function() {
   //             test.equal("a_1", indexName);
 
   //             collection.indexes(function(err, indexes) {
-  //               console.log("-----------------------------------------------")
-  //               console.dir(err)
-  //               console.dir(indexes)
 
   //               client.close();
   //               done();

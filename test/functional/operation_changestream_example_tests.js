@@ -26,7 +26,6 @@ describe('Changestream Examples', function() {
           // Start Changestream Example 1
           const changeStream = collection.watch();
           changeStream.next(function(err, next) {
-            if (err) return console.log(err);
             expect(err).to.equal(null);
             expect(next).to.exist;
 
@@ -41,7 +40,6 @@ describe('Changestream Examples', function() {
           // Insert something
           setTimeout(function() {
             collection.insertOne({ a: 1 }, function(err, result) {
-              if (err) return console.log(err);
               expect(err).to.equal(null);
               expect(result).to.exist;
             });
@@ -81,7 +79,6 @@ describe('Changestream Examples', function() {
         // Insert something
         setTimeout(function() {
           collection.insertOne({ a: 1 }, function(err, result) {
-            if (err) return console.log(err);
             expect(err).to.equal(null);
             expect(result).to.exist;
           });
@@ -119,7 +116,6 @@ describe('Changestream Examples', function() {
         // Insert something
         setTimeout(function() {
           collection.insertOne({ a: 1 }, function(err, result) {
-            if (err) return console.log(err);
             expect(err).to.equal(null);
             expect(result).to.exist;
           });
@@ -159,7 +155,6 @@ describe('Changestream Examples', function() {
         // Insert something
         setTimeout(function() {
           collection.insertOne({ a: 1 }, function(err, result) {
-            if (err) return console.log(err);
             expect(err).to.equal(null);
             expect(result).to.exist;
           });
@@ -187,11 +182,9 @@ describe('Changestream Examples', function() {
 
         const changeStream = collection.watch();
         changeStream.hasNext(function(err, change) {
-          if (err) return console.log(err);
           expect(err).to.equal(null);
           expect(change).to.exist;
           changeStream.next(function(err, change) {
-            if (err) return console.log(err);
             expect(err).to.equal(null);
 
             resumeToken = change._id;
@@ -200,12 +193,10 @@ describe('Changestream Examples', function() {
             expect(changeStream.resumeToken).to.exist;
 
             changeStream.close(function(err) {
-              if (err) return console.log(err);
               expect(err).to.equal(null);
               const newChangeStream = collection.watch({ resumeAfter: resumeToken });
 
               newChangeStream.next(function(err, next) {
-                if (err) return console.log(err);
                 expect(err).to.equal(null);
                 expect(next).to.exist;
 
@@ -222,12 +213,10 @@ describe('Changestream Examples', function() {
         // Insert something
         setTimeout(function() {
           collection.insertOne({ a: 1 }, function(err, result) {
-            if (err) return console.log(err);
             expect(err).to.equal(null);
             expect(result).to.exist;
             // Insert something else
             collection.insertOne({ a: 2 }, function(err, result) {
-              if (err) return console.log(err);
               expect(err).to.equal(null);
               expect(result).to.exist;
             });

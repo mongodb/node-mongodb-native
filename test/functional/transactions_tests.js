@@ -147,7 +147,6 @@ describe('Transactions (spec)', function() {
                     event.commandName
                   )
                 ) {
-                  // console.dir(event, { depth: null });
                   commandEvents.push(event);
                 }
               });
@@ -166,9 +165,6 @@ describe('Transactions (spec)', function() {
                 .catch(err => {
                   // If the driver throws an exception / returns an error while executing this series
                   // of operations, store the error message.
-                  // console.log('error occurred during series of operations');
-                  // console.dir(err);
-                  // operationError = err;
                   throw err;
                 })
                 .then(() => {
@@ -309,8 +305,6 @@ function extractBulkRequests(requests) {
  * @param {Object} context a context object containing sessions used for the test
  */
 function testOperation(operation, obj, context) {
-  // console.log('testing operation: ', operation.name);
-
   const opOptions = {};
   const args = [];
   if (operation.arguments) {

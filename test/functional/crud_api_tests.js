@@ -1106,7 +1106,6 @@ describe('CRUD API', function() {
         var db = client.db(configuration.db);
         var col = db.collection('t22_1');
         col.insertMany([{ a: 1, b: 2 }, { a: 1, b: 3 }, { a: 1, b: 4 }], function(err, r) {
-          console.dir(err);
           expect(err).to.not.exist;
           expect(r.insertedCount).to.equal(3);
 
