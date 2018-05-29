@@ -7,6 +7,7 @@ const monitoring = require('./monitoring');
 const calculateDurationInMs = require('../utils').calculateDurationInMs;
 const MongoTimeoutError = require('../error').MongoTimeoutError;
 const Server = require('./server');
+const relayEvents = require('../utils').relayEvents;
 
 // Global state
 let globalTopologyCounter = 0;
@@ -35,7 +36,7 @@ class Topology extends EventEmitter {
   /**
    * Create a topology
    *
-   * @param {Array|String} seedlist a string list, or array of Server instances to connect to
+   * @param {Array|String} [seedlist] a string list, or array of Server instances to connect to
    * @param {Object} [options] Optional settings
    * @param {Number} [options.localThresholdMS=15] The size of the latency window for selecting among multiple suitable servers
    * @param {Number} [options.serverSelectionTimeoutMS=30000] How long to block for server selection before throwing an error
@@ -43,12 +44,21 @@ class Topology extends EventEmitter {
    */
   constructor(seedlist, options) {
     super();
+    if (typeof options === 'undefined') {
+      options = seedlist;
+      seedlist = [];
+
+      // this is for legacy single server constructor support
+      if (options.host) {
+        seedlist.push({ host: options.host, port: options.port });
+      }
+    }
+
     seedlist = seedlist || [];
     options = Object.assign({}, TOPOLOGY_DEFAULTS, options);
 
     const topologyType = topologyTypeFromSeedlist(seedlist, options);
     const topologyId = globalTopologyCounter++;
-
     const serverDescriptions = seedlist.reduce((result, seed) => {
       const address = seed.port ? `${seed.host}:${seed.port}` : `${seed.host}:27017`;
       result.set(address, new ServerDescription(address));
@@ -72,8 +82,7 @@ class Topology extends EventEmitter {
         options
       ),
       serverSelectionTimeoutMS: options.serverSelectionTimeoutMS,
-      heartbeatFrequencyMS: options.heartbeatFrequencyMS,
-      ServerClass: options.ServerClass || null /* eventually our Server class, but null for now */
+      heartbeatFrequencyMS: options.heartbeatFrequencyMS
     };
   }
 
@@ -104,16 +113,15 @@ class Topology extends EventEmitter {
       )
     );
 
-    connectServers(this, Array.from(this.s.description.servers.keys()));
+    connectServers(this, Array.from(this.s.description.servers.values()));
   }
 
   /**
    * Close this topology
    */
   close(callback) {
-    this.s.servers.forEach(server => {
-      server.destroy();
-    });
+    // destroy all child servers
+    this.s.servers.forEach(server => server.destroy());
 
     // emit an event for close
     this.emit('topologyClosed', new monitoring.TopologyClosedEvent(this.s.id));
@@ -178,7 +186,7 @@ class Topology extends EventEmitter {
     );
 
     // update server list from updated descriptions
-    updateServers(this);
+    updateServers(this, serverDescription);
 
     this.emit(
       'topologyDescriptionChanged',
@@ -304,6 +312,9 @@ class Topology extends EventEmitter {
   }
 }
 
+// legacy aliases
+Topology.prototype.destroy = Topology.prototype.close;
+
 function topologyTypeFromSeedlist(seedlist, options) {
   if (seedlist.length === 1 && !options.replicaset) return TopologyType.Single;
   if (options.replicaset) return TopologyType.ReplicaSetNoPrimary;
@@ -315,11 +326,13 @@ function randomSelection(array) {
 }
 
 /**
+ * Selects servers using the provided selector
+ * NOTE: this is an internal helper, not meant to be used directly
  *
- * @param {*} topology
- * @param {*} selector
- * @param {*} options
- * @param {*} callback
+ * @param {Topology} topology The topology to select servers from
+ * @param {function} selector The actual predicate used for selecting servers
+ * @param {object} options Optional settings
+ * @param {function} callback The callback used to convey errors or the resultant servers
  */
 function selectServers(topology, selector, timeout, start, callback) {
   const serverDescriptions = Array.from(topology.description.servers.values());
@@ -334,8 +347,7 @@ function selectServers(topology, selector, timeout, start, callback) {
   }
 
   if (descriptions.length) {
-    // TODO: obviously return the actual server in the future
-    const servers = descriptions.map(d => new Server(d));
+    const servers = descriptions.map(d => topology.s.servers.get(d.address));
     return callback(null, servers);
   }
 
@@ -347,22 +359,64 @@ function selectServers(topology, selector, timeout, start, callback) {
   // TODO: loop this, add monitoring
 }
 
-function connectServers(topology, servers) {
-  const serverInstances = servers.reduce((servers, serverAddress) => {
+/**
+ * Create `Server` instances for all initially known servers, connect them, and assign
+ * them to the passed in `Topology`.
+ *
+ * @param {Topology} topology The topology responsible for the servers
+ * @param {ServerDescription[]} serverDescriptions A list of server descriptions to connect
+ */
+function connectServers(topology, serverDescriptions) {
+  topology.s.servers = serverDescriptions.reduce((servers, serverDescription) => {
     // publish an open event for each ServerDescription created
-    topology.emit('serverOpening', new monitoring.ServerOpeningEvent(topology.s.id, serverAddress));
+    topology.emit(
+      'serverOpening',
+      new monitoring.ServerOpeningEvent(topology.s.id, serverDescription.address)
+    );
 
-    const server = new Server();
-    servers.set(serverAddress, server);
+    const server = new Server(serverDescription, {});
+    relayEvents(this.s.pool, this, [
+      'serverHeartbeatStarted',
+      'serverHeartbeatSucceeded',
+      'serverHeartbeatFailed'
+    ]);
+
+    server.on('descriptionReceived', topology.serverUpdateHandler);
+    server.on('connect', serverConnectEventHandler(server, topology));
+    servers.set(serverDescription.address, server);
     server.connect();
     return servers;
   }, new Map());
-
-  topology.s.servers = serverInstances;
 }
 
-function updateServers(topology) {
-  // TODO: implement code to add NEW servers
+function updateServers(topology, currentServerDescription) {
+  // update the internal server's description
+  if (topology.s.servers.has(currentServerDescription.address)) {
+    const server = topology.s.servers.get(currentServerDescription.address);
+    server.s.description = currentServerDescription;
+  }
+
+  // add new servers for all descriptions we currently don't know about locally
+  for (const serverDescription of topology.description.servers.values()) {
+    if (!topology.s.servers.has(serverDescription.address)) {
+      topology.emit(
+        'serverOpening',
+        new monitoring.ServerOpeningEvent(topology.s.id, serverDescription.address)
+      );
+
+      const server = new Server(serverDescription, {});
+      relayEvents(this.s.pool, this, [
+        'serverHeartbeatStarted',
+        'serverHeartbeatSucceeded',
+        'serverHeartbeatFailed'
+      ]);
+
+      server.on('descriptionReceived', topology.serverUpdateHandler);
+      server.on('connect', serverConnectEventHandler(server, topology));
+      topology.s.servers.set(serverDescription.address, server);
+      server.connect();
+    }
+  }
 
   // for all servers no longer known, remove their descriptions and destroy their instances
   for (const entry of topology.s.servers) {
@@ -378,6 +432,12 @@ function updateServers(topology) {
       topology.emit('serverClosed', new monitoring.ServerClosedEvent(topology.s.id, serverAddress))
     );
   }
+}
+
+function serverConnectEventHandler(server, topology) {
+  return function(/* ismaster */) {
+    topology.emit('connect');
+  };
 }
 
 /**
