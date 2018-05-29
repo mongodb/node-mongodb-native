@@ -10,7 +10,8 @@ const ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support');
 const BSON = require('../connection/utils').retrieveBSON();
 const createClientInfo = require('../topologies/shared').createClientInfo;
 const Logger = require('../connection/logger');
-const ServerDescription = require('./server_description');
+const ServerDescription = require('./server_description').ServerDescription;
+const ReadPreference = require('../topologies/read_preference').ReadPreference;
 
 /**
  *
@@ -116,6 +117,93 @@ class Server extends EventEmitter {
     if (typeof callback === 'function') {
       callback(null, null);
     }
+  }
+
+  /**
+   * Execute a command
+   *
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {object} cmd The command hash
+   * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+   * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
+   * @param {Boolean} [options.checkKeys=false] Specify if the bson parser should validate keys.
+   * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+   * @param {Boolean} [options.fullResult=false] Return the full envelope instead of just the result document.
+   * @param {ClientSession} [options.session=null] Session to use for the operation
+   * @param {opResultCallback} callback A callback function
+   */
+  command(ns, cmd, options, callback) {
+    if (typeof options === 'function') {
+      (callback = options), (options = {}), (options = options || {});
+    }
+
+    const error = basicReadValidations(this, options);
+    if (error) {
+      return callback(error, null);
+    }
+
+    // Clone the options
+    options = Object.assign({}, options, { wireProtocolCommand: false });
+
+    // Debug log
+    if (this.s.logger.isDebug()) {
+      this.s.logger.debug(
+        `executing command [${JSON.stringify({ ns, cmd, options })}] against ${this.name}`
+      );
+    }
+
+    // Check if we have collation support
+    if (this.description.maxWireVersion < 5 && cmd.collation) {
+      callback(new MongoError(`server ${this.name} does not support collation`));
+      return;
+    }
+
+    // Are we executing against a specific topology
+    const topology = options.topology || {};
+    // Create the query object
+    const query = this.s.wireProtocolHandler.command(this.s.bson, ns, cmd, {}, topology, options);
+    // Set slave OK of the query
+    query.slaveOk = options.readPreference ? options.readPreference.slaveOk() : false;
+
+    // write options
+    const writeOptions = {
+      raw: typeof options.raw === 'boolean' ? options.raw : false,
+      promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
+      promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
+      promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false,
+      command: true,
+      monitoring: typeof options.monitoring === 'boolean' ? options.monitoring : false,
+      fullResult: typeof options.fullResult === 'boolean' ? options.fullResult : false,
+      requestId: query.requestId,
+      socketTimeout: typeof options.socketTimeout === 'number' ? options.socketTimeout : null,
+      session: options.session || null
+    };
+
+    // write the operation to the pool
+    this.s.pool.write(query, writeOptions, callback);
+  }
+}
+
+function basicWriteValidations(server) {
+  if (!server.s.pool) {
+    return new MongoError('server instance is not connected');
+  }
+
+  if (server.s.pool.isDestroyed()) {
+    return new MongoError('server instance pool was destroyed');
+  }
+
+  return null;
+}
+
+function basicReadValidations(server, options) {
+  const error = basicWriteValidations(server, options);
+  if (error) {
+    return error;
+  }
+
+  if (options.readPreference && !(options.readPreference instanceof ReadPreference)) {
+    return new Error('readPreference must be an instance of ReadPreference');
   }
 }
 
