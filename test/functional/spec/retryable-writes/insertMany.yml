@@ -6,7 +6,10 @@ minServerVersion: '3.6'
 tests:
     -
         description: "InsertMany succeeds after one network error"
+        clientOptions:
+            retryWrites: true
         failPoint:
+            configureFailPoint: onPrimaryTransactionalWrite
             mode: { times: 1 }
         operation:
             name: "insertMany"
@@ -25,7 +28,10 @@ tests:
                     - { _id: 3, x: 33 }
     -
         description: "InsertMany with unordered execution"
+        clientOptions:
+            retryWrites: true
         failPoint:
+            configureFailPoint: onPrimaryTransactionalWrite
             mode: { times: 1 }
         operation:
             name: "insertMany"
@@ -44,6 +50,8 @@ tests:
                     - { _id: 3, x: 33 }
     -
         description: "InsertMany fails after multiple network errors"
+        clientOptions:
+            retryWrites: true
         failPoint:
             # Normally, a mongod will insert the documents as a batch with a
             # single commit. If this fails, mongod may try to insert each
@@ -51,6 +59,7 @@ tests:
             # single insert command may trigger the failpoint twice on each
             # driver attempt. This test permanently enables the fail point to
             # ensure the retry attempt always fails.
+            configureFailPoint: onPrimaryTransactionalWrite
             mode: "alwaysOn"
             data: { failBeforeCommitExceptionCode: 1 }
         operation:

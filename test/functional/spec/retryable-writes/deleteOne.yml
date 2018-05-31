@@ -7,7 +7,10 @@ minServerVersion: '3.6'
 tests:
     -
         description: "DeleteOne is committed on first attempt"
+        clientOptions:
+            retryWrites: true
         failPoint:
+            configureFailPoint: onPrimaryTransactionalWrite
             mode: { times: 1 }
         operation:
             name: "deleteOne"
@@ -21,7 +24,10 @@ tests:
                     - { _id: 2, x: 22 }
     -
         description: "DeleteOne is not committed on first attempt"
+        clientOptions:
+            retryWrites: true
         failPoint:
+            configureFailPoint: onPrimaryTransactionalWrite
             mode: { times: 1 }
             data: { failBeforeCommitExceptionCode: 1 }
         operation:
@@ -36,7 +42,10 @@ tests:
                     - { _id: 2, x: 22 }
     -
         description: "DeleteOne is never committed"
+        clientOptions:
+            retryWrites: true
         failPoint:
+            configureFailPoint: onPrimaryTransactionalWrite
             mode: { times: 2 }
             data: { failBeforeCommitExceptionCode: 1 }
         operation:
