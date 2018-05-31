@@ -2,27 +2,20 @@
 
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
-const ChangeStream = require('../../lib/change_stream');
 const MongoClient = require('../../lib/mongo_client');
 const ObjectId = require('../../index').ObjectId;
 const Timestamp = require('../../index').Timestamp;
 const Long = require('../../index').Long;
+const GET_MORE_NON_RESUMABLE_CODES = require('../../lib/error_codes').GET_MORE_NON_RESUMABLE_CODES;
 
-describe.only('Change Stream Resume Tests', function() {
+describe('Change Stream Resume Tests', function() {
   const test = {};
-  const DEFAULT_IS_MASTER = {
+  const DEFAULT_IS_MASTER = Object.assign({}, mock.DEFAULT_ISMASTER, {
     setName: 'rs',
     setVersion: 1,
-    maxBsonObjectSize: 16777216,
-    maxMessageSizeBytes: 48000000,
-    maxWriteBatchSize: 1000,
-    localTime: new Date(),
     maxWireVersion: 7,
-    minWireVersion: 0,
-    ok: 1,
-    ismaster: true,
     secondary: false
-  };
+  });
 
   const AGGREGATE_RESPONSE = {
     ok: 1,
@@ -150,7 +143,7 @@ describe.only('Change Stream Resume Tests', function() {
       }
     ])
     .concat(
-      Array.from(ChangeStream.GET_MORE_NON_RESUMABLE_CODES).map(code => ({
+      Array.from(GET_MORE_NON_RESUMABLE_CODES).map(code => ({
         description: `should not resume on error code ${code}`,
         passing: false,
         errmsg: 'firstGetMoreError',
