@@ -15,10 +15,11 @@ that drivers can use to prove their conformance to the Retryable Writes spec.
 Several prose tests, which are not easily expressed in YAML, are also presented
 in this file. Those tests will need to be manually implemented by each driver.
 
-Tests will require a MongoClient with ``retryWrites`` enabled. Integration tests
-will require a running MongoDB cluster with server versions 3.6.0 or later. The
-``{setFeatureCompatibilityVersion: 3.6}`` admin command will also need to have
-been executed to enable support for retryable writes on the cluster.
+Tests will require a MongoClient created with options defined in the tests.
+Integration tests will require a running MongoDB cluster with server versions
+3.6.0 or later. The ``{setFeatureCompatibilityVersion: 3.6}`` admin command
+will also need to have been executed to enable support for retryable writes on
+the cluster.
 
 Server Fail Point
 =================
@@ -27,7 +28,9 @@ The tests depend on a server fail point, ``onPrimaryTransactionalWrite``, which
 allows us to force a network error before the server would return a write result
 to the client. The fail point also allows control whether the server will
 successfully commit the write via its ``failBeforeCommitExceptionCode`` option.
-The fail point is described in `SERVER-29606`_.
+Keep in mind that the fail point only triggers for transaction writes (i.e. write
+commands including ``txnNumber`` and ``lsid`` fields). See `SERVER-29606`_ for
+more information.
 
 .. _SERVER-29606: https://jira.mongodb.org/browse/SERVER-29606
 
@@ -135,15 +138,16 @@ Each YAML file has the following keys:
 
   - ``description``: The name of the test.
 
-  - ``failPoint``: Document describing options for configuring the
-    ``onPrimaryTransactionalWrite`` fail point on the primary server. This
-    document should be merged with the
-    ``{ configureFailPoint: "onPrimaryTransactionalWrite" }`` command document.
+  - ``clientOptions``: Parameters to pass to MongoClient().
+
+  - ``failPoint``: The ``configureFailPoint`` command document to run to
+    configure a fail point on the primary server. Drivers must ensure that
+    ``configureFailPoint`` is the first field in the command.
 
   - ``operation``: Document describing the operation to be executed. The
     operation should be executed through a collection object derived from a
-    driver session that has been created with the ``retryWrites=true`` option.
-    This will have some or all of the following fields:
+    client that has been created with ``clientOptions``. The operation will have
+    some or all of the following fields:
 
     - ``name``: The name of the operation as defined in the CRUD specification.
 
@@ -174,6 +178,37 @@ Each YAML file has the following keys:
 
       - ``data``: The data that should exist in the collection after the
         operation has been run.
+
+Split Batch Tests
+=================
+
+The YAML tests specify bulk write operations that are split by command type
+(e.g. sequence of insert, update, and delete commands). Multi-statement write
+operations may also be split due to ``maxWriteBatchSize``,
+``maxBsonObjectSize``, or ``maxMessageSizeBytes``.
+
+For instance, an insertMany operation with five 10 MB documents executed using
+OP_MSG payload type 0 (i.e. entire command in one document) would be split into
+five insert commands in order to respect the 16 MB ``maxBsonObjectSize`` limit.
+The same insertMany operation executed using OP_MSG payload type 1 (i.e. command
+arguments pulled out into a separate payload vector) would be split into two
+insert commands in order to respect the 48 MB ``maxMessageSizeBytes`` limit.
+
+Noting when a driver might split operations, the ``onPrimaryTransactionalWrite``
+fail point's ``skip`` option may be used to control when the fail point first
+triggers. Once triggered, the fail point will transition to the ``alwaysOn``
+state until disabled. Driver authors should also note that the server attempts
+to process all documents in a single insert command within a single commit (i.e.
+one insert command with five documents may only trigger the fail point once).
+This behavior is unique to insert commands (each statement in an update and
+delete command is processed independently).
+
+If testing an insert that is split into two commands, a ``skip`` of one will
+allow the fail point to trigger on the second insert command (because all
+documents in the first command will be processed in the same commit). When
+testing an update or delete that is split into two commands, the ``skip`` should
+be set to the number of statements in the first command to allow the fail point
+to trigger on the second command.
 
 Replica Set Failover Test
 =========================
