@@ -1022,7 +1022,6 @@ ReplSet.prototype.destroy = function(options) {
   // Clear out all monitoring
   for (var i = 0; i < this.intervalIds.length; i++) {
     this.intervalIds[i].stop();
-    this.intervalIds[i].stop();
   }
 
   // Reset list of intervalIds
