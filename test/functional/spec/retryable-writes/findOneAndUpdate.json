@@ -13,7 +13,11 @@
   "tests": [
     {
       "description": "FindOneAndUpdate is committed on first attempt",
+      "clientOptions": {
+        "retryWrites": true
+      },
       "failPoint": {
+        "configureFailPoint": "onPrimaryTransactionalWrite",
         "mode": {
           "times": 1
         }
@@ -53,7 +57,11 @@
     },
     {
       "description": "FindOneAndUpdate is not committed on first attempt",
+      "clientOptions": {
+        "retryWrites": true
+      },
       "failPoint": {
+        "configureFailPoint": "onPrimaryTransactionalWrite",
         "mode": {
           "times": 1
         },
@@ -96,7 +104,11 @@
     },
     {
       "description": "FindOneAndUpdate is never committed",
+      "clientOptions": {
+        "retryWrites": true
+      },
       "failPoint": {
+        "configureFailPoint": "onPrimaryTransactionalWrite",
         "mode": {
           "times": 2
         },

@@ -1,0 +1,266 @@
+data:
+    - { _id: 1, x: 11 }
+    - { _id: 2, x: 22 }
+
+# The failCommand failpoint will be in the next release after 3.7.9 but the
+# server does not plan to do another release for a few weeks.
+minServerVersion: '3.7.9'
+
+tests:
+    -
+        description: "InsertOne succeeds after connection failure"
+        failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+                closeConnection: true
+        operation:
+            name: "insertOne"
+            arguments:
+                document: { _id: 3, x: 33 }
+        outcome:
+            result:
+                insertedId: 3
+            collection:
+                data:
+                    - { _id: 1, x: 11 }
+                    - { _id: 2, x: 22 }
+                    - { _id: 3, x: 33 }
+    -
+        description: "InsertOne succeeds after NotMaster"
+        failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+                errorCode: 10107
+                closeConnection: false
+        operation:
+            name: "insertOne"
+            arguments:
+                document: { _id: 3, x: 33 }
+        outcome:
+            result:
+                insertedId: 3
+            collection:
+                data:
+                    - { _id: 1, x: 11 }
+                    - { _id: 2, x: 22 }
+                    - { _id: 3, x: 33 }
+    -
+        description: "InsertOne succeeds after NotMasterOrSecondary"
+        failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+                errorCode: 13436
+                closeConnection: false
+        operation:
+            name: "insertOne"
+            arguments:
+                document: { _id: 3, x: 33 }
+        outcome:
+            result:
+                insertedId: 3
+            collection:
+                data:
+                    - { _id: 1, x: 11 }
+                    - { _id: 2, x: 22 }
+                    - { _id: 3, x: 33 }
+    -
+        description: "InsertOne succeeds after NotMasterNoSlaveOk"
+        failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+                errorCode: 13435
+                closeConnection: false
+        operation:
+            name: "insertOne"
+            arguments:
+                document: { _id: 3, x: 33 }
+        outcome:
+            result:
+                insertedId: 3
+            collection:
+                data:
+                    - { _id: 1, x: 11 }
+                    - { _id: 2, x: 22 }
+                    - { _id: 3, x: 33 }
+    -
+        description: "InsertOne succeeds after InterruptedDueToReplStateChange"
+        failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+                errorCode: 11602
+                closeConnection: false
+        operation:
+            name: "insertOne"
+            arguments:
+                document: { _id: 3, x: 33 }
+        outcome:
+            result:
+                insertedId: 3
+            collection:
+                data:
+                    - { _id: 1, x: 11 }
+                    - { _id: 2, x: 22 }
+                    - { _id: 3, x: 33 }
+    -
+        description: "InsertOne succeeds after InterruptedAtShutdown"
+        failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+                errorCode: 11600
+                closeConnection: false
+        operation:
+            name: "insertOne"
+            arguments:
+                document: { _id: 3, x: 33 }
+        outcome:
+            result:
+                insertedId: 3
+            collection:
+                data:
+                    - { _id: 1, x: 11 }
+                    - { _id: 2, x: 22 }
+                    - { _id: 3, x: 33 }
+    -
+        description: "InsertOne succeeds after PrimarySteppedDown"
+        failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+                errorCode: 189
+                closeConnection: false
+        operation:
+            name: "insertOne"
+            arguments:
+                document: { _id: 3, x: 33 }
+        outcome:
+            result:
+                insertedId: 3
+            collection:
+                data:
+                    - { _id: 1, x: 11 }
+                    - { _id: 2, x: 22 }
+                    - { _id: 3, x: 33 }
+    -
+        description: "InsertOne succeeds after ShutdownInProgress"
+        failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+                errorCode: 91
+                closeConnection: false
+        operation:
+            name: "insertOne"
+            arguments:
+                document: { _id: 3, x: 33 }
+        outcome:
+            result:
+                insertedId: 3
+            collection:
+                data:
+                    - { _id: 1, x: 11 }
+                    - { _id: 2, x: 22 }
+                    - { _id: 3, x: 33 }
+    -
+        description: "InsertOne succeeds after HostNotFound"
+        failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+                errorCode: 7
+                closeConnection: false
+        operation:
+            name: "insertOne"
+            arguments:
+                document: { _id: 3, x: 33 }
+        outcome:
+            result:
+                insertedId: 3
+            collection:
+                data:
+                    - { _id: 1, x: 11 }
+                    - { _id: 2, x: 22 }
+                    - { _id: 3, x: 33 }
+    -
+        description: "InsertOne succeeds after HostUnreachable"
+        failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+                errorCode: 6
+                closeConnection: false
+        operation:
+            name: "insertOne"
+            arguments:
+                document: { _id: 3, x: 33 }
+        outcome:
+            result:
+                insertedId: 3
+            collection:
+                data:
+                    - { _id: 1, x: 11 }
+                    - { _id: 2, x: 22 }
+                    - { _id: 3, x: 33 }
+    -
+        description: "InsertOne succeeds after SocketException"
+        failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+                errorCode: 9001
+                closeConnection: false
+        operation:
+            name: "insertOne"
+            arguments:
+                document: { _id: 3, x: 33 }
+        outcome:
+            result:
+                insertedId: 3
+            collection:
+                data:
+                    - { _id: 1, x: 11 }
+                    - { _id: 2, x: 22 }
+                    - { _id: 3, x: 33 }
+    -
+        description: "InsertOne succeeds after NetworkTimeout"
+        failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+                errorCode: 89
+                closeConnection: false
+        operation:
+            name: "insertOne"
+            arguments:
+                document: { _id: 3, x: 33 }
+        outcome:
+            result:
+                insertedId: 3
+            collection:
+                data:
+                    - { _id: 1, x: 11 }
+                    - { _id: 2, x: 22 }
+                    - { _id: 3, x: 33 }
+    -
+        description: "InsertOne fails after Interrupted"
+        failPoint:
+            configureFailPoint: failCommand
+            mode: { times: 1 }
+            data:
+                errorCode: 11601
+                closeConnection: false
+        operation:
+            name: "insertOne"
+            arguments:
+                document: { _id: 3, x: 33 }
+        outcome:
+            error: true
+            collection:
+                data:
+                    - { _id: 1, x: 11 }
+                    - { _id: 2, x: 22 }
