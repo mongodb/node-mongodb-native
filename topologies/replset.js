@@ -8,7 +8,6 @@ const BasicCursor = require('../cursor');
 const retrieveBSON = require('../connection/utils').retrieveBSON;
 const Logger = require('../connection/logger');
 const MongoError = require('../error').MongoError;
-const errors = require('../error');
 const Server = require('./server');
 const ReplSetState = require('./replset_state');
 const clone = require('./shared').clone;
@@ -18,6 +17,7 @@ const createClientInfo = require('./shared').createClientInfo;
 const SessionMixins = require('./shared').SessionMixins;
 const isRetryableWritesSupported = require('./shared').isRetryableWritesSupported;
 const relayEvents = require('./shared').relayEvents;
+const isRetryableError = require('../error').isRetryableError;
 
 const defaultAuthProviders = require('../auth/defaultAuthProviders').defaultAuthProviders;
 
@@ -1206,7 +1206,7 @@ function executeWriteOperation(args, options, callback) {
 
   const handler = (err, result) => {
     if (!err) return callback(null, result);
-    if (!(err instanceof errors.MongoNetworkError) && !err.message.match(/not master/)) {
+    if (!isRetryableError(err)) {
       return callback(err);
     }
 
@@ -1298,6 +1298,12 @@ ReplSet.prototype.remove = function(ns, ops, options, callback) {
   executeWriteOperation({ self: this, op: 'remove', ns, ops }, options, callback);
 };
 
+const RETRYABLE_WRITE_OPERATIONS = ['findAndModify', 'insert', 'update', 'delete'];
+
+function isWriteCommand(command) {
+  return RETRYABLE_WRITE_OPERATIONS.some(op => command[op]);
+}
+
 /**
  * Execute a command
  * @method
@@ -1370,8 +1376,41 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
     );
   }
 
+  const willRetryWrite =
+    !options.retrying &&
+    options.retryWrites &&
+    options.session &&
+    isRetryableWritesSupported(self) &&
+    !options.session.inTransaction() &&
+    isWriteCommand(cmd);
+
+  const cb = (err, result) => {
+    if (!err) return callback(null, result);
+    if (!isRetryableError(err)) {
+      return callback(err);
+    }
+
+    if (willRetryWrite) {
+      const newOptions = Object.assign({}, options, { retrying: true });
+      return this.command(ns, cmd, newOptions, callback);
+    }
+
+    // Per SDAM, remove primary from replicaset
+    if (this.s.replicaSetState.primary) {
+      this.s.replicaSetState.remove(this.s.replicaSetState.primary, { force: true });
+    }
+
+    return callback(err);
+  };
+
+  // increment and assign txnNumber
+  if (willRetryWrite) {
+    options.session.incrementTransactionNumber();
+    options.willRetryWrite = willRetryWrite;
+  }
+
   // Execute the command
-  server.command(ns, cmd, options, callback);
+  server.command(ns, cmd, options, cb);
 };
 
 /**

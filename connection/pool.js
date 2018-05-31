@@ -575,15 +575,19 @@ function messageHandler(self) {
         }
 
         // Establish if we have an error
-        if (
-          workItem.command &&
-          message.documents[0] &&
-          (message.documents[0].ok === 0 ||
-            message.documents[0]['$err'] ||
-            message.documents[0]['errmsg'] ||
-            message.documents[0]['code'])
-        ) {
-          return handleOperationCallback(self, workItem.cb, new MongoError(message.documents[0]));
+        if (workItem.command && message.documents[0]) {
+          const responseDoc = message.documents[0];
+          if (responseDoc.ok === 0 || responseDoc.$err || responseDoc.errmsg || responseDoc.code) {
+            return handleOperationCallback(self, workItem.cb, new MongoError(responseDoc));
+          }
+
+          if (responseDoc.writeConcernError) {
+            return handleOperationCallback(
+              self,
+              workItem.cb,
+              new MongoError(responseDoc.writeConcernError)
+            );
+          }
         }
 
         // Add the connection details

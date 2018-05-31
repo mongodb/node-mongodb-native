@@ -350,7 +350,7 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
   }
 
   // optionally decorate query with transaction data
-  decorateWithTransactionsData(query.query, options.session);
+  decorateWithTransactionsData(query.query, options.session, options.willRetryWrite);
 
   // We need to increment the statement id if we're in a transaction
   if (options.session && options.session.inTransaction()) {

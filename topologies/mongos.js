@@ -7,7 +7,6 @@ const BasicCursor = require('../cursor');
 const Logger = require('../connection/logger');
 const retrieveBSON = require('../connection/utils').retrieveBSON;
 const MongoError = require('../error').MongoError;
-const errors = require('../error');
 const Server = require('./server');
 const clone = require('./shared').clone;
 const diff = require('./shared').diff;
@@ -16,6 +15,7 @@ const createClientInfo = require('./shared').createClientInfo;
 const SessionMixins = require('./shared').SessionMixins;
 const isRetryableWritesSupported = require('./shared').isRetryableWritesSupported;
 const relayEvents = require('./shared').relayEvents;
+const isRetryableError = require('../error').isRetryableError;
 const BSON = retrieveBSON();
 
 /**
@@ -900,7 +900,7 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
 
   server[op](ns, ops, options, (err, result) => {
     if (!err) return callback(null, result);
-    if (!(err instanceof errors.MongoNetworkError) && !err.message.match(/not master/)) {
+    if (!isRetryableError(err)) {
       return callback(err);
     }
 
@@ -1019,6 +1019,12 @@ Mongos.prototype.remove = function(ns, ops, options, callback) {
   executeWriteOperation(this, 'remove', ns, ops, options, callback);
 };
 
+const RETRYABLE_WRITE_OPERATIONS = ['findAndModify', 'insert', 'update', 'delete'];
+
+function isWriteCommand(command) {
+  return RETRYABLE_WRITE_OPERATIONS.some(op => command[op]);
+}
+
 /**
  * Execute a command
  * @method
@@ -1057,8 +1063,36 @@ Mongos.prototype.command = function(ns, cmd, options, callback) {
   var clonedOptions = cloneOptions(options);
   clonedOptions.topology = self;
 
+  const willRetryWrite =
+    !options.retrying &&
+    options.retryWrites &&
+    options.session &&
+    isRetryableWritesSupported(self) &&
+    !options.session.inTransaction() &&
+    isWriteCommand(cmd);
+
+  const cb = (err, result) => {
+    if (!err) return callback(null, result);
+    if (!isRetryableError(err)) {
+      return callback(err);
+    }
+
+    if (willRetryWrite) {
+      const newOptions = Object.assign({}, clonedOptions, { retrying: true });
+      return this.command(ns, cmd, newOptions, callback);
+    }
+
+    return callback(err);
+  };
+
+  // increment and assign txnNumber
+  if (willRetryWrite) {
+    options.session.incrementTransactionNumber();
+    options.willRetryWrite = willRetryWrite;
+  }
+
   // Execute the command
-  server.command(ns, cmd, clonedOptions, callback);
+  server.command(ns, cmd, clonedOptions, cb);
 };
 
 /**
