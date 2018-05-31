@@ -1,4 +1,6 @@
 'use strict';
+
+var co = require('co');
 var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
@@ -166,6 +168,60 @@ describe('Sharding (Connection)', function() {
           done();
         }
       );
+    }
+  });
+
+  /**
+   * @ignore
+   */
+  it('Should emit close event when mongos is stopped', {
+    metadata: { requires: { topology: 'sharded' } },
+
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var mongo = configuration.require;
+      var MongoClient = mongo.MongoClient;
+      var manager = configuration.manager;
+      var mongos = manager.proxies;
+
+      co(function*() {
+        var url = f(
+          'mongodb://%s:%s,%s:%s/sharded_test_db',
+          configuration.host,
+          configuration.port,
+          configuration.host,
+          configuration.port + 1
+        );
+
+        var client = yield MongoClient.connect(url);
+
+        var doc = { answer: 42 };
+        var db = client.db('Test');
+        var coll = db.collection('docs');
+        yield coll.insertOne(doc);
+
+        doc = yield coll.findOne({ answer: 42 });
+        test.ok(!!doc);
+
+        var waitForClose = new Promise(resolve => db.once('close', resolve));
+
+        yield mongos.map(p => p.stop());
+        yield waitForClose;
+        yield mongos.map(p => p.start());
+
+        doc = yield coll.findOne({ answer: 42 });
+        test.ok(!!doc);
+
+        waitForClose = new Promise(resolve => db.once('close', resolve));
+
+        yield mongos.map(p => p.stop());
+        yield waitForClose;
+        yield mongos.map(p => p.start());
+
+        doc = yield coll.findOne({ answer: 42 });
+        test.ok(!!doc);
+      }).then(() => done(), done);
     }
   });
 });
