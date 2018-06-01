@@ -499,7 +499,7 @@ function updateServers(topology, currentServerDescription) {
 
 function serverConnectEventHandler(server, topology) {
   return function(/* ismaster */) {
-    topology.emit('connect', server);
+    topology.emit('connect', topology);
   };
 }
 
@@ -623,7 +623,4 @@ function executeWriteOperation(args, options, callback) {
  * @type {ServerHeartbeatSucceededEvent}
  */
 
-module.exports = {
-  Topology,
-  ServerDescription
-};
+module.exports = Topology;

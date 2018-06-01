@@ -241,7 +241,7 @@ class Cursor {
     }
 
     // Default pool
-    const pool = this.server.s.pool;
+    const pool = this.s.server.s.pool;
 
     // Execute command
     this.s.server.s.wireProtocolHandler.killCursor(this.bson, this.ns, this.s, pool, callback);
@@ -540,6 +540,44 @@ function _setCursorNotifiedImpl(cursor, callback) {
   return callback();
 }
 
+function initializeCursorAndRetryNext(cursor, callback) {
+  cursor.topology.selectServer(
+    readPreferenceServerSelector(cursor.options.readPreference || ReadPreference.primary),
+    (err, server) => {
+      if (err) {
+        callback(err, null);
+        return;
+      }
+
+      cursor.s.server = server;
+      cursor.s.init = true;
+
+      // check if server supports collation
+      // NOTE: this should be a part of the selection predicate!
+      if (cursor.cmd && cursor.cmd.collation && cursor.server.description.maxWireVersion < 5) {
+        callback(new MongoError(`server ${cursor.server.name} does not support collation`));
+        return;
+      }
+
+      try {
+        cursor.query = cursor.s.server.s.wireProtocolHandler.command(
+          cursor.bson,
+          cursor.ns,
+          cursor.cmd,
+          cursor.s,
+          cursor.topology,
+          cursor.options
+        );
+
+        nextFunction(cursor, callback);
+      } catch (err) {
+        callback(err);
+        return;
+      }
+    }
+  );
+}
+
 function nextFunction(cursor, callback) {
   // We have notified about it
   if (cursor.s.notified) {
@@ -557,40 +595,7 @@ function nextFunction(cursor, callback) {
 
   // We have just started the cursor
   if (!cursor.s.init) {
-    cursor.topology.selectServer(
-      readPreferenceServerSelector(cursor.options.readPreference || ReadPreference.primary),
-      (err, server) => {
-        if (err) {
-          callback(err, null);
-          return;
-        }
-
-        cursor.s.server = server;
-        cursor.s.init = true;
-
-        // Server does not support server
-        // NOTE: this should be a part of the selection predicate!
-        if (cursor.cmd && cursor.cmd.collation && cursor.server.description.maxWireVersion < 5) {
-          callback(new MongoError(`server ${cursor.server.name} does not support collation`));
-          return;
-        }
-
-        try {
-          cursor.query = cursor.s.server.s.wireProtocolHandler.command(
-            cursor.bson,
-            cursor.ns,
-            cursor.cmd,
-            cursor.s,
-            cursor.topology,
-            cursor.options
-          );
-        } catch (err) {
-          console.dir(err);
-          callback(err);
-          return;
-        }
-      }
-    );
+    return initializeCursorAndRetryNext(cursor, callback);
   }
 
   // If we don't have a cursorId execute the first query
@@ -599,15 +604,8 @@ function nextFunction(cursor, callback) {
     // execute the query against the db
     if (isConnectionDead(cursor, callback)) return;
 
-    // Check if topology is destroyed
-    // if (cursor.topology.isDestroyed()) {
-    //   return callback(
-    //     new MongoNetworkError('connection destroyed, not possible to instantiate cursor')
-    //   );
-    // }
-
     // query, cmd, options, s, callback
-    _find(cursor, function(err) {
+    return _find(cursor, function(err) {
       if (err) return handleCallback(callback, err, null);
 
       if (cursor.s.cursorId && cursor.s.cursorId.isZero() && cursor._endSession) {
@@ -626,32 +624,46 @@ function nextFunction(cursor, callback) {
 
       nextFunction(cursor, callback);
     });
-  } else if (cursor.s.limit > 0 && cursor.s.currentLimit >= cursor.s.limit) {
+  }
+
+  if (cursor.s.documents.length === cursor.s.cursorIndex && Long.ZERO.equals(cursor.s.cursorId)) {
+    setCursorDeadAndNotified(cursor, callback);
+    return;
+  }
+
+  if (cursor.s.limit > 0 && cursor.s.currentLimit >= cursor.s.limit) {
     // Ensure we kill the cursor on the server
     cursor.kill();
     // Set cursor in dead and notified state
-    return setCursorDeadAndNotified(cursor, callback);
-  } else if (
-    cursor.s.cursorIndex === cursor.s.documents.length &&
-    !Long.ZERO.equals(cursor.s.cursorId)
+    setCursorDeadAndNotified(cursor, callback);
+    return;
+  }
+
+  if (
+    cursor.s.documents.length === cursor.s.cursorIndex &&
+    cursor.cmd.tailable &&
+    Long.ZERO.equals(cursor.s.cursorId)
   ) {
+    return handleCallback(
+      callback,
+      new MongoError({
+        message: 'No more documents in tailed cursor',
+        tailable: cursor.cmd.tailable,
+        awaitData: cursor.cmd.awaitData
+      })
+    );
+  }
+
+  if (cursor.s.cursorIndex === cursor.s.documents.length && !Long.ZERO.equals(cursor.s.cursorId)) {
     // Ensure an empty cursor state
     cursor.s.documents = [];
     cursor.s.cursorIndex = 0;
 
-    // Check if topology is destroyed
-    // if (cursor.topology.isDestroyed()) {
-    //   return callback(
-    //     new MongoNetworkError('connection destroyed, not possible to instantiate cursor')
-    //   );
-    // }
-
     // Check if connection is dead and return if not possible to
-    // execute a getmore on this connection
     if (isConnectionDead(cursor, callback)) return;
 
     // Execute the next get more
-    _getmore(cursor, function(err, doc, connection) {
+    return _getmore(cursor, function(err, doc, connection) {
       if (err) {
         if (err instanceof MongoError) {
           err[mongoErrorContextSymbol].isGetMore = true;
@@ -698,56 +710,38 @@ function nextFunction(cursor, callback) {
 
       nextFunction(cursor, callback);
     });
-  } else if (
-    cursor.s.documents.length === cursor.s.cursorIndex &&
-    cursor.cmd.tailable &&
-    Long.ZERO.equals(cursor.s.cursorId)
-  ) {
-    return handleCallback(
-      callback,
-      new MongoError({
-        message: 'No more documents in tailed cursor',
-        tailable: cursor.cmd.tailable,
-        awaitData: cursor.cmd.awaitData
-      })
-    );
-  } else if (
-    cursor.s.documents.length === cursor.s.cursorIndex &&
-    Long.ZERO.equals(cursor.s.cursorId)
-  ) {
-    setCursorDeadAndNotified(cursor, callback);
-  } else {
-    if (cursor.s.limit > 0 && cursor.s.currentLimit >= cursor.s.limit) {
-      // Ensure we kill the cursor on the server
-      cursor.kill();
-      // Set cursor in dead and notified state
-      return setCursorDeadAndNotified(cursor, callback);
-    }
-
-    // Increment the current cursor limit
-    cursor.s.currentLimit += 1;
-
-    // Get the document
-    var doc = cursor.s.documents[cursor.s.cursorIndex++];
-
-    // Doc overflow
-    if (!doc || doc.$err) {
-      // Ensure we kill the cursor on the server
-      cursor.kill();
-      // Set cursor in dead and notified state
-      return setCursorDeadAndNotified(cursor, function() {
-        handleCallback(callback, new MongoError(doc ? doc.$err : undefined));
-      });
-    }
-
-    // Transform the doc with passed in transformation method if provided
-    if (cursor.s.transforms && typeof cursor.s.transforms.doc === 'function') {
-      doc = cursor.s.transforms.doc(doc);
-    }
-
-    // Return the document
-    handleCallback(callback, null, doc);
   }
+
+  if (cursor.s.limit > 0 && cursor.s.currentLimit >= cursor.s.limit) {
+    // Ensure we kill the cursor on the server
+    cursor.kill();
+    // Set cursor in dead and notified state
+    return setCursorDeadAndNotified(cursor, callback);
+  }
+
+  // Increment the current cursor limit
+  cursor.s.currentLimit += 1;
+
+  // Get the document
+  let doc = cursor.s.documents[cursor.s.cursorIndex++];
+
+  // Doc overflow
+  if (!doc || doc.$err) {
+    // Ensure we kill the cursor on the server
+    cursor.kill();
+    // Set cursor in dead and notified state
+    return setCursorDeadAndNotified(cursor, function() {
+      handleCallback(callback, new MongoError(doc ? doc.$err : undefined));
+    });
+  }
+
+  // Transform the doc with passed in transformation method if provided
+  if (cursor.s.transforms && typeof cursor.s.transforms.doc === 'function') {
+    doc = cursor.s.transforms.doc(doc);
+  }
+
+  // Return the document
+  handleCallback(callback, null, doc);
 }
 
 module.exports = Cursor;

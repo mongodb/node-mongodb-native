@@ -56,7 +56,7 @@ class Server extends EventEmitter {
           BSON.Timestamp
         ]),
       // client metadata for the initial handshake
-      clientInfo: createClientInfo(options)
+      clientInfo: createClientInfo(options),
     };
   }
 
@@ -86,8 +86,8 @@ class Server extends EventEmitter {
 
     // Set up listeners
     this.s.pool.on('connect', connectEventHandler(this));
+    this.s.pool.on('close', closeEventHandler(this));
 
-    // this.s.pool.on('close', closeEventHandler(this));
     // this.s.pool.on('error', errorEventHandler(this));
     // this.s.pool.on('timeout', timeoutEventHandler(this));
     // this.s.pool.on('parseError', errorEventHandler(this));
@@ -345,8 +345,8 @@ function extractIsMasterError(err, result) {
 function executeServerHandshake(server, callback) {
   // construct an `ismaster` query
   const compressors =
-    server.s.compression && server.s.compression.compressors
-      ? server.s.compression.compressors
+    server.s.options.compression && server.s.options.compression.compressors
+      ? server.s.options.compression.compressors
       : [];
 
   const queryOptions = { numberToSkip: 0, numberToReturn: -1, checkKeys: false, slaveOk: true };
@@ -403,15 +403,17 @@ function connectEventHandler(server) {
 
       // compression negotation
       if (isMaster && isMaster.compression) {
-        for (var i = 0; i < server.s.compression.compressors.length; i++) {
-          if (isMaster.compression.indexOf(server.s.compression.compressors[i]) > -1) {
-            server.s.pool.options.agreedCompressor = server.s.compression.compressors[i];
+        const localCompressionInfo = server.s.options.compression;
+        const localCompressors = localCompressionInfo.compressors;
+        for (var i = 0; i < localCompressors.length; i++) {
+          if (isMaster.compression.indexOf(localCompressors[i]) > -1) {
+            server.s.pool.options.agreedCompressor = localCompressors[i];
             break;
           }
         }
 
-        if (server.s.compression.zlibCompressionLevel) {
-          server.s.pool.options.zlibCompressionLevel = server.s.compression.zlibCompressionLevel;
+        if (localCompressionInfo.zlibCompressionLevel) {
+          server.s.pool.options.zlibCompressionLevel = localCompressionInfo.zlibCompressionLevel;
         }
       }
 
@@ -434,6 +436,12 @@ function connectEventHandler(server) {
       // emit a connect event
       server.emit('connect', isMaster);
     });
+  };
+}
+
+function closeEventHandler(server) {
+  return function() {
+    server.emit('close');
   };
 }
 
