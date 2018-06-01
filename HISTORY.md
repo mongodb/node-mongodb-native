@@ -1,3 +1,15 @@
+<a name="3.0.9"></a>
+## [3.0.9](https://github.com/mongodb/node-mongodb-native/compare/v3.0.8...v3.0.9) (2018-06-01)
+
+
+### Bug Fixes
+
+* **bulk:** fixing retryable writes for mass-change ops ([fed0532](https://github.com/mongodb/node-mongodb-native/commit/fed0532))
+* **mongo-client:** support `retryWrites` in connection strings ([bdf0a24](https://github.com/mongodb/node-mongodb-native/commit/bdf0a24))
+* **mongos:** bubble up close events after the first one ([#1713](https://github.com/mongodb/node-mongodb-native/issues/1713)) ([597931f](https://github.com/mongodb/node-mongodb-native/commit/597931f)), closes [Automattic/mongoose#6249](https://github.com/Automattic/mongoose/issues/6249) [#1685](https://github.com/mongodb/node-mongodb-native/issues/1685)
+
+
+
 <a name="3.0.8"></a>
 ## [3.0.8](https://github.com/mongodb/node-mongodb-native/compare/v3.0.7...v3.0.8) (2018-05-08)
 
