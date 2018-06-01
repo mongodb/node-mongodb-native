@@ -414,12 +414,15 @@ function selectServers(topology, selector, timeout, start, callback) {
     return callback(null, servers);
   }
 
-  const duration = calculateDurationInMs(process.hrtime(start));
-  if (duration > timeout) {
+  const duration = calculateDurationInMs(start);
+  if (duration >= timeout) {
     return callback(new MongoTimeoutError(`Server selection timed out after ${timeout} ms`));
   }
 
-  // TODO: loop this, add monitoring
+  // TODO: we need to kick off requests to each monitor to check immediately before looping
+
+  // loop the server selection process
+  process.nextTick(() => selectServers(topology, selector, timeout, start, callback));
 }
 
 /**
