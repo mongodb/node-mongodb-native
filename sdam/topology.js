@@ -13,7 +13,10 @@ const ReadPreference = require('../topologies/read_preference');
 const readPreferenceServerSelector = require('./server_selectors').readPreferenceServerSelector;
 const writableServerSelector = require('./server_selectors').writableServerSelector;
 const isRetryableWritesSupported = require('../topologies/shared').isRetryableWritesSupported;
-const BasicCursor = require('../cursor');
+const Cursor = require('./cursor');
+const deprecate = require('util').deprecate;
+const BSON = require('../connection/utils').retrieveBSON();
+const createCompressionInfo = require('../topologies/shared').createCompressionInfo;
 
 // Global state
 let globalTopologyCounter = 0;
@@ -90,8 +93,30 @@ class Topology extends EventEmitter {
       serverSelectionTimeoutMS: options.serverSelectionTimeoutMS,
       heartbeatFrequencyMS: options.heartbeatFrequencyMS,
       // allow users to override the cursor factory
-      Cursor: options.cursorFactory || BasicCursor
+      Cursor: options.cursorFactory || Cursor,
+      // the bson parser
+      bson:
+        options.bson ||
+        new BSON([
+          BSON.Binary,
+          BSON.Code,
+          BSON.DBRef,
+          BSON.Decimal128,
+          BSON.Double,
+          BSON.Int32,
+          BSON.Long,
+          BSON.Map,
+          BSON.MaxKey,
+          BSON.MinKey,
+          BSON.ObjectId,
+          BSON.BSONRegExp,
+          BSON.Symbol,
+          BSON.Timestamp
+        ])
     };
+
+    // amend options for server instance creation
+    this.s.options.compression = { compressors: createCompressionInfo(options) };
   }
 
   /**
@@ -348,7 +373,10 @@ class Topology extends EventEmitter {
 }
 
 // legacy aliases
-Topology.prototype.destroy = Topology.prototype.close;
+Topology.prototype.destroy = deprecate(
+  Topology.prototype.close,
+  'destroy() is deprecated, please use close() instead'
+);
 
 function topologyTypeFromSeedlist(seedlist, options) {
   if (seedlist.length === 1 && !options.replicaset) return TopologyType.Single;
@@ -485,10 +513,6 @@ function executeWriteOperation(args, options, callback) {
   const ns = args.ns;
   const ops = args.ops;
 
-  // if (topology.state === DESTROYED) {
-  //   return callback(new MongoError(`topology was destroyed`));
-  // }
-
   const willRetryWrite =
     !args.retrying &&
     options.retryWrites &&
@@ -525,9 +549,6 @@ function executeWriteOperation(args, options, callback) {
       options.session.incrementTransactionNumber();
       options.willRetryWrite = willRetryWrite;
     }
-
-    // optionally autostart transaction if requested
-    // ensureTransactionAutostart(options.session);
 
     // execute the write operation
     server[op](ns, ops, options, handler);
