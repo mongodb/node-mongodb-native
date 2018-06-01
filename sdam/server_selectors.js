@@ -10,14 +10,6 @@ const SMALLEST_MAX_STALENESS_SECONDS = 90;
 
 function writableServerSelector() {
   return function(topologyDescription, servers) {
-    if (topologyDescription === TopologyType.ReplicaSetNoPrimary) return [];
-    if (
-      topologyDescription.type === TopologyType.Sharded ||
-      topologyDescription.type === TopologyType.Single
-    ) {
-      return latencyWindowReducer(topologyDescription, servers);
-    }
-
     return latencyWindowReducer(topologyDescription, servers.filter(s => s.isWritable));
   };
 }
