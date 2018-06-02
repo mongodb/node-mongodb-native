@@ -1,3 +1,10 @@
+<a name="3.0.10"></a>
+## [3.0.10](https://github.com/mongodb/node-mongodb-native/compare/v3.0.9...v3.0.10) (2018-06-02)
+
+### Features
+
+* **mongodb-core:** update to mongodb-core 3.0.9 ([c9f1a8e](https://github.com/mongodb/node-mongodb-native/commit/c9f1a8e))
+
 <a name="3.0.9"></a>
 ## [3.0.9](https://github.com/mongodb/node-mongodb-native/compare/v3.0.8...v3.0.9) (2018-06-01)
 
