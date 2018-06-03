@@ -12,6 +12,7 @@ const createClientInfo = require('../topologies/shared').createClientInfo;
 const Logger = require('../connection/logger');
 const ServerDescription = require('./server_description').ServerDescription;
 const ReadPreference = require('../topologies/read_preference');
+const monitorServer = require('./monitoring').monitorServer;
 
 /**
  *
@@ -56,7 +57,9 @@ class Server extends EventEmitter {
           BSON.Timestamp
         ]),
       // client metadata for the initial handshake
-      clientInfo: createClientInfo(options)
+      clientInfo: createClientInfo(options),
+      // state variable to determine if there is an active server check in progress
+      monitoring: false
     };
   }
 
@@ -117,6 +120,16 @@ class Server extends EventEmitter {
     if (typeof callback === 'function') {
       callback(null, null);
     }
+  }
+
+  /**
+   * Immediately schedule monitoring of this server. If there already an attempt being made
+   * this will be a no-op.
+   */
+  monitor() {
+    if (this.s.monitoring) return;
+    if (this.s.monitorId) clearTimeout(this.s.monitorId);
+    monitorServer(this);
   }
 
   /**
