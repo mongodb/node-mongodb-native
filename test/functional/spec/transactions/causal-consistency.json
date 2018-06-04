@@ -1,4 +1,6 @@
 {
+  "database_name": "transaction-tests",
+  "collection_name": "test",
   "data": [
     {
       "_id": 1,
@@ -11,7 +13,9 @@
       "operations": [
         {
           "name": "updateOne",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "filter": {
               "_id": 1
             },
@@ -20,8 +24,7 @@
                 "count": 1
               }
             },
-            "upsert": false,
-            "session": "session0"
+            "upsert": false
           },
           "result": {
             "matchedCount": 1,
@@ -31,13 +34,13 @@
         },
         {
           "name": "startTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "updateOne",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "filter": {
               "_id": 1
             },
@@ -46,8 +49,7 @@
                 "count": 1
               }
             },
-            "upsert": false,
-            "session": "session0"
+            "upsert": false
           },
           "result": {
             "matchedCount": 1,
@@ -57,9 +59,7 @@
         },
         {
           "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         }
       ],
       "expectations": [
@@ -85,7 +85,6 @@
               "lsid": "session0",
               "readConcern": null,
               "txnNumber": null,
-              "stmtId": null,
               "startTransaction": null,
               "autocommit": null,
               "writeConcern": null
@@ -120,7 +119,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false,
               "writeConcern": null
@@ -137,7 +135,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -168,11 +165,12 @@
       "operations": [
         {
           "name": "insertOne",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "document": {
               "_id": 2
-            },
-            "session": "session0"
+            }
           },
           "result": {
             "insertedId": 2
@@ -180,13 +178,13 @@
         },
         {
           "name": "startTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "updateOne",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "filter": {
               "_id": 1
             },
@@ -195,8 +193,7 @@
                 "count": 1
               }
             },
-            "upsert": false,
-            "session": "session0"
+            "upsert": false
           },
           "result": {
             "matchedCount": 1,
@@ -206,9 +203,7 @@
         },
         {
           "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         }
       ],
       "expectations": [
@@ -225,7 +220,6 @@
               "readConcern": null,
               "lsid": "session0",
               "txnNumber": null,
-              "stmtId": null,
               "autocommit": null,
               "writeConcern": null
             },
@@ -257,7 +251,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false,
               "writeConcern": null
@@ -274,7 +267,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null

@@ -1,3 +1,6 @@
+database_name: &database_name "transaction-tests"
+collection_name: &collection_name "test"
+
 data: []
 
 tests:
@@ -8,42 +11,42 @@ tests:
 
     operations:
       - name: startTransaction
+        object: session0
+      - name: insertOne
+        object: collection
         arguments:
           session: session0
-      - name: insertOne
-        arguments:
           document:
             _id: 1
-          session: session0
         result:
           insertedId: 1
       - name: commitTransaction
-        arguments:
-          session: session0
+        object: session0
       # Retryable write should include the next txnNumber
       - name: insertOne
+        object: collection
         arguments:
+          session: session0
           document:
             _id: 2
-          session: session0
         result:
           insertedId: 2
       # Next transaction should include the next txnNumber
       - name: startTransaction
+        object: session0
+      - name: insertOne
+        object: collection
         arguments:
           session: session0
-      - name: insertOne
-        arguments:
           document:
             _id: 3
-          session: session0
         result:
           insertedId: 3
       - name: abortTransaction
-        arguments:
-          session: session0
+        object: session0
       # Retryable write should include the next txnNumber
       - name: insertMany
+        object: collection
         arguments:
           documents:
             - _id: 4
@@ -55,7 +58,7 @@ tests:
     expectations:
       - command_started_event:
           command:
-            insert: test
+            insert: *collection_name
             documents:
               - _id: 1
             ordered: true
@@ -63,19 +66,17 @@ tests:
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 0
             startTransaction: true
             autocommit: false
             writeConcern:
           command_name: insert
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
             commitTransaction: 1
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 1
             startTransaction:
             autocommit: false
             writeConcern:
@@ -83,7 +84,7 @@ tests:
           database_name: admin
       - command_started_event:
           command:
-            insert: test
+            insert: *collection_name
             documents:
               - _id: 2
             ordered: true
@@ -91,15 +92,14 @@ tests:
             lsid: session0
             txnNumber:
               $numberLong: "2"
-            stmtId:
             startTransaction:
             autocommit:
             writeConcern:
           command_name: insert
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
-            insert: test
+            insert: *collection_name
             documents:
               - _id: 3
             ordered: true
@@ -108,19 +108,17 @@ tests:
             lsid: session0
             txnNumber:
               $numberLong: "3"
-            stmtId: 0
             startTransaction: true
             autocommit: false
             writeConcern:
           command_name: insert
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
             abortTransaction: 1
             lsid: session0
             txnNumber:
               $numberLong: "3"
-            stmtId: 1
             startTransaction:
             autocommit: false
             writeConcern:
@@ -128,7 +126,7 @@ tests:
           database_name: admin
       - command_started_event:
           command:
-            insert: test
+            insert: *collection_name
             documents:
               - _id: 4
               - _id: 5
@@ -137,12 +135,11 @@ tests:
             lsid: session0
             txnNumber:
               $numberLong: "4"
-            stmtId:
             startTransaction:
             autocommit:
             writeConcern:
           command_name: insert
-          database_name: transaction-tests
+          database_name: *database_name
 
     outcome:
       collection:

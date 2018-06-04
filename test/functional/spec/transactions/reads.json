@@ -1,4 +1,6 @@
 {
+  "database_name": "transaction-tests",
+  "collection_name": "test",
   "data": [
     {
       "_id": 1
@@ -15,39 +17,95 @@
   ],
   "tests": [
     {
+      "description": "collection readConcern without transaction",
+      "operations": [
+        {
+          "name": "find",
+          "object": "collection",
+          "collectionOptions": {
+            "readConcern": {
+              "level": "majority"
+            }
+          },
+          "arguments": {
+            "session": "session0"
+          },
+          "result": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 3
+            },
+            {
+              "_id": 4
+            }
+          ]
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "find": "test",
+              "readConcern": {
+                "level": "majority"
+              },
+              "lsid": "session0",
+              "txnNumber": null,
+              "startTransaction": null,
+              "autocommit": null
+            },
+            "command_name": "find",
+            "database_name": "transaction-tests"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 3
+            },
+            {
+              "_id": 4
+            }
+          ]
+        }
+      }
+    },
+    {
       "description": "count",
       "operations": [
         {
           "name": "startTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "count",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "filter": {
               "_id": 1
-            },
-            "session": "session0"
+            }
           },
-          "result": 1
-        },
-        {
-          "name": "count",
-          "arguments": {
-            "filter": {
-              "_id": 1
-            },
-            "session": "session0"
-          },
-          "result": 1
-        },
-        {
-          "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
+          "result": {
+            "errorContains": "Cannot run 'count' in a multi-document transaction"
           }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
         }
       ],
       "expectations": [
@@ -63,7 +121,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false,
               "writeConcern": null
@@ -75,37 +132,16 @@
         {
           "command_started_event": {
             "command": {
-              "count": "test",
-              "query": {
-                "_id": 1
-              },
+              "abortTransaction": 1,
               "lsid": "session0",
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
             },
-            "command_name": "count",
-            "database_name": "transaction-tests"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "commitTransaction": 1,
-              "lsid": "session0",
-              "txnNumber": {
-                "$numberLong": "1"
-              },
-              "stmtId": 2,
-              "startTransaction": null,
-              "autocommit": false,
-              "writeConcern": null
-            },
-            "command_name": "commitTransaction",
+            "command_name": "abortTransaction",
             "database_name": "admin"
           }
         }
@@ -134,15 +170,14 @@
       "operations": [
         {
           "name": "startTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "find",
+          "object": "collection",
           "arguments": {
-            "batchSize": 3,
-            "session": "session0"
+            "session": "session0",
+            "batchSize": 3
           },
           "result": [
             {
@@ -161,9 +196,10 @@
         },
         {
           "name": "find",
+          "object": "collection",
           "arguments": {
-            "batchSize": 3,
-            "session": "session0"
+            "session": "session0",
+            "batchSize": 3
           },
           "result": [
             {
@@ -182,9 +218,7 @@
         },
         {
           "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         }
       ],
       "expectations": [
@@ -198,7 +232,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false
             },
@@ -218,7 +251,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false
             },
@@ -235,7 +267,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 2,
               "startTransaction": null,
               "autocommit": false
             },
@@ -255,7 +286,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 3,
               "startTransaction": null,
               "autocommit": false
             },
@@ -271,7 +301,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 4,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -305,12 +334,11 @@
       "operations": [
         {
           "name": "startTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "aggregate",
+          "object": "collection",
           "arguments": {
             "pipeline": [
               {
@@ -339,6 +367,7 @@
         },
         {
           "name": "aggregate",
+          "object": "collection",
           "arguments": {
             "pipeline": [
               {
@@ -367,9 +396,7 @@
         },
         {
           "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         }
       ],
       "expectations": [
@@ -392,7 +419,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false
             },
@@ -412,7 +438,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false
             },
@@ -438,7 +463,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 2,
               "startTransaction": null,
               "autocommit": false
             },
@@ -458,7 +482,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 3,
               "startTransaction": null,
               "autocommit": false
             },
@@ -474,7 +497,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 4,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -508,15 +530,14 @@
       "operations": [
         {
           "name": "startTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "distinct",
+          "object": "collection",
           "arguments": {
-            "fieldName": "_id",
-            "session": "session0"
+            "session": "session0",
+            "fieldName": "_id"
           },
           "result": [
             1,
@@ -527,9 +548,7 @@
         },
         {
           "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         }
       ],
       "expectations": [
@@ -543,7 +562,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false,
               "writeConcern": null
@@ -561,7 +579,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null

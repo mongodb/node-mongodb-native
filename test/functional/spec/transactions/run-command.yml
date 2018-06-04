@@ -1,27 +1,25 @@
-# Assumes the default for transactions is the same as for all ops, tests
-# setting the writeConcern to "majority".
 database_name: &database_name "transaction-tests"
 collection_name: &collection_name "test"
 
 data: []
 
 tests:
-  - description: commit with majority
+  - description: run command with default read preference
+
     operations:
       - name: startTransaction
         object: session0
-        arguments:
-          options:
-            writeConcern:
-              w: majority
-      - name: insertOne
-        object: collection
+      - name: runCommand
+        object: database
+        command_name: insert
         arguments:
           session: session0
-          document:
-            _id: 1
+          command:
+            insert: *collection_name
+            documents:
+              - _id : 1
         result:
-          insertedId: 1
+          n: 1
       - name: commitTransaction
         object: session0
 
@@ -30,58 +28,7 @@ tests:
           command:
             insert: *collection_name
             documents:
-              - _id: 1
-            ordered: true
-            readConcern:
-            lsid: session0
-            txnNumber:
-              $numberLong: "1"
-            startTransaction: true
-            autocommit: false
-            writeConcern:
-          command_name: insert
-          database_name: *database_name
-      - command_started_event:
-          command:
-            commitTransaction: 1
-            lsid: session0
-            txnNumber:
-              $numberLong: "1"
-            startTransaction:
-            autocommit: false
-            writeConcern:
-              w: majority
-          command_name: commitTransaction
-          database_name: admin
-
-    outcome:
-      collection:
-        data:
-          - _id: 1
-
-  - description: commit with default
-
-    operations:
-      - name: startTransaction
-        object: session0
-      - name: insertOne
-        object: collection
-        arguments:
-          session: session0
-          document:
-            _id: 1
-        result:
-          insertedId: 1
-      - name: commitTransaction
-        object: session0
-
-    expectations:
-      - command_started_event:
-          command:
-            insert: *collection_name
-            documents:
-              - _id: 1
-            ordered: true
+              - _id : 1
             readConcern:
             lsid: session0
             txnNumber:
@@ -103,30 +50,30 @@ tests:
           command_name: commitTransaction
           database_name: admin
 
-    outcome:
-      collection:
-        data:
+  - description: run command with secondary read preference in client option and primary read preference in transaction options
 
-          - _id: 1
-
-  - description: abort with majority
+    clientOptions:
+      readPreference: secondary
 
     operations:
       - name: startTransaction
         object: session0
         arguments:
           options:
-            writeConcern:
-              w: majority
-      - name: insertOne
-        object: collection
+            readPreference:
+              mode: Primary
+      - name: runCommand
+        object: database
+        command_name: insert
         arguments:
           session: session0
-          document:
-            _id: 1
+          command:
+            insert: *collection_name
+            documents:
+              - _id : 1
         result:
-          insertedId: 1
-      - name: abortTransaction
+          n: 1
+      - name: commitTransaction
         object: session0
 
     expectations:
@@ -134,8 +81,7 @@ tests:
           command:
             insert: *collection_name
             documents:
-              - _id: 1
-            ordered: true
+              - _id : 1
             readConcern:
             lsid: session0
             txnNumber:
@@ -147,35 +93,35 @@ tests:
           database_name: *database_name
       - command_started_event:
           command:
-            abortTransaction: 1
+            commitTransaction: 1
             lsid: session0
             txnNumber:
               $numberLong: "1"
             startTransaction:
             autocommit: false
             writeConcern:
-              w: majority
-          command_name: abortTransaction
+          command_name: commitTransaction
           database_name: admin
 
-    outcome:
-      collection:
-        data: []
-
-  - description: abort with default
+  - description: run command with explicit primary read preference
 
     operations:
       - name: startTransaction
         object: session0
-      - name: insertOne
-        object: collection
+      - name: runCommand
+        object: database
+        command_name: insert
         arguments:
           session: session0
-          document:
-            _id: 1
+          command:
+            insert: *collection_name
+            documents:
+              - _id : 1
+          readPreference:
+            mode: Primary
         result:
-          insertedId: 1
-      - name: abortTransaction
+          n: 1
+      - name: commitTransaction
         object: session0
 
     expectations:
@@ -183,8 +129,7 @@ tests:
           command:
             insert: *collection_name
             documents:
-              - _id: 1
-            ordered: true
+              - _id : 1
             readConcern:
             lsid: session0
             txnNumber:
@@ -196,16 +141,49 @@ tests:
           database_name: *database_name
       - command_started_event:
           command:
-            abortTransaction: 1
+            commitTransaction: 1
             lsid: session0
             txnNumber:
               $numberLong: "1"
             startTransaction:
             autocommit: false
             writeConcern:
-          command_name: abortTransaction
+          command_name: commitTransaction
           database_name: admin
 
-    outcome:
-      collection:
-        data: []
+  - description: run command fails with explicit secondary read preference
+
+    operations:
+      - name: startTransaction
+        object: session0
+      - name: runCommand
+        object: database
+        command_name: find
+        arguments:
+          session: session0
+          command:
+            find: *collection_name
+          readPreference:
+            mode: Secondary
+        result:
+          errorContains: read preference in a transaction must be primary
+
+  - description: run command fails with secondary read preference from transaction options
+
+    operations:
+      - name: startTransaction
+        object: session0
+        arguments:
+          options:
+            readPreference:
+              mode: secondary
+      - name: runCommand
+        object: database
+        command_name: find
+        arguments:
+          session: session0
+          command:
+            find: *collection_name
+        result:
+          errorContains: read preference in a transaction must be primary
+

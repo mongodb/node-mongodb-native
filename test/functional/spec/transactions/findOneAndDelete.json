@@ -1,4 +1,6 @@
 {
+  "database_name": "transaction-tests",
+  "collection_name": "test",
   "data": [
     {
       "_id": 1
@@ -16,17 +18,16 @@
       "operations": [
         {
           "name": "startTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "findOneAndDelete",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "filter": {
               "_id": 3
-            },
-            "session": "session0"
+            }
           },
           "result": {
             "_id": 3
@@ -34,19 +35,18 @@
         },
         {
           "name": "findOneAndDelete",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "filter": {
               "_id": 4
-            },
-            "session": "session0"
+            }
           },
           "result": null
         },
         {
           "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         }
       ],
       "expectations": [
@@ -62,7 +62,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false,
               "readConcern": null,
@@ -84,7 +83,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false,
               "readConcern": null,
@@ -102,7 +100,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 2,
               "startTransaction": null,
               "autocommit": false,
               "readConcern": null,
@@ -127,12 +124,12 @@
       }
     },
     {
-      "description": "operation writeConcern ignored for findOneAndDelete",
+      "description": "collection writeConcern ignored for findOneAndDelete",
       "operations": [
         {
           "name": "startTransaction",
+          "object": "session0",
           "arguments": {
-            "session": "session0",
             "options": {
               "writeConcern": {
                 "w": "majority"
@@ -142,13 +139,16 @@
         },
         {
           "name": "findOneAndDelete",
-          "arguments": {
-            "filter": {
-              "_id": 3
-            },
-            "session": "session0",
+          "object": "collection",
+          "collectionOptions": {
             "writeConcern": {
               "w": "majority"
+            }
+          },
+          "arguments": {
+            "session": "session0",
+            "filter": {
+              "_id": 3
             }
           },
           "result": {
@@ -157,9 +157,7 @@
         },
         {
           "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         }
       ],
       "expectations": [
@@ -175,7 +173,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false,
               "readConcern": null,
@@ -193,7 +190,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false,
               "readConcern": null,

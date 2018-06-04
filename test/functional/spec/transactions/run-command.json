@@ -4,30 +4,29 @@
   "data": [],
   "tests": [
     {
-      "description": "commit with majority",
+      "description": "run command with default read preference",
       "operations": [
         {
           "name": "startTransaction",
-          "object": "session0",
-          "arguments": {
-            "options": {
-              "writeConcern": {
-                "w": "majority"
-              }
-            }
-          }
+          "object": "session0"
         },
         {
-          "name": "insertOne",
-          "object": "collection",
+          "name": "runCommand",
+          "object": "database",
+          "command_name": "insert",
           "arguments": {
             "session": "session0",
-            "document": {
-              "_id": 1
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ]
             }
           },
           "result": {
-            "insertedId": 1
+            "n": 1
           }
         },
         {
@@ -45,85 +44,6 @@
                   "_id": 1
                 }
               ],
-              "ordered": true,
-              "readConcern": null,
-              "lsid": "session0",
-              "txnNumber": {
-                "$numberLong": "1"
-              },
-              "startTransaction": true,
-              "autocommit": false,
-              "writeConcern": null
-            },
-            "command_name": "insert",
-            "database_name": "transaction-tests"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "commitTransaction": 1,
-              "lsid": "session0",
-              "txnNumber": {
-                "$numberLong": "1"
-              },
-              "startTransaction": null,
-              "autocommit": false,
-              "writeConcern": {
-                "w": "majority"
-              }
-            },
-            "command_name": "commitTransaction",
-            "database_name": "admin"
-          }
-        }
-      ],
-      "outcome": {
-        "collection": {
-          "data": [
-            {
-              "_id": 1
-            }
-          ]
-        }
-      }
-    },
-    {
-      "description": "commit with default",
-      "operations": [
-        {
-          "name": "startTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "insertOne",
-          "object": "collection",
-          "arguments": {
-            "session": "session0",
-            "document": {
-              "_id": 1
-            }
-          },
-          "result": {
-            "insertedId": 1
-          }
-        },
-        {
-          "name": "commitTransaction",
-          "object": "session0"
-        }
-      ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "insert": "test",
-              "documents": [
-                {
-                  "_id": 1
-                }
-              ],
-              "ordered": true,
               "readConcern": null,
               "lsid": "session0",
               "txnNumber": {
@@ -153,46 +73,46 @@
             "database_name": "admin"
           }
         }
-      ],
-      "outcome": {
-        "collection": {
-          "data": [
-            {
-              "_id": 1
-            }
-          ]
-        }
-      }
+      ]
     },
     {
-      "description": "abort with majority",
+      "description": "run command with secondary read preference in client option and primary read preference in transaction options",
+      "clientOptions": {
+        "readPreference": "secondary"
+      },
       "operations": [
         {
           "name": "startTransaction",
           "object": "session0",
           "arguments": {
             "options": {
-              "writeConcern": {
-                "w": "majority"
+              "readPreference": {
+                "mode": "Primary"
               }
             }
           }
         },
         {
-          "name": "insertOne",
-          "object": "collection",
+          "name": "runCommand",
+          "object": "database",
+          "command_name": "insert",
           "arguments": {
             "session": "session0",
-            "document": {
-              "_id": 1
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ]
             }
           },
           "result": {
-            "insertedId": 1
+            "n": 1
           }
         },
         {
-          "name": "abortTransaction",
+          "name": "commitTransaction",
           "object": "session0"
         }
       ],
@@ -206,7 +126,6 @@
                   "_id": 1
                 }
               ],
-              "ordered": true,
               "readConcern": null,
               "lsid": "session0",
               "txnNumber": {
@@ -223,50 +142,52 @@
         {
           "command_started_event": {
             "command": {
-              "abortTransaction": 1,
+              "commitTransaction": 1,
               "lsid": "session0",
               "txnNumber": {
                 "$numberLong": "1"
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": {
-                "w": "majority"
-              }
+              "writeConcern": null
             },
-            "command_name": "abortTransaction",
+            "command_name": "commitTransaction",
             "database_name": "admin"
           }
         }
-      ],
-      "outcome": {
-        "collection": {
-          "data": []
-        }
-      }
+      ]
     },
     {
-      "description": "abort with default",
+      "description": "run command with explicit primary read preference",
       "operations": [
         {
           "name": "startTransaction",
           "object": "session0"
         },
         {
-          "name": "insertOne",
-          "object": "collection",
+          "name": "runCommand",
+          "object": "database",
+          "command_name": "insert",
           "arguments": {
             "session": "session0",
-            "document": {
-              "_id": 1
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ]
+            },
+            "readPreference": {
+              "mode": "Primary"
             }
           },
           "result": {
-            "insertedId": 1
+            "n": 1
           }
         },
         {
-          "name": "abortTransaction",
+          "name": "commitTransaction",
           "object": "session0"
         }
       ],
@@ -280,7 +201,6 @@
                   "_id": 1
                 }
               ],
-              "ordered": true,
               "readConcern": null,
               "lsid": "session0",
               "txnNumber": {
@@ -297,7 +217,7 @@
         {
           "command_started_event": {
             "command": {
-              "abortTransaction": 1,
+              "commitTransaction": 1,
               "lsid": "session0",
               "txnNumber": {
                 "$numberLong": "1"
@@ -306,16 +226,67 @@
               "autocommit": false,
               "writeConcern": null
             },
-            "command_name": "abortTransaction",
+            "command_name": "commitTransaction",
             "database_name": "admin"
           }
         }
-      ],
-      "outcome": {
-        "collection": {
-          "data": []
+      ]
+    },
+    {
+      "description": "run command fails with explicit secondary read preference",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "runCommand",
+          "object": "database",
+          "command_name": "find",
+          "arguments": {
+            "session": "session0",
+            "command": {
+              "find": "test"
+            },
+            "readPreference": {
+              "mode": "Secondary"
+            }
+          },
+          "result": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
         }
-      }
+      ]
+    },
+    {
+      "description": "run command fails with secondary read preference from transaction options",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0",
+          "arguments": {
+            "options": {
+              "readPreference": {
+                "mode": "secondary"
+              }
+            }
+          }
+        },
+        {
+          "name": "runCommand",
+          "object": "database",
+          "command_name": "find",
+          "arguments": {
+            "session": "session0",
+            "command": {
+              "find": "test"
+            }
+          },
+          "result": {
+            "errorContains": "read preference in a transaction must be primary"
+          }
+        }
+      ]
     }
   ]
 }

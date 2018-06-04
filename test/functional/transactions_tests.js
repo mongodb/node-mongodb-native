@@ -9,7 +9,7 @@ const chai = require('chai');
 const expect = chai.expect;
 const EJSON = require('mongodb-extjson');
 
-// mlaunch init --replicaset --arbiter  --name rs --hostname localhost --port 31000 --binarypath /Users/mbroadst/Downloads/mongodb-osx-x86_64-enterprise-3.7.3-411-g91e4266/bin
+// mlaunch init --replicaset --arbiter  --name rs --hostname localhost --port 31000 --binarypath /Users/mbroadst/Downloads/mongodb-osx-x86_64-enterprise-4.1.0-158-g3d62f3c/bin
 
 chai.use(require('chai-subset'));
 chai.config.includeStack = true;

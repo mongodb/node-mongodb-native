@@ -1,4 +1,6 @@
 {
+  "database_name": "transaction-tests",
+  "collection_name": "test",
   "data": [],
   "tests": [
     {
@@ -9,17 +11,16 @@
       "operations": [
         {
           "name": "startTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "insertOne",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "document": {
               "_id": 1
-            },
-            "session": "session0"
+            }
           },
           "result": {
             "insertedId": 1
@@ -27,17 +28,16 @@
         },
         {
           "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "insertOne",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "document": {
               "_id": 2
-            },
-            "session": "session0"
+            }
           },
           "result": {
             "insertedId": 2
@@ -45,17 +45,16 @@
         },
         {
           "name": "startTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "insertOne",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "document": {
               "_id": 3
-            },
-            "session": "session0"
+            }
           },
           "result": {
             "insertedId": 3
@@ -63,12 +62,11 @@
         },
         {
           "name": "abortTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "insertMany",
+          "object": "collection",
           "arguments": {
             "documents": [
               {
@@ -104,7 +102,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false,
               "writeConcern": null
@@ -121,7 +118,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -145,7 +141,6 @@
               "txnNumber": {
                 "$numberLong": "2"
               },
-              "stmtId": null,
               "startTransaction": null,
               "autocommit": null,
               "writeConcern": null
@@ -171,7 +166,6 @@
               "txnNumber": {
                 "$numberLong": "3"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false,
               "writeConcern": null
@@ -188,7 +182,6 @@
               "txnNumber": {
                 "$numberLong": "3"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -215,7 +208,6 @@
               "txnNumber": {
                 "$numberLong": "4"
               },
-              "stmtId": null,
               "startTransaction": null,
               "autocommit": null,
               "writeConcern": null

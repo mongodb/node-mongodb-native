@@ -1,4 +1,6 @@
 {
+  "database_name": "transaction-tests",
+  "collection_name": "test",
   "data": [],
   "tests": [
     {
@@ -6,17 +8,16 @@
       "operations": [
         {
           "name": "startTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "insertOne",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "document": {
               "_id": 1
-            },
-            "session": "session0"
+            }
           },
           "result": {
             "insertedId": 1
@@ -24,11 +25,12 @@
         },
         {
           "name": "deleteOne",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "filter": {
               "_id": 1
-            },
-            "session": "session0"
+            }
           },
           "result": {
             "deletedCount": 1
@@ -36,7 +38,9 @@
         },
         {
           "name": "bulkWrite",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "requests": [
               {
                 "name": "insertOne",
@@ -152,16 +156,6 @@
                 }
               },
               {
-                "name": "deleteMany",
-                "arguments": {
-                  "filter": {
-                    "_id": {
-                      "$gte": 6
-                    }
-                  }
-                }
-              },
-              {
                 "name": "updateMany",
                 "arguments": {
                   "filter": {
@@ -175,9 +169,18 @@
                     }
                   }
                 }
+              },
+              {
+                "name": "deleteMany",
+                "arguments": {
+                  "filter": {
+                    "_id": {
+                      "$gte": 6
+                    }
+                  }
+                }
               }
-            ],
-            "session": "session0"
+            ]
           },
           "result": {
             "deletedCount": 4,
@@ -189,8 +192,8 @@
               "6": 6,
               "7": 7
             },
-            "matchedCount": 5,
-            "modifiedCount": 5,
+            "matchedCount": 7,
+            "modifiedCount": 7,
             "upsertedCount": 1,
             "upsertedIds": {
               "2": 2
@@ -199,9 +202,7 @@
         },
         {
           "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         }
       ],
       "expectations": [
@@ -220,7 +221,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false,
               "writeConcern": null
@@ -246,7 +246,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -269,7 +268,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 2,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -313,7 +311,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 3,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -348,7 +345,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 5,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -388,7 +384,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 10,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -413,14 +408,6 @@
                     "_id": 4
                   },
                   "limit": 1
-                },
-                {
-                  "q": {
-                    "_id": {
-                      "$gte": 6
-                    }
-                  },
-                  "limit": 0
                 }
               ],
               "ordered": true,
@@ -428,7 +415,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 12,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -462,7 +448,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 15,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -474,12 +459,38 @@
         {
           "command_started_event": {
             "command": {
+              "delete": "test",
+              "deletes": [
+                {
+                  "q": {
+                    "_id": {
+                      "$gte": 6
+                    }
+                  },
+                  "limit": 0
+                }
+              ],
+              "ordered": true,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "delete",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
               "commitTransaction": 1,
               "lsid": "session0",
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 16,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null

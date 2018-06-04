@@ -1,4 +1,6 @@
 {
+  "database_name": "transaction-tests",
+  "collection_name": "test",
   "data": [],
   "tests": [
     {
@@ -6,17 +8,16 @@
       "operations": [
         {
           "name": "startTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "insertOne",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "document": {
               "_id": 1
-            },
-            "session": "session0"
+            }
           },
           "result": {
             "insertedId": 1
@@ -24,6 +25,7 @@
         },
         {
           "name": "insertMany",
+          "object": "collection",
           "arguments": {
             "documents": [
               {
@@ -44,11 +46,12 @@
         },
         {
           "name": "insertOne",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "document": {
               "_id": 4
-            },
-            "session": "session0"
+            }
           },
           "result": {
             "insertedId": 4
@@ -56,23 +59,20 @@
         },
         {
           "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "startTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "insertOne",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "document": {
               "_id": 5
-            },
-            "session": "session0"
+            }
           },
           "result": {
             "insertedId": 5
@@ -80,9 +80,7 @@
         },
         {
           "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         }
       ],
       "expectations": [
@@ -101,7 +99,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false,
               "writeConcern": null
@@ -127,7 +124,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -150,7 +146,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 3,
               "autocommit": false,
               "writeConcern": null
             },
@@ -166,7 +161,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 4,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -192,7 +186,6 @@
               "txnNumber": {
                 "$numberLong": "2"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false,
               "writeConcern": null
@@ -209,7 +202,6 @@
               "txnNumber": {
                 "$numberLong": "2"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -242,12 +234,69 @@
       }
     },
     {
-      "description": "operation writeConcern ignored for insert",
+      "description": "collection writeConcern without transaction",
+      "operations": [
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": "majority"
+            }
+          },
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 1
+            }
+          },
+          "result": {
+            "insertedId": 1
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": null,
+              "startTransaction": null,
+              "autocommit": null,
+              "writeConcern": {
+                "w": "majority"
+              }
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "collection writeConcern ignored for insert",
       "operations": [
         {
           "name": "startTransaction",
+          "object": "session0",
           "arguments": {
-            "session": "session0",
             "options": {
               "writeConcern": {
                 "w": "majority"
@@ -257,13 +306,16 @@
         },
         {
           "name": "insertOne",
-          "arguments": {
-            "document": {
-              "_id": 1
-            },
-            "session": "session0",
+          "object": "collection",
+          "collectionOptions": {
             "writeConcern": {
               "w": "majority"
+            }
+          },
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 1
             }
           },
           "result": {
@@ -272,6 +324,12 @@
         },
         {
           "name": "insertMany",
+          "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": "majority"
+            }
+          },
           "arguments": {
             "documents": [
               {
@@ -281,10 +339,7 @@
                 "_id": 3
               }
             ],
-            "session": "session0",
-            "writeConcern": {
-              "w": "majority"
-            }
+            "session": "session0"
           },
           "result": {
             "insertedIds": {
@@ -295,9 +350,7 @@
         },
         {
           "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         }
       ],
       "expectations": [
@@ -316,7 +369,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false,
               "writeConcern": null
@@ -342,7 +394,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -359,7 +410,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 3,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": {
@@ -370,7 +420,22 @@
             "database_name": "admin"
           }
         }
-      ]
+      ],
+      "outcome": {
+        "collection": {
+          "data": [
+            {
+              "_id": 1
+            },
+            {
+              "_id": 2
+            },
+            {
+              "_id": 3
+            }
+          ]
+        }
+      }
     }
   ]
 }
