@@ -1,3 +1,6 @@
+database_name: &database_name "transaction-tests"
+collection_name: &collection_name "test"
+
 data:
   - _id: 1
   - _id: 2
@@ -8,60 +11,57 @@ tests:
 
     operations:
       - name: startTransaction
-        arguments:
-          session: session0
+        object: session0
       - name: findOneAndDelete
+        object: collection
         arguments:
-          filter: {_id: 3}
           session: session0
+          filter: {_id: 3}
         result: {_id: 3}
       - name: findOneAndDelete
+        object: collection
         arguments:
-          filter: {_id: 4}
           session: session0
+          filter: {_id: 4}
         result:
       - name: commitTransaction
-        arguments:
-          session: session0
+        object: session0
 
     expectations:
       - command_started_event:
           command:
-            findAndModify: test
+            findAndModify: *collection_name
             query: {_id: 3}
             remove: True
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 0
             startTransaction: true
             autocommit: false
             readConcern:
             writeConcern:
           command_name: findAndModify
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
-            findAndModify: test
+            findAndModify: *collection_name
             query: {_id: 4}
             remove: True
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 1
             startTransaction:
             autocommit: false
             readConcern:
             writeConcern:
           command_name: findAndModify
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
             commitTransaction: 1
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 2
             startTransaction:
             autocommit: false
             readConcern:
@@ -75,49 +75,48 @@ tests:
           - {_id: 1}
           - {_id: 2}
 
-  - description: operation writeConcern ignored for findOneAndDelete
+  - description: collection writeConcern ignored for findOneAndDelete
 
     operations:
       - name: startTransaction
+        object: session0
         arguments:
-          session: session0
           options:
             writeConcern:
               w: majority
       - name: findOneAndDelete
-        arguments:
-          filter: {_id: 3}
-          session: session0
+        object: collection
+        collectionOptions:
           writeConcern:
             w: majority
-        result: {_id: 3}
-      - name: commitTransaction
         arguments:
           session: session0
+          filter: {_id: 3}
+        result: {_id: 3}
+      - name: commitTransaction
+        object: session0
 
     expectations:
       - command_started_event:
           command:
-            findAndModify: test
+            findAndModify: *collection_name
             query: {_id: 3}
             remove: True
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 0
             startTransaction: true
             autocommit: false
             readConcern:
             writeConcern:
           command_name: findAndModify
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
             commitTransaction: 1
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 1
             startTransaction:
             autocommit: false
             readConcern:

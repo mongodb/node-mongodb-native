@@ -1,5 +1,6 @@
-# Test all read operations' txnNumbers and stmtIds.
-# Aggregate not yet supported in transactions.
+database_name: &database_name "transaction-tests"
+collection_name: &collection_name "test"
+
 data: &data
   - {_id: 1}
   - {_id: 2}
@@ -7,74 +8,81 @@ data: &data
   - {_id: 4}
 
 tests:
+  - description: collection readConcern without transaction
+
+    operations:
+      - name: find
+        object: collection
+        collectionOptions:
+          readConcern:
+            level: majority
+        arguments:
+          session: session0
+        result: *data
+
+    expectations:
+      - command_started_event:
+          command:
+            find: *collection_name
+            readConcern:
+              level: majority
+            lsid: session0
+            txnNumber:
+            startTransaction:
+            autocommit:
+          command_name: find
+          database_name: *database_name
+
+    outcome: &outcome
+      collection:
+        data:
+          *data
+
   - description: count
 
     operations:
       - &startTransaction
         name: startTransaction
+        object: session0
+      - name: count
+        object: collection
         arguments:
           session: session0
-      - &count
-        name: count
-        arguments:
           filter:
             _id: 1
-          session: session0
-        result: 1
-      - *count
-      - &commitTransaction
-        name: commitTransaction
-        arguments:
-          session: session0
-
+        result:
+          errorContains: "Cannot run 'count' in a multi-document transaction"
+      - name: abortTransaction
+        object: session0
 
     expectations:
       - command_started_event:
           command:
-            count: test
+            count: *collection_name
             query:
               _id: 1
             readConcern:
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 0
             startTransaction: true
             autocommit: false
             writeConcern:
           command_name: count
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
-            count: test
-            query:
-              _id: 1
+            abortTransaction: 1
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 1
             startTransaction:
             autocommit: false
             writeConcern:
-          command_name: count
-          database_name: transaction-tests
-      - command_started_event:
-          command:
-            commitTransaction: 1
-            lsid: session0
-            txnNumber:
-              $numberLong: "1"
-            stmtId: 2
-            startTransaction:
-            autocommit: false
-            writeConcern:
-          command_name: commitTransaction
+          command_name: abortTransaction
           database_name: admin
 
-    outcome: &outcome
-      collection:
-        data:
-          *data
+    outcome: *outcome
 
   - description: find
 
@@ -82,75 +90,73 @@ tests:
       - *startTransaction
       - &find
         name: find
+        object: collection
         arguments:
-          batchSize: 3
           session: session0
+          batchSize: 3
         result: *data
       - *find
-      - *commitTransaction
+      - &commitTransaction
+        name: commitTransaction
+        object: session0
 
     expectations:
       - command_started_event:
           command:
-            find: test
+            find: *collection_name
             batchSize: 3
             readConcern:
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 0
             startTransaction: true
             autocommit: false
           command_name: find
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
             getMore:
               # 42 is a fake placeholder value for the cursorId.
               $numberLong: '42'
-            collection: test
+            collection: *collection_name
             batchSize: 3
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 1
             startTransaction:
             autocommit: false
           command_name: getMore
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
-            find: test
+            find: *collection_name
             batchSize: 3
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 2
             startTransaction:
             autocommit: false
           command_name: find
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
             getMore:
               $numberLong: '42'
-            collection: test
+            collection: *collection_name
             batchSize: 3
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 3
             startTransaction:
             autocommit: false
           command_name: getMore
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
             commitTransaction: 1
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 4
             startTransaction:
             autocommit: false
             writeConcern:
@@ -165,6 +171,7 @@ tests:
       - *startTransaction
       - &aggregate
         name: aggregate
+        object: collection
         arguments:
           pipeline:
             - $project:
@@ -178,7 +185,7 @@ tests:
     expectations:
       - command_started_event:
           command:
-            aggregate: test
+            aggregate: *collection_name
             pipeline:
               - $project:
                   _id: 1
@@ -188,29 +195,27 @@ tests:
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 0
             startTransaction: true
             autocommit: false
           command_name: aggregate
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
             getMore:
               # 42 is a fake placeholder value for the cursorId.
               $numberLong: '42'
-            collection: test
+            collection: *collection_name
             batchSize: 3
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 1
             startTransaction:
             autocommit: false
           command_name: getMore
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
-            aggregate: test
+            aggregate: *collection_name
             pipeline:
               - $project:
                   _id: 1
@@ -219,32 +224,29 @@ tests:
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 2
             startTransaction:
             autocommit: false
           command_name: aggregate
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
             getMore:
               $numberLong: '42'
-            collection: test
+            collection: *collection_name
             batchSize: 3
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 3
             startTransaction:
             autocommit: false
           command_name: getMore
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
             commitTransaction: 1
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 4
             startTransaction:
             autocommit: false
             writeConcern:
@@ -258,27 +260,27 @@ tests:
     operations:
       - *startTransaction
       - name: distinct
+        object: collection
         arguments:
-          fieldName: _id
           session: session0
+          fieldName: _id
         result: [1, 2, 3, 4]
       - *commitTransaction
 
     expectations:
       - command_started_event:
           command:
-            distinct: test
+            distinct: *collection_name
             key: _id
             lsid: session0
             readConcern:
             txnNumber:
               $numberLong: "1"
-            stmtId: 0
             startTransaction: true
             autocommit: false
             writeConcern:
           command_name: distinct
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
             commitTransaction: 1
@@ -286,7 +288,6 @@ tests:
             readConcern:
             txnNumber:
               $numberLong: "1"
-            stmtId: 1
             startTransaction:
             autocommit: false
             writeConcern:

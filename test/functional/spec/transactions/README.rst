@@ -22,8 +22,11 @@ Test Format
 
 Each YAML file has the following keys:
 
+- ``database_name`` and ``collection_name``: The database and collection to use
+  for testing.
+
 - ``data``: The data that should exist in the collection under test before each
-  test run. (TODO: not used yet.)
+  test run.
 
 - ``tests``: An array of tests that are to be run independently of each other.
   Each test will have some or all of the following fields:
@@ -38,9 +41,19 @@ Each YAML file has the following keys:
   - ``operations``: Array of documents, each describing an operation to be
     executed. Each document has the following fields:
 
-      - ``name``: The name of the operation.
+      - ``name``: The name of the operation on ``object``.
 
-      - ``arguments``: The names and values of arguments.
+      - ``object``: The name of the object to perform the operation on. Can be
+        "database", collection", "session0", or "session1".
+
+      - ``collectionOptions``: Optional, parameters to pass to the Collection()
+        used for this operation.
+
+      - ``command_name``: Present only when ``name`` is "runCommand". The name
+        of the command to run. Required for languages that are unable preserve
+        the order keys in the "command" argument when parsing JSON/YAML.
+
+      - ``arguments``: Optional, the names and values of arguments.
 
       - ``result``: The return value from the operation, if any. If the
         operation is expected to return an error, the ``result`` has one field,
@@ -61,18 +74,22 @@ Each YAML file has the following keys:
 Use as integration tests
 ========================
 
-Run a MongoDB replica set with a primary, two secondaries, and an arbiter,
-server version 4.0 or later. (Including two secondaries ensures that transaction
-pinning works properly. Include an arbiter to ensure no new bugs have been
-introduced related to arbiters.)
+Run a MongoDB replica set with a primary, a secondary, and an arbiter,
+server version 4.0 or later. (Including a secondary ensures that server
+selection in a transaction works properly. Including an arbiter helps ensure
+that no new bugs have been introduced related to arbiters.)
 
-For each YAML file, for each element in ``tests``:
+Load each YAML (or JSON) file using a Canonical Extended JSON parser.
+
+Then for each element in ``tests``:
 
 #. Create a MongoClient and call
    ``client.admin.runCommand({killAllSessions: []})`` to clean up any open
    transactions from previous test failures. The command will fail with message
    "operation was interrupted", because it kills its own implicit session. Catch
    the exception and continue.
+#. Create a collection object from the MongoClient, using the ``database_name``
+   and ``collection_name`` fields of the YAML file.
 #. Drop the test collection, using writeConcern "majority".
 #. Execute the "create" command to recreate the collection, using writeConcern
    "majority". (Creating the collection inside a transaction is prohibited, so
@@ -91,27 +108,31 @@ For each YAML file, for each element in ``tests``:
 #. For each element in ``operations``:
 
    - Enter a "try" block or your programming language's closest equivalent.
-   - If ``name`` is "startTransaction", "commitTransaction", or
-     "abortTransaction", call the named method on ``session0`` or
-     ``session1``, depending on the "session" argument.
-   - Otherwise, ``name`` refers to a CRUD method, such as ``insertOne``.
-     Execute the named method on the "transactions-tests" database on the "test"
-     collection, passing the arguments listed. Pass ``session0`` or ``session1``
-     to the method, depending on which session's name is in the arguments list.
+   - Create a Database object from the MongoClient, using the ``database_name``
+     field at the top level of the test file.
+   - Create a Collection object from the Database, using the
+     ``collection_name`` field at the top level of the test file.
+     If ``collectionOptions`` is present create the Collection object with the
+     provided options. Otherwise create the object with the default options.
+   - Execute the named method on the provided ``object``, passing the
+     arguments listed. Pass ``session0`` or ``session1`` to the method,
+     depending on which session's name is in the arguments list.
      If ``arguments`` contains no "session", pass no explicit session to the
-     method. If ``arguments`` includes "readPreference", configure the specified
-     read preference in whatever manner the driver supports.
+     method.
    - If the driver throws an exception / returns an error while executing this
      series of operations, store the error message and server error code.
    - If the result document has an "errorContains" field, verify that the
      method threw an exception or returned an error, and that the value of the
-     "errorContains" field matches the error string. If the result document has
-     an "errorCodeName" field, verify that the method threw a command failed
-     exception or returned an error, and that the value of the "errorCodeName"
-     field matches the "codeName" in the server error response.
+     "errorContains" field matches the error string. "errorContains" is a
+     substring (case-insensitive) of the actual error message.
+     If the result document has an "errorCodeName" field, verify that the
+     method threw a command failed exception or returned an error, and that
+     the value of the "errorCodeName" field matches the "codeName" in the
+     server error response.
+     If the operation returns a raw command response, eg from ``runCommand``,
+     then compare only the fields present in the expected result document.
      Otherwise, compare the method's return value to ``result`` using the same
-     logic as the CRUD Spec Tests runner. key is a substring (case-insensitive)
-     of the actual error message.
+     logic as the CRUD Spec Tests runner.
 
 #. Call ``session0.endSession()`` and ``session1.endSession``.
 #. If the test includes a list of command-started events in ``expectations``,
@@ -121,7 +142,9 @@ For each YAML file, for each element in ``tests``:
 #. For each element in ``outcome``:
 
    - If ``name`` is "collection", verify that the test collection contains
-     exactly the documents in the ``data`` array.
+     exactly the documents in the ``data`` array. Ensure this find uses
+     Primary read preference even when the MongoClient is configured with
+     another read preference.
 
 TODO:
 
@@ -131,6 +154,9 @@ TODO:
 
 Command-Started Events
 ``````````````````````
+
+The event listener used for these tests MUST ignore the security commands
+listed in the Command Monitoring Spec.
 
 Logical Session Id
 ~~~~~~~~~~~~~~~~~~
@@ -144,7 +170,7 @@ Null Values
 ~~~~~~~~~~~
 
 Some command-started events in ``expectations`` include ``null`` values for
-fields such as ``txnNumber``, ``autocommit``, ``writeConcern``, and ``stmtId``.
+fields such as ``txnNumber``, ``autocommit``, and ``writeConcern``.
 Tests MUST assert that the actual command **omits** any field that has a
 ``null`` value in the expected command.
 

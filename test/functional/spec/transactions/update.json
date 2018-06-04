@@ -1,4 +1,6 @@
 {
+  "database_name": "transaction-tests",
+  "collection_name": "test",
   "data": [
     {
       "_id": 1
@@ -16,13 +18,13 @@
       "operations": [
         {
           "name": "startTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "updateOne",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "filter": {
               "_id": 4
             },
@@ -31,8 +33,7 @@
                 "x": 1
               }
             },
-            "upsert": true,
-            "session": "session0"
+            "upsert": true
           },
           "result": {
             "matchedCount": 0,
@@ -43,14 +44,15 @@
         },
         {
           "name": "replaceOne",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "filter": {
               "x": 1
             },
             "replacement": {
               "y": 1
-            },
-            "session": "session0"
+            }
           },
           "result": {
             "matchedCount": 1,
@@ -60,7 +62,9 @@
         },
         {
           "name": "updateMany",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "filter": {
               "_id": {
                 "$gte": 3
@@ -70,8 +74,7 @@
               "$set": {
                 "z": 1
               }
-            },
-            "session": "session0"
+            }
           },
           "result": {
             "matchedCount": 2,
@@ -81,9 +84,7 @@
         },
         {
           "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         }
       ],
       "expectations": [
@@ -111,7 +112,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false,
               "writeConcern": null
@@ -141,7 +141,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -175,7 +174,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 2,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -192,7 +190,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 3,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -225,12 +222,12 @@
       }
     },
     {
-      "description": "operation writeConcern ignored for update",
+      "description": "collections writeConcern ignored for update",
       "operations": [
         {
           "name": "startTransaction",
+          "object": "session0",
           "arguments": {
-            "session": "session0",
             "options": {
               "writeConcern": {
                 "w": "majority"
@@ -240,7 +237,14 @@
         },
         {
           "name": "updateOne",
+          "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": "majority"
+            }
+          },
           "arguments": {
+            "session": "session0",
             "filter": {
               "_id": 4
             },
@@ -249,11 +253,7 @@
                 "x": 1
               }
             },
-            "upsert": true,
-            "writeConcern": {
-              "w": "majority"
-            },
-            "session": "session0"
+            "upsert": true
           },
           "result": {
             "matchedCount": 0,
@@ -264,17 +264,20 @@
         },
         {
           "name": "replaceOne",
+          "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": "majority"
+            }
+          },
           "arguments": {
+            "session": "session0",
             "filter": {
               "x": 1
             },
             "replacement": {
               "y": 1
-            },
-            "writeConcern": {
-              "w": "majority"
-            },
-            "session": "session0"
+            }
           },
           "result": {
             "matchedCount": 1,
@@ -284,7 +287,14 @@
         },
         {
           "name": "updateMany",
+          "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": "majority"
+            }
+          },
           "arguments": {
+            "session": "session0",
             "filter": {
               "_id": {
                 "$gte": 3
@@ -294,11 +304,7 @@
               "$set": {
                 "z": 1
               }
-            },
-            "writeConcern": {
-              "w": "majority"
-            },
-            "session": "session0"
+            }
           },
           "result": {
             "matchedCount": 2,
@@ -308,9 +314,7 @@
         },
         {
           "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         }
       ],
       "expectations": [
@@ -338,7 +342,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false,
               "writeConcern": null
@@ -368,7 +371,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -402,7 +404,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 2,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": null
@@ -419,7 +420,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 3,
               "startTransaction": null,
               "autocommit": false,
               "writeConcern": {

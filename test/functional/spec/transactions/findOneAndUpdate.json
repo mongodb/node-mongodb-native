@@ -1,4 +1,6 @@
 {
+  "database_name": "transaction-tests",
+  "collection_name": "test",
   "data": [
     {
       "_id": 1
@@ -16,13 +18,13 @@
       "operations": [
         {
           "name": "startTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "findOneAndUpdate",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "filter": {
               "_id": 3
             },
@@ -31,8 +33,7 @@
                 "x": 1
               }
             },
-            "returnDocument": "Before",
-            "session": "session0"
+            "returnDocument": "Before"
           },
           "result": {
             "_id": 3
@@ -40,7 +41,9 @@
         },
         {
           "name": "findOneAndUpdate",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "filter": {
               "_id": 4
             },
@@ -50,8 +53,7 @@
               }
             },
             "upsert": true,
-            "returnDocument": "After",
-            "session": "session0"
+            "returnDocument": "After"
           },
           "result": {
             "_id": 4,
@@ -60,19 +62,17 @@
         },
         {
           "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "startTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "findOneAndUpdate",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "filter": {
               "_id": 3
             },
@@ -81,8 +81,7 @@
                 "x": 1
               }
             },
-            "returnDocument": "Before",
-            "session": "session0"
+            "returnDocument": "Before"
           },
           "result": {
             "_id": 3,
@@ -91,19 +90,17 @@
         },
         {
           "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "startTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "findOneAndUpdate",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "filter": {
               "_id": 3
             },
@@ -112,8 +109,7 @@
                 "x": 1
               }
             },
-            "returnDocument": "Before",
-            "session": "session0"
+            "returnDocument": "Before"
           },
           "result": {
             "_id": 3,
@@ -122,9 +118,7 @@
         },
         {
           "name": "abortTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         }
       ],
       "expectations": [
@@ -145,7 +139,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false,
               "readConcern": null,
@@ -173,7 +166,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false,
               "readConcern": null,
@@ -191,7 +183,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 2,
               "startTransaction": null,
               "autocommit": false,
               "readConcern": null,
@@ -218,7 +209,6 @@
               "txnNumber": {
                 "$numberLong": "2"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false,
               "readConcern": {
@@ -238,7 +228,6 @@
               "txnNumber": {
                 "$numberLong": "2"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false,
               "readConcern": null,
@@ -265,7 +254,6 @@
               "txnNumber": {
                 "$numberLong": "3"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false,
               "readConcern": {
@@ -285,7 +273,6 @@
               "txnNumber": {
                 "$numberLong": "3"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false,
               "readConcern": null,
@@ -318,12 +305,12 @@
       }
     },
     {
-      "description": "operation writeConcern ignored for findOneAndUpdate",
+      "description": "collection writeConcern ignored for findOneAndUpdate",
       "operations": [
         {
           "name": "startTransaction",
+          "object": "session0",
           "arguments": {
-            "session": "session0",
             "options": {
               "writeConcern": {
                 "w": "majority"
@@ -333,7 +320,14 @@
         },
         {
           "name": "findOneAndUpdate",
+          "object": "collection",
+          "collectionOptions": {
+            "writeConcern": {
+              "w": "majority"
+            }
+          },
           "arguments": {
+            "session": "session0",
             "filter": {
               "_id": 3
             },
@@ -342,11 +336,7 @@
                 "x": 1
               }
             },
-            "returnDocument": "Before",
-            "session": "session0",
-            "writeConcern": {
-              "w": "majority"
-            }
+            "returnDocument": "Before"
           },
           "result": {
             "_id": 3
@@ -354,9 +344,7 @@
         },
         {
           "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         }
       ],
       "expectations": [
@@ -377,7 +365,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 0,
               "startTransaction": true,
               "autocommit": false,
               "readConcern": null,
@@ -395,7 +382,6 @@
               "txnNumber": {
                 "$numberLong": "1"
               },
-              "stmtId": 1,
               "startTransaction": null,
               "autocommit": false,
               "readConcern": null,

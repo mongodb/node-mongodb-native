@@ -1,4 +1,6 @@
 {
+  "database_name": "transaction-tests",
+  "collection_name": "test",
   "data": [],
   "tests": [
     {
@@ -6,17 +8,16 @@
       "operations": [
         {
           "name": "startTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "insertOne",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "document": {
               "_id": 1
-            },
-            "session": "session0"
+            }
           },
           "result": {
             "insertedId": 1
@@ -24,11 +25,12 @@
         },
         {
           "name": "find",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "filter": {
               "_id": 1
-            },
-            "session": "session0"
+            }
           },
           "result": [
             {
@@ -38,16 +40,18 @@
         },
         {
           "name": "find",
+          "object": "collection",
           "arguments": {
+            "session": "session1",
             "filter": {
               "_id": 1
-            },
-            "session": "session1"
+            }
           },
           "result": []
         },
         {
           "name": "find",
+          "object": "collection",
           "arguments": {
             "filter": {
               "_id": 1
@@ -57,17 +61,16 @@
         },
         {
           "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "find",
+          "object": "collection",
           "arguments": {
+            "session": "session1",
             "filter": {
               "_id": 1
-            },
-            "session": "session1"
+            }
           },
           "result": [
             {
@@ -77,6 +80,7 @@
         },
         {
           "name": "find",
+          "object": "collection",
           "arguments": {
             "filter": {
               "_id": 1
@@ -104,23 +108,20 @@
       "operations": [
         {
           "name": "startTransaction",
-          "arguments": {
-            "session": "session0"
-          }
+          "object": "session0"
         },
         {
           "name": "startTransaction",
-          "arguments": {
-            "session": "session1"
-          }
+          "object": "session1"
         },
         {
           "name": "insertOne",
+          "object": "collection",
           "arguments": {
+            "session": "session0",
             "document": {
               "_id": 1
-            },
-            "session": "session0"
+            }
           },
           "result": {
             "insertedId": 1
@@ -128,56 +129,9 @@
         },
         {
           "name": "find",
+          "object": "collection",
           "arguments": {
-            "filter": {
-              "_id": 1
-            },
-            "session": "session0"
-          },
-          "result": [
-            {
-              "_id": 1
-            }
-          ]
-        },
-        {
-          "name": "find",
-          "arguments": {
-            "filter": {
-              "_id": 1
-            },
-            "session": "session1"
-          },
-          "result": []
-        },
-        {
-          "name": "find",
-          "arguments": {
-            "filter": {
-              "_id": 1
-            }
-          },
-          "result": []
-        },
-        {
-          "name": "commitTransaction",
-          "arguments": {
-            "session": "session0"
-          }
-        },
-        {
-          "name": "find",
-          "arguments": {
-            "filter": {
-              "_id": 1
-            },
-            "session": "session1"
-          },
-          "result": []
-        },
-        {
-          "name": "find",
-          "arguments": {
+            "session": "session0",
             "filter": {
               "_id": 1
             }
@@ -189,10 +143,58 @@
           ]
         },
         {
-          "name": "commitTransaction",
+          "name": "find",
+          "object": "collection",
           "arguments": {
-            "session": "session1"
-          }
+            "session": "session1",
+            "filter": {
+              "_id": 1
+            }
+          },
+          "result": []
+        },
+        {
+          "name": "find",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "result": []
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "find",
+          "object": "collection",
+          "arguments": {
+            "session": "session1",
+            "filter": {
+              "_id": 1
+            }
+          },
+          "result": []
+        },
+        {
+          "name": "find",
+          "object": "collection",
+          "arguments": {
+            "filter": {
+              "_id": 1
+            }
+          },
+          "result": [
+            {
+              "_id": 1
+            }
+          ]
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session1"
         }
       ],
       "outcome": {
