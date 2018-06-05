@@ -16,11 +16,6 @@ chai.config.includeStack = true;
 chai.config.showDiff = true;
 chai.config.truncateThreshold = 0;
 
-const testContext = {
-  dbName: 'transaction-tests',
-  collectionName: 'test'
-};
-
 function isPlainObject(value) {
   return value !== null && typeof value === 'object' && Array.isArray(value) === false;
 }
@@ -79,7 +74,13 @@ function translateClientOptions(options) {
   return options;
 }
 
+// Main test runner
 describe('Transactions (spec)', function() {
+  const testContext = {
+    dbName: 'transaction-tests',
+    collectionName: 'test'
+  };
+
   const testSuites = fs
     .readdirSync(`${__dirname}/spec/transactions`)
     .filter(x => x.indexOf('.json') !== -1)
@@ -105,146 +106,149 @@ describe('Transactions (spec)', function() {
     describe(testSuite.name, {
       metadata: { requires: { topology: ['replicaset', 'mongos'], mongodb: '>=3.7.x' } },
       test: function() {
-        beforeEach(() => {
-          const db = testContext.client.db();
-          const coll = db.collection(testContext.collectionName);
-
-          return coll
-            .drop()
-            .catch(err => {
-              if (!err.message.match(/ns not found/)) throw err;
-            })
-            .then(() => db.createCollection(testContext.collectionName, { w: 'majority' }))
-            .then(() => {
-              if (testSuite.data && Array.isArray(testSuite.data) && testSuite.data.length > 0) {
-                return coll.insert(testSuite.data, { w: 'majority' });
-              }
-            });
-        });
-
-        testSuite.tests.forEach(testData => {
-          afterEach(() => {
-            if (testContext.testClient) {
-              return testContext.testClient.close().then(() => {
-                delete testContext.testClient;
-              });
-            }
-          });
-
-          const maybeSkipIt = testData.skipReason ? it.skip : it;
-          maybeSkipIt(testData.description, function() {
-            const commandEvents = [];
-            const clientOptions = translateClientOptions(
-              Object.assign({ monitorCommands: true }, testData.clientOptions)
-            );
-
-            return MongoClient.connect(testContext.url, clientOptions).then(client => {
-              testContext.testClient = client;
-              client.on('commandStarted', event => {
-                if (
-                  event.databaseName === testContext.dbName ||
-                  ['startTransaction', 'commitTransaction', 'abortTransaction'].includes(
-                    event.commandName
-                  )
-                ) {
-                  commandEvents.push(event);
-                }
-              });
-
-              const sessionOptions = Object.assign({}, testData.transactionOptions);
-
-              testData.sessionOptions = testData.sessionOptions || {};
-              const session0 = client.startSession(
-                Object.assign({}, sessionOptions, testData.sessionOptions.session0)
-              );
-              const session1 = client.startSession(
-                Object.assign({}, sessionOptions, testData.sessionOptions.session1)
-              );
-
-              return testOperations(client, testData, { session0, session1 })
-                .catch(err => {
-                  // If the driver throws an exception / returns an error while executing this series
-                  // of operations, store the error message.
-                  throw err;
-                })
-                .then(() => {
-                  session0.endSession();
-                  session1.endSession();
-
-                  if (
-                    testData.expectations &&
-                    Array.isArray(testData.expectations) &&
-                    testData.expectations.length > 0
-                  ) {
-                    const actualEvents = normalizeCommandShapes(commandEvents);
-                    const rawExpectedEvents = testData.expectations.map(x =>
-                      linkSessionData(x.command_started_event, { session0, session1 })
-                    );
-
-                    const expectedEventPlaceholders = rawExpectedEvents.map(event =>
-                      findPlaceholders(event.command)
-                    );
-
-                    const expectedEvents = normalizeCommandShapes(rawExpectedEvents);
-                    expect(actualEvents).to.have.length(expectedEvents.length);
-
-                    expectedEvents.forEach((expected, idx) => {
-                      const actual = actualEvents[idx];
-                      const placeHolders = expectedEventPlaceholders[idx]; // eslint-disable-line
-
-                      expect(actual.commandName).to.equal(expected.commandName);
-                      expect(actual.databaseName).to.equal(expected.databaseName);
-
-                      const actualCommand = actual.command;
-                      const expectedCommand = expected.command;
-
-                      // handle validation of placeholder values
-                      // placeHolders.forEach(placeholder => {
-                      //   const parsedActual = EJSON.parse(JSON.stringify(actualCommand), {
-                      //     relaxed: true
-                      //   });
-
-                      //   if (placeholder.type === null) {
-                      //     expect(parsedActual).to.not.have.all.nested.property(placeholder.path);
-                      //   } else if (placeholder.type === 'string') {
-                      //     expect(parsedActual).nested.property(placeholder.path).to.exist;
-                      //     expect(parsedActual)
-                      //       .nested.property(placeholder.path)
-                      //       .to.have.length.greaterThan(0);
-                      //   } else if (placeholder.type === 'number') {
-                      //     expect(parsedActual).nested.property(placeholder.path).to.exist;
-                      //     expect(parsedActual)
-                      //       .nested.property(placeholder.path)
-                      //       .to.be.greaterThan(0);
-                      //   }
-                      // });
-
-                      // compare the command
-                      expect(actualCommand).to.containSubset(expectedCommand);
-                    });
-                  }
-
-                  if (testData.outcome) {
-                    if (testData.outcome.collection) {
-                      // use the client without transactions to verify
-                      return testContext.client
-                        .db()
-                        .collection(testContext.collectionName)
-                        .find({})
-                        .toArray()
-                        .then(docs => {
-                          expect(docs).to.eql(testData.outcome.collection.data);
-                        });
-                    }
-                  }
-                });
-            });
-          });
-        });
+        beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
+        afterEach(() => cleanupAfterSuite(testContext));
+        testSuite.tests.forEach(testData => runTestSuiteTest(testData, testContext));
       }
     });
   });
 });
+
+function prepareDatabaseForSuite(suite, context) {
+  const db = context.client.db();
+  const coll = db.collection(context.collectionName);
+
+  return coll
+    .drop()
+    .catch(err => {
+      if (!err.message.match(/ns not found/)) throw err;
+    })
+    .then(() => db.createCollection(context.collectionName, { w: 'majority' }))
+    .then(() => {
+      if (suite.data && Array.isArray(suite.data) && suite.data.length > 0) {
+        return coll.insert(suite.data, { w: 'majority' });
+      }
+    });
+}
+
+function cleanupAfterSuite(context) {
+  if (context.testClient) {
+    return context.testClient.close().then(() => {
+      delete context.testClient;
+    });
+  }
+}
+
+function runTestSuiteTest(testData, context) {
+  const maybeSkipIt = testData.skipReason ? it.skip : it;
+  maybeSkipIt(testData.description, function() {
+    const commandEvents = [];
+    const clientOptions = translateClientOptions(
+      Object.assign({ monitorCommands: true }, testData.clientOptions)
+    );
+
+    return MongoClient.connect(context.url, clientOptions).then(client => {
+      context.testClient = client;
+      client.on('commandStarted', event => {
+        if (
+          event.databaseName === context.dbName ||
+          ['startTransaction', 'commitTransaction', 'abortTransaction'].includes(event.commandName)
+        ) {
+          commandEvents.push(event);
+        }
+      });
+
+      const sessionOptions = Object.assign({}, testData.transactionOptions);
+
+      testData.sessionOptions = testData.sessionOptions || {};
+      const collection = client.db().collection('test');
+      const session0 = client.startSession(
+        Object.assign({}, sessionOptions, testData.sessionOptions.session0)
+      );
+      const session1 = client.startSession(
+        Object.assign({}, sessionOptions, testData.sessionOptions.session1)
+      );
+
+      return testOperations(client, testData, { collection, session0, session1 })
+        .catch(err => {
+          // If the driver throws an exception / returns an error while executing this series
+          // of operations, store the error message.
+          throw err;
+        })
+        .then(() => {
+          session0.endSession();
+          session1.endSession();
+
+          if (
+            testData.expectations &&
+            Array.isArray(testData.expectations) &&
+            testData.expectations.length > 0
+          ) {
+            const actualEvents = normalizeCommandShapes(commandEvents);
+            const rawExpectedEvents = testData.expectations.map(x =>
+              linkSessionData(x.command_started_event, { session0, session1 })
+            );
+
+            const expectedEventPlaceholders = rawExpectedEvents.map(event =>
+              findPlaceholders(event.command)
+            );
+
+            const expectedEvents = normalizeCommandShapes(rawExpectedEvents);
+            expect(actualEvents).to.have.length(expectedEvents.length);
+
+            expectedEvents.forEach((expected, idx) => {
+              const actual = actualEvents[idx];
+              const placeHolders = expectedEventPlaceholders[idx]; // eslint-disable-line
+
+              expect(actual.commandName).to.equal(expected.commandName);
+              expect(actual.databaseName).to.equal(expected.databaseName);
+
+              const actualCommand = actual.command;
+              const expectedCommand = expected.command;
+
+              // handle validation of placeholder values
+              // placeHolders.forEach(placeholder => {
+              //   const parsedActual = EJSON.parse(JSON.stringify(actualCommand), {
+              //     relaxed: true
+              //   });
+
+              //   if (placeholder.type === null) {
+              //     expect(parsedActual).to.not.have.all.nested.property(placeholder.path);
+              //   } else if (placeholder.type === 'string') {
+              //     expect(parsedActual).nested.property(placeholder.path).to.exist;
+              //     expect(parsedActual)
+              //       .nested.property(placeholder.path)
+              //       .to.have.length.greaterThan(0);
+              //   } else if (placeholder.type === 'number') {
+              //     expect(parsedActual).nested.property(placeholder.path).to.exist;
+              //     expect(parsedActual)
+              //       .nested.property(placeholder.path)
+              //       .to.be.greaterThan(0);
+              //   }
+              // });
+
+              // compare the command
+              expect(actualCommand).to.containSubset(expectedCommand);
+            });
+          }
+
+          if (testData.outcome) {
+            if (testData.outcome.collection) {
+              // use the client without transactions to verify
+              return context.client
+                .db()
+                .collection(context.collectionName)
+                .find({})
+                .toArray()
+                .then(docs => {
+                  expect(docs).to.eql(testData.outcome.collection.data);
+                });
+            }
+          }
+        });
+    });
+  });
+}
 
 function linkSessionData(command, context) {
   const session = context[command.command.lsid];
@@ -385,14 +389,10 @@ function testOperation(operation, obj, context) {
   return opPromise;
 }
 
-function testOperations(client, testData, context) {
-  const coll = client.db().collection('test');
+function testOperations(client, testData, operationContext) {
   return testData.operations.reduce((combined, operation) => {
-    if (isTransactionCommand(operation.name)) {
-      const session = context[operation.arguments.session];
-      return combined.then(() => testOperation(operation, session, context));
-    }
-
-    return combined.then(() => testOperation(operation, coll, context));
+    return combined.then(() =>
+      testOperation(operation, operationContext[operation.object], context)
+    );
   }, Promise.resolve());
 }
