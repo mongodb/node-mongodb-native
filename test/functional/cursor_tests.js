@@ -4396,4 +4396,27 @@ describe('Cursor', function() {
       cursor.close(() => client.close(() => done()));
     });
   });
+
+  it('should return the correct count when find method used with collation set', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+
+    client.connect(function(err, client) {
+      const db = client.db(configuration.db);
+      const docs = [{ _id: 0, name: 'foo' }, { _id: 1, name: 'Foo' }];
+      const collation = { locale: 'en_US', strength: 2 };
+      let collection, cursor;
+
+      Promise.resolve()
+        .then(() => db.createCollection('cursor_collation_count'))
+        .then(() => (collection = db.collection('cursor_collation_count')))
+        .then(() => collection.insertMany(docs))
+        .then(() => collection.find({ name: 'foo' }).collation(collation))
+        .then(_cursor => (cursor = _cursor))
+        .then(() => cursor.count())
+        .then(val => expect(val).to.equal(2))
+        .then(() => cursor.close(() => client.close(() => done())))
+        .catch(err => cursor.close(() => client.close(() => done(err))));
+    });
+  });
 });
