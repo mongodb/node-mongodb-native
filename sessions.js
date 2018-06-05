@@ -54,6 +54,25 @@ function txnStateTransition(txnState, nextState) {
   );
 }
 
+class TransactionState {
+  constructor(options) {
+    options = options || {};
+
+    this.state = NO_TRANSACTION;
+    this.options = {};
+    if (options.writeConcern) this.options.writeConcern = options.writeConcern;
+    if (options.readConcern) this.options.readConcern = options.readConcern;
+    if (options.readPreference) this.options.readPreference = options.readPreference;
+  }
+
+  /**
+   * @return Whether this session is presently in a transaction
+   */
+  get isActive() {
+    return [STARTING_TRANSACTION, TRANSACTION_IN_PROGRESS].indexOf(this.state) !== -1;
+  }
+}
+
 /** A class representing a client session on the server */
 class ClientSession extends EventEmitter {
   /**
@@ -101,9 +120,8 @@ class ClientSession extends EventEmitter {
     this.operationTime = null;
     this.explicit = !!options.explicit;
     this.owner = options.owner;
-    this.transactionOptions = null;
-    this.autoStartTransaction = options.autoStartTransaction;
     this.defaultTransactionOptions = Object.assign({}, options.defaultTransactionOptions);
+    this.transaction = new TransactionState();
   }
 
   /**
@@ -174,7 +192,7 @@ class ClientSession extends EventEmitter {
    * @returns whether this session is current in a transaction or not
    */
   inTransaction() {
-    return this.transactionOptions != null;
+    return this.transaction.isActive;
   }
 
   /**
@@ -190,11 +208,15 @@ class ClientSession extends EventEmitter {
       throw new MongoError('Transaction already in progress');
     }
 
-    // increment txnNumber and reset stmtId to zero.
-    this.serverSession.txnNumber += 1;
+    // increment txnNumber
+    this.incrementTransactionNumber();
 
-    // set transaction options, we will use this to determine if we are in a transaction
-    this.transactionOptions = Object.assign({}, options || this.defaultTransactionOptions);
+    // create transaction state
+    this.transaction = new TransactionState(
+      Object.assign({}, options || this.defaultTransactionOptions)
+    );
+
+    txnStateTransition(this.transaction, STARTING_TRANSACTION);
   }
 
   /**
@@ -240,10 +262,6 @@ class ClientSession extends EventEmitter {
   }
 }
 
-function resetTransactionState(clientSession) {
-  clientSession.transactionOptions = null;
-}
-
 function endTransaction(clientSession, commandName, callback) {
   if (!assertAlive(clientSession, callback)) {
     // checking result in case callback was called
@@ -259,22 +277,23 @@ function endTransaction(clientSession, commandName, callback) {
     }
   }
 
-  if (clientSession.serverSession.stmtId === 0) {
-    // The server transaction was never started.
-    resetTransactionState(clientSession);
-    callback(null, null);
-    return;
-  }
+  // if (clientSession.serverSession.stmtId === 0) {
+  //   // The server transaction was never started.
+  //   resetTransactionState(clientSession);
+  //   callback(null, null);
+  //   return;
+  // }
 
   const command = { [commandName]: 1 };
-  if (clientSession.transactionOptions.writeConcern) {
-    Object.assign(command, { writeConcern: clientSession.transactionOptions.writeConcern });
-  } else if (clientSession.clientOptions && clientSession.clientOptions.w) {
-    Object.assign(command, { writeConcern: { w: clientSession.clientOptions.w } });
-  }
+
+  // if (clientSession.transactionOptions.writeConcern) {
+  //   Object.assign(command, { writeConcern: clientSession.transactionOptions.writeConcern });
+  // } else if (clientSession.clientOptions && clientSession.clientOptions.w) {
+  //   Object.assign(command, { writeConcern: { w: clientSession.clientOptions.w } });
+  // }
 
   function commandHandler(e, r) {
-    resetTransactionState(clientSession);
+    // resetTransactionState(clientSession);
     callback(e, r);
   }
 
