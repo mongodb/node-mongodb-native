@@ -139,16 +139,6 @@ class ClientSession extends EventEmitter {
   }
 
   /**
-   * Increment the statement id on the internal ServerSession
-   *
-   * @param {Number} [operationCount] the number of operations performed
-   */
-  incrementStatementId(operationCount) {
-    operationCount = operationCount || 1;
-    this.serverSession.stmtId += operationCount;
-  }
-
-  /**
    * @returns whether this session is current in a transaction or not
    */
   inTransaction() {
@@ -170,7 +160,6 @@ class ClientSession extends EventEmitter {
 
     // increment txnNumber and reset stmtId to zero.
     this.serverSession.txnNumber += 1;
-    this.serverSession.stmtId = 0;
 
     // set transaction options, we will use this to determine if we are in a transaction
     this.transactionOptions = Object.assign({}, options || this.defaultTransactionOptions);

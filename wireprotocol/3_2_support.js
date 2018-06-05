@@ -38,7 +38,6 @@ function decorateWithTransactionsData(command, session, isRetryableWrite) {
     return;
   }
 
-  command.stmtId = serverSession.stmtId;
   command.autocommit = false;
 
   if (serverSession.stmtId === 0) {
@@ -317,11 +316,6 @@ WireProtocol.prototype.getMore = function(
     queryOptions.session = cursorState.session;
   }
 
-  // We need to increment the statement id if we're in a transaction
-  if (options.session && options.session.inTransaction()) {
-    options.session.incrementStatementId();
-  }
-
   // Write out the getMore command
   connection.write(query, queryOptions, queryCallback);
 };
@@ -351,11 +345,6 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
 
   // optionally decorate query with transaction data
   decorateWithTransactionsData(query.query, options.session, options.willRetryWrite);
-
-  // We need to increment the statement id if we're in a transaction
-  if (options.session && options.session.inTransaction()) {
-    options.session.incrementStatementId();
-  }
 
   return query;
 };
