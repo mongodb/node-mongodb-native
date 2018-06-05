@@ -22,6 +22,38 @@ function assertAlive(session, callback) {
   return true;
 }
 
+// Client session states
+const NO_TRANSACTION = 'NO_TRANSACTION';
+const STARTING_TRANSACTION = 'STARTING_TRANSACTION';
+const TRANSACTION_IN_PROGRESS = 'TRANSACTION_IN_PROGRESS';
+const TRANSACTION_COMMITTED = 'TRANSACTION_COMMITTED';
+const TRANSACTION_ABORTED = 'TRANSACTION_ABORTED';
+
+function txnStateTransition(txnState, nextState) {
+  const validTransitions = {
+    [NO_TRANSACTION]: [NO_TRANSACTION, STARTING_TRANSACTION],
+    [STARTING_TRANSACTION]: [TRANSACTION_IN_PROGRESS, TRANSACTION_COMMITTED, TRANSACTION_ABORTED],
+    [TRANSACTION_IN_PROGRESS]: [
+      TRANSACTION_IN_PROGRESS,
+      TRANSACTION_COMMITTED,
+      TRANSACTION_ABORTED
+    ],
+    [TRANSACTION_COMMITTED]: [TRANSACTION_COMMITTED, STARTING_TRANSACTION, NO_TRANSACTION],
+    [TRANSACTION_ABORTED]: [STARTING_TRANSACTION, NO_TRANSACTION]
+  };
+
+  // Get current state
+  const nextStates = validTransitions[txnState.state];
+  if (nextStates && nextStates.indexOf(nextState) !== -1) {
+    txnState.state = nextState;
+    return;
+  }
+
+  throw new MongoError(
+    `ClientSession attempted illegal state transition from [${txnState.state}] to [${nextState}]`
+  );
+}
+
 /** A class representing a client session on the server */
 class ClientSession extends EventEmitter {
   /**
