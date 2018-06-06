@@ -4396,4 +4396,79 @@ describe('Cursor', function() {
       cursor.close(() => client.close(() => done()));
     });
   });
+
+  function testTransformStream(client, configuration, dbName, transformFunc, expectedSet, done) {
+    client.connect(function(err, client) {
+      const db = client.db(configuration.db);
+      let collection, cursor;
+      const docs = [
+        { _id: 0, a: { b: 1, c: 0 } },
+        { _id: 1, a: { b: 1, c: 0 } },
+        { _id: 2, a: { b: 1, c: 0 } }
+      ];
+      const resultSet = new Set();
+      const transformParam = transformFunc != null ? { transform: transformFunc } : null;
+
+      Promise.resolve()
+        .then(() => db.createCollection(dbName))
+        .then(() => (collection = db.collection(dbName)))
+        .then(() => collection.insertMany(docs))
+        .then(() => collection.find())
+        .then(_cursor => (cursor = _cursor))
+        .then(() => cursor.transformStream(transformParam))
+        .then(stream => {
+          stream.on('data', function(doc) {
+            resultSet.add(doc);
+          });
+
+          stream.once('end', function() {
+            expect(resultSet).to.deep.equal(expectedSet);
+            cursor.close(() => client.close(() => done()));
+          });
+
+          stream.once('error', function(err) {
+            cursor.close(() => client.close(() => done(err)));
+          });
+
+          stream.resume();
+        })
+        .catch(err => cursor.close(() => client.close(() => done(err))));
+    });
+  }
+
+  it('transformStream should apply the supplied transformation function to each document in the stream', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+    const expectedDocs = [{ _id: 0, b: 1, c: 0 }, { _id: 1, b: 1, c: 0 }, { _id: 2, b: 1, c: 0 }];
+
+    testTransformStream(
+      client,
+      configuration,
+      'transformStream-test-transform',
+      doc => {
+        return { _id: doc._id, b: doc.a.b, c: doc.a.c };
+      },
+      new Set(expectedDocs),
+      done
+    );
+  });
+
+  it('transformStream should return a stream of unmodified docs if no transform function applied', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+    const expectedDocs = [
+      { _id: 0, a: { b: 1, c: 0 } },
+      { _id: 1, a: { b: 1, c: 0 } },
+      { _id: 2, a: { b: 1, c: 0 } }
+    ];
+
+    testTransformStream(
+      client,
+      configuration,
+      'transformStream-test-notransform',
+      null,
+      new Set(expectedDocs),
+      done
+    );
+  });
 });
