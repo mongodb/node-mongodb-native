@@ -4396,4 +4396,31 @@ describe('Cursor', function() {
       cursor.close(() => client.close(() => done()));
     });
   });
+
+  it('should return false when exhausted and hasNext called more than once', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+
+    client.connect(function(err, client) {
+      const db = client.db(configuration.db);
+
+      db.createCollection('cursor_hasNext_test').then(function() {
+        const cursor = db.collection('cursor_hasNext_test').find();
+
+        cursor
+          .hasNext()
+          .then(function(val1) {
+            expect(val1).to.equal(false);
+            return cursor.hasNext();
+          })
+          .then(function(val2) {
+            expect(val2).to.equal(false);
+            cursor.close(() => client.close(() => done()));
+          })
+          .catch(err => {
+            cursor.close(() => client.close(() => done(err)));
+          });
+      });
+    });
+  });
 });
