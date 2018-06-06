@@ -7,7 +7,7 @@ const ObjectId = require('../../index').ObjectId;
 const Timestamp = require('../../index').Timestamp;
 const Long = require('../../index').Long;
 const GET_MORE_NON_RESUMABLE_CODES = require('../../lib/error').GET_MORE_NON_RESUMABLE_CODES;
-const isGetMoreError = require('../../lib/error').isGetMoreError;
+const isResumableError = require('../../lib/error').isResumableError;
 
 describe('Change Stream Resume Tests', function() {
   const test = {};
@@ -217,6 +217,6 @@ describe('Change Stream Resume Tests', function() {
 
 describe('Change Stream Resume Error Tests', function() {
   it('should properly process errors that lack the `mongoErrorContextSymbol`', function() {
-    expect(() => isGetMoreError(new Error())).to.not.throw();
+    expect(() => isResumableError(new Error())).to.not.throw();
   });
 });
