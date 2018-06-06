@@ -6,7 +6,8 @@ const MongoClient = require('../../lib/mongo_client');
 const ObjectId = require('../../index').ObjectId;
 const Timestamp = require('../../index').Timestamp;
 const Long = require('../../index').Long;
-const GET_MORE_NON_RESUMABLE_CODES = require('../../lib/error_codes').GET_MORE_NON_RESUMABLE_CODES;
+const GET_MORE_NON_RESUMABLE_CODES = require('../../lib/error').GET_MORE_NON_RESUMABLE_CODES;
+const isResumableError = require('../../lib/error').isResumableError;
 
 describe('Change Stream Resume Tests', function() {
   const test = {};
@@ -126,7 +127,7 @@ describe('Change Stream Resume Tests', function() {
         secondGetMore: req => req.reply(GET_MORE_RESPONSE)
       },
       {
-        description: `should resume on an error that says "not master"`,
+        description: `should resume on an error that says 'not master'`,
         passing: true,
         firstAggregate: req => req.reply(AGGREGATE_RESPONSE),
         secondAggregate: req => req.reply(AGGREGATE_RESPONSE),
@@ -134,7 +135,7 @@ describe('Change Stream Resume Tests', function() {
         secondGetMore: req => req.reply(GET_MORE_RESPONSE)
       },
       {
-        description: `should resume on an error that says "node is recovering"`,
+        description: `should resume on an error that says 'node is recovering'`,
         passing: true,
         firstAggregate: req => req.reply(AGGREGATE_RESPONSE),
         secondAggregate: req => req.reply(AGGREGATE_RESPONSE),
@@ -175,6 +176,7 @@ describe('Change Stream Resume Tests', function() {
       test.server = server;
     });
   });
+
   afterEach(done => changeStream.close(() => client.close(() => mock.cleanup(done))));
 
   configs.forEach(config => {
@@ -182,7 +184,9 @@ describe('Change Stream Resume Tests', function() {
       metadata: { requires: { mongodb: '>=3.6.0' } },
       test: function() {
         test.server.setMessageHandler(makeServerHandler(config));
-        client = new MongoClient(`mongodb://${test.server.uri()}`, { socketTimeoutMS: 300 });
+        client = new MongoClient(`mongodb://${test.server.uri()}`, {
+          socketTimeoutMS: 300
+        });
         return client
           .connect()
           .then(client => client.db('test'))
@@ -208,5 +212,11 @@ describe('Change Stream Resume Tests', function() {
           );
       }
     });
+  });
+});
+
+describe('Change Stream Resume Error Tests', function() {
+  it('should properly process errors that lack the `mongoErrorContextSymbol`', function() {
+    expect(() => isResumableError(new Error())).to.not.throw();
   });
 });
