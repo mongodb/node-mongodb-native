@@ -4382,4 +4382,18 @@ describe('Cursor', function() {
       }
     }
   );
+
+  it('should return a promise when no callback supplied to forEach method', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+
+    client.connect(function(err, client) {
+      const db = client.db(configuration.db);
+      const collection = db.collection('cursor_session_tests2');
+
+      const cursor = collection.find();
+      expect(cursor.forEach()).to.exist.and.to.be.an.instanceof(cursor.s.promiseLibrary);
+      cursor.close(() => client.close(() => done()));
+    });
+  });
 });
