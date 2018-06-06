@@ -2,7 +2,8 @@
 const test = require('./shared').assert,
   setupDatabase = require('./shared').setupDatabase,
   Script = require('vm'),
-  expect = require('chai').expect;
+  expect = require('chai').expect,
+  normalizedFunctionString = require('bson/lib/bson/parser/utils').normalizedFunctionString;
 
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.
@@ -667,7 +668,7 @@ describe('Insert', function() {
           test.equal(null, err);
 
           collection.findOne({ _id: result.ops[0]._id }, function(err, object) {
-            test.equal(func.toString(), object.z.code);
+            test.equal(normalizedFunctionString(func), object.z.code);
             test.equal(1, object.i);
             client.close();
             done();
@@ -703,7 +704,7 @@ describe('Insert', function() {
             test.equal(null, err);
 
             collection.findOne({ _id: result.ops[0]._id }, function(err, object) {
-              test.equal(func.toString(), object.z.code);
+              test.equal(normalizedFunctionString(func), object.z.code);
               test.equal(1, object.i);
               client.close();
               done();
