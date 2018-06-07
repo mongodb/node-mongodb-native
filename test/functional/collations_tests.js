@@ -1113,8 +1113,8 @@ describe('Collation', function() {
         const db = client.db(configuration.db);
         const docs = [{ _id: 0, name: 'foo' }, { _id: 1, name: 'Foo' }];
         const collation = { locale: 'en_US', strength: 2 };
-        const close = e => cursor.close(() => client.close(() => done(e)));
         let collection, cursor;
+        const close = e => cursor.close(() => client.close(() => done(e)));
 
         Promise.resolve()
           .then(() => db.createCollection('cursor_collation_count'))
@@ -1153,7 +1153,13 @@ describe('Collation', function() {
         var col = db.collection('collation_test');
         // Create collation index
         col.createIndexes(
-          [{ key: { a: 1 }, collation: { locale: 'nn' }, name: 'collation_test' }],
+          [
+            {
+              key: { a: 1 },
+              collation: { locale: 'nn' },
+              name: 'collation_test'
+            }
+          ],
           function(err) {
             test.equal(null, err);
 
