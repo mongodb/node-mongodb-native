@@ -4382,4 +4382,45 @@ describe('Cursor', function() {
       }
     }
   );
+
+  it('should return a promise when no callback supplied to forEach method', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+
+    client.connect(function(err, client) {
+      const db = client.db(configuration.db);
+      const collection = db.collection('cursor_session_tests2');
+
+      const cursor = collection.find();
+      expect(cursor.forEach()).to.exist.and.to.be.an.instanceof(cursor.s.promiseLibrary);
+      cursor.close(() => client.close(() => done()));
+    });
+  });
+
+  it('should return false when exhausted and hasNext called more than once', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+
+    client.connect(function(err, client) {
+      const db = client.db(configuration.db);
+
+      db.createCollection('cursor_hasNext_test').then(function() {
+        const cursor = db.collection('cursor_hasNext_test').find();
+
+        cursor
+          .hasNext()
+          .then(function(val1) {
+            expect(val1).to.equal(false);
+            return cursor.hasNext();
+          })
+          .then(function(val2) {
+            expect(val2).to.equal(false);
+            cursor.close(() => client.close(() => done()));
+          })
+          .catch(err => {
+            cursor.close(() => client.close(() => done(err)));
+          });
+      });
+    });
+  });
 });
