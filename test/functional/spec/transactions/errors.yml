@@ -82,12 +82,16 @@ tests:
             _id: 1
         result:
           errorCodeName: WriteConflict
+          errorLabelsContain: ["TransientTransactionError"]
+          errorLabelsOmit: ["UnknownTransactionCommitResult"]
       - name: commitTransaction
         object: session0
       - name: commitTransaction
         object: session1
         result:
           errorCodeName: NoSuchTransaction
+          errorLabelsContain: ["TransientTransactionError"]
+          errorLabelsOmit: ["UnknownTransactionCommitResult"]
 
   - description: write conflict abort
 
@@ -112,6 +116,8 @@ tests:
             _id: 1
         result:
           errorCodeName: WriteConflict
+          errorLabelsContain: ["TransientTransactionError"]
+          errorLabelsOmit: ["UnknownTransactionCommitResult"]
       - name: commitTransaction
         object: session0
       # Driver ignores "NoSuchTransaction" error.
