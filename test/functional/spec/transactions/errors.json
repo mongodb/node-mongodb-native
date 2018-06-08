@@ -123,7 +123,13 @@
             }
           },
           "result": {
-            "errorCodeName": "WriteConflict"
+            "errorCodeName": "WriteConflict",
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ],
+            "errorLabelsOmit": [
+              "UnknownTransactionCommitResult"
+            ]
           }
         },
         {
@@ -134,7 +140,13 @@
           "name": "commitTransaction",
           "object": "session1",
           "result": {
-            "errorCodeName": "NoSuchTransaction"
+            "errorCodeName": "NoSuchTransaction",
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ],
+            "errorLabelsOmit": [
+              "UnknownTransactionCommitResult"
+            ]
           }
         }
       ]
@@ -173,7 +185,13 @@
             }
           },
           "result": {
-            "errorCodeName": "WriteConflict"
+            "errorCodeName": "WriteConflict",
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ],
+            "errorLabelsOmit": [
+              "UnknownTransactionCommitResult"
+            ]
           }
         },
         {

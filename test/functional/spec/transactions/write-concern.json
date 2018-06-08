@@ -316,6 +316,40 @@
           "data": []
         }
       }
+    },
+    {
+      "description": "start with unacknowledged write concern",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0",
+          "arguments": {
+            "options": {
+              "writeConcern": {
+                "w": 0
+              }
+            }
+          },
+          "result": {
+            "errorContains": "transactions do not support unacknowledged write concern"
+          }
+        }
+      ]
+    },
+    {
+      "description": "start with implicit unacknowledged write concern",
+      "clientOptions": {
+        "w": 0
+      },
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0",
+          "result": {
+            "errorContains": "transactions do not support unacknowledged write concern"
+          }
+        }
+      ]
     }
   ]
 }

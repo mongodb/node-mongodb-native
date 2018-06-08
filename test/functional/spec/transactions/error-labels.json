@@ -4,7 +4,370 @@
   "data": [],
   "tests": [
     {
-      "description": "commit",
+      "description": "DuplicateKey errors do not contain transient label",
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertMany",
+          "object": "collection",
+          "arguments": {
+            "session": "session0",
+            "documents": [
+              {
+                "_id": 1
+              },
+              {
+                "_id": 1
+              }
+            ]
+          },
+          "result": {
+            "errorCodeName": "DuplicateKey",
+            "errorLabelsOmit": [
+              "TransientTransactionError",
+              "UnknownTransactionCommitResult"
+            ]
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                },
+                {
+                  "_id": 1
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": true,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "abortTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "abortTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": []
+        }
+      }
+    },
+    {
+      "description": "NotMaster errors contain transient label",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "errorCode": 10107
+        }
+      },
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 1
+            }
+          },
+          "result": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ],
+            "errorLabelsOmit": [
+              "UnknownTransactionCommitResult"
+            ]
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": true,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "abortTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "abortTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": []
+        }
+      }
+    },
+    {
+      "description": "WriteConflict errors contain transient label",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "errorCode": 112
+        }
+      },
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 1
+            }
+          },
+          "result": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ],
+            "errorLabelsOmit": [
+              "UnknownTransactionCommitResult"
+            ]
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": true,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "abortTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "abortTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": []
+        }
+      }
+    },
+    {
+      "description": "NoSuchTransaction errors contain transient label",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "errorCode": 251
+        }
+      },
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 1
+            }
+          },
+          "result": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ],
+            "errorLabelsOmit": [
+              "UnknownTransactionCommitResult"
+            ]
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": true,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "abortTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "abortTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": []
+        }
+      }
+    },
+    {
+      "description": "NoSuchTransaction errors on commit contain transient label",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "commitTransaction"
+          ],
+          "errorCode": 251
+        }
+      },
       "operations": [
         {
           "name": "startTransaction",
@@ -25,8 +388,79 @@
         },
         {
           "name": "commitTransaction",
-          "object": "session0"
+          "object": "session0",
+          "result": {
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ],
+            "errorLabelsOmit": [
+              "UnknownTransactionCommitResult"
+            ]
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": true,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
         },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": []
+        }
+      }
+    },
+    {
+      "description": "add transient label to connection errors",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "closeConnection": true
+        }
+      },
+      "operations": [
         {
           "name": "startTransaction",
           "object": "session0"
@@ -37,11 +471,112 @@
           "arguments": {
             "session": "session0",
             "document": {
-              "_id": 2
+              "_id": 1
             }
           },
           "result": {
-            "insertedId": 2
+            "errorLabelsContain": [
+              "TransientTransactionError"
+            ],
+            "errorLabelsOmit": [
+              "UnknownTransactionCommitResult"
+            ]
+          }
+        },
+        {
+          "name": "abortTransaction",
+          "object": "session0"
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "insert": "test",
+              "documents": [
+                {
+                  "_id": 1
+                }
+              ],
+              "ordered": true,
+              "readConcern": null,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": true,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "insert",
+            "database_name": "transaction-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "abortTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "startTransaction": null,
+              "autocommit": false,
+              "writeConcern": null
+            },
+            "command_name": "abortTransaction",
+            "database_name": "admin"
+          }
+        }
+      ],
+      "outcome": {
+        "collection": {
+          "data": []
+        }
+      }
+    },
+    {
+      "description": "add unknown commit label to connection errors",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 2
+        },
+        "data": {
+          "failCommands": [
+            "commitTransaction"
+          ],
+          "closeConnection": true
+        }
+      },
+      "operations": [
+        {
+          "name": "startTransaction",
+          "object": "session0"
+        },
+        {
+          "name": "insertOne",
+          "object": "collection",
+          "arguments": {
+            "session": "session0",
+            "document": {
+              "_id": 1
+            }
+          },
+          "result": {
+            "insertedId": 1
+          }
+        },
+        {
+          "name": "commitTransaction",
+          "object": "session0",
+          "result": {
+            "errorLabelsContain": [
+              "UnknownTransactionCommitResult"
+            ],
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
           }
         },
         {
@@ -92,35 +627,10 @@
         {
           "command_started_event": {
             "command": {
-              "insert": "test",
-              "documents": [
-                {
-                  "_id": 2
-                }
-              ],
-              "ordered": true,
-              "readConcern": {
-                "afterClusterTime": 42
-              },
-              "lsid": "session0",
-              "txnNumber": {
-                "$numberLong": "2"
-              },
-              "startTransaction": true,
-              "autocommit": false,
-              "writeConcern": null
-            },
-            "command_name": "insert",
-            "database_name": "transaction-tests"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
               "commitTransaction": 1,
               "lsid": "session0",
               "txnNumber": {
-                "$numberLong": "2"
+                "$numberLong": "1"
               },
               "startTransaction": null,
               "autocommit": false,
@@ -129,81 +639,6 @@
             "command_name": "commitTransaction",
             "database_name": "admin"
           }
-        }
-      ],
-      "outcome": {
-        "collection": {
-          "data": [
-            {
-              "_id": 1
-            },
-            {
-              "_id": 2
-            }
-          ]
-        }
-      }
-    },
-    {
-      "description": "rerun commit after empty transaction",
-      "operations": [
-        {
-          "name": "startTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "commitTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "commitTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "startTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "insertOne",
-          "object": "collection",
-          "arguments": {
-            "session": "session0",
-            "document": {
-              "_id": 1
-            }
-          },
-          "result": {
-            "insertedId": 1
-          }
-        },
-        {
-          "name": "commitTransaction",
-          "object": "session0"
-        }
-      ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "insert": "test",
-              "documents": [
-                {
-                  "_id": 1
-                }
-              ],
-              "ordered": true,
-              "readConcern": null,
-              "lsid": "session0",
-              "txnNumber": {
-                "$numberLong": "2"
-              },
-              "startTransaction": true,
-              "autocommit": false,
-              "writeConcern": null
-            },
-            "command_name": "insert",
-            "database_name": "transaction-tests"
-          }
         },
         {
           "command_started_event": {
@@ -211,7 +646,7 @@
               "commitTransaction": 1,
               "lsid": "session0",
               "txnNumber": {
-                "$numberLong": "2"
+                "$numberLong": "1"
               },
               "startTransaction": null,
               "autocommit": false,
@@ -233,7 +668,19 @@
       }
     },
     {
-      "description": "multiple commits in a row",
+      "description": "add unknown commit label to retryable commit errors",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 2
+        },
+        "data": {
+          "failCommands": [
+            "commitTransaction"
+          ],
+          "errorCode": 11602
+        }
+      },
       "operations": [
         {
           "name": "startTransaction",
@@ -254,11 +701,15 @@
         },
         {
           "name": "commitTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "commitTransaction",
-          "object": "session0"
+          "object": "session0",
+          "result": {
+            "errorLabelsContain": [
+              "UnknownTransactionCommitResult"
+            ],
+            "errorLabelsOmit": [
+              "TransientTransactionError"
+            ]
+          }
         },
         {
           "name": "commitTransaction",
@@ -349,7 +800,22 @@
       }
     },
     {
-      "description": "write concern error on commit",
+      "description": "add unknown commit label to writeConcernError ShutdownInProgress",
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 2
+        },
+        "data": {
+          "failCommands": [
+            "commitTransaction"
+          ],
+          "writeConcernError": {
+            "code": 91,
+            "errmsg": "Replication is being shut down"
+          }
+        }
+      },
       "operations": [
         {
           "name": "startTransaction",
@@ -357,7 +823,7 @@
           "arguments": {
             "options": {
               "writeConcern": {
-                "w": 10
+                "w": "majority"
               }
             }
           }
@@ -379,330 +845,17 @@
           "name": "commitTransaction",
           "object": "session0",
           "result": {
-            "errorLabelsOmit": [
-              "TransientTransactionError",
+            "errorLabelsContain": [
               "UnknownTransactionCommitResult"
+            ],
+            "errorLabelsOmit": [
+              "TransientTransactionError"
             ]
           }
-        }
-      ],
-      "outcome": {
-        "collection": {
-          "data": [
-            {
-              "_id": 1
-            }
-          ]
-        }
-      }
-    },
-    {
-      "description": "commit without start",
-      "operations": [
-        {
-          "name": "commitTransaction",
-          "object": "session0",
-          "result": {
-            "errorContains": "no transaction started"
-          }
-        }
-      ],
-      "expectations": [],
-      "outcome": {
-        "collection": {
-          "data": []
-        }
-      }
-    },
-    {
-      "description": "commit after no-op abort",
-      "operations": [
-        {
-          "name": "startTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "abortTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "commitTransaction",
-          "object": "session0",
-          "result": {
-            "errorContains": "Cannot call commitTransaction after calling abortTransaction"
-          }
-        }
-      ],
-      "expectations": [],
-      "outcome": {
-        "collection": {
-          "data": []
-        }
-      }
-    },
-    {
-      "description": "commit after abort",
-      "operations": [
-        {
-          "name": "startTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "insertOne",
-          "object": "collection",
-          "arguments": {
-            "session": "session0",
-            "document": {
-              "_id": 1
-            }
-          },
-          "result": {
-            "insertedId": 1
-          }
-        },
-        {
-          "name": "abortTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "commitTransaction",
-          "object": "session0",
-          "result": {
-            "errorContains": "Cannot call commitTransaction after calling abortTransaction"
-          }
-        }
-      ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "insert": "test",
-              "documents": [
-                {
-                  "_id": 1
-                }
-              ],
-              "ordered": true,
-              "readConcern": null,
-              "lsid": "session0",
-              "txnNumber": {
-                "$numberLong": "1"
-              },
-              "startTransaction": true,
-              "autocommit": false,
-              "writeConcern": null
-            },
-            "command_name": "insert",
-            "database_name": "transaction-tests"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "abortTransaction": 1,
-              "lsid": "session0",
-              "txnNumber": {
-                "$numberLong": "1"
-              },
-              "startTransaction": null,
-              "autocommit": false,
-              "writeConcern": null
-            },
-            "command_name": "abortTransaction",
-            "database_name": "admin"
-          }
-        }
-      ]
-    },
-    {
-      "description": "multiple commits after empty transaction",
-      "operations": [
-        {
-          "name": "startTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "insertOne",
-          "object": "collection",
-          "arguments": {
-            "session": "session0",
-            "document": {
-              "_id": 1
-            }
-          },
-          "result": {
-            "insertedId": 1
-          }
-        },
-        {
-          "name": "abortTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "startTransaction",
-          "object": "session0"
         },
         {
           "name": "commitTransaction",
           "object": "session0"
-        },
-        {
-          "name": "commitTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "startTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "insertOne",
-          "object": "collection",
-          "arguments": {
-            "session": "session0",
-            "document": {
-              "_id": 1
-            }
-          },
-          "result": {
-            "insertedId": 1
-          }
-        },
-        {
-          "name": "abortTransaction",
-          "object": "session0"
-        }
-      ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "insert": "test",
-              "documents": [
-                {
-                  "_id": 1
-                }
-              ],
-              "ordered": true,
-              "readConcern": null,
-              "lsid": "session0",
-              "txnNumber": {
-                "$numberLong": "1"
-              },
-              "startTransaction": true,
-              "autocommit": false,
-              "writeConcern": null
-            },
-            "command_name": "insert",
-            "database_name": "transaction-tests"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "abortTransaction": 1,
-              "lsid": "session0",
-              "txnNumber": {
-                "$numberLong": "1"
-              },
-              "startTransaction": null,
-              "autocommit": false,
-              "writeConcern": null
-            },
-            "command_name": "abortTransaction",
-            "database_name": "admin"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "insert": "test",
-              "documents": [
-                {
-                  "_id": 1
-                }
-              ],
-              "ordered": true,
-              "readConcern": {
-                "afterClusterTime": 42
-              },
-              "lsid": "session0",
-              "txnNumber": {
-                "$numberLong": "3"
-              },
-              "startTransaction": true,
-              "autocommit": false,
-              "writeConcern": null
-            },
-            "command_name": "insert",
-            "database_name": "transaction-tests"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "abortTransaction": 1,
-              "lsid": "session0",
-              "txnNumber": {
-                "$numberLong": "3"
-              },
-              "startTransaction": null,
-              "autocommit": false,
-              "writeConcern": null
-            },
-            "command_name": "abortTransaction",
-            "database_name": "admin"
-          }
-        }
-      ],
-      "outcome": {
-        "collection": {
-          "data": []
-        }
-      }
-    },
-    {
-      "description": "reset session state commit",
-      "operations": [
-        {
-          "name": "startTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "insertOne",
-          "object": "collection",
-          "arguments": {
-            "session": "session0",
-            "document": {
-              "_id": 1
-            }
-          },
-          "result": {
-            "insertedId": 1
-          }
-        },
-        {
-          "name": "commitTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "insertOne",
-          "object": "collection",
-          "arguments": {
-            "session": "session0",
-            "document": {
-              "_id": 2
-            }
-          },
-          "result": {
-            "insertedId": 2
-          }
-        },
-        {
-          "name": "commitTransaction",
-          "object": "session0",
-          "result": {
-            "errorContains": "no transaction started"
-          }
         }
       ],
       "expectations": [
@@ -739,7 +892,9 @@
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority"
+              }
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -748,140 +903,37 @@
         {
           "command_started_event": {
             "command": {
-              "insert": "test",
-              "documents": [
-                {
-                  "_id": 2
-                }
-              ],
-              "ordered": true,
-              "readConcern": null,
-              "lsid": "session0",
-              "txnNumber": null,
-              "startTransaction": null,
-              "autocommit": null
-            },
-            "command_name": "insert",
-            "database_name": "transaction-tests"
-          }
-        }
-      ],
-      "outcome": {
-        "collection": {
-          "data": [
-            {
-              "_id": 1
-            },
-            {
-              "_id": 2
-            }
-          ]
-        }
-      }
-    },
-    {
-      "description": "reset session state abort",
-      "operations": [
-        {
-          "name": "startTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "insertOne",
-          "object": "collection",
-          "arguments": {
-            "session": "session0",
-            "document": {
-              "_id": 1
-            }
-          },
-          "result": {
-            "insertedId": 1
-          }
-        },
-        {
-          "name": "abortTransaction",
-          "object": "session0"
-        },
-        {
-          "name": "insertOne",
-          "object": "collection",
-          "arguments": {
-            "session": "session0",
-            "document": {
-              "_id": 2
-            }
-          },
-          "result": {
-            "insertedId": 2
-          }
-        },
-        {
-          "name": "abortTransaction",
-          "object": "session0",
-          "result": {
-            "errorContains": "no transaction started"
-          }
-        }
-      ],
-      "expectations": [
-        {
-          "command_started_event": {
-            "command": {
-              "insert": "test",
-              "documents": [
-                {
-                  "_id": 1
-                }
-              ],
-              "ordered": true,
-              "readConcern": null,
-              "lsid": "session0",
-              "txnNumber": {
-                "$numberLong": "1"
-              },
-              "startTransaction": true,
-              "autocommit": false,
-              "writeConcern": null
-            },
-            "command_name": "insert",
-            "database_name": "transaction-tests"
-          }
-        },
-        {
-          "command_started_event": {
-            "command": {
-              "abortTransaction": 1,
+              "commitTransaction": 1,
               "lsid": "session0",
               "txnNumber": {
                 "$numberLong": "1"
               },
               "startTransaction": null,
               "autocommit": false,
-              "writeConcern": null
+              "writeConcern": {
+                "w": "majority"
+              }
             },
-            "command_name": "abortTransaction",
+            "command_name": "commitTransaction",
             "database_name": "admin"
           }
         },
         {
           "command_started_event": {
             "command": {
-              "insert": "test",
-              "documents": [
-                {
-                  "_id": 2
-                }
-              ],
-              "ordered": true,
-              "readConcern": null,
+              "commitTransaction": 1,
               "lsid": "session0",
-              "txnNumber": null,
+              "txnNumber": {
+                "$numberLong": "1"
+              },
               "startTransaction": null,
-              "autocommit": null
+              "autocommit": false,
+              "writeConcern": {
+                "w": "majority"
+              }
             },
-            "command_name": "insert",
-            "database_name": "transaction-tests"
+            "command_name": "commitTransaction",
+            "database_name": "admin"
           }
         }
       ],
@@ -889,7 +941,7 @@
         "collection": {
           "data": [
             {
-              "_id": 2
+              "_id": 1
             }
           ]
         }

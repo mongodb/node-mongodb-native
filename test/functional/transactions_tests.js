@@ -20,6 +20,8 @@ function isPlainObject(value) {
   return value !== null && typeof value === 'object' && Array.isArray(value) === false;
 }
 
+process.on('unhandledRejection', err => console.dir(err));
+
 /**
  * Finds placeholder values in a deeply nested object.
  *
@@ -53,7 +55,7 @@ function findPlaceholders(value, parent) {
         result.push({ path: key, type: 'string' });
       }
 
-      // NOTE: fix this, it just passes the current example
+      // NOTE: fix this, it just passes the current examples
       delete parent[0][parent[1]];
     } else if (value[key] === '') {
       result.push({ path: key, type: 'string' });
@@ -139,6 +141,8 @@ function cleanupAfterSuite(context) {
   }
 }
 
+let displayCommands = false;
+
 function runTestSuiteTest(testData, context) {
   const maybeSkipIt = testData.skipReason ? it.skip : it;
   maybeSkipIt(testData.description, function() {
@@ -156,12 +160,20 @@ function runTestSuiteTest(testData, context) {
         ) {
           commandEvents.push(event);
         }
+
+        // very useful for debugging
+        if (displayCommands) {
+          // usually makes things much easier
+          // if (event.command.$clusterTime) delete event.command.$clusterTime;
+          // if (event.command.lsid) delete event.command.lsid;
+          console.dir(event, { depth: 5 });
+        }
       });
 
       const sessionOptions = Object.assign({}, testData.transactionOptions);
 
       testData.sessionOptions = testData.sessionOptions || {};
-      const collection = client.db().collection('test');
+      const database = client.db();
       const session0 = client.startSession(
         Object.assign({}, sessionOptions, testData.sessionOptions.session0)
       );
@@ -169,7 +181,9 @@ function runTestSuiteTest(testData, context) {
         Object.assign({}, sessionOptions, testData.sessionOptions.session1)
       );
 
-      return testOperations(client, testData, { collection, session0, session1 })
+      // enable to see useful APM debug information at the time of actual test run
+      // displayCommands = true;
+      return testOperations(client, testData, { database, session0, session1 })
         .catch(err => {
           // If the driver throws an exception / returns an error while executing this series
           // of operations, store the error message.
@@ -317,6 +331,7 @@ function testOperation(operation, obj, context) {
         return args.unshift(operation.arguments[key]);
       }
 
+      if (key === 'command') return args.unshift(operation.arguments[key]);
       if (key === 'requests') return args.unshift(extractBulkRequests(operation.arguments[key]));
       if (key === 'update' || key === 'replacement') return args.push(operation.arguments[key]);
       if (key === 'session') {
@@ -332,6 +347,10 @@ function testOperation(operation, obj, context) {
 
       if (key === 'options') {
         Object.assign(opOptions, operation.arguments[key]);
+        if (opOptions.readPreference) {
+          opOptions.readPreference = opOptions.readPreference.mode.toLowerCase();
+        }
+
         return;
       }
 
@@ -353,6 +372,9 @@ function testOperation(operation, obj, context) {
     args.push(opOptions);
   }
 
+  // console.log(`\noperation: ${operation.name}`);
+  // console.log(`options:`, opOptions);
+
   let opPromise;
   if (operation.name === 'find' || operation.name === 'aggregate') {
     // `find` creates a cursor, so we need to call `toArray` on it
@@ -361,6 +383,8 @@ function testOperation(operation, obj, context) {
   } else if (operation.name === 'startTransaction') {
     // `startTansaction` can throw, so we need to make sure we wrap it in a promise
     opPromise = Promise.try(() => obj[operation.name].apply(obj, args));
+  } else if (operation.name === 'runCommand') {
+    opPromise = obj.command.apply(obj, args);
   } else {
     opPromise = obj[operation.name].apply(obj, args);
   }
@@ -389,10 +413,33 @@ function testOperation(operation, obj, context) {
   return opPromise;
 }
 
+function convertCollectionOptions(options) {
+  const result = {};
+  Object.keys(options).forEach(key => {
+    if (key === 'readPreference') {
+      result[key] = options[key].mode.toLowerCase();
+    } else {
+      result[key] = options[key];
+    }
+  });
+
+  return result;
+}
+
 function testOperations(client, testData, operationContext) {
   return testData.operations.reduce((combined, operation) => {
-    return combined.then(() =>
-      testOperation(operation, operationContext[operation.object], context)
-    );
+    return combined.then(() => {
+      if (operation.object === 'collection') {
+        const db = operationContext.database;
+        const collectionOptions = operation.collectionOptions || {};
+
+        operationContext[operation.object] = db.collection(
+          'test',
+          convertCollectionOptions(collectionOptions)
+        );
+      }
+
+      return testOperation(operation, operationContext[operation.object], operationContext);
+    });
   }, Promise.resolve());
 }

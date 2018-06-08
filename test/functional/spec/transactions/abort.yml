@@ -298,6 +298,7 @@ tests:
             _id: 1
         result:
           errorCodeName: DuplicateKey
+          errorLabelsOmit: ["TransientTransactionError", "UnknownTransactionCommitResult"]
       # Make sure the server aborted the transaction.
       - name: insertOne
         object: collection
@@ -307,6 +308,8 @@ tests:
             _id: 1
         result:
           errorCodeName: NoSuchTransaction
+          errorLabelsContain: ["TransientTransactionError"]
+          errorLabelsOmit: ["UnknownTransactionCommitResult"]
       # abortTransaction must ignore the TransactionAborted and succeed.
       - name: abortTransaction
         object: session0
@@ -393,7 +396,7 @@ tests:
           insertedId: 1
       - name: abortTransaction
         object: session0
-        # No CannotSatisfyWriteConcern error.
+        # No write concern error.
 
     outcome:
       collection:
