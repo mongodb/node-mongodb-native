@@ -15,7 +15,59 @@
   ],
   "tests": [
     {
-      "description": "Count without a filter",
+      "description": "Estimated document count",
+      "operation": {
+        "name": "estimatedDocumentCount",
+        "arguments": {}
+      },
+      "outcome": {
+        "result": 3
+      }
+    },
+    {
+      "description": "Count documents without a filter",
+      "operation": {
+        "name": "countDocuments",
+        "arguments": {
+          "filter": {}
+        }
+      },
+      "outcome": {
+        "result": 3
+      }
+    },
+    {
+      "description": "Count documents with a filter",
+      "operation": {
+        "name": "countDocuments",
+        "arguments": {
+          "filter": {
+            "_id": {
+              "$gt": 1
+            }
+          }
+        }
+      },
+      "outcome": {
+        "result": 2
+      }
+    },
+    {
+      "description": "Count documents with skip and limit",
+      "operation": {
+        "name": "countDocuments",
+        "arguments": {
+          "filter": {},
+          "skip": 1,
+          "limit": 3
+        }
+      },
+      "outcome": {
+        "result": 2
+      }
+    },
+    {
+      "description": "Deprecated count without a filter",
       "operation": {
         "name": "count",
         "arguments": {
@@ -27,7 +79,7 @@
       }
     },
     {
-      "description": "Count with a filter",
+      "description": "Deprecated count with a filter",
       "operation": {
         "name": "count",
         "arguments": {
@@ -43,7 +95,7 @@
       }
     },
     {
-      "description": "Count with skip and limit",
+      "description": "Deprecated count with skip and limit",
       "operation": {
         "name": "count",
         "arguments": {
