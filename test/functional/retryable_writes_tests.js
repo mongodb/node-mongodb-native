@@ -61,8 +61,7 @@ function executeScenarioSetup(scenario, test, config, ctx) {
   const url = config.url();
   const options = Object.assign({}, test.clientOptions, {
     monitorCommands: true,
-    minSize: 10,
-    retryWrites: true
+    minSize: 10
   });
 
   ctx.failPointName = test.failPoint && test.failPoint.configureFailPoint;

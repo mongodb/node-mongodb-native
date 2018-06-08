@@ -2,17 +2,20 @@ data:
     - { _id: 1, x: 11 }
     - { _id: 2, x: 22 }
 
-# The failCommand failpoint will be in the next release after 3.7.9 but the
-# server does not plan to do another release for a few weeks.
-minServerVersion: '3.7.9'
+# TODO: this should change to 4.0.0 once a 4.0 version is released that has
+# SERVER-35004.
+minServerVersion: '4.1.0'
 
 tests:
     -
         description: "InsertOne succeeds after connection failure"
+        clientOptions:
+            retryWrites: true
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
+                failCommands: ["insert"]
                 closeConnection: true
         operation:
             name: "insertOne"
@@ -28,10 +31,13 @@ tests:
                     - { _id: 3, x: 33 }
     -
         description: "InsertOne succeeds after NotMaster"
+        clientOptions:
+            retryWrites: true
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
+                failCommands: ["insert"]
                 errorCode: 10107
                 closeConnection: false
         operation:
@@ -48,10 +54,13 @@ tests:
                     - { _id: 3, x: 33 }
     -
         description: "InsertOne succeeds after NotMasterOrSecondary"
+        clientOptions:
+            retryWrites: true
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
+                failCommands: ["insert"]
                 errorCode: 13436
                 closeConnection: false
         operation:
@@ -68,10 +77,13 @@ tests:
                     - { _id: 3, x: 33 }
     -
         description: "InsertOne succeeds after NotMasterNoSlaveOk"
+        clientOptions:
+            retryWrites: true
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
+                failCommands: ["insert"]
                 errorCode: 13435
                 closeConnection: false
         operation:
@@ -88,10 +100,13 @@ tests:
                     - { _id: 3, x: 33 }
     -
         description: "InsertOne succeeds after InterruptedDueToReplStateChange"
+        clientOptions:
+            retryWrites: true
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
+                failCommands: ["insert"]
                 errorCode: 11602
                 closeConnection: false
         operation:
@@ -108,10 +123,13 @@ tests:
                     - { _id: 3, x: 33 }
     -
         description: "InsertOne succeeds after InterruptedAtShutdown"
+        clientOptions:
+            retryWrites: true
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
+                failCommands: ["insert"]
                 errorCode: 11600
                 closeConnection: false
         operation:
@@ -128,10 +146,13 @@ tests:
                     - { _id: 3, x: 33 }
     -
         description: "InsertOne succeeds after PrimarySteppedDown"
+        clientOptions:
+            retryWrites: true
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
+                failCommands: ["insert"]
                 errorCode: 189
                 closeConnection: false
         operation:
@@ -148,10 +169,13 @@ tests:
                     - { _id: 3, x: 33 }
     -
         description: "InsertOne succeeds after ShutdownInProgress"
+        clientOptions:
+            retryWrites: true
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
+                failCommands: ["insert"]
                 errorCode: 91
                 closeConnection: false
         operation:
@@ -168,10 +192,13 @@ tests:
                     - { _id: 3, x: 33 }
     -
         description: "InsertOne succeeds after HostNotFound"
+        clientOptions:
+            retryWrites: true
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
+                failCommands: ["insert"]
                 errorCode: 7
                 closeConnection: false
         operation:
@@ -188,10 +215,13 @@ tests:
                     - { _id: 3, x: 33 }
     -
         description: "InsertOne succeeds after HostUnreachable"
+        clientOptions:
+            retryWrites: true
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
+                failCommands: ["insert"]
                 errorCode: 6
                 closeConnection: false
         operation:
@@ -208,10 +238,13 @@ tests:
                     - { _id: 3, x: 33 }
     -
         description: "InsertOne succeeds after SocketException"
+        clientOptions:
+            retryWrites: true
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
+                failCommands: ["insert"]
                 errorCode: 9001
                 closeConnection: false
         operation:
@@ -228,10 +261,13 @@ tests:
                     - { _id: 3, x: 33 }
     -
         description: "InsertOne succeeds after NetworkTimeout"
+        clientOptions:
+            retryWrites: true
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
+                failCommands: ["insert"]
                 errorCode: 89
                 closeConnection: false
         operation:
@@ -248,10 +284,13 @@ tests:
                     - { _id: 3, x: 33 }
     -
         description: "InsertOne fails after Interrupted"
+        clientOptions:
+            retryWrites: true
         failPoint:
             configureFailPoint: failCommand
             mode: { times: 1 }
             data:
+                failCommands: ["insert"]
                 errorCode: 11601
                 closeConnection: false
         operation:
