@@ -7502,6 +7502,8 @@ describe('Operation (Promises)', function() {
             .then(() => commitWithRetry(session));
         }
 
+        // LINE const { MongoClient } = require('mongodb'),
+        // LINE const client = new MongoClient('myRepl/mongodb0.example.net:27017,mongodb1.example.net:27017,mongodb2.example.net:27017');
         return client
           .connect()
           .then(() =>
