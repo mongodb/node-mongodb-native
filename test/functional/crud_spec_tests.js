@@ -45,7 +45,7 @@ describe('CRUD spec', function() {
       };
 
       if (scenario.minServerVersion) {
-        metadata.mongodb = `>=${scenario.minServerVersion}`;
+        metadata.requires.mongodb = `>=${scenario.minServerVersion}`;
       }
 
       describe(scenarioName, function() {
@@ -75,7 +75,7 @@ describe('CRUD spec', function() {
       };
 
       if (scenario.minServerVersion) {
-        metadata.mongodb = `>=${scenario.minServerVersion}`;
+        metadata.requires.mongodb = `>=${scenario.minServerVersion}`;
       }
 
       describe(scenarioName, function() {
