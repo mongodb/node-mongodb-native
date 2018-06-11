@@ -92,7 +92,7 @@ MongoDB also provides
 support text search of string content. Text indexes can include any
 field whose value is a string or an array of string elements.
 
-This example specifies a text index key for the ``content`` field:
+This example specifies a text index key for the ``comments`` field:
 
 ```js
 {{% create-text-index %}}
