@@ -320,6 +320,11 @@ function extractBulkRequests(requests) {
   return requests.map(request => ({ [request.name]: request.arguments }));
 }
 
+function translateOperationName(operationName) {
+  if (operationName === 'runCommand') return 'command';
+  return operationName;
+}
+
 /**
  *
  * @param {Object} operation the operation definition from the spec test
@@ -329,6 +334,8 @@ function extractBulkRequests(requests) {
 function testOperation(operation, obj, context) {
   const opOptions = {};
   const args = [];
+  const operationName = translateOperationName(operation.name);
+
   if (operation.arguments) {
     Object.keys(operation.arguments).forEach(key => {
       if (['filter', 'fieldName', 'document', 'documents', 'pipeline'].includes(key)) {
@@ -339,7 +346,7 @@ function testOperation(operation, obj, context) {
       if (key === 'requests') return args.unshift(extractBulkRequests(operation.arguments[key]));
       if (key === 'update' || key === 'replacement') return args.push(operation.arguments[key]);
       if (key === 'session') {
-        if (isTransactionCommand(operation.name)) return;
+        if (isTransactionCommand(operationName)) return;
         opOptions.session = context[operation.arguments.session];
         return;
       }
@@ -358,39 +365,37 @@ function testOperation(operation, obj, context) {
         return;
       }
 
+      if (key === 'readPreference') {
+        opOptions[key] = operation.arguments[key].mode.toLowerCase();
+        return;
+      }
+
       opOptions[key] = operation.arguments[key];
     });
   }
 
-  if (args.length === 0 && !isTransactionCommand(operation.name)) {
+  if (args.length === 0 && !isTransactionCommand(operationName)) {
     args.push({});
   }
 
   if (Object.keys(opOptions).length > 0) {
     // NOTE: this is awful, but in order to provide options for some methods we need to add empty
     //       query objects.
-    if (operation.name === 'distinct') {
+    if (operationName === 'distinct') {
       args.push({});
     }
 
     args.push(opOptions);
   }
 
-  // console.log(`\noperation: ${operation.name}`);
-  // console.log(`options:`, opOptions);
-
   let opPromise;
-  if (operation.name === 'find' || operation.name === 'aggregate') {
+  if (operationName === 'find' || operationName === 'aggregate') {
     // `find` creates a cursor, so we need to call `toArray` on it
-    const cursor = obj[operation.name].apply(obj, args);
+    const cursor = obj[operationName].apply(obj, args);
     opPromise = cursor.toArray();
-  } else if (operation.name === 'startTransaction') {
-    // `startTansaction` can throw, so we need to make sure we wrap it in a promise
-    opPromise = Promise.try(() => obj[operation.name].apply(obj, args));
-  } else if (operation.name === 'runCommand') {
-    opPromise = obj.command.apply(obj, args);
   } else {
-    opPromise = obj[operation.name].apply(obj, args);
+    // wrap this in a `Promise.try` because some operations might throw
+    opPromise = Promise.try(() => obj[operationName].apply(obj, args));
   }
 
   if (operation.result) {
