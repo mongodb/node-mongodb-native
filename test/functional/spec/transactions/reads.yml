@@ -52,6 +52,7 @@ tests:
             _id: 1
         result:
           errorContains: "Cannot run 'count' in a multi-document transaction"
+          errorLabelsOmit: ["TransientTransactionError", "UnknownTransactionCommitResult"]
       - name: abortTransaction
         object: session0
 

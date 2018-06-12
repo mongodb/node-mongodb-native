@@ -289,9 +289,9 @@ tests:
 
     failPoint:
       configureFailPoint: failCommand
-      mode: { times: 1 }
+      mode: { times: 4 }
       data:
-          failCommands: ["insert"]
+          failCommands: ["insert", "find", "aggregate", "distinct"]
           closeConnection: true
 
     operations:
@@ -303,9 +303,28 @@ tests:
           session: session0
           document:
             _id: 1
-        result:
+        result: &transient_label_only
           errorLabelsContain: ["TransientTransactionError"]
           errorLabelsOmit: ["UnknownTransactionCommitResult"]
+      - name: find
+        object: collection
+        arguments:
+          session: session0
+        result: *transient_label_only
+      - name: aggregate
+        object: collection
+        arguments:
+          pipeline:
+            - $project:
+                _id: 1
+          session: session0
+        result: *transient_label_only
+      - name: distinct
+        object: collection
+        arguments:
+          fieldName: _id
+          session: session0
+        result: *transient_label_only
       - name: abortTransaction
         object: session0
 
@@ -324,6 +343,43 @@ tests:
             autocommit: false
             writeConcern:
           command_name: insert
+          database_name: *database_name
+      - command_started_event:
+          command:
+            find: *collection_name
+            readConcern:
+            lsid: session0
+            txnNumber:
+              $numberLong: "1"
+            startTransaction:
+            autocommit: false
+          command_name: find
+          database_name: *database_name
+      - command_started_event:
+          command:
+            aggregate: *collection_name
+            pipeline:
+              - $project:
+                  _id: 1
+            readConcern:
+            lsid: session0
+            txnNumber:
+              $numberLong: "1"
+            startTransaction:
+            autocommit: false
+          command_name: aggregate
+          database_name: *database_name
+      - command_started_event:
+          command:
+            distinct: *collection_name
+            key: _id
+            lsid: session0
+            readConcern:
+            txnNumber:
+              $numberLong: "1"
+            startTransaction:
+            autocommit: false
+          command_name: distinct
           database_name: *database_name
       - command_started_event:
           command:

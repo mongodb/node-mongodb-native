@@ -100,7 +100,11 @@
             }
           },
           "result": {
-            "errorContains": "Cannot run 'count' in a multi-document transaction"
+            "errorContains": "Cannot run 'count' in a multi-document transaction",
+            "errorLabelsOmit": [
+              "TransientTransactionError",
+              "UnknownTransactionCommitResult"
+            ]
           }
         },
         {
