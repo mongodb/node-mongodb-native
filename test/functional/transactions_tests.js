@@ -9,7 +9,7 @@ const chai = require('chai');
 const expect = chai.expect;
 const EJSON = require('mongodb-extjson');
 
-// mlaunch init --replicaset --arbiter  --name rs --hostname localhost --port 31000 --binarypath /Users/mbroadst/Downloads/mongodb-osx-x86_64-enterprise-4.1.0-158-g3d62f3c/bin
+// mlaunch init --replicaset --arbiter  --name rs --hostname localhost --port 31000 --setParameter enableTestCommands=1 --binarypath /Users/mbroadst/Downloads/mongodb-osx-x86_64-enterprise-4.1.0-158-g3d62f3c/bin
 
 chai.use(require('chai-subset'));
 chai.config.includeStack = true;
@@ -110,6 +110,7 @@ describe('Transactions (spec)', function() {
       test: function() {
         beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
         afterEach(() => cleanupAfterSuite(testContext));
+
         testSuite.tests.forEach(testData => runTestSuiteTest(testData, testContext));
       }
     });
@@ -120,8 +121,11 @@ function prepareDatabaseForSuite(suite, context) {
   const db = context.client.db();
   const coll = db.collection(context.collectionName);
 
-  return coll
-    .drop()
+  return db
+    .admin()
+    .command({ killAllSessions: [] })
+    .catch(() => {}) // ignore any error from this
+    .then(() => coll.drop({ writeConcern: 'majority' }))
     .catch(err => {
       if (!err.message.match(/ns not found/)) throw err;
     })
@@ -163,9 +167,6 @@ function runTestSuiteTest(testData, context) {
 
         // very useful for debugging
         if (displayCommands) {
-          // usually makes things much easier
-          // if (event.command.$clusterTime) delete event.command.$clusterTime;
-          // if (event.command.lsid) delete event.command.lsid;
           console.dir(event, { depth: 5 });
         }
       });
@@ -183,7 +184,10 @@ function runTestSuiteTest(testData, context) {
 
       // enable to see useful APM debug information at the time of actual test run
       // displayCommands = true;
-      return testOperations(client, testData, { database, session0, session1 })
+
+      let testPromise = Promise.resolve();
+      return testPromise
+        .then(() => testOperations(client, testData, { database, session0, session1 }))
         .catch(err => {
           // If the driver throws an exception / returns an error while executing this series
           // of operations, store the error message.
