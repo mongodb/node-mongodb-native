@@ -27,6 +27,7 @@
     "eslint-plugin-prettier": "^2.2.0",
     "istanbul": "^0.4.5",
     "jsdoc": "3.5.5",
+    "lodash.camelcase": "^4.3.0",
     "mongodb-extjson": "^2.1.1",
     "mongodb-mock-server": "^1.0.0",
     "mongodb-test-runner": "^1.1.18",
