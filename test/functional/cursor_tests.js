@@ -4424,7 +4424,13 @@ describe('Cursor', function() {
     });
   });
 
-  function testTransformStream(client, configuration, dbName, transformFunc, expectedSet, done) {
+  function testTransformStream(config, done) {
+    const client = config.client;
+    const configuration = config.configuration;
+    const collectionName = config.collectionName;
+    const transformFunc = config.transformFunc;
+    const expectedSet = config.expectedSet;
+
     client.connect(function(err, client) {
       const db = client.db(configuration.db);
       let collection, cursor;
@@ -4435,10 +4441,11 @@ describe('Cursor', function() {
       ];
       const resultSet = new Set();
       const transformParam = transformFunc != null ? { transform: transformFunc } : null;
+      const close = e => cursor.close(() => client.close(() => done(e)));
 
       Promise.resolve()
-        .then(() => db.createCollection(dbName))
-        .then(() => (collection = db.collection(dbName)))
+        .then(() => db.createCollection(collectionName))
+        .then(() => (collection = db.collection(collectionName)))
         .then(() => collection.insertMany(docs))
         .then(() => collection.find())
         .then(_cursor => (cursor = _cursor))
@@ -4450,16 +4457,14 @@ describe('Cursor', function() {
 
           stream.once('end', function() {
             expect(resultSet).to.deep.equal(expectedSet);
-            cursor.close(() => client.close(() => done()));
+            close();
           });
 
-          stream.once('error', function(err) {
-            cursor.close(() => client.close(() => done(err)));
+          stream.once('error', function(e) {
+            close(e);
           });
-
-          stream.resume();
         })
-        .catch(err => cursor.close(() => client.close(() => done(err))));
+        .catch(e => close(e));
     });
   }
 
@@ -4467,17 +4472,15 @@ describe('Cursor', function() {
     const configuration = this.configuration;
     const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
     const expectedDocs = [{ _id: 0, b: 1, c: 0 }, { _id: 1, b: 1, c: 0 }, { _id: 2, b: 1, c: 0 }];
+    const config = {
+      client: client,
+      configuration: configuration,
+      collectionName: 'transformStream-test-transform',
+      transformFunc: doc => ({ _id: doc._id, b: doc.a.b, c: doc.a.c }),
+      expectedSet: new Set(expectedDocs)
+    };
 
-    testTransformStream(
-      client,
-      configuration,
-      'transformStream-test-transform',
-      doc => {
-        return { _id: doc._id, b: doc.a.b, c: doc.a.c };
-      },
-      new Set(expectedDocs),
-      done
-    );
+    testTransformStream(config, done);
   });
 
   it('transformStream should return a stream of unmodified docs if no transform function applied', function(done) {
@@ -4488,14 +4491,14 @@ describe('Cursor', function() {
       { _id: 1, a: { b: 1, c: 0 } },
       { _id: 2, a: { b: 1, c: 0 } }
     ];
+    const config = {
+      client: client,
+      configuration: configuration,
+      collectionName: 'transformStream-test-notransform',
+      transformFunc: null,
+      expectedSet: new Set(expectedDocs)
+    };
 
-    testTransformStream(
-      client,
-      configuration,
-      'transformStream-test-notransform',
-      null,
-      new Set(expectedDocs),
-      done
-    );
+    testTransformStream(config, done);
   });
 });
