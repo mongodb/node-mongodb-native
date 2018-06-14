@@ -61,6 +61,9 @@ MongoError.create = function(options) {
 var MongoNetworkError = function(message) {
   MongoError.call(this, message);
   this.name = 'MongoNetworkError';
+
+  // This is added as part of the transactions specification
+  this.errorLabels = ['TransientTransactionError'];
 };
 util.inherits(MongoNetworkError, MongoError);
 
