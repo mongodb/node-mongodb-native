@@ -22,10 +22,10 @@ describe('bypass document validation', function() {
     };
 
     test.server.setMessageHandler(request => {
-      var doc = request.document;
+      const doc = request.document;
       if (doc.aggregate) {
         try {
-          expect(doc.bypassDocumentValidation).equal(bypassDocumentValidation || undefined);
+          expect(doc.bypassDocumentValidation).equal(bypassDocumentValidation.expected);
           request.reply({
             ok: 1,
             cursor: {
@@ -48,14 +48,12 @@ describe('bypass document validation', function() {
 
     client.connect(function(err, client) {
       expect(err).to.not.exist;
-      var db = client.db('test');
-      var collection = db.collection('test_c');
+      const db = client.db('test');
+      const collection = db.collection('test_c');
 
-      var options = {
-        bypassDocumentValidation: bypassDocumentValidation
-      };
+      const options = { bypassDocumentValidation: bypassDocumentValidation.actual };
 
-      var pipeline = [
+      const pipeline = [
         {
           $project: {}
         }
@@ -65,11 +63,11 @@ describe('bypass document validation', function() {
   }
   // aggregate
   it('should only set bypass document validation if strictly true in aggregate', function(done) {
-    testAggregate(true, done);
+    testAggregate({ expected: true, actual: true }, done);
   });
 
   it('should not set bypass document validation if not strictly true in aggregate', function(done) {
-    testAggregate(false, done);
+    testAggregate({ expected: undefined, actual: false }, done);
   });
 
   // general test for mapReduce function
@@ -81,10 +79,10 @@ describe('bypass document validation', function() {
     };
 
     test.server.setMessageHandler(request => {
-      var doc = request.document;
+      const doc = request.document;
       if (doc.mapreduce) {
         try {
-          expect(doc.bypassDocumentValidation).equal(bypassDocumentValidation || undefined);
+          expect(doc.bypassDocumentValidation).equal(bypassDocumentValidation.expected);
           request.reply({
             results: 't',
             ok: 1
@@ -103,12 +101,12 @@ describe('bypass document validation', function() {
 
     client.connect(function(err, client) {
       expect(err).to.not.exist;
-      var db = client.db('test');
-      var collection = db.collection('test_c');
+      const db = client.db('test');
+      const collection = db.collection('test_c');
 
-      var options = {
+      const options = {
         out: 'test_c',
-        bypassDocumentValidation: bypassDocumentValidation
+        bypassDocumentValidation: bypassDocumentValidation.actual
       };
 
       collection.mapReduce(function map() {}, function reduce() {}, options, e => {
@@ -118,11 +116,11 @@ describe('bypass document validation', function() {
   }
   // map reduce
   it('should only set bypass document validation if strictly true in mapReduce', function(done) {
-    testMapReduce(true, done);
+    testMapReduce({ expected: true, actual: true }, done);
   });
 
   it('should not set bypass document validation if not strictly true in mapReduce', function(done) {
-    testMapReduce(false, done);
+    testMapReduce({ expected: undefined, actual: false }, done);
   });
 
   // general test for findAndModify function
@@ -134,10 +132,10 @@ describe('bypass document validation', function() {
     };
 
     test.server.setMessageHandler(request => {
-      var doc = request.document;
+      const doc = request.document;
       if (doc.findAndModify) {
         try {
-          expect(doc.bypassDocumentValidation).equal(bypassDocumentValidation || undefined);
+          expect(doc.bypassDocumentValidation).equal(bypassDocumentValidation.expected);
           request.reply({
             ok: 1
           });
@@ -155,12 +153,10 @@ describe('bypass document validation', function() {
 
     client.connect(function(err, client) {
       expect(err).to.not.exist;
-      var db = client.db('test');
-      var collection = db.collection('test_c');
+      const db = client.db('test');
+      const collection = db.collection('test_c');
 
-      var options = {
-        bypassDocumentValidation: bypassDocumentValidation
-      };
+      const options = { bypassDocumentValidation: bypassDocumentValidation.actual };
 
       collection.findAndModify(
         { name: 'Andy' },
@@ -175,15 +171,15 @@ describe('bypass document validation', function() {
   }
   // find and modify
   it('should only set bypass document validation if strictly true in findAndModify', function(done) {
-    testFindAndModify(true, done);
+    testFindAndModify({ expected: true, actual: true }, done);
   });
 
   it('should not set bypass document validation if not strictly true in findAndModify', function(done) {
-    testFindAndModify(false, done);
+    testFindAndModify({ expected: undefined, actual: false }, done);
   });
 
   // general test for BlukWrite to test changes made in ordered.js and unordered.js
-  function testBulkWrite(bypassDocumentValidation, ordered, done) {
+  function testBulkWrite(bypassDocumentValidation, done) {
     const client = new MongoClient(`mongodb://${test.server.uri()}/test`);
     let close = e => {
       close = () => {};
@@ -191,10 +187,10 @@ describe('bypass document validation', function() {
     };
 
     test.server.setMessageHandler(request => {
-      var doc = request.document;
+      const doc = request.document;
       if (doc.insert) {
         try {
-          expect(doc.bypassDocumentValidation).equal(bypassDocumentValidation || undefined);
+          expect(doc.bypassDocumentValidation).equal(bypassDocumentValidation.expected);
           request.reply({
             ok: 1
           });
@@ -212,12 +208,12 @@ describe('bypass document validation', function() {
 
     client.connect(function(err, client) {
       expect(err).to.not.exist;
-      var db = client.db('test');
-      var collection = db.collection('test_c');
+      const db = client.db('test');
+      const collection = db.collection('test_c');
 
-      var options = {
-        bypassDocumentValidation: bypassDocumentValidation,
-        ordered: ordered
+      const options = {
+        bypassDocumentValidation: bypassDocumentValidation.actual,
+        ordered: bypassDocumentValidation.ordered
       };
 
       collection.bulkWrite([{ insertOne: { document: { a: 1 } } }], options, () => close());
@@ -225,19 +221,19 @@ describe('bypass document validation', function() {
   }
   // ordered bulk write, testing change in ordered.js
   it('should only set bypass document validation if strictly true in ordered bulkWrite', function(done) {
-    testBulkWrite(true, true, done);
+    testBulkWrite({ expected: true, actual: true, ordered: true }, done);
   });
 
   it('should not set bypass document validation if not strictly true in ordered bulkWrite', function(done) {
-    testBulkWrite(false, true, done);
+    testBulkWrite({ expected: undefined, actual: false, ordered: true }, done);
   });
 
   // unordered bulk write, testing change in ordered.js
   it('should only set bypass document validation if strictly true in unordered bulkWrite', function(done) {
-    testBulkWrite(true, false, done);
+    testBulkWrite({ expected: true, actual: true, ordered: false }, done);
   });
 
   it('should not set bypass document validation if not strictly true in unordered bulkWrite', function(done) {
-    testBulkWrite(false, false, done);
+    testBulkWrite({ expected: undefined, actual: false, ordered: false }, done);
   });
 });
