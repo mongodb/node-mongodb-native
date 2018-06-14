@@ -115,7 +115,21 @@ describe('Transactions (spec)', function() {
           const maybeSkipIt = testData.skipReason ? it.skip : it;
           maybeSkipIt(testData.description, function() {
             let testPromise = Promise.resolve();
+
+            if (testData.failPoint) {
+              testPromise = testPromise.then(() =>
+                enableFailPoint(testData.failPoint, testContext)
+              );
+            }
+
+            // run the actual test
             testPromise = testPromise.then(() => runTestSuiteTest(testData, testContext));
+
+            if (testData.failPoint) {
+              testPromise = testPromise.then(() =>
+                disableFailPoint(testData.failPoint, testContext)
+              );
+            }
 
             return testPromise;
           });
@@ -152,6 +166,17 @@ function cleanupAfterSuite(context) {
       delete context.testClient;
     });
   }
+}
+
+function enableFailPoint(failPoint, testContext) {
+  return testContext.sharedClient.db(testContext.dbName).executeDbAdminCommand(failPoint);
+}
+
+function disableFailPoint(failPoint, testContext) {
+  return testContext.sharedClient.db(testContext.dbName).executeDbAdminCommand({
+    configureFailPoint: failPoint.configureFailPoint,
+    mode: 'off'
+  });
 }
 
 let displayCommands = false;
