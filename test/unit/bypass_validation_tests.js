@@ -14,7 +14,7 @@ describe('bypass document validation', function() {
   afterEach(() => mock.cleanup());
 
   // general test for aggregate function
-  function testAggregate(bypassDocumentValidation, done) {
+  function testAggregate(config, done) {
     const client = new MongoClient(`mongodb://${test.server.uri()}/test`);
     let close = e => {
       close = () => {};
@@ -25,7 +25,7 @@ describe('bypass document validation', function() {
       const doc = request.document;
       if (doc.aggregate) {
         try {
-          expect(doc.bypassDocumentValidation).equal(bypassDocumentValidation.expected);
+          expect(doc.bypassDocumentValidation).equal(config.expected);
           request.reply({
             ok: 1,
             cursor: {
@@ -51,7 +51,7 @@ describe('bypass document validation', function() {
       const db = client.db('test');
       const collection = db.collection('test_c');
 
-      const options = { bypassDocumentValidation: bypassDocumentValidation.actual };
+      const options = { bypassDocumentValidation: config.actual };
 
       const pipeline = [
         {
@@ -71,7 +71,7 @@ describe('bypass document validation', function() {
   });
 
   // general test for mapReduce function
-  function testMapReduce(bypassDocumentValidation, done) {
+  function testMapReduce(config, done) {
     const client = new MongoClient(`mongodb://${test.server.uri()}/test`);
     let close = e => {
       close = () => {};
@@ -82,7 +82,7 @@ describe('bypass document validation', function() {
       const doc = request.document;
       if (doc.mapreduce) {
         try {
-          expect(doc.bypassDocumentValidation).equal(bypassDocumentValidation.expected);
+          expect(doc.bypassDocumentValidation).equal(config.expected);
           request.reply({
             results: 't',
             ok: 1
@@ -106,7 +106,7 @@ describe('bypass document validation', function() {
 
       const options = {
         out: 'test_c',
-        bypassDocumentValidation: bypassDocumentValidation.actual
+        bypassDocumentValidation: config.actual
       };
 
       collection.mapReduce(function map() {}, function reduce() {}, options, e => {
@@ -124,7 +124,7 @@ describe('bypass document validation', function() {
   });
 
   // general test for findAndModify function
-  function testFindAndModify(bypassDocumentValidation, done) {
+  function testFindAndModify(config, done) {
     const client = new MongoClient(`mongodb://${test.server.uri()}/test`);
     let close = e => {
       close = () => {};
@@ -135,7 +135,7 @@ describe('bypass document validation', function() {
       const doc = request.document;
       if (doc.findAndModify) {
         try {
-          expect(doc.bypassDocumentValidation).equal(bypassDocumentValidation.expected);
+          expect(doc.bypassDocumentValidation).equal(config.expected);
           request.reply({
             ok: 1
           });
@@ -156,7 +156,7 @@ describe('bypass document validation', function() {
       const db = client.db('test');
       const collection = db.collection('test_c');
 
-      const options = { bypassDocumentValidation: bypassDocumentValidation.actual };
+      const options = { bypassDocumentValidation: config.actual };
 
       collection.findAndModify(
         { name: 'Andy' },
@@ -179,7 +179,7 @@ describe('bypass document validation', function() {
   });
 
   // general test for BlukWrite to test changes made in ordered.js and unordered.js
-  function testBulkWrite(bypassDocumentValidation, done) {
+  function testBulkWrite(config, done) {
     const client = new MongoClient(`mongodb://${test.server.uri()}/test`);
     let close = e => {
       close = () => {};
@@ -190,7 +190,7 @@ describe('bypass document validation', function() {
       const doc = request.document;
       if (doc.insert) {
         try {
-          expect(doc.bypassDocumentValidation).equal(bypassDocumentValidation.expected);
+          expect(doc.bypassDocumentValidation).equal(config.expected);
           request.reply({
             ok: 1
           });
@@ -212,8 +212,8 @@ describe('bypass document validation', function() {
       const collection = db.collection('test_c');
 
       const options = {
-        bypassDocumentValidation: bypassDocumentValidation.actual,
-        ordered: bypassDocumentValidation.ordered
+        bypassDocumentValidation: config.actual,
+        ordered: config.ordered
       };
 
       collection.bulkWrite([{ insertOne: { document: { a: 1 } } }], options, () => close());
