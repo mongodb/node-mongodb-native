@@ -186,6 +186,9 @@ function runTestSuiteTest(testData, context) {
     Object.assign({ monitorCommands: true }, testData.clientOptions)
   );
 
+  // test-specific client options
+  clientOptions.autoReconnect = false;
+
   return MongoClient.connect(context.url, clientOptions).then(client => {
     context.testClient = client;
     client.on('commandStarted', event => {
@@ -438,16 +441,40 @@ function testOperation(operation, obj, context) {
   }
 
   if (operation.result) {
-    if (operation.result.errorContains || operation.result.errorCodeName) {
+    const result = operation.result;
+
+    if (
+      result.errorContains ||
+      result.errorCodeName ||
+      result.errorLabelsContain ||
+      result.errorLabelsOmit
+    ) {
       return opPromise
         .then(() => {
           throw new Error('expected an error!');
         })
         .catch(err => {
+          const errorContains = result.errorContains;
+          const errorCodeName = result.errorCodeName;
+          const errorLabelsContain = result.errorLabelsContain;
+          const errorLabelsOmit = result.errorLabelsOmit;
+
+          if (errorLabelsContain) {
+            expect(err.errorLabels).to.include.members(errorLabelsContain);
+          }
+
+          if (errorLabelsOmit) {
+            if (err.errorLabels && Array.isArray(err.errorLabels) && err.errorLabels.length !== 0) {
+              expect(err.errorLabels).to.not.include.members(errorLabelsOmit);
+            }
+          }
+
           if (operation.result.errorContains) {
-            expect(err).to.match(new RegExp(operation.result.errorContains, 'i'));
-          } else {
-            expect(err.codeName).to.equal(operation.result.errorCodeName);
+            expect(err).to.match(new RegExp(errorContains, 'i'));
+          }
+
+          if (errorCodeName) {
+            expect(err.codeName).to.equal(errorCodeName);
           }
         });
     }
