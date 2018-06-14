@@ -43,7 +43,7 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
   }
 
   // Do we have bypassDocumentValidation set, then enable it on the write command
-  if (typeof options.bypassDocumentValidation === 'boolean') {
+  if (options.bypassDocumentValidation === true) {
     writeCommand.bypassDocumentValidation = options.bypassDocumentValidation;
   }
 
