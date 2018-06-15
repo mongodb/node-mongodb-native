@@ -3,6 +3,7 @@ var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 var co = require('co');
 var mock = require('mongodb-mock-server');
+const expect = require('chai').expect;
 
 var defaultFields = {
   ismaster: true,
@@ -1102,6 +1103,33 @@ describe('Collation', function() {
     }
   });
 
+  it('cursor count method should return the correct number when used with collation set', {
+    metadata: { requires: { mongodb: '>=3.4.0' } },
+    test: function(done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+
+      client.connect(function(err, client) {
+        const db = client.db(configuration.db);
+        const docs = [{ _id: 0, name: 'foo' }, { _id: 1, name: 'Foo' }];
+        const collation = { locale: 'en_US', strength: 2 };
+        let collection, cursor;
+        const close = e => cursor.close(() => client.close(() => done(e)));
+
+        Promise.resolve()
+          .then(() => db.createCollection('cursor_collation_count'))
+          .then(() => (collection = db.collection('cursor_collation_count')))
+          .then(() => collection.insertMany(docs))
+          .then(() => collection.find({ name: 'foo' }).collation(collation))
+          .then(_cursor => (cursor = _cursor))
+          .then(() => cursor.count())
+          .then(val => expect(val).to.equal(2))
+          .then(() => close())
+          .catch(e => close(e));
+      });
+    }
+  });
+
   /******************************************************************************
   .___        __                              __  .__
   |   | _____/  |_  ____   ________________ _/  |_|__| ____   ____
@@ -1125,7 +1153,13 @@ describe('Collation', function() {
         var col = db.collection('collation_test');
         // Create collation index
         col.createIndexes(
-          [{ key: { a: 1 }, collation: { locale: 'nn' }, name: 'collation_test' }],
+          [
+            {
+              key: { a: 1 },
+              collation: { locale: 'nn' },
+              name: 'collation_test'
+            }
+          ],
           function(err) {
             test.equal(null, err);
 

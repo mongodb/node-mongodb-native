@@ -163,7 +163,7 @@ bucket.openDownloadStreamByName('meistersinger.mp3').
   on('error', function(error) {
     assert.ifError(error);
   }).
-  on('finish', function() {
+  on('end', function() {
     console.log('done!');
     process.exit(0);
   });
@@ -182,7 +182,7 @@ bucket.openDownloadStreamByName('meistersinger.mp3').
   on('error', function(error) {
     assert.ifError(error);
   }).
-  on('finish', function() {
+  on('end', function() {
     console.log('done!');
     process.exit(0);
   });

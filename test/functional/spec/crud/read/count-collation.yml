@@ -4,12 +4,22 @@ minServerVersion: '3.4'
 
 tests:
     -
-        description: "Count with collation"
+        description: "Count documents with collation"
+        operation:
+            name: countDocuments
+            arguments:
+                filter: { x: 'ping' }
+                collation: { locale: 'en_US', strength: 2 } # https://docs.mongodb.com/master/reference/collation/#collation-document
+
+        outcome:
+            result: 1
+    -
+        description: "Deprecated count with collation"
         operation:
             name: count
             arguments:
                 filter: { x: 'ping' }
-                collation: { locale: 'en_US', strength: 2 } # https://docs.mongodb.com/master/reference/collation/#collation-document
+                collation: { locale: 'en_US', strength: 2 }
 
         outcome:
             result: 1

@@ -38,16 +38,21 @@ describe('CRUD spec', function() {
       const scenario = scenarioData[1];
       scenario.name = scenarioName;
 
+      const metadata = {
+        requires: {
+          topology: ['single', 'replicaset', 'sharded']
+        }
+      };
+
+      if (scenario.minServerVersion) {
+        metadata.requires.mongodb = `>=${scenario.minServerVersion}`;
+      }
+
       describe(scenarioName, function() {
         scenario.tests.forEach(scenarioTest => {
           beforeEach(() => testContext.db.dropDatabase());
           it(scenarioTest.description, {
-            metadata: {
-              requires: {
-                topology: ['single', 'replicaset', 'sharded'],
-                mongodb: `>=${scenario.minServerVersion}`
-              }
-            },
+            metadata,
             test: function() {
               return executeScenario(scenario, scenarioTest, this.configuration, testContext);
             }
@@ -63,17 +68,22 @@ describe('CRUD spec', function() {
       const scenario = scenarioData[1];
       scenario.name = scenarioName;
 
+      const metadata = {
+        requires: {
+          topology: ['single', 'replicaset', 'sharded']
+        }
+      };
+
+      if (scenario.minServerVersion) {
+        metadata.requires.mongodb = `>=${scenario.minServerVersion}`;
+      }
+
       describe(scenarioName, function() {
         beforeEach(() => testContext.db.dropDatabase());
 
         scenario.tests.forEach(scenarioTest => {
           it(scenarioTest.description, {
-            metadata: {
-              requires: {
-                topology: ['single', 'replicaset', 'sharded'],
-                mongodb: `>=${scenario.minServerVersion}`
-              }
-            },
+            metadata,
             test: function() {
               return executeScenario(scenario, scenarioTest, this.configuration, testContext);
             }
@@ -117,6 +127,27 @@ describe('CRUD spec', function() {
 
     return collection
       .count(filter, options)
+      .then(result => test.equal(result, scenarioTest.outcome.result));
+  }
+
+  function executeCountDocumentsTest(scenarioTest, db, collection) {
+    const args = scenarioTest.operation.arguments;
+    const filter = args.filter;
+    const options = Object.assign({}, args);
+    delete options.filter;
+
+    return collection
+      .countDocuments(filter, options)
+      .then(result => test.equal(result, scenarioTest.outcome.result));
+  }
+
+  function executeEstimatedDocumentCountTest(scenarioTest, db, collection) {
+    const args = scenarioTest.operation.arguments;
+    const options = Object.assign({}, args);
+    delete options.filter;
+
+    return collection
+      .estimatedDocumentCount(options)
       .then(result => test.equal(result, scenarioTest.outcome.result));
   }
 
@@ -326,6 +357,10 @@ describe('CRUD spec', function() {
             return executeAggregateTest(scenarioTest, context.db, collection);
           case 'count':
             return executeCountTest(scenarioTest, context.db, collection);
+          case 'countDocuments':
+            return executeCountDocumentsTest(scenarioTest, context.db, collection);
+          case 'estimatedDocumentCount':
+            return executeEstimatedDocumentCountTest(scenarioTest, context.db, collection);
           case 'distinct':
             return executeDistinctTest(scenarioTest, context.db, collection);
           case 'find':
