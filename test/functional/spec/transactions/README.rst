@@ -108,9 +108,11 @@ Each YAML file has the following keys:
 
     - ``arguments``: Optional, the names and values of arguments.
 
-    - ``result``: The return value from the operation, if any. If the
-      operation is expected to return an error, the ``result`` has one or more
-      of the following fields:
+    - ``result``: The return value from the operation, if any. This field may
+      be a single document or an array of documents in the case of a
+      multi-document read. If the operation is expected to return an error, the
+      ``result`` is a single document that has one or more of the following
+      fields:
 
       - ``errorContains``: A substring of the expected error message.
 
@@ -138,9 +140,9 @@ Use as integration tests
 ========================
 
 Run a MongoDB replica set with a primary, a secondary, and an arbiter,
-server version 4.0 or later. (Including a secondary ensures that server
-selection in a transaction works properly. Including an arbiter helps ensure
-that no new bugs have been introduced related to arbiters.)
+**server version 4.0.0-rc4 or later**. (Including a secondary ensures that
+server selection in a transaction works properly. Including an arbiter helps
+ensure that no new bugs have been introduced related to arbiters.)
 
 Load each YAML (or JSON) file using a Canonical Extended JSON parser.
 
@@ -229,11 +231,6 @@ Then for each element in ``tests``:
      exactly the documents in the ``data`` array. Ensure this find uses
      Primary read preference even when the MongoClient is configured with
      another read preference.
-
-TODO:
-
-- drivers MUST retry commit/abort, needs to use failpoint.
-- test writeConcernErrors
 
 Command-Started Events
 ``````````````````````
