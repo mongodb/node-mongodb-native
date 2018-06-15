@@ -188,6 +188,7 @@ function runTestSuiteTest(testData, context) {
 
   // test-specific client options
   clientOptions.autoReconnect = false;
+  clientOptions.haInterval = 100;
 
   return MongoClient.connect(context.url, clientOptions).then(client => {
     context.testClient = client;
