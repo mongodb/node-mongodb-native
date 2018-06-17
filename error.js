@@ -123,11 +123,27 @@ function isRetryableError(error) {
   return false;
 }
 
+/**
+ * An error thrown when the server reports a writeConcernError
+ *
+ * @class
+ * @param {Error|string|object} message The error message
+ * @property {string} message The error message
+ * @return {MongoWriteConcernError} A MongoWriteConcernError instance
+ * @extends {MongoError}
+ */
+const MongoWriteConcernError = function(message) {
+  MongoError.call(this, message);
+  this.name = 'MongoWriteConcernError';
+};
+util.inherits(MongoWriteConcernError, MongoError);
+
 module.exports = {
   MongoError,
   MongoNetworkError,
   MongoParseError,
   MongoTimeoutError,
+  MongoWriteConcernError,
   mongoErrorContextSymbol,
   isRetryableError
 };

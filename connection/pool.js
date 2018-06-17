@@ -1,23 +1,22 @@
 'use strict';
 
-var inherits = require('util').inherits,
-  EventEmitter = require('events').EventEmitter,
-  Connection = require('./connection'),
-  MongoError = require('../error').MongoError,
-  MongoNetworkError = require('../error').MongoNetworkError,
-  Logger = require('./logger'),
-  f = require('util').format,
-  Query = require('./commands').Query,
-  CommandResult = require('./command_result'),
-  MESSAGE_HEADER_SIZE = require('../wireprotocol/shared').MESSAGE_HEADER_SIZE,
-  opcodes = require('../wireprotocol/shared').opcodes,
-  compress = require('../wireprotocol/compression').compress,
-  compressorIDs = require('../wireprotocol/compression').compressorIDs,
-  uncompressibleCommands = require('../wireprotocol/compression').uncompressibleCommands,
-  resolveClusterTime = require('../topologies/shared').resolveClusterTime;
-
+const inherits = require('util').inherits;
+const EventEmitter = require('events').EventEmitter;
+const Connection = require('./connection');
+const MongoError = require('../error').MongoError;
+const MongoNetworkError = require('../error').MongoNetworkError;
+const MongoWriteConcernError = require('../error').MongoWriteConcernError;
+const Logger = require('./logger');
+const f = require('util').format;
+const Query = require('./commands').Query;
+const CommandResult = require('./command_result');
+const MESSAGE_HEADER_SIZE = require('../wireprotocol/shared').MESSAGE_HEADER_SIZE;
+const opcodes = require('../wireprotocol/shared').opcodes;
+const compress = require('../wireprotocol/compression').compress;
+const compressorIDs = require('../wireprotocol/compression').compressorIDs;
+const uncompressibleCommands = require('../wireprotocol/compression').uncompressibleCommands;
+const resolveClusterTime = require('../topologies/shared').resolveClusterTime;
 const apm = require('./apm');
-
 const defaultAuthProviders = require('../auth/defaultAuthProviders').defaultAuthProviders;
 
 var DISCONNECTED = 'disconnected';
@@ -585,7 +584,7 @@ function messageHandler(self) {
             return handleOperationCallback(
               self,
               workItem.cb,
-              new MongoError(responseDoc.writeConcernError)
+              new MongoWriteConcernError(responseDoc.writeConcernError)
             );
           }
         }
