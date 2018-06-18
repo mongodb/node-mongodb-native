@@ -645,6 +645,10 @@ var nextFunction = function(self, callback) {
         self.topology,
         self.options
       );
+
+      if (self.query instanceof MongoError) {
+        return callback(self.query);
+      }
     } catch (err) {
       return callback(err);
     }

@@ -8,42 +8,70 @@ const MongoNetworkError = require('../error').MongoNetworkError;
 const getReadPreference = require('./shared').getReadPreference;
 const BSON = retrieveBSON();
 const Long = BSON.Long;
+const ReadPreference = require('../topologies/read_preference');
+const TxnState = require('../sessions').TxnState;
 
 var WireProtocol = function(legacyWireProtocol) {
   this.legacyWireProtocol = legacyWireProtocol;
 };
 
+function isTransactionCommand(command) {
+  return !!(command.commitTransaction || command.abortTransaction);
+}
+
 /**
- * Optionally decorate a command with transactions specific keys
+ * Optionally decorate a command with sessions specific keys
  *
  * @param {Object} command the command to decorate
  * @param {ClientSession} session the session tracking transaction state
- * @param {boolean} [isRetryableWrite=false] if true, will be decorated for retryable writes
+ * @param {Object} [options] Optional settings passed to calling operation
+ * @param {Function} [callback] Optional callback passed from calling operation
+ * @return {MongoError|null} An error, if some error condition was met
  */
-function decorateWithTransactionsData(command, session, isRetryableWrite) {
+function decorateWithSessionsData(command, session, options) {
   if (!session) {
     return;
   }
 
   // first apply non-transaction-specific sessions data
   const serverSession = session.serverSession;
-  const inTransaction = session.inTransaction();
+  const inTransaction = session.inTransaction() || isTransactionCommand(command);
+  const isRetryableWrite = options.willRetryWrite;
 
   if (serverSession.txnNumber && (isRetryableWrite || inTransaction)) {
     command.txnNumber = BSON.Long.fromNumber(serverSession.txnNumber);
   }
 
-  // now try to apply tansaction-specific data
+  // now attempt to apply transaction-specific sessions data
   if (!inTransaction) {
+    if (session.transaction.state !== TxnState.NO_TRANSACTION) {
+      session.transaction.transition(TxnState.NO_TRANSACTION);
+    }
+
+    // for causal consistency
+    if (session.supports.causalConsistency && session.operationTime) {
+      command.readConcern = command.readConcern || {};
+      Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
+    }
+
     return;
   }
 
+  if (options.readPreference && !options.readPreference.equals(ReadPreference.primary)) {
+    return new MongoError(
+      `Read preference in a transaction must be primary, not: ${options.readPreference.mode}`
+    );
+  }
+
+  // `autocommit` must always be false to differentiate from retryable writes
   command.autocommit = false;
 
-  if (serverSession.stmtId === 0) {
+  if (session.transaction.state === TxnState.STARTING_TRANSACTION) {
+    session.transaction.transition(TxnState.TRANSACTION_IN_PROGRESS);
     command.startTransaction = true;
 
-    const readConcern = session.transactionOptions.readConcern || session.clientOptions.readConcern;
+    const readConcern =
+      session.transaction.options.readConcern || session.clientOptions.readConcern;
     if (readConcern) {
       command.readConcern = readConcern;
     }
@@ -51,13 +79,6 @@ function decorateWithTransactionsData(command, session, isRetryableWrite) {
     if (session.supports.causalConsistency && session.operationTime) {
       command.readConcern = command.readConcern || {};
       Object.assign(command.readConcern, { afterClusterTime: session.operationTime });
-    }
-  } else {
-    // Drivers MUST add this readConcern to the first command in a transaction and MUST NOT
-    // automatically add any readConcern to subsequent commands. Drivers MUST ignore all other
-    // readConcerns.
-    if (command.readConcern) {
-      delete command.readConcern;
     }
   }
 }
@@ -105,7 +126,10 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
   }
 
   // optionally decorate command with transactions data
-  decorateWithTransactionsData(writeCommand, options.session, options.willRetryWrite);
+  const err = decorateWithSessionsData(writeCommand, options.session, options, callback);
+  if (err) {
+    return callback(err, null);
+  }
 
   // Options object
   var opts = { command: true };
@@ -237,7 +261,10 @@ WireProtocol.prototype.getMore = function(
   };
 
   // optionally decorate command with transactions data
-  decorateWithTransactionsData(getMoreCmd, options.session);
+  const err = decorateWithSessionsData(getMoreCmd, options.session, options, callback);
+  if (err) {
+    return callback(err, null);
+  }
 
   if (cursorState.cmd.tailable && typeof cursorState.cmd.maxAwaitTimeMS === 'number') {
     getMoreCmd.maxTimeMS = cursorState.cmd.maxAwaitTimeMS;
@@ -331,6 +358,7 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
   if (cmd.find && wireProtocolCommand) {
     // Create the find command
     query = executeFindCommand(bson, ns, cmd, cursorState, topology, options);
+
     // Mark the cmd as virtual
     cmd.virtual = false;
     // Signal the documents are in the firstBatch value
@@ -340,11 +368,18 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
   } else if (cmd) {
     query = setupCommand(bson, ns, cmd, cursorState, topology, options);
   } else {
-    throw new MongoError(f('command %s does not return a cursor', JSON.stringify(cmd)));
+    return new MongoError(f('command %s does not return a cursor', JSON.stringify(cmd)));
+  }
+
+  if (query instanceof MongoError) {
+    return query;
   }
 
   // optionally decorate query with transaction data
-  decorateWithTransactionsData(query.query, options.session, options.willRetryWrite);
+  const err = decorateWithSessionsData(query.query, options.session, options);
+  if (err) {
+    return err;
+  }
 
   return query;
 };
@@ -570,7 +605,10 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
   }
 
   // optionally decorate query with transaction data
-  decorateWithTransactionsData(findCmd, options.session);
+  const err = decorateWithSessionsData(findCmd, options.session, options);
+  if (err) {
+    return err;
+  }
 
   // Build Query object
   var query = new Query(bson, commandns, findCmd, {
@@ -623,7 +661,10 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
   }
 
   // optionally decorate query with transaction data
-  decorateWithTransactionsData(finalCmd, options.session);
+  const err = decorateWithSessionsData(finalCmd, options.session, options);
+  if (err) {
+    return err;
+  }
 
   // Build Query object
   var query = new Query(bson, f('%s.$cmd', parts.shift()), finalCmd, {

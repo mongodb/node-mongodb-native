@@ -757,6 +757,10 @@ Server.prototype.command = function(ns, cmd, options, callback) {
   var topology = options.topology || {};
   // Create the query object
   var query = self.wireProtocolHandler.command(self.s.bson, ns, cmd, {}, topology, options);
+  if (query instanceof MongoError) {
+    return callback(query, null);
+  }
+
   // Set slave OK of the query
   query.slaveOk = options.readPreference ? options.readPreference.slaveOk() : false;
 
