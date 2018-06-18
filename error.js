@@ -101,14 +101,13 @@ util.inherits(MongoTimeoutError, MongoError);
 const RETRYABLE_ERROR_CODES = new Set([
   6, // HostUnreachable
   7, // HostNotFound
-  64, // WriteConcernFailed
   89, // NetworkTimeout
   91, // ShutdownInProgress
   189, // PrimarySteppedDown
   9001, // SocketException
+  10107, // NotMaster
   11600, // InterruptedAtShutdown
   11602, // InterruptedDueToReplStateChange
-  10107, // NotMaster
   13435, // NotMasterNoSlaveOk
   13436 // NotMasterOrSecondary
 ]);
