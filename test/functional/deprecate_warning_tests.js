@@ -57,6 +57,30 @@ describe('Deprecation Warnings', function() {
     });
   });
 
+  it('db createCollection deprecate warning test', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+
+    client.connect(function(err, client) {
+      const db = client.db(configuration.db);
+      const close = e => client.close(() => done(e));
+
+      Promise.resolve()
+        .then(() => db.createCollection('deprecation_test', { autoIndexId: 1 }))
+        .then(() => expect(console.warn.calledOnce).to.be.true)
+        .then(
+          () =>
+            expect(
+              console.warn.calledWith(
+                '[Deprecation Warning] db.createCollection parameter [autoIndexId] is deprecated, and will be removed in a later version.'
+              )
+            ).to.be.true
+        )
+        .then(() => close())
+        .catch(e => close(e));
+    });
+  });
+
   const tester = deprecateParams(
     function(options) {
       if (options) {
@@ -154,14 +178,22 @@ describe('Deprecation Warnings', function() {
 
   it('same function only warns once per deprecated parameter', function(done) {
     Promise.resolve()
-      .then(() => tester5({ maxScan: 5 }))
-      .then(() => tester5({ maxScan: 5 }))
-      .then(() => expect(console.warn.calledOnce).to.be.true)
+      .then(() => tester5({ maxScan: 5, fields: 'hi' }))
+      .then(() => tester5({ maxScan: 5, fields: 'hi' }))
+      .then(() => expect(console.warn.calledTwice).to.be.true)
       .then(
         () =>
           expect(
             console.warn.calledWith(
               '[Deprecation Warning] Tester5 parameter [maxScan] is deprecated, and will be removed in a later version.'
+            )
+          ).to.be.true
+      )
+      .then(
+        () =>
+          expect(
+            console.warn.calledWith(
+              '[Deprecation Warning] Tester5 parameter [fields] is deprecated, and will be removed in a later version.'
             )
           ).to.be.true
       )
