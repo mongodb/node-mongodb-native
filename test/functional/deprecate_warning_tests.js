@@ -28,6 +28,30 @@ describe('Deprecation Warnings', function() {
         .then(() => collection.find({}, { maxScan: 5, fields: 'hi', snapshot: true }))
         .then(_cursor => (cursor = _cursor))
         .then(() => expect(console.warn.calledThrice).to.be.true)
+        .then(
+          () =>
+            expect(
+              console.warn.calledWith(
+                '[Deprecation Warning] collection.find parameter [maxScan] is deprecated, and will be removed in a later version.'
+              )
+            ).to.be.true
+        )
+        .then(
+          () =>
+            expect(
+              console.warn.calledWith(
+                '[Deprecation Warning] collection.find parameter [fields] is deprecated, and will be removed in a later version.'
+              )
+            ).to.be.true
+        )
+        .then(
+          () =>
+            expect(
+              console.warn.calledWith(
+                '[Deprecation Warning] collection.find parameter [snapshot] is deprecated, and will be removed in a later version.'
+              )
+            ).to.be.true
+        )
         .then(() => close())
         .catch(e => close(e));
     });
@@ -60,6 +84,22 @@ describe('Deprecation Warnings', function() {
       .then(() => tester({ maxScan: 5 }))
       .then(() => tester2({ maxScan: 5 }))
       .then(() => expect(console.warn.calledTwice).to.be.true)
+      .then(
+        () =>
+          expect(
+            console.warn.calledWith(
+              '[Deprecation Warning] Tester parameter [maxScan] is deprecated, and will be removed in a later version.'
+            )
+          ).to.be.true
+      )
+      .then(
+        () =>
+          expect(
+            console.warn.calledWith(
+              '[Deprecation Warning] Tester2 parameter [maxScan] is deprecated, and will be removed in a later version.'
+            )
+          ).to.be.true
+      )
       .then(() => done());
   });
 
@@ -96,6 +136,7 @@ describe('Deprecation Warnings', function() {
   it('manually inputted message test', function(done) {
     Promise.resolve()
       .then(() => tester4({ maxScan: 5, fields: 'hi', snapshot: true }))
+      .then(() => expect(console.warn.calledThrice).to.be.true)
       .then(() => expect(console.warn.calledWith('manual message')).to.be.true)
       .then(() => done());
   });
@@ -116,6 +157,14 @@ describe('Deprecation Warnings', function() {
       .then(() => tester5({ maxScan: 5 }))
       .then(() => tester5({ maxScan: 5 }))
       .then(() => expect(console.warn.calledOnce).to.be.true)
+      .then(
+        () =>
+          expect(
+            console.warn.calledWith(
+              '[Deprecation Warning] Tester5 parameter [maxScan] is deprecated, and will be removed in a later version.'
+            )
+          ).to.be.true
+      )
       .then(() => done());
   });
 
