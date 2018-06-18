@@ -7,6 +7,8 @@ const Binary = BSON.Binary;
 const uuidV4 = require('./utils').uuidV4;
 const MongoError = require('./error').MongoError;
 const isRetryableError = require('././error').isRetryableError;
+const MongoNetworkError = require('./error').MongoNetworkError;
+const MongoWriteConcernError = require('./error').MongoWriteConcernError;
 
 function assertAlive(session, callback) {
   if (session.serverSession == null) {
@@ -23,27 +25,44 @@ function assertAlive(session, callback) {
 }
 
 // Client session states
-const NO_TRANSACTION = 'NO_TRANSACTION';
-const STARTING_TRANSACTION = 'STARTING_TRANSACTION';
-const TRANSACTION_IN_PROGRESS = 'TRANSACTION_IN_PROGRESS';
-const TRANSACTION_COMMITTED = 'TRANSACTION_COMMITTED';
-const TRANSACTION_ABORTED = 'TRANSACTION_ABORTED';
+const TxnState = {
+  NO_TRANSACTION: 'NO_TRANSACTION',
+  STARTING_TRANSACTION: 'STARTING_TRANSACTION',
+  TRANSACTION_IN_PROGRESS: 'TRANSACTION_IN_PROGRESS',
+  TRANSACTION_COMMITTED: 'TRANSACTION_COMMITTED',
+  TRANSACTION_COMMITTED_EMPTY: 'TRANSACTION_COMMITTED_EMPTY',
+  TRANSACTION_ABORTED: 'TRANSACTION_ABORTED'
+};
 
 function txnStateTransition(txnState, nextState) {
-  const validTransitions = {
-    [NO_TRANSACTION]: [NO_TRANSACTION, STARTING_TRANSACTION],
-    [STARTING_TRANSACTION]: [TRANSACTION_IN_PROGRESS, TRANSACTION_COMMITTED, TRANSACTION_ABORTED],
-    [TRANSACTION_IN_PROGRESS]: [
-      TRANSACTION_IN_PROGRESS,
-      TRANSACTION_COMMITTED,
-      TRANSACTION_ABORTED
+  const stateMachine = {
+    [TxnState.NO_TRANSACTION]: [TxnState.NO_TRANSACTION, TxnState.STARTING_TRANSACTION],
+    [TxnState.STARTING_TRANSACTION]: [
+      TxnState.TRANSACTION_IN_PROGRESS,
+      TxnState.TRANSACTION_COMMITTED,
+      TxnState.TRANSACTION_COMMITTED_EMPTY,
+      TxnState.TRANSACTION_ABORTED
     ],
-    [TRANSACTION_COMMITTED]: [TRANSACTION_COMMITTED, STARTING_TRANSACTION, NO_TRANSACTION],
-    [TRANSACTION_ABORTED]: [STARTING_TRANSACTION, NO_TRANSACTION]
+    [TxnState.TRANSACTION_IN_PROGRESS]: [
+      TxnState.TRANSACTION_IN_PROGRESS,
+      TxnState.TRANSACTION_COMMITTED,
+      TxnState.TRANSACTION_ABORTED
+    ],
+    [TxnState.TRANSACTION_COMMITTED]: [
+      TxnState.TRANSACTION_COMMITTED,
+      TxnState.TRANSACTION_COMMITTED_EMPTY,
+      TxnState.STARTING_TRANSACTION,
+      TxnState.NO_TRANSACTION
+    ],
+    [TxnState.TRANSACTION_ABORTED]: [TxnState.STARTING_TRANSACTION, TxnState.NO_TRANSACTION],
+    [TxnState.TRANSACTION_COMMITTED_EMPTY]: [
+      TxnState.TRANSACTION_COMMITTED_EMPTY,
+      TxnState.NO_TRANSACTION
+    ]
   };
 
   // Get current state
-  const nextStates = validTransitions[txnState.state];
+  const nextStates = stateMachine[txnState.state];
   if (nextStates && nextStates.indexOf(nextState) !== -1) {
     txnState.state = nextState;
     return;
@@ -54,13 +73,22 @@ function txnStateTransition(txnState, nextState) {
   );
 }
 
-class TransactionState {
+class Transaction {
   constructor(options) {
     options = options || {};
 
-    this.state = NO_TRANSACTION;
+    this.state = TxnState.NO_TRANSACTION;
     this.options = {};
-    if (options.writeConcern) this.options.writeConcern = options.writeConcern;
+
+    if (options.writeConcern || typeof options.w !== 'undefined') {
+      const w = options.writeConcern ? options.writeConcern.w : options.w;
+      if (w <= 0) {
+        throw new MongoError('Transactions do not support unacknowledged write concern');
+      }
+
+      this.options.writeConcern = options.writeConcern ? options.writeConcern : { w: options.w };
+    }
+
     if (options.readConcern) this.options.readConcern = options.readConcern;
     if (options.readPreference) this.options.readPreference = options.readPreference;
   }
@@ -69,7 +97,18 @@ class TransactionState {
    * @return Whether this session is presently in a transaction
    */
   get isActive() {
-    return [STARTING_TRANSACTION, TRANSACTION_IN_PROGRESS].indexOf(this.state) !== -1;
+    return (
+      [TxnState.STARTING_TRANSACTION, TxnState.TRANSACTION_IN_PROGRESS].indexOf(this.state) !== -1
+    );
+  }
+
+  /**
+   * Transition the transaction in the state machine
+   *
+   * @param {TxnState} state The new state to transition to
+   */
+  transition(state) {
+    txnStateTransition(this, state);
   }
 }
 
@@ -121,7 +160,14 @@ class ClientSession extends EventEmitter {
     this.explicit = !!options.explicit;
     this.owner = options.owner;
     this.defaultTransactionOptions = Object.assign({}, options.defaultTransactionOptions);
-    this.transaction = new TransactionState();
+    this.transaction = new Transaction();
+  }
+
+  /**
+   * Return the server id associated with this session
+   */
+  get id() {
+    return this.serverSession.id;
   }
 
   /**
@@ -212,11 +258,11 @@ class ClientSession extends EventEmitter {
     this.incrementTransactionNumber();
 
     // create transaction state
-    this.transaction = new TransactionState(
-      Object.assign({}, options || this.defaultTransactionOptions)
+    this.transaction = new Transaction(
+      Object.assign({}, this.clientOptions, options || this.defaultTransactionOptions)
     );
 
-    txnStateTransition(this.transaction, STARTING_TRANSACTION);
+    this.transaction.transition(TxnState.STARTING_TRANSACTION);
   }
 
   /**
@@ -262,70 +308,111 @@ class ClientSession extends EventEmitter {
   }
 }
 
-function endTransaction(clientSession, commandName, callback) {
-  if (!assertAlive(clientSession, callback)) {
+function endTransaction(session, commandName, callback) {
+  if (!assertAlive(session, callback)) {
     // checking result in case callback was called
     return;
   }
 
-  if (!clientSession.inTransaction()) {
-    if (clientSession.autoStartTransaction) {
-      clientSession.startTransaction();
-    } else {
-      callback(new MongoError('No transaction started'));
+  // handle any initial problematic cases
+  let txnState = session.transaction.state;
+
+  if (txnState === TxnState.NO_TRANSACTION) {
+    callback(new MongoError('No transaction started'));
+    return;
+  }
+
+  if (commandName === 'commitTransaction') {
+    if (
+      txnState === TxnState.STARTING_TRANSACTION ||
+      txnState === TxnState.TRANSACTION_COMMITTED_EMPTY
+    ) {
+      // the transaction was never started, we can safely exit here
+      session.transaction.transition(TxnState.TRANSACTION_COMMITTED_EMPTY);
+      callback(null, null);
+      return;
+    }
+
+    if (txnState === TxnState.TRANSACTION_ABORTED) {
+      callback(new MongoError('Cannot call commitTransaction after calling abortTransaction'));
+      return;
+    }
+  } else {
+    if (txnState === TxnState.STARTING_TRANSACTION) {
+      // the transaction was never started, we can safely exit here
+      session.transaction.transition(TxnState.TRANSACTION_ABORTED);
+      callback(null, null);
+      return;
+    }
+
+    if (txnState === TxnState.TRANSACTION_ABORTED) {
+      callback(new MongoError('Cannot call abortTransaction twice'));
+      return;
+    }
+
+    if (
+      txnState === TxnState.TRANSACTION_COMMITTED ||
+      txnState === TxnState.TRANSACTION_COMMITTED_EMPTY
+    ) {
+      callback(new MongoError('Cannot call abortTransaction after calling commitTransaction'));
       return;
     }
   }
 
-  // if (clientSession.serverSession.stmtId === 0) {
-  //   // The server transaction was never started.
-  //   resetTransactionState(clientSession);
-  //   callback(null, null);
-  //   return;
-  // }
-
+  // construct and send the command
   const command = { [commandName]: 1 };
 
-  // if (clientSession.transactionOptions.writeConcern) {
-  //   Object.assign(command, { writeConcern: clientSession.transactionOptions.writeConcern });
-  // } else if (clientSession.clientOptions && clientSession.clientOptions.w) {
-  //   Object.assign(command, { writeConcern: { w: clientSession.clientOptions.w } });
-  // }
+  // apply a writeConcern if specified
+  if (session.transaction.options.writeConcern) {
+    Object.assign(command, { writeConcern: session.transaction.options.writeConcern });
+  } else if (session.clientOptions && session.clientOptions.w) {
+    Object.assign(command, { writeConcern: { w: session.clientOptions.w } });
+  }
 
   function commandHandler(e, r) {
-    // resetTransactionState(clientSession);
+    if (commandName === 'commitTransaction') {
+      session.transaction.transition(TxnState.TRANSACTION_COMMITTED);
+
+      if (
+        e &&
+        (e instanceof MongoNetworkError ||
+          e instanceof MongoWriteConcernError ||
+          isRetryableError(e))
+      ) {
+        if (e.errorLabels) {
+          const idx = e.errorLabels.indexOf('TransientTransactionError');
+          if (idx !== -1) {
+            e.errorLabels.splice(idx, 1);
+          }
+        } else {
+          e.errorLabels = [];
+        }
+
+        e.errorLabels.push('UnknownTransactionCommitResult');
+      }
+    } else {
+      session.transaction.transition(TxnState.TRANSACTION_ABORTED);
+    }
+
     callback(e, r);
   }
 
+  // The spec indicates that we should ignore all errors on `abortTransaction`
   function transactionError(err) {
     return commandName === 'commitTransaction' ? err : null;
   }
 
   // send the command
-  clientSession.topology.command(
-    'admin.$cmd',
-    command,
-    { session: clientSession },
-    (err, reply) => {
-      if (err && isRetryableError(err)) {
-        return clientSession.topology.command(
-          'admin.$cmd',
-          command,
-          { session: clientSession },
-          (_err, _reply) => commandHandler(transactionError(_err), _reply)
-        );
-      }
-
-      commandHandler(transactionError(err), reply);
+  session.topology.command('admin.$cmd', command, { session }, (err, reply) => {
+    if (err && isRetryableError(err)) {
+      return session.topology.command('admin.$cmd', command, { session }, (_err, _reply) =>
+        commandHandler(transactionError(_err), _reply)
+      );
     }
-  );
-}
 
-Object.defineProperty(ClientSession.prototype, 'id', {
-  get: function() {
-    return this.serverSession.id;
-  }
-});
+    commandHandler(transactionError(err), reply);
+  });
+}
 
 /**
  *
@@ -409,7 +496,8 @@ class ServerSessionPool {
 }
 
 module.exports = {
-  ClientSession: ClientSession,
-  ServerSession: ServerSession,
-  ServerSessionPool: ServerSessionPool
+  ClientSession,
+  ServerSession,
+  ServerSessionPool,
+  TxnState
 };
