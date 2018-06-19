@@ -9,6 +9,8 @@ const MongoError = require('./error').MongoError;
 const isRetryableError = require('././error').isRetryableError;
 const MongoNetworkError = require('./error').MongoNetworkError;
 const MongoWriteConcernError = require('./error').MongoWriteConcernError;
+const Transaction = require('./transactions').Transaction;
+const TxnState = require('./transactions').TxnState;
 
 function assertAlive(session, callback) {
   if (session.serverSession == null) {
@@ -22,94 +24,6 @@ function assertAlive(session, callback) {
   }
 
   return true;
-}
-
-// Client session states
-const TxnState = {
-  NO_TRANSACTION: 'NO_TRANSACTION',
-  STARTING_TRANSACTION: 'STARTING_TRANSACTION',
-  TRANSACTION_IN_PROGRESS: 'TRANSACTION_IN_PROGRESS',
-  TRANSACTION_COMMITTED: 'TRANSACTION_COMMITTED',
-  TRANSACTION_COMMITTED_EMPTY: 'TRANSACTION_COMMITTED_EMPTY',
-  TRANSACTION_ABORTED: 'TRANSACTION_ABORTED'
-};
-
-function txnStateTransition(txnState, nextState) {
-  const stateMachine = {
-    [TxnState.NO_TRANSACTION]: [TxnState.NO_TRANSACTION, TxnState.STARTING_TRANSACTION],
-    [TxnState.STARTING_TRANSACTION]: [
-      TxnState.TRANSACTION_IN_PROGRESS,
-      TxnState.TRANSACTION_COMMITTED,
-      TxnState.TRANSACTION_COMMITTED_EMPTY,
-      TxnState.TRANSACTION_ABORTED
-    ],
-    [TxnState.TRANSACTION_IN_PROGRESS]: [
-      TxnState.TRANSACTION_IN_PROGRESS,
-      TxnState.TRANSACTION_COMMITTED,
-      TxnState.TRANSACTION_ABORTED
-    ],
-    [TxnState.TRANSACTION_COMMITTED]: [
-      TxnState.TRANSACTION_COMMITTED,
-      TxnState.TRANSACTION_COMMITTED_EMPTY,
-      TxnState.STARTING_TRANSACTION,
-      TxnState.NO_TRANSACTION
-    ],
-    [TxnState.TRANSACTION_ABORTED]: [TxnState.STARTING_TRANSACTION, TxnState.NO_TRANSACTION],
-    [TxnState.TRANSACTION_COMMITTED_EMPTY]: [
-      TxnState.TRANSACTION_COMMITTED_EMPTY,
-      TxnState.NO_TRANSACTION
-    ]
-  };
-
-  // Get current state
-  const nextStates = stateMachine[txnState.state];
-  if (nextStates && nextStates.indexOf(nextState) !== -1) {
-    txnState.state = nextState;
-    return;
-  }
-
-  throw new MongoError(
-    `ClientSession attempted illegal state transition from [${txnState.state}] to [${nextState}]`
-  );
-}
-
-class Transaction {
-  constructor(options) {
-    options = options || {};
-
-    this.state = TxnState.NO_TRANSACTION;
-    this.options = {};
-
-    if (options.writeConcern || typeof options.w !== 'undefined') {
-      const w = options.writeConcern ? options.writeConcern.w : options.w;
-      if (w <= 0) {
-        throw new MongoError('Transactions do not support unacknowledged write concern');
-      }
-
-      this.options.writeConcern = options.writeConcern ? options.writeConcern : { w: options.w };
-    }
-
-    if (options.readConcern) this.options.readConcern = options.readConcern;
-    if (options.readPreference) this.options.readPreference = options.readPreference;
-  }
-
-  /**
-   * @return Whether this session is presently in a transaction
-   */
-  get isActive() {
-    return (
-      [TxnState.STARTING_TRANSACTION, TxnState.TRANSACTION_IN_PROGRESS].indexOf(this.state) !== -1
-    );
-  }
-
-  /**
-   * Transition the transaction in the state machine
-   *
-   * @param {TxnState} state The new state to transition to
-   */
-  transition(state) {
-    txnStateTransition(this, state);
-  }
 }
 
 /** A class representing a client session on the server */
