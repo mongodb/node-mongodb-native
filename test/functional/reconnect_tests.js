@@ -10,7 +10,8 @@ describe('Reconnect', function() {
   /**
    * @ignore
    */
-  it('Should correctly stop reconnection attempts after limit reached', {
+  // NOTE: skipped for use of topology manager
+  it.skip('Should correctly stop reconnection attempts after limit reached', {
     metadata: { requires: { topology: ['single'] }, ignore: { travis: true } },
 
     // The actual test we wish to run
@@ -47,7 +48,8 @@ describe('Reconnect', function() {
   /**
    * @ignore
    */
-  it('Should correctly recover when bufferMaxEntries: -1 and multiple restarts', {
+  // NOTE: skipped for use of topology manager
+  it.skip('Should correctly recover when bufferMaxEntries: -1 and multiple restarts', {
     metadata: { requires: { topology: ['single'] }, ignore: { travis: true } },
 
     // The actual test we wish to run
