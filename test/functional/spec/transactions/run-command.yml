@@ -176,7 +176,7 @@ tests:
         arguments:
           options:
             readPreference:
-              mode: secondary
+              mode: Secondary
       - name: runCommand
         object: database
         command_name: find
