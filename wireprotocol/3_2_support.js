@@ -2,7 +2,6 @@
 
 const Query = require('../connection/commands').Query;
 const retrieveBSON = require('../connection/utils').retrieveBSON;
-const f = require('util').format;
 const MongoError = require('../error').MongoError;
 const MongoNetworkError = require('../error').MongoNetworkError;
 const getReadPreference = require('./shared').getReadPreference;
@@ -11,7 +10,7 @@ const Long = BSON.Long;
 const ReadPreference = require('../topologies/read_preference');
 const TxnState = require('../transactions').TxnState;
 
-var WireProtocol = function(legacyWireProtocol) {
+const WireProtocol = function(legacyWireProtocol) {
   this.legacyWireProtocol = legacyWireProtocol;
 };
 
@@ -85,7 +84,7 @@ function decorateWithSessionsData(command, session, options) {
 
 //
 // Execute a write operation
-var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callback) {
+function executeWrite(pool, bson, type, opsField, ns, ops, options, callback) {
   if (ops.length === 0) throw new MongoError('insert must contain at least one document');
   if (typeof options === 'function') {
     callback = options;
@@ -94,14 +93,14 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
   }
 
   // Split the ns up to get db and collection
-  var p = ns.split('.');
-  var d = p.shift();
+  const p = ns.split('.');
+  const d = p.shift();
   // Options
-  var ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
-  var writeConcern = options.writeConcern;
+  const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
+  const writeConcern = options.writeConcern;
 
   // return skeleton
-  var writeCommand = {};
+  const writeCommand = {};
   writeCommand[type] = p.join('.');
   writeCommand[opsField] = ops;
   writeCommand.ordered = ordered;
@@ -113,7 +112,7 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
 
   // If we have collation passed in
   if (options.collation) {
-    for (var i = 0; i < writeCommand[opsField].length; i++) {
+    for (let i = 0; i < writeCommand[opsField].length; i++) {
       if (!writeCommand[opsField][i].collation) {
         writeCommand[opsField][i].collation = options.collation;
       }
@@ -132,9 +131,9 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
   }
 
   // Options object
-  var opts = { command: true };
+  const opts = { command: true };
   if (typeof options.session !== 'undefined') opts.session = options.session;
-  var queryOptions = { checkKeys: false, numberToSkip: 0, numberToReturn: 1 };
+  const queryOptions = { checkKeys: false, numberToSkip: 0, numberToReturn: 1 };
   if (type === 'insert') queryOptions.checkKeys = false;
   if (typeof options.checkKeys === 'boolean') queryOptions.checkKeys = options.checkKeys;
 
@@ -145,13 +144,13 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
 
   try {
     // Create write command
-    var cmd = new Query(bson, f('%s.$cmd', d), writeCommand, queryOptions);
+    const cmd = new Query(bson, `${d}.$cmd`, writeCommand, queryOptions);
     // Execute command
     pool.write(cmd, opts, callback);
   } catch (err) {
     callback(err);
   }
-};
+}
 
 //
 // Needs to support legacy mass insert as well as ordered/unordered legacy
@@ -171,18 +170,18 @@ WireProtocol.prototype.remove = function(pool, ismaster, ns, bson, ops, options,
 
 WireProtocol.prototype.killCursor = function(bson, ns, cursorState, pool, callback) {
   // Build command namespace
-  var parts = ns.split(/\./);
+  const parts = ns.split(/\./);
   // Command namespace
-  var commandns = f('%s.$cmd', parts.shift());
+  const commandns = `${parts.shift()}.$cmd`;
   const cursorId = cursorState.cursorId;
   // Create killCursor command
-  var killcursorCmd = {
+  const killcursorCmd = {
     killCursors: parts.join('.'),
     cursors: [cursorId]
   };
 
   // Build Query object
-  var query = new Query(bson, commandns, killcursorCmd, {
+  const query = new Query(bson, commandns, killcursorCmd, {
     numberToSkip: 0,
     numberToReturn: -1,
     checkKeys: false,
@@ -190,14 +189,14 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorState, pool, callba
   });
 
   // Kill cursor callback
-  var killCursorCallback = function(err, result) {
+  function killCursorCallback(err, result) {
     if (err) {
       if (typeof callback !== 'function') return;
       return callback(err);
     }
 
     // Result
-    var r = result.message;
+    const r = result.message;
     // If we have a timed out query or a cursor that was killed
     if ((r.responseFlags & (1 << 0)) !== 0) {
       if (typeof callback !== 'function') return;
@@ -207,7 +206,7 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorState, pool, callba
     if (!Array.isArray(r.documents) || r.documents.length === 0) {
       if (typeof callback !== 'function') return;
       return callback(
-        new MongoError(f('invalid killCursors result returned for cursor id %s', cursorId))
+        new MongoError(`invalid killCursors result returned for cursor id ${cursorId}`)
       );
     }
 
@@ -215,7 +214,7 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorState, pool, callba
     if (typeof callback === 'function') {
       callback(null, r.documents[0]);
     }
-  };
+  }
 
   const options = { command: true };
   if (typeof cursorState.session === 'object') {
@@ -249,12 +248,12 @@ WireProtocol.prototype.getMore = function(
 ) {
   options = options || {};
   // Build command namespace
-  var parts = ns.split(/\./);
+  const parts = ns.split(/\./);
   // Command namespace
-  var commandns = f('%s.$cmd', parts.shift());
+  const commandns = `${parts.shift()}.$cmd`;
 
   // Create getMore command
-  var getMoreCmd = {
+  const getMoreCmd = {
     getMore: cursorState.cursorId,
     collection: parts.join('.'),
     batchSize: Math.abs(batchSize)
@@ -271,7 +270,7 @@ WireProtocol.prototype.getMore = function(
   }
 
   // Build Query object
-  var query = new Query(bson, commandns, getMoreCmd, {
+  const query = new Query(bson, commandns, getMoreCmd, {
     numberToSkip: 0,
     numberToReturn: -1,
     checkKeys: false,
@@ -279,10 +278,10 @@ WireProtocol.prototype.getMore = function(
   });
 
   // Query callback
-  var queryCallback = function(err, result) {
+  function queryCallback(err, result) {
     if (err) return callback(err);
     // Get the raw message
-    var r = result.message;
+    const r = result.message;
 
     // If we have a timed out query or a cursor that was killed
     if ((r.responseFlags & (1 << 0)) !== 0) {
@@ -302,7 +301,7 @@ WireProtocol.prototype.getMore = function(
     }
 
     // Ensure we have a Long valid cursor id
-    var cursorId =
+    const cursorId =
       typeof r.documents[0].cursor.id === 'number'
         ? Long.fromNumber(r.documents[0].cursor.id)
         : r.documents[0].cursor.id;
@@ -313,10 +312,10 @@ WireProtocol.prototype.getMore = function(
 
     // Return the result
     callback(null, r.documents[0], r.connection);
-  };
+  }
 
   // Query options
-  var queryOptions = { command: true };
+  const queryOptions = { command: true };
 
   // If we have a raw query decorate the function
   if (raw) {
@@ -350,7 +349,7 @@ WireProtocol.prototype.getMore = function(
 WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, options) {
   options = options || {};
   // Check if this is a wire protocol command or not
-  var wireProtocolCommand =
+  const wireProtocolCommand =
     typeof options.wireProtocolCommand === 'boolean' ? options.wireProtocolCommand : true;
 
   // Establish type of command
@@ -368,7 +367,7 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
   } else if (cmd) {
     query = setupCommand(bson, ns, cmd, cursorState, topology, options);
   } else {
-    return new MongoError(f('command %s does not return a cursor', JSON.stringify(cmd)));
+    return new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`);
   }
 
   if (query instanceof MongoError) {
@@ -441,22 +440,22 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
 
 //
 // Execute a find command
-var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options) {
+function executeFindCommand(bson, ns, cmd, cursorState, topology, options) {
   // Ensure we have at least some options
   options = options || {};
   // Get the readPreference
-  var readPreference = getReadPreference(cmd, options);
+  const readPreference = getReadPreference(cmd, options);
 
   // Set the optional batchSize
   cursorState.batchSize = cmd.batchSize || cursorState.batchSize;
 
   // Build command namespace
-  var parts = ns.split(/\./);
+  const parts = ns.split(/\./);
   // Command namespace
-  var commandns = f('%s.$cmd', parts.shift());
+  const commandns = `${parts.shift()}.$cmd`;
 
   // Build actual find command
-  var findCmd = {
+  let findCmd = {
     find: parts.join('.')
   };
 
@@ -471,14 +470,14 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
   }
 
   // Sort value
-  var sortValue = cmd.sort;
+  let sortValue = cmd.sort;
 
   // Handle issue of sort being an Array
   if (Array.isArray(sortValue)) {
-    var sortObject = {};
+    const sortObject = {};
 
     if (sortValue.length > 0 && !Array.isArray(sortValue[0])) {
-      var sortDirection = sortValue[1];
+      let sortDirection = sortValue[1];
       // Translate the sort order text
       if (sortDirection === 'asc') {
         sortDirection = 1;
@@ -490,7 +489,7 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
       sortObject[sortValue[0]] = sortDirection;
     } else {
       for (var i = 0; i < sortValue.length; i++) {
-        sortDirection = sortValue[i][1];
+        let sortDirection = sortValue[i][1];
         // Translate the sort order text
         if (sortDirection === 'asc') {
           sortDirection = 1;
@@ -591,9 +590,9 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
   if (cmd.readConcern) findCmd.readConcern = cmd.readConcern;
 
   // Set up the serialize and ignoreUndefined fields
-  var serializeFunctions =
+  const serializeFunctions =
     typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
-  var ignoreUndefined =
+  const ignoreUndefined =
     typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
 
   // We have a Mongos topology, check if we need to add a readPreference
@@ -611,7 +610,7 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
   }
 
   // Build Query object
-  var query = new Query(bson, commandns, findCmd, {
+  const query = new Query(bson, commandns, findCmd, {
     numberToSkip: 0,
     numberToReturn: 1,
     checkKeys: false,
@@ -625,31 +624,31 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
 
   // Return the query
   return query;
-};
+}
 
 //
 // Set up a command cursor
-var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
+function setupCommand(bson, ns, cmd, cursorState, topology, options) {
   // Set empty options object
   options = options || {};
   // Get the readPreference
-  var readPreference = getReadPreference(cmd, options);
+  const readPreference = getReadPreference(cmd, options);
 
   // Final query
-  var finalCmd = {};
-  for (var name in cmd) {
+  let finalCmd = {};
+  for (let name in cmd) {
     finalCmd[name] = cmd[name];
   }
 
   // Build command namespace
-  var parts = ns.split(/\./);
+  const parts = ns.split(/\./);
 
   // Serialize functions
-  var serializeFunctions =
+  const serializeFunctions =
     typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
 
   // Set up the serialize and ignoreUndefined fields
-  var ignoreUndefined =
+  const ignoreUndefined =
     typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
 
   // We have a Mongos topology, check if we need to add a readPreference
@@ -667,7 +666,7 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
   }
 
   // Build Query object
-  var query = new Query(bson, f('%s.$cmd', parts.shift()), finalCmd, {
+  const query = new Query(bson, `${parts.shift()}.$cmd`, finalCmd, {
     numberToSkip: 0,
     numberToReturn: -1,
     checkKeys: false,
@@ -680,6 +679,6 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
 
   // Return the query
   return query;
-};
+}
 
 module.exports = WireProtocol;
