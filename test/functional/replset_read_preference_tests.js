@@ -11,10 +11,7 @@ var restartAndDone = function(done) {
 
 describe('ReplSet (ReadPreference)', function() {
   before(function() {
-    var configuration = this.configuration;
-    return setupDatabase(configuration).then(function() {
-      return configuration.manager.restart();
-    });
+    return setupDatabase(this.configuration);
   });
 
   it('Should Correctly Pick lowest ping time', {

@@ -47,7 +47,8 @@ class NativeConfiguration extends ConfigurationBase {
   }
 
   newClient(dbOptions, serverOptions) {
-    serverOptions = serverOptions || {};
+    serverOptions = Object.assign({}, { haInterval: 100 }, serverOptions);
+
     // Override implementation
     if (this.options.newDbInstance) {
       return this.options.newDbInstance(dbOptions, serverOptions);
