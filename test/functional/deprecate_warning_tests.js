@@ -206,33 +206,33 @@ describe('Deprecation Warnings', function() {
       .catch(e => done(e));
   });
 
-  it('logger test for deprecation', function(done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-    const Logger = this.configuration.require.Logger;
+  // it('logger test for deprecation', function(done) {
+  //   const configuration = this.configuration;
+  //   const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+  //   const Logger = this.configuration.require.Logger;
 
-    client.connect(function(err, client) {
-      const db = client.db(configuration.db);
-      let collection, cursor;
-      const close = e => cursor.close(() => client.close(() => done(e)));
+  //   client.connect(function(err, client) {
+  //     const db = client.db(configuration.db);
+  //     let collection, cursor;
+  //     const close = e => cursor.close(() => client.close(() => done(e)));
 
-      Logger.setLevel('warn');
+  //     Logger.setLevel('warn');
 
-      Logger.setCurrentLogger(function(msg, context) {
-        expect(msg).to.exist;
-        console.log('warn msg: ' + msg);
-      });
+  //     Logger.setCurrentLogger(function(msg, context) {
+  //       expect(msg).to.exist;
+  //       console.log('warn msg: ' + msg);
+  //     });
 
-      Promise.resolve()
-        .then(() => db.createCollection('log_test_deprecation'))
-        .then(() => (collection = db.collection('log_test_deprecation')))
-        .then(() => collection.find({}, { maxScan: 5, fields: 'hi', snapshot: true }))
-        .then(() => collection.find({}, { maxScan: 5, fields: 'hi', snapshot: true }))
-        .then(_cursor => (cursor = _cursor))
-        .then(() => close())
-        .catch(e => close(e));
-    });
-  });
+  //     Promise.resolve()
+  //       .then(() => db.createCollection('log_test_deprecation'))
+  //       .then(() => (collection = db.collection('log_test_deprecation')))
+  //       .then(() => collection.find({}, { maxScan: 5, fields: 'hi', snapshot: true }))
+  //       .then(() => collection.find({}, { maxScan: 5, fields: 'hi', snapshot: true }))
+  //       .then(_cursor => (cursor = _cursor))
+  //       .then(() => close())
+  //       .catch(e => close(e));
+  //   });
+  // });
 
   // const tester6 = deprecate(function() {}, 'Tester6', {});
 
