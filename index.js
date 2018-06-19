@@ -49,6 +49,9 @@ connect.Decimal128 = core.BSON.Decimal128;
 // Add connect method
 connect.connect = connect;
 
+// Export entire core
+connect.core = core;
+
 // Set up the instrumentation method
 connect.instrument = function(options, callback) {
   if (typeof options === 'function') {
