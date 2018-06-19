@@ -13,77 +13,7 @@ describe('Deprecation Warnings', function() {
 
   beforeEach(function() {
     this.sinon.stub(console, 'warn');
-    const hi = this.sinon.stub(util, 'deprecate');
-    console.log(hi.wrappedMethod);
   });
-
-  // it('collection find deprecate warning test', function(done) {
-  //   const configuration = this.configuration;
-  //   const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-
-  //   client.connect(function(err, client) {
-  //     const db = client.db(configuration.db);
-  //     let collection, cursor;
-  //     const close = e => cursor.close(() => client.close(() => done(e)));
-
-  //     Promise.resolve()
-  //       .then(() => db.createCollection('deprecation_test'))
-  //       .then(() => (collection = db.collection('deprecation_test')))
-  //       .then(() => collection.find({}, { maxScan: 5, fields: 'hi', snapshot: true }))
-  //       .then(_cursor => (cursor = _cursor))
-  //       .then(() => expect(console.warn.calledThrice).to.be.true)
-  //       .then(
-  //         () =>
-  //           expect(
-  //             console.warn.calledWith(
-  //               '[Deprecation Warning] collection.find parameter [maxScan] is deprecated, and will be removed in a later version.'
-  //             )
-  //           ).to.be.true
-  //       )
-  //       .then(
-  //         () =>
-  //           expect(
-  //             console.warn.calledWith(
-  //               '[Deprecation Warning] collection.find parameter [fields] is deprecated, and will be removed in a later version.'
-  //             )
-  //           ).to.be.true
-  //       )
-  //       .then(
-  //         () =>
-  //           expect(
-  //             console.warn.calledWith(
-  //               '[Deprecation Warning] collection.find parameter [snapshot] is deprecated, and will be removed in a later version.'
-  //             )
-  //           ).to.be.true
-  //       )
-  //       .then(() => close())
-  //       .catch(e => close(e));
-  //   });
-  // });
-
-  // it('db createCollection deprecate warning test', function(done) {
-  //   const configuration = this.configuration;
-  //   const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-
-  //   client.connect(function(err, client) {
-  //     const db = client.db(configuration.db);
-  //     const close = e => client.close(() => done(e));
-
-  //     Promise.resolve()
-  //       .then(() => db.createCollection('deprecation_test', { autoIndexId: 1 }))
-  //       .then(() => expect(console.warn.calledOnce).to.be.true)
-  //       .then(
-  //         () =>
-  //           expect(
-  //             console.warn.calledWith(
-  //               '[Deprecation Warning] db.createCollection parameter [autoIndexId] is deprecated, and will be removed in a later version.'
-  //             )
-  //           ).to.be.true
-  //       )
-  //       .then(() => close())
-  //       .catch(e => close(e));
-  //   });
-  // });
 
   const tester = deprecate(
     function(options) {
@@ -225,6 +155,39 @@ describe('Deprecation Warnings', function() {
   //     .catch(e => done(e));
   // });
 
+  const tester7 = deprecate(
+    function(options) {
+      if (options) {
+        options = null;
+      }
+    },
+    'Tester7',
+    { deprecatedParams: new Set(['maxScan', 'snapshot', 'fields']), optionsIndex: 0, both: true }
+  );
+
+  it('function and parameter deprecation', function(done) {
+    Promise.resolve()
+      .then(() => tester7({ maxScan: 5, fields: 'hi' }))
+      .then(() => expect(console.warn.calledTwice).to.be.true)
+      .then(
+        () =>
+          expect(
+            console.warn.calledWith(
+              'DeprecationWarning: Tester7 parameter [maxScan] is deprecated and will be removed in a later version.'
+            )
+          ).to.be.true
+      )
+      .then(
+        () =>
+          expect(
+            console.warn.calledWith(
+              'DeprecationWarning: Tester7 parameter [fields] is deprecated and will be removed in a later version.'
+            )
+          ).to.be.true
+      )
+      .then(() => done())
+      .catch(e => done(e));
+  });
   //   it('logging deprecated warnings test', function(done) {
   //     done();
   //   });
