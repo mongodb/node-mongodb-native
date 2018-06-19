@@ -255,6 +255,7 @@ Cursor.prototype._find = function(callback) {
         // Promote id to long if needed
         self.cursorState.cursorId = typeof id === 'number' ? Long.fromNumber(id) : id;
         self.cursorState.lastCursorId = self.cursorState.cursorId;
+        self.cursorState.operationTime = result.documents[0].operationTime;
         // If we have a firstBatch set it
         if (Array.isArray(result.documents[0].cursor.firstBatch)) {
           self.cursorState.documents = result.documents[0].cursor.firstBatch; //.reverse();
