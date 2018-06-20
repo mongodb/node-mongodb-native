@@ -13,7 +13,7 @@
     "official"
   ],
   "dependencies": {
-    "mongodb-core": "github:mongodb-js/mongodb-core#master"
+    "mongodb-core": "mongodb-js/mongodb-core#master"
   },
   "devDependencies": {
     "bluebird": "3.5.0",
