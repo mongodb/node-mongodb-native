@@ -1,5 +1,6 @@
 'use strict';
 var expect = require('chai').expect;
+const ReadPreference = require('mongodb-core').ReadPreference;
 
 describe('Aggregation', function() {
   it('Should use secondary readPreference if given', {
@@ -8,8 +9,6 @@ describe('Aggregation', function() {
     // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
-      const mongo = configuration.require;
-      const ReadPreference = mongo.ReadPreference;
 
       // Open the database
       const client = configuration.newClient(
@@ -40,7 +39,7 @@ describe('Aggregation', function() {
 
         // Create a collection
         const collection = db.collection(
-          'shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray'
+          'shouldCorrectlyExecuteSimpleAggregationPipelineWithSecondaryReadPreference'
         );
         // Insert the docs
         collection.insert(docs, { w: 1 }, (err, result) => {
