@@ -3,86 +3,21 @@ const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
 require('mocha-sinon');
 const deprecate = require('../../lib/utils').deprecate;
-// const deprecateFunctions = require('util').deprecate;
-// const util = require('util');
 const exec = require('child_process').exec;
 
 describe('Deprecation Warnings', function() {
+  let messages = [];
+
   before(function() {
+    process.on('warning', warning => {
+      messages.push(warning.message);
+    });
     return setupDatabase(this.configuration, []);
   });
 
   beforeEach(function() {
-    this.sinon.stub(console, 'warn');
+    this.sinon.stub(console, 'error');
   });
-
-  // it('collection find deprecate warning test', function(done) {
-  //   const configuration = this.configuration;
-  //   const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-
-  //   client.connect(function(err, client) {
-  //     const db = client.db(configuration.db);
-  //     let collection, cursor;
-  //     const close = e => cursor.close(() => client.close(() => done(e)));
-
-  //     Promise.resolve()
-  //       .then(() => db.createCollection('deprecation_test'))
-  //       .then(() => (collection = db.collection('deprecation_test')))
-  //       .then(() => collection.find({}, { maxScan: 5, fields: 'hi', snapshot: true }))
-  //       .then(_cursor => (cursor = _cursor))
-  //       .then(() => expect(console.warn.calledThrice).to.be.true)
-  //       .then(
-  //         () =>
-  //           expect(
-  //             console.warn.calledWith(
-  //               '[Deprecation Warning] collection.find parameter [maxScan] is deprecated, and will be removed in a later version.'
-  //             )
-  //           ).to.be.true
-  //       )
-  //       .then(
-  //         () =>
-  //           expect(
-  //             console.warn.calledWith(
-  //               '[Deprecation Warning] collection.find parameter [fields] is deprecated, and will be removed in a later version.'
-  //             )
-  //           ).to.be.true
-  //       )
-  //       .then(
-  //         () =>
-  //           expect(
-  //             console.warn.calledWith(
-  //               '[Deprecation Warning] collection.find parameter [snapshot] is deprecated, and will be removed in a later version.'
-  //             )
-  //           ).to.be.true
-  //       )
-  //       .then(() => close())
-  //       .catch(e => close(e));
-  //   });
-  // });
-
-  // it('db createCollection deprecate warning test', function(done) {
-  //   const configuration = this.configuration;
-  //   const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-
-  //   client.connect(function(err, client) {
-  //     const db = client.db(configuration.db);
-  //     const close = e => client.close(() => done(e));
-
-  //     Promise.resolve()
-  //       .then(() => db.createCollection('deprecation_test', { autoIndexId: 1 }))
-  //       .then(() => expect(console.warn.calledOnce).to.be.true)
-  //       .then(
-  //         () =>
-  //           expect(
-  //             console.warn.calledWith(
-  //               '[Deprecation Warning] db.createCollection parameter [autoIndexId] is deprecated, and will be removed in a later version.'
-  //             )
-  //           ).to.be.true
-  //       )
-  //       .then(() => close())
-  //       .catch(e => close(e));
-  //   });
-  // });
 
   const tester = deprecate(
     function(options) {
@@ -105,28 +40,19 @@ describe('Deprecation Warnings', function() {
   );
 
   it('multiple functions with the same deprecated params deprecate warning test', function(done) {
-    Promise.resolve()
-      .then(() => tester({ maxScan: 5 }))
-      .then(() => tester2({ maxScan: 5 }))
-      .then(() => expect(console.warn.calledTwice).to.be.true)
-      .then(
-        () =>
-          expect(
-            console.warn.calledWith(
-              'DeprecationWarning: Tester parameter [maxScan] is deprecated and will be removed in a later version.'
-            )
-          ).to.be.true
-      )
-      .then(
-        () =>
-          expect(
-            console.warn.calledWith(
-              'DeprecationWarning: Tester2 parameter [maxScan] is deprecated and will be removed in a later version.'
-            )
-          ).to.be.true
-      )
-      .then(() => done())
-      .catch(e => done(e));
+    messages.length = 0;
+    tester({ maxScan: 5 });
+    tester2({ maxScan: 5 });
+    process.nextTick(() => {
+      expect(messages[0]).to.equal(
+        'Tester parameter [maxScan] is deprecated and will be removed in a later version.'
+      );
+      expect(messages[1]).to.equal(
+        'Tester2 parameter [maxScan] is deprecated and will be removed in a later version.'
+      );
+      expect(messages.length).to.equal(2);
+      done();
+    });
   });
 
   const tester3 = deprecate(
@@ -140,11 +66,12 @@ describe('Deprecation Warnings', function() {
   );
 
   it('no deprecated params passed in deprecate warning test', function(done) {
-    Promise.resolve()
-      .then(() => tester3({}, {}))
-      .then(() => expect(console.warn.called).to.be.false)
-      .then(() => done())
-      .catch(e => done(e));
+    messages.length = 0;
+    tester3({}, {});
+    process.nextTick(() => {
+      expect(messages.length).to.equal(0);
+      done();
+    });
   });
 
   const tester4 = deprecate(
@@ -162,12 +89,15 @@ describe('Deprecation Warnings', function() {
   );
 
   it('manually inputted message test', function(done) {
-    Promise.resolve()
-      .then(() => tester4({ maxScan: 5, fields: 'hi', snapshot: true }))
-      .then(() => expect(console.warn.calledThrice).to.be.true)
-      .then(() => expect(console.warn.calledWith('DeprecationWarning: manual message')).to.be.true)
-      .then(() => done())
-      .catch(e => done(e));
+    messages.length = 0;
+    tester4({ maxScan: 5, fields: 'hi', snapshot: true });
+    process.nextTick(() => {
+      expect(messages[0]).to.equal('manual message');
+      expect(messages[1]).to.equal('manual message');
+      expect(messages[2]).to.equal('manual message');
+      expect(messages.length).to.equal(3);
+      done();
+    });
   });
 
   const tester5 = deprecate(
@@ -181,28 +111,34 @@ describe('Deprecation Warnings', function() {
   );
 
   it('same function only warns once per deprecated parameter', function(done) {
-    Promise.resolve()
-      .then(() => tester5({ maxScan: 5, fields: 'hi' }))
-      .then(() => tester5({ maxScan: 5, fields: 'hi' }))
-      .then(() => expect(console.warn.calledTwice).to.be.true)
-      .then(
-        () =>
-          expect(
-            console.warn.calledWith(
-              'DeprecationWarning: Tester5 parameter [maxScan] is deprecated and will be removed in a later version.'
-            )
-          ).to.be.true
-      )
-      .then(
-        () =>
-          expect(
-            console.warn.calledWith(
-              'DeprecationWarning: Tester5 parameter [fields] is deprecated and will be removed in a later version.'
-            )
-          ).to.be.true
-      )
-      .then(() => done())
-      .catch(e => done(e));
+    messages.length = 0;
+    tester5({ maxScan: 5, fields: 'hi' });
+    tester5({ maxScan: 5, fields: 'hi' });
+    process.nextTick(() => {
+      expect(messages[0]).to.equal(
+        'Tester5 parameter [maxScan] is deprecated and will be removed in a later version.'
+      );
+      expect(messages[1]).to.equal(
+        'Tester5 parameter [fields] is deprecated and will be removed in a later version.'
+      );
+      expect(messages.length).to.equal(2);
+      done();
+    });
+  });
+
+  const tester6 = deprecate(function() {}, 'Tester6', {});
+  const tester8 = deprecate(function() {}, 'Tester8', {});
+
+  it('deprecated function test', function(done) {
+    messages.length = 0;
+    tester6();
+    tester8();
+    process.nextTick(() => {
+      expect(messages[0]).to.equal('Tester6 is deprecated and will be removed in a later version');
+      expect(messages[1]).to.equal('Tester8 is deprecated and will be removed in a later version');
+      expect(messages.length).to.equal(2);
+      done();
+    });
   });
 
   // it('logger test for deprecation', function(done) {
@@ -233,24 +169,15 @@ describe('Deprecation Warnings', function() {
   //   });
   // });
 
-  // const tester6 = deprecate(function() {}, 'Tester6', {});
-
-  // it('deprecated function test', function(done) {
-  //   Promise.resolve()
-  //     .then(() => tester6())
-  //     .then(() => expect(util.deprecate.calledOnce).to.be.true)
-  //     // .then(
-  //     //   () =>
-  //     //     expect(
-  //     //       deprecateFunction.calledWith(
-  //     //         tester6,
-  //     //         'DeprecationWarning: Tester6 is deprecated and will be removed in a later version.'
-  //     //       )
-  //     //     ).to.be.true
-  //     // )
-  //     .then(() => done())
-  //     .catch(e => done(e));
-  // });
+  const tester7 = deprecate(
+    function(options) {
+      if (options) {
+        options = null;
+      }
+    },
+    'Tester7',
+    { deprecatedParams: new Set(['maxScan', 'snapshot', 'fields']), optionsIndex: 0, both: true }
+  );
 
   //   it('logging deprecated warnings test', function(done) {
   //     done();
@@ -313,5 +240,21 @@ describe('Deprecation Warnings', function() {
         done();
       }
     );
+  });
+
+  it('function and parameter deprecation', function(done) {
+    messages.length = 0;
+    tester7({ maxScan: 5, fields: 'hi' });
+    process.nextTick(() => {
+      expect(messages[0]).to.equal('Tester7 is deprecated and will be removed in a later version');
+      expect(messages[1]).to.equal(
+        'Tester7 parameter [maxScan] is deprecated and will be removed in a later version.'
+      );
+      expect(messages[2]).to.equal(
+        'Tester7 parameter [fields] is deprecated and will be removed in a later version.'
+      );
+      expect(messages.length).to.equal(3);
+      done();
+    });
   });
 });
