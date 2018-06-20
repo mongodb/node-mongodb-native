@@ -60,6 +60,7 @@ function executeScenarioSetup(scenario, test, config, ctx) {
   const MongoClient = config.require.MongoClient;
   const url = config.url();
   const options = Object.assign({}, test.clientOptions, {
+    haInterval: 100,
     monitorCommands: true,
     minSize: 10
   });
