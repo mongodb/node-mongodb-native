@@ -56,7 +56,7 @@ class Server extends EventEmitter {
           BSON.Timestamp
         ]),
       // client metadata for the initial handshake
-      clientInfo: createClientInfo(options),
+      clientInfo: createClientInfo(options)
     };
   }
 
@@ -263,7 +263,9 @@ function executeWriteOperation(args, options, callback) {
   const server = args.server;
   const op = args.op;
   const ns = args.ns;
-  const ops = args.ops;
+  const ops = Array.isArray(args.ops) ? args.ops : [args.ops];
+
+  args.ops;
 
   const error = basicWriteValidations(server, options);
   if (error) {
@@ -276,9 +278,6 @@ function executeWriteOperation(args, options, callback) {
     callback(new MongoError(`server ${this.name} does not support collation`));
     return;
   }
-
-  // Setup the docs as an array
-  ops = Array.isArray(ops) ? ops : [ops];
 
   // Execute write
   return this.s.wireProtocolHandler[op](server.s.pool, ns, server.s.bson, ops, options, callback);
