@@ -196,27 +196,7 @@ class Server extends EventEmitter {
    * @param {opResultCallback} callback A callback function
    */
   insert(ns, ops, options, callback) {
-    if (typeof options === 'function') {
-      (callback = options), (options = {}), (options = options || {});
-    }
-
-    const error = basicWriteValidations(this, options);
-    if (error) {
-      callback(error);
-      return;
-    }
-
-    // Check if we have collation support
-    if (this.description.maxWireVersion < 5 && options.collation) {
-      callback(new MongoError(`server ${this.name} does not support collation`));
-      return;
-    }
-
-    // Setup the docs as an array
-    ops = Array.isArray(ops) ? ops : [ops];
-
-    // Execute write
-    return this.s.wireProtocolHandler.insert(this.s.pool, ns, this.s.bson, ops, options, callback);
+    executeWriteOperation({ server: this, op: 'insert', ns, ops }, options, callback);
   }
 
   /**
@@ -232,27 +212,7 @@ class Server extends EventEmitter {
    * @param {opResultCallback} callback A callback function
    */
   update(ns, ops, options, callback) {
-    if (typeof options === 'function') {
-      (callback = options), (options = {}), (options = options || {});
-    }
-
-    const error = basicWriteValidations(this, options);
-    if (error) {
-      callback(error, null);
-      return;
-    }
-
-    // Check if we have collation support
-    if (this.description.maxWireVersion < 5 && options.collation) {
-      callback(new MongoError(`server ${this.name} does not support collation`));
-      return;
-    }
-
-    // Setup the docs as an array
-    ops = Array.isArray(ops) ? ops : [ops];
-
-    // Execute write
-    return this.s.wireProtocolHandler.update(this.s.pool, ns, this.s.bson, ops, options, callback);
+    executeWriteOperation({ server: this, op: 'update', ns, ops }, options, callback);
   }
 
   /**
@@ -268,26 +228,7 @@ class Server extends EventEmitter {
    * @param {opResultCallback} callback A callback function
    */
   remove(ns, ops, options, callback) {
-    if (typeof options === 'function') {
-      (callback = options), (options = {}), (options = options || {});
-    }
-
-    const error = basicWriteValidations(this, options);
-    if (error) {
-      callback(error, null);
-      return;
-    }
-
-    // Check if we have collation support
-    if (this.description.maxWireVersion < 5 && options.collation) {
-      callback(new MongoError(`server ${this.name} does not support collation`));
-      return;
-    }
-
-    // Setup the docs as an array
-    ops = Array.isArray(ops) ? ops : [ops];
-    // Execute write
-    return this.s.wireProtocolHandler.remove(this.s.pool, ns, this.s.bson, ops, options, callback);
+    executeWriteOperation({ server: this, op: 'remove', ns, ops }, options, callback);
   }
 }
 
@@ -312,6 +253,35 @@ function basicReadValidations(server, options) {
   if (options.readPreference && !(options.readPreference instanceof ReadPreference)) {
     return new Error('readPreference must be an instance of ReadPreference');
   }
+}
+
+function executeWriteOperation(args, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  // TODO: once we drop Node 4, use destructuring either here or in arguments.
+  const server = args.server;
+  const op = args.op;
+  const ns = args.ns;
+  const ops = args.ops;
+
+  const error = basicWriteValidations(server, options);
+  if (error) {
+    callback(error, null);
+    return;
+  }
+
+  // Check if we have collation support
+  if (server.description.maxWireVersion < 5 && options.collation) {
+    callback(new MongoError(`server ${this.name} does not support collation`));
+    return;
+  }
+
+  // Setup the docs as an array
+  ops = Array.isArray(ops) ? ops : [ops];
+
+  // Execute write
+  return this.s.wireProtocolHandler[op](server.s.pool, ns, server.s.bson, ops, options, callback);
 }
 
 function saslSupportedMechs(options) {
