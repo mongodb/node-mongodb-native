@@ -410,7 +410,7 @@ function selectServers(topology, selector, timeout, start, callback) {
   }
 
   if (descriptions.length) {
-    const servers = descriptions.map(d => topology.s.servers.get(d.address));
+    const servers = descriptions.map(description => topology.s.servers.get(description.address));
     return callback(null, servers);
   }
 
