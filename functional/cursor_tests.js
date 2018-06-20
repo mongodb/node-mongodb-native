@@ -1,11 +1,16 @@
 'use strict';
 
-var expect = require('chai').expect,
-  f = require('util').format,
-  Server = require('../../../lib/topologies/server'),
-  Bson = require('bson');
+const expect = require('chai').expect;
+const f = require('util').format;
+const Server = require('../../../lib/topologies/server');
+const Bson = require('bson');
+const setupDatabase = require('./shared').setupDatabase;
 
 describe('Cursor tests', function() {
+  before(function() {
+    return setupDatabase(this.configuration);
+  });
+
   it('Should iterate cursor', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
