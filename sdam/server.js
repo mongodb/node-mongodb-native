@@ -341,7 +341,7 @@ function executeServerHandshake(server, callback) {
 function configureWireProtocolHandler(ismaster) {
   // 3.2 wire protocol handler
   if (ismaster.maxWireVersion >= 4) {
-    return new ThreeTwoWireProtocolSupport(new TwoSixWireProtocolSupport());
+    return new ThreeTwoWireProtocolSupport();
   }
 
   // default to 2.6 wire protocol handler

@@ -10,9 +10,7 @@ const Long = BSON.Long;
 const ReadPreference = require('../topologies/read_preference');
 const TxnState = require('../transactions').TxnState;
 
-const WireProtocol = function(legacyWireProtocol) {
-  this.legacyWireProtocol = legacyWireProtocol;
-};
+const WireProtocol = function() {};
 
 function isTransactionCommand(command) {
   return !!(command.commitTransaction || command.abortTransaction);
