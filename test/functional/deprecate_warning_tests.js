@@ -133,8 +133,8 @@ describe('Deprecation Warnings', function() {
     tester6();
     tester8();
     process.nextTick(() => {
-      expect(messages[0]).to.equal('Tester6 is deprecated and will be removed in a later version');
-      expect(messages[1]).to.equal('Tester8 is deprecated and will be removed in a later version');
+      expect(messages[0]).to.equal('Tester6 is deprecated and will be removed in a later version.');
+      expect(messages[1]).to.equal('Tester8 is deprecated and will be removed in a later version.');
       expect(messages.length).to.equal(2);
       done();
     });
@@ -182,7 +182,7 @@ describe('Deprecation Warnings', function() {
     messages.length = 0;
     tester7({ maxScan: 5, fields: 'hi' });
     process.nextTick(() => {
-      expect(messages[0]).to.equal('Tester7 is deprecated and will be removed in a later version');
+      expect(messages[0]).to.equal('Tester7 is deprecated and will be removed in a later version.');
       expect(messages[1]).to.equal(
         'Tester7 parameter [maxScan] is deprecated and will be removed in a later version.'
       );
