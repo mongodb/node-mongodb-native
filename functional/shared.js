@@ -1,12 +1,12 @@
 'use strict';
 const EventEmitter = require('events');
+const Server = require('../../../lib/topologies/server');
+const Pool = require('../../../lib/connection/pool');
+const f = require('util').format;
+const bson = require('bson');
+const Query = require('../../../lib/connection/commands').Query;
 
 function executeCommand(configuration, db, cmd, options, cb) {
-  var Pool = require('../../../lib/connection/pool'),
-    f = require('util').format,
-    bson = require('bson'),
-    Query = require('../../../lib/connection/commands').Query;
-
   // Optional options
   if (typeof options === 'function') (cb = options), (options = {});
   // Set the default options object if none passed in
@@ -136,7 +136,45 @@ class ConnectionSpy extends EventEmitter {
   }
 }
 
-module.exports.executeCommand = executeCommand;
-module.exports.locateAuthMethod = locateAuthMethod;
-module.exports.delay = delay;
-module.exports.ConnectionSpy = ConnectionSpy;
+/**
+ * Prepares a database for testing, dropping all databases
+ *
+ * @param {Configuration} configuration The test configuration
+ * @param {String[]} [dbsToClean] The databases to clean
+ */
+function setupDatabase(configuration, dbsToClean) {
+  return new Promise((resolve, reject) => {
+    dbsToClean = Array.isArray(dbsToClean) ? dbsToClean : [];
+    const configDbName = configuration.db;
+    const server = new Server({
+      host: configuration.host,
+      port: configuration.port,
+      bson: new bson()
+    });
+
+    dbsToClean.push(configDbName);
+
+    server.on('connect', function() {
+      let cleanedCount = 0;
+      const dropHandler = err => {
+        if (err) return reject(err);
+        cleanedCount++;
+        if (cleanedCount === dbsToClean.length) resolve();
+      };
+
+      dbsToClean.forEach(dbName => {
+        server.command(`${dbName}.$cmd`, { dropDatabase: 1 }, dropHandler);
+      });
+    });
+
+    server.connect();
+  });
+}
+
+module.exports = {
+  executeCommand,
+  locateAuthMethod,
+  delay,
+  ConnectionSpy,
+  setupDatabase
+};
