@@ -2,6 +2,7 @@
 const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
+const MongoClient = require('../../lib/mongo_client');
 
 describe('Find', function() {
   before(function() {
@@ -2617,6 +2618,59 @@ describe('Find', function() {
               test.equal(true, cursors[0].isClosed());
               client.close();
               done();
+            });
+          });
+        });
+      });
+    }
+  });
+
+  it('Should not use a session when using parallelCollectionScan', {
+    metadata: {
+      requires: {
+        mongodb: '>=3.6.0',
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+      }
+    },
+    test: function(done) {
+      const configuration = this.configuration;
+      const client = new MongoClient(configuration.url());
+
+      client.connect(function(err, client) {
+        var db = client.db(configuration.db);
+        var docs = [];
+
+        // Insert some documents
+        for (var i = 0; i < 1000; i++) {
+          docs.push({ a: i });
+        }
+
+        // Get the collection
+        var collection = db.collection('parallelCollectionScan_4');
+        // Insert 1000 documents in a batch
+        collection.insert(docs, function(err) {
+          expect(err).to.be.null;
+          var numCursors = 1;
+
+          // Execute parallelCollectionScan command
+          collection.parallelCollectionScan({ numCursors: numCursors }, function(err, cursors) {
+            expect(err).to.be.null;
+            expect(cursors)
+              .to.be.an('array')
+              .with.lengthOf(1);
+
+            const cursor = cursors[0];
+
+            expect(cursor).to.not.have.nested.property('s.session');
+            expect(cursor)
+              .to.have.nested.property('s.explicitlyIgnoreSession')
+              .that.equals(true);
+
+            cursor.toArray(err => {
+              expect(err).to.be.null;
+              expect(cursor).to.not.have.nested.property('s.session');
+
+              cursor.close().then(() => client.close().then(() => done()));
             });
           });
         });
