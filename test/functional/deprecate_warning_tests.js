@@ -7,10 +7,8 @@ const exec = require('child_process').exec;
 
 function makeTestFunction(fName, config) {
   return deprecate(
-    function(options) {
-      if (options) {
-        options = null;
-      }
+    options => {
+      if (options) options = null;
     },
     fName,
     config
