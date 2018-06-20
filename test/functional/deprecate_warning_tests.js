@@ -59,7 +59,7 @@ describe('Deprecation Warnings', function() {
       optionsIndex: 0
     });
     messages.length = 0;
-    f({}, {});
+    f({});
     process.nextTick(() => {
       expect(messages.length).to.equal(0);
       done();
