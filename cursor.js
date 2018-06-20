@@ -107,13 +107,15 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
     transforms: options.transforms
   };
 
+  if (typeof options.session === 'object') {
+    this.cursorState.session = options.session;
+  }
+
   // Add promoteLong to cursor state
   if (typeof topologyOptions.promoteLongs === 'boolean') {
     this.cursorState.promoteLongs = topologyOptions.promoteLongs;
   } else if (typeof options.promoteLongs === 'boolean') {
     this.cursorState.promoteLongs = options.promoteLongs;
-  } else if (typeof options.session === 'object') {
-    this.cursorState.session = options.session;
   }
 
   // Add promoteValues to cursor state
