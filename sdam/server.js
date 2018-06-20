@@ -265,8 +265,6 @@ function executeWriteOperation(args, options, callback) {
   const ns = args.ns;
   const ops = Array.isArray(args.ops) ? args.ops : [args.ops];
 
-  args.ops;
-
   const error = basicWriteValidations(server, options);
   if (error) {
     callback(error, null);
