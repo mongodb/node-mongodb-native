@@ -91,13 +91,15 @@ class Cursor {
       transforms: options.transforms
     };
 
+    if (typeof options.session === 'object') {
+      this.s.session = options.session;
+    }
+
     // Add promoteLong to cursor state
     if (typeof topologyOptions.promoteLongs === 'boolean') {
       this.s.promoteLongs = topologyOptions.promoteLongs;
     } else if (typeof options.promoteLongs === 'boolean') {
       this.s.promoteLongs = options.promoteLongs;
-    } else if (typeof options.session === 'object') {
-      this.s.session = options.session;
     }
 
     // Add promoteValues to cursor state
