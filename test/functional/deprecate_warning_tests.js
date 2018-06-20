@@ -31,7 +31,7 @@ describe('Deprecation Warnings', function() {
     this.sinon.stub(console, 'error');
   });
 
-  it('multiple functions with the same deprecated params deprecate warning test', function(done) {
+  it('multiple functions with the same deprecated params should both warn', function(done) {
     const f1 = makeTestFunction('f1', {
       deprecatedParams: deprecatedParams,
       optionsIndex: 0
@@ -51,7 +51,7 @@ describe('Deprecation Warnings', function() {
     });
   });
 
-  it('no deprecated params passed in deprecate warning test', function(done) {
+  it('should not warn if no deprecated params passed in', function(done) {
     const f = makeTestFunction('f', {
       deprecatedParams: deprecatedParams,
       optionsIndex: 0
@@ -64,7 +64,7 @@ describe('Deprecation Warnings', function() {
     });
   });
 
-  it('manually inputted message test', function(done) {
+  it('should output manually inputted message if specified', function(done) {
     const f = makeTestFunction('f', {
       deprecatedParams: deprecatedParams,
       optionsIndex: 0,
@@ -81,7 +81,7 @@ describe('Deprecation Warnings', function() {
     });
   });
 
-  it('same function only warns once per deprecated parameter', function(done) {
+  it('each function should only warn once per deprecated parameter', function(done) {
     const f = makeTestFunction('f', {
       deprecatedParams: deprecatedParams,
       optionsIndex: 0
@@ -97,11 +97,13 @@ describe('Deprecation Warnings', function() {
     });
   });
 
-  it('deprecated function test', function(done) {
+  it('each deprecated function should warn only once', function(done) {
     const f1 = deprecate(function() {}, 'f1', {});
     const f2 = deprecate(function() {}, 'f2', {});
     messages.length = 0;
     f1();
+    f1();
+    f2();
     f2();
     process.nextTick(() => {
       expect(messages[0]).to.equal('f1' + defaultMessage);
@@ -111,7 +113,7 @@ describe('Deprecation Warnings', function() {
     });
   });
 
-  it('function and parameter deprecation', function(done) {
+  it('if function and some of its parameters are deprecated, should warn for both cases', function(done) {
     const f = makeTestFunction('f', {
       deprecatedParams: deprecatedParams,
       optionsIndex: 0,
@@ -128,63 +130,72 @@ describe('Deprecation Warnings', function() {
     });
   });
 
-  it('node --no-deprecation flag should suppress all deprecation warnings', function(done) {
-    exec(
-      'node --no-deprecation ./test/deprecate_warning_test_program.js',
-      (err, stdout, stderr) => {
-        expect(err).to.be.null;
-        expect(stdout).to.be.empty;
-        expect(stderr).to.be.empty;
-        done();
-      }
-    );
+  it('node --no-deprecation flag should suppress all deprecation warnings', {
+    metadata: { requires: { node: '>=6.0.0' } },
+    test: function(done) {
+      exec(
+        'node --no-deprecation ./test/deprecate_warning_test_program.js',
+        (err, stdout, stderr) => {
+          expect(err).to.be.null;
+          expect(stdout).to.be.empty;
+          expect(stderr).to.be.empty;
+          done();
+        }
+      );
+    }
   });
 
-  it('node --trace-deprecation flag should print stack trace to stderr', function(done) {
-    exec(
-      'node --trace-deprecation ./test/deprecate_warning_test_program.js',
-      (err, stdout, stderr) => {
-        expect(err).to.be.null;
-        expect(stdout).to.be.empty;
-        expect(stderr).to.not.be.empty;
+  it('node --trace-deprecation flag should print stack trace to stderr', {
+    metadata: { requires: { node: '>=6.0.0' } },
+    test: function(done) {
+      exec(
+        'node --trace-deprecation ./test/deprecate_warning_test_program.js',
+        (err, stdout, stderr) => {
+          expect(err).to.be.null;
+          expect(stdout).to.be.empty;
+          expect(stderr).to.not.be.empty;
 
-        const split = stderr.split('\n');
-        const warning = split
-          .shift()
-          .split(')')[1]
-          .trim();
+          const split = stderr.split('\n');
+          const warning = split
+            .shift()
+            .split(')')[1]
+            .trim();
 
-        // ensure warning is the first line printed
-        expect(warning).to.equal(
-          'DeprecationWarning: testDeprecationFlags parameter [maxScan]' + defaultMessage
-        );
+          // ensure warning is the first line printed
+          expect(warning).to.equal(
+            'DeprecationWarning: testDeprecationFlags parameter [maxScan]' + defaultMessage
+          );
 
-        // ensure each following line is from the stack trace, i.e. 'at config.deprecatedParams.forEach.deprecatedParam'
-        split.pop();
-        split.forEach(s => {
-          expect(s.trim()).to.match(/^at/);
-        });
+          // ensure each following line is from the stack trace, i.e. 'at config.deprecatedParams.forEach.deprecatedParam'
+          split.pop();
+          split.forEach(s => {
+            expect(s.trim()).to.match(/^at/);
+          });
 
-        done();
-      }
-    );
+          done();
+        }
+      );
+    }
   });
 
-  it('node --throw-deprecation flag should throw error when deprecated function is called', function(done) {
-    exec(
-      'node --throw-deprecation ./test/deprecate_warning_test_program.js this_arg_should_never_print',
-      (err, stdout, stderr) => {
-        expect(stderr).to.not.be.empty;
-        expect(err).to.not.be.null;
-        expect(err)
-          .to.have.own.property('code')
-          .that.equals(1);
+  it('node --throw-deprecation flag should throw error when deprecated function is called', {
+    metadata: { requires: { node: '>=6.0.0' } },
+    test: function(done) {
+      exec(
+        'node --throw-deprecation ./test/deprecate_warning_test_program.js this_arg_should_never_print',
+        (err, stdout, stderr) => {
+          expect(stderr).to.not.be.empty;
+          expect(err).to.not.be.null;
+          expect(err)
+            .to.have.own.property('code')
+            .that.equals(1);
 
-        // ensure stdout is empty, i.e. that the program threw an error before reaching the console.log statement
-        expect(stdout).to.be.empty;
-        done();
-      }
-    );
+          // ensure stdout is empty, i.e. that the program threw an error before reaching the console.log statement
+          expect(stdout).to.be.empty;
+          done();
+        }
+      );
+    }
   });
 
   // it('logger test for deprecation', function(done) {
