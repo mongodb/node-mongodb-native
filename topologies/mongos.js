@@ -14,7 +14,7 @@ const cloneOptions = require('./shared').cloneOptions;
 const createClientInfo = require('./shared').createClientInfo;
 const SessionMixins = require('./shared').SessionMixins;
 const isRetryableWritesSupported = require('./shared').isRetryableWritesSupported;
-const relayEvents = require('./shared').relayEvents;
+const relayEvents = require('../utils').relayEvents;
 const isRetryableError = require('../error').isRetryableError;
 const BSON = retrieveBSON();
 
