@@ -1,7 +1,7 @@
 'use strict';
 const path = require('path');
 const fs = require('fs');
-const Topology = require('../../../lib/sdam/topology').Topology;
+const Topology = require('../../../lib/sdam/topology');
 const ServerDescription = require('../../../lib/sdam/server_description').ServerDescription;
 const ServerType = require('../../../lib/sdam/server_description').ServerType;
 const ServerSelectors = require('../../../lib/sdam/server_selectors');
