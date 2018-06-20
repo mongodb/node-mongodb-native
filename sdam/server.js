@@ -251,7 +251,7 @@ function basicReadValidations(server, options) {
   }
 
   if (options.readPreference && !(options.readPreference instanceof ReadPreference)) {
-    return new Error('readPreference must be an instance of ReadPreference');
+    return new MongoError('readPreference must be an instance of ReadPreference');
   }
 }
 
