@@ -4,7 +4,8 @@ const expect = require('chai').expect;
 require('mocha-sinon');
 const deprecate = require('../../lib/utils').deprecate;
 // const deprecateFunctions = require('util').deprecate;
-const util = require('util');
+// const util = require('util');
+const exec = require('child_process').exec;
 
 describe('Deprecation Warnings', function() {
   before(function() {
@@ -13,8 +14,6 @@ describe('Deprecation Warnings', function() {
 
   beforeEach(function() {
     this.sinon.stub(console, 'warn');
-    const hi = this.sinon.stub(util, 'deprecate');
-    console.log(hi.wrappedMethod);
   });
 
   // it('collection find deprecate warning test', function(done) {
@@ -256,4 +255,63 @@ describe('Deprecation Warnings', function() {
   //   it('logging deprecated warnings test', function(done) {
   //     done();
   //   });
+
+  it('node --no-deprecation flag should suppress all deprecation warnings', function(done) {
+    exec(
+      'node --no-deprecation ./test/deprecate_warning_test_program.js',
+      (err, stdout, stderr) => {
+        expect(err).to.be.null;
+        expect(stdout).to.be.empty;
+        expect(stderr).to.be.empty;
+        done();
+      }
+    );
+  });
+
+  it('node --trace-deprecation flag should print stack trace to stderr', function(done) {
+    exec(
+      'node --trace-deprecation ./test/deprecate_warning_test_program.js',
+      (err, stdout, stderr) => {
+        expect(err).to.be.null;
+        expect(stdout).to.be.empty;
+        expect(stderr).to.not.be.empty;
+
+        const split = stderr.split('\n');
+        const warning = split
+          .shift()
+          .split(')')[1]
+          .trim();
+
+        // ensure warning is the first line printed
+        expect(warning).to.equal(
+          'DeprecationWarning: testDeprecationFlags parameter [maxScan] is deprecated and will be removed in a later version.'
+        );
+
+        // ensure each following line is from the stack trace, i.e. 'at config.deprecatedParams.forEach.deprecatedParam'
+        split.pop();
+        split.forEach(s => {
+          expect(s.trim()).to.match(/^at/);
+        });
+
+        done();
+      }
+    );
+  });
+
+  it('node --throw-deprecation flag should throw error when deprecated function is called', function(done) {
+    exec(
+      'node --throw-deprecation ./test/deprecate_warning_test_program.js this_arg_should_never_print',
+      (err, stdout, stderr) => {
+        expect(stderr).to.not.be.empty;
+        expect(err).to.not.be.null;
+        expect(err)
+          .to.have.own.property('code')
+          .that.equals(1);
+
+        // ensure stdout is empty, i.e. that the program threw an error before reaching the console.log statement
+        expect(stdout).to.be.empty;
+        done();
+      }
+    );
+  });
 });
