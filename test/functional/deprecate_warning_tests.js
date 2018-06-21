@@ -136,23 +136,26 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  it('if function and some of its parameters are deprecated, should warn for both cases', function(done) {
-    const f = makeTestFunction({
-      fName: 'f',
-      deprecatedParams: deprecatedParams,
-      optionsIndex: 0,
-      deprecateFunction: true
-    });
-    f({ maxScan: 5, fields: 'hi' });
-    process.nextTick(() => {
-      expect(messages).to.deep.equal([
-        'f' + defaultMessage,
-        'f parameter [maxScan]' + defaultMessage,
-        'f parameter [fields]' + defaultMessage
-      ]);
-      expect(messages).to.have.a.lengthOf(3);
-      done();
-    });
+  it('if function and some of its parameters are deprecated, should warn for both cases', {
+    metadata: { requires: { node: '>=6.0.0' } },
+    test: function(done) {
+      const f = makeTestFunction({
+        fName: 'f',
+        deprecatedParams: deprecatedParams,
+        optionsIndex: 0,
+        deprecateFunction: true
+      });
+      f({ maxScan: 5, fields: 'hi' });
+      process.nextTick(() => {
+        expect(messages).to.deep.equal([
+          'f' + defaultMessage,
+          'f parameter [maxScan]' + defaultMessage,
+          'f parameter [fields]' + defaultMessage
+        ]);
+        expect(messages).to.have.a.lengthOf(3);
+        done();
+      });
+    }
   });
 
   it('node --no-deprecation flag should suppress all deprecation warnings', {
