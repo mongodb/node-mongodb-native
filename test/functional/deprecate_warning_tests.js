@@ -69,16 +69,25 @@ describe('Deprecation Warnings', function() {
     });
   });
 
-  it('should output manually inputted message if specified', function(done) {
+  it('should use user-specified message handler', function(done) {
+    const customMsgHandler = (fName, param) => {
+      return 'custom msg for function ' + fName + ' and param ' + param;
+    };
+
     const f = makeTestFunction({
       fName: 'f',
       deprecatedParams: deprecatedParams,
       optionsIndex: 0,
-      msg: 'manual message'
+      msgHandler: customMsgHandler
     });
-    f({ maxScan: 5, fields: 'hi', snapshot: true });
+
+    f({ maxScan: 5, snapshot: true, fields: 'hi' });
     process.nextTick(() => {
-      expect(messages).to.deep.equal(['manual message', 'manual message', 'manual message']);
+      expect(messages).to.deep.equal([
+        'custom msg for function f and param maxScan',
+        'custom msg for function f and param snapshot',
+        'custom msg for function f and param fields'
+      ]);
       expect(messages).to.have.a.lengthOf(3);
       done();
     });
@@ -103,8 +112,8 @@ describe('Deprecation Warnings', function() {
   });
 
   it('each deprecated function should warn only once', function(done) {
-    const f1 = deprecate({ fn: function() {}, fName: 'f1' , deprecateFunction: true});
-    const f2 = deprecate({ fn: function() {}, fName: 'f2' , deprecateFunction: true});
+    const f1 = deprecate({ fn: function() {}, fName: 'f1', deprecateFunction: true });
+    const f2 = deprecate({ fn: function() {}, fName: 'f2', deprecateFunction: true });
     f1();
     f1();
     f2();
