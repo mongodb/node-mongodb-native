@@ -1,5 +1,9 @@
 'use strict';
 
+if (require.main !== module) {
+  return;
+}
+
 const deprecate = require('../lib/utils.js').deprecate;
 
 const testDeprecationFlags = deprecate(
