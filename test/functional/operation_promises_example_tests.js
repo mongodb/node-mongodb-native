@@ -7240,4 +7240,281 @@ describe('Operation (Promises)', function() {
       // END
     }
   });
+
+  describe('Transaction Examples', function() {
+    before(function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax());
+
+      return client
+        .connect()
+        .then(() => client.db('hr').createCollection('employees'))
+        .then(() => client.db('reporting').createCollection('events'));
+    });
+
+    // Start Transactions Intro Example 1
+    it('should be able to run transactions example 1', {
+      metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.8.0' } },
+      test: function() {
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax());
+
+        // BEGIN
+        function updateEmployeeInfo(client) {
+          return client.withSession(session => {
+            function commit() {
+              return session.commitTransaction().catch(e => {
+                if (e.errorLabels && e.errorLabels.indexOf('UnknownTransactionCommitResult') < 0) {
+                  // LINE console.log('Transaction aborted. Caught exception during transaction.');
+                  return commit();
+                }
+
+                // LINE console.log('Error during commit ...');
+                throw e;
+              });
+            }
+
+            const employeesCollection = client.db('hr').collection('employees');
+            const eventsCollection = client.db('reporting').collection('events');
+
+            session.startTransaction({
+              readConcern: { level: 'snapshot' },
+              writeConcern: { w: 'majority' }
+            });
+
+            return employeesCollection
+              .updateOne({ employee: 3 }, { $set: { status: 'Inactive' } }, { session })
+              .then(() => {
+                return eventsCollection.insertOne(
+                  {
+                    employee: 3,
+                    status: { new: 'Inactive', old: 'Active' }
+                  },
+                  { session }
+                );
+              })
+              .catch(e => {
+                // LINE console.log('caugh exception during transaction, aborting')
+                return session.abortTransaction().then(() => Promise.reject(e));
+              })
+              .then(() => commit())
+              .then(() => {
+                // LINE console.log('Transaction committed');
+              });
+          });
+          // END
+        }
+        client
+          .connect()
+          .then(() => updateEmployeeInfo(client))
+          .then(() => client.close());
+      }
+    });
+    // End Transactions Intro Example 1
+
+    // Start Transactions Retry Example 1
+    it('should be able to run transactions retry example 1', {
+      metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.8.0' } },
+      test: function() {
+        // BEGIN
+        function runTransactionWithRetry(txnFunc, client, session) {
+          return txnFunc(client, session).catch(error => {
+            // LINE console.log('Transaction aborted. Caught exception during transaction.');
+
+            // If transient error, retry the whole transaction
+            if (error.errorLabels && error.errorLabels.indexOf('TransientTransactionError') < 0) {
+              // LINE console.log('TransientTransactionError, retrying transaction ...');
+              return runTransactionWithRetry(txnFunc, client, session);
+            }
+
+            throw error;
+          });
+        }
+        // END
+
+        function updateEmployeeInfo(client, session) {
+          session.startTransaction({
+            readConcern: { level: 'snapshot' },
+            writeConcern: { w: 'majority' }
+          });
+
+          const employeesCollection = client.db('hr').collection('employees');
+          const eventsCollection = client.db('reporting').collection('events');
+
+          return employeesCollection
+            .updateOne({ employee: 3 }, { $set: { status: 'Inactive' } }, { session })
+            .then(() => {
+              return eventsCollection.insertOne(
+                {
+                  employee: 3,
+                  status: { new: 'Inactive', old: 'Active' }
+                },
+                { session }
+              );
+            })
+            .then(() => session.commitTransaction())
+            .catch(e => {
+              return session.abortTransaction().then(() => Promise.reject(e));
+            });
+        }
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax());
+
+        return client
+          .connect()
+          .then(() =>
+            client.withSession(session =>
+              runTransactionWithRetry(updateEmployeeInfo, client, session)
+            )
+          )
+          .then(() => client.close());
+      }
+    });
+
+    // End Transactions Retry Example 1
+
+    // Start Transactions Retry Example 2
+    it('should be able to run transactions retry example 2', {
+      metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.8.0' } },
+      test: function() {
+        // BEGIN
+        function commitWithRetry(session) {
+          return (
+            session
+              .commitTransaction()
+              // LINE .then(() => console.log('Transaction committed.'))
+              .catch(error => {
+                if (
+                  error.errorLabels &&
+                  error.errorLabels.indexOf('UnknownTransactionCommitResult') < 0
+                ) {
+                  // LINE console.log('UnknownTransactionCommitResult, retrying commit operation ...');
+                  return commitWithRetry(session);
+                }
+                // LINE console.log('Error during commit ...');
+                throw error;
+              })
+          );
+        }
+        // END
+
+        function updateEmployeeInfo(client, session) {
+          session.startTransaction({
+            readConcern: { level: 'snapshot' },
+            writeConcern: { w: 'majority' }
+          });
+
+          const employeesCollection = client.db('hr').collection('employees');
+          const eventsCollection = client.db('reporting').collection('events');
+
+          return employeesCollection
+            .updateOne({ employee: 3 }, { $set: { status: 'Inactive' } }, { session })
+            .then(() => {
+              return eventsCollection.insertOne(
+                {
+                  employee: 3,
+                  status: { new: 'Inactive', old: 'Active' }
+                },
+                { session }
+              );
+            })
+            .then(() => commitWithRetry(session))
+            .catch(e => {
+              return session.abortTransaction().then(() => Promise.reject(e));
+            });
+        }
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax());
+
+        return client
+          .connect()
+          .then(() => client.withSession(session => updateEmployeeInfo(client, session)))
+          .then(() => client.close());
+      }
+    });
+    // End Transactions Retry Example 2
+
+    // Start Transactions Retry Example 3
+    it('should be able to run transactions retry example 3', {
+      metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.8.0' } },
+      test: function() {
+        const configuration = this.configuration;
+        const client = configuration.newClient(configuration.writeConcernMax());
+
+        // BEGIN
+        function commitWithRetry(session) {
+          return (
+            session
+              .commitTransaction()
+              // LINE .then(() => console.log('Transaction committed.'))
+              .catch(error => {
+                if (
+                  error.errorLabels &&
+                  error.errorLabels.indexOf('UnknownTransactionCommitResult') < 0
+                ) {
+                  // LINE console.log('UnknownTransactionCommitResult, retrying commit operation ...');
+                  return commitWithRetry(session);
+                }
+                // LINE console.log('Error during commit ...');
+                throw error;
+              })
+          );
+        }
+
+        function runTransactionWithRetry(txnFunc, client, session) {
+          return txnFunc(client, session).catch(error => {
+            // LINE console.log('Transaction aborted. Caught exception during transaction.');
+
+            // If transient error, retry the whole transaction
+            if (error.errorLabels && error.errorLabels.indexOf('TransientTransactionError') < 0) {
+              // LINE console.log('TransientTransactionError, retrying transaction ...');
+              return runTransactionWithRetry(txnFunc, client, session);
+            }
+
+            throw error;
+          });
+        }
+
+        function updateEmployeeInfo(client, session) {
+          const employeesCollection = client.db('hr').collection('employees');
+          const eventsCollection = client.db('reporting').collection('events');
+
+          session.startTransaction({
+            readConcern: { level: 'snapshot' },
+            writeConcern: { w: 'majority' }
+          });
+
+          return employeesCollection
+            .updateOne({ employee: 3 }, { $set: { status: 'Inactive' } }, { session })
+            .then(() => {
+              return eventsCollection.insertOne(
+                {
+                  employee: 3,
+                  status: { new: 'Inactive', old: 'Active' }
+                },
+                { session }
+              );
+            })
+            .catch(e => {
+              // LINE console.log('caugh exception during transaction, aborting')
+              return session.abortTransaction().then(() => Promise.reject(e));
+            })
+            .then(() => commitWithRetry(session));
+        }
+
+        // LINE const { MongoClient } = require('mongodb'),
+        // LINE const client = new MongoClient('myRepl/mongodb0.example.net:27017,mongodb1.example.net:27017,mongodb2.example.net:27017');
+        return client
+          .connect()
+          .then(() =>
+            client.withSession(session =>
+              runTransactionWithRetry(updateEmployeeInfo, client, session)
+            )
+          )
+          .then(() => client.close());
+        // END
+      }
+    });
+    // End Transactions Retry Example 3
+  });
 });
