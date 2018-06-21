@@ -130,13 +130,19 @@ function isRetryableError(error) {
  *
  * @class
  * @param {Error|string|object} message The error message
+ * @param {object} result The result document (provided if ok: 1)
  * @property {string} message The error message
+ * @property {object} [result] The result document (provided if ok: 1)
  * @return {MongoWriteConcernError} A MongoWriteConcernError instance
  * @extends {MongoError}
  */
-const MongoWriteConcernError = function(message) {
+const MongoWriteConcernError = function(message, result) {
   MongoError.call(this, message);
   this.name = 'MongoWriteConcernError';
+
+  if (result != null) {
+    this.result = result;
+  }
 };
 util.inherits(MongoWriteConcernError, MongoError);
 

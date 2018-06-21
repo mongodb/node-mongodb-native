@@ -581,11 +581,11 @@ function messageHandler(self) {
           }
 
           if (responseDoc.writeConcernError) {
-            return handleOperationCallback(
-              self,
-              workItem.cb,
-              new MongoWriteConcernError(responseDoc.writeConcernError)
-            );
+            const err =
+              responseDoc.ok === 1
+                ? new MongoWriteConcernError(responseDoc.writeConcernError, responseDoc)
+                : new MongoWriteConcernError(responseDoc.writeConcernError);
+            return handleOperationCallback(self, workItem.cb, err);
           }
         }
 
