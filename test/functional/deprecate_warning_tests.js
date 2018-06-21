@@ -6,16 +6,15 @@ const deprecate = require('../../lib/utils').deprecate;
 const exec = require('child_process').exec;
 
 function makeTestFunction(config) {
-  const fn = options => {
+  config.fn = options => {
     if (options) options = null;
   };
-  config.fn = fn;
   return deprecate(config);
 }
 
 describe('Deprecation Warnings', function() {
   let messages = [];
-  const deprecatedParams = new Set(['maxScan', 'snapshot', 'fields']);
+  const deprecatedParams = ['maxScan', 'snapshot', 'fields'];
   const defaultMessage = ' is deprecated and will be removed in a later version.';
 
   before(function() {
@@ -115,9 +114,9 @@ describe('Deprecation Warnings', function() {
     const f1 = deprecate({ fn: function() {}, fName: 'f1', deprecateFunction: true });
     const f2 = deprecate({ fn: function() {}, fName: 'f2', deprecateFunction: true });
     f1();
+    f2();
+    f2();
     f1();
-    f2();
-    f2();
     process.nextTick(() => {
       expect(messages).to.deep.equal(['f1' + defaultMessage, 'f2' + defaultMessage]);
       expect(messages).to.have.a.lengthOf(2);
