@@ -103,8 +103,8 @@ describe('Deprecation Warnings', function() {
   });
 
   it('each deprecated function should warn only once', function(done) {
-    const f1 = deprecate({ fn: function() {}, fName: 'f1' });
-    const f2 = deprecate({ fn: function() {}, fName: 'f2' });
+    const f1 = deprecate({ fn: function() {}, fName: 'f1' , deprecateFunction: true});
+    const f2 = deprecate({ fn: function() {}, fName: 'f2' , deprecateFunction: true});
     f1();
     f1();
     f2();
@@ -121,7 +121,7 @@ describe('Deprecation Warnings', function() {
       fName: 'f',
       deprecatedParams: deprecatedParams,
       optionsIndex: 0,
-      both: true
+      deprecateFunction: true
     });
     f({ maxScan: 5, fields: 'hi' });
     process.nextTick(() => {
