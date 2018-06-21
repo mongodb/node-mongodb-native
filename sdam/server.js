@@ -291,7 +291,7 @@ function executeWriteOperation(args, options, callback) {
   }
 
   // Execute write
-  return this.s.wireProtocolHandler[op](server.s.pool, ns, server.s.bson, ops, options, callback);
+  return server.s.wireProtocolHandler[op](server.s.pool, ns, server.s.bson, ops, options, callback);
 }
 
 function saslSupportedMechs(options) {
