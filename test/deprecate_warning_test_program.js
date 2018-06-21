@@ -2,16 +2,14 @@
 
 const deprecate = require('../lib/utils.js').deprecate;
 
-const testDeprecationFlags = deprecate(
-  options => {
+const testDeprecationFlags = deprecate({
+  fn: options => {
     if (options) options = null;
   },
-  'testDeprecationFlags',
-  {
-    deprecatedParams: new Set(['maxScan', 'snapshot', 'fields']),
-    optionsIndex: 0
-  }
-);
+  fName: 'testDeprecationFlags',
+  deprecatedParams: new Set(['maxScan', 'snapshot', 'fields']),
+  optionsIndex: 0
+});
 
 testDeprecationFlags({ maxScan: 0 });
 

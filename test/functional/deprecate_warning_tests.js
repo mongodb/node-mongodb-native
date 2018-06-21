@@ -5,14 +5,12 @@ require('mocha-sinon');
 const deprecate = require('../../lib/utils').deprecate;
 const exec = require('child_process').exec;
 
-function makeTestFunction(fName, config) {
-  return deprecate(
-    options => {
-      if (options) options = null;
-    },
-    fName,
-    config
-  );
+function makeTestFunction(config) {
+  const fn = options => {
+    if (options) options = null;
+  };
+  config.fn = fn;
+  return deprecate(config);
 }
 
 describe('Deprecation Warnings', function() {
@@ -31,101 +29,108 @@ describe('Deprecation Warnings', function() {
     this.sinon.stub(console, 'error');
   });
 
-  it('multiple functions with the same deprecated params should both warn', function(done) {
-    const f1 = makeTestFunction('f1', {
-      deprecatedParams: deprecatedParams,
-      optionsIndex: 0
-    });
-    const f2 = makeTestFunction('f2', {
-      deprecatedParams: deprecatedParams,
-      optionsIndex: 0
-    });
+  afterEach(function() {
     messages.length = 0;
+  });
+
+  it('multiple functions with the same deprecated params should both warn', function(done) {
+    const f1 = makeTestFunction({
+      fName: 'f1',
+      deprecatedParams: deprecatedParams,
+      optionsIndex: 0
+    });
+    const f2 = makeTestFunction({
+      fName: 'f2',
+      deprecatedParams: deprecatedParams,
+      optionsIndex: 0
+    });
     f1({ maxScan: 5 });
     f2({ maxScan: 5 });
     process.nextTick(() => {
-      expect(messages[0]).to.equal('f1 parameter [maxScan]' + defaultMessage);
-      expect(messages[1]).to.equal('f2 parameter [maxScan]' + defaultMessage);
-      expect(messages.length).to.equal(2);
+      expect(messages).to.deep.equal([
+        'f1 parameter [maxScan]' + defaultMessage,
+        'f2 parameter [maxScan]' + defaultMessage
+      ]);
+      expect(messages).to.have.a.lengthOf(2);
       done();
     });
   });
 
   it('should not warn if no deprecated params passed in', function(done) {
-    const f = makeTestFunction('f', {
+    const f = makeTestFunction({
+      fName: 'f',
       deprecatedParams: deprecatedParams,
       optionsIndex: 0
     });
-    messages.length = 0;
     f({});
     process.nextTick(() => {
-      expect(messages.length).to.equal(0);
+      expect(messages).to.have.a.lengthOf(0);
       done();
     });
   });
 
   it('should output manually inputted message if specified', function(done) {
-    const f = makeTestFunction('f', {
+    const f = makeTestFunction({
+      fName: 'f',
       deprecatedParams: deprecatedParams,
       optionsIndex: 0,
       msg: 'manual message'
     });
-    messages.length = 0;
     f({ maxScan: 5, fields: 'hi', snapshot: true });
     process.nextTick(() => {
-      expect(messages[0]).to.equal('manual message');
-      expect(messages[1]).to.equal('manual message');
-      expect(messages[2]).to.equal('manual message');
-      expect(messages.length).to.equal(3);
+      expect(messages).to.deep.equal(['manual message', 'manual message', 'manual message']);
+      expect(messages).to.have.a.lengthOf(3);
       done();
     });
   });
 
   it('each function should only warn once per deprecated parameter', function(done) {
-    const f = makeTestFunction('f', {
+    const f = makeTestFunction({
+      fName: 'f',
       deprecatedParams: deprecatedParams,
       optionsIndex: 0
     });
-    messages.length = 0;
     f({ maxScan: 5, fields: 'hi' });
     f({ maxScan: 5, fields: 'hi' });
     process.nextTick(() => {
-      expect(messages[0]).to.equal('f parameter [maxScan]' + defaultMessage);
-      expect(messages[1]).to.equal('f parameter [fields]' + defaultMessage);
-      expect(messages.length).to.equal(2);
+      expect(messages).to.deep.equal([
+        'f parameter [maxScan]' + defaultMessage,
+        'f parameter [fields]' + defaultMessage
+      ]);
+      expect(messages).to.have.a.lengthOf(2);
       done();
     });
   });
 
   it('each deprecated function should warn only once', function(done) {
-    const f1 = deprecate(function() {}, 'f1', {});
-    const f2 = deprecate(function() {}, 'f2', {});
-    messages.length = 0;
+    const f1 = deprecate({ fn: function() {}, fName: 'f1' });
+    const f2 = deprecate({ fn: function() {}, fName: 'f2' });
     f1();
     f1();
     f2();
     f2();
     process.nextTick(() => {
-      expect(messages[0]).to.equal('f1' + defaultMessage);
-      expect(messages[1]).to.equal('f2' + defaultMessage);
-      expect(messages.length).to.equal(2);
+      expect(messages).to.deep.equal(['f1' + defaultMessage, 'f2' + defaultMessage]);
+      expect(messages).to.have.a.lengthOf(2);
       done();
     });
   });
 
   it('if function and some of its parameters are deprecated, should warn for both cases', function(done) {
-    const f = makeTestFunction('f', {
+    const f = makeTestFunction({
+      fName: 'f',
       deprecatedParams: deprecatedParams,
       optionsIndex: 0,
       both: true
     });
-    messages.length = 0;
     f({ maxScan: 5, fields: 'hi' });
     process.nextTick(() => {
-      expect(messages[0]).to.equal('f' + defaultMessage);
-      expect(messages[1]).to.equal('f parameter [maxScan]' + defaultMessage);
-      expect(messages[2]).to.equal('f parameter [fields]' + defaultMessage);
-      expect(messages.length).to.equal(3);
+      expect(messages).to.deep.equal([
+        'f' + defaultMessage,
+        'f parameter [maxScan]' + defaultMessage,
+        'f parameter [fields]' + defaultMessage
+      ]);
+      expect(messages).to.have.a.lengthOf(3);
       done();
     });
   });
