@@ -7264,7 +7264,7 @@ describe('Operation (Promises)', function() {
           return client.withSession(session => {
             function commit() {
               return session.commitTransaction().catch(e => {
-                if (e.errmsg && e.errmsg.match(/UnknownTransactionCommitResult/)) {
+                if (e.errorLabels && e.errorLabels.indexOf('UnknownTransactionCommitResult') < 0) {
                   // LINE console.log('Transaction aborted. Caught exception during transaction.');
                   return commit();
                 }
@@ -7322,7 +7322,7 @@ describe('Operation (Promises)', function() {
             // LINE console.log('Transaction aborted. Caught exception during transaction.');
 
             // If transient error, retry the whole transaction
-            if (error.errorLabels && error.errorLabels.includes('TransientTransactionError')) {
+            if (error.errorLabels && error.errorLabels.indexOf('TransientTransactionError') < 0) {
               // LINE console.log('TransientTransactionError, retrying transaction ...');
               return runTransactionWithRetry(txnFunc, client, session);
             }
@@ -7386,7 +7386,7 @@ describe('Operation (Promises)', function() {
               .catch(error => {
                 if (
                   error.errorLabels &&
-                  error.errorLabels.includes('UnknownTransactionCommitResult')
+                  error.errorLabels.indexOf('UnknownTransactionCommitResult') < 0
                 ) {
                   // LINE console.log('UnknownTransactionCommitResult, retrying commit operation ...');
                   return commitWithRetry(session);
@@ -7450,7 +7450,7 @@ describe('Operation (Promises)', function() {
               .catch(error => {
                 if (
                   error.errorLabels &&
-                  error.errorLabels.includes('UnknownTransactionCommitResult')
+                  error.errorLabels.indexOf('UnknownTransactionCommitResult') < 0
                 ) {
                   // LINE console.log('UnknownTransactionCommitResult, retrying commit operation ...');
                   return commitWithRetry(session);
@@ -7466,7 +7466,7 @@ describe('Operation (Promises)', function() {
             // LINE console.log('Transaction aborted. Caught exception during transaction.');
 
             // If transient error, retry the whole transaction
-            if (error.errorLabels && error.errorLabels.includes('TransientTransactionError')) {
+            if (error.errorLabels && error.errorLabels.indexOf('TransientTransactionError') < 0) {
               // LINE console.log('TransientTransactionError, retrying transaction ...');
               return runTransactionWithRetry(txnFunc, client, session);
             }
