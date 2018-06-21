@@ -11,7 +11,7 @@ const testDeprecationFlags = deprecate({
     if (options) options = null;
   },
   fName: 'testDeprecationFlags',
-  deprecatedParams: new Set(['maxScan', 'snapshot', 'fields']),
+  deprecatedParams: ['maxScan', 'snapshot', 'fields'],
   optionsIndex: 0
 });
 
