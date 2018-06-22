@@ -78,17 +78,33 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  it('should not warn if no deprecated params passed in', function(done) {
+  function setupNoParams() {
     const f = makeTestFunction({
       fName: 'f',
       deprecatedParams: deprecatedParams,
       optionsIndex: 0
     });
     f({});
-    process.nextTick(() => {
-      expect(messages).to.have.a.lengthOf(0);
+  }
+
+  it('should not warn if no deprecated params passed in [>=6.0.0]', {
+    metadata: { requires: { node: '>=6.0.0' } },
+    test: function(done) {
+      setupNoParams();
+      process.nextTick(() => {
+        expect(messages).to.have.a.lengthOf(0);
+        done();
+      });
+    }
+  });
+
+  it('should not warn if no deprecated params passed in [<6.0.0]', {
+    metadata: { requires: { node: '<6.0.0' } },
+    test: function(done) {
+      setupNoParams();
+      expect(console.error).to.have.not.been.called;
       done();
-    });
+    }
   });
 
   function setupUserMsgHandler() {
