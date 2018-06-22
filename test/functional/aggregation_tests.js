@@ -69,7 +69,8 @@ describe('Aggregation', function() {
             (err, cursor) => {
               expect(err).to.be.null;
               expect(cursor).to.not.be.null;
-              expect(internalClientCursor.getCall(0).args[2])
+              console.log(internalClientCursor.getCall(0).args[1]);
+              expect(internalClientCursor.getCall(0).args[1])
                 .to.have.nested.property('readPreference')
                 .that.deep.equals(expectedReadPreference);
               client.close();
