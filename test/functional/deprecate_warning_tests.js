@@ -56,7 +56,7 @@ describe('Deprecation Warnings', function() {
     f2({ maxScan: 5 });
   }
 
-  it('multiple functions with the same deprecated params should both warn [>=6.0.0]', {
+  it('multiple functions with the same deprecated params should both warn', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
       setupMultFunctionswithSameParams();
@@ -71,7 +71,7 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  it('multiple functions with the same deprecated params should both warn [<6.0.0]', {
+  it('multiple functions with the same deprecated params should both warn', {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
       setupMultFunctionswithSameParams();
@@ -93,7 +93,7 @@ describe('Deprecation Warnings', function() {
     f({});
   }
 
-  it('should not warn if no deprecated params passed in [>=6.0.0]', {
+  it('should not warn if no deprecated params passed in', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
       setupNoParams();
@@ -104,7 +104,7 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  it('should not warn if no deprecated params passed in [<6.0.0]', {
+  it('should not warn if no deprecated params passed in', {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
       setupNoParams();
@@ -128,7 +128,7 @@ describe('Deprecation Warnings', function() {
     f({ maxScan: 5, snapshot: true, fields: 'hi' });
   }
 
-  it('should use user-specified message handler [>=6.0.0]', {
+  it('should use user-specified message handler', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
       setupUserMsgHandler();
@@ -144,7 +144,7 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  it('should use user-specified message handler [<6.0.0]', {
+  it('should use user-specified message handler', {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
       setupUserMsgHandler();
@@ -168,7 +168,7 @@ describe('Deprecation Warnings', function() {
     f({ maxScan: 5, fields: 'hi' });
   }
 
-  it('each function should only warn once per deprecated parameter [>=6.0.0]', {
+  it('each function should only warn once per deprecated parameter', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
       setupOncePerParameter();
@@ -183,7 +183,7 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  it('each function should only warn once per deprecated parameter [<6.0.0]', {
+  it('each function should only warn once per deprecated parameter', {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
       setupOncePerParameter();
@@ -205,7 +205,7 @@ describe('Deprecation Warnings', function() {
     f1();
   }
 
-  it('each deprecated function should warn only once [>=6.0.0]', {
+  it('each deprecated function should warn only once', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
       setupFunctionsWarnOnce();
@@ -217,7 +217,7 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  it('each deprecated function should warn only once [<6.0.0]', {
+  it('each deprecated function should warn only once', {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
       setupFunctionsWarnOnce();
@@ -237,7 +237,7 @@ describe('Deprecation Warnings', function() {
     f({ maxScan: 5, fields: 'hi' });
   }
 
-  it('if function and some parameters are deprecated, should warn for both cases [>=6.0.0]', {
+  it('if function and some parameters are deprecated, should warn for both cases', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
       setupBothDeprecation();
@@ -253,7 +253,7 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  it('if function and some parameters are deprecated, should warn for both cases [<6.0.0]', {
+  it('if function and some parameters are deprecated, should warn for both cases', {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
       setupBothDeprecation();
