@@ -1,9 +1,12 @@
 'use strict';
 
-var f = require('util').format,
-  require_optional = require('require_optional'),
-  Query = require('../connection/commands').Query,
-  MongoError = require('../error').MongoError;
+const f = require('util').format;
+const Query = require('../connection/commands').Query;
+const MongoError = require('../error').MongoError;
+
+// Kerberos class
+const Kerberos = require('./getKerberos').Kerberos;
+const MongoAuthProcess = require('./getKerberos').MongoAuthProcess;
 
 var AuthSession = function(db, username, password, options) {
   this.db = db;
@@ -19,17 +22,6 @@ AuthSession.prototype.equal = function(session) {
     session.password === this.password
   );
 };
-
-// Kerberos class
-var Kerberos = null;
-var MongoAuthProcess = null;
-
-// Try to grab the Kerberos class
-try {
-  Kerberos = require_optional('kerberos').Kerberos;
-  // Authentication process for Mongo
-  MongoAuthProcess = require_optional('kerberos').processes.MongoAuthProcess;
-} catch (err) {} // eslint-disable-line
 
 /**
  * Creates a new SSPI authentication mechanism
