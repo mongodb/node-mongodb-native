@@ -126,16 +126,20 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  it('each function should only warn once per deprecated parameter', {
+  function setupOncePerParameter() {
+    const f = makeTestFunction({
+      fName: 'f',
+      deprecatedParams: deprecatedParams,
+      optionsIndex: 0
+    });
+    f({ maxScan: 5, fields: 'hi' });
+    f({ maxScan: 5, fields: 'hi' });
+  }
+
+  it('each function should only warn once per deprecated parameter [>=6.0.0]', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
-      const f = makeTestFunction({
-        fName: 'f',
-        deprecatedParams: deprecatedParams,
-        optionsIndex: 0
-      });
-      f({ maxScan: 5, fields: 'hi' });
-      f({ maxScan: 5, fields: 'hi' });
+      setupOncePerParameter();
       process.nextTick(() => {
         expect(messages).to.deep.equal([
           'f parameter [maxScan]' + defaultMessage,
@@ -147,15 +151,30 @@ describe('Deprecation Warnings', function() {
     }
   });
 
+  it('each function should only warn once per deprecated parameter [<6.0.0]', {
+    metadata: { requires: { node: '<6.0.0' } },
+    test: function(done) {
+      setupOncePerParameter();
+      expect(console.error).to.have.been.calledWith('f parameter [maxScan]' + defaultMessage);
+      expect(console.error).to.have.been.calledWith('f parameter [maxScan]' + defaultMessage);
+      expect(console.error).to.have.been.calledTwice;
+      done();
+    }
+  });
+
+  function setupFunctionsWarnOnce() {
+    const f1 = deprecate({ fn: function() {}, fName: 'f1', deprecateFunction: true });
+    const f2 = deprecate({ fn: function() {}, fName: 'f2', deprecateFunction: true });
+    f1();
+    f2();
+    f2();
+    f1();
+  }
+
   it('each deprecated function should warn only once [>=6.0.0]', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
-      const f1 = deprecate({ fn: function() {}, fName: 'f1', deprecateFunction: true });
-      const f2 = deprecate({ fn: function() {}, fName: 'f2', deprecateFunction: true });
-      f1();
-      f2();
-      f2();
-      f1();
+      setupFunctionsWarnOnce();
       process.nextTick(() => {
         expect(messages).to.deep.equal(['f1' + defaultMessage, 'f2' + defaultMessage]);
         expect(messages).to.have.a.lengthOf(2);
@@ -164,33 +183,31 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  it('each deprecated function should warn only once [<6.0.0]', function(done) {
-    const f1 = deprecate({ fn: function() {}, fName: 'f1', deprecateFunction: true });
-    const f2 = deprecate({ fn: function() {}, fName: 'f2', deprecateFunction: true });
-    f1();
-    f2();
-    f2();
-    f1();
-    expect(console.error).to.have.been.calledTwice;
-    expect(console.error).to.have.been.calledWith(
-      'f1 is deprecated and will be removed in a later version.'
-    );
-    expect(console.error).to.have.been.calledWith(
-      'f2 is deprecated and will be removed in a later version.'
-    );
-    done();
+  it('each deprecated function should warn only once [<6.0.0]', {
+    metadata: { requires: { node: '<6.0.0' } },
+    test: function(done) {
+      setupFunctionsWarnOnce();
+      expect(console.error).to.have.been.calledTwice;
+      expect(console.error).to.have.been.calledWith('f1' + defaultMessage);
+      expect(console.error).to.have.been.calledWith('f2' + defaultMessage);
+      done();
+    }
   });
 
-  it('if function and some of its parameters are deprecated, should warn for both cases', {
+  function setupBothDeprecation() {
+    const f = makeTestFunction({
+      fName: 'f',
+      deprecatedParams: deprecatedParams,
+      optionsIndex: 0,
+      deprecateFunction: true
+    });
+    f({ maxScan: 5, fields: 'hi' });
+  }
+
+  it('if function and some parameters are deprecated, should warn for both cases [>=6.0.0]', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
-      const f = makeTestFunction({
-        fName: 'f',
-        deprecatedParams: deprecatedParams,
-        optionsIndex: 0,
-        deprecateFunction: true
-      });
-      f({ maxScan: 5, fields: 'hi' });
+      setupBothDeprecation();
       process.nextTick(() => {
         expect(messages).to.deep.equal([
           'f' + defaultMessage,
@@ -200,6 +217,18 @@ describe('Deprecation Warnings', function() {
         expect(messages).to.have.a.lengthOf(3);
         done();
       });
+    }
+  });
+
+  it('if function and some parameters are deprecated, should warn for both cases [<6.0.0]', {
+    metadata: { requires: { node: '<6.0.0' } },
+    test: function(done) {
+      setupBothDeprecation();
+      expect(console.error).to.have.been.calledThrice;
+      expect(console.error).to.have.been.calledWith('f' + defaultMessage);
+      expect(console.error).to.have.been.calledWith('f parameter [maxScan]' + defaultMessage);
+      expect(console.error).to.have.been.calledWith('f parameter [fields]' + defaultMessage);
+      done();
     }
   });
 
