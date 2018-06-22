@@ -15,6 +15,10 @@ function makeTestFunction(config) {
   return deprecate(config);
 }
 
+function ensureCalledWith(args) {
+  args.forEach(m => expect(console.error).to.have.been.calledWith(m));
+}
+
 describe('Deprecation Warnings', function() {
   let messages = [];
   const deprecatedParams = ['maxScan', 'snapshot', 'fields'];
@@ -71,8 +75,10 @@ describe('Deprecation Warnings', function() {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
       setupMultFunctionswithSameParams();
-      expect(console.error).to.have.been.calledWith('f1 parameter [maxScan]' + defaultMessage);
-      expect(console.error).to.have.been.calledWith('f2 parameter [maxScan]' + defaultMessage);
+      ensureCalledWith([
+        'f1 parameter [maxScan]' + defaultMessage,
+        'f2 parameter [maxScan]' + defaultMessage
+      ]);
       expect(console.error).to.have.been.calledTwice;
       done();
     }
@@ -126,9 +132,11 @@ describe('Deprecation Warnings', function() {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
       setupUserMsgHandler();
-      expect(console.error).to.have.been.calledWith('custom msg for function f and param maxScan');
-      expect(console.error).to.have.been.calledWith('custom msg for function f and param snapshot');
-      expect(console.error).to.have.been.calledWith('custom msg for function f and param fields');
+      ensureCalledWith([
+        'custom msg for function f and param maxScan',
+        'custom msg for function f and param snapshot',
+        'custom msg for function f and param fields'
+      ]);
       expect(console.error).to.have.been.calledThrice;
       done();
     }
@@ -163,8 +171,10 @@ describe('Deprecation Warnings', function() {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
       setupOncePerParameter();
-      expect(console.error).to.have.been.calledWith('f parameter [maxScan]' + defaultMessage);
-      expect(console.error).to.have.been.calledWith('f parameter [maxScan]' + defaultMessage);
+      ensureCalledWith([
+        'f parameter [maxScan]' + defaultMessage,
+        'f parameter [maxScan]' + defaultMessage
+      ]);
       expect(console.error).to.have.been.calledTwice;
       done();
     }
@@ -195,9 +205,8 @@ describe('Deprecation Warnings', function() {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
       setupFunctionsWarnOnce();
+      ensureCalledWith(['f1' + defaultMessage, 'f2' + defaultMessage]);
       expect(console.error).to.have.been.calledTwice;
-      expect(console.error).to.have.been.calledWith('f1' + defaultMessage);
-      expect(console.error).to.have.been.calledWith('f2' + defaultMessage);
       done();
     }
   });
@@ -232,10 +241,12 @@ describe('Deprecation Warnings', function() {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
       setupBothDeprecation();
+      ensureCalledWith([
+        'f' + defaultMessage,
+        'f parameter [maxScan]' + defaultMessage,
+        'f parameter [fields]' + defaultMessage
+      ]);
       expect(console.error).to.have.been.calledThrice;
-      expect(console.error).to.have.been.calledWith('f' + defaultMessage);
-      expect(console.error).to.have.been.calledWith('f parameter [maxScan]' + defaultMessage);
-      expect(console.error).to.have.been.calledWith('f parameter [fields]' + defaultMessage);
       done();
     }
   });
