@@ -1,9 +1,12 @@
 'use strict';
 const setupDatabase = require('./shared').setupDatabase;
-const expect = require('chai').expect;
-require('mocha-sinon');
 const deprecate = require('../../lib/utils').deprecate;
 const exec = require('child_process').exec;
+const chai = require('chai');
+const expect = chai.expect;
+const sinonChai = require('sinon-chai');
+require('mocha-sinon');
+chai.use(sinonChai);
 
 function makeTestFunction(config) {
   config.fn = options => {
@@ -18,9 +21,11 @@ describe('Deprecation Warnings', function() {
   const defaultMessage = ' is deprecated and will be removed in a later version.';
 
   before(function() {
-    process.on('warning', warning => {
-      messages.push(warning.message);
-    });
+    if (process.emitWarning) {
+      process.on('warning', warning => {
+        messages.push(warning.message);
+      });
+    }
     return setupDatabase(this.configuration, []);
   });
 
@@ -32,7 +37,7 @@ describe('Deprecation Warnings', function() {
     messages.length = 0;
   });
 
-  it('multiple functions with the same deprecated params should both warn', {
+  it('multiple functions with the same deprecated params should both warn [>=6.0.0]', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
       const f1 = makeTestFunction({
@@ -56,6 +61,29 @@ describe('Deprecation Warnings', function() {
         done();
       });
     }
+  });
+
+  it('multiple functions with the same deprecated params should both warn [<6.0.0]', function(done) {
+    const f1 = makeTestFunction({
+      fName: 'f1',
+      deprecatedParams: deprecatedParams,
+      optionsIndex: 0
+    });
+    const f2 = makeTestFunction({
+      fName: 'f2',
+      deprecatedParams: deprecatedParams,
+      optionsIndex: 0
+    });
+    f1({ maxScan: 5 });
+    f2({ maxScan: 5 });
+    expect(console.error).to.have.been.calledWith(
+      'f1 parameter [maxScan] is deprecated and will be removed in a later version.'
+    );
+    expect(console.error).to.have.been.calledWith(
+      'f2 parameter [maxScan] is deprecated and will be removed in a later version.'
+    );
+    expect(console.error).to.have.been.calledTwice;
+    done();
   });
 
   it('should not warn if no deprecated params passed in', function(done) {
@@ -119,7 +147,7 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  it('each deprecated function should warn only once', {
+  it('each deprecated function should warn only once [>=6.0.0]', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
       const f1 = deprecate({ fn: function() {}, fName: 'f1', deprecateFunction: true });
@@ -134,6 +162,23 @@ describe('Deprecation Warnings', function() {
         done();
       });
     }
+  });
+
+  it('each deprecated function should warn only once [<6.0.0]', function(done) {
+    const f1 = deprecate({ fn: function() {}, fName: 'f1', deprecateFunction: true });
+    const f2 = deprecate({ fn: function() {}, fName: 'f2', deprecateFunction: true });
+    f1();
+    f2();
+    f2();
+    f1();
+    expect(console.error).to.have.been.calledTwice;
+    expect(console.error).to.have.been.calledWith(
+      'f1 is deprecated and will be removed in a later version.'
+    );
+    expect(console.error).to.have.been.calledWith(
+      'f2 is deprecated and will be removed in a later version.'
+    );
+    done();
   });
 
   it('if function and some of its parameters are deprecated, should warn for both cases', {
