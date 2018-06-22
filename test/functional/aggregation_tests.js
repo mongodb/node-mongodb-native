@@ -45,9 +45,8 @@ describe('Aggregation', function() {
           expect(result).to.exist;
           expect(err).to.be.null;
 
-          const internalClientCursor = sinon.stub(client.topology.s.coreTopology, 'cursor');
+          const internalClientCursor = sinon.spy(client.topology.s.coreTopology, 'cursor');
           const expectedReadPreference = new ReadPreference(ReadPreference.SECONDARY);
-
           // Execute aggregate, notice the pipeline is expressed as an Array
           collection.aggregate(
             [
@@ -56,25 +55,20 @@ describe('Aggregation', function() {
                   author: 1,
                   tags: 1
                 }
-              },
-              { $unwind: '$tags' },
-              {
-                $group: {
-                  _id: { tags: '$tags' },
-                  authors: { $addToSet: '$author' }
-                }
               }
             ],
             { readPreference: new ReadPreference(ReadPreference.SECONDARY) },
             (err, cursor) => {
-              expect(err).to.be.null;
-              expect(cursor).to.not.be.null;
-              console.log(internalClientCursor.getCall(0).args[1]);
-              expect(internalClientCursor.getCall(0).args[1])
-                .to.have.nested.property('readPreference')
-                .that.deep.equals(expectedReadPreference);
-              client.close();
-              done();
+              expect(err).to.not.exist;
+              cursor.toArray(err => {
+                expect(err).to.be.null;
+                expect(cursor).to.not.be.null;
+                expect(internalClientCursor.getCall(0).args[2])
+                  .to.have.nested.property('readPreference')
+                  .that.deep.equals(expectedReadPreference);
+                client.close();
+                done();
+              });
             }
           );
         });
