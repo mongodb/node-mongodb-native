@@ -4507,7 +4507,7 @@ describe('Cursor', function() {
     const configuration = this.configuration;
     const ReadPreference = this.configuration.require.ReadPreference;
     const client = configuration.newClient(
-      { w: 1, readPreference: ReadPreference.SECONDARY },
+      { w: 1, readPreference: ReadPreference.secondary },
       { poolSize: 1, auto_reconnect: false }
     );
 
