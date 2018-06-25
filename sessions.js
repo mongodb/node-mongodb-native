@@ -220,6 +220,10 @@ class ClientSession extends EventEmitter {
       );
     });
   }
+
+  toBSON() {
+    throw new Error('ClientSession cannot be serialized to BSON.');
+  }
 }
 
 function endTransaction(session, commandName, callback) {
