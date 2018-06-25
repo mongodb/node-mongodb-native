@@ -1,12 +1,10 @@
 'use strict';
 
 const f = require('util').format;
+const Kerberos = require('../utils').Kerberos;
+const MongoAuthProcess = require('../utils').MongoAuthProcess;
 const Query = require('../connection/commands').Query;
 const MongoError = require('../error').MongoError;
-
-// Kerberos class
-const Kerberos = require('./getKerberos').Kerberos;
-const MongoAuthProcess = require('./getKerberos').MongoAuthProcess;
 
 var AuthSession = function(db, username, password, options) {
   this.db = db;

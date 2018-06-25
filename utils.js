@@ -1,6 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
+const requireOptional = require('require_optional');
 
 /**
  * Generate a UUIDv4
@@ -33,8 +34,24 @@ function relayEvents(listener, emitter, events) {
   events.forEach(eventName => listener.on(eventName, event => emitter.emit(eventName, event)));
 }
 
+// Grab Kerberos values if they exist, otherwise set them to null
+let Kerberos = null;
+let MongoAuthProcess = null;
+
+try {
+  const kerberos = requireOptional('kerberos');
+  if (kerberos) {
+    Kerberos = kerberos.Kerberos;
+    MongoAuthProcess = kerberos.processes.MongoAuthProcess;
+  }
+} catch (err) {
+  console.warn(err.message);
+}
+
 module.exports = {
   uuidV4,
   calculateDurationInMs,
-  relayEvents
+  relayEvents,
+  Kerberos,
+  MongoAuthProcess
 };
