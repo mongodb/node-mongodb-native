@@ -4,6 +4,7 @@ const setupDatabase = require('./shared').setupDatabase;
 const fs = require('fs');
 const expect = require('chai').expect;
 const Long = require('bson').Long;
+const sinon = require('sinon');
 
 describe('Cursor', function() {
   before(function() {
@@ -4500,5 +4501,35 @@ describe('Cursor', function() {
     };
 
     testTransformStream(config, done);
+  });
+
+  it('should apply parent read preference to count command', function(done) {
+    const configuration = this.configuration;
+    const ReadPreference = this.configuration.require.ReadPreference;
+    const client = configuration.newClient(
+      { w: 1, readPreference: ReadPreference.secondary },
+      { poolSize: 1, auto_reconnect: false }
+    );
+
+    client.connect(function(err, client) {
+      const db = client.db(configuration.db);
+      let collection, cursor, spy;
+      const close = e => cursor.close(() => client.close(() => done(e)));
+
+      Promise.resolve()
+        .then(() => db.createCollection('test_count_readPreference'))
+        .then(() => (collection = db.collection('test_count_readPreference')))
+        .then(() => collection.find())
+        .then(_cursor => (cursor = _cursor))
+        .then(() => (spy = sinon.spy(cursor.s.topology, 'command')))
+        .then(() => cursor.count())
+        .then(() =>
+          expect(spy.firstCall.args[2])
+            .to.have.nested.property('readPreference.mode')
+            .that.equals('secondary')
+        )
+        .then(() => close())
+        .catch(e => close(e));
+    });
   });
 });
