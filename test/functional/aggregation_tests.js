@@ -1,7 +1,167 @@
 'use strict';
 var expect = require('chai').expect;
+const ReadPreference = require('mongodb-core').ReadPreference;
+const sinon = require('sinon');
 
 describe('Aggregation', function() {
+  it('Should use secondary readPreference if given', {
+    metadata: { requires: { topology: 'replicaset' } },
+
+    test: function(done) {
+      const configuration = this.configuration;
+
+      const client = configuration.newClient(
+        { w: 1, readConcern: { level: 'majority' } },
+        { poolSize: 1 }
+      );
+
+      // Trigger test once whole set is up
+      client.connect((err, client) => {
+        expect(err).to.be.null;
+
+        const db = client.db(this.configuration.db);
+        // Some docs for insertion
+        const docs = [
+          {
+            title: 'this is my title',
+            author: 'bob',
+            posted: new Date(),
+            pageViews: 5,
+            tags: ['fun', 'good', 'fun'],
+            other: { foo: 5 },
+            comments: [
+              { author: 'joe', text: 'this is cool' },
+              { author: 'sam', text: 'this is bad' }
+            ]
+          }
+        ];
+
+        // Create a collection
+        const collection = db.collection(
+          'shouldCorrectlyExecuteSimpleAggregationPipelineWithSecondaryReadPreference'
+        );
+        // Insert the docs
+        collection.insert(docs, { w: 1 }, (err, result) => {
+          expect(result).to.exist;
+          expect(err).to.be.null;
+
+          const internalClientCursor = sinon.stub(client.topology.s.coreTopology, 'cursor');
+          const expectedReadPreference = new ReadPreference(ReadPreference.SECONDARY);
+
+          // Execute aggregate, notice the pipeline is expressed as an Array
+          collection.aggregate(
+            [
+              {
+                $project: {
+                  author: 1,
+                  tags: 1
+                }
+              },
+              { $unwind: '$tags' },
+              {
+                $group: {
+                  _id: { tags: '$tags' },
+                  authors: { $addToSet: '$author' }
+                }
+              }
+            ],
+            { readPreference: new ReadPreference(ReadPreference.SECONDARY) },
+            (err, cursor) => {
+              expect(err).to.be.null;
+              expect(cursor).to.not.be.null;
+              expect(internalClientCursor.getCall(0).args[2])
+                .to.have.nested.property('readPreference')
+                .that.deep.equals(expectedReadPreference);
+              client.close();
+              done();
+            }
+          );
+        });
+      });
+    }
+  });
+
+  it('Should not error if secondary readPreference given', {
+    metadata: { requires: { topology: 'replicaset' } },
+
+    // The actual test we wish to run
+    test: function(done) {
+      const configuration = this.configuration;
+
+      // Open the database
+      const client = configuration.newClient(
+        { w: 1, readConcern: { level: 'majority' } },
+        { poolSize: 1 }
+      );
+
+      // Trigger test once whole set is up
+      client.connect((err, client) => {
+        expect(err).to.be.null;
+
+        const db = client.db(configuration.db);
+        // Some docs for insertion
+        const docs = [
+          {
+            title: 'this is my title',
+            author: 'bob',
+            posted: new Date(),
+            pageViews: 5,
+            tags: ['fun', 'good', 'fun'],
+            other: { foo: 5 },
+            comments: [
+              { author: 'joe', text: 'this is cool' },
+              { author: 'sam', text: 'this is bad' }
+            ]
+          }
+        ];
+
+        // Create a collection
+        const collection = db.collection(
+          'shouldCorrectlyExecuteSimpleAggregationPipelineWithSecondaryReadPreference'
+        );
+        // Insert the docs
+        collection.insert(docs, { w: 1 }, (err, result) => {
+          expect(result).to.exist;
+          expect(err).to.be.null;
+
+          // Execute aggregate, notice the pipeline is expressed as an Array
+          collection.aggregate(
+            [
+              {
+                $project: {
+                  author: 1,
+                  tags: 1
+                }
+              },
+              { $unwind: '$tags' },
+              {
+                $group: {
+                  _id: { tags: '$tags' },
+                  authors: { $addToSet: '$author' }
+                }
+              }
+            ],
+            { readPreference: new ReadPreference(ReadPreference.SECONDARY) },
+            (err, cursor) => {
+              expect(err).to.be.null;
+
+              cursor.toArray((err, result) => {
+                expect(err).to.be.null;
+
+                expect(result[0]._id.tags).to.equal('good');
+                expect(result[0].authors).to.eql(['bob']);
+                expect(result[1]._id.tags).to.equal('fun');
+                expect(result[1].authors).to.eql(['bob']);
+
+                client.close();
+                done();
+              });
+            }
+          );
+        });
+      });
+    }
+  });
   /**
    * Correctly call the aggregation framework using a pipeline in an Array.
    *
