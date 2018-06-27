@@ -1,3 +1,59 @@
+<a name="3.1.0"></a>
+# [3.1.0](https://github.com/mongodb/node-mongodb-native/compare/v3.0.6...v3.1.0) (2018-06-27)
+
+
+### Bug Fixes
+
+* **aggregte:** support user-provided `batchSize` ([ad10dee](https://github.com/mongodb/node-mongodb-native/commit/ad10dee))
+* **bulk:** fixing retryable writes for mass-change ops ([0604036](https://github.com/mongodb/node-mongodb-native/commit/0604036))
+* **bulk:** handle MongoWriteConcernErrors ([12ff392](https://github.com/mongodb/node-mongodb-native/commit/12ff392))
+* **change_stream:** do not check isGetMore if error[mongoErrorContextSymbol] is undefined ([#1720](https://github.com/mongodb/node-mongodb-native/issues/1720)) ([844c2c8](https://github.com/mongodb/node-mongodb-native/commit/844c2c8))
+* **change-stream:** fix change stream resuming with promises ([3063f00](https://github.com/mongodb/node-mongodb-native/commit/3063f00))
+* **collection:** depend on `resolveReadPreference` for inheritance ([a649e35](https://github.com/mongodb/node-mongodb-native/commit/a649e35))
+* **collection:** only send bypassDocumentValidation if true ([fdb828b](https://github.com/mongodb/node-mongodb-native/commit/fdb828b))
+* **cursor:** cursor count with collation fix ([71879c3](https://github.com/mongodb/node-mongodb-native/commit/71879c3))
+* **cursor:** cursor hasNext returns false when exhausted ([184b817](https://github.com/mongodb/node-mongodb-native/commit/184b817))
+* **cursor:** cursor.count not respecting parent readPreference ([5a9fdf0](https://github.com/mongodb/node-mongodb-native/commit/5a9fdf0))
+* **db:** don't send session down to createIndex command ([559c195](https://github.com/mongodb/node-mongodb-native/commit/559c195))
+* **db:** throw readable error when creating `_id` with background: true ([b3ff3ed](https://github.com/mongodb/node-mongodb-native/commit/b3ff3ed))
+* **findOneAndUpdate:** ensure that update documents contain atomic operators ([eb68074](https://github.com/mongodb/node-mongodb-native/commit/eb68074))
+* **index:** export MongoNetworkError ([98ab29e](https://github.com/mongodb/node-mongodb-native/commit/98ab29e))
+* **mongo-client:** pass arguments to ctor when new keyword is used ([d6c3417](https://github.com/mongodb/node-mongodb-native/commit/d6c3417))
+* **mongos:** bubble up close events after the first one ([#1713](https://github.com/mongodb/node-mongodb-native/issues/1713)) ([3e91d77](https://github.com/mongodb/node-mongodb-native/commit/3e91d77)), closes [Automattic/mongoose#6249](https://github.com/Automattic/mongoose/issues/6249) [#1685](https://github.com/mongodb/node-mongodb-native/issues/1685)
+* **parallelCollectionScan:** do not use implicit sessions on cursors ([2de470a](https://github.com/mongodb/node-mongodb-native/commit/2de470a))
+* **retryWrites:** fixes more bulk ops to not use retryWrites ([69e5254](https://github.com/mongodb/node-mongodb-native/commit/69e5254))
+* **topology-base:** sending `endSessions` is always skipped now ([a276cbe](https://github.com/mongodb/node-mongodb-native/commit/a276cbe))
+* **txns:** omit writeConcern when in a transaction ([b88c938](https://github.com/mongodb/node-mongodb-native/commit/b88c938))
+* **utils:** restructure inheritance rules for read preferences ([6a7dac1](https://github.com/mongodb/node-mongodb-native/commit/6a7dac1))
+
+
+### Features
+
+* **auth:** add support for SCRAM-SHA-256 ([f53195d](https://github.com/mongodb/node-mongodb-native/commit/f53195d))
+* **changeStream:** Adding new 4.0 ChangeStream features ([2cb4894](https://github.com/mongodb/node-mongodb-native/commit/2cb4894))
+* **changeStream:** allow resuming on getMore errors ([4ba5adc](https://github.com/mongodb/node-mongodb-native/commit/4ba5adc))
+* **changeStream:** expanding changeStream resumable errors ([49fbafd](https://github.com/mongodb/node-mongodb-native/commit/49fbafd))
+* **ChangeStream:** update default startAtOperationTime ([50a9f65](https://github.com/mongodb/node-mongodb-native/commit/50a9f65))
+* **collection:** add colleciton level document mapping/unmapping ([d03335e](https://github.com/mongodb/node-mongodb-native/commit/d03335e))
+* **collection:** Implement new count API ([a5240ae](https://github.com/mongodb/node-mongodb-native/commit/a5240ae))
+* **Collection:** warn if callback is not function in find and findOne ([cddaba0](https://github.com/mongodb/node-mongodb-native/commit/cddaba0))
+* **core:** bump core dependency to v3.1.0 ([855bfdb](https://github.com/mongodb/node-mongodb-native/commit/855bfdb))
+* **cursor:** new cursor.transformStream method ([397fcd2](https://github.com/mongodb/node-mongodb-native/commit/397fcd2))
+* **GridFS:** add option to disable md5 in file upload ([704a88e](https://github.com/mongodb/node-mongodb-native/commit/704a88e))
+* **listCollections:** add support for nameOnly option ([d2d0367](https://github.com/mongodb/node-mongodb-native/commit/d2d0367))
+* **parallelCollectionScan:** does not allow user to pass a session ([4da9e03](https://github.com/mongodb/node-mongodb-native/commit/4da9e03))
+* **read-preference:** add transaction to inheritance rules ([18ca41d](https://github.com/mongodb/node-mongodb-native/commit/18ca41d))
+* **read-preference:** unify means of read preference resolution ([#1738](https://github.com/mongodb/node-mongodb-native/issues/1738)) ([2995e11](https://github.com/mongodb/node-mongodb-native/commit/2995e11))
+* **urlParser:** use core URL parser ([c1c5d8d](https://github.com/mongodb/node-mongodb-native/commit/c1c5d8d))
+* **withSession:** add top level helper for session lifetime ([9976b86](https://github.com/mongodb/node-mongodb-native/commit/9976b86))
+
+
+### Reverts
+
+* **collection:** reverting collection-mapping features ([7298c76](https://github.com/mongodb/node-mongodb-native/commit/7298c76)), closes [#1698](https://github.com/mongodb/node-mongodb-native/issues/1698) [mongodb/js-bson#253](https://github.com/mongodb/js-bson/issues/253)
+
+
+
 <a name="3.0.6"></a>
 ## [3.0.6](https://github.com/mongodb/node-mongodb-native/compare/v3.0.5...v3.0.6) (2018-04-09)
 
