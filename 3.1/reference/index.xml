@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>References on MongoDB Node.js Driver</title>
+    <link>/node-mongodb-native/3.1/reference/</link>
+    <description>Recent content in References on MongoDB Node.js Driver</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 19 Mar 2015 14:27:51 -0400</lastBuildDate>
+    
+	<atom:link href="/node-mongodb-native/3.1/reference/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Management</title>
+      <link>/node-mongodb-native/3.1/reference/management/</link>
+      <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/management/</guid>
+      <description> Management The driver provides two mechanisms for examining its state:
+ Logging: Comprehensive logging of all operations. Application Performance Monitoring: The Application Performance Monitoring API is an API that allows developers to tap into the commands issued to MongoDB to record performance metrics and/or inspect the commands sent to MongoDB.  </description>
+    </item>
+    
+    <item>
+      <title>CRUD Operations</title>
+      <link>/node-mongodb-native/3.1/reference/ecmascriptnext/crud/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/ecmascriptnext/crud/</guid>
+      <description>ECMAScript Next CRUD Let&amp;rsquo;s take a look at the CRUD operations from the perspective of ESNext. In this guide we will be using the same examples as in the general CRUD specification overview but rewrite them to use the new ESNext features. For all method options refer to the main CRUD tutorial.
+ CRUD: CRUD Specification.  This reference also omits methods that no longer make sense when using ESNext such as the each and forEach methods.</description>
+    </item>
+    
+    <item>
+      <title>Connecting</title>
+      <link>/node-mongodb-native/3.1/reference/ecmascriptnext/connecting/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/ecmascriptnext/connecting/</guid>
+      <description>Connecting The MongoClient connection method returns a Promise if no callback is passed to it. Below is an example using the async/await commands.
+const MongoClient = require(&#39;mongodb&#39;).MongoClient; const assert = require(&#39;assert&#39;); (async function() { // Connection URL const url = &#39;mongodb://localhost:27017/myproject&#39;; // Database Name const dbName = &#39;myproject&#39;; let client; try { // Use connect method to connect to the Server client = await MongoClient.connect(url); const db = client.db(dbName); } catch (err) { console.</description>
+    </item>
+    
+    <item>
+      <title>Connection Options</title>
+      <link>/node-mongodb-native/3.1/reference/connecting/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/connecting/</guid>
+      <description> Connection Options For more information on the connection options:
+ URI Connection String: MongoDB connection string URI. Connection Settings: Reference on the driver-specific connection settings.  </description>
+    </item>
+    
+    <item>
+      <title>Connection Settings</title>
+      <link>/node-mongodb-native/3.1/reference/connecting/connection-settings/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/connecting/connection-settings/</guid>
+      <description>URI Connection Settings Optional connection settings are settings not covered by the URI Connection String . The following options are passed in the options parameter in the MongoClient.connect function.
+const MongoClient = require(&#39;mongodb&#39;).MongoClient; const assert = require(&#39;assert&#39;); // Connection URL const url = &#39;mongodb://localhost:50000,localhost:50001&#39;; // Database Name const dbName = &#39;myproject&#39;; // Use connect method to connect to the Server passing in // additional options MongoClient.connect(url, { poolSize: 10, ssl: true }, function(err, client) { assert.</description>
+    </item>
+    
+    <item>
+      <title>ECMAScript Next</title>
+      <link>/node-mongodb-native/3.1/reference/ecmascriptnext/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/ecmascriptnext/</guid>
+      <description>ECMAScript Next ECMAScript Next (also know as ESNext, ES2015, ES6, and many other names) is the new future of the Javascript language. It introduces fundamental changes in JavaScript while maintaining backward compatibility with ECMAScript 5.
+The MongoDB Node.js driver embraces modern JavaScript by optionally returning Promises from all async methods.
+This section exposes how to use the MongoDB Node.js driver with ESNext, leveraging all the productivity gains you get from the new Javascript.</description>
+    </item>
+    
+    <item>
+      <title>Frequently Asked Questions</title>
+      <link>/node-mongodb-native/3.1/reference/faq/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/faq/</guid>
+      <description>What is the difference between connectTimeoutMS, socketTimeoutMS and maxTimeMS ?    Setting Default Value MongoClient.connect Description     connectTimeoutMS 30000 The connectTimeoutMS sets the number of milliseconds a socket stays inactive before closing during the connection phase of the driver. That is to say, when the application initiates a connection, when a replica set connects to new members, or when a replica set reconnects to members.</description>
+    </item>
+    
+    <item>
+      <title>Pool Design</title>
+      <link>/node-mongodb-native/3.1/reference/pool/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/pool/</guid>
+      <description>Driver Pool Design The 2.0 series of the mongodb-core module introduced a newly re-designed pool that will grow and contract based on the usage pattern. This reference outlines how the growing/shrinking of the pool works, how authentication is handled and how operations are executed.
+Operations are executed using a work-queue. That means the Pool is responsible for scheduling the execution of operations on connections. The benefit of this is that one avoids slow operations holding up fast operations as long as the following holds true.</description>
+    </item>
+    
+    <item>
+      <title>APM</title>
+      <link>/node-mongodb-native/3.1/reference/management/apm/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:26 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/management/apm/</guid>
+      <description>APM Application Performance Monitoring support is a driver feature that allows monitoring services to hook into the driver in a forward compatible and stable way. The API is not applied to the driver unless explicitly initialized to avoid any performance penalties.
+API The following code example hooks into all the available features of the APM API.
+const listener = require(&#39;mongodb&#39;).instrument({ operationIdGenerator: { operationId: 1, next: function() { return this.operationId++; } }, timestampGenerator: { current: function() { return new Date().</description>
+    </item>
+    
+    <item>
+      <title>Topology Monitoring</title>
+      <link>/node-mongodb-native/3.1/reference/management/sdam-monitoring/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:26 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/management/sdam-monitoring/</guid>
+      <description>Topology Management The Node.js driver 2.1.10 or higher features SDAM Monitoring events, allowing an application or tool to monitor changes in the drivers view of a single server, replica set or mongos. This allows an application to react to changes of topology, such as a secondary joining or leaving a replica set.
+Overview of SDAM events    Event Applies To Description     serverOpening Server, Replicaset, Mongos Emitted when server connection is established.</description>
+    </item>
+    
+    <item>
+      <title>Logging</title>
+      <link>/node-mongodb-native/3.1/reference/management/logging/</link>
+      <pubDate>Wed, 18 Mar 2015 21:14:20 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/management/logging/</guid>
+      <description>Logging You can change the log level, filter on classes to allow only specific classes to log, and provide your own logger implementation.
+Setting Log level The driver allows logging at three different levels: debug, info and error. The default level is error. The following example demonstrates how to set the logger to debug.
+const MongoClient = require(&#39;mongodb&#39;).MongoClient; const Logger = require(&#39;mongodb&#39;).Logger; const assert = require(&#39;assert&#39;); // Connection URL const url = &#39;mongodb://localhost:27017&#39;; // Database Name const dbName = &#39;myprojeect&#39;; // Use connect method to connect to the Server MongoClient.</description>
+    </item>
+    
+    <item>
+      <title>Reference</title>
+      <link>/node-mongodb-native/3.1/reference/main/</link>
+      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/main/</guid>
+      <description> Reference The reference documentation for the Node.js driver driver focuses on high-level documentation and use-cases.
+ Connect to MongoDB: Documentation of the driver&amp;rsquo;s support for connecting to MongoDB servers ECMAScript Next: Using the driver with ESNext. Management: Documentation of the driver&amp;rsquo;s support for logging and monitoring of its internal state  </description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,4109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Source: lib/collection.js</title>
+    
+    
+    
+    
+    
+    <meta property="og:title" content="MongoDB Driver API for Node.js"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:image" content=""/>
+    
+    <meta property="og:url" content=""/>
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <script src="scripts/jquery.min.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/jaguar.css">
+    
+    
+    <script>
+    var config = {"monospaceLinks":true,"cleverLinks":true,"default":{"outputSourceFiles":true},"applicationName":"Node.js MongoDB Driver API","googleAnalytics":"UA-29229787-1","openGraph":{"title":"MongoDB Driver API for Node.js","type":"website","image":"","site_name":"","url":""},"meta":{"title":"","description":"","keyword":""},"linenums":true};
+    </script>
+    
+
+    
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', UA-29229787-1, 'auto');
+      ga('send', 'pageview');
+    </script>    
+    
+</head>
+<body>
+<div id="wrap" class="clearfix" style="width:100%;">
+    <table style="height:100%;width:100%">
+        <tr>
+            <td valign='top' width="1px">
+                
+<div class="navigation">
+    <h3 class="applicationName"><a href="index.html">Node.js MongoDB Driver API</a></h3>
+
+    <div class="search">
+        <input id="search" type="text" class="form-control input-sm" placeholder="Search Documentations">
+    </div>
+    <ul class="list">
+    
+        <li class="item" data-name="Admin">
+            <span class="title">
+                <a href="Admin.html">Admin</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="Admin~resultCallback"><a href="Admin.html#~resultCallback">resultCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Admin#addUser"><a href="Admin.html#addUser">addUser</a></li>
+            
+                <li data-name="Admin#buildInfo"><a href="Admin.html#buildInfo">buildInfo</a></li>
+            
+                <li data-name="Admin#command"><a href="Admin.html#command">command</a></li>
+            
+                <li data-name="Admin#listDatabases"><a href="Admin.html#listDatabases">listDatabases</a></li>
+            
+                <li data-name="Admin#ping"><a href="Admin.html#ping">ping</a></li>
+            
+                <li data-name="Admin#removeUser"><a href="Admin.html#removeUser">removeUser</a></li>
+            
+                <li data-name="Admin#replSetGetStatus"><a href="Admin.html#replSetGetStatus">replSetGetStatus</a></li>
+            
+                <li data-name="Admin#serverInfo"><a href="Admin.html#serverInfo">serverInfo</a></li>
+            
+                <li data-name="Admin#serverStatus"><a href="Admin.html#serverStatus">serverStatus</a></li>
+            
+                <li data-name="Admin#validateCollection"><a href="Admin.html#validateCollection">validateCollection</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="AggregationCursor">
+            <span class="title">
+                <a href="AggregationCursor.html">AggregationCursor</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="AggregationCursor~endCallback"><a href="AggregationCursor.html#~endCallback">endCallback</a></li>
+            
+                <li data-name="AggregationCursor~iteratorCallback"><a href="AggregationCursor.html#~iteratorCallback">iteratorCallback</a></li>
+            
+                <li data-name="AggregationCursor~resultCallback"><a href="AggregationCursor.html#~resultCallback">resultCallback</a></li>
+            
+                <li data-name="AggregationCursor~toArrayResultCallback"><a href="AggregationCursor.html#~toArrayResultCallback">toArrayResultCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="AggregationCursor#batchSize"><a href="AggregationCursor.html#batchSize">batchSize</a></li>
+            
+                <li data-name="AggregationCursor#clone"><a href="AggregationCursor.html#clone">clone</a></li>
+            
+                <li data-name="AggregationCursor#close"><a href="AggregationCursor.html#close">close</a></li>
+            
+                <li data-name="AggregationCursor#each"><a href="AggregationCursor.html#each">each</a></li>
+            
+                <li data-name="AggregationCursor#explain"><a href="AggregationCursor.html#explain">explain</a></li>
+            
+                <li data-name="AggregationCursor#geoNear"><a href="AggregationCursor.html#geoNear">geoNear</a></li>
+            
+                <li data-name="AggregationCursor#group"><a href="AggregationCursor.html#group">group</a></li>
+            
+                <li data-name="AggregationCursor#hasNext"><a href="AggregationCursor.html#hasNext">hasNext</a></li>
+            
+                <li data-name="AggregationCursor#isClosed"><a href="AggregationCursor.html#isClosed">isClosed</a></li>
+            
+                <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
+            
+                <li data-name="AggregationCursor#lookup"><a href="AggregationCursor.html#lookup">lookup</a></li>
+            
+                <li data-name="AggregationCursor#match"><a href="AggregationCursor.html#match">match</a></li>
+            
+                <li data-name="AggregationCursor#maxTimeMS"><a href="AggregationCursor.html#maxTimeMS">maxTimeMS</a></li>
+            
+                <li data-name="AggregationCursor#next"><a href="AggregationCursor.html#next">next</a></li>
+            
+                <li data-name="AggregationCursor#out"><a href="AggregationCursor.html#out">out</a></li>
+            
+                <li data-name="AggregationCursor#pause"><a href="AggregationCursor.html#pause">pause</a></li>
+            
+                <li data-name="AggregationCursor#pipe"><a href="AggregationCursor.html#pipe">pipe</a></li>
+            
+                <li data-name="AggregationCursor#project"><a href="AggregationCursor.html#project">project</a></li>
+            
+                <li data-name="AggregationCursor#read"><a href="AggregationCursor.html#read">read</a></li>
+            
+                <li data-name="AggregationCursor#redact"><a href="AggregationCursor.html#redact">redact</a></li>
+            
+                <li data-name="AggregationCursor#resume"><a href="AggregationCursor.html#resume">resume</a></li>
+            
+                <li data-name="AggregationCursor#rewind"><a href="AggregationCursor.html#rewind">rewind</a></li>
+            
+                <li data-name="AggregationCursor#setEncoding"><a href="AggregationCursor.html#setEncoding">setEncoding</a></li>
+            
+                <li data-name="AggregationCursor#skip"><a href="AggregationCursor.html#skip">skip</a></li>
+            
+                <li data-name="AggregationCursor#sort"><a href="AggregationCursor.html#sort">sort</a></li>
+            
+                <li data-name="AggregationCursor#toArray"><a href="AggregationCursor.html#toArray">toArray</a></li>
+            
+                <li data-name="AggregationCursor#unpipe"><a href="AggregationCursor.html#unpipe">unpipe</a></li>
+            
+                <li data-name="AggregationCursor#unshift"><a href="AggregationCursor.html#unshift">unshift</a></li>
+            
+                <li data-name="AggregationCursor#unwind"><a href="AggregationCursor.html#unwind">unwind</a></li>
+            
+                <li data-name="AggregationCursor#wrap"><a href="AggregationCursor.html#wrap">wrap</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="AggregationCursor#event:close"><a href="AggregationCursor.html#event:close">close</a></li>
+            
+                <li data-name="AggregationCursor#event:data"><a href="AggregationCursor.html#event:data">data</a></li>
+            
+                <li data-name="AggregationCursor#event:end"><a href="AggregationCursor.html#event:end">end</a></li>
+            
+                <li data-name="AggregationCursor#event:readable"><a href="AggregationCursor.html#event:readable">readable</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Binary">
+            <span class="title">
+                <a href="Binary.html">Binary</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="Binary.SUBTYPE_BYTE_ARRAY"><a href="Binary.html#.SUBTYPE_BYTE_ARRAY">SUBTYPE_BYTE_ARRAY</a></li>
+            
+                <li data-name="Binary.SUBTYPE_DEFAULT"><a href="Binary.html#.SUBTYPE_DEFAULT">SUBTYPE_DEFAULT</a></li>
+            
+                <li data-name="Binary.SUBTYPE_FUNCTION"><a href="Binary.html#.SUBTYPE_FUNCTION">SUBTYPE_FUNCTION</a></li>
+            
+                <li data-name="Binary.SUBTYPE_MD5"><a href="Binary.html#.SUBTYPE_MD5">SUBTYPE_MD5</a></li>
+            
+                <li data-name="Binary.SUBTYPE_USER_DEFINED"><a href="Binary.html#.SUBTYPE_USER_DEFINED">SUBTYPE_USER_DEFINED</a></li>
+            
+                <li data-name="Binary.SUBTYPE_UUID"><a href="Binary.html#.SUBTYPE_UUID">SUBTYPE_UUID</a></li>
+            
+                <li data-name="Binary.SUBTYPE_UUID_OLD"><a href="Binary.html#.SUBTYPE_UUID_OLD">SUBTYPE_UUID_OLD</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Binary#length"><a href="Binary.html#length">length</a></li>
+            
+                <li data-name="Binary#put"><a href="Binary.html#put">put</a></li>
+            
+                <li data-name="Binary#read"><a href="Binary.html#read">read</a></li>
+            
+                <li data-name="Binary#value"><a href="Binary.html#value">value</a></li>
+            
+                <li data-name="Binary#write"><a href="Binary.html#write">write</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="BSONRegExp">
+            <span class="title">
+                <a href="BSONRegExp.html">BSONRegExp</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="BulkWriteError">
+            <span class="title">
+                <a href="BulkWriteError.html">BulkWriteError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="BulkWriteResult">
+            <span class="title">
+                <a href="BulkWriteResult.html">BulkWriteResult</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="BulkWriteResult#getInsertedIds"><a href="BulkWriteResult.html#getInsertedIds">getInsertedIds</a></li>
+            
+                <li data-name="BulkWriteResult#getLastOp"><a href="BulkWriteResult.html#getLastOp">getLastOp</a></li>
+            
+                <li data-name="BulkWriteResult#getRawResponse"><a href="BulkWriteResult.html#getRawResponse">getRawResponse</a></li>
+            
+                <li data-name="BulkWriteResult#getUpsertedIdAt"><a href="BulkWriteResult.html#getUpsertedIdAt">getUpsertedIdAt</a></li>
+            
+                <li data-name="BulkWriteResult#getUpsertedIds"><a href="BulkWriteResult.html#getUpsertedIds">getUpsertedIds</a></li>
+            
+                <li data-name="BulkWriteResult#getWriteConcernError"><a href="BulkWriteResult.html#getWriteConcernError">getWriteConcernError</a></li>
+            
+                <li data-name="BulkWriteResult#getWriteErrorAt"><a href="BulkWriteResult.html#getWriteErrorAt">getWriteErrorAt</a></li>
+            
+                <li data-name="BulkWriteResult#getWriteErrorCount"><a href="BulkWriteResult.html#getWriteErrorCount">getWriteErrorCount</a></li>
+            
+                <li data-name="BulkWriteResult#getWriteErrors"><a href="BulkWriteResult.html#getWriteErrors">getWriteErrors</a></li>
+            
+                <li data-name="BulkWriteResult#hasWriteErrors"><a href="BulkWriteResult.html#hasWriteErrors">hasWriteErrors</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="ChangeStream">
+            <span class="title">
+                <a href="ChangeStream.html">ChangeStream</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="ChangeStream~resultCallback"><a href="ChangeStream.html#~resultCallback">resultCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="ChangeStream#close"><a href="ChangeStream.html#close">close</a></li>
+            
+                <li data-name="ChangeStream#hasNext"><a href="ChangeStream.html#hasNext">hasNext</a></li>
+            
+                <li data-name="ChangeStream#isClosed"><a href="ChangeStream.html#isClosed">isClosed</a></li>
+            
+                <li data-name="ChangeStream#next"><a href="ChangeStream.html#next">next</a></li>
+            
+                <li data-name="ChangeStream#pause"><a href="ChangeStream.html#pause">pause</a></li>
+            
+                <li data-name="ChangeStream#pipe"><a href="ChangeStream.html#pipe">pipe</a></li>
+            
+                <li data-name="ChangeStream#resume"><a href="ChangeStream.html#resume">resume</a></li>
+            
+                <li data-name="ChangeStream#stream"><a href="ChangeStream.html#stream">stream</a></li>
+            
+                <li data-name="ChangeStream#unpipe"><a href="ChangeStream.html#unpipe">unpipe</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="ChangeStream#event:change"><a href="ChangeStream.html#event:change">change</a></li>
+            
+                <li data-name="ChangeStream#event:close"><a href="ChangeStream.html#event:close">close</a></li>
+            
+                <li data-name="ChangeStream#event:end"><a href="ChangeStream.html#event:end">end</a></li>
+            
+                <li data-name="ChangeStream#event:error"><a href="ChangeStream.html#event:error">error</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Code">
+            <span class="title">
+                <a href="Code.html">Code</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Collection">
+            <span class="title">
+                <a href="Collection.html">Collection</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="Collection~aggregationCallback"><a href="Collection.html#~aggregationCallback">aggregationCallback</a></li>
+            
+                <li data-name="Collection~bulkWriteOpCallback"><a href="Collection.html#~bulkWriteOpCallback">bulkWriteOpCallback</a></li>
+            
+                <li data-name="Collection~BulkWriteOpResult"><a href="Collection.html#~BulkWriteOpResult">BulkWriteOpResult</a></li>
+            
+                <li data-name="Collection~collectionResultCallback"><a href="Collection.html#~collectionResultCallback">collectionResultCallback</a></li>
+            
+                <li data-name="Collection~countCallback"><a href="Collection.html#~countCallback">countCallback</a></li>
+            
+                <li data-name="Collection~deleteWriteOpCallback"><a href="Collection.html#~deleteWriteOpCallback">deleteWriteOpCallback</a></li>
+            
+                <li data-name="Collection~deleteWriteOpResult"><a href="Collection.html#~deleteWriteOpResult">deleteWriteOpResult</a></li>
+            
+                <li data-name="Collection~findAndModifyCallback"><a href="Collection.html#~findAndModifyCallback">findAndModifyCallback</a></li>
+            
+                <li data-name="Collection~findAndModifyWriteOpResult"><a href="Collection.html#~findAndModifyWriteOpResult">findAndModifyWriteOpResult</a></li>
+            
+                <li data-name="Collection~insertOneWriteOpCallback"><a href="Collection.html#~insertOneWriteOpCallback">insertOneWriteOpCallback</a></li>
+            
+                <li data-name="Collection~insertOneWriteOpResult"><a href="Collection.html#~insertOneWriteOpResult">insertOneWriteOpResult</a></li>
+            
+                <li data-name="Collection~insertWriteOpCallback"><a href="Collection.html#~insertWriteOpCallback">insertWriteOpCallback</a></li>
+            
+                <li data-name="Collection~insertWriteOpResult"><a href="Collection.html#~insertWriteOpResult">insertWriteOpResult</a></li>
+            
+                <li data-name="Collection~parallelCollectionScanCallback"><a href="Collection.html#~parallelCollectionScanCallback">parallelCollectionScanCallback</a></li>
+            
+                <li data-name="Collection~resultCallback"><a href="Collection.html#~resultCallback">resultCallback</a></li>
+            
+                <li data-name="Collection~updateWriteOpCallback"><a href="Collection.html#~updateWriteOpCallback">updateWriteOpCallback</a></li>
+            
+                <li data-name="Collection~updateWriteOpResult"><a href="Collection.html#~updateWriteOpResult">updateWriteOpResult</a></li>
+            
+                <li data-name="Collection~writeOpCallback"><a href="Collection.html#~writeOpCallback">writeOpCallback</a></li>
+            
+                <li data-name="Collection~WriteOpResult"><a href="Collection.html#~WriteOpResult">WriteOpResult</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Collection#aggregate"><a href="Collection.html#aggregate">aggregate</a></li>
+            
+                <li data-name="Collection#bulkWrite"><a href="Collection.html#bulkWrite">bulkWrite</a></li>
+            
+                <li data-name="Collection#count"><a href="Collection.html#count">count</a></li>
+            
+                <li data-name="Collection#countDocuments"><a href="Collection.html#countDocuments">countDocuments</a></li>
+            
+                <li data-name="Collection#createIndex"><a href="Collection.html#createIndex">createIndex</a></li>
+            
+                <li data-name="Collection#createIndexes"><a href="Collection.html#createIndexes">createIndexes</a></li>
+            
+                <li data-name="Collection#deleteMany"><a href="Collection.html#deleteMany">deleteMany</a></li>
+            
+                <li data-name="Collection#deleteOne"><a href="Collection.html#deleteOne">deleteOne</a></li>
+            
+                <li data-name="Collection#distinct"><a href="Collection.html#distinct">distinct</a></li>
+            
+                <li data-name="Collection#drop"><a href="Collection.html#drop">drop</a></li>
+            
+                <li data-name="Collection#dropAllIndexes"><a href="Collection.html#dropAllIndexes">dropAllIndexes</a></li>
+            
+                <li data-name="Collection#dropIndex"><a href="Collection.html#dropIndex">dropIndex</a></li>
+            
+                <li data-name="Collection#dropIndexes"><a href="Collection.html#dropIndexes">dropIndexes</a></li>
+            
+                <li data-name="Collection#ensureIndex"><a href="Collection.html#ensureIndex">ensureIndex</a></li>
+            
+                <li data-name="Collection#estimatedDocumentCount"><a href="Collection.html#estimatedDocumentCount">estimatedDocumentCount</a></li>
+            
+                <li data-name="Collection#find"><a href="Collection.html#find">find</a></li>
+            
+                <li data-name="Collection#findAndModify"><a href="Collection.html#findAndModify">findAndModify</a></li>
+            
+                <li data-name="Collection#findAndRemove"><a href="Collection.html#findAndRemove">findAndRemove</a></li>
+            
+                <li data-name="Collection#findOne"><a href="Collection.html#findOne">findOne</a></li>
+            
+                <li data-name="Collection#findOneAndDelete"><a href="Collection.html#findOneAndDelete">findOneAndDelete</a></li>
+            
+                <li data-name="Collection#findOneAndReplace"><a href="Collection.html#findOneAndReplace">findOneAndReplace</a></li>
+            
+                <li data-name="Collection#findOneAndUpdate"><a href="Collection.html#findOneAndUpdate">findOneAndUpdate</a></li>
+            
+                <li data-name="Collection#geoHaystackSearch"><a href="Collection.html#geoHaystackSearch">geoHaystackSearch</a></li>
+            
+                <li data-name="Collection#group"><a href="Collection.html#group">group</a></li>
+            
+                <li data-name="Collection#indexes"><a href="Collection.html#indexes">indexes</a></li>
+            
+                <li data-name="Collection#indexExists"><a href="Collection.html#indexExists">indexExists</a></li>
+            
+                <li data-name="Collection#indexInformation"><a href="Collection.html#indexInformation">indexInformation</a></li>
+            
+                <li data-name="Collection#initializeOrderedBulkOp"><a href="Collection.html#initializeOrderedBulkOp">initializeOrderedBulkOp</a></li>
+            
+                <li data-name="Collection#initializeUnorderedBulkOp"><a href="Collection.html#initializeUnorderedBulkOp">initializeUnorderedBulkOp</a></li>
+            
+                <li data-name="Collection#insert"><a href="Collection.html#insert">insert</a></li>
+            
+                <li data-name="Collection#insertMany"><a href="Collection.html#insertMany">insertMany</a></li>
+            
+                <li data-name="Collection#insertOne"><a href="Collection.html#insertOne">insertOne</a></li>
+            
+                <li data-name="Collection#isCapped"><a href="Collection.html#isCapped">isCapped</a></li>
+            
+                <li data-name="Collection#listIndexes"><a href="Collection.html#listIndexes">listIndexes</a></li>
+            
+                <li data-name="Collection#mapReduce"><a href="Collection.html#mapReduce">mapReduce</a></li>
+            
+                <li data-name="Collection#options"><a href="Collection.html#options">options</a></li>
+            
+                <li data-name="Collection#parallelCollectionScan"><a href="Collection.html#parallelCollectionScan">parallelCollectionScan</a></li>
+            
+                <li data-name="Collection#reIndex"><a href="Collection.html#reIndex">reIndex</a></li>
+            
+                <li data-name="Collection#remove"><a href="Collection.html#remove">remove</a></li>
+            
+                <li data-name="Collection#rename"><a href="Collection.html#rename">rename</a></li>
+            
+                <li data-name="Collection#replaceOne"><a href="Collection.html#replaceOne">replaceOne</a></li>
+            
+                <li data-name="Collection#save"><a href="Collection.html#save">save</a></li>
+            
+                <li data-name="Collection#stats"><a href="Collection.html#stats">stats</a></li>
+            
+                <li data-name="Collection#update"><a href="Collection.html#update">update</a></li>
+            
+                <li data-name="Collection#updateMany"><a href="Collection.html#updateMany">updateMany</a></li>
+            
+                <li data-name="Collection#updateOne"><a href="Collection.html#updateOne">updateOne</a></li>
+            
+                <li data-name="Collection#watch"><a href="Collection.html#watch">watch</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="CommandCursor">
+            <span class="title">
+                <a href="CommandCursor.html">CommandCursor</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="CommandCursor~endCallback"><a href="CommandCursor.html#~endCallback">endCallback</a></li>
+            
+                <li data-name="CommandCursor~iteratorCallback"><a href="CommandCursor.html#~iteratorCallback">iteratorCallback</a></li>
+            
+                <li data-name="CommandCursor~resultCallback"><a href="CommandCursor.html#~resultCallback">resultCallback</a></li>
+            
+                <li data-name="CommandCursor~toArrayResultCallback"><a href="CommandCursor.html#~toArrayResultCallback">toArrayResultCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="CommandCursor#batchSize"><a href="CommandCursor.html#batchSize">batchSize</a></li>
+            
+                <li data-name="CommandCursor#clone"><a href="CommandCursor.html#clone">clone</a></li>
+            
+                <li data-name="CommandCursor#close"><a href="CommandCursor.html#close">close</a></li>
+            
+                <li data-name="CommandCursor#each"><a href="CommandCursor.html#each">each</a></li>
+            
+                <li data-name="CommandCursor#hasNext"><a href="CommandCursor.html#hasNext">hasNext</a></li>
+            
+                <li data-name="CommandCursor#isClosed"><a href="CommandCursor.html#isClosed">isClosed</a></li>
+            
+                <li data-name="CommandCursor#maxTimeMS"><a href="CommandCursor.html#maxTimeMS">maxTimeMS</a></li>
+            
+                <li data-name="CommandCursor#next"><a href="CommandCursor.html#next">next</a></li>
+            
+                <li data-name="CommandCursor#pause"><a href="CommandCursor.html#pause">pause</a></li>
+            
+                <li data-name="CommandCursor#pipe"><a href="CommandCursor.html#pipe">pipe</a></li>
+            
+                <li data-name="CommandCursor#read"><a href="CommandCursor.html#read">read</a></li>
+            
+                <li data-name="CommandCursor#resume"><a href="CommandCursor.html#resume">resume</a></li>
+            
+                <li data-name="CommandCursor#rewind"><a href="CommandCursor.html#rewind">rewind</a></li>
+            
+                <li data-name="CommandCursor#setEncoding"><a href="CommandCursor.html#setEncoding">setEncoding</a></li>
+            
+                <li data-name="CommandCursor#setReadPreference"><a href="CommandCursor.html#setReadPreference">setReadPreference</a></li>
+            
+                <li data-name="CommandCursor#toArray"><a href="CommandCursor.html#toArray">toArray</a></li>
+            
+                <li data-name="CommandCursor#unpipe"><a href="CommandCursor.html#unpipe">unpipe</a></li>
+            
+                <li data-name="CommandCursor#unshift"><a href="CommandCursor.html#unshift">unshift</a></li>
+            
+                <li data-name="CommandCursor#wrap"><a href="CommandCursor.html#wrap">wrap</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="CommandCursor#event:close"><a href="CommandCursor.html#event:close">close</a></li>
+            
+                <li data-name="CommandCursor#event:data"><a href="CommandCursor.html#event:data">data</a></li>
+            
+                <li data-name="CommandCursor#event:end"><a href="CommandCursor.html#event:end">end</a></li>
+            
+                <li data-name="CommandCursor#event:readable"><a href="CommandCursor.html#event:readable">readable</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Cursor">
+            <span class="title">
+                <a href="Cursor.html">Cursor</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="Cursor~countResultCallback"><a href="Cursor.html#~countResultCallback">countResultCallback</a></li>
+            
+                <li data-name="Cursor~endCallback"><a href="Cursor.html#~endCallback">endCallback</a></li>
+            
+                <li data-name="Cursor~iteratorCallback"><a href="Cursor.html#~iteratorCallback">iteratorCallback</a></li>
+            
+                <li data-name="Cursor~resultCallback"><a href="Cursor.html#~resultCallback">resultCallback</a></li>
+            
+                <li data-name="Cursor~toArrayResultCallback"><a href="Cursor.html#~toArrayResultCallback">toArrayResultCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Cursor#addCursorFlag"><a href="Cursor.html#addCursorFlag">addCursorFlag</a></li>
+            
+                <li data-name="Cursor#addQueryModifier"><a href="Cursor.html#addQueryModifier">addQueryModifier</a></li>
+            
+                <li data-name="Cursor#batchSize"><a href="Cursor.html#batchSize">batchSize</a></li>
+            
+                <li data-name="Cursor#clone"><a href="Cursor.html#clone">clone</a></li>
+            
+                <li data-name="Cursor#close"><a href="Cursor.html#close">close</a></li>
+            
+                <li data-name="Cursor#collation"><a href="Cursor.html#collation">collation</a></li>
+            
+                <li data-name="Cursor#comment"><a href="Cursor.html#comment">comment</a></li>
+            
+                <li data-name="Cursor#count"><a href="Cursor.html#count">count</a></li>
+            
+                <li data-name="Cursor#each"><a href="Cursor.html#each">each</a></li>
+            
+                <li data-name="Cursor#explain"><a href="Cursor.html#explain">explain</a></li>
+            
+                <li data-name="Cursor#filter"><a href="Cursor.html#filter">filter</a></li>
+            
+                <li data-name="Cursor#forEach"><a href="Cursor.html#forEach">forEach</a></li>
+            
+                <li data-name="Cursor#hasNext"><a href="Cursor.html#hasNext">hasNext</a></li>
+            
+                <li data-name="Cursor#hint"><a href="Cursor.html#hint">hint</a></li>
+            
+                <li data-name="Cursor#isClosed"><a href="Cursor.html#isClosed">isClosed</a></li>
+            
+                <li data-name="Cursor#limit"><a href="Cursor.html#limit">limit</a></li>
+            
+                <li data-name="Cursor#map"><a href="Cursor.html#map">map</a></li>
+            
+                <li data-name="Cursor#max"><a href="Cursor.html#max">max</a></li>
+            
+                <li data-name="Cursor#maxAwaitTimeMS"><a href="Cursor.html#maxAwaitTimeMS">maxAwaitTimeMS</a></li>
+            
+                <li data-name="Cursor#maxScan"><a href="Cursor.html#maxScan">maxScan</a></li>
+            
+                <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
+            
+                <li data-name="Cursor#min"><a href="Cursor.html#min">min</a></li>
+            
+                <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
+            
+                <li data-name="Cursor#pause"><a href="Cursor.html#pause">pause</a></li>
+            
+                <li data-name="Cursor#pipe"><a href="Cursor.html#pipe">pipe</a></li>
+            
+                <li data-name="Cursor#project"><a href="Cursor.html#project">project</a></li>
+            
+                <li data-name="Cursor#read"><a href="Cursor.html#read">read</a></li>
+            
+                <li data-name="Cursor#resume"><a href="Cursor.html#resume">resume</a></li>
+            
+                <li data-name="Cursor#returnKey"><a href="Cursor.html#returnKey">returnKey</a></li>
+            
+                <li data-name="Cursor#rewind"><a href="Cursor.html#rewind">rewind</a></li>
+            
+                <li data-name="Cursor#setCursorOption"><a href="Cursor.html#setCursorOption">setCursorOption</a></li>
+            
+                <li data-name="Cursor#setEncoding"><a href="Cursor.html#setEncoding">setEncoding</a></li>
+            
+                <li data-name="Cursor#setReadPreference"><a href="Cursor.html#setReadPreference">setReadPreference</a></li>
+            
+                <li data-name="Cursor#showRecordId"><a href="Cursor.html#showRecordId">showRecordId</a></li>
+            
+                <li data-name="Cursor#skip"><a href="Cursor.html#skip">skip</a></li>
+            
+                <li data-name="Cursor#snapshot"><a href="Cursor.html#snapshot">snapshot</a></li>
+            
+                <li data-name="Cursor#sort"><a href="Cursor.html#sort">sort</a></li>
+            
+                <li data-name="Cursor#stream"><a href="Cursor.html#stream">stream</a></li>
+            
+                <li data-name="Cursor#toArray"><a href="Cursor.html#toArray">toArray</a></li>
+            
+                <li data-name="Cursor#transformStream"><a href="Cursor.html#transformStream">transformStream</a></li>
+            
+                <li data-name="Cursor#unpipe"><a href="Cursor.html#unpipe">unpipe</a></li>
+            
+                <li data-name="Cursor#unshift"><a href="Cursor.html#unshift">unshift</a></li>
+            
+                <li data-name="Cursor#wrap"><a href="Cursor.html#wrap">wrap</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="Cursor#event:close"><a href="Cursor.html#event:close">close</a></li>
+            
+                <li data-name="Cursor#event:data"><a href="Cursor.html#event:data">data</a></li>
+            
+                <li data-name="Cursor#event:end"><a href="Cursor.html#event:end">end</a></li>
+            
+                <li data-name="Cursor#event:readable"><a href="Cursor.html#event:readable">readable</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Db">
+            <span class="title">
+                <a href="Db.html">Db</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="Db~collectionResultCallback"><a href="Db.html#~collectionResultCallback">collectionResultCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Db#addUser"><a href="Db.html#addUser">addUser</a></li>
+            
+                <li data-name="Db#admin"><a href="Db.html#admin">admin</a></li>
+            
+                <li data-name="Db#collection"><a href="Db.html#collection">collection</a></li>
+            
+                <li data-name="Db#collections"><a href="Db.html#collections">collections</a></li>
+            
+                <li data-name="Db#command"><a href="Db.html#command">command</a></li>
+            
+                <li data-name="Db#createCollection"><a href="Db.html#createCollection">createCollection</a></li>
+            
+                <li data-name="Db#createIndex"><a href="Db.html#createIndex">createIndex</a></li>
+            
+                <li data-name="Db#dropCollection"><a href="Db.html#dropCollection">dropCollection</a></li>
+            
+                <li data-name="Db#dropDatabase"><a href="Db.html#dropDatabase">dropDatabase</a></li>
+            
+                <li data-name="Db#ensureIndex"><a href="Db.html#ensureIndex">ensureIndex</a></li>
+            
+                <li data-name="Db#eval"><a href="Db.html#eval">eval</a></li>
+            
+                <li data-name="Db#executeDbAdminCommand"><a href="Db.html#executeDbAdminCommand">executeDbAdminCommand</a></li>
+            
+                <li data-name="Db#indexInformation"><a href="Db.html#indexInformation">indexInformation</a></li>
+            
+                <li data-name="Db#listCollections"><a href="Db.html#listCollections">listCollections</a></li>
+            
+                <li data-name="Db#profilingInfo"><a href="Db.html#profilingInfo">profilingInfo</a></li>
+            
+                <li data-name="Db#profilingLevel"><a href="Db.html#profilingLevel">profilingLevel</a></li>
+            
+                <li data-name="Db#removeUser"><a href="Db.html#removeUser">removeUser</a></li>
+            
+                <li data-name="Db#renameCollection"><a href="Db.html#renameCollection">renameCollection</a></li>
+            
+                <li data-name="Db#setProfilingLevel"><a href="Db.html#setProfilingLevel">setProfilingLevel</a></li>
+            
+                <li data-name="Db#stats"><a href="Db.html#stats">stats</a></li>
+            
+                <li data-name="Db#unref"><a href="Db.html#unref">unref</a></li>
+            
+                <li data-name="Db#watch"><a href="Db.html#watch">watch</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="Db#event:close"><a href="Db.html#event:close">close</a></li>
+            
+                <li data-name="Db#event:error"><a href="Db.html#event:error">error</a></li>
+            
+                <li data-name="Db#event:fullsetup"><a href="Db.html#event:fullsetup">fullsetup</a></li>
+            
+                <li data-name="Db#event:parseError"><a href="Db.html#event:parseError">parseError</a></li>
+            
+                <li data-name="Db#event:reconnect"><a href="Db.html#event:reconnect">reconnect</a></li>
+            
+                <li data-name="Db#event:timeout"><a href="Db.html#event:timeout">timeout</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="DBRef">
+            <span class="title">
+                <a href="DBRef.html">DBRef</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Decimal128">
+            <span class="title">
+                <a href="Decimal128.html">Decimal128</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Decimal128#toString"><a href="Decimal128.html#toString">toString</a></li>
+            
+                <li data-name="Decimal128.fromString"><a href="Decimal128.html#.fromString">fromString</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Double">
+            <span class="title">
+                <a href="Double.html">Double</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Double#valueOf"><a href="Double.html#valueOf">valueOf</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="FindOperatorsOrdered">
+            <span class="title">
+                <a href="FindOperatorsOrdered.html">FindOperatorsOrdered</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="FindOperatorsOrdered#delete"><a href="FindOperatorsOrdered.html#delete">delete</a></li>
+            
+                <li data-name="FindOperatorsOrdered#deleteOne"><a href="FindOperatorsOrdered.html#deleteOne">deleteOne</a></li>
+            
+                <li data-name="FindOperatorsOrdered#replaceOne"><a href="FindOperatorsOrdered.html#replaceOne">replaceOne</a></li>
+            
+                <li data-name="FindOperatorsOrdered#update"><a href="FindOperatorsOrdered.html#update">update</a></li>
+            
+                <li data-name="FindOperatorsOrdered#updateOne"><a href="FindOperatorsOrdered.html#updateOne">updateOne</a></li>
+            
+                <li data-name="FindOperatorsOrdered#upsert"><a href="FindOperatorsOrdered.html#upsert">upsert</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="FindOperatorsUnordered">
+            <span class="title">
+                <a href="FindOperatorsUnordered.html">FindOperatorsUnordered</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="FindOperatorsUnordered#remove"><a href="FindOperatorsUnordered.html#remove">remove</a></li>
+            
+                <li data-name="FindOperatorsUnordered#removeOne"><a href="FindOperatorsUnordered.html#removeOne">removeOne</a></li>
+            
+                <li data-name="FindOperatorsUnordered#replaceOne"><a href="FindOperatorsUnordered.html#replaceOne">replaceOne</a></li>
+            
+                <li data-name="FindOperatorsUnordered#update"><a href="FindOperatorsUnordered.html#update">update</a></li>
+            
+                <li data-name="FindOperatorsUnordered#updateOne"><a href="FindOperatorsUnordered.html#updateOne">updateOne</a></li>
+            
+                <li data-name="FindOperatorsUnordered#upsert"><a href="FindOperatorsUnordered.html#upsert">upsert</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="GridFSBucket">
+            <span class="title">
+                <a href="GridFSBucket.html">GridFSBucket</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="GridFSBucket~errorCallback"><a href="GridFSBucket.html#~errorCallback">errorCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="GridFSBucket#delete"><a href="GridFSBucket.html#delete">delete</a></li>
+            
+                <li data-name="GridFSBucket#drop"><a href="GridFSBucket.html#drop">drop</a></li>
+            
+                <li data-name="GridFSBucket#find"><a href="GridFSBucket.html#find">find</a></li>
+            
+                <li data-name="GridFSBucket#openDownloadStream"><a href="GridFSBucket.html#openDownloadStream">openDownloadStream</a></li>
+            
+                <li data-name="GridFSBucket#openDownloadStreamByName"><a href="GridFSBucket.html#openDownloadStreamByName">openDownloadStreamByName</a></li>
+            
+                <li data-name="GridFSBucket#openUploadStream"><a href="GridFSBucket.html#openUploadStream">openUploadStream</a></li>
+            
+                <li data-name="GridFSBucket#openUploadStreamWithId"><a href="GridFSBucket.html#openUploadStreamWithId">openUploadStreamWithId</a></li>
+            
+                <li data-name="GridFSBucket#rename"><a href="GridFSBucket.html#rename">rename</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="GridFSBucket#event:index"><a href="GridFSBucket.html#event:index">index</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="GridFSBucketReadStream">
+            <span class="title">
+                <a href="GridFSBucketReadStream.html">GridFSBucketReadStream</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="GridFSBucketReadStream#_read"><a href="GridFSBucketReadStream.html#_read">_read</a></li>
+            
+                <li data-name="GridFSBucketReadStream#abort"><a href="GridFSBucketReadStream.html#abort">abort</a></li>
+            
+                <li data-name="GridFSBucketReadStream#end"><a href="GridFSBucketReadStream.html#end">end</a></li>
+            
+                <li data-name="GridFSBucketReadStream#start"><a href="GridFSBucketReadStream.html#start">start</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="GridFSBucketReadStream#event:close"><a href="GridFSBucketReadStream.html#event:close">close</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:data"><a href="GridFSBucketReadStream.html#event:data">data</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:end"><a href="GridFSBucketReadStream.html#event:end">end</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:error"><a href="GridFSBucketReadStream.html#event:error">error</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:file"><a href="GridFSBucketReadStream.html#event:file">file</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="GridFSBucketWriteStream">
+            <span class="title">
+                <a href="GridFSBucketWriteStream.html">GridFSBucketWriteStream</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="GridFSBucketWriteStream#abort"><a href="GridFSBucketWriteStream.html#abort">abort</a></li>
+            
+                <li data-name="GridFSBucketWriteStream#end"><a href="GridFSBucketWriteStream.html#end">end</a></li>
+            
+                <li data-name="GridFSBucketWriteStream#write"><a href="GridFSBucketWriteStream.html#write">write</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="GridFSBucketWriteStream#event:error"><a href="GridFSBucketWriteStream.html#event:error">error</a></li>
+            
+                <li data-name="GridFSBucketWriteStream#event:finish"><a href="GridFSBucketWriteStream.html#event:finish">finish</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="GridStore">
+            <span class="title">
+                <a href="GridStore.html">GridStore</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="GridStore.DEFAULT_CONTENT_TYPE"><a href="GridStore.html#.DEFAULT_CONTENT_TYPE">DEFAULT_CONTENT_TYPE</a></li>
+            
+                <li data-name="GridStore.DEFAULT_ROOT_COLLECTION"><a href="GridStore.html#.DEFAULT_ROOT_COLLECTION">DEFAULT_ROOT_COLLECTION</a></li>
+            
+                <li data-name="GridStore.IO_SEEK_CUR"><a href="GridStore.html#.IO_SEEK_CUR">IO_SEEK_CUR</a></li>
+            
+                <li data-name="GridStore.IO_SEEK_END"><a href="GridStore.html#.IO_SEEK_END">IO_SEEK_END</a></li>
+            
+                <li data-name="GridStore.IO_SEEK_SET"><a href="GridStore.html#.IO_SEEK_SET">IO_SEEK_SET</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="GridStore~collectionCallback"><a href="GridStore.html#~collectionCallback">collectionCallback</a></li>
+            
+                <li data-name="GridStore~gridStoreCallback"><a href="GridStore.html#~gridStoreCallback">gridStoreCallback</a></li>
+            
+                <li data-name="GridStore~openCallback"><a href="GridStore.html#~openCallback">openCallback</a></li>
+            
+                <li data-name="GridStore~readCallback"><a href="GridStore.html#~readCallback">readCallback</a></li>
+            
+                <li data-name="GridStore~readlinesCallback"><a href="GridStore.html#~readlinesCallback">readlinesCallback</a></li>
+            
+                <li data-name="GridStore~resultCallback"><a href="GridStore.html#~resultCallback">resultCallback</a></li>
+            
+                <li data-name="GridStore~tellCallback"><a href="GridStore.html#~tellCallback">tellCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="GridStore.exist"><a href="GridStore.html#.exist">exist</a></li>
+            
+                <li data-name="GridStore.list"><a href="GridStore.html#.list">list</a></li>
+            
+                <li data-name="GridStore.read"><a href="GridStore.html#.read">read</a></li>
+            
+                <li data-name="GridStore.readlines"><a href="GridStore.html#.readlines">readlines</a></li>
+            
+                <li data-name="GridStore.unlink"><a href="GridStore.html#.unlink">unlink</a></li>
+            
+                <li data-name="GridStore#chunkCollection"><a href="GridStore.html#chunkCollection">chunkCollection</a></li>
+            
+                <li data-name="GridStore#close"><a href="GridStore.html#close">close</a></li>
+            
+                <li data-name="GridStore#collection"><a href="GridStore.html#collection">collection</a></li>
+            
+                <li data-name="GridStore#destroy"><a href="GridStore.html#destroy">destroy</a></li>
+            
+                <li data-name="GridStore#eof"><a href="GridStore.html#eof">eof</a></li>
+            
+                <li data-name="GridStore#getc"><a href="GridStore.html#getc">getc</a></li>
+            
+                <li data-name="GridStore#open"><a href="GridStore.html#open">open</a></li>
+            
+                <li data-name="GridStore#puts"><a href="GridStore.html#puts">puts</a></li>
+            
+                <li data-name="GridStore#read"><a href="GridStore.html#read">read</a></li>
+            
+                <li data-name="GridStore#readlines"><a href="GridStore.html#readlines">readlines</a></li>
+            
+                <li data-name="GridStore#rewind"><a href="GridStore.html#rewind">rewind</a></li>
+            
+                <li data-name="GridStore#seek"><a href="GridStore.html#seek">seek</a></li>
+            
+                <li data-name="GridStore#stream"><a href="GridStore.html#stream">stream</a></li>
+            
+                <li data-name="GridStore#tell"><a href="GridStore.html#tell">tell</a></li>
+            
+                <li data-name="GridStore#unlink"><a href="GridStore.html#unlink">unlink</a></li>
+            
+                <li data-name="GridStore#write"><a href="GridStore.html#write">write</a></li>
+            
+                <li data-name="GridStore#writeFile"><a href="GridStore.html#writeFile">writeFile</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="GridStoreStream">
+            <span class="title">
+                <a href="GridStoreStream.html">GridStoreStream</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="GridStoreStream#end"><a href="GridStoreStream.html#end">end</a></li>
+            
+                <li data-name="GridStoreStream#pause"><a href="GridStoreStream.html#pause">pause</a></li>
+            
+                <li data-name="GridStoreStream#pipe"><a href="GridStoreStream.html#pipe">pipe</a></li>
+            
+                <li data-name="GridStoreStream#read"><a href="GridStoreStream.html#read">read</a></li>
+            
+                <li data-name="GridStoreStream#resume"><a href="GridStoreStream.html#resume">resume</a></li>
+            
+                <li data-name="GridStoreStream#setEncoding"><a href="GridStoreStream.html#setEncoding">setEncoding</a></li>
+            
+                <li data-name="GridStoreStream#unpipe"><a href="GridStoreStream.html#unpipe">unpipe</a></li>
+            
+                <li data-name="GridStoreStream#unshift"><a href="GridStoreStream.html#unshift">unshift</a></li>
+            
+                <li data-name="GridStoreStream#wrap"><a href="GridStoreStream.html#wrap">wrap</a></li>
+            
+                <li data-name="GridStoreStream#write"><a href="GridStoreStream.html#write">write</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="GridStoreStream#event:close"><a href="GridStoreStream.html#event:close">close</a></li>
+            
+                <li data-name="GridStoreStream#event:data"><a href="GridStoreStream.html#event:data">data</a></li>
+            
+                <li data-name="GridStoreStream#event:drain"><a href="GridStoreStream.html#event:drain">drain</a></li>
+            
+                <li data-name="GridStoreStream#event:end"><a href="GridStoreStream.html#event:end">end</a></li>
+            
+                <li data-name="GridStoreStream#event:error"><a href="GridStoreStream.html#event:error">error</a></li>
+            
+                <li data-name="GridStoreStream#event:finish"><a href="GridStoreStream.html#event:finish">finish</a></li>
+            
+                <li data-name="GridStoreStream#event:pipe"><a href="GridStoreStream.html#event:pipe">pipe</a></li>
+            
+                <li data-name="GridStoreStream#event:readable"><a href="GridStoreStream.html#event:readable">readable</a></li>
+            
+                <li data-name="GridStoreStream#event:unpipe"><a href="GridStoreStream.html#event:unpipe">unpipe</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Int32">
+            <span class="title">
+                <a href="Int32.html">Int32</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Int32#valueOf"><a href="Int32.html#valueOf">valueOf</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Logger">
+            <span class="title">
+                <a href="Logger.html">Logger</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Logger.currentLogger"><a href="Logger.html#.currentLogger">currentLogger</a></li>
+            
+                <li data-name="Logger.filter"><a href="Logger.html#.filter">filter</a></li>
+            
+                <li data-name="Logger.reset"><a href="Logger.html#.reset">reset</a></li>
+            
+                <li data-name="Logger.setCurrentLogger"><a href="Logger.html#.setCurrentLogger">setCurrentLogger</a></li>
+            
+                <li data-name="Logger.setLevel"><a href="Logger.html#.setLevel">setLevel</a></li>
+            
+                <li data-name="Logger#debug"><a href="Logger.html#debug">debug</a></li>
+            
+                <li data-name="Logger#error"><a href="Logger.html#error">error</a></li>
+            
+                <li data-name="Logger#info"><a href="Logger.html#info">info</a></li>
+            
+                <li data-name="Logger#isDebug"><a href="Logger.html#isDebug">isDebug</a></li>
+            
+                <li data-name="Logger#isError"><a href="Logger.html#isError">isError</a></li>
+            
+                <li data-name="Logger#isInfo"><a href="Logger.html#isInfo">isInfo</a></li>
+            
+                <li data-name="Logger#isWarn"><a href="Logger.html#isWarn">isWarn</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Long">
+            <span class="title">
+                <a href="Long.html">Long</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="Long.MAX_VALUE"><a href="Long.html#.MAX_VALUE">MAX_VALUE</a></li>
+            
+                <li data-name="Long.MIN_VALUE"><a href="Long.html#.MIN_VALUE">MIN_VALUE</a></li>
+            
+                <li data-name="Long.NEG_ONE"><a href="Long.html#.NEG_ONE">NEG_ONE</a></li>
+            
+                <li data-name="Long.ONE"><a href="Long.html#.ONE">ONE</a></li>
+            
+                <li data-name="Long.ZERO"><a href="Long.html#.ZERO">ZERO</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Long.fromBits"><a href="Long.html#.fromBits">fromBits</a></li>
+            
+                <li data-name="Long.fromInt"><a href="Long.html#.fromInt">fromInt</a></li>
+            
+                <li data-name="Long.fromNumber"><a href="Long.html#.fromNumber">fromNumber</a></li>
+            
+                <li data-name="Long.fromString"><a href="Long.html#.fromString">fromString</a></li>
+            
+                <li data-name="Long#add"><a href="Long.html#add">add</a></li>
+            
+                <li data-name="Long#and"><a href="Long.html#and">and</a></li>
+            
+                <li data-name="Long#compare"><a href="Long.html#compare">compare</a></li>
+            
+                <li data-name="Long#div"><a href="Long.html#div">div</a></li>
+            
+                <li data-name="Long#equals"><a href="Long.html#equals">equals</a></li>
+            
+                <li data-name="Long#getHighBits"><a href="Long.html#getHighBits">getHighBits</a></li>
+            
+                <li data-name="Long#getLowBits"><a href="Long.html#getLowBits">getLowBits</a></li>
+            
+                <li data-name="Long#getLowBitsUnsigned"><a href="Long.html#getLowBitsUnsigned">getLowBitsUnsigned</a></li>
+            
+                <li data-name="Long#getNumBitsAbs"><a href="Long.html#getNumBitsAbs">getNumBitsAbs</a></li>
+            
+                <li data-name="Long#greaterThan"><a href="Long.html#greaterThan">greaterThan</a></li>
+            
+                <li data-name="Long#greaterThanOrEqual"><a href="Long.html#greaterThanOrEqual">greaterThanOrEqual</a></li>
+            
+                <li data-name="Long#isNegative"><a href="Long.html#isNegative">isNegative</a></li>
+            
+                <li data-name="Long#isOdd"><a href="Long.html#isOdd">isOdd</a></li>
+            
+                <li data-name="Long#isZero"><a href="Long.html#isZero">isZero</a></li>
+            
+                <li data-name="Long#lessThan"><a href="Long.html#lessThan">lessThan</a></li>
+            
+                <li data-name="Long#lessThanOrEqual"><a href="Long.html#lessThanOrEqual">lessThanOrEqual</a></li>
+            
+                <li data-name="Long#modulo"><a href="Long.html#modulo">modulo</a></li>
+            
+                <li data-name="Long#multiply"><a href="Long.html#multiply">multiply</a></li>
+            
+                <li data-name="Long#negate"><a href="Long.html#negate">negate</a></li>
+            
+                <li data-name="Long#not"><a href="Long.html#not">not</a></li>
+            
+                <li data-name="Long#notEquals"><a href="Long.html#notEquals">notEquals</a></li>
+            
+                <li data-name="Long#or"><a href="Long.html#or">or</a></li>
+            
+                <li data-name="Long#shiftLeft"><a href="Long.html#shiftLeft">shiftLeft</a></li>
+            
+                <li data-name="Long#shiftRight"><a href="Long.html#shiftRight">shiftRight</a></li>
+            
+                <li data-name="Long#shiftRightUnsigned"><a href="Long.html#shiftRightUnsigned">shiftRightUnsigned</a></li>
+            
+                <li data-name="Long#subtract"><a href="Long.html#subtract">subtract</a></li>
+            
+                <li data-name="Long#toInt"><a href="Long.html#toInt">toInt</a></li>
+            
+                <li data-name="Long#toJSON"><a href="Long.html#toJSON">toJSON</a></li>
+            
+                <li data-name="Long#toNumber"><a href="Long.html#toNumber">toNumber</a></li>
+            
+                <li data-name="Long#toString"><a href="Long.html#toString">toString</a></li>
+            
+                <li data-name="Long#xor"><a href="Long.html#xor">xor</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MaxKey">
+            <span class="title">
+                <a href="MaxKey.html">MaxKey</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MinKey">
+            <span class="title">
+                <a href="MinKey.html">MinKey</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoClient">
+            <span class="title">
+                <a href="MongoClient.html">MongoClient</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="MongoClient~connectCallback"><a href="MongoClient.html#~connectCallback">connectCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="MongoClient.connect"><a href="MongoClient.html#.connect">connect</a></li>
+            
+                <li data-name="MongoClient#close"><a href="MongoClient.html#close">close</a></li>
+            
+                <li data-name="MongoClient#connect"><a href="MongoClient.html#connect">connect</a></li>
+            
+                <li data-name="MongoClient#db"><a href="MongoClient.html#db">db</a></li>
+            
+                <li data-name="MongoClient#isConnected"><a href="MongoClient.html#isConnected">isConnected</a></li>
+            
+                <li data-name="MongoClient#logout"><a href="MongoClient.html#logout">logout</a></li>
+            
+                <li data-name="MongoClient#startSession"><a href="MongoClient.html#startSession">startSession</a></li>
+            
+                <li data-name="MongoClient#watch"><a href="MongoClient.html#watch">watch</a></li>
+            
+                <li data-name="MongoClient#withSession"><a href="MongoClient.html#withSession">withSession</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoError">
+            <span class="title">
+                <a href="MongoError.html">MongoError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="MongoError.create"><a href="MongoError.html#.create">create</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoNetworkError">
+            <span class="title">
+                <a href="MongoNetworkError.html">MongoNetworkError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoParseError">
+            <span class="title">
+                <a href="MongoParseError.html">MongoParseError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Mongos">
+            <span class="title">
+                <a href="Mongos.html">Mongos</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="Mongos#event:close"><a href="Mongos.html#event:close">close</a></li>
+            
+                <li data-name="Mongos#event:commandFailed"><a href="Mongos.html#event:commandFailed">commandFailed</a></li>
+            
+                <li data-name="Mongos#event:commandStarted"><a href="Mongos.html#event:commandStarted">commandStarted</a></li>
+            
+                <li data-name="Mongos#event:commandSucceeded"><a href="Mongos.html#event:commandSucceeded">commandSucceeded</a></li>
+            
+                <li data-name="Mongos#event:connect"><a href="Mongos.html#event:connect">connect</a></li>
+            
+                <li data-name="Mongos#event:error"><a href="Mongos.html#event:error">error</a></li>
+            
+                <li data-name="Mongos#event:fullsetup"><a href="Mongos.html#event:fullsetup">fullsetup</a></li>
+            
+                <li data-name="Mongos#event:ha"><a href="Mongos.html#event:ha">ha</a></li>
+            
+                <li data-name="Mongos#event:joined"><a href="Mongos.html#event:joined">joined</a></li>
+            
+                <li data-name="Mongos#event:left"><a href="Mongos.html#event:left">left</a></li>
+            
+                <li data-name="Mongos#event:open"><a href="Mongos.html#event:open">open</a></li>
+            
+                <li data-name="Mongos#event:parseError"><a href="Mongos.html#event:parseError">parseError</a></li>
+            
+                <li data-name="Mongos#event:timeout"><a href="Mongos.html#event:timeout">timeout</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoTimeoutError">
+            <span class="title">
+                <a href="MongoTimeoutError.html">MongoTimeoutError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoWriteConcernError">
+            <span class="title">
+                <a href="MongoWriteConcernError.html">MongoWriteConcernError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="ObjectID">
+            <span class="title">
+                <a href="ObjectID.html">ObjectID</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="ObjectID.createFromHexString"><a href="ObjectID.html#.createFromHexString">createFromHexString</a></li>
+            
+                <li data-name="ObjectID.createFromTime"><a href="ObjectID.html#.createFromTime">createFromTime</a></li>
+            
+                <li data-name="ObjectID.isValid"><a href="ObjectID.html#.isValid">isValid</a></li>
+            
+                <li data-name="ObjectID#equals"><a href="ObjectID.html#equals">equals</a></li>
+            
+                <li data-name="ObjectID#generate"><a href="ObjectID.html#generate">generate</a></li>
+            
+                <li data-name="ObjectID#getTimestamp"><a href="ObjectID.html#getTimestamp">getTimestamp</a></li>
+            
+                <li data-name="ObjectID#toHexString"><a href="ObjectID.html#toHexString">toHexString</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="OrderedBulkOperation">
+            <span class="title">
+                <a href="OrderedBulkOperation.html">OrderedBulkOperation</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="OrderedBulkOperation~resultCallback"><a href="OrderedBulkOperation.html#~resultCallback">resultCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="OrderedBulkOperation#execute"><a href="OrderedBulkOperation.html#execute">execute</a></li>
+            
+                <li data-name="OrderedBulkOperation#find"><a href="OrderedBulkOperation.html#find">find</a></li>
+            
+                <li data-name="OrderedBulkOperation#insert"><a href="OrderedBulkOperation.html#insert">insert</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="ReplSet">
+            <span class="title">
+                <a href="ReplSet.html">ReplSet</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="ReplSet#event:close"><a href="ReplSet.html#event:close">close</a></li>
+            
+                <li data-name="ReplSet#event:commandFailed"><a href="ReplSet.html#event:commandFailed">commandFailed</a></li>
+            
+                <li data-name="ReplSet#event:commandStarted"><a href="ReplSet.html#event:commandStarted">commandStarted</a></li>
+            
+                <li data-name="ReplSet#event:commandSucceeded"><a href="ReplSet.html#event:commandSucceeded">commandSucceeded</a></li>
+            
+                <li data-name="ReplSet#event:connect"><a href="ReplSet.html#event:connect">connect</a></li>
+            
+                <li data-name="ReplSet#event:error"><a href="ReplSet.html#event:error">error</a></li>
+            
+                <li data-name="ReplSet#event:fullsetup"><a href="ReplSet.html#event:fullsetup">fullsetup</a></li>
+            
+                <li data-name="ReplSet#event:ha"><a href="ReplSet.html#event:ha">ha</a></li>
+            
+                <li data-name="ReplSet#event:joined"><a href="ReplSet.html#event:joined">joined</a></li>
+            
+                <li data-name="ReplSet#event:left"><a href="ReplSet.html#event:left">left</a></li>
+            
+                <li data-name="ReplSet#event:open"><a href="ReplSet.html#event:open">open</a></li>
+            
+                <li data-name="ReplSet#event:parseError"><a href="ReplSet.html#event:parseError">parseError</a></li>
+            
+                <li data-name="ReplSet#event:timeout"><a href="ReplSet.html#event:timeout">timeout</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Server">
+            <span class="title">
+                <a href="Server.html">Server</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="Server#event:close"><a href="Server.html#event:close">close</a></li>
+            
+                <li data-name="Server#event:commandFailed"><a href="Server.html#event:commandFailed">commandFailed</a></li>
+            
+                <li data-name="Server#event:commandStarted"><a href="Server.html#event:commandStarted">commandStarted</a></li>
+            
+                <li data-name="Server#event:commandSucceeded"><a href="Server.html#event:commandSucceeded">commandSucceeded</a></li>
+            
+                <li data-name="Server#event:connect"><a href="Server.html#event:connect">connect</a></li>
+            
+                <li data-name="Server#event:error"><a href="Server.html#event:error">error</a></li>
+            
+                <li data-name="Server#event:parseError"><a href="Server.html#event:parseError">parseError</a></li>
+            
+                <li data-name="Server#event:reconnect"><a href="Server.html#event:reconnect">reconnect</a></li>
+            
+                <li data-name="Server#event:timeout"><a href="Server.html#event:timeout">timeout</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Symbol">
+            <span class="title">
+                <a href="Symbol.html">Symbol</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Symbol#valueOf"><a href="Symbol.html#valueOf">valueOf</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Timestamp">
+            <span class="title">
+                <a href="Timestamp.html">Timestamp</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="Timestamp.MAX_VALUE"><a href="Timestamp.html#.MAX_VALUE">MAX_VALUE</a></li>
+            
+                <li data-name="Timestamp.MIN_VALUE"><a href="Timestamp.html#.MIN_VALUE">MIN_VALUE</a></li>
+            
+                <li data-name="Timestamp.NEG_ONE"><a href="Timestamp.html#.NEG_ONE">NEG_ONE</a></li>
+            
+                <li data-name="Timestamp.ONE"><a href="Timestamp.html#.ONE">ONE</a></li>
+            
+                <li data-name="Timestamp.ZERO"><a href="Timestamp.html#.ZERO">ZERO</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Timestamp.fromBits"><a href="Timestamp.html#.fromBits">fromBits</a></li>
+            
+                <li data-name="Timestamp.fromInt"><a href="Timestamp.html#.fromInt">fromInt</a></li>
+            
+                <li data-name="Timestamp.fromNumber"><a href="Timestamp.html#.fromNumber">fromNumber</a></li>
+            
+                <li data-name="Timestamp.fromString"><a href="Timestamp.html#.fromString">fromString</a></li>
+            
+                <li data-name="Timestamp#add"><a href="Timestamp.html#add">add</a></li>
+            
+                <li data-name="Timestamp#and"><a href="Timestamp.html#and">and</a></li>
+            
+                <li data-name="Timestamp#compare"><a href="Timestamp.html#compare">compare</a></li>
+            
+                <li data-name="Timestamp#div"><a href="Timestamp.html#div">div</a></li>
+            
+                <li data-name="Timestamp#equals"><a href="Timestamp.html#equals">equals</a></li>
+            
+                <li data-name="Timestamp#getHighBits"><a href="Timestamp.html#getHighBits">getHighBits</a></li>
+            
+                <li data-name="Timestamp#getLowBits"><a href="Timestamp.html#getLowBits">getLowBits</a></li>
+            
+                <li data-name="Timestamp#getLowBitsUnsigned"><a href="Timestamp.html#getLowBitsUnsigned">getLowBitsUnsigned</a></li>
+            
+                <li data-name="Timestamp#getNumBitsAbs"><a href="Timestamp.html#getNumBitsAbs">getNumBitsAbs</a></li>
+            
+                <li data-name="Timestamp#greaterThan"><a href="Timestamp.html#greaterThan">greaterThan</a></li>
+            
+                <li data-name="Timestamp#greaterThanOrEqual"><a href="Timestamp.html#greaterThanOrEqual">greaterThanOrEqual</a></li>
+            
+                <li data-name="Timestamp#isNegative"><a href="Timestamp.html#isNegative">isNegative</a></li>
+            
+                <li data-name="Timestamp#isOdd"><a href="Timestamp.html#isOdd">isOdd</a></li>
+            
+                <li data-name="Timestamp#isZero"><a href="Timestamp.html#isZero">isZero</a></li>
+            
+                <li data-name="Timestamp#lessThan"><a href="Timestamp.html#lessThan">lessThan</a></li>
+            
+                <li data-name="Timestamp#lessThanOrEqual"><a href="Timestamp.html#lessThanOrEqual">lessThanOrEqual</a></li>
+            
+                <li data-name="Timestamp#modulo"><a href="Timestamp.html#modulo">modulo</a></li>
+            
+                <li data-name="Timestamp#multiply"><a href="Timestamp.html#multiply">multiply</a></li>
+            
+                <li data-name="Timestamp#negate"><a href="Timestamp.html#negate">negate</a></li>
+            
+                <li data-name="Timestamp#not"><a href="Timestamp.html#not">not</a></li>
+            
+                <li data-name="Timestamp#notEquals"><a href="Timestamp.html#notEquals">notEquals</a></li>
+            
+                <li data-name="Timestamp#or"><a href="Timestamp.html#or">or</a></li>
+            
+                <li data-name="Timestamp#shiftLeft"><a href="Timestamp.html#shiftLeft">shiftLeft</a></li>
+            
+                <li data-name="Timestamp#shiftRight"><a href="Timestamp.html#shiftRight">shiftRight</a></li>
+            
+                <li data-name="Timestamp#shiftRightUnsigned"><a href="Timestamp.html#shiftRightUnsigned">shiftRightUnsigned</a></li>
+            
+                <li data-name="Timestamp#subtract"><a href="Timestamp.html#subtract">subtract</a></li>
+            
+                <li data-name="Timestamp#toInt"><a href="Timestamp.html#toInt">toInt</a></li>
+            
+                <li data-name="Timestamp#toJSON"><a href="Timestamp.html#toJSON">toJSON</a></li>
+            
+                <li data-name="Timestamp#toNumber"><a href="Timestamp.html#toNumber">toNumber</a></li>
+            
+                <li data-name="Timestamp#toString"><a href="Timestamp.html#toString">toString</a></li>
+            
+                <li data-name="Timestamp#xor"><a href="Timestamp.html#xor">xor</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="UnorderedBulkOperation">
+            <span class="title">
+                <a href="UnorderedBulkOperation.html">UnorderedBulkOperation</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="UnorderedBulkOperation~resultCallback"><a href="UnorderedBulkOperation.html#~resultCallback">resultCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="UnorderedBulkOperation#execute"><a href="UnorderedBulkOperation.html#execute">execute</a></li>
+            
+                <li data-name="UnorderedBulkOperation#find"><a href="UnorderedBulkOperation.html#find">find</a></li>
+            
+                <li data-name="UnorderedBulkOperation#insert"><a href="UnorderedBulkOperation.html#insert">insert</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="WriteConcernError">
+            <span class="title">
+                <a href="WriteConcernError.html">WriteConcernError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="WriteError">
+            <span class="title">
+                <a href="WriteError.html">WriteError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+    </ul>
+</div>
+            </td>
+            <td valign='top'>        
+                <div class="main">
+                    <h1 class="page-title" data-filename="lib_collection.js.html">Source: lib/collection.js</h1>
+                    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
+
+const deprecate = require('util').deprecate;
+const checkCollectionName = require('./utils').checkCollectionName;
+const ObjectID = require('mongodb-core').BSON.ObjectID;
+const AggregationCursor = require('./aggregation_cursor');
+const MongoError = require('mongodb-core').MongoError;
+const toError = require('./utils').toError;
+const normalizeHintField = require('./utils').normalizeHintField;
+const handleCallback = require('./utils').handleCallback;
+const decorateWithCollation = require('./utils').decorateWithCollation;
+const decorateWithReadConcern = require('./utils').decorateWithReadConcern;
+const formattedOrderClause = require('./utils').formattedOrderClause;
+const ReadPreference = require('mongodb-core').ReadPreference;
+const CommandCursor = require('./command_cursor');
+const unordered = require('./bulk/unordered');
+const ordered = require('./bulk/ordered');
+const ChangeStream = require('./change_stream');
+const executeOperation = require('./utils').executeOperation;
+const applyWriteConcern = require('./utils').applyWriteConcern;
+const resolveReadPreference = require('./utils').resolveReadPreference;
+
+// Operations
+const bulkWrite = require('./operations/collection_ops').bulkWrite;
+const checkForAtomicOperators = require('./operations/collection_ops').checkForAtomicOperators;
+const count = require('./operations/collection_ops').count;
+const countDocuments = require('./operations/collection_ops').countDocuments;
+const createIndex = require('./operations/collection_ops').createIndex;
+const createIndexes = require('./operations/collection_ops').createIndexes;
+const deleteMany = require('./operations/collection_ops').deleteMany;
+const deleteOne = require('./operations/collection_ops').deleteOne;
+const distinct = require('./operations/collection_ops').distinct;
+const dropIndex = require('./operations/collection_ops').dropIndex;
+const dropIndexes = require('./operations/collection_ops').dropIndexes;
+const ensureIndex = require('./operations/collection_ops').ensureIndex;
+const findAndModify = require('./operations/collection_ops').findAndModify;
+const findAndRemove = require('./operations/collection_ops').findAndRemove;
+const findOne = require('./operations/collection_ops').findOne;
+const findOneAndDelete = require('./operations/collection_ops').findOneAndDelete;
+const findOneAndReplace = require('./operations/collection_ops').findOneAndReplace;
+const findOneAndUpdate = require('./operations/collection_ops').findOneAndUpdate;
+const geoHaystackSearch = require('./operations/collection_ops').geoHaystackSearch;
+const group = require('./operations/collection_ops').group;
+const indexes = require('./operations/collection_ops').indexes;
+const indexExists = require('./operations/collection_ops').indexExists;
+const indexInformation = require('./operations/collection_ops').indexInformation;
+const insertOne = require('./operations/collection_ops').insertOne;
+const isCapped = require('./operations/collection_ops').isCapped;
+const mapReduce = require('./operations/collection_ops').mapReduce;
+const optionsOp = require('./operations/collection_ops').optionsOp;
+const parallelCollectionScan = require('./operations/collection_ops').parallelCollectionScan;
+const prepareDocs = require('./operations/collection_ops').prepareDocs;
+const reIndex = require('./operations/collection_ops').reIndex;
+const removeDocuments = require('./operations/collection_ops').removeDocuments;
+const rename = require('./operations/collection_ops').rename;
+const replaceOne = require('./operations/collection_ops').replaceOne;
+const save = require('./operations/collection_ops').save;
+const stats = require('./operations/collection_ops').stats;
+const updateDocuments = require('./operations/collection_ops').updateDocuments;
+const updateMany = require('./operations/collection_ops').updateMany;
+const updateOne = require('./operations/collection_ops').updateOne;
+
+/**
+ * @fileOverview The **Collection** class is an internal class that embodies a MongoDB collection
+ * allowing for insert/update/remove/find and other command operation on that MongoDB collection.
+ *
+ * **COLLECTION Cannot directly be instantiated**
+ * @example
+ * const MongoClient = require('mongodb').MongoClient;
+ * const test = require('assert');
+ * // Connection url
+ * const url = 'mongodb://localhost:27017';
+ * // Database Name
+ * const dbName = 'test';
+ * // Connect using MongoClient
+ * MongoClient.connect(url, function(err, client) {
+ *   // Create a collection we want to drop later
+ *   const col = client.db(dbName).collection('createIndexExample1');
+ *   // Show that duplicate records got dropped
+ *   col.find({}).toArray(function(err, items) {
+ *     test.equal(null, err);
+ *     test.equal(4, items.length);
+ *     client.close();
+ *   });
+ * });
+ */
+
+const mergeKeys = ['ignoreUndefined'];
+
+/**
+ * Create a new Collection instance (INTERNAL TYPE, do not instantiate directly)
+ * @class
+ * @property {string} collectionName Get the collection name.
+ * @property {string} namespace Get the full collection namespace.
+ * @property {object} writeConcern The current write concern values.
+ * @property {object} readConcern The current read concern values.
+ * @property {object} hint Get current index hint for collection.
+ * @return {Collection} a Collection instance.
+ */
+function Collection(db, topology, dbName, name, pkFactory, options) {
+  checkCollectionName(name);
+
+  // Unpack variables
+  const internalHint = null;
+  const slaveOk = options == null || options.slaveOk == null ? db.slaveOk : options.slaveOk;
+  const serializeFunctions =
+    options == null || options.serializeFunctions == null
+      ? db.s.options.serializeFunctions
+      : options.serializeFunctions;
+  const raw = options == null || options.raw == null ? db.s.options.raw : options.raw;
+  const promoteLongs =
+    options == null || options.promoteLongs == null
+      ? db.s.options.promoteLongs
+      : options.promoteLongs;
+  const promoteValues =
+    options == null || options.promoteValues == null
+      ? db.s.options.promoteValues
+      : options.promoteValues;
+  const promoteBuffers =
+    options == null || options.promoteBuffers == null
+      ? db.s.options.promoteBuffers
+      : options.promoteBuffers;
+  let readPreference = null;
+  const collectionHint = null;
+  const namespace = `${dbName}.${name}`;
+
+  // Get the promiseLibrary
+  const promiseLibrary = options.promiseLibrary || Promise;
+
+  // Assign the right collection level readPreference
+  if (options &amp;&amp; options.readPreference) {
+    readPreference = options.readPreference;
+  } else if (db.options.readPreference) {
+    readPreference = db.options.readPreference;
+  }
+
+  // Set custom primary key factory if provided
+  pkFactory = pkFactory == null ? ObjectID : pkFactory;
+
+  // Internal state
+  this.s = {
+    // Set custom primary key factory if provided
+    pkFactory: pkFactory,
+    // Db
+    db: db,
+    // Topology
+    topology: topology,
+    // dbName
+    dbName: dbName,
+    // Options
+    options: options,
+    // Namespace
+    namespace: namespace,
+    // Read preference
+    readPreference: readPreference,
+    // SlaveOK
+    slaveOk: slaveOk,
+    // Serialize functions
+    serializeFunctions: serializeFunctions,
+    // Raw
+    raw: raw,
+    // promoteLongs
+    promoteLongs: promoteLongs,
+    // promoteValues
+    promoteValues: promoteValues,
+    // promoteBuffers
+    promoteBuffers: promoteBuffers,
+    // internalHint
+    internalHint: internalHint,
+    // collectionHint
+    collectionHint: collectionHint,
+    // Name
+    name: name,
+    // Promise library
+    promiseLibrary: promiseLibrary,
+    // Read Concern
+    readConcern: options.readConcern,
+    // Write Concern
+    writeConcern: options.writeConcern
+  };
+}
+
+Object.defineProperty(Collection.prototype, 'dbName', {
+  enumerable: true,
+  get: function() {
+    return this.s.dbName;
+  }
+});
+
+Object.defineProperty(Collection.prototype, 'collectionName', {
+  enumerable: true,
+  get: function() {
+    return this.s.name;
+  }
+});
+
+Object.defineProperty(Collection.prototype, 'namespace', {
+  enumerable: true,
+  get: function() {
+    return this.s.namespace;
+  }
+});
+
+Object.defineProperty(Collection.prototype, 'readConcern', {
+  enumerable: true,
+  get: function() {
+    return this.s.readConcern || { level: 'local' };
+  }
+});
+
+Object.defineProperty(Collection.prototype, 'writeConcern', {
+  enumerable: true,
+  get: function() {
+    let ops = {};
+    if (this.s.writeConcern) {
+      return this.s.writeConcern;
+    }
+
+    if (this.s.options.w != null) ops.w = this.s.options.w;
+    if (this.s.options.j != null) ops.j = this.s.options.j;
+    if (this.s.options.fsync != null) ops.fsync = this.s.options.fsync;
+    if (this.s.options.wtimeout != null) ops.wtimeout = this.s.options.wtimeout;
+    return ops;
+  }
+});
+
+/**
+ * @ignore
+ */
+Object.defineProperty(Collection.prototype, 'hint', {
+  enumerable: true,
+  get: function() {
+    return this.s.collectionHint;
+  },
+  set: function(v) {
+    this.s.collectionHint = normalizeHintField(v);
+  }
+});
+
+const DEPRECATED_FIND_OPTIONS = ['maxScan', 'snapshot'];
+
+/**
+ * Creates a cursor for a query that can be used to iterate over results from MongoDB
+ * @method
+ * @param {object} [query={}] The cursor query object.
+ * @param {object} [options] Optional settings.
+ * @param {number} [options.limit=0] Sets the limit of documents returned in the query.
+ * @param {(array|object)} [options.sort] Set to sort the documents coming back from the query. Array of indexes, [['a', 1]] etc.
+ * @param {object} [options.projection] The fields to return in the query. Object of fields to include or exclude (not both), {'a':1}
+ * @param {object} [options.fields] **Deprecated** Use `options.projection` instead
+ * @param {number} [options.skip=0] Set to skip N documents ahead in your query (useful for pagination).
+ * @param {Object} [options.hint] Tell the query to use specific indexes in the query. Object of indexes to use, {'_id':1}
+ * @param {boolean} [options.explain=false] Explain the query instead of returning the data.
+ * @param {boolean} [options.snapshot=false] DEPRECATED: Snapshot query.
+ * @param {boolean} [options.timeout=false] Specify if the cursor can timeout.
+ * @param {boolean} [options.tailable=false] Specify if the cursor is tailable.
+ * @param {number} [options.batchSize=0] Set the batchSize for the getMoreCommand when iterating over the query results.
+ * @param {boolean} [options.returnKey=false] Only return the index key.
+ * @param {number} [options.maxScan] DEPRECATED: Limit the number of items to scan.
+ * @param {number} [options.min] Set index bounds.
+ * @param {number} [options.max] Set index bounds.
+ * @param {boolean} [options.showDiskLoc=false] Show disk location of results.
+ * @param {string} [options.comment] You can put a $comment field on a query to make looking in the profiler logs simpler.
+ * @param {boolean} [options.raw=false] Return document results as raw BSON buffers.
+ * @param {boolean} [options.promoteLongs=true] Promotes Long values to number if they fit inside the 53 bits resolution.
+ * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
+ * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
+ * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ * @param {boolean} [options.partial=false] Specify if the cursor should return partial results when querying against a sharded system
+ * @param {number} [options.maxTimeMS] Number of miliseconds to wait before aborting the query.
+ * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Collection.prototype.find = function(query, options, callback) {
+  if (typeof callback === 'object') {
+    // TODO(MAJOR): throw in the future
+    console.warn('Third parameter to `find()` must be a callback or undefined');
+  }
+
+  let selector = query;
+  // figuring out arguments
+  if (typeof callback !== 'function') {
+    if (typeof options === 'function') {
+      callback = options;
+      options = undefined;
+    } else if (options == null) {
+      callback = typeof selector === 'function' ? selector : undefined;
+      selector = typeof selector === 'object' ? selector : undefined;
+    }
+  }
+
+  // Ensure selector is not null
+  selector = selector == null ? {} : selector;
+  // Validate correctness off the selector
+  const object = selector;
+  if (Buffer.isBuffer(object)) {
+    const object_size = object[0] | (object[1] &lt;&lt; 8) | (object[2] &lt;&lt; 16) | (object[3] &lt;&lt; 24);
+    if (object_size !== object.length) {
+      const error = new Error(
+        'query selector raw message size does not match message header size [' +
+          object.length +
+          '] != [' +
+          object_size +
+          ']'
+      );
+      error.name = 'MongoError';
+      throw error;
+    }
+  }
+
+  // Check special case where we are using an objectId
+  if (selector != null &amp;&amp; selector._bsontype === 'ObjectID') {
+    selector = { _id: selector };
+  }
+
+  if (!options) options = {};
+
+  let projection = options.projection || options.fields;
+
+  if (projection &amp;&amp; !Buffer.isBuffer(projection) &amp;&amp; Array.isArray(projection)) {
+    projection = projection.length
+      ? projection.reduce((result, field) => {
+          result[field] = 1;
+          return result;
+        }, {})
+      : { _id: 1 };
+  }
+
+  // Make a shallow copy of options
+  let newOptions = Object.assign({}, options);
+
+  // Make a shallow copy of the collection options
+  for (let key in this.s.options) {
+    if (mergeKeys.indexOf(key) !== -1) {
+      newOptions[key] = this.s.options[key];
+    }
+  }
+
+  // Unpack options
+  newOptions.skip = options.skip ? options.skip : 0;
+  newOptions.limit = options.limit ? options.limit : 0;
+  newOptions.raw = typeof options.raw === 'boolean' ? options.raw : this.s.raw;
+  newOptions.hint = options.hint != null ? normalizeHintField(options.hint) : this.s.collectionHint;
+  newOptions.timeout = typeof options.timeout === 'undefined' ? undefined : options.timeout;
+  // // If we have overridden slaveOk otherwise use the default db setting
+  newOptions.slaveOk = options.slaveOk != null ? options.slaveOk : this.s.db.slaveOk;
+
+  // Add read preference if needed
+  newOptions.readPreference = resolveReadPreference(newOptions, {
+    db: this.s.db,
+    collection: this
+  });
+
+  // Set slave ok to true if read preference different from primary
+  if (
+    newOptions.readPreference != null &amp;&amp;
+    (newOptions.readPreference !== 'primary' || newOptions.readPreference.mode !== 'primary')
+  ) {
+    newOptions.slaveOk = true;
+  }
+
+  // Ensure the query is an object
+  if (selector != null &amp;&amp; typeof selector !== 'object') {
+    throw MongoError.create({ message: 'query selector must be an object', driver: true });
+  }
+
+  // Build the find command
+  const findCommand = {
+    find: this.s.namespace,
+    limit: newOptions.limit,
+    skip: newOptions.skip,
+    query: selector
+  };
+
+  // Ensure we use the right await data option
+  if (typeof newOptions.awaitdata === 'boolean') {
+    newOptions.awaitData = newOptions.awaitdata;
+  }
+
+  // Translate to new command option noCursorTimeout
+  if (typeof newOptions.timeout === 'boolean') newOptions.noCursorTimeout = newOptions.timeout;
+
+  // Merge in options to command
+  for (let name in newOptions) {
+    if (newOptions[name] != null &amp;&amp; name !== 'session') {
+      findCommand[name] = newOptions[name];
+    }
+  }
+
+  DEPRECATED_FIND_OPTIONS.forEach(deprecatedOption => {
+    if (findCommand[deprecatedOption]) {
+      console.warn(
+        `Find option ${deprecatedOption} is deprecated, and will be removed in a later version`
+      );
+    }
+  });
+
+  if (projection) findCommand.fields = projection;
+
+  // Add db object to the new options
+  newOptions.db = this.s.db;
+
+  // Add the promise library
+  newOptions.promiseLibrary = this.s.promiseLibrary;
+
+  // Set raw if available at collection level
+  if (newOptions.raw == null &amp;&amp; typeof this.s.raw === 'boolean') newOptions.raw = this.s.raw;
+  // Set promoteLongs if available at collection level
+  if (newOptions.promoteLongs == null &amp;&amp; typeof this.s.promoteLongs === 'boolean')
+    newOptions.promoteLongs = this.s.promoteLongs;
+  if (newOptions.promoteValues == null &amp;&amp; typeof this.s.promoteValues === 'boolean')
+    newOptions.promoteValues = this.s.promoteValues;
+  if (newOptions.promoteBuffers == null &amp;&amp; typeof this.s.promoteBuffers === 'boolean')
+    newOptions.promoteBuffers = this.s.promoteBuffers;
+
+  // Sort options
+  if (findCommand.sort) {
+    findCommand.sort = formattedOrderClause(findCommand.sort);
+  }
+
+  // Set the readConcern
+  decorateWithReadConcern(findCommand, this, options);
+
+  // Decorate find command with collation options
+  decorateWithCollation(findCommand, this, options);
+
+  const cursor = this.s.topology.cursor(this.s.namespace, findCommand, newOptions);
+
+  return typeof callback === 'function' ? handleCallback(callback, null, cursor) : cursor;
+};
+
+/**
+ * Inserts a single document into MongoDB. If documents passed in do not contain the **_id** field,
+ * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
+ * can be overridden by setting the **forceServerObjectId** flag.
+ *
+ * @method
+ * @param {object} doc Document to insert.
+ * @param {object} [options] Optional settings.
+ * @param {(number|string)} [options.w] The write concern.
+ * @param {number} [options.wtimeout] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
+ * @param {boolean} [options.forceServerObjectId=false] Force server to assign _id values instead of driver.
+ * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~insertOneWriteOpCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.insertOne = function(doc, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  // Add ignoreUndfined
+  if (this.s.options.ignoreUndefined) {
+    options = Object.assign({}, options);
+    options.ignoreUndefined = this.s.options.ignoreUndefined;
+  }
+
+  return executeOperation(this.s.topology, insertOne, [this, doc, options, callback]);
+};
+
+function mapInsertManyResults(docs, r) {
+  const finalResult = {
+    result: { ok: 1, n: r.insertedCount },
+    ops: docs,
+    insertedCount: r.insertedCount,
+    insertedIds: r.insertedIds
+  };
+
+  if (r.getLastOp()) {
+    finalResult.result.opTime = r.getLastOp();
+  }
+
+  return finalResult;
+}
+
+/**
+ * Inserts an array of documents into MongoDB. If documents passed in do not contain the **_id** field,
+ * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
+ * can be overridden by setting the **forceServerObjectId** flag.
+ *
+ * @method
+ * @param {object[]} docs Documents to insert.
+ * @param {object} [options] Optional settings.
+ * @param {(number|string)} [options.w] The write concern.
+ * @param {number} [options.wtimeout] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
+ * @param {boolean} [options.forceServerObjectId=false] Force server to assign _id values instead of driver.
+ * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
+ * @param {boolean} [options.ordered=true] If true, when an insert fails, don't execute the remaining writes. If false, continue with remaining inserts when one fails.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~insertWriteOpCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.insertMany = function(docs, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options ? Object.assign({}, options) : { ordered: true };
+
+  if (!Array.isArray(docs) &amp;&amp; typeof callback === 'function') {
+    return callback(
+      MongoError.create({ message: 'docs parameter must be an array of documents', driver: true })
+    );
+  } else if (!Array.isArray(docs)) {
+    return new this.s.promiseLibrary((resolve, reject) => {
+      reject(
+        MongoError.create({ message: 'docs parameter must be an array of documents', driver: true })
+      );
+    });
+  }
+
+  // If keep going set unordered
+  options['serializeFunctions'] = options['serializeFunctions'] || this.s.serializeFunctions;
+
+  docs = prepareDocs(this, docs, options);
+
+  // Generate the bulk write operations
+  const operations = [
+    {
+      insertMany: docs
+    }
+  ];
+
+  return executeOperation(this.s.topology, bulkWrite, [this, operations, options, callback], {
+    resultMutator: result => mapInsertManyResults(docs, result)
+  });
+};
+
+/**
+ * @typedef {Object} Collection~BulkWriteOpResult
+ * @property {number} insertedCount Number of documents inserted.
+ * @property {number} matchedCount Number of documents matched for update.
+ * @property {number} modifiedCount Number of documents modified.
+ * @property {number} deletedCount Number of documents deleted.
+ * @property {number} upsertedCount Number of documents upserted.
+ * @property {object} insertedIds Inserted document generated Id's, hash key is the index of the originating operation
+ * @property {object} upsertedIds Upserted document generated Id's, hash key is the index of the originating operation
+ * @property {object} result The command result object.
+ */
+
+/**
+ * The callback format for inserts
+ * @callback Collection~bulkWriteOpCallback
+ * @param {BulkWriteError} error An error instance representing the error during the execution.
+ * @param {Collection~BulkWriteOpResult} result The result object if the command was executed successfully.
+ */
+
+/**
+ * Perform a bulkWrite operation without a fluent API
+ *
+ * Legal operation types are
+ *
+ *  { insertOne: { document: { a: 1 } } }
+ *
+ *  { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+ *
+ *  { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+ *
+ *  { deleteOne: { filter: {c:1} } }
+ *
+ *  { deleteMany: { filter: {c:1} } }
+ *
+ *  { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}
+ *
+ * If documents passed in do not contain the **_id** field,
+ * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
+ * can be overridden by setting the **forceServerObjectId** flag.
+ *
+ * @method
+ * @param {object[]} operations Bulk operations to perform.
+ * @param {object} [options] Optional settings.
+ * @param {(number|string)} [options.w] The write concern.
+ * @param {number} [options.wtimeout] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
+ * @param {boolean} [options.ordered=true] Execute write operation in ordered or unordered fashion.
+ * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~bulkWriteOpCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.bulkWrite = function(operations, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || { ordered: true };
+
+  if (!Array.isArray(operations)) {
+    throw MongoError.create({ message: 'operations must be an array of documents', driver: true });
+  }
+
+  return executeOperation(this.s.topology, bulkWrite, [this, operations, options, callback]);
+};
+
+/**
+ * @typedef {Object} Collection~WriteOpResult
+ * @property {object[]} ops All the documents inserted using insertOne/insertMany/replaceOne. Documents contain the _id field if forceServerObjectId == false for insertOne/insertMany
+ * @property {object} connection The connection object used for the operation.
+ * @property {object} result The command result object.
+ */
+
+/**
+ * The callback format for inserts
+ * @callback Collection~writeOpCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {Collection~WriteOpResult} result The result object if the command was executed successfully.
+ */
+
+/**
+ * @typedef {Object} Collection~insertWriteOpResult
+ * @property {Number} insertedCount The total amount of documents inserted.
+ * @property {object[]} ops All the documents inserted using insertOne/insertMany/replaceOne. Documents contain the _id field if forceServerObjectId == false for insertOne/insertMany
+ * @property {Object.&lt;Number, ObjectId>} insertedIds Map of the index of the inserted document to the id of the inserted document.
+ * @property {object} connection The connection object used for the operation.
+ * @property {object} result The raw command result object returned from MongoDB (content might vary by server version).
+ * @property {Number} result.ok Is 1 if the command executed correctly.
+ * @property {Number} result.n The total count of documents inserted.
+ */
+
+/**
+ * @typedef {Object} Collection~insertOneWriteOpResult
+ * @property {Number} insertedCount The total amount of documents inserted.
+ * @property {object[]} ops All the documents inserted using insertOne/insertMany/replaceOne. Documents contain the _id field if forceServerObjectId == false for insertOne/insertMany
+ * @property {ObjectId} insertedId The driver generated ObjectId for the insert operation.
+ * @property {object} connection The connection object used for the operation.
+ * @property {object} result The raw command result object returned from MongoDB (content might vary by server version).
+ * @property {Number} result.ok Is 1 if the command executed correctly.
+ * @property {Number} result.n The total count of documents inserted.
+ */
+
+/**
+ * The callback format for inserts
+ * @callback Collection~insertWriteOpCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {Collection~insertWriteOpResult} result The result object if the command was executed successfully.
+ */
+
+/**
+ * The callback format for inserts
+ * @callback Collection~insertOneWriteOpCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {Collection~insertOneWriteOpResult} result The result object if the command was executed successfully.
+ */
+
+/**
+ * Inserts a single document or a an array of documents into MongoDB. If documents passed in do not contain the **_id** field,
+ * one will be added to each of the documents missing it by the driver, mutating the document. This behavior
+ * can be overridden by setting the **forceServerObjectId** flag.
+ *
+ * @method
+ * @param {(object|object[])} docs Documents to insert.
+ * @param {object} [options] Optional settings.
+ * @param {(number|string)} [options.w] The write concern.
+ * @param {number} [options.wtimeout] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
+ * @param {boolean} [options.forceServerObjectId=false] Force server to assign _id values instead of driver.
+ * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~insertWriteOpCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ * @deprecated Use insertOne, insertMany or bulkWrite
+ */
+Collection.prototype.insert = function(docs, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || { ordered: false };
+  docs = !Array.isArray(docs) ? [docs] : docs;
+
+  if (options.keepGoing === true) {
+    options.ordered = false;
+  }
+
+  return this.insertMany(docs, options, callback);
+};
+
+/**
+ * @typedef {Object} Collection~updateWriteOpResult
+ * @property {Object} result The raw result returned from MongoDB, field will vary depending on server version.
+ * @property {Number} result.ok Is 1 if the command executed correctly.
+ * @property {Number} result.n The total count of documents scanned.
+ * @property {Number} result.nModified The total count of documents modified.
+ * @property {Object} connection The connection object used for the operation.
+ * @property {Number} matchedCount The number of documents that matched the filter.
+ * @property {Number} modifiedCount The number of documents that were modified.
+ * @property {Number} upsertedCount The number of documents upserted.
+ * @property {Object} upsertedId The upserted id.
+ * @property {ObjectId} upsertedId._id The upserted _id returned from the server.
+ */
+
+/**
+ * The callback format for inserts
+ * @callback Collection~updateWriteOpCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {Collection~updateWriteOpResult} result The result object if the command was executed successfully.
+ */
+
+/**
+ * Update a single document on MongoDB
+ * @method
+ * @param {object} filter The Filter used to select the document to update
+ * @param {object} update The update operations to be applied to the document
+ * @param {object} [options] Optional settings.
+ * @param {boolean} [options.upsert=false] Update operation is an upsert.
+ * @param {(number|string)} [options.w] The write concern.
+ * @param {number} [options.wtimeout] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
+ * @param {Array} [options.arrayFilters] optional list of array filters referenced in filtered positional operators
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~updateWriteOpCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.updateOne = function(filter, update, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  const err = checkForAtomicOperators(update);
+  if (err) {
+    if (typeof callback === 'function') return callback(err);
+    return this.s.promiseLibrary.reject(err);
+  }
+
+  options = Object.assign({}, options);
+
+  // Add ignoreUndfined
+  if (this.s.options.ignoreUndefined) {
+    options = Object.assign({}, options);
+    options.ignoreUndefined = this.s.options.ignoreUndefined;
+  }
+
+  return executeOperation(this.s.topology, updateOne, [this, filter, update, options, callback]);
+};
+
+/**
+ * Replace a document on MongoDB
+ * @method
+ * @param {object} filter The Filter used to select the document to update
+ * @param {object} doc The Document that replaces the matching document
+ * @param {object} [options] Optional settings.
+ * @param {boolean} [options.upsert=false] Update operation is an upsert.
+ * @param {(number|string)} [options.w] The write concern.
+ * @param {number} [options.wtimeout] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~updateWriteOpCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.replaceOne = function(filter, doc, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = Object.assign({}, options);
+
+  // Add ignoreUndfined
+  if (this.s.options.ignoreUndefined) {
+    options = Object.assign({}, options);
+    options.ignoreUndefined = this.s.options.ignoreUndefined;
+  }
+
+  return executeOperation(this.s.topology, replaceOne, [this, filter, doc, options, callback]);
+};
+
+/**
+ * Update multiple documents on MongoDB
+ * @method
+ * @param {object} filter The Filter used to select the documents to update
+ * @param {object} update The update operations to be applied to the document
+ * @param {object} [options] Optional settings.
+ * @param {boolean} [options.upsert=false] Update operation is an upsert.
+ * @param {(number|string)} [options.w] The write concern.
+ * @param {number} [options.wtimeout] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {Array} [options.arrayFilters] optional list of array filters referenced in filtered positional operators
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~updateWriteOpCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.updateMany = function(filter, update, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  const err = checkForAtomicOperators(update);
+  if (err) {
+    if (typeof callback === 'function') return callback(err);
+    return this.s.promiseLibrary.reject(err);
+  }
+
+  options = Object.assign({}, options);
+
+  // Add ignoreUndfined
+  if (this.s.options.ignoreUndefined) {
+    options = Object.assign({}, options);
+    options.ignoreUndefined = this.s.options.ignoreUndefined;
+  }
+
+  return executeOperation(this.s.topology, updateMany, [this, filter, update, options, callback]);
+};
+
+/**
+ * Updates documents.
+ * @method
+ * @param {object} selector The selector for the update operation.
+ * @param {object} document The update document.
+ * @param {object} [options] Optional settings.
+ * @param {(number|string)} [options.w] The write concern.
+ * @param {number} [options.wtimeout] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {boolean} [options.upsert=false] Update operation is an upsert.
+ * @param {boolean} [options.multi=false] Update one/all documents with operation.
+ * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
+ * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
+ * @param {Array} [options.arrayFilters] optional list of array filters referenced in filtered positional operators
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~writeOpCallback} [callback] The command result callback
+ * @throws {MongoError}
+ * @return {Promise} returns Promise if no callback passed
+ * @deprecated use updateOne, updateMany or bulkWrite
+ */
+Collection.prototype.update = function(selector, document, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  // Add ignoreUndfined
+  if (this.s.options.ignoreUndefined) {
+    options = Object.assign({}, options);
+    options.ignoreUndefined = this.s.options.ignoreUndefined;
+  }
+
+  return executeOperation(this.s.topology, updateDocuments, [
+    this,
+    selector,
+    document,
+    options,
+    callback
+  ]);
+};
+
+/**
+ * @typedef {Object} Collection~deleteWriteOpResult
+ * @property {Object} result The raw result returned from MongoDB, field will vary depending on server version.
+ * @property {Number} result.ok Is 1 if the command executed correctly.
+ * @property {Number} result.n The total count of documents deleted.
+ * @property {Object} connection The connection object used for the operation.
+ * @property {Number} deletedCount The number of documents deleted.
+ */
+
+/**
+ * The callback format for inserts
+ * @callback Collection~deleteWriteOpCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {Collection~deleteWriteOpResult} result The result object if the command was executed successfully.
+ */
+
+/**
+ * Delete a document on MongoDB
+ * @method
+ * @param {object} filter The Filter used to select the document to remove
+ * @param {object} [options] Optional settings.
+ * @param {(number|string)} [options.w] The write concern.
+ * @param {number} [options.wtimeout] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~deleteWriteOpCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.deleteOne = function(filter, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = Object.assign({}, options);
+
+  // Add ignoreUndfined
+  if (this.s.options.ignoreUndefined) {
+    options = Object.assign({}, options);
+    options.ignoreUndefined = this.s.options.ignoreUndefined;
+  }
+
+  return executeOperation(this.s.topology, deleteOne, [this, filter, options, callback]);
+};
+
+Collection.prototype.removeOne = Collection.prototype.deleteOne;
+
+/**
+ * Delete multiple documents on MongoDB
+ * @method
+ * @param {object} filter The Filter used to select the documents to remove
+ * @param {object} [options] Optional settings.
+ * @param {(number|string)} [options.w] The write concern.
+ * @param {number} [options.wtimeout] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~deleteWriteOpCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.deleteMany = function(filter, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = Object.assign({}, options);
+
+  // Add ignoreUndfined
+  if (this.s.options.ignoreUndefined) {
+    options = Object.assign({}, options);
+    options.ignoreUndefined = this.s.options.ignoreUndefined;
+  }
+
+  return executeOperation(this.s.topology, deleteMany, [this, filter, options, callback]);
+};
+
+Collection.prototype.removeMany = Collection.prototype.deleteMany;
+
+/**
+ * Remove documents.
+ * @method
+ * @param {object} selector The selector for the update operation.
+ * @param {object} [options] Optional settings.
+ * @param {(number|string)} [options.w] The write concern.
+ * @param {number} [options.wtimeout] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {boolean} [options.single=false] Removes the first document found.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~writeOpCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ * @deprecated use deleteOne, deleteMany or bulkWrite
+ */
+Collection.prototype.remove = function(selector, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  // Add ignoreUndfined
+  if (this.s.options.ignoreUndefined) {
+    options = Object.assign({}, options);
+    options.ignoreUndefined = this.s.options.ignoreUndefined;
+  }
+
+  return executeOperation(this.s.topology, removeDocuments, [this, selector, options, callback]);
+};
+
+/**
+ * Save a document. Simple full document replacement function. Not recommended for efficiency, use atomic
+ * operators and update instead for more efficient operations.
+ * @method
+ * @param {object} doc Document to save
+ * @param {object} [options] Optional settings.
+ * @param {(number|string)} [options.w] The write concern.
+ * @param {number} [options.wtimeout] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~writeOpCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ * @deprecated use insertOne, insertMany, updateOne or updateMany
+ */
+Collection.prototype.save = function(doc, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  // Add ignoreUndfined
+  if (this.s.options.ignoreUndefined) {
+    options = Object.assign({}, options);
+    options.ignoreUndefined = this.s.options.ignoreUndefined;
+  }
+
+  return executeOperation(this.s.topology, save, [this, doc, options, callback]);
+};
+
+/**
+ * The callback format for results
+ * @callback Collection~resultCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {object} result The result object if the command was executed successfully.
+ */
+
+/**
+ * The callback format for an aggregation call
+ * @callback Collection~aggregationCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {AggregationCursor} cursor The cursor if the aggregation command was executed successfully.
+ */
+
+/**
+ * Fetches the first document that matches the query
+ * @method
+ * @param {object} query Query for find Operation
+ * @param {object} [options] Optional settings.
+ * @param {number} [options.limit=0] Sets the limit of documents returned in the query.
+ * @param {(array|object)} [options.sort] Set to sort the documents coming back from the query. Array of indexes, [['a', 1]] etc.
+ * @param {object} [options.projection] The fields to return in the query. Object of fields to include or exclude (not both), {'a':1}
+ * @param {object} [options.fields] **Deprecated** Use `options.projection` instead
+ * @param {number} [options.skip=0] Set to skip N documents ahead in your query (useful for pagination).
+ * @param {Object} [options.hint] Tell the query to use specific indexes in the query. Object of indexes to use, {'_id':1}
+ * @param {boolean} [options.explain=false] Explain the query instead of returning the data.
+ * @param {boolean} [options.snapshot=false] DEPRECATED: Snapshot query.
+ * @param {boolean} [options.timeout=false] Specify if the cursor can timeout.
+ * @param {boolean} [options.tailable=false] Specify if the cursor is tailable.
+ * @param {number} [options.batchSize=0] Set the batchSize for the getMoreCommand when iterating over the query results.
+ * @param {boolean} [options.returnKey=false] Only return the index key.
+ * @param {number} [options.maxScan] DEPRECATED: Limit the number of items to scan.
+ * @param {number} [options.min] Set index bounds.
+ * @param {number} [options.max] Set index bounds.
+ * @param {boolean} [options.showDiskLoc=false] Show disk location of results.
+ * @param {string} [options.comment] You can put a $comment field on a query to make looking in the profiler logs simpler.
+ * @param {boolean} [options.raw=false] Return document results as raw BSON buffers.
+ * @param {boolean} [options.promoteLongs=true] Promotes Long values to number if they fit inside the 53 bits resolution.
+ * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
+ * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
+ * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ * @param {boolean} [options.partial=false] Specify if the cursor should return partial results when querying against a sharded system
+ * @param {number} [options.maxTimeMS] Number of miliseconds to wait before aborting the query.
+ * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~resultCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.findOne = function(query, options, callback) {
+  if (typeof callback === 'object') {
+    // TODO(MAJOR): throw in the future
+    console.warn('Third parameter to `findOne()` must be a callback or undefined');
+  }
+
+  if (typeof query === 'function') (callback = query), (query = {}), (options = {});
+  if (typeof options === 'function') (callback = options), (options = {});
+  query = query || {};
+  options = options || {};
+
+  return executeOperation(this.s.topology, findOne, [this, query, options, callback]);
+};
+
+/**
+ * The callback format for the collection method, must be used if strict is specified
+ * @callback Collection~collectionResultCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {Collection} collection The collection instance.
+ */
+
+/**
+ * Rename the collection.
+ *
+ * @method
+ * @param {string} newName New name of of the collection.
+ * @param {object} [options] Optional settings.
+ * @param {boolean} [options.dropTarget=false] Drop the target name collection if it previously exists.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~collectionResultCallback} [callback] The results callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.rename = function(newName, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = Object.assign({}, options, { readPreference: ReadPreference.PRIMARY });
+
+  return executeOperation(this.s.topology, rename, [this, newName, options, callback]);
+};
+
+/**
+ * Drop the collection from the database, removing it permanently. New accesses will create a new collection.
+ *
+ * @method
+ * @param {object} [options] Optional settings.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~resultCallback} [callback] The results callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.drop = function(options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  return executeOperation(this.s.topology, this.s.db.dropCollection.bind(this.s.db), [
+    this.s.name,
+    options,
+    callback
+  ]);
+};
+
+/**
+ * Returns the options of the collection.
+ *
+ * @method
+ * @param {Object} [options] Optional settings
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~resultCallback} [callback] The results callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.options = function(opts, callback) {
+  if (typeof opts === 'function') (callback = opts), (opts = {});
+  opts = opts || {};
+
+  return executeOperation(this.s.topology, optionsOp, [this, opts, callback]);
+};
+
+/**
+ * Returns if the collection is a capped collection
+ *
+ * @method
+ * @param {Object} [options] Optional settings
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~resultCallback} [callback] The results callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.isCapped = function(options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  return executeOperation(this.s.topology, isCapped, [this, options, callback]);
+};
+
+/**
+ * Creates an index on the db and collection collection.
+ * @method
+ * @param {(string|object)} fieldOrSpec Defines the index.
+ * @param {object} [options] Optional settings.
+ * @param {(number|string)} [options.w] The write concern.
+ * @param {number} [options.wtimeout] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {boolean} [options.unique=false] Creates an unique index.
+ * @param {boolean} [options.sparse=false] Creates a sparse index.
+ * @param {boolean} [options.background=false] Creates the index in the background, yielding whenever possible.
+ * @param {boolean} [options.dropDups=false] A unique index cannot be created on a key that has pre-existing duplicate values. If you would like to create the index anyway, keeping the first document the database indexes and deleting all subsequent documents that have duplicate value
+ * @param {number} [options.min] For geospatial indexes set the lower bound for the co-ordinates.
+ * @param {number} [options.max] For geospatial indexes set the high bound for the co-ordinates.
+ * @param {number} [options.v] Specify the format version of the indexes.
+ * @param {number} [options.expireAfterSeconds] Allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
+ * @param {string} [options.name] Override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
+ * @param {object} [options.partialFilterExpression] Creates a partial index based on the given filter object (MongoDB 3.2 or higher)
+ * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~resultCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.createIndex = function(fieldOrSpec, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  return executeOperation(this.s.topology, createIndex, [this, fieldOrSpec, options, callback]);
+};
+
+/**
+ * Creates multiple indexes in the collection, this method is only supported for
+ * MongoDB 2.6 or higher. Earlier version of MongoDB will throw a command not supported
+ * error. Index specifications are defined at http://docs.mongodb.org/manual/reference/command/createIndexes/.
+ * @method
+ * @param {array} indexSpecs An array of index specifications to be created
+ * @param {Object} [options] Optional settings
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~resultCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.createIndexes = function(indexSpecs, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+
+  options = options ? Object.assign({}, options) : {};
+  if (typeof options.maxTimeMS !== 'number') delete options.maxTimeMS;
+
+  return executeOperation(this.s.topology, createIndexes, [this, indexSpecs, options, callback]);
+};
+
+/**
+ * Drops an index from this collection.
+ * @method
+ * @param {string} indexName Name of the index to drop.
+ * @param {object} [options] Optional settings.
+ * @param {(number|string)} [options.w] The write concern.
+ * @param {number} [options.wtimeout] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {number} [options.maxTimeMS] Number of miliseconds to wait before aborting the query.
+ * @param {Collection~resultCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.dropIndex = function(indexName, options, callback) {
+  const args = Array.prototype.slice.call(arguments, 1);
+  callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
+
+  options = args.length ? args.shift() || {} : {};
+  // Run only against primary
+  options.readPreference = ReadPreference.PRIMARY;
+
+  return executeOperation(this.s.topology, dropIndex, [this, indexName, options, callback]);
+};
+
+/**
+ * Drops all indexes from this collection.
+ * @method
+ * @param {Object} [options] Optional settings
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {number} [options.maxTimeMS] Number of miliseconds to wait before aborting the query.
+ * @param {Collection~resultCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.dropIndexes = function(options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options ? Object.assign({}, options) : {};
+
+  if (typeof options.maxTimeMS !== 'number') delete options.maxTimeMS;
+
+  return executeOperation(this.s.topology, dropIndexes, [this, options, callback]);
+};
+
+/**
+ * Drops all indexes from this collection.
+ * @method
+ * @deprecated use dropIndexes
+ * @param {Collection~resultCallback} callback The command result callback
+ * @return {Promise} returns Promise if no [callback] passed
+ */
+Collection.prototype.dropAllIndexes = Collection.prototype.dropIndexes;
+
+/**
+ * Reindex all indexes on the collection
+ * Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground) and will be slow for large collections.
+ * @method
+ * @param {Object} [options] Optional settings
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~resultCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.reIndex = function(options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  return executeOperation(this.s.topology, reIndex, [this, options, callback]);
+};
+
+/**
+ * Get the list of all indexes information for the collection.
+ *
+ * @method
+ * @param {object} [options] Optional settings.
+ * @param {number} [options.batchSize] The batchSize for the returned command cursor or if pre 2.8 the systems batch collection
+ * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @return {CommandCursor}
+ */
+Collection.prototype.listIndexes = function(options) {
+  options = options || {};
+  // Clone the options
+  options = Object.assign({}, options);
+  // Determine the read preference in the options.
+  options.readPreference = resolveReadPreference(options, { db: this.s.db, collection: this });
+  // Set the CommandCursor constructor
+  options.cursorFactory = CommandCursor;
+  // Set the promiseLibrary
+  options.promiseLibrary = this.s.promiseLibrary;
+
+  if (!this.s.topology.capabilities()) {
+    throw new MongoError('cannot connect to server');
+  }
+
+  // Cursor options
+  let cursor = options.batchSize ? { batchSize: options.batchSize } : {};
+
+  // We have a list collections command
+  if (this.s.topology.capabilities().hasListIndexesCommand) {
+    // Build the command
+    const command = { listIndexes: this.s.name, cursor: cursor };
+    // Execute the cursor
+    cursor = this.s.topology.cursor(`${this.s.dbName}.$cmd`, command, options);
+    // Do we have a readPreference, apply it
+    if (options.readPreference) cursor.setReadPreference(options.readPreference);
+    // Return the cursor
+    return cursor;
+  }
+
+  // Get the namespace
+  const ns = `${this.s.dbName}.system.indexes`;
+  // Get the query
+  cursor = this.s.topology.cursor(ns, { find: ns, query: { ns: this.s.namespace } }, options);
+  // Do we have a readPreference, apply it
+  if (options.readPreference) cursor.setReadPreference(options.readPreference);
+  // Set the passed in batch size if one was provided
+  if (options.batchSize) cursor = cursor.batchSize(options.batchSize);
+  // Return the cursor
+  return cursor;
+};
+
+/**
+ * Ensures that an index exists, if it does not it creates it
+ * @method
+ * @deprecated use createIndexes instead
+ * @param {(string|object)} fieldOrSpec Defines the index.
+ * @param {object} [options] Optional settings.
+ * @param {(number|string)} [options.w] The write concern.
+ * @param {number} [options.wtimeout] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {boolean} [options.unique=false] Creates an unique index.
+ * @param {boolean} [options.sparse=false] Creates a sparse index.
+ * @param {boolean} [options.background=false] Creates the index in the background, yielding whenever possible.
+ * @param {boolean} [options.dropDups=false] A unique index cannot be created on a key that has pre-existing duplicate values. If you would like to create the index anyway, keeping the first document the database indexes and deleting all subsequent documents that have duplicate value
+ * @param {number} [options.min] For geospatial indexes set the lower bound for the co-ordinates.
+ * @param {number} [options.max] For geospatial indexes set the high bound for the co-ordinates.
+ * @param {number} [options.v] Specify the format version of the indexes.
+ * @param {number} [options.expireAfterSeconds] Allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
+ * @param {number} [options.name] Override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
+ * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~resultCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.ensureIndex = function(fieldOrSpec, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  return executeOperation(this.s.topology, ensureIndex, [this, fieldOrSpec, options, callback]);
+};
+
+/**
+ * Checks if one or more indexes exist on the collection, fails on first non-existing index
+ * @method
+ * @param {(string|array)} indexes One or more index names to check.
+ * @param {Object} [options] Optional settings
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~resultCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.indexExists = function(indexes, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  return executeOperation(this.s.topology, indexExists, [this, indexes, options, callback]);
+};
+
+/**
+ * Retrieves this collections index info.
+ * @method
+ * @param {object} [options] Optional settings.
+ * @param {boolean} [options.full=false] Returns the full raw index information.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~resultCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.indexInformation = function(options, callback) {
+  const args = Array.prototype.slice.call(arguments, 0);
+  callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
+  options = args.length ? args.shift() || {} : {};
+
+  return executeOperation(this.s.topology, indexInformation, [this, options, callback]);
+};
+
+/**
+ * The callback format for results
+ * @callback Collection~countCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {number} result The count of documents that matched the query.
+ */
+
+/**
+ * Count number of matching documents in the db to a query.
+ * @method
+ * @param {object} [query={}] The query for the count.
+ * @param {object} [options] Optional settings.
+ * @param {boolean} [options.limit] The limit of documents to count.
+ * @param {boolean} [options.skip] The number of documents to skip for the count.
+ * @param {string} [options.hint] An index name hint for the query.
+ * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ * @param {number} [options.maxTimeMS] Number of miliseconds to wait before aborting the query.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~countCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ * @deprecated use {@link Collection#countDocuments countDocuments} or {@link Collection#estimatedDocumentCount estimatedDocumentCount} instead
+ */
+Collection.prototype.count = deprecate(function(query, options, callback) {
+  const args = Array.prototype.slice.call(arguments, 0);
+  callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
+  query = args.length ? args.shift() || {} : {};
+  options = args.length ? args.shift() || {} : {};
+
+  return executeOperation(this.s.topology, count, [this, query, options, callback]);
+}, 'collection.count is deprecated, and will be removed in a future version.' +
+  ' Use collection.countDocuments or collection.estimatedDocumentCount instead');
+
+/**
+ * Gets an estimate of the count of documents in a collection using collection metadata.
+ *
+ * **Note**: When migrating from {@link Collection#count count} to {@link Collection#estimatedDocumentCount estimatedDocumentCount}
+ * the following query operators must be replaced:
+ *
+ * | Operator | Replacement |
+ * | -------- | ----------- |
+ * | `$where`   | [`$expr`][1] |
+ * | `$near`    | [`$geoWithin`][2] with [`$center`][3] |
+ * | `$nearSphere` | [`$geoWithin`][2] with [`$centerSphere`][4] |
+ *
+ * [1]: https://docs.mongodb.com/manual/reference/operator/query/expr/
+ * [2]: https://docs.mongodb.com/manual/reference/operator/query/geoWithin/
+ * [3]: https://docs.mongodb.com/manual/reference/operator/query/center/#op._S_center
+ * [4]: https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
+ * @method
+ * @param {object} [options] Optional settings.
+ * @param {number} [options.maxTimeMS] The maximum amount of time to allow the operation to run.
+ * @param {Collection~countCallback} [callback] The command result callback.
+ * @return {Promise} returns Promise if no callback passed.
+ * @see https://docs.mongodb.com/manual/reference/operator/query/expr/
+ * @see https://docs.mongodb.com/manual/reference/operator/query/geoWithin/
+ * @see https://docs.mongodb.com/manual/reference/operator/query/center/#op._S_center
+ * @see https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
+ */
+Collection.prototype.estimatedDocumentCount = function(options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  options = typeof options.maxTimeMS === 'number' ? options : {};
+
+  return executeOperation(this.s.topology, count, [this, null, options, callback]);
+};
+
+/**
+ * Gets the number of documents matching the filter.
+ *
+ * **Note**: When migrating from {@link Collection#count count} to {@link Collection#countDocuments countDocuments}
+ * the following query operators must be replaced:
+ *
+ * | Operator | Replacement |
+ * | -------- | ----------- |
+ * | `$where`   | [`$expr`][1] |
+ * | `$near`    | [`$geoWithin`][2] with [`$center`][3] |
+ * | `$nearSphere` | [`$geoWithin`][2] with [`$centerSphere`][4] |
+ *
+ * [1]: https://docs.mongodb.com/manual/reference/operator/query/expr/
+ * [2]: https://docs.mongodb.com/manual/reference/operator/query/geoWithin/
+ * [3]: https://docs.mongodb.com/manual/reference/operator/query/center/#op._S_center
+ * [4]: https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
+ *
+ * @param {object} [query] the query for the count
+ * @param {object} [options] Optional settings.
+ * @param {object} [options.collation] Specifies a collation.
+ * @param {string|object} [options.hint] The index to use.
+ * @param {number} [options.limit] The maximum number of document to count.
+ * @param {number} [options.maxTimeMS] The maximum amount of time to allow the operation to run.
+ * @param {number} [options.skip] The number of documents to skip before counting.
+ * @param {Collection~countCallback} [callback] The command result callback.
+ * @return {Promise} returns Promise if no callback passed.
+ * @see https://docs.mongodb.com/manual/reference/operator/query/expr/
+ * @see https://docs.mongodb.com/manual/reference/operator/query/geoWithin/
+ * @see https://docs.mongodb.com/manual/reference/operator/query/center/#op._S_center
+ * @see https://docs.mongodb.com/manual/reference/operator/query/centerSphere/#op._S_centerSphere
+ */
+
+Collection.prototype.countDocuments = function(query, options, callback) {
+  const args = Array.prototype.slice.call(arguments, 0);
+  callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
+  query = args.length ? args.shift() || {} : {};
+  options = args.length ? args.shift() || {} : {};
+
+  return executeOperation(this.s.topology, countDocuments, [this, query, options, callback]);
+};
+
+/**
+ * The distinct command returns returns a list of distinct values for the given key across a collection.
+ * @method
+ * @param {string} key Field of the document to find distinct values for.
+ * @param {object} query The query for filtering the set of documents to which we apply the distinct filter.
+ * @param {object} [options] Optional settings.
+ * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ * @param {number} [options.maxTimeMS] Number of miliseconds to wait before aborting the query.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~resultCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.distinct = function(key, query, options, callback) {
+  const args = Array.prototype.slice.call(arguments, 1);
+  callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
+  const queryOption = args.length ? args.shift() || {} : {};
+  const optionsOption = args.length ? args.shift() || {} : {};
+
+  return executeOperation(this.s.topology, distinct, [
+    this,
+    key,
+    queryOption,
+    optionsOption,
+    callback
+  ]);
+};
+
+/**
+ * Retrieve all the indexes on the collection.
+ * @method
+ * @param {Object} [options] Optional settings
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~resultCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.indexes = function(options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  return executeOperation(this.s.topology, indexes, [this, options, callback]);
+};
+
+/**
+ * Get all the collection statistics.
+ *
+ * @method
+ * @param {object} [options] Optional settings.
+ * @param {number} [options.scale] Divide the returned sizes by scale value.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~resultCallback} [callback] The collection result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.stats = function(options, callback) {
+  const args = Array.prototype.slice.call(arguments, 0);
+  callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
+  options = args.length ? args.shift() || {} : {};
+
+  return executeOperation(this.s.topology, stats, [this, options, callback]);
+};
+
+/**
+ * @typedef {Object} Collection~findAndModifyWriteOpResult
+ * @property {object} value Document returned from findAndModify command.
+ * @property {object} lastErrorObject The raw lastErrorObject returned from the command.
+ * @property {Number} ok Is 1 if the command executed correctly.
+ */
+
+/**
+ * The callback format for inserts
+ * @callback Collection~findAndModifyCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {Collection~findAndModifyWriteOpResult} result The result object if the command was executed successfully.
+ */
+
+/**
+ * Find a document and delete it in one atomic operation, requires a write lock for the duration of the operation.
+ *
+ * @method
+ * @param {object} filter Document selection filter.
+ * @param {object} [options] Optional settings.
+ * @param {object} [options.projection] Limits the fields to return for all matching documents.
+ * @param {object} [options.sort] Determines which document the operation modifies if the query selects multiple documents.
+ * @param {number} [options.maxTimeMS] The maximum amount of time to allow the query to run.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~findAndModifyCallback} [callback] The collection result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.findOneAndDelete = function(filter, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  // Basic validation
+  if (filter == null || typeof filter !== 'object')
+    throw toError('filter parameter must be an object');
+
+  return executeOperation(this.s.topology, findOneAndDelete, [this, filter, options, callback]);
+};
+
+/**
+ * Find a document and replace it in one atomic operation, requires a write lock for the duration of the operation.
+ *
+ * @method
+ * @param {object} filter Document selection filter.
+ * @param {object} replacement Document replacing the matching document.
+ * @param {object} [options] Optional settings.
+ * @param {object} [options.projection] Limits the fields to return for all matching documents.
+ * @param {object} [options.sort] Determines which document the operation modifies if the query selects multiple documents.
+ * @param {number} [options.maxTimeMS] The maximum amount of time to allow the query to run.
+ * @param {boolean} [options.upsert=false] Upsert the document if it does not exist.
+ * @param {boolean} [options.returnOriginal=true] When false, returns the updated document rather than the original. The default is true.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~findAndModifyCallback} [callback] The collection result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.findOneAndReplace = function(filter, replacement, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  // Basic validation
+  if (filter == null || typeof filter !== 'object')
+    throw toError('filter parameter must be an object');
+  if (replacement == null || typeof replacement !== 'object')
+    throw toError('replacement parameter must be an object');
+
+  return executeOperation(this.s.topology, findOneAndReplace, [
+    this,
+    filter,
+    replacement,
+    options,
+    callback
+  ]);
+};
+
+/**
+ * Find a document and update it in one atomic operation, requires a write lock for the duration of the operation.
+ *
+ * @method
+ * @param {object} filter Document selection filter.
+ * @param {object} update Update operations to be performed on the document
+ * @param {object} [options] Optional settings.
+ * @param {object} [options.projection] Limits the fields to return for all matching documents.
+ * @param {object} [options.sort] Determines which document the operation modifies if the query selects multiple documents.
+ * @param {number} [options.maxTimeMS] The maximum amount of time to allow the query to run.
+ * @param {boolean} [options.upsert=false] Upsert the document if it does not exist.
+ * @param {boolean} [options.returnOriginal=true] When false, returns the updated document rather than the original. The default is true.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Array} [options.arrayFilters] optional list of array filters referenced in filtered positional operators
+ * @param {Collection~findAndModifyCallback} [callback] The collection result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.findOneAndUpdate = function(filter, update, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = options || {};
+
+  // Basic validation
+  if (filter == null || typeof filter !== 'object')
+    throw toError('filter parameter must be an object');
+  if (update == null || typeof update !== 'object')
+    throw toError('update parameter must be an object');
+
+  const err = checkForAtomicOperators(update);
+  if (err) {
+    if (typeof callback === 'function') return callback(err);
+    return this.s.promiseLibrary.reject(err);
+  }
+
+  return executeOperation(this.s.topology, findOneAndUpdate, [
+    this,
+    filter,
+    update,
+    options,
+    callback
+  ]);
+};
+
+/**
+ * Find and update a document.
+ * @method
+ * @param {object} query Query object to locate the object to modify.
+ * @param {array} sort If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
+ * @param {object} doc The fields/vals to be updated.
+ * @param {object} [options] Optional settings.
+ * @param {(number|string)} [options.w] The write concern.
+ * @param {number} [options.wtimeout] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {boolean} [options.remove=false] Set to true to remove the object before returning.
+ * @param {boolean} [options.upsert=false] Perform an upsert operation.
+ * @param {boolean} [options.new=false] Set to true if you want to return the modified object rather than the original. Ignored for remove.
+ * @param {object} [options.projection] Object containing the field projection for the result returned from the operation.
+ * @param {object} [options.fields] **Deprecated** Use `options.projection` instead
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Array} [options.arrayFilters] optional list of array filters referenced in filtered positional operators
+ * @param {Collection~findAndModifyCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ * @deprecated use findOneAndUpdate, findOneAndReplace or findOneAndDelete instead
+ */
+Collection.prototype.findAndModify = function(query, sort, doc, options, callback) {
+  const args = Array.prototype.slice.call(arguments, 1);
+  callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
+  sort = args.length ? args.shift() || [] : [];
+  doc = args.length ? args.shift() : null;
+  options = args.length ? args.shift() || {} : {};
+
+  // Clone options
+  options = Object.assign({}, options);
+  // Force read preference primary
+  options.readPreference = ReadPreference.PRIMARY;
+
+  return executeOperation(this.s.topology, findAndModify, [
+    this,
+    query,
+    sort,
+    doc,
+    options,
+    callback
+  ]);
+};
+
+/**
+ * Find and remove a document.
+ * @method
+ * @param {object} query Query object to locate the object to modify.
+ * @param {array} sort If multiple docs match, choose the first one in the specified sort order as the object to manipulate.
+ * @param {object} [options] Optional settings.
+ * @param {(number|string)} [options.w] The write concern.
+ * @param {number} [options.wtimeout] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~resultCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ * @deprecated use findOneAndDelete instead
+ */
+Collection.prototype.findAndRemove = function(query, sort, options, callback) {
+  const args = Array.prototype.slice.call(arguments, 1);
+  callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
+  sort = args.length ? args.shift() || [] : [];
+  options = args.length ? args.shift() || {} : {};
+
+  return executeOperation(this.s.topology, findAndRemove, [this, query, sort, options, callback]);
+};
+
+/**
+ * Execute an aggregation framework pipeline against the collection, needs MongoDB >= 2.2
+ * @method
+ * @param {object} pipeline Array containing all the aggregation framework commands for the execution.
+ * @param {object} [options] Optional settings.
+ * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ * @param {object} [options.cursor] Return the query as cursor, on 2.6 > it returns as a real cursor on pre 2.6 it returns as an emulated cursor.
+ * @param {number} [options.cursor.batchSize] The batchSize for the cursor
+ * @param {boolean} [options.explain=false] Explain returns the aggregation execution plan (requires mongodb 2.6 >).
+ * @param {boolean} [options.allowDiskUse=false] allowDiskUse lets the server know if it can use disk to store temporary results for the aggregation (requires mongodb 2.6 >).
+ * @param {number} [options.maxTimeMS] maxTimeMS specifies a cumulative time limit in milliseconds for processing operations on the cursor. MongoDB interrupts the operation at the earliest following interrupt point.
+ * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
+ * @param {boolean} [options.raw=false] Return document results as raw BSON buffers.
+ * @param {boolean} [options.promoteLongs=true] Promotes Long values to number if they fit inside the 53 bits resolution.
+ * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
+ * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
+ * @param {object} [options.collation] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
+ * @param {string} [options.comment] Add a comment to an aggregation command
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~aggregationCallback} callback The command result callback
+ * @return {(null|AggregationCursor)}
+ */
+Collection.prototype.aggregate = function(pipeline, options, callback) {
+  if (Array.isArray(pipeline)) {
+    // Set up callback if one is provided
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
+
+    // If we have no options or callback we are doing
+    // a cursor based aggregation
+    if (options == null &amp;&amp; callback == null) {
+      options = {};
+    }
+  } else {
+    // Aggregation pipeline passed as arguments on the method
+    const args = Array.prototype.slice.call(arguments, 0);
+    // Get the callback
+    callback = args.pop();
+    // Get the possible options object
+    const opts = args[args.length - 1];
+    // If it contains any of the admissible options pop it of the args
+    options =
+      opts &amp;&amp;
+      (opts.readPreference ||
+        opts.explain ||
+        opts.cursor ||
+        opts.out ||
+        opts.maxTimeMS ||
+        opts.hint ||
+        opts.allowDiskUse)
+        ? args.pop()
+        : {};
+    // Left over arguments is the pipeline
+    pipeline = args;
+  }
+
+  // Ignore readConcern option
+  let ignoreReadConcern = false;
+
+  // Build the command
+  const command = { aggregate: this.s.name, pipeline: pipeline };
+
+  // If out was specified
+  if (typeof options.out === 'string') {
+    pipeline.push({ $out: options.out });
+    // Ignore read concern
+    ignoreReadConcern = true;
+  } else if (pipeline.length > 0 &amp;&amp; pipeline[pipeline.length - 1]['$out']) {
+    ignoreReadConcern = true;
+  }
+
+  // Decorate command with writeConcern if out has been specified
+  if (
+    pipeline.length > 0 &amp;&amp;
+    pipeline[pipeline.length - 1]['$out'] &amp;&amp;
+    this.s.topology.capabilities().commandsTakeWriteConcern
+  ) {
+    applyWriteConcern(command, { db: this.s.db, collection: this }, options);
+  }
+
+  // Have we specified collation
+  decorateWithCollation(command, this, options);
+
+  // If we have bypassDocumentValidation set
+  if (options.bypassDocumentValidation === true) {
+    command.bypassDocumentValidation = options.bypassDocumentValidation;
+  }
+
+  // Do we have a readConcern specified
+  if (!ignoreReadConcern) {
+    decorateWithReadConcern(command, this, options);
+  }
+
+  // If we have allowDiskUse defined
+  if (options.allowDiskUse) command.allowDiskUse = options.allowDiskUse;
+  if (typeof options.maxTimeMS === 'number') command.maxTimeMS = options.maxTimeMS;
+
+  // If we are giving a hint
+  if (options.hint) command.hint = options.hint;
+
+  options = Object.assign({}, options);
+  // Ensure we have the right read preference inheritance
+  options.readPreference = resolveReadPreference(options, { db: this.s.db, collection: this });
+
+  // If explain has been specified add it
+  if (options.explain) {
+    if (command.readConcern || command.writeConcern) {
+      throw toError('"explain" cannot be used on an aggregate call with readConcern/writeConcern');
+    }
+    command.explain = options.explain;
+  }
+
+  if (typeof options.comment === 'string') command.comment = options.comment;
+
+  // Validate that cursor options is valid
+  if (options.cursor != null &amp;&amp; typeof options.cursor !== 'object') {
+    throw toError('cursor options must be an object');
+  }
+
+  options.cursor = options.cursor || {};
+  if (options.batchSize) options.cursor.batchSize = options.batchSize;
+  command.cursor = options.cursor;
+
+  // promiseLibrary
+  options.promiseLibrary = this.s.promiseLibrary;
+
+  // Set the AggregationCursor constructor
+  options.cursorFactory = AggregationCursor;
+  if (typeof callback !== 'function') {
+    if (!this.s.topology.capabilities()) {
+      throw new MongoError('cannot connect to server');
+    }
+
+    // Allow disk usage command
+    if (typeof options.allowDiskUse === 'boolean') command.allowDiskUse = options.allowDiskUse;
+    if (typeof options.maxTimeMS === 'number') command.maxTimeMS = options.maxTimeMS;
+
+    // Execute the cursor
+    return this.s.topology.cursor(this.s.namespace, command, options);
+  }
+
+  return handleCallback(callback, null, this.s.topology.cursor(this.s.namespace, command, options));
+};
+
+/**
+ * Create a new Change Stream, watching for new changes (insertions, updates, replacements, deletions, and invalidations) in this collection.
+ * @method
+ * @since 3.0.0
+ * @param {Array} [pipeline] An array of {@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline/|aggregation pipeline stages} through which to pass change stream documents. This allows for filtering (using $match) and manipulating the change stream documents.
+ * @param {object} [options] Optional settings
+ * @param {string} [options.fullDocument='default'] Allowed values: ‘default’, ‘updateLookup’. When set to ‘updateLookup’, the change stream will include both a delta describing the changes to the document, as well as a copy of the entire document that was changed from some time after the change occurred.
+ * @param {object} [options.resumeAfter] Specifies the logical starting point for the new change stream. This should be the _id field from a previously returned change stream document.
+ * @param {number} [options.maxAwaitTimeMS] The maximum amount of time for the server to wait on new documents to satisfy a change stream query
+ * @param {number} [options.batchSize] The number of documents to return per batch. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
+ * @param {object} [options.collation] Specify collation settings for operation. See {@link https://docs.mongodb.com/manual/reference/command/aggregate|aggregation documentation}.
+ * @param {ReadPreference} [options.readPreference] The read preference. Defaults to the read preference of the database or collection. See {@link https://docs.mongodb.com/manual/reference/read-preference|read preference documentation}.
+ * @param {Timestamp} [options.startAtClusterTime] receive change events that occur after the specified timestamp
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @return {ChangeStream} a ChangeStream instance.
+ */
+Collection.prototype.watch = function(pipeline, options) {
+  pipeline = pipeline || [];
+  options = options || {};
+
+  // Allow optionally not specifying a pipeline
+  if (!Array.isArray(pipeline)) {
+    options = pipeline;
+    pipeline = [];
+  }
+
+  return new ChangeStream(this, pipeline, options);
+};
+
+/**
+ * The callback format for results
+ * @callback Collection~parallelCollectionScanCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {Cursor[]} cursors A list of cursors returned allowing for parallel reading of collection.
+ */
+
+/**
+ * Return N number of parallel cursors for a collection allowing parallel reading of entire collection. There are
+ * no ordering guarantees for returned results.
+ * @method
+ * @param {object} [options] Optional settings.
+ * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ * @param {number} [options.batchSize] Set the batchSize for the getMoreCommand when iterating over the query results.
+ * @param {number} [options.numCursors=1] The maximum number of parallel command cursors to return (the number of returned cursors will be in the range 1:numCursors)
+ * @param {boolean} [options.raw=false] Return all BSON documents as Raw Buffer documents.
+ * @param {Collection~parallelCollectionScanCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.parallelCollectionScan = function(options, callback) {
+  if (typeof options === 'function') (callback = options), (options = { numCursors: 1 });
+  // Set number of cursors to 1
+  options.numCursors = options.numCursors || 1;
+  options.batchSize = options.batchSize || 1000;
+
+  options = Object.assign({}, options);
+  // Ensure we have the right read preference inheritance
+  options.readPreference = resolveReadPreference(options, { db: this.s.db, collection: this });
+
+  // Add a promiseLibrary
+  options.promiseLibrary = this.s.promiseLibrary;
+
+  if (options.session) {
+    options.session = undefined;
+  }
+
+  return executeOperation(this.s.topology, parallelCollectionScan, [this, options, callback], {
+    skipSessions: true
+  });
+};
+
+/**
+ * Execute a geo search using a geo haystack index on a collection.
+ *
+ * @method
+ * @param {number} x Point to search on the x axis, ensure the indexes are ordered in the same order.
+ * @param {number} y Point to search on the y axis, ensure the indexes are ordered in the same order.
+ * @param {object} [options] Optional settings.
+ * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ * @param {number} [options.maxDistance] Include results up to maxDistance from the point.
+ * @param {object} [options.search] Filter the results by a query.
+ * @param {number} [options.limit=false] Max number of results to return.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~resultCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.geoHaystackSearch = function(x, y, options, callback) {
+  const args = Array.prototype.slice.call(arguments, 2);
+  callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
+  options = args.length ? args.shift() || {} : {};
+
+  return executeOperation(this.s.topology, geoHaystackSearch, [this, x, y, options, callback]);
+};
+
+/**
+ * Run a group command across a collection
+ *
+ * @method
+ * @param {(object|array|function|code)} keys An object, array or function expressing the keys to group by.
+ * @param {object} condition An optional condition that must be true for a row to be considered.
+ * @param {object} initial Initial value of the aggregation counter object.
+ * @param {(function|Code)} reduce The reduce function aggregates (reduces) the objects iterated
+ * @param {(function|Code)} finalize An optional function to be run on each item in the result set just before the item is returned.
+ * @param {boolean} command Specify if you wish to run using the internal group command or using eval, default is true.
+ * @param {object} [options] Optional settings.
+ * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~resultCallback} [callback] The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ * @deprecated MongoDB 3.6 or higher will no longer support the group command. We recommend rewriting using the aggregation framework.
+ */
+Collection.prototype.group = function(
+  keys,
+  condition,
+  initial,
+  reduce,
+  finalize,
+  command,
+  options,
+  callback
+) {
+  const args = Array.prototype.slice.call(arguments, 3);
+  callback = typeof args[args.length - 1] === 'function' ? args.pop() : undefined;
+  reduce = args.length ? args.shift() : null;
+  finalize = args.length ? args.shift() : null;
+  command = args.length ? args.shift() : null;
+  options = args.length ? args.shift() || {} : {};
+
+  // Make sure we are backward compatible
+  if (!(typeof finalize === 'function')) {
+    command = finalize;
+    finalize = null;
+  }
+
+  if (
+    !Array.isArray(keys) &amp;&amp;
+    keys instanceof Object &amp;&amp;
+    typeof keys !== 'function' &amp;&amp;
+    !(keys._bsontype === 'Code')
+  ) {
+    keys = Object.keys(keys);
+  }
+
+  if (typeof reduce === 'function') {
+    reduce = reduce.toString();
+  }
+
+  if (typeof finalize === 'function') {
+    finalize = finalize.toString();
+  }
+
+  // Set up the command as default
+  command = command == null ? true : command;
+
+  return executeOperation(this.s.topology, group, [
+    this,
+    keys,
+    condition,
+    initial,
+    reduce,
+    finalize,
+    command,
+    options,
+    callback
+  ]);
+};
+
+/**
+ * Run Map Reduce across a collection. Be aware that the inline option for out will return an array of results not a collection.
+ *
+ * @method
+ * @param {(function|string)} map The mapping function.
+ * @param {(function|string)} reduce The reduce function.
+ * @param {object} [options] Optional settings.
+ * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ * @param {object} [options.out] Sets the output target for the map reduce job. *{inline:1} | {replace:'collectionName'} | {merge:'collectionName'} | {reduce:'collectionName'}*
+ * @param {object} [options.query] Query filter object.
+ * @param {object} [options.sort] Sorts the input objects using this key. Useful for optimization, like sorting by the emit key for fewer reduces.
+ * @param {number} [options.limit] Number of objects to return from collection.
+ * @param {boolean} [options.keeptemp=false] Keep temporary data.
+ * @param {(function|string)} [options.finalize] Finalize function.
+ * @param {object} [options.scope] Can pass in variables that can be access from map/reduce/finalize.
+ * @param {boolean} [options.jsMode=false] It is possible to make the execution stay in JS. Provided in MongoDB > 2.0.X.
+ * @param {boolean} [options.verbose=false] Provide statistics on job execution time.
+ * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {Collection~resultCallback} [callback] The command result callback
+ * @throws {MongoError}
+ * @return {Promise} returns Promise if no callback passed
+ */
+Collection.prototype.mapReduce = function(map, reduce, options, callback) {
+  if ('function' === typeof options) (callback = options), (options = {});
+  // Out must allways be defined (make sure we don't break weirdly on pre 1.8+ servers)
+  if (null == options.out) {
+    throw new Error(
+      'the out option parameter must be defined, see mongodb docs for possible values'
+    );
+  }
+
+  if ('function' === typeof map) {
+    map = map.toString();
+  }
+
+  if ('function' === typeof reduce) {
+    reduce = reduce.toString();
+  }
+
+  if ('function' === typeof options.finalize) {
+    options.finalize = options.finalize.toString();
+  }
+
+  return executeOperation(this.s.topology, mapReduce, [this, map, reduce, options, callback]);
+};
+
+/**
+ * Initiate a Out of order batch write operation. All operations will be buffered into insert/update/remove commands executed out of order.
+ *
+ * @method
+ * @param {object} [options] Optional settings.
+ * @param {(number|string)} [options.w] The write concern.
+ * @param {number} [options.wtimeout] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @return {UnorderedBulkOperation}
+ */
+Collection.prototype.initializeUnorderedBulkOp = function(options) {
+  options = options || {};
+  options.promiseLibrary = this.s.promiseLibrary;
+  return unordered(this.s.topology, this, options);
+};
+
+/**
+ * Initiate an In order bulk write operation, operations will be serially executed in the order they are added, creating a new operation for each switch in types.
+ *
+ * @method
+ * @param {object} [options] Optional settings.
+ * @param {(number|string)} [options.w] The write concern.
+ * @param {number} [options.wtimeout] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {ClientSession} [options.session] optional session to use for this operation
+ * @param {OrderedBulkOperation} callback The command result callback
+ * @return {null}
+ */
+Collection.prototype.initializeOrderedBulkOp = function(options) {
+  options = options || {};
+  options.promiseLibrary = this.s.promiseLibrary;
+  return ordered(this.s.topology, this, options);
+};
+
+module.exports = Collection;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+
+
+                    <footer>
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Jun 27 2018 09:40:13 GMT-0400 (EDT)
+                    </footer>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+<script src="scripts/main.js"></script>
+</body>
+</html>

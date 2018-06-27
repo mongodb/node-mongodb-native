@@ -1,0 +1,2320 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="author" content="">
+<meta name="keyword" content="">
+
+    <link rel="shortcut icon" href="/node-mongodb-native/3.1/img/favicon.png">
+
+    <title>Upgrading to 2.x</title>
+
+    <link rel="stylesheet" href="/node-mongodb-native/3.1/lib/bootstrap.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.1/lib/font-awesome/css/font-awesome.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.1/css/mongodb-docs.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.1/css/overrides.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.1/lib/highlight/styles/idea.css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.1/lib/bootstrap-toggle/bootstrap-toggle.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.1/css/java.css" type="text/css" />
+
+
+  </head>
+
+  <body>
+  
+  <section id="container" class="">
+      
+      <header id="header-db" class="row" role="navigation">
+  <div class="header-content">
+    <div class="toggle-nav pull-left">
+        <i class="fa fa-bars"></i>
+        <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+    </div>
+    
+    <div class="logo pull-left">
+      <a href="https://www.mongodb.com/">
+        <img src="http://mongodb.github.io/node-mongodb-native/img/logo-mongodb-header.png", alt="MongoDB.com" />
+      </a>
+    </div>
+    
+    <div>
+<div class="nav-items pull-right">
+  <a href="https://university.mongodb.com" data-toggle="tooltip" data-placement="bottom" title="Free Online Classes">MongoDB University</a>
+  <a href="http://www.mongodb.org/downloads" data-toggle="tooltip" data-placement="bottom" title="Download MongoDB">Downloads</a>
+  <a href="http://www.mongodb.org/get-involved" data-toggle="tooltip" data-placement="bottom" title="Get involved with MongoDB">Community</a>
+  <a href="http://docs.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Documentation">Docs</a>
+  <a href="http://blog.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Blog">Blog</a>
+  <div id="search">
+<form method="get" action="//www.google.com/search" target="_blank">
+    <input type="text" name="searchQuery" size="20" value="" autocomplete="off" placeholder="Search docs">
+    <input type="hidden" name="site" value="/node-mongodb-native/3.1">
+    <input type="hidden" name="q" value="">
+    <label for="searchQuery"><i class="fa fa-search fa-1"></i></label>
+</form>
+</div>
+
+</div>
+</div>
+
+  </div>
+</header>
+
+
+      
+
+      
+<aside id="sidebar" class="sidebar">
+    <div class="ssidebar nav-collapse">
+      <div class="ssidebarwrapper">
+        <h3>
+          <a class="index-link" href="/node-mongodb-native/3.1/../">MongoDB Node.js Driver</a>
+          <a class="version pull-right" href="/node-mongodb-native/3.1">3.x</a>
+        </h3>
+
+        
+        <ul class="sidebar-menu">
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+
+          
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+    
+    
+    
+      
+    
+  
+  
+
+
+        
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+
+          
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.1/installation-guide/installation-guide/">
+        <i class='fa fa-puzzle-piece'></i>
+        Installation Guide
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.1/quick-start/quick-start/">
+        <i class='fa fa-road'></i>
+        Quick Start
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/3.1/tutorials/main/" class="">
+      <i class='fa fa-thumb-tack'></i>
+      <span>Tutorials</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.1/tutorials/connect/" class="">
+      <i class='fa'></i>
+      <span>Connect to MongoDB</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/tutorials/connect/authenticating/">
+        <i class='fa'></i>
+        Authentication
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/tutorials/connect/ssl/">
+        <i class='fa'></i>
+        SSL Settings
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/collations/">
+        <i class='fa'></i>
+        Collations
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/collections/">
+        <i class='fa'></i>
+        Collections
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/create-indexes/">
+        <i class='fa'></i>
+        Create Indexes
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/projections/">
+        <i class='fa'></i>
+        Projections
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/aggregation/">
+        <i class='fa'></i>
+        Aggregation
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/text-search/">
+        <i class='fa'></i>
+        Text Search
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/geospatial-search/">
+        <i class='fa'></i>
+        Geospatial Search
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/commands/">
+        <i class='fa'></i>
+        Database Commands
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.1/tutorials/gridfs/" class="">
+      <i class='fa'></i>
+      <span>GridFS</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/tutorials/gridfs/streaming/">
+        <i class='fa'></i>
+        GridFS API
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/tutorials/gridfs/gridstore/">
+        <i class='fa'></i>
+        Legacy GridStore
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/3.1/reference/main/" class="">
+      <i class='fa fa-book'></i>
+      <span>Reference</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.1/reference/connecting/" class="">
+      <i class='fa'></i>
+      <span>Connection Options</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/reference/connecting/connection-settings/">
+        <i class='fa'></i>
+        Connection Settings
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.1/reference/ecmascriptnext/" class="">
+      <i class='fa'></i>
+      <span>ECMAScript Next</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/reference/ecmascriptnext/connecting/">
+        <i class='fa'></i>
+        Connecting
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/reference/ecmascriptnext/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.1/reference/management/" class="">
+      <i class='fa'></i>
+      <span>Management</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/reference/management/logging/">
+        <i class='fa'></i>
+        Logging
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/reference/management/apm/">
+        <i class='fa'></i>
+        APM
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/reference/management/sdam-monitoring/">
+        <i class='fa'></i>
+        Topology Monitoring
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/reference/pool/">
+        <i class='fa'></i>
+        Pool Design
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/reference/faq/">
+        <i class='fa'></i>
+        Frequently Asked Questions
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<li class="toctree-l1  current">
+  <a href="/node-mongodb-native/3.1/upgrade-migration/main/" class="">
+      <i class='fa fa-cog'></i>
+      <span>Upgrade Guide</span>
+      <span class="menu-arrow fa fa-angle-down"></span>
+  </a>
+    <ul  class="current">
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/upgrade-migration/upgrading/">
+        <i class='fa fa-wrench'></i>
+        Upgrading to 2.x
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.1/api">
+        <i class='fa fa-file-text-o'></i>
+        API Documentation
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://github.com/mongodb/node-mongodb-native">
+        <i class='fa fa-github'></i>
+        Source Code
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.1/issues-help/">
+        <i class='fa fa-life-ring'></i>
+        Issues &amp; Help
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge">
+        <img src='https://badges.gitter.im/Join Chat.svg'/>
+        
+    </a>
+  </li>
+
+
+          
+        </ul>
+        
+    </div>
+  </div>
+  
+</aside>
+
+<div class="option-popup closed hidden" id="optionsVersionsPopup">
+<div class="option-header">
+  <i class="fa fa-gear"></i>
+  <span>OPTIONS</span>
+  <i class="fa fa-angle-up pull-right"></i>
+</div>
+<div class="option-body">
+  <ul>
+      
+      <li>
+        <label>Version</label>
+        <div class="btn-group btn-group-xs pull-right">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            Select Version <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu" id="optionsVersionsMenu">
+          </ul>
+        </div>
+      </li>
+
+   
+
+
+    
+
+  </ul>
+</div>
+</div>
+
+
+
+      
+      <section id="main-content" class="content">
+          <section class="main-column pull-left">
+            <div class="document">
+              <div class="documentwrapper">
+                <div class="bodywrapper">
+                  <div class="body">
+                    <p><div class="admonition note">
+                    <h5 class="admonition-title">Survey</h5>
+                    <p>Please help us improve by answering a few questions at our
+						<a href="https://www.research.net/r/BPJSGJC"><strong> user survey</strong></a>.
+                    </p>
+                    </div>
+                    </p>
+
+
+   
+<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.0.0/docs/reference/content/upgrade-migration/upgrading.md" target="_blank" title="Edit upgrade-migration/upgrading.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+
+
+
+
+
+
+
+
+
+
+<div class="bc">
+<ul>
+  
+  
+  
+  
+  
+  <li><a href="/node-mongodb-native/3.1/upgrade-migration/main/">Upgrade Guide</a> <i class="fa fa-angle-right"></i></li>
+  <li>Upgrading to 2.x</li>
+</ul>
+</div>
+
+
+
+
+<h1 id="migrating-your-application-to-2-x">Migrating Your Application To 2.x</h1>
+
+<p>There are some key changes in the driver that you should be aware of before migrating your application from version 1.x to 2.x.
+Some APIs are cleaned up, and some 1.x features have been deprecated.</p>
+
+<h2 id="design-differences-in-2-x">Design differences in 2.x</h2>
+
+<p>One major change is that the driver has been split into two pieces. There is a new <code>mongodb-core</code> that contains the
+low-level MongoDB APIs while <code>mongodb</code> contains the high-level driver. <code>mongodb-core</code> is targeted to creators of libraries like <a href="http://mongoosejs.com/">Mongoose</a> and other ODMs who do not need the abstractions available in the <code>mongodb</code> driver. The driver is
+currently compatible with the 0.11.x Node.js branch, which includes support for Kerberos and MongoDB 3.0.</p>
+
+<h2 id="changes">Changes</h2>
+
+<p>Below are listed some driver changes which could impact your application.</p>
+
+<h3 id="node-js-versions-and-streams">Node.js versions and Streams</h3>
+
+<p>The 2.0 driver drops support for 0.8.x style streams in favor of 0.10.x or higher style pull-based streams, which are
+faster and more reliable. Backwards compatibility is available by using the <code>readable-stream</code> npm package (might cause
+some behavior changes for the cursor streams).</p>
+
+<p>All dependencies have now been updated to use the <code>nan</code> package. They will compile and work on 0.11.x or higher.</p>
+
+<h3 id="grid-object">Grid Object</h3>
+
+<p>The grid object has been removed, due to its limited GridStore capabilities.</p>
+
+<h3 id="db-object">db Object</h3>
+
+<p>The db instance object has changed in several ways. The following methods have been removed:</p>
+
+<ul>
+<li><code>db.dereference</code> due to db references being deprecated in the server.</li>
+<li><code>db.cursorInfo</code> removed as it never worked reliably.</li>
+<li><code>db.stats</code> removed as inconsistent.</li>
+<li><code>db.collectionNames</code> removed as it&rsquo;s just a specialized version of the new <code>listCollections</code> helper.</li>
+<li><code>db.collectionInfo</code> removed as it&rsquo;s not compatible with the new MongoDB 3.0 or higher alternative storage engines.</li>
+</ul>
+
+<p>New method:</p>
+
+<ul>
+<li><code>db.listCollections</code> to replace all other collection inquiry methods. It works with MongoDB 3.0 and higher and provide backwards compatibility for MongoDB 2.6 or lower.</li>
+</ul>
+
+<h3 id="collection-object">Collection Object</h3>
+
+<p>The collection instance object has also changed in several key respects. Most importantly, we now return the <code>mongodb-core</code> result objects directly, with all the associated information returned from the server, instead of the selective information returned in the 1.4.x version.</p>
+
+<p>New methods:</p>
+
+<ul>
+<li><code>collection.insertOne</code> insert a single document.</li>
+<li><code>collection.insertMany</code> insert an array of documents.</li>
+<li><code>collection.replaceOne</code> fully replace an existing document.</li>
+<li><code>collection.updateOne</code> update a single document.</li>
+<li><code>collection.updateMany</code> update multiple documents.</li>
+<li><code>collection.deleteOne</code> delete a single document.</li>
+<li><code>collection.deleteMany</code> delete multiple documents.</li>
+<li><code>collection.findOneAndUpdate</code> use findAndModify to update a document.</li>
+<li><code>collection.findOneAndDelete</code> use findAndModify to remove a specific document.</li>
+<li><code>collection.findOneAndReplace</code> use findAndModify to replace a specific document.</li>
+</ul>
+
+<p>The current <code>insert</code>, <code>update</code> and <code>remove</code> methods are marked for deprecation and will be removed in a future 3.0 driver. These three methods now return the full <code>mongodb-core</code> results, and their third return value has been removed to ensure fewer compatibility problems with orchestration libraries like <code>async</code>.</p>
+
+<p>The insert methods are now capping at the <code>maxWriteBatchSize</code> passed back from MongoDB on the results from the <code>ismaster</code> command. For MongoDB 2.4 and lower this means a maximum of 1000 documents in each insert batch. Legacy insert mode has been deprecated in favor of proper emulation of current 2.6 or higher write commands.</p>
+
+<p>Another important change is in how <code>collection.find</code> works. The idea is to chain commands instead of passing them into the <code>find</code> method. It still supports old behavior from 1.4 so no code should break, but the API documentation reflects the new, preferred way of using <code>find</code> to execute queries.</p>
+
+<h3 id="gridstore">GridStore</h3>
+
+<p>The GridStore object has changed in major ways, due to issues discovered by users related to parallel writing (using the previously available <code>w+</code> append mode). As a result, in 2.0 <code>w+</code> only allows for changes to the file metadata and does not allow for appending to a file, avoiding possible data corruption. The hope is to create a new GridStore spec in the future that allows for properly handling parallel writing to an existing file, but that will require changes for all drivers as well as the server.</p>
+
+<h3 id="mongoclient">MongoClient</h3>
+
+<p>MongoClient now has only the class method <code>connect</code>. Construction of a new MongoClient using <code>Server</code>, <code>ReplSet</code> or <code>Mongos</code> has been removed, due to the confusion it caused by duplicating the way one can build a topology connection using <code>Db</code> in 1.4. <code>MongoClient.connect</code> is the recommended way to connect to a MongoDB topology.</p>
+
+
+
+
+
+
+<div id="btnv">
+  
+  
+</div>
+</div>
+
+
+</div>
+<div class="right-column">
+<div class="wrapper">
+  
+  <div class="toc">
+    <span class="toc-header">On this page</span>
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#migrating-your-application-to-2-x">Migrating Your Application To 2.x</a>
+<ul>
+<li><a href="#design-differences-in-2-x">Design differences in 2.x</a></li>
+<li><a href="#changes">Changes</a>
+<ul>
+<li><a href="#node-js-versions-and-streams">Node.js versions and Streams</a></li>
+<li><a href="#grid-object">Grid Object</a></li>
+<li><a href="#db-object">db Object</a></li>
+<li><a href="#collection-object">Collection Object</a></li>
+<li><a href="#gridstore">GridStore</a></li>
+<li><a href="#mongoclient">MongoClient</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  </div>
+  
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+
+</section>
+
+
+<script type="text/javascript">
+  var DOCUMENTATION_OPTIONS = {
+   URL_ROOT:    "/node-mongodb-native/3.1",
+   VERSION:     "3.x",
+   COLLAPSE_INDEX: false,
+   FILE_SUFFIX: '.html',
+   HAS_SOURCE:  true
+  };
+</script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/js/jquery.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/lib/bootstrap.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/js/navbar.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/lib/highlight/highlight.pack.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/js/scripts.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/lib/bootstrap-toggle/bootstrap-toggle.min.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/js/java.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/js/toggle-switch.js"></script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-29229787-1', 'auto');
+  ga('send', 'pageview');
+</script>
+</body>
+</html>
+

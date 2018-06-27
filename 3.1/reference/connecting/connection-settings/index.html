@@ -1,0 +1,2366 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="author" content="">
+<meta name="keyword" content="">
+
+    <link rel="shortcut icon" href="/node-mongodb-native/3.1/img/favicon.png">
+
+    <title>Connection Settings</title>
+
+    <link rel="stylesheet" href="/node-mongodb-native/3.1/lib/bootstrap.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.1/lib/font-awesome/css/font-awesome.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.1/css/mongodb-docs.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.1/css/overrides.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.1/lib/highlight/styles/idea.css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.1/lib/bootstrap-toggle/bootstrap-toggle.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.1/css/java.css" type="text/css" />
+
+
+  </head>
+
+  <body>
+  
+  <section id="container" class="">
+      
+      <header id="header-db" class="row" role="navigation">
+  <div class="header-content">
+    <div class="toggle-nav pull-left">
+        <i class="fa fa-bars"></i>
+        <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+    </div>
+    
+    <div class="logo pull-left">
+      <a href="https://www.mongodb.com/">
+        <img src="http://mongodb.github.io/node-mongodb-native/img/logo-mongodb-header.png", alt="MongoDB.com" />
+      </a>
+    </div>
+    
+    <div>
+<div class="nav-items pull-right">
+  <a href="https://university.mongodb.com" data-toggle="tooltip" data-placement="bottom" title="Free Online Classes">MongoDB University</a>
+  <a href="http://www.mongodb.org/downloads" data-toggle="tooltip" data-placement="bottom" title="Download MongoDB">Downloads</a>
+  <a href="http://www.mongodb.org/get-involved" data-toggle="tooltip" data-placement="bottom" title="Get involved with MongoDB">Community</a>
+  <a href="http://docs.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Documentation">Docs</a>
+  <a href="http://blog.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Blog">Blog</a>
+  <div id="search">
+<form method="get" action="//www.google.com/search" target="_blank">
+    <input type="text" name="searchQuery" size="20" value="" autocomplete="off" placeholder="Search docs">
+    <input type="hidden" name="site" value="/node-mongodb-native/3.1">
+    <input type="hidden" name="q" value="">
+    <label for="searchQuery"><i class="fa fa-search fa-1"></i></label>
+</form>
+</div>
+
+</div>
+</div>
+
+  </div>
+</header>
+
+
+      
+
+      
+<aside id="sidebar" class="sidebar">
+    <div class="ssidebar nav-collapse">
+      <div class="ssidebarwrapper">
+        <h3>
+          <a class="index-link" href="/node-mongodb-native/3.1/../">MongoDB Node.js Driver</a>
+          <a class="version pull-right" href="/node-mongodb-native/3.1">3.x</a>
+        </h3>
+
+        
+        <ul class="sidebar-menu">
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+
+          
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+    
+    
+    
+      
+      
+      
+        
+      
+    
+    
+  
+  
+
+
+        
+      
+    
+    
+  
+
+
+        
+      
+    
+      
+      
+        
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+
+          
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.1/installation-guide/installation-guide/">
+        <i class='fa fa-puzzle-piece'></i>
+        Installation Guide
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.1/quick-start/quick-start/">
+        <i class='fa fa-road'></i>
+        Quick Start
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/3.1/tutorials/main/" class="">
+      <i class='fa fa-thumb-tack'></i>
+      <span>Tutorials</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.1/tutorials/connect/" class="">
+      <i class='fa'></i>
+      <span>Connect to MongoDB</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/tutorials/connect/authenticating/">
+        <i class='fa'></i>
+        Authentication
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/tutorials/connect/ssl/">
+        <i class='fa'></i>
+        SSL Settings
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/collations/">
+        <i class='fa'></i>
+        Collations
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/collections/">
+        <i class='fa'></i>
+        Collections
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/create-indexes/">
+        <i class='fa'></i>
+        Create Indexes
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/projections/">
+        <i class='fa'></i>
+        Projections
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/aggregation/">
+        <i class='fa'></i>
+        Aggregation
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/text-search/">
+        <i class='fa'></i>
+        Text Search
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/geospatial-search/">
+        <i class='fa'></i>
+        Geospatial Search
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/commands/">
+        <i class='fa'></i>
+        Database Commands
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.1/tutorials/gridfs/" class="">
+      <i class='fa'></i>
+      <span>GridFS</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/tutorials/gridfs/streaming/">
+        <i class='fa'></i>
+        GridFS API
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/tutorials/gridfs/gridstore/">
+        <i class='fa'></i>
+        Legacy GridStore
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<li class="toctree-l1  current">
+  <a href="/node-mongodb-native/3.1/reference/main/" class="">
+      <i class='fa fa-book'></i>
+      <span>Reference</span>
+      <span class="menu-arrow fa fa-angle-down"></span>
+  </a>
+    <ul  class="current">
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<li class="toctree-l2  current">
+  <a href="/node-mongodb-native/3.1/reference/connecting/" class="">
+      <i class='fa'></i>
+      <span>Connection Options</span>
+      
+  </a>
+    <ul  class="current">
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/reference/connecting/connection-settings/">
+        <i class='fa'></i>
+        Connection Settings
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.1/reference/ecmascriptnext/" class="">
+      <i class='fa'></i>
+      <span>ECMAScript Next</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/reference/ecmascriptnext/connecting/">
+        <i class='fa'></i>
+        Connecting
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/reference/ecmascriptnext/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.1/reference/management/" class="">
+      <i class='fa'></i>
+      <span>Management</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/reference/management/logging/">
+        <i class='fa'></i>
+        Logging
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/reference/management/apm/">
+        <i class='fa'></i>
+        APM
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/reference/management/sdam-monitoring/">
+        <i class='fa'></i>
+        Topology Monitoring
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/reference/pool/">
+        <i class='fa'></i>
+        Pool Design
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/reference/faq/">
+        <i class='fa'></i>
+        Frequently Asked Questions
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/3.1/upgrade-migration/main/" class="">
+      <i class='fa fa-cog'></i>
+      <span>Upgrade Guide</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/upgrade-migration/upgrading/">
+        <i class='fa fa-wrench'></i>
+        Upgrading to 2.x
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.1/api">
+        <i class='fa fa-file-text-o'></i>
+        API Documentation
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://github.com/mongodb/node-mongodb-native">
+        <i class='fa fa-github'></i>
+        Source Code
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.1/issues-help/">
+        <i class='fa fa-life-ring'></i>
+        Issues &amp; Help
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge">
+        <img src='https://badges.gitter.im/Join Chat.svg'/>
+        
+    </a>
+  </li>
+
+
+          
+        </ul>
+        
+    </div>
+  </div>
+  
+</aside>
+
+<div class="option-popup closed hidden" id="optionsVersionsPopup">
+<div class="option-header">
+  <i class="fa fa-gear"></i>
+  <span>OPTIONS</span>
+  <i class="fa fa-angle-up pull-right"></i>
+</div>
+<div class="option-body">
+  <ul>
+      
+      <li>
+        <label>Version</label>
+        <div class="btn-group btn-group-xs pull-right">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            Select Version <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu" id="optionsVersionsMenu">
+          </ul>
+        </div>
+      </li>
+
+   
+
+
+    
+
+  </ul>
+</div>
+</div>
+
+
+
+      
+      <section id="main-content" class="content">
+          <section class="main-column pull-left">
+            <div class="document">
+              <div class="documentwrapper">
+                <div class="bodywrapper">
+                  <div class="body">
+                    <p><div class="admonition note">
+                    <h5 class="admonition-title">Survey</h5>
+                    <p>Please help us improve by answering a few questions at our
+						<a href="https://www.research.net/r/BPJSGJC"><strong> user survey</strong></a>.
+                    </p>
+                    </div>
+                    </p>
+
+
+   
+<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.0.0/docs/reference/content/reference/connecting/connection-settings.md" target="_blank" title="Edit reference/connecting/connection-settings.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+
+
+
+
+
+
+
+
+
+
+<div class="bc">
+<ul>
+  
+  
+  
+  
+  <li><a href="/node-mongodb-native/3.1/reference/main/">Reference</a> <i class="fa fa-angle-right"></i></li>
+  <li><a href="/node-mongodb-native/3.1/reference/connecting/">Connection Options</a> <i class="fa fa-angle-right"></i></li>
+  <li>Connection Settings</li>
+</ul>
+</div>
+
+
+
+
+<h1 id="uri-connection-settings">URI Connection Settings</h1>
+
+<p>Optional connection settings are settings not covered by the <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI Connection String </a>. The following options are passed in the options parameter in the MongoClient.connect function.</p>
+
+<pre><code class="language-js">const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:50000,localhost:50001';
+// Database Name
+const dbName = 'myproject';
+// Use connect method to connect to the Server passing in
+// additional options
+MongoClient.connect(url, {
+  poolSize: 10, ssl: true
+}, function(err, client) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  client.close();
+});
+</code></pre>
+
+<p>The table below shows all settings and what topology they affect.</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Option</th>
+<th align="left">Affects</th>
+<th align="left">Type</th>
+<th align="left">Default</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><strong>poolSize</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">integer</td>
+<td align="left">5</td>
+<td align="left">Set the maximum poolSize for each individual server or proxy connection.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>ssl</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">boolean</td>
+<td align="left">false</td>
+<td align="left">Use ssl connection</td>
+</tr>
+
+<tr>
+<td align="left"><strong>sslValidate</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">boolean</td>
+<td align="left">true</td>
+<td align="left">Validate mongod server certificate against ca</td>
+</tr>
+
+<tr>
+<td align="left"><strong>sslCA</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">Array</td>
+<td align="left">null</td>
+<td align="left">Array of valid certificates either as Buffers or Strings</td>
+</tr>
+
+<tr>
+<td align="left"><strong>sslCert</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">Buffer/String</td>
+<td align="left">null</td>
+<td align="left">String or buffer containing the certificate we wish to present</td>
+</tr>
+
+<tr>
+<td align="left"><strong>sslKey</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">Buffer/String</td>
+<td align="left">null</td>
+<td align="left">String or buffer containing the certificate private key we wish to present</td>
+</tr>
+
+<tr>
+<td align="left"><strong>sslPass</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">Buffer/String</td>
+<td align="left">null</td>
+<td align="left">String or buffer containing the certificate password</td>
+</tr>
+
+<tr>
+<td align="left"><strong>autoReconnect</strong></td>
+<td align="left">Server</td>
+<td align="left">boolean</td>
+<td align="left">true</td>
+<td align="left">Reconnect on error.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>noDelay</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">boolean</td>
+<td align="left">true</td>
+<td align="left">TCP Socket NoDelay option.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>keepAlive</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">integer</td>
+<td align="left">30000</td>
+<td align="left">The number of milliseconds to wait before initiating keepAlive on the TCP socket.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>connectTimeoutMS</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">integer</td>
+<td align="left">30000</td>
+<td align="left">TCP Connection timeout setting.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>socketTimeoutMS</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">integer</td>
+<td align="left">360000</td>
+<td align="left">TCP Socket timeout setting.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>reconnectTries</strong></td>
+<td align="left">Server</td>
+<td align="left">integer</td>
+<td align="left">30</td>
+<td align="left">Server attempt to reconnect #times</td>
+</tr>
+
+<tr>
+<td align="left"><strong>reconnectInterval</strong></td>
+<td align="left">Server</td>
+<td align="left">integer</td>
+<td align="left">1000</td>
+<td align="left">Server will wait # milliseconds between retries.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>ha</strong></td>
+<td align="left">ReplicaSet, Mongos</td>
+<td align="left">boolean</td>
+<td align="left">true</td>
+<td align="left">Turn on high availability monitoring.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>haInterval</strong></td>
+<td align="left">ReplicaSet, Mongos</td>
+<td align="left">integer</td>
+<td align="left">10000,5000</td>
+<td align="left">Time between each replicaset status check.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>replicaSet</strong></td>
+<td align="left">ReplicaSet</td>
+<td align="left">string</td>
+<td align="left">null</td>
+<td align="left">The name of the replicaset to connect to.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>secondaryAcceptableLatencyMS</strong></td>
+<td align="left">ReplicaSet</td>
+<td align="left">integer</td>
+<td align="left">15</td>
+<td align="left">Sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms).</td>
+</tr>
+
+<tr>
+<td align="left"><strong>acceptableLatencyMS</strong></td>
+<td align="left">Mongos</td>
+<td align="left">integer</td>
+<td align="left">15</td>
+<td align="left">Sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms).</td>
+</tr>
+
+<tr>
+<td align="left"><strong>connectWithNoPrimary</strong></td>
+<td align="left">ReplicaSet</td>
+<td align="left">boolean</td>
+<td align="left">false</td>
+<td align="left">Sets if the driver should connect even if no primary is available.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>authSource</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">string</td>
+<td align="left">null</td>
+<td align="left">If the database authentication is dependent on another databaseName.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>w</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">string, integer</td>
+<td align="left">null</td>
+<td align="left">The write concern.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>wtimeout</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">integer</td>
+<td align="left">null</td>
+<td align="left">The write concern timeout value.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>j</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">boolean</td>
+<td align="left">false</td>
+<td align="left">Specify a journal write concern.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>forceServerObjectId</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">boolean</td>
+<td align="left">false</td>
+<td align="left">Force server to assign _id values instead of driver.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>serializeFunctions</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">boolean</td>
+<td align="left">false</td>
+<td align="left">Serialize functions on any object.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>ignoreUndefined</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">boolean</td>
+<td align="left">false</td>
+<td align="left">Specify if the BSON serializer should ignore undefined fields.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>raw</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">boolean</td>
+<td align="left">false</td>
+<td align="left">Return document results as raw BSON buffers.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>promoteLongs</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">boolean</td>
+<td align="left">true</td>
+<td align="left">Promotes Long values to number if they fit inside the 53 bits resolution.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>promoteBuffers</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">boolean</td>
+<td align="left">false</td>
+<td align="left">Promotes Binary BSON values to native Node Buffers.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>promoteValues</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">boolean</td>
+<td align="left">true</td>
+<td align="left">Promotes BSON values to native types where possible, set to false to only receive wrapper types.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>domainsEnabled</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">boolean</td>
+<td align="left">false</td>
+<td align="left">Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>bufferMaxEntries</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">integer</td>
+<td align="left">-1</td>
+<td align="left">Sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>readPreference</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">object</td>
+<td align="left">null</td>
+<td align="left">The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</td>
+</tr>
+
+<tr>
+<td align="left"><strong>pkFactory</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">object</td>
+<td align="left">null</td>
+<td align="left">A primary key factory object for generation of custom _id keys.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>promiseLibrary</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">object</td>
+<td align="left">null</td>
+<td align="left">A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>readConcern</strong></td>
+<td align="left">Server, ReplicaSet, Mongos</td>
+<td align="left">object</td>
+<td align="left">null</td>
+<td align="left">Specify a read concern for the collection. (only MongoDB 3.2 or higher supported).</td>
+</tr>
+
+<tr>
+<td align="left"><strong>maxStalenessSeconds</strong></td>
+<td align="left">Replicaset</td>
+<td align="left">number</td>
+<td align="left">null</td>
+<td align="left">Specify a maxStalenessSeconds value for secondary reads, minimum is 90 seconds</td>
+</tr>
+
+<tr>
+<td align="left"><strong>appname</strong></td>
+<td align="left">Server, Replicaset, Mongos</td>
+<td align="left">string</td>
+<td align="left">null</td>
+<td align="left">The name of the application that created this MongoClient instance. MongoDB 3.4 and newer will print this value in the server log upon establishing each connection. It is also recorded in the slow query log and profile collections.</td>
+</tr>
+
+<tr>
+<td align="left"><strong>loggerLevel</strong></td>
+<td align="left">Server, Replicaset, Mongos</td>
+<td align="left">string</td>
+<td align="left">null</td>
+<td align="left">Specify the log level used by the driver logger (error/warn/info/debug)</td>
+</tr>
+
+<tr>
+<td align="left"><strong>logger</strong></td>
+<td align="left">Server, Replicaset, Mongos</td>
+<td align="left">object</td>
+<td align="left">null</td>
+<td align="left">Specify a customer logger mechanism, can be used to log using your app level logger</td>
+</tr>
+</tbody>
+</table>
+
+<h1 id="ensure-your-connection-string-is-valid-for-replica-sets">Ensure your connection string is valid for Replica Sets</h1>
+
+<p>The connection string passed to the driver must use the fully qualified host names for the servers as set in the replicaset config. Given the following configuration settings for your replicaset.</p>
+
+<pre><code class="language-js">{
+	&quot;_id&quot; : &quot;testSet&quot;,
+	&quot;version&quot; : 1,
+	&quot;protocolVersion&quot; : 1,
+	&quot;members&quot; : [
+		{
+			&quot;_id&quot; : 1,
+			&quot;host&quot; : &quot;server1:31000&quot;,
+		},
+		{
+			&quot;_id&quot; : 2,
+			&quot;host&quot; : &quot;server2:31001&quot;,
+		},
+		{
+			&quot;_id&quot; : 3,
+			&quot;host&quot; : &quot;server3:31002&quot;,
+		}
+	]
+}
+</code></pre>
+
+<p>You must ensure <code>server1</code>, <code>server2</code> and <code>server3</code> are resolvable from the driver for the Replicaset discovery and failover to work correctly.</p>
+
+
+
+
+
+
+<div id="btnv">
+  
+  
+  <div class="pull-right">
+  <a class="navigation next" href="/node-mongodb-native/3.1/reference/ecmascriptnext/">
+    ECMAScript Next <i class="fa fa-long-arrow-right"> </i>
+  </a>
+  
+</div>
+</div>
+
+
+</div>
+<div class="right-column">
+<div class="wrapper">
+  
+  <div class="toc">
+    <span class="toc-header">On this page</span>
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#uri-connection-settings">URI Connection Settings</a></li>
+<li><a href="#ensure-your-connection-string-is-valid-for-replica-sets">Ensure your connection string is valid for Replica Sets</a></li>
+</ul>
+</nav>
+  </div>
+  
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+
+</section>
+
+
+<script type="text/javascript">
+  var DOCUMENTATION_OPTIONS = {
+   URL_ROOT:    "/node-mongodb-native/3.1",
+   VERSION:     "3.x",
+   COLLAPSE_INDEX: false,
+   FILE_SUFFIX: '.html',
+   HAS_SOURCE:  true
+  };
+</script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/js/jquery.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/lib/bootstrap.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/js/navbar.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/lib/highlight/highlight.pack.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/js/scripts.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/lib/bootstrap-toggle/bootstrap-toggle.min.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/js/java.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/js/toggle-switch.js"></script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-29229787-1', 'auto');
+  ga('send', 'pageview');
+</script>
+</body>
+</html>
+

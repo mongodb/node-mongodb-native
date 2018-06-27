@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>MongoDB Node.js Driver</title>
+    <link>/node-mongodb-native/3.1/</link>
+    <description>Recent content on MongoDB Node.js Driver</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 01 Jun 2016 12:53:30 -0400</lastBuildDate>
+    
+	<atom:link href="/node-mongodb-native/3.1/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Projections</title>
+      <link>/node-mongodb-native/3.1/tutorials/projections/</link>
+      <pubDate>Wed, 01 Jun 2016 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/tutorials/projections/</guid>
+      <description>Projections By default, queries in MongoDB return all fields in matching documents. To limit the amount of data that MongoDB sends to applications, you can include a projection document in the query operation.
+Projection Document The projection document limits the fields to return for all matching documents. The projection document can specify the inclusion of fields or the exclusion of field and has the following form:
+{ field1: &amp;lt;value&amp;gt;, field2: &amp;lt;value&amp;gt; .</description>
+    </item>
+    
+    <item>
+      <title>GridFS API</title>
+      <link>/node-mongodb-native/3.1/tutorials/gridfs/streaming/</link>
+      <pubDate>Thu, 15 Oct 2015 14:27:51 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/tutorials/gridfs/streaming/</guid>
+      <description>The GridFS API The MongoDB Node.js driver now supports a stream-based API for GridFS that&amp;rsquo;s compatible with Node.js&amp;rsquo; streams3, so you can .pipe() directly from file streams to MongoDB. In this tutorial, you&amp;rsquo;ll see how to use the new GridFS streaming API to upload a CC-licensed 28 MB recording of the overture from Richard Wagner&amp;rsquo;s opera Die Meistersinger von Nurnberg to MongoDB using streams.
+Uploading a File You can use GridFS to upload a file to MongoDB.</description>
+    </item>
+    
+    <item>
+      <title>GridFS</title>
+      <link>/node-mongodb-native/3.1/tutorials/gridfs/</link>
+      <pubDate>Wed, 05 Aug 2015 12:00:00 +0000</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/tutorials/gridfs/</guid>
+      <description>GridFS GridFS is a specification for storing and retrieving files that exceed the BSON-document size limit of 16 megabytes.
+Instead of storing a file in a single document, GridFS divides a file into parts, or chunks, and stores each of those chunks as a separate document. By default, GridFS limits chunk size to 255 kilobytes. GridFS uses two collections to store files: the chunks collection which stores the file chunks, and the files collection that stores the file metadata.</description>
+    </item>
+    
+    <item>
+      <title>Authentication</title>
+      <link>/node-mongodb-native/3.1/tutorials/connect/authenticating/</link>
+      <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/tutorials/connect/authenticating/</guid>
+      <description>Authentication The Node.js driver supports all MongoDB authentication mechanisms, including those only available in the MongoDB Enterprise Edition.
+DEFAULT Note Starting in MongoDB 3.0, MongoDB changed the default authentication mechanism from MONGODB-CR to SCRAM-SHA-1.
+ To use the default mechanism, either omit the authentication mechanism specification or specify DEFAULT as the mechanism in the URI ConnectionString. The driver will attempt to authenticate using the SCRAM-SHA-1 authentication method if it is available on the MongoDB server.</description>
+    </item>
+    
+    <item>
+      <title>Collections</title>
+      <link>/node-mongodb-native/3.1/tutorials/collections/</link>
+      <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/tutorials/collections/</guid>
+      <description>Collections MongoDB stores documents in collections. If a collection does not exist, MongoDB creates the collection when you first store data for that collection.
+You can also explicitly create a collection with various options, such as setting the maximum size or the documentation validation rules.
+Capped Collection Capped collections have maximum size or document counts that prevent them from growing beyond maximum thresholds. All capped collections must specify a maximum size and may also specify a maximum document count.</description>
+    </item>
+    
+    <item>
+      <title>Database Commands</title>
+      <link>/node-mongodb-native/3.1/tutorials/commands/</link>
+      <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/tutorials/commands/</guid>
+      <description>Database Commands Database commands allow you to perform a wide range of diagnostic and administrative tasks with the Node.js driver. For example, the dbStats command returns storage statistics for a given database. Use the command function to access database commands.
+// set up a command function function getDbStats(db, callback) { db.command({&#39;dbStats&#39;: 1}, function(err, results) { console.log(results); callback(); }); }; // use the function const MongoClient = require(&#39;mongodb&#39;).MongoClient; const assert = require(&#39;assert&#39;); // Connection URL const url = &#39;mongodb://localhost:27017&#39;; // Database Name const dbName = &#39;myproject&#39;; // Use connect method to connect to the Server MongoClient.</description>
+    </item>
+    
+    <item>
+      <title>Geospatial Search</title>
+      <link>/node-mongodb-native/3.1/tutorials/geospatial-search/</link>
+      <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/tutorials/geospatial-search/</guid>
+      <description>Geospatial Search You can query against geospatial indexes in several ways via the Node.js driver, using geospatial query operators.
+To create a 2dsphere index on a collection, pass a document containing the name of the field to be indexed with the value &amp;lsquo;2dsphere&amp;rsquo; to the createIndex() method.
+function create2dSphereIndex(db, callback) { // Get the restaurants collection const collection = db.collection(&#39;restaurants&#39;); // Create the index collection.createIndex( { &#39;address.coord&#39; : &amp;quot;2dsphere&amp;quot; }, function(err, result) { console.</description>
+    </item>
+    
+    <item>
+      <title>Legacy GridStore</title>
+      <link>/node-mongodb-native/3.1/tutorials/gridfs/gridstore/</link>
+      <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/tutorials/gridfs/gridstore/</guid>
+      <description>Note The GridStore API is deprecated. Driver version 2.0 and later uses the GridFS API.
+ GridStore GridStore is a single file inside GridFS that can be managed by the script.
+Open a GridFS file Opening a GridStore is similar to opening a database. First you create a GridStore object, then open it.
+const gs = new GridStore(db, filename, mode[, options])  Where:
+ db is the database object filename is the name of the file in GridFS that needs to be accessed/created mode indicates the operation, can be one of:  &amp;ldquo;r&amp;rdquo; (Read): Looks for the file information in fs.</description>
+    </item>
+    
+    <item>
+      <title>Management</title>
+      <link>/node-mongodb-native/3.1/reference/management/</link>
+      <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/management/</guid>
+      <description> Management The driver provides two mechanisms for examining its state:
+ Logging: Comprehensive logging of all operations. Application Performance Monitoring: The Application Performance Monitoring API is an API that allows developers to tap into the commands issued to MongoDB to record performance metrics and/or inspect the commands sent to MongoDB.  </description>
+    </item>
+    
+    <item>
+      <title>Text Search</title>
+      <link>/node-mongodb-native/3.1/tutorials/text-search/</link>
+      <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/tutorials/text-search/</guid>
+      <description>Text Search Use the $text operator to perform text searches on fields which have a text index.
+To create a text index on a collection, pass a document containing the name of the field to be indexed with the value &amp;lsquo;text&amp;rsquo; to the createIndex() method.
+function createTextIndex(db, callback) { // Get the restaurants collection const collection = db.collection(&#39;restaurants&#39;); // Create the index collection.createIndex( { name : &amp;quot;text&amp;quot; }, function(err, result) { console.</description>
+    </item>
+    
+    <item>
+      <title>Upgrading to 2.x</title>
+      <link>/node-mongodb-native/3.1/upgrade-migration/upgrading/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:39 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/upgrade-migration/upgrading/</guid>
+      <description>Migrating Your Application To 2.x There are some key changes in the driver that you should be aware of before migrating your application from version 1.x to 2.x. Some APIs are cleaned up, and some 1.x features have been deprecated.
+Design differences in 2.x One major change is that the driver has been split into two pieces. There is a new mongodb-core that contains the low-level MongoDB APIs while mongodb contains the high-level driver.</description>
+    </item>
+    
+    <item>
+      <title>Upgrade Guide</title>
+      <link>/node-mongodb-native/3.1/upgrade-migration/main/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:35 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/upgrade-migration/main/</guid>
+      <description>What&amp;rsquo;s new in 3.0  Support added for Retryable Writes Support added for DNS Seedlists Support added for Change Streams Support added for sessions MongoClient.connect now returns a Client instead of a DB.  Full 3.0 Changes Here
+What&amp;rsquo;s New in 2.3 Key features of the 2.3 driver include:
+ Implements Decimal128, a decimal floating-point numbering format that occupies 16 bytes (128 bits). See the CRUD tutorial for an example.</description>
+    </item>
+    
+    <item>
+      <title>CRUD Operations</title>
+      <link>/node-mongodb-native/3.1/reference/ecmascriptnext/crud/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/ecmascriptnext/crud/</guid>
+      <description>ECMAScript Next CRUD Let&amp;rsquo;s take a look at the CRUD operations from the perspective of ESNext. In this guide we will be using the same examples as in the general CRUD specification overview but rewrite them to use the new ESNext features. For all method options refer to the main CRUD tutorial.
+ CRUD: CRUD Specification.  This reference also omits methods that no longer make sense when using ESNext such as the each and forEach methods.</description>
+    </item>
+    
+    <item>
+      <title>CRUD Operations</title>
+      <link>/node-mongodb-native/3.1/tutorials/crud/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/tutorials/crud/</guid>
+      <description>CRUD Operations For a walkthrough of the main CRUD operations please refer to the Quick Start guide.
+Driver CRUD operations are defined as the operations performed to create, read, update, and delete documents. This tutorial covers both the basic CRUD methods and the specialized findAndModify based methods as well as the new Bulk API methods for efficient bulk write operations.
+ Write Methods Write methods are divided into those which insert documents into a collection, those which update documents in a collection, and those which remove documents from a collection.</description>
+    </item>
+    
+    <item>
+      <title>Collations</title>
+      <link>/node-mongodb-native/3.1/tutorials/collations/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/tutorials/collations/</guid>
+      <description>Overview Collations provide a set of rules which comply with the conventions of a particular language when comparing strings.
+For example, in Canadian French, the last accent in a given word determines the sorting order.
+Consider the following French words:
+cote &amp;lt; coté &amp;lt; côte &amp;lt; côté  The sort order using the Canadian French collation would result in the following:
+cote &amp;lt; côte &amp;lt; coté &amp;lt; côté  If collation is unspecified, MongoDB uses the simple binary comparison for strings.</description>
+    </item>
+    
+    <item>
+      <title>Connect to MongoDB</title>
+      <link>/node-mongodb-native/3.1/tutorials/connect/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/tutorials/connect/</guid>
+      <description>Connect to MongoDB Use the MongoClient.connect method to connect to a running MongoDB deployment.
+Connect to a Single MongoDB Instance To connect to a single MongoDB instance, specify the URI of the MongoDB instance to connect to.
+In the following example, the URI connection string specifies connecting to a MongoDB instance that is running on localhost using port 27017. The myproject indicates the database to use.
+const MongoClient = require(&#39;mongodb&#39;).</description>
+    </item>
+    
+    <item>
+      <title>Connecting</title>
+      <link>/node-mongodb-native/3.1/reference/ecmascriptnext/connecting/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/ecmascriptnext/connecting/</guid>
+      <description>Connecting The MongoClient connection method returns a Promise if no callback is passed to it. Below is an example using the async/await commands.
+const MongoClient = require(&#39;mongodb&#39;).MongoClient; const assert = require(&#39;assert&#39;); (async function() { // Connection URL const url = &#39;mongodb://localhost:27017/myproject&#39;; // Database Name const dbName = &#39;myproject&#39;; let client; try { // Use connect method to connect to the Server client = await MongoClient.connect(url); const db = client.db(dbName); } catch (err) { console.</description>
+    </item>
+    
+    <item>
+      <title>Connection Options</title>
+      <link>/node-mongodb-native/3.1/reference/connecting/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/connecting/</guid>
+      <description> Connection Options For more information on the connection options:
+ URI Connection String: MongoDB connection string URI. Connection Settings: Reference on the driver-specific connection settings.  </description>
+    </item>
+    
+    <item>
+      <title>Connection Settings</title>
+      <link>/node-mongodb-native/3.1/reference/connecting/connection-settings/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/connecting/connection-settings/</guid>
+      <description>URI Connection Settings Optional connection settings are settings not covered by the URI Connection String . The following options are passed in the options parameter in the MongoClient.connect function.
+const MongoClient = require(&#39;mongodb&#39;).MongoClient; const assert = require(&#39;assert&#39;); // Connection URL const url = &#39;mongodb://localhost:50000,localhost:50001&#39;; // Database Name const dbName = &#39;myproject&#39;; // Use connect method to connect to the Server passing in // additional options MongoClient.connect(url, { poolSize: 10, ssl: true }, function(err, client) { assert.</description>
+    </item>
+    
+    <item>
+      <title>ECMAScript Next</title>
+      <link>/node-mongodb-native/3.1/reference/ecmascriptnext/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/ecmascriptnext/</guid>
+      <description>ECMAScript Next ECMAScript Next (also know as ESNext, ES2015, ES6, and many other names) is the new future of the Javascript language. It introduces fundamental changes in JavaScript while maintaining backward compatibility with ECMAScript 5.
+The MongoDB Node.js driver embraces modern JavaScript by optionally returning Promises from all async methods.
+This section exposes how to use the MongoDB Node.js driver with ESNext, leveraging all the productivity gains you get from the new Javascript.</description>
+    </item>
+    
+    <item>
+      <title>Frequently Asked Questions</title>
+      <link>/node-mongodb-native/3.1/reference/faq/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/faq/</guid>
+      <description>What is the difference between connectTimeoutMS, socketTimeoutMS and maxTimeMS ?    Setting Default Value MongoClient.connect Description     connectTimeoutMS 30000 The connectTimeoutMS sets the number of milliseconds a socket stays inactive before closing during the connection phase of the driver. That is to say, when the application initiates a connection, when a replica set connects to new members, or when a replica set reconnects to members.</description>
+    </item>
+    
+    <item>
+      <title>Pool Design</title>
+      <link>/node-mongodb-native/3.1/reference/pool/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/pool/</guid>
+      <description>Driver Pool Design The 2.0 series of the mongodb-core module introduced a newly re-designed pool that will grow and contract based on the usage pattern. This reference outlines how the growing/shrinking of the pool works, how authentication is handled and how operations are executed.
+Operations are executed using a work-queue. That means the Pool is responsible for scheduling the execution of operations on connections. The benefit of this is that one avoids slow operations holding up fast operations as long as the following holds true.</description>
+    </item>
+    
+    <item>
+      <title>APM</title>
+      <link>/node-mongodb-native/3.1/reference/management/apm/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:26 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/management/apm/</guid>
+      <description>APM Application Performance Monitoring support is a driver feature that allows monitoring services to hook into the driver in a forward compatible and stable way. The API is not applied to the driver unless explicitly initialized to avoid any performance penalties.
+API The following code example hooks into all the available features of the APM API.
+const listener = require(&#39;mongodb&#39;).instrument({ operationIdGenerator: { operationId: 1, next: function() { return this.operationId++; } }, timestampGenerator: { current: function() { return new Date().</description>
+    </item>
+    
+    <item>
+      <title>SSL Settings</title>
+      <link>/node-mongodb-native/3.1/tutorials/connect/ssl/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:26 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/tutorials/connect/ssl/</guid>
+      <description>TLS/SSL The Node.js driver supports TLS/SSL connections to MongoDB that support TLS/SSL support.
+No Certificate Validation If the MongoDB instance does not perform any validation of the certificate chain, include the ssl=true in the URI Connection String .
+const MongoClient = require(&#39;mongodb&#39;).MongoClient; MongoClient.connect(&amp;quot;mongodb://localhost:27017?ssl=true&amp;quot;, function(err, client) { client.close(); });  Validate Server Certificate If the MongoDB instance presents a certificate, to validate the server&amp;rsquo;s certificate, pass to the MongoClient.connect method:</description>
+    </item>
+    
+    <item>
+      <title>Topology Monitoring</title>
+      <link>/node-mongodb-native/3.1/reference/management/sdam-monitoring/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:26 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/management/sdam-monitoring/</guid>
+      <description>Topology Management The Node.js driver 2.1.10 or higher features SDAM Monitoring events, allowing an application or tool to monitor changes in the drivers view of a single server, replica set or mongos. This allows an application to react to changes of topology, such as a secondary joining or leaving a replica set.
+Overview of SDAM events    Event Applies To Description     serverOpening Server, Replicaset, Mongos Emitted when server connection is established.</description>
+    </item>
+    
+    <item>
+      <title>Aggregation</title>
+      <link>/node-mongodb-native/3.1/tutorials/aggregation/</link>
+      <pubDate>Wed, 18 Mar 2015 21:14:20 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/tutorials/aggregation/</guid>
+      <description>Aggregation Overview Aggregation operations process data records and return computed results. Aggregation operations group values from multiple documents together, and can perform a variety of operations on the grouped data to return a single result.
+The Aggregation Pipeline The aggregation pipeline is a framework for data aggregation modeled on the concept of data processing pipelines. Documents enter a multi-stage pipeline that transforms the documents into aggregated results.
+For a full explanation and a complete list of pipeline stages and operators, see the manual:</description>
+    </item>
+    
+    <item>
+      <title>Logging</title>
+      <link>/node-mongodb-native/3.1/reference/management/logging/</link>
+      <pubDate>Wed, 18 Mar 2015 21:14:20 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/management/logging/</guid>
+      <description>Logging You can change the log level, filter on classes to allow only specific classes to log, and provide your own logger implementation.
+Setting Log level The driver allows logging at three different levels: debug, info and error. The default level is error. The following example demonstrates how to set the logger to debug.
+const MongoClient = require(&#39;mongodb&#39;).MongoClient; const Logger = require(&#39;mongodb&#39;).Logger; const assert = require(&#39;assert&#39;); // Connection URL const url = &#39;mongodb://localhost:27017&#39;; // Database Name const dbName = &#39;myprojeect&#39;; // Use connect method to connect to the Server MongoClient.</description>
+    </item>
+    
+    <item>
+      <title>Issues &amp; Help</title>
+      <link>/node-mongodb-native/3.1/issues-help/</link>
+      <pubDate>Wed, 18 Mar 2015 16:56:14 +0000</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/issues-help/</guid>
+      <description>Issues &amp;amp; Help Our developer community is vibrant and highly engaged, with wide experience using Node.js with MongoDB. Often, the quickest way to get support for general questions is through the mongodb-user google group or through stackoverflow.
+Refer to our support channels documentation for more information.
+Bugs / Feature Requests To report a bug or to request a new feature in the Node.js driver, please open a case in our issue management tool, JIRA:</description>
+    </item>
+    
+    <item>
+      <title>Create Indexes</title>
+      <link>/node-mongodb-native/3.1/tutorials/create-indexes/</link>
+      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/tutorials/create-indexes/</guid>
+      <description>Create Indexes To create an index on a field or fields, pass an index specification document to the createIndex() method:
+{ &amp;lt;field1&amp;gt;: &amp;lt;type1&amp;gt;, &amp;lt;field2&amp;gt;: &amp;lt;type2&amp;gt; ... }  Create an Ascending Index For an ascending index type, specify 1 for &amp;lt;type&amp;gt;.
+The following example creates an ascending index key for the dateOfBirth field:
+function createAscendingIndex(db, callback) { // Get the users collection const collection = db.collection(&#39;users&#39;); // Create the index collection.</description>
+    </item>
+    
+    <item>
+      <title>Installation Guide</title>
+      <link>/node-mongodb-native/3.1/installation-guide/installation-guide/</link>
+      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/installation-guide/installation-guide/</guid>
+      <description>Installation The recommended way to get started using the Node.js 2.0 driver is by using NPM (Node Package Manager) to install the dependency in your project.
+MongoDB Driver After you&amp;rsquo;ve created your project with npm init, you can install the MongoDB driver and its dependencies with the command:
+npm install mongodb --save  This will download the MongoDB driver and add a dependency entry in your package.json file.
+Troubleshooting The MongoDB driver depends on several other packages, including:</description>
+    </item>
+    
+    <item>
+      <title>Quick Start</title>
+      <link>/node-mongodb-native/3.1/quick-start/quick-start/</link>
+      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/quick-start/quick-start/</guid>
+      <description>Quick Start This guide will show you how to set up a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD operations. For more in-depth coverage, see the tutorials.
+Create the package.json file First, create a directory where your application will live.
+mkdir myproject cd myproject  Enter the following command and answer the questions to create the initial structure for your new project:</description>
+    </item>
+    
+    <item>
+      <title>Reference</title>
+      <link>/node-mongodb-native/3.1/reference/main/</link>
+      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/reference/main/</guid>
+      <description> Reference The reference documentation for the Node.js driver driver focuses on high-level documentation and use-cases.
+ Connect to MongoDB: Documentation of the driver&amp;rsquo;s support for connecting to MongoDB servers ECMAScript Next: Using the driver with ESNext. Management: Documentation of the driver&amp;rsquo;s support for logging and monitoring of its internal state  </description>
+    </item>
+    
+    <item>
+      <title>Tutorials</title>
+      <link>/node-mongodb-native/3.1/tutorials/main/</link>
+      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/tutorials/main/</guid>
+      <description>Tutorials The tutorials in this section provide examples of some frequently used operations. This section is not meant to be an exhaustive list of all operations available in the Node.js driver.
+Connect to MongoDB
+Collections
+Create Indexes
+CRUD Operations
+Collations
+Projections
+Aggregation
+Text Search
+Geospatial Search
+Database Commands
+GridFS</description>
+    </item>
+    
+    <item>
+      <title>index</title>
+      <link>/node-mongodb-native/3.1/</link>
+      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/</guid>
+      <description>MongoDB Node.js Driver Documentation Welcome to the MongoDB Node.js 3.x driver documentation.
+What&amp;rsquo;s New The What&amp;rsquo;s New guide explains the major new features of the driver.
+If you are upgrading from the 1.x series of the driver, consult the Upgrading documentation for information on recent changes.
+Starting points  Installing the driver Quick start CRUD operations Connect  Developing with ECMAScript Next If you&amp;rsquo;d like to use the MongoDB driver with ESNext features such as Promises and async/await, here are some good starting points.</description>
+    </item>
+    
+  </channel>
+</rss>

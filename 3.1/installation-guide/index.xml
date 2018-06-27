@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Installation-guides on MongoDB Node.js Driver</title>
+    <link>/node-mongodb-native/3.1/installation-guide/</link>
+    <description>Recent content in Installation-guides on MongoDB Node.js Driver</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 17 Mar 2015 15:36:56 +0000</lastBuildDate>
+    
+	<atom:link href="/node-mongodb-native/3.1/installation-guide/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Installation Guide</title>
+      <link>/node-mongodb-native/3.1/installation-guide/installation-guide/</link>
+      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
+      
+      <guid>/node-mongodb-native/3.1/installation-guide/installation-guide/</guid>
+      <description>Installation The recommended way to get started using the Node.js 2.0 driver is by using NPM (Node Package Manager) to install the dependency in your project.
+MongoDB Driver After you&amp;rsquo;ve created your project with npm init, you can install the MongoDB driver and its dependencies with the command:
+npm install mongodb --save  This will download the MongoDB driver and add a dependency entry in your package.json file.
+Troubleshooting The MongoDB driver depends on several other packages, including:</description>
+    </item>
+    
+  </channel>
+</rss>

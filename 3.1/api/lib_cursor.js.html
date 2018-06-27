@@ -1,0 +1,3169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Source: lib/cursor.js</title>
+    
+    
+    
+    
+    
+    <meta property="og:title" content="MongoDB Driver API for Node.js"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:image" content=""/>
+    
+    <meta property="og:url" content=""/>
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <script src="scripts/jquery.min.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/jaguar.css">
+    
+    
+    <script>
+    var config = {"monospaceLinks":true,"cleverLinks":true,"default":{"outputSourceFiles":true},"applicationName":"Node.js MongoDB Driver API","googleAnalytics":"UA-29229787-1","openGraph":{"title":"MongoDB Driver API for Node.js","type":"website","image":"","site_name":"","url":""},"meta":{"title":"","description":"","keyword":""},"linenums":true};
+    </script>
+    
+
+    
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', UA-29229787-1, 'auto');
+      ga('send', 'pageview');
+    </script>    
+    
+</head>
+<body>
+<div id="wrap" class="clearfix" style="width:100%;">
+    <table style="height:100%;width:100%">
+        <tr>
+            <td valign='top' width="1px">
+                
+<div class="navigation">
+    <h3 class="applicationName"><a href="index.html">Node.js MongoDB Driver API</a></h3>
+
+    <div class="search">
+        <input id="search" type="text" class="form-control input-sm" placeholder="Search Documentations">
+    </div>
+    <ul class="list">
+    
+        <li class="item" data-name="Admin">
+            <span class="title">
+                <a href="Admin.html">Admin</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="Admin~resultCallback"><a href="Admin.html#~resultCallback">resultCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Admin#addUser"><a href="Admin.html#addUser">addUser</a></li>
+            
+                <li data-name="Admin#buildInfo"><a href="Admin.html#buildInfo">buildInfo</a></li>
+            
+                <li data-name="Admin#command"><a href="Admin.html#command">command</a></li>
+            
+                <li data-name="Admin#listDatabases"><a href="Admin.html#listDatabases">listDatabases</a></li>
+            
+                <li data-name="Admin#ping"><a href="Admin.html#ping">ping</a></li>
+            
+                <li data-name="Admin#removeUser"><a href="Admin.html#removeUser">removeUser</a></li>
+            
+                <li data-name="Admin#replSetGetStatus"><a href="Admin.html#replSetGetStatus">replSetGetStatus</a></li>
+            
+                <li data-name="Admin#serverInfo"><a href="Admin.html#serverInfo">serverInfo</a></li>
+            
+                <li data-name="Admin#serverStatus"><a href="Admin.html#serverStatus">serverStatus</a></li>
+            
+                <li data-name="Admin#validateCollection"><a href="Admin.html#validateCollection">validateCollection</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="AggregationCursor">
+            <span class="title">
+                <a href="AggregationCursor.html">AggregationCursor</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="AggregationCursor~endCallback"><a href="AggregationCursor.html#~endCallback">endCallback</a></li>
+            
+                <li data-name="AggregationCursor~iteratorCallback"><a href="AggregationCursor.html#~iteratorCallback">iteratorCallback</a></li>
+            
+                <li data-name="AggregationCursor~resultCallback"><a href="AggregationCursor.html#~resultCallback">resultCallback</a></li>
+            
+                <li data-name="AggregationCursor~toArrayResultCallback"><a href="AggregationCursor.html#~toArrayResultCallback">toArrayResultCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="AggregationCursor#batchSize"><a href="AggregationCursor.html#batchSize">batchSize</a></li>
+            
+                <li data-name="AggregationCursor#clone"><a href="AggregationCursor.html#clone">clone</a></li>
+            
+                <li data-name="AggregationCursor#close"><a href="AggregationCursor.html#close">close</a></li>
+            
+                <li data-name="AggregationCursor#each"><a href="AggregationCursor.html#each">each</a></li>
+            
+                <li data-name="AggregationCursor#explain"><a href="AggregationCursor.html#explain">explain</a></li>
+            
+                <li data-name="AggregationCursor#geoNear"><a href="AggregationCursor.html#geoNear">geoNear</a></li>
+            
+                <li data-name="AggregationCursor#group"><a href="AggregationCursor.html#group">group</a></li>
+            
+                <li data-name="AggregationCursor#hasNext"><a href="AggregationCursor.html#hasNext">hasNext</a></li>
+            
+                <li data-name="AggregationCursor#isClosed"><a href="AggregationCursor.html#isClosed">isClosed</a></li>
+            
+                <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
+            
+                <li data-name="AggregationCursor#lookup"><a href="AggregationCursor.html#lookup">lookup</a></li>
+            
+                <li data-name="AggregationCursor#match"><a href="AggregationCursor.html#match">match</a></li>
+            
+                <li data-name="AggregationCursor#maxTimeMS"><a href="AggregationCursor.html#maxTimeMS">maxTimeMS</a></li>
+            
+                <li data-name="AggregationCursor#next"><a href="AggregationCursor.html#next">next</a></li>
+            
+                <li data-name="AggregationCursor#out"><a href="AggregationCursor.html#out">out</a></li>
+            
+                <li data-name="AggregationCursor#pause"><a href="AggregationCursor.html#pause">pause</a></li>
+            
+                <li data-name="AggregationCursor#pipe"><a href="AggregationCursor.html#pipe">pipe</a></li>
+            
+                <li data-name="AggregationCursor#project"><a href="AggregationCursor.html#project">project</a></li>
+            
+                <li data-name="AggregationCursor#read"><a href="AggregationCursor.html#read">read</a></li>
+            
+                <li data-name="AggregationCursor#redact"><a href="AggregationCursor.html#redact">redact</a></li>
+            
+                <li data-name="AggregationCursor#resume"><a href="AggregationCursor.html#resume">resume</a></li>
+            
+                <li data-name="AggregationCursor#rewind"><a href="AggregationCursor.html#rewind">rewind</a></li>
+            
+                <li data-name="AggregationCursor#setEncoding"><a href="AggregationCursor.html#setEncoding">setEncoding</a></li>
+            
+                <li data-name="AggregationCursor#skip"><a href="AggregationCursor.html#skip">skip</a></li>
+            
+                <li data-name="AggregationCursor#sort"><a href="AggregationCursor.html#sort">sort</a></li>
+            
+                <li data-name="AggregationCursor#toArray"><a href="AggregationCursor.html#toArray">toArray</a></li>
+            
+                <li data-name="AggregationCursor#unpipe"><a href="AggregationCursor.html#unpipe">unpipe</a></li>
+            
+                <li data-name="AggregationCursor#unshift"><a href="AggregationCursor.html#unshift">unshift</a></li>
+            
+                <li data-name="AggregationCursor#unwind"><a href="AggregationCursor.html#unwind">unwind</a></li>
+            
+                <li data-name="AggregationCursor#wrap"><a href="AggregationCursor.html#wrap">wrap</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="AggregationCursor#event:close"><a href="AggregationCursor.html#event:close">close</a></li>
+            
+                <li data-name="AggregationCursor#event:data"><a href="AggregationCursor.html#event:data">data</a></li>
+            
+                <li data-name="AggregationCursor#event:end"><a href="AggregationCursor.html#event:end">end</a></li>
+            
+                <li data-name="AggregationCursor#event:readable"><a href="AggregationCursor.html#event:readable">readable</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Binary">
+            <span class="title">
+                <a href="Binary.html">Binary</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="Binary.SUBTYPE_BYTE_ARRAY"><a href="Binary.html#.SUBTYPE_BYTE_ARRAY">SUBTYPE_BYTE_ARRAY</a></li>
+            
+                <li data-name="Binary.SUBTYPE_DEFAULT"><a href="Binary.html#.SUBTYPE_DEFAULT">SUBTYPE_DEFAULT</a></li>
+            
+                <li data-name="Binary.SUBTYPE_FUNCTION"><a href="Binary.html#.SUBTYPE_FUNCTION">SUBTYPE_FUNCTION</a></li>
+            
+                <li data-name="Binary.SUBTYPE_MD5"><a href="Binary.html#.SUBTYPE_MD5">SUBTYPE_MD5</a></li>
+            
+                <li data-name="Binary.SUBTYPE_USER_DEFINED"><a href="Binary.html#.SUBTYPE_USER_DEFINED">SUBTYPE_USER_DEFINED</a></li>
+            
+                <li data-name="Binary.SUBTYPE_UUID"><a href="Binary.html#.SUBTYPE_UUID">SUBTYPE_UUID</a></li>
+            
+                <li data-name="Binary.SUBTYPE_UUID_OLD"><a href="Binary.html#.SUBTYPE_UUID_OLD">SUBTYPE_UUID_OLD</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Binary#length"><a href="Binary.html#length">length</a></li>
+            
+                <li data-name="Binary#put"><a href="Binary.html#put">put</a></li>
+            
+                <li data-name="Binary#read"><a href="Binary.html#read">read</a></li>
+            
+                <li data-name="Binary#value"><a href="Binary.html#value">value</a></li>
+            
+                <li data-name="Binary#write"><a href="Binary.html#write">write</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="BSONRegExp">
+            <span class="title">
+                <a href="BSONRegExp.html">BSONRegExp</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="BulkWriteError">
+            <span class="title">
+                <a href="BulkWriteError.html">BulkWriteError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="BulkWriteResult">
+            <span class="title">
+                <a href="BulkWriteResult.html">BulkWriteResult</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="BulkWriteResult#getInsertedIds"><a href="BulkWriteResult.html#getInsertedIds">getInsertedIds</a></li>
+            
+                <li data-name="BulkWriteResult#getLastOp"><a href="BulkWriteResult.html#getLastOp">getLastOp</a></li>
+            
+                <li data-name="BulkWriteResult#getRawResponse"><a href="BulkWriteResult.html#getRawResponse">getRawResponse</a></li>
+            
+                <li data-name="BulkWriteResult#getUpsertedIdAt"><a href="BulkWriteResult.html#getUpsertedIdAt">getUpsertedIdAt</a></li>
+            
+                <li data-name="BulkWriteResult#getUpsertedIds"><a href="BulkWriteResult.html#getUpsertedIds">getUpsertedIds</a></li>
+            
+                <li data-name="BulkWriteResult#getWriteConcernError"><a href="BulkWriteResult.html#getWriteConcernError">getWriteConcernError</a></li>
+            
+                <li data-name="BulkWriteResult#getWriteErrorAt"><a href="BulkWriteResult.html#getWriteErrorAt">getWriteErrorAt</a></li>
+            
+                <li data-name="BulkWriteResult#getWriteErrorCount"><a href="BulkWriteResult.html#getWriteErrorCount">getWriteErrorCount</a></li>
+            
+                <li data-name="BulkWriteResult#getWriteErrors"><a href="BulkWriteResult.html#getWriteErrors">getWriteErrors</a></li>
+            
+                <li data-name="BulkWriteResult#hasWriteErrors"><a href="BulkWriteResult.html#hasWriteErrors">hasWriteErrors</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="ChangeStream">
+            <span class="title">
+                <a href="ChangeStream.html">ChangeStream</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="ChangeStream~resultCallback"><a href="ChangeStream.html#~resultCallback">resultCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="ChangeStream#close"><a href="ChangeStream.html#close">close</a></li>
+            
+                <li data-name="ChangeStream#hasNext"><a href="ChangeStream.html#hasNext">hasNext</a></li>
+            
+                <li data-name="ChangeStream#isClosed"><a href="ChangeStream.html#isClosed">isClosed</a></li>
+            
+                <li data-name="ChangeStream#next"><a href="ChangeStream.html#next">next</a></li>
+            
+                <li data-name="ChangeStream#pause"><a href="ChangeStream.html#pause">pause</a></li>
+            
+                <li data-name="ChangeStream#pipe"><a href="ChangeStream.html#pipe">pipe</a></li>
+            
+                <li data-name="ChangeStream#resume"><a href="ChangeStream.html#resume">resume</a></li>
+            
+                <li data-name="ChangeStream#stream"><a href="ChangeStream.html#stream">stream</a></li>
+            
+                <li data-name="ChangeStream#unpipe"><a href="ChangeStream.html#unpipe">unpipe</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="ChangeStream#event:change"><a href="ChangeStream.html#event:change">change</a></li>
+            
+                <li data-name="ChangeStream#event:close"><a href="ChangeStream.html#event:close">close</a></li>
+            
+                <li data-name="ChangeStream#event:end"><a href="ChangeStream.html#event:end">end</a></li>
+            
+                <li data-name="ChangeStream#event:error"><a href="ChangeStream.html#event:error">error</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Code">
+            <span class="title">
+                <a href="Code.html">Code</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Collection">
+            <span class="title">
+                <a href="Collection.html">Collection</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="Collection~aggregationCallback"><a href="Collection.html#~aggregationCallback">aggregationCallback</a></li>
+            
+                <li data-name="Collection~bulkWriteOpCallback"><a href="Collection.html#~bulkWriteOpCallback">bulkWriteOpCallback</a></li>
+            
+                <li data-name="Collection~BulkWriteOpResult"><a href="Collection.html#~BulkWriteOpResult">BulkWriteOpResult</a></li>
+            
+                <li data-name="Collection~collectionResultCallback"><a href="Collection.html#~collectionResultCallback">collectionResultCallback</a></li>
+            
+                <li data-name="Collection~countCallback"><a href="Collection.html#~countCallback">countCallback</a></li>
+            
+                <li data-name="Collection~deleteWriteOpCallback"><a href="Collection.html#~deleteWriteOpCallback">deleteWriteOpCallback</a></li>
+            
+                <li data-name="Collection~deleteWriteOpResult"><a href="Collection.html#~deleteWriteOpResult">deleteWriteOpResult</a></li>
+            
+                <li data-name="Collection~findAndModifyCallback"><a href="Collection.html#~findAndModifyCallback">findAndModifyCallback</a></li>
+            
+                <li data-name="Collection~findAndModifyWriteOpResult"><a href="Collection.html#~findAndModifyWriteOpResult">findAndModifyWriteOpResult</a></li>
+            
+                <li data-name="Collection~insertOneWriteOpCallback"><a href="Collection.html#~insertOneWriteOpCallback">insertOneWriteOpCallback</a></li>
+            
+                <li data-name="Collection~insertOneWriteOpResult"><a href="Collection.html#~insertOneWriteOpResult">insertOneWriteOpResult</a></li>
+            
+                <li data-name="Collection~insertWriteOpCallback"><a href="Collection.html#~insertWriteOpCallback">insertWriteOpCallback</a></li>
+            
+                <li data-name="Collection~insertWriteOpResult"><a href="Collection.html#~insertWriteOpResult">insertWriteOpResult</a></li>
+            
+                <li data-name="Collection~parallelCollectionScanCallback"><a href="Collection.html#~parallelCollectionScanCallback">parallelCollectionScanCallback</a></li>
+            
+                <li data-name="Collection~resultCallback"><a href="Collection.html#~resultCallback">resultCallback</a></li>
+            
+                <li data-name="Collection~updateWriteOpCallback"><a href="Collection.html#~updateWriteOpCallback">updateWriteOpCallback</a></li>
+            
+                <li data-name="Collection~updateWriteOpResult"><a href="Collection.html#~updateWriteOpResult">updateWriteOpResult</a></li>
+            
+                <li data-name="Collection~writeOpCallback"><a href="Collection.html#~writeOpCallback">writeOpCallback</a></li>
+            
+                <li data-name="Collection~WriteOpResult"><a href="Collection.html#~WriteOpResult">WriteOpResult</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Collection#aggregate"><a href="Collection.html#aggregate">aggregate</a></li>
+            
+                <li data-name="Collection#bulkWrite"><a href="Collection.html#bulkWrite">bulkWrite</a></li>
+            
+                <li data-name="Collection#count"><a href="Collection.html#count">count</a></li>
+            
+                <li data-name="Collection#countDocuments"><a href="Collection.html#countDocuments">countDocuments</a></li>
+            
+                <li data-name="Collection#createIndex"><a href="Collection.html#createIndex">createIndex</a></li>
+            
+                <li data-name="Collection#createIndexes"><a href="Collection.html#createIndexes">createIndexes</a></li>
+            
+                <li data-name="Collection#deleteMany"><a href="Collection.html#deleteMany">deleteMany</a></li>
+            
+                <li data-name="Collection#deleteOne"><a href="Collection.html#deleteOne">deleteOne</a></li>
+            
+                <li data-name="Collection#distinct"><a href="Collection.html#distinct">distinct</a></li>
+            
+                <li data-name="Collection#drop"><a href="Collection.html#drop">drop</a></li>
+            
+                <li data-name="Collection#dropAllIndexes"><a href="Collection.html#dropAllIndexes">dropAllIndexes</a></li>
+            
+                <li data-name="Collection#dropIndex"><a href="Collection.html#dropIndex">dropIndex</a></li>
+            
+                <li data-name="Collection#dropIndexes"><a href="Collection.html#dropIndexes">dropIndexes</a></li>
+            
+                <li data-name="Collection#ensureIndex"><a href="Collection.html#ensureIndex">ensureIndex</a></li>
+            
+                <li data-name="Collection#estimatedDocumentCount"><a href="Collection.html#estimatedDocumentCount">estimatedDocumentCount</a></li>
+            
+                <li data-name="Collection#find"><a href="Collection.html#find">find</a></li>
+            
+                <li data-name="Collection#findAndModify"><a href="Collection.html#findAndModify">findAndModify</a></li>
+            
+                <li data-name="Collection#findAndRemove"><a href="Collection.html#findAndRemove">findAndRemove</a></li>
+            
+                <li data-name="Collection#findOne"><a href="Collection.html#findOne">findOne</a></li>
+            
+                <li data-name="Collection#findOneAndDelete"><a href="Collection.html#findOneAndDelete">findOneAndDelete</a></li>
+            
+                <li data-name="Collection#findOneAndReplace"><a href="Collection.html#findOneAndReplace">findOneAndReplace</a></li>
+            
+                <li data-name="Collection#findOneAndUpdate"><a href="Collection.html#findOneAndUpdate">findOneAndUpdate</a></li>
+            
+                <li data-name="Collection#geoHaystackSearch"><a href="Collection.html#geoHaystackSearch">geoHaystackSearch</a></li>
+            
+                <li data-name="Collection#group"><a href="Collection.html#group">group</a></li>
+            
+                <li data-name="Collection#indexes"><a href="Collection.html#indexes">indexes</a></li>
+            
+                <li data-name="Collection#indexExists"><a href="Collection.html#indexExists">indexExists</a></li>
+            
+                <li data-name="Collection#indexInformation"><a href="Collection.html#indexInformation">indexInformation</a></li>
+            
+                <li data-name="Collection#initializeOrderedBulkOp"><a href="Collection.html#initializeOrderedBulkOp">initializeOrderedBulkOp</a></li>
+            
+                <li data-name="Collection#initializeUnorderedBulkOp"><a href="Collection.html#initializeUnorderedBulkOp">initializeUnorderedBulkOp</a></li>
+            
+                <li data-name="Collection#insert"><a href="Collection.html#insert">insert</a></li>
+            
+                <li data-name="Collection#insertMany"><a href="Collection.html#insertMany">insertMany</a></li>
+            
+                <li data-name="Collection#insertOne"><a href="Collection.html#insertOne">insertOne</a></li>
+            
+                <li data-name="Collection#isCapped"><a href="Collection.html#isCapped">isCapped</a></li>
+            
+                <li data-name="Collection#listIndexes"><a href="Collection.html#listIndexes">listIndexes</a></li>
+            
+                <li data-name="Collection#mapReduce"><a href="Collection.html#mapReduce">mapReduce</a></li>
+            
+                <li data-name="Collection#options"><a href="Collection.html#options">options</a></li>
+            
+                <li data-name="Collection#parallelCollectionScan"><a href="Collection.html#parallelCollectionScan">parallelCollectionScan</a></li>
+            
+                <li data-name="Collection#reIndex"><a href="Collection.html#reIndex">reIndex</a></li>
+            
+                <li data-name="Collection#remove"><a href="Collection.html#remove">remove</a></li>
+            
+                <li data-name="Collection#rename"><a href="Collection.html#rename">rename</a></li>
+            
+                <li data-name="Collection#replaceOne"><a href="Collection.html#replaceOne">replaceOne</a></li>
+            
+                <li data-name="Collection#save"><a href="Collection.html#save">save</a></li>
+            
+                <li data-name="Collection#stats"><a href="Collection.html#stats">stats</a></li>
+            
+                <li data-name="Collection#update"><a href="Collection.html#update">update</a></li>
+            
+                <li data-name="Collection#updateMany"><a href="Collection.html#updateMany">updateMany</a></li>
+            
+                <li data-name="Collection#updateOne"><a href="Collection.html#updateOne">updateOne</a></li>
+            
+                <li data-name="Collection#watch"><a href="Collection.html#watch">watch</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="CommandCursor">
+            <span class="title">
+                <a href="CommandCursor.html">CommandCursor</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="CommandCursor~endCallback"><a href="CommandCursor.html#~endCallback">endCallback</a></li>
+            
+                <li data-name="CommandCursor~iteratorCallback"><a href="CommandCursor.html#~iteratorCallback">iteratorCallback</a></li>
+            
+                <li data-name="CommandCursor~resultCallback"><a href="CommandCursor.html#~resultCallback">resultCallback</a></li>
+            
+                <li data-name="CommandCursor~toArrayResultCallback"><a href="CommandCursor.html#~toArrayResultCallback">toArrayResultCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="CommandCursor#batchSize"><a href="CommandCursor.html#batchSize">batchSize</a></li>
+            
+                <li data-name="CommandCursor#clone"><a href="CommandCursor.html#clone">clone</a></li>
+            
+                <li data-name="CommandCursor#close"><a href="CommandCursor.html#close">close</a></li>
+            
+                <li data-name="CommandCursor#each"><a href="CommandCursor.html#each">each</a></li>
+            
+                <li data-name="CommandCursor#hasNext"><a href="CommandCursor.html#hasNext">hasNext</a></li>
+            
+                <li data-name="CommandCursor#isClosed"><a href="CommandCursor.html#isClosed">isClosed</a></li>
+            
+                <li data-name="CommandCursor#maxTimeMS"><a href="CommandCursor.html#maxTimeMS">maxTimeMS</a></li>
+            
+                <li data-name="CommandCursor#next"><a href="CommandCursor.html#next">next</a></li>
+            
+                <li data-name="CommandCursor#pause"><a href="CommandCursor.html#pause">pause</a></li>
+            
+                <li data-name="CommandCursor#pipe"><a href="CommandCursor.html#pipe">pipe</a></li>
+            
+                <li data-name="CommandCursor#read"><a href="CommandCursor.html#read">read</a></li>
+            
+                <li data-name="CommandCursor#resume"><a href="CommandCursor.html#resume">resume</a></li>
+            
+                <li data-name="CommandCursor#rewind"><a href="CommandCursor.html#rewind">rewind</a></li>
+            
+                <li data-name="CommandCursor#setEncoding"><a href="CommandCursor.html#setEncoding">setEncoding</a></li>
+            
+                <li data-name="CommandCursor#setReadPreference"><a href="CommandCursor.html#setReadPreference">setReadPreference</a></li>
+            
+                <li data-name="CommandCursor#toArray"><a href="CommandCursor.html#toArray">toArray</a></li>
+            
+                <li data-name="CommandCursor#unpipe"><a href="CommandCursor.html#unpipe">unpipe</a></li>
+            
+                <li data-name="CommandCursor#unshift"><a href="CommandCursor.html#unshift">unshift</a></li>
+            
+                <li data-name="CommandCursor#wrap"><a href="CommandCursor.html#wrap">wrap</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="CommandCursor#event:close"><a href="CommandCursor.html#event:close">close</a></li>
+            
+                <li data-name="CommandCursor#event:data"><a href="CommandCursor.html#event:data">data</a></li>
+            
+                <li data-name="CommandCursor#event:end"><a href="CommandCursor.html#event:end">end</a></li>
+            
+                <li data-name="CommandCursor#event:readable"><a href="CommandCursor.html#event:readable">readable</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Cursor">
+            <span class="title">
+                <a href="Cursor.html">Cursor</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="Cursor~countResultCallback"><a href="Cursor.html#~countResultCallback">countResultCallback</a></li>
+            
+                <li data-name="Cursor~endCallback"><a href="Cursor.html#~endCallback">endCallback</a></li>
+            
+                <li data-name="Cursor~iteratorCallback"><a href="Cursor.html#~iteratorCallback">iteratorCallback</a></li>
+            
+                <li data-name="Cursor~resultCallback"><a href="Cursor.html#~resultCallback">resultCallback</a></li>
+            
+                <li data-name="Cursor~toArrayResultCallback"><a href="Cursor.html#~toArrayResultCallback">toArrayResultCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Cursor#addCursorFlag"><a href="Cursor.html#addCursorFlag">addCursorFlag</a></li>
+            
+                <li data-name="Cursor#addQueryModifier"><a href="Cursor.html#addQueryModifier">addQueryModifier</a></li>
+            
+                <li data-name="Cursor#batchSize"><a href="Cursor.html#batchSize">batchSize</a></li>
+            
+                <li data-name="Cursor#clone"><a href="Cursor.html#clone">clone</a></li>
+            
+                <li data-name="Cursor#close"><a href="Cursor.html#close">close</a></li>
+            
+                <li data-name="Cursor#collation"><a href="Cursor.html#collation">collation</a></li>
+            
+                <li data-name="Cursor#comment"><a href="Cursor.html#comment">comment</a></li>
+            
+                <li data-name="Cursor#count"><a href="Cursor.html#count">count</a></li>
+            
+                <li data-name="Cursor#each"><a href="Cursor.html#each">each</a></li>
+            
+                <li data-name="Cursor#explain"><a href="Cursor.html#explain">explain</a></li>
+            
+                <li data-name="Cursor#filter"><a href="Cursor.html#filter">filter</a></li>
+            
+                <li data-name="Cursor#forEach"><a href="Cursor.html#forEach">forEach</a></li>
+            
+                <li data-name="Cursor#hasNext"><a href="Cursor.html#hasNext">hasNext</a></li>
+            
+                <li data-name="Cursor#hint"><a href="Cursor.html#hint">hint</a></li>
+            
+                <li data-name="Cursor#isClosed"><a href="Cursor.html#isClosed">isClosed</a></li>
+            
+                <li data-name="Cursor#limit"><a href="Cursor.html#limit">limit</a></li>
+            
+                <li data-name="Cursor#map"><a href="Cursor.html#map">map</a></li>
+            
+                <li data-name="Cursor#max"><a href="Cursor.html#max">max</a></li>
+            
+                <li data-name="Cursor#maxAwaitTimeMS"><a href="Cursor.html#maxAwaitTimeMS">maxAwaitTimeMS</a></li>
+            
+                <li data-name="Cursor#maxScan"><a href="Cursor.html#maxScan">maxScan</a></li>
+            
+                <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
+            
+                <li data-name="Cursor#min"><a href="Cursor.html#min">min</a></li>
+            
+                <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
+            
+                <li data-name="Cursor#pause"><a href="Cursor.html#pause">pause</a></li>
+            
+                <li data-name="Cursor#pipe"><a href="Cursor.html#pipe">pipe</a></li>
+            
+                <li data-name="Cursor#project"><a href="Cursor.html#project">project</a></li>
+            
+                <li data-name="Cursor#read"><a href="Cursor.html#read">read</a></li>
+            
+                <li data-name="Cursor#resume"><a href="Cursor.html#resume">resume</a></li>
+            
+                <li data-name="Cursor#returnKey"><a href="Cursor.html#returnKey">returnKey</a></li>
+            
+                <li data-name="Cursor#rewind"><a href="Cursor.html#rewind">rewind</a></li>
+            
+                <li data-name="Cursor#setCursorOption"><a href="Cursor.html#setCursorOption">setCursorOption</a></li>
+            
+                <li data-name="Cursor#setEncoding"><a href="Cursor.html#setEncoding">setEncoding</a></li>
+            
+                <li data-name="Cursor#setReadPreference"><a href="Cursor.html#setReadPreference">setReadPreference</a></li>
+            
+                <li data-name="Cursor#showRecordId"><a href="Cursor.html#showRecordId">showRecordId</a></li>
+            
+                <li data-name="Cursor#skip"><a href="Cursor.html#skip">skip</a></li>
+            
+                <li data-name="Cursor#snapshot"><a href="Cursor.html#snapshot">snapshot</a></li>
+            
+                <li data-name="Cursor#sort"><a href="Cursor.html#sort">sort</a></li>
+            
+                <li data-name="Cursor#stream"><a href="Cursor.html#stream">stream</a></li>
+            
+                <li data-name="Cursor#toArray"><a href="Cursor.html#toArray">toArray</a></li>
+            
+                <li data-name="Cursor#transformStream"><a href="Cursor.html#transformStream">transformStream</a></li>
+            
+                <li data-name="Cursor#unpipe"><a href="Cursor.html#unpipe">unpipe</a></li>
+            
+                <li data-name="Cursor#unshift"><a href="Cursor.html#unshift">unshift</a></li>
+            
+                <li data-name="Cursor#wrap"><a href="Cursor.html#wrap">wrap</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="Cursor#event:close"><a href="Cursor.html#event:close">close</a></li>
+            
+                <li data-name="Cursor#event:data"><a href="Cursor.html#event:data">data</a></li>
+            
+                <li data-name="Cursor#event:end"><a href="Cursor.html#event:end">end</a></li>
+            
+                <li data-name="Cursor#event:readable"><a href="Cursor.html#event:readable">readable</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Db">
+            <span class="title">
+                <a href="Db.html">Db</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="Db~collectionResultCallback"><a href="Db.html#~collectionResultCallback">collectionResultCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Db#addUser"><a href="Db.html#addUser">addUser</a></li>
+            
+                <li data-name="Db#admin"><a href="Db.html#admin">admin</a></li>
+            
+                <li data-name="Db#collection"><a href="Db.html#collection">collection</a></li>
+            
+                <li data-name="Db#collections"><a href="Db.html#collections">collections</a></li>
+            
+                <li data-name="Db#command"><a href="Db.html#command">command</a></li>
+            
+                <li data-name="Db#createCollection"><a href="Db.html#createCollection">createCollection</a></li>
+            
+                <li data-name="Db#createIndex"><a href="Db.html#createIndex">createIndex</a></li>
+            
+                <li data-name="Db#dropCollection"><a href="Db.html#dropCollection">dropCollection</a></li>
+            
+                <li data-name="Db#dropDatabase"><a href="Db.html#dropDatabase">dropDatabase</a></li>
+            
+                <li data-name="Db#ensureIndex"><a href="Db.html#ensureIndex">ensureIndex</a></li>
+            
+                <li data-name="Db#eval"><a href="Db.html#eval">eval</a></li>
+            
+                <li data-name="Db#executeDbAdminCommand"><a href="Db.html#executeDbAdminCommand">executeDbAdminCommand</a></li>
+            
+                <li data-name="Db#indexInformation"><a href="Db.html#indexInformation">indexInformation</a></li>
+            
+                <li data-name="Db#listCollections"><a href="Db.html#listCollections">listCollections</a></li>
+            
+                <li data-name="Db#profilingInfo"><a href="Db.html#profilingInfo">profilingInfo</a></li>
+            
+                <li data-name="Db#profilingLevel"><a href="Db.html#profilingLevel">profilingLevel</a></li>
+            
+                <li data-name="Db#removeUser"><a href="Db.html#removeUser">removeUser</a></li>
+            
+                <li data-name="Db#renameCollection"><a href="Db.html#renameCollection">renameCollection</a></li>
+            
+                <li data-name="Db#setProfilingLevel"><a href="Db.html#setProfilingLevel">setProfilingLevel</a></li>
+            
+                <li data-name="Db#stats"><a href="Db.html#stats">stats</a></li>
+            
+                <li data-name="Db#unref"><a href="Db.html#unref">unref</a></li>
+            
+                <li data-name="Db#watch"><a href="Db.html#watch">watch</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="Db#event:close"><a href="Db.html#event:close">close</a></li>
+            
+                <li data-name="Db#event:error"><a href="Db.html#event:error">error</a></li>
+            
+                <li data-name="Db#event:fullsetup"><a href="Db.html#event:fullsetup">fullsetup</a></li>
+            
+                <li data-name="Db#event:parseError"><a href="Db.html#event:parseError">parseError</a></li>
+            
+                <li data-name="Db#event:reconnect"><a href="Db.html#event:reconnect">reconnect</a></li>
+            
+                <li data-name="Db#event:timeout"><a href="Db.html#event:timeout">timeout</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="DBRef">
+            <span class="title">
+                <a href="DBRef.html">DBRef</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Decimal128">
+            <span class="title">
+                <a href="Decimal128.html">Decimal128</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Decimal128#toString"><a href="Decimal128.html#toString">toString</a></li>
+            
+                <li data-name="Decimal128.fromString"><a href="Decimal128.html#.fromString">fromString</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Double">
+            <span class="title">
+                <a href="Double.html">Double</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Double#valueOf"><a href="Double.html#valueOf">valueOf</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="FindOperatorsOrdered">
+            <span class="title">
+                <a href="FindOperatorsOrdered.html">FindOperatorsOrdered</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="FindOperatorsOrdered#delete"><a href="FindOperatorsOrdered.html#delete">delete</a></li>
+            
+                <li data-name="FindOperatorsOrdered#deleteOne"><a href="FindOperatorsOrdered.html#deleteOne">deleteOne</a></li>
+            
+                <li data-name="FindOperatorsOrdered#replaceOne"><a href="FindOperatorsOrdered.html#replaceOne">replaceOne</a></li>
+            
+                <li data-name="FindOperatorsOrdered#update"><a href="FindOperatorsOrdered.html#update">update</a></li>
+            
+                <li data-name="FindOperatorsOrdered#updateOne"><a href="FindOperatorsOrdered.html#updateOne">updateOne</a></li>
+            
+                <li data-name="FindOperatorsOrdered#upsert"><a href="FindOperatorsOrdered.html#upsert">upsert</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="FindOperatorsUnordered">
+            <span class="title">
+                <a href="FindOperatorsUnordered.html">FindOperatorsUnordered</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="FindOperatorsUnordered#remove"><a href="FindOperatorsUnordered.html#remove">remove</a></li>
+            
+                <li data-name="FindOperatorsUnordered#removeOne"><a href="FindOperatorsUnordered.html#removeOne">removeOne</a></li>
+            
+                <li data-name="FindOperatorsUnordered#replaceOne"><a href="FindOperatorsUnordered.html#replaceOne">replaceOne</a></li>
+            
+                <li data-name="FindOperatorsUnordered#update"><a href="FindOperatorsUnordered.html#update">update</a></li>
+            
+                <li data-name="FindOperatorsUnordered#updateOne"><a href="FindOperatorsUnordered.html#updateOne">updateOne</a></li>
+            
+                <li data-name="FindOperatorsUnordered#upsert"><a href="FindOperatorsUnordered.html#upsert">upsert</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="GridFSBucket">
+            <span class="title">
+                <a href="GridFSBucket.html">GridFSBucket</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="GridFSBucket~errorCallback"><a href="GridFSBucket.html#~errorCallback">errorCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="GridFSBucket#delete"><a href="GridFSBucket.html#delete">delete</a></li>
+            
+                <li data-name="GridFSBucket#drop"><a href="GridFSBucket.html#drop">drop</a></li>
+            
+                <li data-name="GridFSBucket#find"><a href="GridFSBucket.html#find">find</a></li>
+            
+                <li data-name="GridFSBucket#openDownloadStream"><a href="GridFSBucket.html#openDownloadStream">openDownloadStream</a></li>
+            
+                <li data-name="GridFSBucket#openDownloadStreamByName"><a href="GridFSBucket.html#openDownloadStreamByName">openDownloadStreamByName</a></li>
+            
+                <li data-name="GridFSBucket#openUploadStream"><a href="GridFSBucket.html#openUploadStream">openUploadStream</a></li>
+            
+                <li data-name="GridFSBucket#openUploadStreamWithId"><a href="GridFSBucket.html#openUploadStreamWithId">openUploadStreamWithId</a></li>
+            
+                <li data-name="GridFSBucket#rename"><a href="GridFSBucket.html#rename">rename</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="GridFSBucket#event:index"><a href="GridFSBucket.html#event:index">index</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="GridFSBucketReadStream">
+            <span class="title">
+                <a href="GridFSBucketReadStream.html">GridFSBucketReadStream</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="GridFSBucketReadStream#_read"><a href="GridFSBucketReadStream.html#_read">_read</a></li>
+            
+                <li data-name="GridFSBucketReadStream#abort"><a href="GridFSBucketReadStream.html#abort">abort</a></li>
+            
+                <li data-name="GridFSBucketReadStream#end"><a href="GridFSBucketReadStream.html#end">end</a></li>
+            
+                <li data-name="GridFSBucketReadStream#start"><a href="GridFSBucketReadStream.html#start">start</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="GridFSBucketReadStream#event:close"><a href="GridFSBucketReadStream.html#event:close">close</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:data"><a href="GridFSBucketReadStream.html#event:data">data</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:end"><a href="GridFSBucketReadStream.html#event:end">end</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:error"><a href="GridFSBucketReadStream.html#event:error">error</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:file"><a href="GridFSBucketReadStream.html#event:file">file</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="GridFSBucketWriteStream">
+            <span class="title">
+                <a href="GridFSBucketWriteStream.html">GridFSBucketWriteStream</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="GridFSBucketWriteStream#abort"><a href="GridFSBucketWriteStream.html#abort">abort</a></li>
+            
+                <li data-name="GridFSBucketWriteStream#end"><a href="GridFSBucketWriteStream.html#end">end</a></li>
+            
+                <li data-name="GridFSBucketWriteStream#write"><a href="GridFSBucketWriteStream.html#write">write</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="GridFSBucketWriteStream#event:error"><a href="GridFSBucketWriteStream.html#event:error">error</a></li>
+            
+                <li data-name="GridFSBucketWriteStream#event:finish"><a href="GridFSBucketWriteStream.html#event:finish">finish</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="GridStore">
+            <span class="title">
+                <a href="GridStore.html">GridStore</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="GridStore.DEFAULT_CONTENT_TYPE"><a href="GridStore.html#.DEFAULT_CONTENT_TYPE">DEFAULT_CONTENT_TYPE</a></li>
+            
+                <li data-name="GridStore.DEFAULT_ROOT_COLLECTION"><a href="GridStore.html#.DEFAULT_ROOT_COLLECTION">DEFAULT_ROOT_COLLECTION</a></li>
+            
+                <li data-name="GridStore.IO_SEEK_CUR"><a href="GridStore.html#.IO_SEEK_CUR">IO_SEEK_CUR</a></li>
+            
+                <li data-name="GridStore.IO_SEEK_END"><a href="GridStore.html#.IO_SEEK_END">IO_SEEK_END</a></li>
+            
+                <li data-name="GridStore.IO_SEEK_SET"><a href="GridStore.html#.IO_SEEK_SET">IO_SEEK_SET</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="GridStore~collectionCallback"><a href="GridStore.html#~collectionCallback">collectionCallback</a></li>
+            
+                <li data-name="GridStore~gridStoreCallback"><a href="GridStore.html#~gridStoreCallback">gridStoreCallback</a></li>
+            
+                <li data-name="GridStore~openCallback"><a href="GridStore.html#~openCallback">openCallback</a></li>
+            
+                <li data-name="GridStore~readCallback"><a href="GridStore.html#~readCallback">readCallback</a></li>
+            
+                <li data-name="GridStore~readlinesCallback"><a href="GridStore.html#~readlinesCallback">readlinesCallback</a></li>
+            
+                <li data-name="GridStore~resultCallback"><a href="GridStore.html#~resultCallback">resultCallback</a></li>
+            
+                <li data-name="GridStore~tellCallback"><a href="GridStore.html#~tellCallback">tellCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="GridStore.exist"><a href="GridStore.html#.exist">exist</a></li>
+            
+                <li data-name="GridStore.list"><a href="GridStore.html#.list">list</a></li>
+            
+                <li data-name="GridStore.read"><a href="GridStore.html#.read">read</a></li>
+            
+                <li data-name="GridStore.readlines"><a href="GridStore.html#.readlines">readlines</a></li>
+            
+                <li data-name="GridStore.unlink"><a href="GridStore.html#.unlink">unlink</a></li>
+            
+                <li data-name="GridStore#chunkCollection"><a href="GridStore.html#chunkCollection">chunkCollection</a></li>
+            
+                <li data-name="GridStore#close"><a href="GridStore.html#close">close</a></li>
+            
+                <li data-name="GridStore#collection"><a href="GridStore.html#collection">collection</a></li>
+            
+                <li data-name="GridStore#destroy"><a href="GridStore.html#destroy">destroy</a></li>
+            
+                <li data-name="GridStore#eof"><a href="GridStore.html#eof">eof</a></li>
+            
+                <li data-name="GridStore#getc"><a href="GridStore.html#getc">getc</a></li>
+            
+                <li data-name="GridStore#open"><a href="GridStore.html#open">open</a></li>
+            
+                <li data-name="GridStore#puts"><a href="GridStore.html#puts">puts</a></li>
+            
+                <li data-name="GridStore#read"><a href="GridStore.html#read">read</a></li>
+            
+                <li data-name="GridStore#readlines"><a href="GridStore.html#readlines">readlines</a></li>
+            
+                <li data-name="GridStore#rewind"><a href="GridStore.html#rewind">rewind</a></li>
+            
+                <li data-name="GridStore#seek"><a href="GridStore.html#seek">seek</a></li>
+            
+                <li data-name="GridStore#stream"><a href="GridStore.html#stream">stream</a></li>
+            
+                <li data-name="GridStore#tell"><a href="GridStore.html#tell">tell</a></li>
+            
+                <li data-name="GridStore#unlink"><a href="GridStore.html#unlink">unlink</a></li>
+            
+                <li data-name="GridStore#write"><a href="GridStore.html#write">write</a></li>
+            
+                <li data-name="GridStore#writeFile"><a href="GridStore.html#writeFile">writeFile</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="GridStoreStream">
+            <span class="title">
+                <a href="GridStoreStream.html">GridStoreStream</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="GridStoreStream#end"><a href="GridStoreStream.html#end">end</a></li>
+            
+                <li data-name="GridStoreStream#pause"><a href="GridStoreStream.html#pause">pause</a></li>
+            
+                <li data-name="GridStoreStream#pipe"><a href="GridStoreStream.html#pipe">pipe</a></li>
+            
+                <li data-name="GridStoreStream#read"><a href="GridStoreStream.html#read">read</a></li>
+            
+                <li data-name="GridStoreStream#resume"><a href="GridStoreStream.html#resume">resume</a></li>
+            
+                <li data-name="GridStoreStream#setEncoding"><a href="GridStoreStream.html#setEncoding">setEncoding</a></li>
+            
+                <li data-name="GridStoreStream#unpipe"><a href="GridStoreStream.html#unpipe">unpipe</a></li>
+            
+                <li data-name="GridStoreStream#unshift"><a href="GridStoreStream.html#unshift">unshift</a></li>
+            
+                <li data-name="GridStoreStream#wrap"><a href="GridStoreStream.html#wrap">wrap</a></li>
+            
+                <li data-name="GridStoreStream#write"><a href="GridStoreStream.html#write">write</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="GridStoreStream#event:close"><a href="GridStoreStream.html#event:close">close</a></li>
+            
+                <li data-name="GridStoreStream#event:data"><a href="GridStoreStream.html#event:data">data</a></li>
+            
+                <li data-name="GridStoreStream#event:drain"><a href="GridStoreStream.html#event:drain">drain</a></li>
+            
+                <li data-name="GridStoreStream#event:end"><a href="GridStoreStream.html#event:end">end</a></li>
+            
+                <li data-name="GridStoreStream#event:error"><a href="GridStoreStream.html#event:error">error</a></li>
+            
+                <li data-name="GridStoreStream#event:finish"><a href="GridStoreStream.html#event:finish">finish</a></li>
+            
+                <li data-name="GridStoreStream#event:pipe"><a href="GridStoreStream.html#event:pipe">pipe</a></li>
+            
+                <li data-name="GridStoreStream#event:readable"><a href="GridStoreStream.html#event:readable">readable</a></li>
+            
+                <li data-name="GridStoreStream#event:unpipe"><a href="GridStoreStream.html#event:unpipe">unpipe</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Int32">
+            <span class="title">
+                <a href="Int32.html">Int32</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Int32#valueOf"><a href="Int32.html#valueOf">valueOf</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Logger">
+            <span class="title">
+                <a href="Logger.html">Logger</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Logger.currentLogger"><a href="Logger.html#.currentLogger">currentLogger</a></li>
+            
+                <li data-name="Logger.filter"><a href="Logger.html#.filter">filter</a></li>
+            
+                <li data-name="Logger.reset"><a href="Logger.html#.reset">reset</a></li>
+            
+                <li data-name="Logger.setCurrentLogger"><a href="Logger.html#.setCurrentLogger">setCurrentLogger</a></li>
+            
+                <li data-name="Logger.setLevel"><a href="Logger.html#.setLevel">setLevel</a></li>
+            
+                <li data-name="Logger#debug"><a href="Logger.html#debug">debug</a></li>
+            
+                <li data-name="Logger#error"><a href="Logger.html#error">error</a></li>
+            
+                <li data-name="Logger#info"><a href="Logger.html#info">info</a></li>
+            
+                <li data-name="Logger#isDebug"><a href="Logger.html#isDebug">isDebug</a></li>
+            
+                <li data-name="Logger#isError"><a href="Logger.html#isError">isError</a></li>
+            
+                <li data-name="Logger#isInfo"><a href="Logger.html#isInfo">isInfo</a></li>
+            
+                <li data-name="Logger#isWarn"><a href="Logger.html#isWarn">isWarn</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Long">
+            <span class="title">
+                <a href="Long.html">Long</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="Long.MAX_VALUE"><a href="Long.html#.MAX_VALUE">MAX_VALUE</a></li>
+            
+                <li data-name="Long.MIN_VALUE"><a href="Long.html#.MIN_VALUE">MIN_VALUE</a></li>
+            
+                <li data-name="Long.NEG_ONE"><a href="Long.html#.NEG_ONE">NEG_ONE</a></li>
+            
+                <li data-name="Long.ONE"><a href="Long.html#.ONE">ONE</a></li>
+            
+                <li data-name="Long.ZERO"><a href="Long.html#.ZERO">ZERO</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Long.fromBits"><a href="Long.html#.fromBits">fromBits</a></li>
+            
+                <li data-name="Long.fromInt"><a href="Long.html#.fromInt">fromInt</a></li>
+            
+                <li data-name="Long.fromNumber"><a href="Long.html#.fromNumber">fromNumber</a></li>
+            
+                <li data-name="Long.fromString"><a href="Long.html#.fromString">fromString</a></li>
+            
+                <li data-name="Long#add"><a href="Long.html#add">add</a></li>
+            
+                <li data-name="Long#and"><a href="Long.html#and">and</a></li>
+            
+                <li data-name="Long#compare"><a href="Long.html#compare">compare</a></li>
+            
+                <li data-name="Long#div"><a href="Long.html#div">div</a></li>
+            
+                <li data-name="Long#equals"><a href="Long.html#equals">equals</a></li>
+            
+                <li data-name="Long#getHighBits"><a href="Long.html#getHighBits">getHighBits</a></li>
+            
+                <li data-name="Long#getLowBits"><a href="Long.html#getLowBits">getLowBits</a></li>
+            
+                <li data-name="Long#getLowBitsUnsigned"><a href="Long.html#getLowBitsUnsigned">getLowBitsUnsigned</a></li>
+            
+                <li data-name="Long#getNumBitsAbs"><a href="Long.html#getNumBitsAbs">getNumBitsAbs</a></li>
+            
+                <li data-name="Long#greaterThan"><a href="Long.html#greaterThan">greaterThan</a></li>
+            
+                <li data-name="Long#greaterThanOrEqual"><a href="Long.html#greaterThanOrEqual">greaterThanOrEqual</a></li>
+            
+                <li data-name="Long#isNegative"><a href="Long.html#isNegative">isNegative</a></li>
+            
+                <li data-name="Long#isOdd"><a href="Long.html#isOdd">isOdd</a></li>
+            
+                <li data-name="Long#isZero"><a href="Long.html#isZero">isZero</a></li>
+            
+                <li data-name="Long#lessThan"><a href="Long.html#lessThan">lessThan</a></li>
+            
+                <li data-name="Long#lessThanOrEqual"><a href="Long.html#lessThanOrEqual">lessThanOrEqual</a></li>
+            
+                <li data-name="Long#modulo"><a href="Long.html#modulo">modulo</a></li>
+            
+                <li data-name="Long#multiply"><a href="Long.html#multiply">multiply</a></li>
+            
+                <li data-name="Long#negate"><a href="Long.html#negate">negate</a></li>
+            
+                <li data-name="Long#not"><a href="Long.html#not">not</a></li>
+            
+                <li data-name="Long#notEquals"><a href="Long.html#notEquals">notEquals</a></li>
+            
+                <li data-name="Long#or"><a href="Long.html#or">or</a></li>
+            
+                <li data-name="Long#shiftLeft"><a href="Long.html#shiftLeft">shiftLeft</a></li>
+            
+                <li data-name="Long#shiftRight"><a href="Long.html#shiftRight">shiftRight</a></li>
+            
+                <li data-name="Long#shiftRightUnsigned"><a href="Long.html#shiftRightUnsigned">shiftRightUnsigned</a></li>
+            
+                <li data-name="Long#subtract"><a href="Long.html#subtract">subtract</a></li>
+            
+                <li data-name="Long#toInt"><a href="Long.html#toInt">toInt</a></li>
+            
+                <li data-name="Long#toJSON"><a href="Long.html#toJSON">toJSON</a></li>
+            
+                <li data-name="Long#toNumber"><a href="Long.html#toNumber">toNumber</a></li>
+            
+                <li data-name="Long#toString"><a href="Long.html#toString">toString</a></li>
+            
+                <li data-name="Long#xor"><a href="Long.html#xor">xor</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MaxKey">
+            <span class="title">
+                <a href="MaxKey.html">MaxKey</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MinKey">
+            <span class="title">
+                <a href="MinKey.html">MinKey</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoClient">
+            <span class="title">
+                <a href="MongoClient.html">MongoClient</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="MongoClient~connectCallback"><a href="MongoClient.html#~connectCallback">connectCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="MongoClient.connect"><a href="MongoClient.html#.connect">connect</a></li>
+            
+                <li data-name="MongoClient#close"><a href="MongoClient.html#close">close</a></li>
+            
+                <li data-name="MongoClient#connect"><a href="MongoClient.html#connect">connect</a></li>
+            
+                <li data-name="MongoClient#db"><a href="MongoClient.html#db">db</a></li>
+            
+                <li data-name="MongoClient#isConnected"><a href="MongoClient.html#isConnected">isConnected</a></li>
+            
+                <li data-name="MongoClient#logout"><a href="MongoClient.html#logout">logout</a></li>
+            
+                <li data-name="MongoClient#startSession"><a href="MongoClient.html#startSession">startSession</a></li>
+            
+                <li data-name="MongoClient#watch"><a href="MongoClient.html#watch">watch</a></li>
+            
+                <li data-name="MongoClient#withSession"><a href="MongoClient.html#withSession">withSession</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoError">
+            <span class="title">
+                <a href="MongoError.html">MongoError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="MongoError.create"><a href="MongoError.html#.create">create</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoNetworkError">
+            <span class="title">
+                <a href="MongoNetworkError.html">MongoNetworkError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoParseError">
+            <span class="title">
+                <a href="MongoParseError.html">MongoParseError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Mongos">
+            <span class="title">
+                <a href="Mongos.html">Mongos</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="Mongos#event:close"><a href="Mongos.html#event:close">close</a></li>
+            
+                <li data-name="Mongos#event:commandFailed"><a href="Mongos.html#event:commandFailed">commandFailed</a></li>
+            
+                <li data-name="Mongos#event:commandStarted"><a href="Mongos.html#event:commandStarted">commandStarted</a></li>
+            
+                <li data-name="Mongos#event:commandSucceeded"><a href="Mongos.html#event:commandSucceeded">commandSucceeded</a></li>
+            
+                <li data-name="Mongos#event:connect"><a href="Mongos.html#event:connect">connect</a></li>
+            
+                <li data-name="Mongos#event:error"><a href="Mongos.html#event:error">error</a></li>
+            
+                <li data-name="Mongos#event:fullsetup"><a href="Mongos.html#event:fullsetup">fullsetup</a></li>
+            
+                <li data-name="Mongos#event:ha"><a href="Mongos.html#event:ha">ha</a></li>
+            
+                <li data-name="Mongos#event:joined"><a href="Mongos.html#event:joined">joined</a></li>
+            
+                <li data-name="Mongos#event:left"><a href="Mongos.html#event:left">left</a></li>
+            
+                <li data-name="Mongos#event:open"><a href="Mongos.html#event:open">open</a></li>
+            
+                <li data-name="Mongos#event:parseError"><a href="Mongos.html#event:parseError">parseError</a></li>
+            
+                <li data-name="Mongos#event:timeout"><a href="Mongos.html#event:timeout">timeout</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoTimeoutError">
+            <span class="title">
+                <a href="MongoTimeoutError.html">MongoTimeoutError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoWriteConcernError">
+            <span class="title">
+                <a href="MongoWriteConcernError.html">MongoWriteConcernError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="ObjectID">
+            <span class="title">
+                <a href="ObjectID.html">ObjectID</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="ObjectID.createFromHexString"><a href="ObjectID.html#.createFromHexString">createFromHexString</a></li>
+            
+                <li data-name="ObjectID.createFromTime"><a href="ObjectID.html#.createFromTime">createFromTime</a></li>
+            
+                <li data-name="ObjectID.isValid"><a href="ObjectID.html#.isValid">isValid</a></li>
+            
+                <li data-name="ObjectID#equals"><a href="ObjectID.html#equals">equals</a></li>
+            
+                <li data-name="ObjectID#generate"><a href="ObjectID.html#generate">generate</a></li>
+            
+                <li data-name="ObjectID#getTimestamp"><a href="ObjectID.html#getTimestamp">getTimestamp</a></li>
+            
+                <li data-name="ObjectID#toHexString"><a href="ObjectID.html#toHexString">toHexString</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="OrderedBulkOperation">
+            <span class="title">
+                <a href="OrderedBulkOperation.html">OrderedBulkOperation</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="OrderedBulkOperation~resultCallback"><a href="OrderedBulkOperation.html#~resultCallback">resultCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="OrderedBulkOperation#execute"><a href="OrderedBulkOperation.html#execute">execute</a></li>
+            
+                <li data-name="OrderedBulkOperation#find"><a href="OrderedBulkOperation.html#find">find</a></li>
+            
+                <li data-name="OrderedBulkOperation#insert"><a href="OrderedBulkOperation.html#insert">insert</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="ReplSet">
+            <span class="title">
+                <a href="ReplSet.html">ReplSet</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="ReplSet#event:close"><a href="ReplSet.html#event:close">close</a></li>
+            
+                <li data-name="ReplSet#event:commandFailed"><a href="ReplSet.html#event:commandFailed">commandFailed</a></li>
+            
+                <li data-name="ReplSet#event:commandStarted"><a href="ReplSet.html#event:commandStarted">commandStarted</a></li>
+            
+                <li data-name="ReplSet#event:commandSucceeded"><a href="ReplSet.html#event:commandSucceeded">commandSucceeded</a></li>
+            
+                <li data-name="ReplSet#event:connect"><a href="ReplSet.html#event:connect">connect</a></li>
+            
+                <li data-name="ReplSet#event:error"><a href="ReplSet.html#event:error">error</a></li>
+            
+                <li data-name="ReplSet#event:fullsetup"><a href="ReplSet.html#event:fullsetup">fullsetup</a></li>
+            
+                <li data-name="ReplSet#event:ha"><a href="ReplSet.html#event:ha">ha</a></li>
+            
+                <li data-name="ReplSet#event:joined"><a href="ReplSet.html#event:joined">joined</a></li>
+            
+                <li data-name="ReplSet#event:left"><a href="ReplSet.html#event:left">left</a></li>
+            
+                <li data-name="ReplSet#event:open"><a href="ReplSet.html#event:open">open</a></li>
+            
+                <li data-name="ReplSet#event:parseError"><a href="ReplSet.html#event:parseError">parseError</a></li>
+            
+                <li data-name="ReplSet#event:timeout"><a href="ReplSet.html#event:timeout">timeout</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Server">
+            <span class="title">
+                <a href="Server.html">Server</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="Server#event:close"><a href="Server.html#event:close">close</a></li>
+            
+                <li data-name="Server#event:commandFailed"><a href="Server.html#event:commandFailed">commandFailed</a></li>
+            
+                <li data-name="Server#event:commandStarted"><a href="Server.html#event:commandStarted">commandStarted</a></li>
+            
+                <li data-name="Server#event:commandSucceeded"><a href="Server.html#event:commandSucceeded">commandSucceeded</a></li>
+            
+                <li data-name="Server#event:connect"><a href="Server.html#event:connect">connect</a></li>
+            
+                <li data-name="Server#event:error"><a href="Server.html#event:error">error</a></li>
+            
+                <li data-name="Server#event:parseError"><a href="Server.html#event:parseError">parseError</a></li>
+            
+                <li data-name="Server#event:reconnect"><a href="Server.html#event:reconnect">reconnect</a></li>
+            
+                <li data-name="Server#event:timeout"><a href="Server.html#event:timeout">timeout</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Symbol">
+            <span class="title">
+                <a href="Symbol.html">Symbol</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Symbol#valueOf"><a href="Symbol.html#valueOf">valueOf</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Timestamp">
+            <span class="title">
+                <a href="Timestamp.html">Timestamp</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="Timestamp.MAX_VALUE"><a href="Timestamp.html#.MAX_VALUE">MAX_VALUE</a></li>
+            
+                <li data-name="Timestamp.MIN_VALUE"><a href="Timestamp.html#.MIN_VALUE">MIN_VALUE</a></li>
+            
+                <li data-name="Timestamp.NEG_ONE"><a href="Timestamp.html#.NEG_ONE">NEG_ONE</a></li>
+            
+                <li data-name="Timestamp.ONE"><a href="Timestamp.html#.ONE">ONE</a></li>
+            
+                <li data-name="Timestamp.ZERO"><a href="Timestamp.html#.ZERO">ZERO</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Timestamp.fromBits"><a href="Timestamp.html#.fromBits">fromBits</a></li>
+            
+                <li data-name="Timestamp.fromInt"><a href="Timestamp.html#.fromInt">fromInt</a></li>
+            
+                <li data-name="Timestamp.fromNumber"><a href="Timestamp.html#.fromNumber">fromNumber</a></li>
+            
+                <li data-name="Timestamp.fromString"><a href="Timestamp.html#.fromString">fromString</a></li>
+            
+                <li data-name="Timestamp#add"><a href="Timestamp.html#add">add</a></li>
+            
+                <li data-name="Timestamp#and"><a href="Timestamp.html#and">and</a></li>
+            
+                <li data-name="Timestamp#compare"><a href="Timestamp.html#compare">compare</a></li>
+            
+                <li data-name="Timestamp#div"><a href="Timestamp.html#div">div</a></li>
+            
+                <li data-name="Timestamp#equals"><a href="Timestamp.html#equals">equals</a></li>
+            
+                <li data-name="Timestamp#getHighBits"><a href="Timestamp.html#getHighBits">getHighBits</a></li>
+            
+                <li data-name="Timestamp#getLowBits"><a href="Timestamp.html#getLowBits">getLowBits</a></li>
+            
+                <li data-name="Timestamp#getLowBitsUnsigned"><a href="Timestamp.html#getLowBitsUnsigned">getLowBitsUnsigned</a></li>
+            
+                <li data-name="Timestamp#getNumBitsAbs"><a href="Timestamp.html#getNumBitsAbs">getNumBitsAbs</a></li>
+            
+                <li data-name="Timestamp#greaterThan"><a href="Timestamp.html#greaterThan">greaterThan</a></li>
+            
+                <li data-name="Timestamp#greaterThanOrEqual"><a href="Timestamp.html#greaterThanOrEqual">greaterThanOrEqual</a></li>
+            
+                <li data-name="Timestamp#isNegative"><a href="Timestamp.html#isNegative">isNegative</a></li>
+            
+                <li data-name="Timestamp#isOdd"><a href="Timestamp.html#isOdd">isOdd</a></li>
+            
+                <li data-name="Timestamp#isZero"><a href="Timestamp.html#isZero">isZero</a></li>
+            
+                <li data-name="Timestamp#lessThan"><a href="Timestamp.html#lessThan">lessThan</a></li>
+            
+                <li data-name="Timestamp#lessThanOrEqual"><a href="Timestamp.html#lessThanOrEqual">lessThanOrEqual</a></li>
+            
+                <li data-name="Timestamp#modulo"><a href="Timestamp.html#modulo">modulo</a></li>
+            
+                <li data-name="Timestamp#multiply"><a href="Timestamp.html#multiply">multiply</a></li>
+            
+                <li data-name="Timestamp#negate"><a href="Timestamp.html#negate">negate</a></li>
+            
+                <li data-name="Timestamp#not"><a href="Timestamp.html#not">not</a></li>
+            
+                <li data-name="Timestamp#notEquals"><a href="Timestamp.html#notEquals">notEquals</a></li>
+            
+                <li data-name="Timestamp#or"><a href="Timestamp.html#or">or</a></li>
+            
+                <li data-name="Timestamp#shiftLeft"><a href="Timestamp.html#shiftLeft">shiftLeft</a></li>
+            
+                <li data-name="Timestamp#shiftRight"><a href="Timestamp.html#shiftRight">shiftRight</a></li>
+            
+                <li data-name="Timestamp#shiftRightUnsigned"><a href="Timestamp.html#shiftRightUnsigned">shiftRightUnsigned</a></li>
+            
+                <li data-name="Timestamp#subtract"><a href="Timestamp.html#subtract">subtract</a></li>
+            
+                <li data-name="Timestamp#toInt"><a href="Timestamp.html#toInt">toInt</a></li>
+            
+                <li data-name="Timestamp#toJSON"><a href="Timestamp.html#toJSON">toJSON</a></li>
+            
+                <li data-name="Timestamp#toNumber"><a href="Timestamp.html#toNumber">toNumber</a></li>
+            
+                <li data-name="Timestamp#toString"><a href="Timestamp.html#toString">toString</a></li>
+            
+                <li data-name="Timestamp#xor"><a href="Timestamp.html#xor">xor</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="UnorderedBulkOperation">
+            <span class="title">
+                <a href="UnorderedBulkOperation.html">UnorderedBulkOperation</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="UnorderedBulkOperation~resultCallback"><a href="UnorderedBulkOperation.html#~resultCallback">resultCallback</a></li>
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="UnorderedBulkOperation#execute"><a href="UnorderedBulkOperation.html#execute">execute</a></li>
+            
+                <li data-name="UnorderedBulkOperation#find"><a href="UnorderedBulkOperation.html#find">find</a></li>
+            
+                <li data-name="UnorderedBulkOperation#insert"><a href="UnorderedBulkOperation.html#insert">insert</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="WriteConcernError">
+            <span class="title">
+                <a href="WriteConcernError.html">WriteConcernError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="WriteError">
+            <span class="title">
+                <a href="WriteError.html">WriteError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+    </ul>
+</div>
+            </td>
+            <td valign='top'>        
+                <div class="main">
+                    <h1 class="page-title" data-filename="lib_cursor.js.html">Source: lib/cursor.js</h1>
+                    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
+
+const Transform = require('stream').Transform;
+const PassThrough = require('stream').PassThrough;
+const inherits = require('util').inherits;
+const deprecate = require('util').deprecate;
+const handleCallback = require('./utils').handleCallback;
+const ReadPreference = require('mongodb-core').ReadPreference;
+const MongoError = require('mongodb-core').MongoError;
+const Readable = require('stream').Readable;
+const CoreCursor = require('mongodb-core').Cursor;
+const Map = require('mongodb-core').BSON.Map;
+const executeOperation = require('./utils').executeOperation;
+
+const count = require('./operations/cursor_ops').count;
+const each = require('./operations/cursor_ops').each;
+const hasNext = require('./operations/cursor_ops').hasNext;
+const next = require('./operations/cursor_ops').next;
+const toArray = require('./operations/cursor_ops').toArray;
+
+/**
+ * @fileOverview The **Cursor** class is an internal class that embodies a cursor on MongoDB
+ * allowing for iteration over the results returned from the underlying query. It supports
+ * one by one document iteration, conversion to an array or can be iterated as a Node 4.X
+ * or higher stream
+ *
+ * **CURSORS Cannot directly be instantiated**
+ * @example
+ * const MongoClient = require('mongodb').MongoClient;
+ * const test = require('assert');
+ * // Connection url
+ * const url = 'mongodb://localhost:27017';
+ * // Database Name
+ * const dbName = 'test';
+ * // Connect using MongoClient
+ * MongoClient.connect(url, function(err, client) {
+ *   // Create a collection we want to drop later
+ *   const col = client.db(dbName).collection('createIndexExample1');
+ *   // Insert a bunch of documents
+ *   col.insert([{a:1, b:1}
+ *     , {a:2, b:2}, {a:3, b:3}
+ *     , {a:4, b:4}], {w:1}, function(err, result) {
+ *     test.equal(null, err);
+ *     // Show that duplicate records got dropped
+ *     col.find({}).toArray(function(err, items) {
+ *       test.equal(null, err);
+ *       test.equal(4, items.length);
+ *       client.close();
+ *     });
+ *   });
+ * });
+ */
+
+/**
+ * Namespace provided by the mongodb-core and node.js
+ * @external CoreCursor
+ * @external Readable
+ */
+
+// Flags allowed for cursor
+const flags = ['tailable', 'oplogReplay', 'noCursorTimeout', 'awaitData', 'exhaust', 'partial'];
+const fields = ['numberOfRetries', 'tailableRetryInterval'];
+
+/**
+ * Creates a new Cursor instance (INTERNAL TYPE, do not instantiate directly)
+ * @class Cursor
+ * @extends external:CoreCursor
+ * @extends external:Readable
+ * @property {string} sortValue Cursor query sort setting.
+ * @property {boolean} timeout Is Cursor able to time out.
+ * @property {ReadPreference} readPreference Get cursor ReadPreference.
+ * @fires Cursor#data
+ * @fires Cursor#end
+ * @fires Cursor#close
+ * @fires Cursor#readable
+ * @return {Cursor} a Cursor instance.
+ * @example
+ * Cursor cursor options.
+ *
+ * collection.find({}).project({a:1})                             // Create a projection of field a
+ * collection.find({}).skip(1).limit(10)                          // Skip 1 and limit 10
+ * collection.find({}).batchSize(5)                               // Set batchSize on cursor to 5
+ * collection.find({}).filter({a:1})                              // Set query on the cursor
+ * collection.find({}).comment('add a comment')                   // Add a comment to the query, allowing to correlate queries
+ * collection.find({}).addCursorFlag('tailable', true)            // Set cursor as tailable
+ * collection.find({}).addCursorFlag('oplogReplay', true)         // Set cursor as oplogReplay
+ * collection.find({}).addCursorFlag('noCursorTimeout', true)     // Set cursor as noCursorTimeout
+ * collection.find({}).addCursorFlag('awaitData', true)           // Set cursor as awaitData
+ * collection.find({}).addCursorFlag('partial', true)             // Set cursor as partial
+ * collection.find({}).addQueryModifier('$orderby', {a:1})        // Set $orderby {a:1}
+ * collection.find({}).max(10)                                    // Set the cursor max
+ * collection.find({}).maxTimeMS(1000)                            // Set the cursor maxTimeMS
+ * collection.find({}).min(100)                                   // Set the cursor min
+ * collection.find({}).returnKey(true)                            // Set the cursor returnKey
+ * collection.find({}).setReadPreference(ReadPreference.PRIMARY)  // Set the cursor readPreference
+ * collection.find({}).showRecordId(true)                         // Set the cursor showRecordId
+ * collection.find({}).sort([['a', 1]])                           // Sets the sort order of the cursor query
+ * collection.find({}).hint('a_1')                                // Set the cursor hint
+ *
+ * All options are chainable, so one can do the following.
+ *
+ * collection.find({}).maxTimeMS(1000).maxScan(100).skip(1).toArray(..)
+ */
+function Cursor(bson, ns, cmd, options, topology, topologyOptions) {
+  CoreCursor.apply(this, Array.prototype.slice.call(arguments, 0));
+  const state = Cursor.INIT;
+  const streamOptions = {};
+
+  // Tailable cursor options
+  const numberOfRetries = options.numberOfRetries || 5;
+  const tailableRetryInterval = options.tailableRetryInterval || 500;
+  const currentNumberOfRetries = numberOfRetries;
+
+  // Get the promiseLibrary
+  const promiseLibrary = options.promiseLibrary || Promise;
+
+  // Set up
+  Readable.call(this, { objectMode: true });
+
+  // Internal cursor state
+  this.s = {
+    // Tailable cursor options
+    numberOfRetries: numberOfRetries,
+    tailableRetryInterval: tailableRetryInterval,
+    currentNumberOfRetries: currentNumberOfRetries,
+    // State
+    state: state,
+    // Stream options
+    streamOptions: streamOptions,
+    // BSON
+    bson: bson,
+    // Namespace
+    ns: ns,
+    // Command
+    cmd: cmd,
+    // Options
+    options: options,
+    // Topology
+    topology: topology,
+    // Topology options
+    topologyOptions: topologyOptions,
+    // Promise library
+    promiseLibrary: promiseLibrary,
+    // Current doc
+    currentDoc: null,
+    // explicitlyIgnoreSession
+    explicitlyIgnoreSession: options.explicitlyIgnoreSession
+  };
+
+  // Optional ClientSession
+  if (!options.explicitlyIgnoreSession &amp;&amp; options.session) {
+    this.s.session = options.session;
+  }
+
+  // Translate correctly
+  if (this.s.options.noCursorTimeout === true) {
+    this.addCursorFlag('noCursorTimeout', true);
+  }
+
+  // Set the sort value
+  this.sortValue = this.s.cmd.sort;
+
+  // Get the batchSize
+  const batchSize =
+    cmd.cursor &amp;&amp; cmd.cursor.batchSize
+      ? cmd.cursor &amp;&amp; cmd.cursor.batchSize
+      : options.cursor &amp;&amp; options.cursor.batchSize
+        ? options.cursor.batchSize
+        : 1000;
+
+  // Set the batchSize
+  this.setCursorBatchSize(batchSize);
+}
+
+/**
+ * Cursor stream data event, fired for each document in the cursor.
+ *
+ * @event Cursor#data
+ * @type {object}
+ */
+
+/**
+ * Cursor stream end event
+ *
+ * @event Cursor#end
+ * @type {null}
+ */
+
+/**
+ * Cursor stream close event
+ *
+ * @event Cursor#close
+ * @type {null}
+ */
+
+/**
+ * Cursor stream readable event
+ *
+ * @event Cursor#readable
+ * @type {null}
+ */
+
+// Inherit from Readable
+inherits(Cursor, Readable);
+
+// Map core cursor _next method so we can apply mapping
+Cursor.prototype._next = function() {
+  if (this._initImplicitSession) {
+    this._initImplicitSession();
+  }
+  return CoreCursor.prototype.next.apply(this, arguments);
+};
+
+for (let name in CoreCursor.prototype) {
+  Cursor.prototype[name] = CoreCursor.prototype[name];
+}
+
+Cursor.prototype._initImplicitSession = function() {
+  if (!this.s.explicitlyIgnoreSession &amp;&amp; !this.s.session &amp;&amp; this.s.topology.hasSessionSupport()) {
+    this.s.session = this.s.topology.startSession({ owner: this });
+    this.cursorState.session = this.s.session;
+  }
+};
+
+Cursor.prototype._endSession = function() {
+  const didCloseCursor = CoreCursor.prototype._endSession.apply(this, arguments);
+  if (didCloseCursor) {
+    this.s.session = undefined;
+  }
+};
+
+/**
+ * Check if there is any document still available in the cursor
+ * @method
+ * @param {Cursor~resultCallback} [callback] The result callback.
+ * @throws {MongoError}
+ * @return {Promise} returns Promise if no callback passed
+ */
+Cursor.prototype.hasNext = function(callback) {
+  return executeOperation(this.s.topology, hasNext, [this, callback], {
+    skipSessions: true
+  });
+};
+
+/**
+ * Get the next available document from the cursor, returns null if no more documents are available.
+ * @method
+ * @param {Cursor~resultCallback} [callback] The result callback.
+ * @throws {MongoError}
+ * @return {Promise} returns Promise if no callback passed
+ */
+Cursor.prototype.next = function(callback) {
+  return executeOperation(this.s.topology, next, [this, callback], {
+    skipSessions: true
+  });
+};
+
+/**
+ * Set the cursor query
+ * @method
+ * @param {object} filter The filter object used for the cursor.
+ * @return {Cursor}
+ */
+Cursor.prototype.filter = function(filter) {
+  if (this.s.state === Cursor.CLOSED || this.s.state === Cursor.OPEN || this.isDead()) {
+    throw MongoError.create({ message: 'Cursor is closed', driver: true });
+  }
+
+  this.s.cmd.query = filter;
+  return this;
+};
+
+/**
+ * Set the cursor maxScan
+ * @method
+ * @param {object} maxScan Constrains the query to only scan the specified number of documents when fulfilling the query
+ * @deprecated as of MongoDB 4.0
+ * @return {Cursor}
+ */
+Cursor.prototype.maxScan = deprecate(function(maxScan) {
+  if (this.s.state === Cursor.CLOSED || this.s.state === Cursor.OPEN || this.isDead()) {
+    throw MongoError.create({ message: 'Cursor is closed', driver: true });
+  }
+
+  this.s.cmd.maxScan = maxScan;
+  return this;
+}, 'Cursor.maxScan is deprecated, and will be removed in a later version');
+
+/**
+ * Set the cursor hint
+ * @method
+ * @param {object} hint If specified, then the query system will only consider plans using the hinted index.
+ * @return {Cursor}
+ */
+Cursor.prototype.hint = function(hint) {
+  if (this.s.state === Cursor.CLOSED || this.s.state === Cursor.OPEN || this.isDead()) {
+    throw MongoError.create({ message: 'Cursor is closed', driver: true });
+  }
+
+  this.s.cmd.hint = hint;
+  return this;
+};
+
+/**
+ * Set the cursor min
+ * @method
+ * @param {object} min Specify a $min value to specify the inclusive lower bound for a specific index in order to constrain the results of find(). The $min specifies the lower bound for all keys of a specific index in order.
+ * @return {Cursor}
+ */
+Cursor.prototype.min = function(min) {
+  if (this.s.state === Cursor.CLOSED || this.s.state === Cursor.OPEN || this.isDead())
+    throw MongoError.create({ message: 'Cursor is closed', driver: true });
+  this.s.cmd.min = min;
+  return this;
+};
+
+/**
+ * Set the cursor max
+ * @method
+ * @param {object} max Specify a $max value to specify the exclusive upper bound for a specific index in order to constrain the results of find(). The $max specifies the upper bound for all keys of a specific index in order.
+ * @return {Cursor}
+ */
+Cursor.prototype.max = function(max) {
+  if (this.s.state === Cursor.CLOSED || this.s.state === Cursor.OPEN || this.isDead()) {
+    throw MongoError.create({ message: 'Cursor is closed', driver: true });
+  }
+
+  this.s.cmd.max = max;
+  return this;
+};
+
+/**
+ * Set the cursor returnKey. If set to true, modifies the cursor to only return the index field or fields for the results of the query, rather than documents. If set to true and the query does not use an index to perform the read operation, the returned documents will not contain any fields.
+ * @method
+ * @param {bool} returnKey the returnKey value.
+ * @return {Cursor}
+ */
+Cursor.prototype.returnKey = function(value) {
+  if (this.s.state === Cursor.CLOSED || this.s.state === Cursor.OPEN || this.isDead()) {
+    throw MongoError.create({ message: 'Cursor is closed', driver: true });
+  }
+
+  this.s.cmd.returnKey = value;
+  return this;
+};
+
+/**
+ * Set the cursor showRecordId
+ * @method
+ * @param {object} showRecordId The $showDiskLoc option has now been deprecated and replaced with the showRecordId field. $showDiskLoc will still be accepted for OP_QUERY stye find.
+ * @return {Cursor}
+ */
+Cursor.prototype.showRecordId = function(value) {
+  if (this.s.state === Cursor.CLOSED || this.s.state === Cursor.OPEN || this.isDead()) {
+    throw MongoError.create({ message: 'Cursor is closed', driver: true });
+  }
+
+  this.s.cmd.showDiskLoc = value;
+  return this;
+};
+
+/**
+ * Set the cursor snapshot
+ * @method
+ * @param {object} snapshot The $snapshot operator prevents the cursor from returning a document more than once because an intervening write operation results in a move of the document.
+ * @deprecated as of MongoDB 4.0
+ * @return {Cursor}
+ */
+Cursor.prototype.snapshot = deprecate(function(value) {
+  if (this.s.state === Cursor.CLOSED || this.s.state === Cursor.OPEN || this.isDead()) {
+    throw MongoError.create({ message: 'Cursor is closed', driver: true });
+  }
+
+  this.s.cmd.snapshot = value;
+  return this;
+}, 'Cursor Snapshot is deprecated, and will be removed in a later version');
+
+/**
+ * Set a node.js specific cursor option
+ * @method
+ * @param {string} field The cursor option to set ['numberOfRetries', 'tailableRetryInterval'].
+ * @param {object} value The field value.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.setCursorOption = function(field, value) {
+  if (this.s.state === Cursor.CLOSED || this.s.state === Cursor.OPEN || this.isDead()) {
+    throw MongoError.create({ message: 'Cursor is closed', driver: true });
+  }
+
+  if (fields.indexOf(field) === -1) {
+    throw MongoError.create({
+      message: `option ${field} is not a supported option ${fields}`,
+      driver: true
+    });
+  }
+
+  this.s[field] = value;
+  if (field === 'numberOfRetries') this.s.currentNumberOfRetries = value;
+  return this;
+};
+
+/**
+ * Add a cursor flag to the cursor
+ * @method
+ * @param {string} flag The flag to set, must be one of following ['tailable', 'oplogReplay', 'noCursorTimeout', 'awaitData', 'partial'].
+ * @param {boolean} value The flag boolean value.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.addCursorFlag = function(flag, value) {
+  if (this.s.state === Cursor.CLOSED || this.s.state === Cursor.OPEN || this.isDead()) {
+    throw MongoError.create({ message: 'Cursor is closed', driver: true });
+  }
+
+  if (flags.indexOf(flag) === -1) {
+    throw MongoError.create({
+      message: `flag ${flag} is not a supported flag ${flags}`,
+      driver: true
+    });
+  }
+
+  if (typeof value !== 'boolean') {
+    throw MongoError.create({ message: `flag ${flag} must be a boolean value`, driver: true });
+  }
+
+  this.s.cmd[flag] = value;
+  return this;
+};
+
+/**
+ * Add a query modifier to the cursor query
+ * @method
+ * @param {string} name The query modifier (must start with $, such as $orderby etc)
+ * @param {string|boolean|number} value The modifier value.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.addQueryModifier = function(name, value) {
+  if (this.s.state === Cursor.CLOSED || this.s.state === Cursor.OPEN || this.isDead()) {
+    throw MongoError.create({ message: 'Cursor is closed', driver: true });
+  }
+
+  if (name[0] !== '$') {
+    throw MongoError.create({ message: `${name} is not a valid query modifier`, driver: true });
+  }
+
+  // Strip of the $
+  const field = name.substr(1);
+  // Set on the command
+  this.s.cmd[field] = value;
+  // Deal with the special case for sort
+  if (field === 'orderby') this.s.cmd.sort = this.s.cmd[field];
+  return this;
+};
+
+/**
+ * Add a comment to the cursor query allowing for tracking the comment in the log.
+ * @method
+ * @param {string} value The comment attached to this query.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.comment = function(value) {
+  if (this.s.state === Cursor.CLOSED || this.s.state === Cursor.OPEN || this.isDead()) {
+    throw MongoError.create({ message: 'Cursor is closed', driver: true });
+  }
+
+  this.s.cmd.comment = value;
+  return this;
+};
+
+/**
+ * Set a maxAwaitTimeMS on a tailing cursor query to allow to customize the timeout value for the option awaitData (Only supported on MongoDB 3.2 or higher, ignored otherwise)
+ * @method
+ * @param {number} value Number of milliseconds to wait before aborting the tailed query.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.maxAwaitTimeMS = function(value) {
+  if (typeof value !== 'number') {
+    throw MongoError.create({ message: 'maxAwaitTimeMS must be a number', driver: true });
+  }
+
+  if (this.s.state === Cursor.CLOSED || this.s.state === Cursor.OPEN || this.isDead()) {
+    throw MongoError.create({ message: 'Cursor is closed', driver: true });
+  }
+
+  this.s.cmd.maxAwaitTimeMS = value;
+  return this;
+};
+
+/**
+ * Set a maxTimeMS on the cursor query, allowing for hard timeout limits on queries (Only supported on MongoDB 2.6 or higher)
+ * @method
+ * @param {number} value Number of milliseconds to wait before aborting the query.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.maxTimeMS = function(value) {
+  if (typeof value !== 'number') {
+    throw MongoError.create({ message: 'maxTimeMS must be a number', driver: true });
+  }
+
+  if (this.s.state === Cursor.CLOSED || this.s.state === Cursor.OPEN || this.isDead()) {
+    throw MongoError.create({ message: 'Cursor is closed', driver: true });
+  }
+
+  this.s.cmd.maxTimeMS = value;
+  return this;
+};
+
+Cursor.prototype.maxTimeMs = Cursor.prototype.maxTimeMS;
+
+/**
+ * Sets a field projection for the query.
+ * @method
+ * @param {object} value The field projection object.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.project = function(value) {
+  if (this.s.state === Cursor.CLOSED || this.s.state === Cursor.OPEN || this.isDead()) {
+    throw MongoError.create({ message: 'Cursor is closed', driver: true });
+  }
+
+  this.s.cmd.fields = value;
+  return this;
+};
+
+/**
+ * Sets the sort order of the cursor query.
+ * @method
+ * @param {(string|array|object)} keyOrList The key or keys set for the sort.
+ * @param {number} [direction] The direction of the sorting (1 or -1).
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.sort = function(keyOrList, direction) {
+  if (this.s.options.tailable) {
+    throw MongoError.create({ message: "Tailable cursor doesn't support sorting", driver: true });
+  }
+
+  if (this.s.state === Cursor.CLOSED || this.s.state === Cursor.OPEN || this.isDead()) {
+    throw MongoError.create({ message: 'Cursor is closed', driver: true });
+  }
+
+  let order = keyOrList;
+
+  // We have an array of arrays, we need to preserve the order of the sort
+  // so we will us a Map
+  if (Array.isArray(order) &amp;&amp; Array.isArray(order[0])) {
+    order = new Map(
+      order.map(x => {
+        const value = [x[0], null];
+        if (x[1] === 'asc') {
+          value[1] = 1;
+        } else if (x[1] === 'desc') {
+          value[1] = -1;
+        } else if (x[1] === 1 || x[1] === -1) {
+          value[1] = x[1];
+        } else {
+          throw new MongoError(
+            "Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]"
+          );
+        }
+
+        return value;
+      })
+    );
+  }
+
+  if (direction != null) {
+    order = [[keyOrList, direction]];
+  }
+
+  this.s.cmd.sort = order;
+  this.sortValue = order;
+  return this;
+};
+
+/**
+ * Set the batch size for the cursor.
+ * @method
+ * @param {number} value The batchSize for the cursor.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.batchSize = function(value) {
+  if (this.s.options.tailable) {
+    throw MongoError.create({ message: "Tailable cursor doesn't support batchSize", driver: true });
+  }
+
+  if (this.s.state === Cursor.CLOSED || this.isDead()) {
+    throw MongoError.create({ message: 'Cursor is closed', driver: true });
+  }
+
+  if (typeof value !== 'number') {
+    throw MongoError.create({ message: 'batchSize requires an integer', driver: true });
+  }
+
+  this.s.cmd.batchSize = value;
+  this.setCursorBatchSize(value);
+  return this;
+};
+
+/**
+ * Set the collation options for the cursor.
+ * @method
+ * @param {object} value The cursor collation options (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.collation = function(value) {
+  this.s.cmd.collation = value;
+  return this;
+};
+
+/**
+ * Set the limit for the cursor.
+ * @method
+ * @param {number} value The limit for the cursor query.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.limit = function(value) {
+  if (this.s.options.tailable) {
+    throw MongoError.create({ message: "Tailable cursor doesn't support limit", driver: true });
+  }
+
+  if (this.s.state === Cursor.OPEN || this.s.state === Cursor.CLOSED || this.isDead()) {
+    throw MongoError.create({ message: 'Cursor is closed', driver: true });
+  }
+
+  if (typeof value !== 'number') {
+    throw MongoError.create({ message: 'limit requires an integer', driver: true });
+  }
+
+  this.s.cmd.limit = value;
+  // this.cursorLimit = value;
+  this.setCursorLimit(value);
+  return this;
+};
+
+/**
+ * Set the skip for the cursor.
+ * @method
+ * @param {number} value The skip for the cursor query.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.skip = function(value) {
+  if (this.s.options.tailable) {
+    throw MongoError.create({ message: "Tailable cursor doesn't support skip", driver: true });
+  }
+
+  if (this.s.state === Cursor.OPEN || this.s.state === Cursor.CLOSED || this.isDead()) {
+    throw MongoError.create({ message: 'Cursor is closed', driver: true });
+  }
+
+  if (typeof value !== 'number') {
+    throw MongoError.create({ message: 'skip requires an integer', driver: true });
+  }
+
+  this.s.cmd.skip = value;
+  this.setCursorSkip(value);
+  return this;
+};
+
+/**
+ * The callback format for results
+ * @callback Cursor~resultCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {(object|null|boolean)} result The result object if the command was executed successfully.
+ */
+
+/**
+ * Clone the cursor
+ * @function external:CoreCursor#clone
+ * @return {Cursor}
+ */
+
+/**
+ * Resets the cursor
+ * @function external:CoreCursor#rewind
+ * @return {null}
+ */
+
+/**
+ * Iterates over all the documents for this cursor. As with **{cursor.toArray}**,
+ * not all of the elements will be iterated if this cursor had been previouly accessed.
+ * In that case, **{cursor.rewind}** can be used to reset the cursor. However, unlike
+ * **{cursor.toArray}**, the cursor will only hold a maximum of batch size elements
+ * at any given time if batch size is specified. Otherwise, the caller is responsible
+ * for making sure that the entire result can fit the memory.
+ * @method
+ * @deprecated
+ * @param {Cursor~resultCallback} callback The result callback.
+ * @throws {MongoError}
+ * @return {null}
+ */
+Cursor.prototype.each = function(callback) {
+  // Rewind cursor state
+  this.rewind();
+  // Set current cursor to INIT
+  this.s.state = Cursor.INIT;
+  // Run the query
+  each(this, callback);
+};
+
+/**
+ * The callback format for the forEach iterator method
+ * @callback Cursor~iteratorCallback
+ * @param {Object} doc An emitted document for the iterator
+ */
+
+/**
+ * The callback error format for the forEach iterator method
+ * @callback Cursor~endCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ */
+
+/**
+ * Iterates over all the documents for this cursor using the iterator, callback pattern.
+ * @method
+ * @param {Cursor~iteratorCallback} iterator The iteration callback.
+ * @param {Cursor~endCallback} callback The end callback.
+ * @throws {MongoError}
+ * @return {Promise} if no callback supplied
+ */
+Cursor.prototype.forEach = function(iterator, callback) {
+  if (typeof callback === 'function') {
+    this.each((err, doc) => {
+      if (err) {
+        callback(err);
+        return false;
+      }
+      if (doc != null) {
+        iterator(doc);
+        return true;
+      }
+      if (doc == null &amp;&amp; callback) {
+        const internalCallback = callback;
+        callback = null;
+        internalCallback(null);
+        return false;
+      }
+    });
+  } else {
+    return new this.s.promiseLibrary((fulfill, reject) => {
+      this.each((err, doc) => {
+        if (err) {
+          reject(err);
+          return false;
+        } else if (doc == null) {
+          fulfill(null);
+          return false;
+        } else {
+          iterator(doc);
+          return true;
+        }
+      });
+    });
+  }
+};
+
+/**
+ * Set the ReadPreference for the cursor.
+ * @method
+ * @param {(string|ReadPreference)} readPreference The new read preference for the cursor.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.setReadPreference = function(readPreference) {
+  if (this.s.state !== Cursor.INIT) {
+    throw MongoError.create({
+      message: 'cannot change cursor readPreference after cursor has been accessed',
+      driver: true
+    });
+  }
+
+  if (readPreference instanceof ReadPreference) {
+    this.s.options.readPreference = readPreference;
+  } else if (typeof readPreference === 'string') {
+    this.s.options.readPreference = new ReadPreference(readPreference);
+  } else {
+    throw new TypeError('Invalid read preference: ' + readPreference);
+  }
+
+  return this;
+};
+
+/**
+ * The callback format for results
+ * @callback Cursor~toArrayResultCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {object[]} documents All the documents the satisfy the cursor.
+ */
+
+/**
+ * Returns an array of documents. The caller is responsible for making sure that there
+ * is enough memory to store the results. Note that the array only contain partial
+ * results when this cursor had been previouly accessed. In that case,
+ * cursor.rewind() can be used to reset the cursor.
+ * @method
+ * @param {Cursor~toArrayResultCallback} [callback] The result callback.
+ * @throws {MongoError}
+ * @return {Promise} returns Promise if no callback passed
+ */
+Cursor.prototype.toArray = function(callback) {
+  if (this.s.options.tailable) {
+    throw MongoError.create({
+      message: 'Tailable cursor cannot be converted to array',
+      driver: true
+    });
+  }
+
+  return executeOperation(this.s.topology, toArray, [this, callback], {
+    skipSessions: true
+  });
+};
+
+/**
+ * The callback format for results
+ * @callback Cursor~countResultCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {number} count The count of documents.
+ */
+
+/**
+ * Get the count of documents for this cursor
+ * @method
+ * @param {boolean} [applySkipLimit=true] Should the count command apply limit and skip settings on the cursor or in the passed in options.
+ * @param {object} [options] Optional settings.
+ * @param {number} [options.skip] The number of documents to skip.
+ * @param {number} [options.limit] The maximum amounts to count before aborting.
+ * @param {number} [options.maxTimeMS] Number of miliseconds to wait before aborting the query.
+ * @param {string} [options.hint] An index name hint for the query.
+ * @param {(ReadPreference|string)} [options.readPreference] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ * @param {Cursor~countResultCallback} [callback] The result callback.
+ * @return {Promise} returns Promise if no callback passed
+ */
+Cursor.prototype.count = function(applySkipLimit, opts, callback) {
+  if (this.s.cmd.query == null)
+    throw MongoError.create({ message: 'count can only be used with find command', driver: true });
+  if (typeof opts === 'function') (callback = opts), (opts = {});
+  opts = opts || {};
+
+  if (typeof applySkipLimit === 'function') {
+    callback = applySkipLimit;
+    applySkipLimit = true;
+  }
+
+  if (this.s.session) {
+    opts = Object.assign({}, opts, { session: this.s.session });
+  }
+
+  return executeOperation(this.s.topology, count, [this, applySkipLimit, opts, callback], {
+    skipSessions: !!this.s.session
+  });
+};
+
+/**
+ * Close the cursor, sending a KillCursor command and emitting close.
+ * @method
+ * @param {object} [options] Optional settings.
+ * @param {boolean} [options.skipKillCursors] Bypass calling killCursors when closing the cursor.
+ * @param {Cursor~resultCallback} [callback] The result callback.
+ * @return {Promise} returns Promise if no callback passed
+ */
+Cursor.prototype.close = function(options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
+  options = Object.assign({}, { skipKillCursors: false }, options);
+
+  this.s.state = Cursor.CLOSED;
+  if (!options.skipKillCursors) {
+    // Kill the cursor
+    this.kill();
+  }
+
+  const completeClose = () => {
+    // Emit the close event for the cursor
+    this.emit('close');
+
+    // Callback if provided
+    if (typeof callback === 'function') {
+      return handleCallback(callback, null, this);
+    }
+
+    // Return a Promise
+    return new this.s.promiseLibrary(resolve => {
+      resolve();
+    });
+  };
+
+  if (this.s.session) {
+    if (typeof callback === 'function') {
+      return this._endSession(() => completeClose());
+    }
+
+    return new this.s.promiseLibrary(resolve => {
+      this._endSession(() => completeClose().then(resolve));
+    });
+  }
+
+  return completeClose();
+};
+
+/**
+ * Map all documents using the provided function
+ * @method
+ * @param {function} [transform] The mapping transformation method.
+ * @return {Cursor}
+ */
+Cursor.prototype.map = function(transform) {
+  if (this.cursorState.transforms &amp;&amp; this.cursorState.transforms.doc) {
+    const oldTransform = this.cursorState.transforms.doc;
+    this.cursorState.transforms.doc = doc => {
+      return transform(oldTransform(doc));
+    };
+  } else {
+    this.cursorState.transforms = { doc: transform };
+  }
+  return this;
+};
+
+/**
+ * Is the cursor closed
+ * @method
+ * @return {boolean}
+ */
+Cursor.prototype.isClosed = function() {
+  return this.isDead();
+};
+
+Cursor.prototype.destroy = function(err) {
+  if (err) this.emit('error', err);
+  this.pause();
+  this.close();
+};
+
+/**
+ * Return a modified Readable stream including a possible transform method.
+ * @method
+ * @param {object} [options] Optional settings.
+ * @param {function} [options.transform] A transformation method applied to each document emitted by the stream.
+ * @return {Cursor}
+ * TODO: replace this method with transformStream in next major release
+ */
+Cursor.prototype.stream = function(options) {
+  this.s.streamOptions = options || {};
+  return this;
+};
+
+/**
+ * Return a modified Readable stream that applies a given transform function, if supplied. If none supplied,
+ * returns a stream of unmodified docs.
+ * @method
+ * @param {object} [options] Optional settings.
+ * @param {function} [options.transform] A transformation method applied to each document emitted by the stream.
+ * @return {stream}
+ */
+Cursor.prototype.transformStream = function(options) {
+  const streamOptions = options || {};
+  if (typeof streamOptions.transform === 'function') {
+    const stream = new Transform({
+      objectMode: true,
+      transform: function(chunk, encoding, callback) {
+        this.push(streamOptions.transform(chunk));
+        callback();
+      }
+    });
+
+    return this.pipe(stream);
+  }
+  return this.pipe(new PassThrough({ objectMode: true }));
+};
+
+/**
+ * Execute the explain for the cursor
+ * @method
+ * @param {Cursor~resultCallback} [callback] The result callback.
+ * @return {Promise} returns Promise if no callback passed
+ */
+Cursor.prototype.explain = function(callback) {
+  this.s.cmd.explain = true;
+
+  // Do we have a readConcern
+  if (this.s.cmd.readConcern) {
+    delete this.s.cmd['readConcern'];
+  }
+
+  return executeOperation(this.s.topology, this._next.bind(this), [callback], {
+    skipSessions: true
+  });
+};
+
+Cursor.prototype._read = function() {
+  if (this.s.state === Cursor.CLOSED || this.isDead()) {
+    return this.push(null);
+  }
+
+  // Get the next item
+  this.next((err, result) => {
+    if (err) {
+      if (this.listeners('error') &amp;&amp; this.listeners('error').length > 0) {
+        this.emit('error', err);
+      }
+      if (!this.isDead()) this.close();
+
+      // Emit end event
+      this.emit('end');
+      return this.emit('finish');
+    }
+
+    // If we provided a transformation method
+    if (typeof this.s.streamOptions.transform === 'function' &amp;&amp; result != null) {
+      return this.push(this.s.streamOptions.transform(result));
+    }
+
+    // If we provided a map function
+    if (
+      this.cursorState.transforms &amp;&amp;
+      typeof this.cursorState.transforms.doc === 'function' &amp;&amp;
+      result != null
+    ) {
+      return this.push(this.cursorState.transforms.doc(result));
+    }
+
+    // Return the result
+    this.push(result);
+
+    if (result === null &amp;&amp; this.isDead()) {
+      this.once('end', () => {
+        this.close();
+        this.emit('finish');
+      });
+    }
+  });
+};
+
+Object.defineProperty(Cursor.prototype, 'readPreference', {
+  enumerable: true,
+  get: function() {
+    if (!this || !this.s) {
+      return null;
+    }
+
+    return this.s.options.readPreference;
+  }
+});
+
+Object.defineProperty(Cursor.prototype, 'namespace', {
+  enumerable: true,
+  get: function() {
+    if (!this || !this.s) {
+      return null;
+    }
+
+    // TODO: refactor this logic into core
+    const ns = this.s.ns || '';
+    const firstDot = ns.indexOf('.');
+    if (firstDot &lt; 0) {
+      return {
+        database: this.s.ns,
+        collection: ''
+      };
+    }
+    return {
+      database: ns.substr(0, firstDot),
+      collection: ns.substr(firstDot + 1)
+    };
+  }
+});
+
+/**
+ * The read() method pulls some data out of the internal buffer and returns it. If there is no data available, then it will return null.
+ * @function external:Readable#read
+ * @param {number} size Optional argument to specify how much data to read.
+ * @return {(String | Buffer | null)}
+ */
+
+/**
+ * Call this function to cause the stream to return strings of the specified encoding instead of Buffer objects.
+ * @function external:Readable#setEncoding
+ * @param {string} encoding The encoding to use.
+ * @return {null}
+ */
+
+/**
+ * This method will cause the readable stream to resume emitting data events.
+ * @function external:Readable#resume
+ * @return {null}
+ */
+
+/**
+ * This method will cause a stream in flowing-mode to stop emitting data events. Any data that becomes available will remain in the internal buffer.
+ * @function external:Readable#pause
+ * @return {null}
+ */
+
+/**
+ * This method pulls all the data out of a readable stream, and writes it to the supplied destination, automatically managing the flow so that the destination is not overwhelmed by a fast readable stream.
+ * @function external:Readable#pipe
+ * @param {Writable} destination The destination for writing data
+ * @param {object} [options] Pipe options
+ * @return {null}
+ */
+
+/**
+ * This method will remove the hooks set up for a previous pipe() call.
+ * @function external:Readable#unpipe
+ * @param {Writable} [destination] The destination for writing data
+ * @return {null}
+ */
+
+/**
+ * This is useful in certain cases where a stream is being consumed by a parser, which needs to "un-consume" some data that it has optimistically pulled out of the source, so that the stream can be passed on to some other party.
+ * @function external:Readable#unshift
+ * @param {(Buffer|string)} chunk Chunk of data to unshift onto the read queue.
+ * @return {null}
+ */
+
+/**
+ * Versions of Node prior to v0.10 had streams that did not implement the entire Streams API as it is today. (See "Compatibility" below for more information.)
+ * @function external:Readable#wrap
+ * @param {Stream} stream An "old style" readable stream.
+ * @return {null}
+ */
+
+Cursor.INIT = 0;
+Cursor.OPEN = 1;
+Cursor.CLOSED = 2;
+Cursor.GET_MORE = 3;
+
+module.exports = Cursor;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+
+
+                    <footer>
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Jun 27 2018 09:40:13 GMT-0400 (EDT)
+                    </footer>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+<script src="scripts/main.js"></script>
+</body>
+</html>

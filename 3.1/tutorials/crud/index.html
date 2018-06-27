@@ -1,0 +1,3007 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="author" content="">
+<meta name="keyword" content="">
+
+    <link rel="shortcut icon" href="/node-mongodb-native/3.1/img/favicon.png">
+
+    <title>CRUD Operations</title>
+
+    <link rel="stylesheet" href="/node-mongodb-native/3.1/lib/bootstrap.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.1/lib/font-awesome/css/font-awesome.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.1/css/mongodb-docs.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.1/css/overrides.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.1/lib/highlight/styles/idea.css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.1/lib/bootstrap-toggle/bootstrap-toggle.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/3.1/css/java.css" type="text/css" />
+
+
+  </head>
+
+  <body>
+  
+  <section id="container" class="">
+      
+      <header id="header-db" class="row" role="navigation">
+  <div class="header-content">
+    <div class="toggle-nav pull-left">
+        <i class="fa fa-bars"></i>
+        <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+    </div>
+    
+    <div class="logo pull-left">
+      <a href="https://www.mongodb.com/">
+        <img src="http://mongodb.github.io/node-mongodb-native/img/logo-mongodb-header.png", alt="MongoDB.com" />
+      </a>
+    </div>
+    
+    <div>
+<div class="nav-items pull-right">
+  <a href="https://university.mongodb.com" data-toggle="tooltip" data-placement="bottom" title="Free Online Classes">MongoDB University</a>
+  <a href="http://www.mongodb.org/downloads" data-toggle="tooltip" data-placement="bottom" title="Download MongoDB">Downloads</a>
+  <a href="http://www.mongodb.org/get-involved" data-toggle="tooltip" data-placement="bottom" title="Get involved with MongoDB">Community</a>
+  <a href="http://docs.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Documentation">Docs</a>
+  <a href="http://blog.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Blog">Blog</a>
+  <div id="search">
+<form method="get" action="//www.google.com/search" target="_blank">
+    <input type="text" name="searchQuery" size="20" value="" autocomplete="off" placeholder="Search docs">
+    <input type="hidden" name="site" value="/node-mongodb-native/3.1">
+    <input type="hidden" name="q" value="">
+    <label for="searchQuery"><i class="fa fa-search fa-1"></i></label>
+</form>
+</div>
+
+</div>
+</div>
+
+  </div>
+</header>
+
+
+      
+
+      
+<aside id="sidebar" class="sidebar">
+    <div class="ssidebar nav-collapse">
+      <div class="ssidebarwrapper">
+        <h3>
+          <a class="index-link" href="/node-mongodb-native/3.1/../">MongoDB Node.js Driver</a>
+          <a class="version pull-right" href="/node-mongodb-native/3.1">3.x</a>
+        </h3>
+
+        
+        <ul class="sidebar-menu">
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+
+          
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+    
+    
+    
+  
+  
+
+
+        
+      
+    
+      
+      
+        
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+
+          
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.1/installation-guide/installation-guide/">
+        <i class='fa fa-puzzle-piece'></i>
+        Installation Guide
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.1/quick-start/quick-start/">
+        <i class='fa fa-road'></i>
+        Quick Start
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<li class="toctree-l1  current">
+  <a href="/node-mongodb-native/3.1/tutorials/main/" class="">
+      <i class='fa fa-thumb-tack'></i>
+      <span>Tutorials</span>
+      <span class="menu-arrow fa fa-angle-down"></span>
+  </a>
+    <ul  class="current">
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.1/tutorials/connect/" class="">
+      <i class='fa'></i>
+      <span>Connect to MongoDB</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/tutorials/connect/authenticating/">
+        <i class='fa'></i>
+        Authentication
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/tutorials/connect/ssl/">
+        <i class='fa'></i>
+        SSL Settings
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/collations/">
+        <i class='fa'></i>
+        Collations
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/collections/">
+        <i class='fa'></i>
+        Collections
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/create-indexes/">
+        <i class='fa'></i>
+        Create Indexes
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/projections/">
+        <i class='fa'></i>
+        Projections
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/aggregation/">
+        <i class='fa'></i>
+        Aggregation
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/text-search/">
+        <i class='fa'></i>
+        Text Search
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/geospatial-search/">
+        <i class='fa'></i>
+        Geospatial Search
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/tutorials/commands/">
+        <i class='fa'></i>
+        Database Commands
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.1/tutorials/gridfs/" class="">
+      <i class='fa'></i>
+      <span>GridFS</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/tutorials/gridfs/streaming/">
+        <i class='fa'></i>
+        GridFS API
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/tutorials/gridfs/gridstore/">
+        <i class='fa'></i>
+        Legacy GridStore
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/3.1/reference/main/" class="">
+      <i class='fa fa-book'></i>
+      <span>Reference</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.1/reference/connecting/" class="">
+      <i class='fa'></i>
+      <span>Connection Options</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/reference/connecting/connection-settings/">
+        <i class='fa'></i>
+        Connection Settings
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.1/reference/ecmascriptnext/" class="">
+      <i class='fa'></i>
+      <span>ECMAScript Next</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/reference/ecmascriptnext/connecting/">
+        <i class='fa'></i>
+        Connecting
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/reference/ecmascriptnext/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/3.1/reference/management/" class="">
+      <i class='fa'></i>
+      <span>Management</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/reference/management/logging/">
+        <i class='fa'></i>
+        Logging
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/reference/management/apm/">
+        <i class='fa'></i>
+        APM
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/3.1/reference/management/sdam-monitoring/">
+        <i class='fa'></i>
+        Topology Monitoring
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/reference/pool/">
+        <i class='fa'></i>
+        Pool Design
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/reference/faq/">
+        <i class='fa'></i>
+        Frequently Asked Questions
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/3.1/upgrade-migration/main/" class="">
+      <i class='fa fa-cog'></i>
+      <span>Upgrade Guide</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/3.1/upgrade-migration/upgrading/">
+        <i class='fa fa-wrench'></i>
+        Upgrading to 2.x
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.1/api">
+        <i class='fa fa-file-text-o'></i>
+        API Documentation
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://github.com/mongodb/node-mongodb-native">
+        <i class='fa fa-github'></i>
+        Source Code
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/3.1/issues-help/">
+        <i class='fa fa-life-ring'></i>
+        Issues &amp; Help
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge">
+        <img src='https://badges.gitter.im/Join Chat.svg'/>
+        
+    </a>
+  </li>
+
+
+          
+        </ul>
+        
+    </div>
+  </div>
+  
+</aside>
+
+<div class="option-popup closed hidden" id="optionsVersionsPopup">
+<div class="option-header">
+  <i class="fa fa-gear"></i>
+  <span>OPTIONS</span>
+  <i class="fa fa-angle-up pull-right"></i>
+</div>
+<div class="option-body">
+  <ul>
+      
+      <li>
+        <label>Version</label>
+        <div class="btn-group btn-group-xs pull-right">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            Select Version <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu" id="optionsVersionsMenu">
+          </ul>
+        </div>
+      </li>
+
+   
+
+
+    
+
+  </ul>
+</div>
+</div>
+
+
+
+      
+      <section id="main-content" class="content">
+          <section class="main-column pull-left">
+            <div class="document">
+              <div class="documentwrapper">
+                <div class="bodywrapper">
+                  <div class="body">
+                    <p><div class="admonition note">
+                    <h5 class="admonition-title">Survey</h5>
+                    <p>Please help us improve by answering a few questions at our
+						<a href="https://www.research.net/r/BPJSGJC"><strong> user survey</strong></a>.
+                    </p>
+                    </div>
+                    </p>
+
+
+   
+<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.0.0/docs/reference/content/tutorials/crud.md" target="_blank" title="Edit tutorials/crud.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+
+
+
+
+
+
+
+
+
+
+<div class="bc">
+<ul>
+  
+  
+  
+  
+  
+  <li><a href="/node-mongodb-native/3.1/tutorials/main/">Tutorials</a> <i class="fa fa-angle-right"></i></li>
+  <li>CRUD Operations</li>
+</ul>
+</div>
+
+
+
+
+<h1 id="crud-operations">CRUD Operations</h1>
+
+<p>For a walkthrough of the main CRUD operations please refer to the
+<a href="/node-mongodb-native/3.1/quick-start/quick-start/">Quick Start guide</a>.</p>
+
+<p>Driver CRUD operations are defined as the operations performed to create, read, update, and delete documents.
+This tutorial covers both the basic CRUD methods and the specialized <code>findAndModify</code> based methods
+as well as the new Bulk API methods for efficient bulk write operations.</p>
+
+<div class="pull-right">
+  <input type="checkbox" checked="" class="distroPicker" data-toggle="toggle" data-on="ES2015" data-off="ES2017" data-offstyle="success">
+</div>
+
+<h2 id="write-methods">Write Methods</h2>
+
+<p>Write methods are divided into those which insert documents into a collection, those which update
+documents in a collection, and those which remove documents from a collection.</p>
+
+<h3 id="insert-documents">Insert Documents</h3>
+
+<p>The <code>insertOne</code> and <code>insertMany</code> methods exist on the <code>Collection</code> class and are used to insert documents into MongoDB.</p>
+
+<section class="javascript5"><pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+
+// Database Name
+const dbName = 'myproject';
+
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, client) {
+  assert.equal(null, err);
+  console.log("Connected correctly to server");
+
+  const db = client.db(dbName);
+
+  // Insert a single document
+  db.collection('inserts').insertOne({a:1}, function(err, r) {
+    assert.equal(null, err);
+    assert.equal(1, r.insertedCount);
+
+    // Insert multiple documents
+    db.collection('inserts').insertMany([{a:2}, {a:3}], function(err, r) {
+      assert.equal(null, err);
+      assert.equal(2, r.insertedCount);
+
+      client.close();
+    });
+  });
+});
+
+</code></pre></section>
+<section class="javascript6 hidden"><pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+// Database name
+const dbName = 'myproject';
+
+(async function() {
+  try {
+    const client = await MongoClient.connect(url);
+    console.log("Connected correctly to server");
+    const db = client.db(dbName);
+
+    // Insert a single document
+    let r = await db.collection('inserts').insertOne({a:1});
+    assert.equal(1, r.insertedCount);
+
+    // Insert multiple documents
+    var r = await db.collection('inserts').insertMany([{a:2}, {a:3}]);
+    assert.equal(2, r.insertedCount);
+
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
+</code></pre></section>
+
+<p>The first <code>insert</code> inserts a single document into the <em>inserts</em> collection. Notice that there&rsquo;s no need to
+explicitly create a new <em>inserts</em> collection, as the server will create it implicitly when the first document
+is inserted. The method <code>db.createIndex</code> is only necessary when creating non-standard collections,
+such as <a href="https://docs.mongodb.org/manual/core/capped-collections/">capped collections</a> or where parameters other
+than the defaults are necessary.</p>
+
+<p>The <code>insertOne</code> and <code>insertMany</code> methods also accept a second argument which can be an options object. This object can have the following fields:</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>w</code></td>
+<td align="left">{Number/String, &gt; -1 || &lsquo;majority&rsquo;}</td>
+<td align="left">the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</td>
+</tr>
+
+<tr>
+<td align="left"><code>wtimeout</code></td>
+<td align="left">{Number, 0}</td>
+<td align="left">set the timeout for waiting for write concern to finish (combines with w option).</td>
+</tr>
+
+<tr>
+<td align="left"><code>j</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">write waits for journal sync.</td>
+</tr>
+
+<tr>
+<td align="left"><code>serializeFunctions</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">serialize functions on an object to mongodb, by default the driver does not serialize any functions on the passed in documents.</td>
+</tr>
+
+<tr>
+<td align="left"><code>forceServerObjectId</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">Force server to assign _id values instead of driver.</td>
+</tr>
+</tbody>
+</table>
+
+<p>The following example shows how to serialize a passed-in function when writing to a
+<a href="https://docs.mongodb.org/manual/core/replica-set-members/">replica set</a>.</p>
+
+<section class="javascript5"><pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+
+// Database Name
+const dbName = 'myproject';
+
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, client) {
+  assert.equal(null, err);
+  console.log("Connected correctly to server");
+
+  const db = client.db(dbName);
+
+  // Insert a single document
+  db.collection('inserts').insertOne({
+        a:1
+      , b: function() { return 'hello'; }
+    }, {
+        w: 'majority'
+      , wtimeout: 10000
+      , serializeFunctions: true
+    }, function(err, r) {
+    assert.equal(null, err);
+    assert.equal(1, r.insertedCount);
+    client.close();
+  });
+});
+</code></pre></section>
+<section class="javascript6 hidden"><pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+// Database name
+const dbName = 'myproject';
+
+(async function() {
+  try {
+    const client = await MongoClient.connect(url);
+    console.log("Connected correctly to server");
+    const db = client.db(dbName);
+
+    // Insert a single document
+    const r = await db.collection('inserts').insertOne({
+          a:1
+        , b: function() { return 'hello'; }
+      }, {
+          w: 'majority'
+        , wtimeout: 10000
+        , serializeFunctions: true
+        , forceServerObjectId: true
+      });
+
+    assert.equal(1, r.insertedCount);
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
+</code></pre></section>
+
+<p><a name='specify-data-type'></a></p>
+
+<h4 id="specify-a-data-type">Specify a Data Type</h4>
+
+<p>The following example specifies a numerical data type
+when inserting documents with the <code>insertMany</code> method.</p>
+
+<div class="admonition note">
+<h5 class="admonition-title">Note</h5>
+<p>The Decimal128 data type requires MongoDB server version 3.4 or higher.</p>
+
+</div>
+
+
+<section class="javascript5"><pre><code class="hljs">
+const Long = require('mongodb').Long;
+const Decimal = require('mongodb').Decimal128;
+
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+
+// Database Name
+const dbName = 'myproject';
+
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, client) {
+  assert.equal(null, err);
+  console.log("Connected correctly to server");
+
+  const db = client.db(dbName);
+
+  const longValue = Long(1787);
+  const decimalValue = Decimal.fromString("27.8892836");
+
+  // Insert multiple documents
+  db.collection('numbers').insertMany([ { a : longValue }, { b : decimalValue } ], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(2, r.insertedCount);
+    client.close();
+  });
+});
+
+</code></pre></section>
+<section class="javascript6 hidden"><pre><code class="hljs">
+const Long = require('mongodb').Long;
+const Decimal = require('mongodb').Decimal128;
+
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+// Database name
+const dbName = 'myproject';
+
+(async function() {
+  try {
+    const client = await MongoClient.connect(url);
+    console.log("Connected correctly to server");
+    const db = client.db(dbName);
+
+    const longValue = Long(1787);
+    const decimalValue = Decimal.fromString("27.8892836");
+
+    // Insert multiple documents
+    const r = await db.collection('numbers').insertMany([ { a : longValue }, { b : decimalValue } ]);
+    assert.equal(2, r.insertedCount);
+
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
+</code></pre></section>
+
+<p>The above operation inserts the following documents into the
+<code>numbers</code> collection:</p>
+
+<pre><code class="language-js">{ &quot;_id&quot; : ObjectId(&quot;57d6f63a98724c65a5d7bd7a&quot;), &quot;a&quot; : NumberLong(1787) }
+{ &quot;_id&quot; : ObjectId(&quot;57d6f63a98724c65a5d7bd7b&quot;), &quot;b&quot; : NumberDecimal(&quot;27.8892836&quot;) }
+</code></pre>
+
+<h3 id="updating-documents">Updating Documents</h3>
+
+<p>The <code>updateOne</code> and <code>updateMany</code> methods exist on the <code>Collection</code> class and are used to update and upsert documents.</p>
+
+<section class="javascript5"><pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+
+// Database Name
+const dbName = 'myproject';
+
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, client) {
+  assert.equal(null, err);
+  console.log("Connected correctly to server");
+
+  const db = client.db(dbName);
+
+  const col = db.collection('updates');
+  // Insert a single document
+  col.insertMany([{a:1}, {a:2}, {a:2}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.insertedCount);
+
+    // Update a single document
+    col.updateOne({a:1}, {$set: {b: 1}}, function(err, r) {
+      assert.equal(null, err);
+      assert.equal(1, r.matchedCount);
+      assert.equal(1, r.modifiedCount);
+
+      // Update multiple documents
+      col.updateMany({a:2}, {$set: {b: 1}}, function(err, r) {
+        assert.equal(null, err);
+        assert.equal(2, r.matchedCount);
+        assert.equal(2, r.modifiedCount);
+
+        // Upsert a single document
+        col.updateOne({a:3}, {$set: {b: 1}}, {
+          upsert: true
+        }, function(err, r) {
+          assert.equal(null, err);
+          assert.equal(0, r.matchedCount);
+          assert.equal(1, r.upsertedCount);
+          client.close();
+        });
+      });
+    });
+  });
+});
+</code></pre></section>
+<section class="javascript6 hidden"><pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+// Database name
+const dbName = 'myproject';
+
+(async function() {
+  try {
+    const client = await MongoClient.connect(url);
+    console.log("Connected correctly to server");
+    const db = client.db(dbName);
+
+    // Get the updates collection
+    const col = db.collection('updates');
+    // Insert a single document
+    let r = await col.insertMany([{a:1}, {a:2}, {a:2}]);
+    assert.equal(3, r.insertedCount);
+
+    // Update a single document
+    r = await col.updateOne({a:1}, {$set: {b: 1}});
+    assert.equal(1, r.matchedCount);
+    assert.equal(1, r.modifiedCount);
+
+    // Update multiple documents
+    r = await col.updateMany({a:2}, {$set: {b: 1}});
+    assert.equal(2, r.matchedCount);
+    assert.equal(2, r.modifiedCount);
+
+    // Upsert a single document
+    r = await col.updateOne({a:3}, {$set: {b: 1}}, {
+      upsert: true
+    });
+    assert.equal(0, r.matchedCount);
+    assert.equal(1, r.upsertedCount);
+
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
+</code></pre></section>
+
+<p>The <code>update</code> method also accepts a third argument which can be an options object. This object can have the following fields:</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>w</code></td>
+<td align="left">{Number/String, &gt; -1 || &lsquo;majority&rsquo;}</td>
+<td align="left">the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</td>
+</tr>
+
+<tr>
+<td align="left"><code>wtimeout</code></td>
+<td align="left">{Number, 0}</td>
+<td align="left">set the timeout for waiting for write concern to finish (combines with w option).</td>
+</tr>
+
+<tr>
+<td align="left"><code>j</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">write waits for journal sync.</td>
+</tr>
+
+<tr>
+<td align="left"><code>multi</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">Update one/all documents with operation.</td>
+</tr>
+
+<tr>
+<td align="left"><code>upsert</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">Update operation is an upsert.</td>
+</tr>
+</tbody>
+</table>
+
+<p>Just as for <code>insert</code>, the <code>update</code> method allows you to specify a per operation write concern using the <code>w</code>, <code>wtimeout</code> and <code>fsync</code> parameters.</p>
+
+<h3 id="removing-documents">Removing Documents</h3>
+
+<p>The <code>deleteOne</code> and <code>deleteMany</code> methods exist on the <code>Collection</code> class and are used to remove documents from MongoDB.</p>
+
+<section class="javascript5"><pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+
+// Database Name
+const dbName = 'myproject';
+
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, client) {
+  assert.equal(null, err);
+  console.log("Connected correctly to server");
+
+  const db = client.db(dbName);
+
+  const col = db.collection('removes');
+  // Insert a single document
+  col.insertMany([{a:1}, {a:2}, {a:2}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.insertedCount);
+
+    // Remove a single document
+    col.deleteOne({a:1}, function(err, r) {
+      assert.equal(null, err);
+      assert.equal(1, r.deletedCount);
+
+      // Update multiple documents
+      col.deleteMany({a:2}, function(err, r) {
+        assert.equal(null, err);
+        assert.equal(2, r.deletedCount);
+        client.close();
+      });
+    });
+  });
+});
+</code></pre></section>
+<section class="javascript6 hidden"><pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+// Database name
+const dbName = 'myproject';
+
+(async function() {
+  try {
+    const client = await MongoClient.connect(url);
+    console.log("Connected correctly to server");
+    const db = client.db(dbName);
+
+    // Get the removes collection
+    const col = db.collection('removes');
+    // Insert a single document
+    let r = await col.insertMany([{a:1}, {a:2}, {a:2}]);
+    assert.equal(3, r.insertedCount);
+
+    // Remove a single document
+    r = await col.deleteOne({a:1});
+    assert.equal(1, r.deletedCount);
+
+    // Update multiple documents
+    r = await col.deleteMany({a:2});
+    assert.equal(2, r.deletedCount);
+
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
+</code></pre></section>
+
+<p>The <code>deleteOne</code> and <code>deleteMany</code> methods also accept a second argument which can be an options object. This object can have the following fields:</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>w</code></td>
+<td align="left">{Number/String, &gt; -1 || &lsquo;majority&rsquo;}</td>
+<td align="left">the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</td>
+</tr>
+
+<tr>
+<td align="left"><code>wtimeout</code></td>
+<td align="left">{Number, 0}</td>
+<td align="left">set the timeout for waiting for write concern to finish (combines with w option).</td>
+</tr>
+
+<tr>
+<td align="left"><code>j</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">write waits for journal sync.</td>
+</tr>
+
+<tr>
+<td align="left"><code>single</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">Removes the first document found.</td>
+</tr>
+</tbody>
+</table>
+
+<p>Just as for <code>updateOne/updateMany</code> and <code>insertOne/insertMany</code>, the <code>deleteOne/deleteMany</code> method allows you to specify a per operation write concern using the <code>w</code>, <code>wtimeout</code> and <code>fsync</code> parameters.</p>
+
+<h3 id="findoneandupdate-findoneanddelete-and-findoneandreplace">findOneAndUpdate, findOneAndDelete, and findOneAndReplace</h3>
+
+<p>The three methods <code>findOneAndUpdate</code>, <code>findOneAndDelete</code> and <code>findOneAndReplace</code> are special commands which
+allow the user to update or upsert a document and have the modified or existing document returned. When using these
+methods, the operation takes a write lock for the duration of the operation in order to ensure the modification is
+<a href="https://docs.mongodb.org/manual/core/write-operations-atomicity/">atomic</a>.</p>
+
+<section class="javascript5"><pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+
+// Database Name
+const dbName = 'myproject';
+
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, client) {
+  assert.equal(null, err);
+  console.log("Connected correctly to server");
+
+  const db = client.db(dbName);
+
+  const col = db.collection('findAndModify');
+  // Insert a single document
+  col.insert([{a:1}, {a:2}, {a:2}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.result.n);
+
+    // Modify and return the modified document
+    col.findOneAndUpdate({a:1}, {$set: {b: 1}}, {
+        returnOriginal: false
+      , sort: [[a,1]]
+      , upsert: true
+    }, function(err, r) {
+      assert.equal(null, err);
+      assert.equal(1, r.value.b);
+
+      // Remove and return a document
+      col.findOneAndDelete({a:2}, function(err, r) {
+        assert.equal(null, err);
+        assert.ok(r.value.b == null);
+        client.close();
+      });
+    });
+  });
+});
+</code></pre></section>
+<section class="javascript6 hidden"><pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+// Database name
+const dbName = 'myproject';
+
+(async function() {
+  try {
+    const client = await MongoClient.connect(url);
+    console.log("Connected correctly to server");
+    const db = client.db(dbName);
+
+    // Get the findAndModify collection
+    const col = db.collection('findAndModify');
+    // Insert a single document
+    let r = await col.insert([{a:1}, {a:2}, {a:2}]);
+    assert.equal(3, r.result.n);
+
+    // Modify and return the modified document
+    r = await col.findOneAndUpdate({a:1}, {$set: {b: 1}}, {
+        returnOriginal: false
+      , sort: [[a,1]]
+      , upsert: true
+    });
+    assert.equal(1, r.value.b);
+
+    // Remove and return a document
+    r = await col.findOneAndDelete({a:2});
+    assert.ok(r.value.b == null);
+
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
+</code></pre></section>
+
+<p>The <code>findOneAndUpdate</code> method also accepts a third argument which can be an options object. This object can have the following fields:</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>w</code></td>
+<td align="left">{Number/String, &gt; -1 || &lsquo;majority&rsquo;}</td>
+<td align="left">the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</td>
+</tr>
+
+<tr>
+<td align="left"><code>wtimeout</code></td>
+<td align="left">{Number, 0}</td>
+<td align="left">set the timeout for waiting for write concern to finish (combines with w option).</td>
+</tr>
+
+<tr>
+<td align="left"><code>j</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">write waits for journal sync.</td>
+</tr>
+
+<tr>
+<td align="left"><code>upsert</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">Perform an upsert operation.</td>
+</tr>
+
+<tr>
+<td align="left"><code>sort</code></td>
+<td align="left">(Object, default:null)</td>
+<td align="left">Sort for find operation.</td>
+</tr>
+
+<tr>
+<td align="left"><code>projection</code></td>
+<td align="left">(Object, default:null)</td>
+<td align="left">Projection for returned result</td>
+</tr>
+
+<tr>
+<td align="left"><code>returnOriginal</code></td>
+<td align="left">(Boolean, default:true)</td>
+<td align="left">Set to false if you want to return the modified object rather than the original. Ignored for remove.</td>
+</tr>
+</tbody>
+</table>
+
+<p>The <code>findOneAndDelete</code> function is designed to help remove a document.</p>
+
+<section class="javascript5"><pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+
+// Database Name
+const dbName = 'myproject';
+
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, client) {
+  assert.equal(null, err);
+  console.log("Connected correctly to server");
+
+  const db = client.db(dbName);
+
+  const col = db.collection('findAndModify');
+  // Insert a single document
+  col.insert([{a:1}, {a:2}, {a:2}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.result.n);
+
+    // Remove a document from MongoDB and return it
+    col.findOneAndDelete({a:1}, {
+        sort: [[a,1]]
+      }
+      , function(err, r) {
+        assert.equal(null, err);
+        assert.ok(r.value.b == null);
+        client.close();
+    });
+  });
+});
+</code></pre></section>
+<section class="javascript6 hidden"><pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+// Database name
+const dbName = 'myproject';
+
+(async function() {
+  try {
+    const client = await MongoClient.connect(url);
+    console.log("Connected correctly to server");
+    const db = client.db(dbName);
+
+    // Get the findAndModify collection
+    const col = db.collection('findAndModify');
+    // Insert a single document
+    let r = await col.insert([{a:1}, {a:2}, {a:2}]);
+    assert.equal(3, r.result.n);
+
+    // Remove a document from MongoDB and return it
+    r = await col.findOneAndDelete({a:1}, {
+        sort: [[a,1]]
+      });
+    assert.ok(r.value.b == null);
+
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
+</code></pre></section>
+
+<p>Like <code>findOneAndUpdate</code>, it allows an object of options to be passed in which can have the following fields:</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>w</code></td>
+<td align="left">{Number/String, &gt; -1 || &lsquo;majority&rsquo;}</td>
+<td align="left">the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</td>
+</tr>
+
+<tr>
+<td align="left"><code>wtimeout</code></td>
+<td align="left">{Number, 0}</td>
+<td align="left">set the timeout for waiting for write concern to finish (combines with w option).</td>
+</tr>
+
+<tr>
+<td align="left"><code>j</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">write waits for journal sync.</td>
+</tr>
+
+<tr>
+<td align="left"><code>sort</code></td>
+<td align="left">(Object, default:null)</td>
+<td align="left">Sort for find operation.</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="bulkwrite">BulkWrite</h3>
+
+<p>The <code>bulkWrite</code> function allows a simple set of bulk operations to run in a non-fluent way, in comparison to the bulk API discussed next.</p>
+
+<section class="javascript5"><pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+
+// Database Name
+const dbName = 'myproject';
+
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, client) {
+  assert.equal(null, err);
+  console.log("Connected correctly to server");
+
+  const db = client.db(dbName);
+
+  // Get the collection
+  const col = db.collection('bulk_write');
+  col.bulkWrite([
+      { insertOne: { document: { a: 1 } } }
+    , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+    , { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+    , { deleteOne: { filter: {c:1} } }
+    , { deleteMany: { filter: {c:1} } }
+    , { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}]
+  , {ordered:true, w:1}, function(err, r) {
+    assert.equal(null, err);
+    assert.equal(1, r.insertedCount);
+    assert.equal(1, Object.keys(r.insertedIds).length);
+    assert.equal(1, r.matchedCount);
+    assert.equal(0, r.modifiedCount);
+    assert.equal(0, r.deletedCount);
+    assert.equal(2, r.upsertedCount);
+    assert.equal(2, Object.keys(r.upsertedIds).length);
+
+    // Ordered bulk operation
+    client.close();
+  });
+});
+</code></pre></section>
+<section class="javascript6 hidden"><pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+// Database name
+const dbName = 'myproject';
+
+(async function() {
+  try {
+    const client = await MongoClient.connect(url);
+    console.log("Connected correctly to server");
+    const db = client.db(dbName);
+
+    // Get the collection
+    const col = db.collection('bulk_write');
+    const r = await col.bulkWrite([
+        { insertOne: { document: { a: 1 } } }
+      , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+      , { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+      , { deleteOne: { filter: {c:1} } }
+      , { deleteMany: { filter: {c:1} } }
+      , { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}]
+    , {ordered:true, w:1});
+    assert.equal(1, r.insertedCount);
+    assert.equal(1, Object.keys(r.insertedIds).length);
+    assert.equal(1, r.matchedCount);
+    assert.equal(0, r.modifiedCount);
+    assert.equal(0, r.deletedCount);
+    assert.equal(2, r.upsertedCount);
+    assert.equal(2, Object.keys(r.upsertedIds).length);
+
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
+</code></pre></section>
+
+<p>The <code>bulkWrite</code> function takes an array of operations which can be objects of either <code>insertOne</code>, <code>updateOne</code>, <code>updateMany</code>, <code>deleteOne</code>, <code>deleteMany</code>, or <code>replaceOne</code>. It also takes a second parameter which takes the following options:</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>ordered</code></td>
+<td align="left">(Boolean, default:true)</td>
+<td align="left">Execute in order or out of order.</td>
+</tr>
+
+<tr>
+<td align="left"><code>w</code></td>
+<td align="left">{Number/String, &gt; -1 || &lsquo;majority&rsquo;}</td>
+<td align="left">the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</td>
+</tr>
+
+<tr>
+<td align="left"><code>wtimeout</code></td>
+<td align="left">{Number, 0}</td>
+<td align="left">set the timeout for waiting for write concern to finish (combines with w option).</td>
+</tr>
+
+<tr>
+<td align="left"><code>j</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">write waits for journal sync.</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="bulk-write-operations">Bulk Write Operations</h2>
+
+<p>Bulk write operations make it easy to write groups of operations together to MongoDB. There are some caveats and to get the best performance you need to be running against MongoDB version 2.6 or higher, which supports the new write commands. Bulk operations are split into <em>ordered</em> and <em>unordered</em> bulk operations. An <em>ordered</em> bulk operation guarantees the order of execution of writes while the <em>unordered</em> bulk operation makes no assumptions about the order of execution. In the Node.js driver the <em>unordered</em> bulk operations will group operations according to type and write them in parallel.</p>
+
+<section class="javascript5"><pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+
+// Database Name
+const dbName = 'myproject';
+
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, client) {
+  assert.equal(null, err);
+  console.log("Connected correctly to server");
+
+  const db = client.db(dbName);
+
+  const col = db.collection('bulkops');
+  // Create ordered bulk, for unordered initializeUnorderedBulkOp()
+  var bulk = col.initializeOrderedBulkOp();
+  // Insert 10 documents
+  for(var i = 0; i < 10; i++) {
+    bulk.insert({a: i});
+  }
+
+  // Next perform some upserts
+  for(var i = 0; i < 10; i++) {
+    bulk.find({b:i}).upsert().updateOne({b:1});
+  }
+
+  // Finally perform a remove operation
+  bulk.find({b:1}).deleteOne();
+
+  // Execute the bulk with a journal write concern
+  bulk.execute(function(err, result) {
+    assert.equal(null, err);
+    client.close();
+  });
+});
+</code></pre></section>
+<section class="javascript6 hidden"><pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+// Database name
+const dbName = 'myproject';
+
+(async function() {
+  try {
+    const client = await MongoClient.connect(url);
+    console.log("Connected correctly to server");
+    const db = client.db(dbName);
+
+    // Get the collection
+    const col = db.collection('bulkops');
+    // Create ordered bulk, for unordered initializeUnorderedBulkOp()
+    const bulk = col.initializeOrderedBulkOp();
+    // Insert 10 documents
+    for(let i = 0; i < 10; i++) {
+      bulk.insert({a: i});
+    }
+
+    // Next perform some upserts
+    for(let i = 0; i < 10; i++) {
+      bulk.find({b:i}).upsert().updateOne({b:1});
+    }
+
+    // Finally perform a remove operation
+    bulk.find({b:1}).deleteOne();
+
+    // Execute the bulk with a journal write concern
+    const result = await bulk.execute();
+
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
+</code></pre></section>
+
+<p>The Bulk API handles all the splitting of operations into multiple writes and also emulates 2.6 and higher write commands for 2.4 and earlier servers.</p>
+
+<p>There are some important things to keep in mind when using the bulk API and especially the <em>ordered</em> bulk API mode. The write commands are single operation type. That means they can only do insert/update and remove. If you f.ex do the following combination of operations:</p>
+
+<pre><code>Insert {a:1}
+Update {a:1} to {a:1, b:1}
+Insert {a:2}
+Remove {b:1}
+Insert {a:3}
+</code></pre>
+
+<p>This will result in the driver issuing four write commands to the server:</p>
+
+<pre><code>Insert Command with {a:1}
+Update Command {a:1} to {a:1, b:1}
+Insert Command with {a:2}
+Remove Command with {b:1}
+Insert Command with {a:3}
+</code></pre>
+
+<p>If you instead organize your <em>ordered</em> in the following manner:</p>
+
+<pre><code>Insert {a:1}
+Insert {a:2}
+Insert {a:3}
+Update {a:1} to {a:1, b:1}
+Remove {b:1}
+</code></pre>
+
+<p>The number of write commands issued by the driver will be:</p>
+
+<pre><code>Insert Command with {a:1}, {a:2}, {a:3}
+Update Command {a:1} to {a:1, b:1}
+Remove Command with {b:1}
+</code></pre>
+
+<p>Attention to the order of operations results in more efficient and faster bulk write operation.</p>
+
+<p>For <em>unordered</em> bulk operations this is not important, as the driver sorts operations by type and executes them in parallel.</p>
+
+<h2 id="read-methods">Read Methods</h2>
+
+<p>The main method for querying the database is the <code>find</code> method.</p>
+
+<p><code>find</code> returns a cursor which allows the user to operate on the data. The <em>cursor</em> also implements the Node.js 0.10.x or higher stream interface, allowing the user to pipe the results to other streams.</p>
+
+<p>The following example materializes all the documents from a query using the <code>toArray</code> method, but limits the number of returned results to two documents.</p>
+
+<section class="javascript5"><pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+
+// Database Name
+const dbName = 'myproject';
+
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, client) {
+  assert.equal(null, err);
+  console.log("Connected correctly to server");
+
+  const db = client.db(dbName);
+
+  const col = db.collection('find');
+  // Insert a single document
+  col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.insertedCount);
+
+    // Get first two documents that match the query
+    col.find({a:1}).limit(2).toArray(function(err, docs) {
+      assert.equal(null, err);
+      assert.equal(2, docs.length);
+      client.close();
+    });
+  });
+});
+</code></pre></section>
+<section class="javascript6 hidden"><pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+// Database name
+const dbName = 'myproject';
+
+(async function() {
+  try {
+    const client = await MongoClient.connect(url);
+    console.log("Connected correctly to server");
+    const db = client.db(dbName);
+
+    // Get the collection
+    const col = db.collection('find');
+    // Insert a single document
+    const r = await col.insertMany([{a:1}, {a:1}, {a:1}]);
+    assert.equal(3, r.insertedCount);
+
+    // Get first two documents that match the query
+    const docs = await col.find({a:1}).limit(2).toArray();
+    assert.equal(2, docs.length);
+
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
+</code></pre></section>
+
+<p>The cursor returned by the <code>find</code> method has several methods that allow for chaining of options for a query. Once the query is ready to be executed you can retrieve the documents using the <code>next</code>, <code>each</code> and <code>toArray</code> methods. If the query returns many documents it&rsquo;s preferable to use the <code>next</code> or <code>each</code> methods, as the <code>toArray</code> method will materialize all the documents into memory before calling the callback function, potentially using a lot of memory if the query returns many documents.</p>
+
+<pre><code class="language-js">collection.find({}).project({a:1})                             // Create a projection of field a
+collection.find({}).skip(1).limit(10)                          // Skip 1 and limit 10
+collection.find({}).batchSize(5)                               // Set batchSize on cursor to 5
+collection.find({}).filter({a:1})                              // Set query on the cursor
+collection.find({}).comment('add a comment')                   // Add a comment to the query, allowing to correlate queries
+collection.find({}).addCursorFlag('tailable', true)            // Set cursor as tailable
+collection.find({}).addCursorFlag('oplogReplay', true)         // Set cursor as oplogReplay
+collection.find({}).addCursorFlag('noCursorTimeout', true)     // Set cursor as noCursorTimeout
+collection.find({}).addCursorFlag('awaitData', true)           // Set cursor as awaitData
+collection.find({}).addCursorFlag('exhaust', true)             // Set cursor as exhaust
+collection.find({}).addCursorFlag('partial', true)             // Set cursor as partial
+collection.find({}).addQueryModifier('$orderby', {a:1})        // Set $orderby {a:1}
+collection.find({}).max(10)                                    // Set the cursor max
+collection.find({}).maxTimeMS(1000)                            // Set the cursor maxTimeMS
+collection.find({}).min(100)                                   // Set the cursor min
+collection.find({}).returnKey(10)                              // Set the cursor returnKey
+collection.find({}).setReadPreference(ReadPreference.PRIMARY)  // Set the cursor readPreference
+collection.find({}).showRecordId(true)                         // Set the cursor showRecordId
+collection.find({}).sort([['a', 1]])                           // Sets the sort order of the cursor query
+collection.find({}).hint('a_1')                                // Set the cursor hint
+</code></pre>
+
+<p>All options are chainable, so you can combine settings in the following way:</p>
+
+<pre><code class="language-js">collection.find({}).maxTimeMS(1000).skip(1).toArray(..)
+</code></pre>
+
+<p>More information can be found in the <a href="/node-mongodb-native/2.0/api/Cursor.html">Cursor API documentation</a>.</p>
+
+<p>The following example uses the <code>next</code> method.</p>
+
+<section class="javascript5"><pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+
+// Database Name
+const dbName = 'myproject';
+
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, client) {
+  assert.equal(null, err);
+  console.log("Connected correctly to server");
+
+  const db = client.db(dbName);
+
+  const col = db.collection('find');
+  // Insert a single document
+  col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.insertedCount);
+
+    // Get first documents from cursor
+    col.find({a:1}).limit(2).next(function(err, doc) {
+      assert.equal(null, err);
+      assert.ok(doc != null);
+      client.close();
+    });
+  });
+});
+</code></pre></section>
+<section class="javascript6 hidden">
+In ECMAScript 6, The new `generator` functions allow for what is arguably a
+much cleaner and easier way to read iteration code.
+
+<pre><code class="hljs">
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+// Database name
+const dbName = 'myproject';
+
+(async function() {
+  try {
+    const client = await MongoClient.connect(url);
+    console.log("Connected correctly to server");
+    const db = client.db(dbName);
+
+    // Get the collection
+    const col = db.collection('find');
+    // Insert a single document
+    const r = await col.insertMany([{a:1}, {a:1}, {a:1}]);
+    assert.equal(3, r.insertedCount);
+
+    // Get the cursor
+    const cursor = col.find({a:1}).limit(2);
+
+    // Iterate over the cursor
+    while(await cursor.hasNext()) {
+      const doc = await cursor.next();
+      console.dir(doc);
+    }
+
+    // Close connection
+    client.close();
+  } catch(err) {
+    console.log(err.stack);
+  }
+})();
+</code></pre></section>
+
+<p>The <code>next</code> method allows the application to read one document at a time using callbacks.</p>
+
+<p>The following example uses the <code>each</code> method.</p>
+
+<pre><code class="language-js">const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+
+// Database Name
+const dbName = 'myproject';
+
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, client) {
+  assert.equal(null, err);
+  console.log("Connected correctly to server");
+
+  const db = client.db(dbName);
+
+  const col = db.collection('find');
+  // Insert a single document
+  col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.insertedCount);
+
+    // Get first documents from cursor using each
+    col.find({a:1}).limit(2).each(function(err, doc) {
+      if(doc) {
+        // Got a document
+      } else {
+        client.close();
+        return false;
+      }
+    });
+  });
+});
+</code></pre>
+
+<p>The <code>each</code> method calls the supplied callback until there are no more documents available that satisfy the query. Once the available documents are exhausted it will return <code>null</code> for the second parameter in the callback. If you wish to terminate the <code>each</code> early you should return false in your <code>each</code> callback. This will stop the cursor from returning documents.</p>
+
+
+
+
+
+
+<div id="btnv">
+  
+  <div class="pull-left">
+  <a class="navigation prev" href="/node-mongodb-native/3.1/tutorials/create-indexes/">
+      <i class="fa fa-long-arrow-left"> </i> Create Indexes
+  </a>
+  </div>
+  
+  
+  <div class="pull-right">
+  <a class="navigation next" href="/node-mongodb-native/3.1/tutorials/projections/">
+    Projections <i class="fa fa-long-arrow-right"> </i>
+  </a>
+  
+</div>
+</div>
+
+
+</div>
+<div class="right-column">
+<div class="wrapper">
+  
+  <div class="toc">
+    <span class="toc-header">On this page</span>
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#crud-operations">CRUD Operations</a>
+<ul>
+<li><a href="#write-methods">Write Methods</a>
+<ul>
+<li><a href="#insert-documents">Insert Documents</a>
+<ul>
+<li><a href="#specify-a-data-type">Specify a Data Type</a></li>
+</ul></li>
+<li><a href="#updating-documents">Updating Documents</a></li>
+<li><a href="#removing-documents">Removing Documents</a></li>
+<li><a href="#findoneandupdate-findoneanddelete-and-findoneandreplace">findOneAndUpdate, findOneAndDelete, and findOneAndReplace</a></li>
+<li><a href="#bulkwrite">BulkWrite</a></li>
+</ul></li>
+<li><a href="#bulk-write-operations">Bulk Write Operations</a></li>
+<li><a href="#read-methods">Read Methods</a></li>
+</ul></li>
+</ul>
+</nav>
+  </div>
+  
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+
+</section>
+
+
+<script type="text/javascript">
+  var DOCUMENTATION_OPTIONS = {
+   URL_ROOT:    "/node-mongodb-native/3.1",
+   VERSION:     "3.x",
+   COLLAPSE_INDEX: false,
+   FILE_SUFFIX: '.html',
+   HAS_SOURCE:  true
+  };
+</script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/js/jquery.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/lib/bootstrap.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/js/navbar.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/lib/highlight/highlight.pack.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/js/scripts.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/lib/bootstrap-toggle/bootstrap-toggle.min.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/js/java.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/3.1/js/toggle-switch.js"></script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-29229787-1', 'auto');
+  ga('send', 'pageview');
+</script>
+</body>
+</html>
+
