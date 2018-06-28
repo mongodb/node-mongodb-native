@@ -9,7 +9,7 @@
       "x": 22
     }
   ],
-  "minServerVersion": "4.1.0",
+  "minServerVersion": "3.99",
   "tests": [
     {
       "description": "InsertOne succeeds after connection failure",
@@ -636,6 +636,361 @@
             {
               "_id": 2,
               "x": 22
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after WriteConcernError InterruptedAtShutdown",
+      "clientOptions": {
+        "retryWrites": true
+      },
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "writeConcernError": {
+            "code": 11600,
+            "errmsg": "Replication is being shut down"
+          }
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after WriteConcernError InterruptedDueToReplStateChange",
+      "clientOptions": {
+        "retryWrites": true
+      },
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "writeConcernError": {
+            "code": 11602,
+            "errmsg": "Replication is being shut down"
+          }
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after WriteConcernError PrimarySteppedDown",
+      "clientOptions": {
+        "retryWrites": true
+      },
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "writeConcernError": {
+            "code": 189,
+            "errmsg": "Replication is being shut down"
+          }
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne succeeds after WriteConcernError ShutdownInProgress",
+      "clientOptions": {
+        "retryWrites": true
+      },
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "writeConcernError": {
+            "code": 91,
+            "errmsg": "Replication is being shut down"
+          }
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "result": {
+          "insertedId": 3
+        },
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne fails after multiple retryable writeConcernErrors",
+      "clientOptions": {
+        "retryWrites": true
+      },
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 2
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "writeConcernError": {
+            "code": 91,
+            "errmsg": "Replication is being shut down"
+          }
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "error": true,
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne fails after WriteConcernError Interrupted",
+      "clientOptions": {
+        "retryWrites": true
+      },
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "writeConcernError": {
+            "code": 11601,
+            "errmsg": "operation was interrupted"
+          }
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "error": true,
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
+            }
+          ]
+        }
+      }
+    },
+    {
+      "description": "InsertOne fails after WriteConcernError WriteConcernFailed",
+      "clientOptions": {
+        "retryWrites": true
+      },
+      "failPoint": {
+        "configureFailPoint": "failCommand",
+        "mode": {
+          "times": 1
+        },
+        "data": {
+          "failCommands": [
+            "insert"
+          ],
+          "writeConcernError": {
+            "code": 64,
+            "codeName": "WriteConcernFailed",
+            "errmsg": "waiting for replication timed out",
+            "errInfo": {
+              "wtimeout": true
+            }
+          }
+        }
+      },
+      "operation": {
+        "name": "insertOne",
+        "arguments": {
+          "document": {
+            "_id": 3,
+            "x": 33
+          }
+        }
+      },
+      "outcome": {
+        "error": true,
+        "collection": {
+          "data": [
+            {
+              "_id": 1,
+              "x": 11
+            },
+            {
+              "_id": 2,
+              "x": 22
+            },
+            {
+              "_id": 3,
+              "x": 33
             }
           ]
         }

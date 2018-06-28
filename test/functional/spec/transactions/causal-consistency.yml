@@ -1,3 +1,6 @@
+database_name: &database_name "transaction-tests"
+collection_name: &collection_name "test"
+
 data:
   - _id: 1
     count: 0
@@ -9,12 +12,13 @@ tests:
       # Update a document without a transaction.
       - &updateOne
         name: updateOne
+        object: collection
         arguments:
+          session: session0
           filter: {_id: 1}
           update:
             $inc: {count: 1}
           upsert: false
-          session: session0
         result:
           matchedCount: 1
           modifiedCount: 1
@@ -23,17 +27,15 @@ tests:
       # Casual consistency ensures that the transaction snapshot is causally
       # after the first updateOne.
       - name: startTransaction
-        arguments:
-          session: session0
+        object: session0
       - *updateOne
       - name: commitTransaction
-        arguments:
-          session: session0
+        object: session0
 
     expectations:
       - command_started_event:
           command:
-            update: test
+            update: *collection_name
             updates:
               - q: {_id: 1}
                 u: {$inc: {count: 1}}
@@ -43,15 +45,14 @@ tests:
             lsid: session0
             readConcern:
             txnNumber:
-            stmtId:
             startTransaction:
             autocommit:
             writeConcern:
           command_name: update
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
-            update: test
+            update: *collection_name
             updates:
               - q: {_id: 1}
                 u: {$inc: {count: 1}}
@@ -63,19 +64,17 @@ tests:
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 0
             startTransaction: true
             autocommit: false
             writeConcern:
           command_name: update
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
             commitTransaction: 1
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 1
             startTransaction:
             autocommit: false
             writeConcern:
@@ -97,48 +96,47 @@ tests:
     operations:
       # Insert a document without a transaction.
       - name: insertOne
+        object: collection
         arguments:
+          session: session0
           document:
             _id: 2
-          session: session0
         result:
           insertedId: 2
       - name: startTransaction
+        object: session0
+      - name: updateOne
+        object: collection
         arguments:
           session: session0
-      - name: updateOne
-        arguments:
           filter: {_id: 1}
           update:
             $inc: {count: 1}
           upsert: false
-          session: session0
         result:
           matchedCount: 1
           modifiedCount: 1
           upsertedCount: 0
       - name: commitTransaction
-        arguments:
-          session: session0
+        object: session0
 
     expectations:
       - command_started_event:
           command:
-            insert: test
+            insert: *collection_name
             documents:
               - _id: 2
             ordered: true
             readConcern:
             lsid: session0
             txnNumber:
-            stmtId:
             autocommit:
             writeConcern:
           command_name: insert
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
-            update: test
+            update: *collection_name
             updates:
               - q: {_id: 1}
                 u: {$inc: {count: 1}}
@@ -150,19 +148,17 @@ tests:
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 0
             startTransaction: true
             autocommit: false
             writeConcern:
           command_name: update
-          database_name: transaction-tests
+          database_name: *database_name
       - command_started_event:
           command:
             commitTransaction: 1
             lsid: session0
             txnNumber:
               $numberLong: "1"
-            stmtId: 1
             startTransaction:
             autocommit: false
             writeConcern:

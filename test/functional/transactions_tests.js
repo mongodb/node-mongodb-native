@@ -9,21 +9,18 @@ const chai = require('chai');
 const expect = chai.expect;
 const EJSON = require('mongodb-extjson');
 
-// mlaunch init --replicaset --arbiter  --name rs --hostname localhost --port 31000 --binarypath /Users/mbroadst/Downloads/mongodb-osx-x86_64-enterprise-3.7.3-411-g91e4266/bin
+// mlaunch init --replicaset --arbiter  --name rs --hostname localhost --port 31000 --setParameter enableTestCommands=1 --binarypath /Users/mbroadst/Downloads/mongodb-osx-x86_64-enterprise-4.1.0-158-g3d62f3c/bin
 
 chai.use(require('chai-subset'));
 chai.config.includeStack = true;
 chai.config.showDiff = true;
 chai.config.truncateThreshold = 0;
 
-const testContext = {
-  dbName: 'transaction-tests',
-  collectionName: 'test'
-};
-
 function isPlainObject(value) {
   return value !== null && typeof value === 'object' && Array.isArray(value) === false;
 }
+
+process.on('unhandledRejection', err => console.dir(err));
 
 /**
  * Finds placeholder values in a deeply nested object.
@@ -58,7 +55,7 @@ function findPlaceholders(value, parent) {
         result.push({ path: key, type: 'string' });
       }
 
-      // NOTE: fix this, it just passes the current example
+      // NOTE: fix this, it just passes the current examples
       delete parent[0][parent[1]];
     } else if (value[key] === '') {
       result.push({ path: key, type: 'string' });
@@ -79,7 +76,13 @@ function translateClientOptions(options) {
   return options;
 }
 
+// Main test runner
 describe('Transactions (spec)', function() {
+  const testContext = {
+    dbName: 'transaction-tests',
+    collectionName: 'test'
+  };
+
   const testSuites = fs
     .readdirSync(`${__dirname}/spec/transactions`)
     .filter(x => x.indexOf('.json') !== -1)
@@ -89,7 +92,7 @@ describe('Transactions (spec)', function() {
       })
     );
 
-  after(() => testContext.client.close());
+  after(() => testContext.sharedClient.close());
   before(function() {
     // create a shared client for admin tasks
     const config = this.configuration;
@@ -97,154 +100,216 @@ describe('Transactions (spec)', function() {
       config.replicasetName
     }`;
 
-    testContext.client = new MongoClient(testContext.url);
-    return testContext.client.connect();
+    testContext.sharedClient = new MongoClient(testContext.url);
+    return testContext.sharedClient.connect();
   });
 
   testSuites.forEach(testSuite => {
     describe(testSuite.name, {
       metadata: { requires: { topology: ['replicaset', 'mongos'], mongodb: '>=3.7.x' } },
       test: function() {
-        beforeEach(() => {
-          const db = testContext.client.db();
-          const coll = db.collection(testContext.collectionName);
-
-          return coll
-            .drop()
-            .catch(err => {
-              if (!err.message.match(/ns not found/)) throw err;
-            })
-            .then(() => db.createCollection(testContext.collectionName, { w: 'majority' }))
-            .then(() => {
-              if (testSuite.data && Array.isArray(testSuite.data) && testSuite.data.length > 0) {
-                return coll.insert(testSuite.data, { w: 'majority' });
-              }
-            });
-        });
+        beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
+        afterEach(() => cleanupAfterSuite(testContext));
 
         testSuite.tests.forEach(testData => {
-          afterEach(() => {
-            if (testContext.testClient) {
-              return testContext.testClient.close().then(() => {
-                delete testContext.testClient;
-              });
-            }
-          });
-
           const maybeSkipIt = testData.skipReason ? it.skip : it;
           maybeSkipIt(testData.description, function() {
-            const commandEvents = [];
-            const clientOptions = translateClientOptions(
-              Object.assign({ monitorCommands: true }, testData.clientOptions)
-            );
+            let testPromise = Promise.resolve();
 
-            return MongoClient.connect(testContext.url, clientOptions).then(client => {
-              testContext.testClient = client;
-              client.on('commandStarted', event => {
-                if (
-                  event.databaseName === testContext.dbName ||
-                  ['startTransaction', 'commitTransaction', 'abortTransaction'].includes(
-                    event.commandName
-                  )
-                ) {
-                  commandEvents.push(event);
-                }
-              });
-
-              const sessionOptions = Object.assign({}, testData.transactionOptions);
-
-              testData.sessionOptions = testData.sessionOptions || {};
-              const session0 = client.startSession(
-                Object.assign({}, sessionOptions, testData.sessionOptions.session0)
+            if (testData.failPoint) {
+              testPromise = testPromise.then(() =>
+                enableFailPoint(testData.failPoint, testContext)
               );
-              const session1 = client.startSession(
-                Object.assign({}, sessionOptions, testData.sessionOptions.session1)
+            }
+
+            // run the actual test
+            testPromise = testPromise.then(() => runTestSuiteTest(testData, testContext));
+
+            if (testData.failPoint) {
+              testPromise = testPromise.then(() =>
+                disableFailPoint(testData.failPoint, testContext)
               );
+            }
 
-              return testOperations(client, testData, { session0, session1 })
-                .catch(err => {
-                  // If the driver throws an exception / returns an error while executing this series
-                  // of operations, store the error message.
-                  throw err;
-                })
-                .then(() => {
-                  session0.endSession();
-                  session1.endSession();
-
-                  if (
-                    testData.expectations &&
-                    Array.isArray(testData.expectations) &&
-                    testData.expectations.length > 0
-                  ) {
-                    const actualEvents = normalizeCommandShapes(commandEvents);
-                    const rawExpectedEvents = testData.expectations.map(x =>
-                      linkSessionData(x.command_started_event, { session0, session1 })
-                    );
-
-                    const expectedEventPlaceholders = rawExpectedEvents.map(event =>
-                      findPlaceholders(event.command)
-                    );
-
-                    const expectedEvents = normalizeCommandShapes(rawExpectedEvents);
-                    expect(actualEvents).to.have.length(expectedEvents.length);
-
-                    expectedEvents.forEach((expected, idx) => {
-                      const actual = actualEvents[idx];
-                      const placeHolders = expectedEventPlaceholders[idx]; // eslint-disable-line
-
-                      expect(actual.commandName).to.equal(expected.commandName);
-                      expect(actual.databaseName).to.equal(expected.databaseName);
-
-                      const actualCommand = actual.command;
-                      const expectedCommand = expected.command;
-
-                      // handle validation of placeholder values
-                      // placeHolders.forEach(placeholder => {
-                      //   const parsedActual = EJSON.parse(JSON.stringify(actualCommand), {
-                      //     relaxed: true
-                      //   });
-
-                      //   if (placeholder.type === null) {
-                      //     expect(parsedActual).to.not.have.all.nested.property(placeholder.path);
-                      //   } else if (placeholder.type === 'string') {
-                      //     expect(parsedActual).nested.property(placeholder.path).to.exist;
-                      //     expect(parsedActual)
-                      //       .nested.property(placeholder.path)
-                      //       .to.have.length.greaterThan(0);
-                      //   } else if (placeholder.type === 'number') {
-                      //     expect(parsedActual).nested.property(placeholder.path).to.exist;
-                      //     expect(parsedActual)
-                      //       .nested.property(placeholder.path)
-                      //       .to.be.greaterThan(0);
-                      //   }
-                      // });
-
-                      // compare the command
-                      expect(actualCommand).to.containSubset(expectedCommand);
-                    });
-                  }
-
-                  if (testData.outcome) {
-                    if (testData.outcome.collection) {
-                      // use the client without transactions to verify
-                      return testContext.client
-                        .db()
-                        .collection(testContext.collectionName)
-                        .find({})
-                        .toArray()
-                        .then(docs => {
-                          expect(docs).to.eql(testData.outcome.collection.data);
-                        });
-                    }
-                  }
-                });
-            });
+            return testPromise;
           });
         });
       }
     });
   });
 });
+
+// Test runner helpers
+function prepareDatabaseForSuite(suite, context) {
+  const db = context.sharedClient.db();
+  const coll = db.collection(context.collectionName);
+
+  return db
+    .admin()
+    .command({ killAllSessions: [] })
+    .catch(() => {}) // ignore any error from this
+    .then(() => coll.drop({ writeConcern: 'majority' }))
+    .catch(err => {
+      if (!err.message.match(/ns not found/)) throw err;
+    })
+    .then(() => db.createCollection(context.collectionName, { w: 'majority' }))
+    .then(() => {
+      if (suite.data && Array.isArray(suite.data) && suite.data.length > 0) {
+        return coll.insert(suite.data, { w: 'majority' });
+      }
+    });
+}
+
+function cleanupAfterSuite(context) {
+  if (context.testClient) {
+    return context.testClient.close().then(() => {
+      delete context.testClient;
+    });
+  }
+}
+
+function enableFailPoint(failPoint, testContext) {
+  return testContext.sharedClient.db(testContext.dbName).executeDbAdminCommand(failPoint);
+}
+
+function disableFailPoint(failPoint, testContext) {
+  return testContext.sharedClient.db(testContext.dbName).executeDbAdminCommand({
+    configureFailPoint: failPoint.configureFailPoint,
+    mode: 'off'
+  });
+}
+
+let displayCommands = false;
+function runTestSuiteTest(testData, context) {
+  const commandEvents = [];
+  const clientOptions = translateClientOptions(
+    Object.assign({ monitorCommands: true }, testData.clientOptions)
+  );
+
+  // test-specific client options
+  clientOptions.autoReconnect = false;
+  clientOptions.haInterval = 100;
+
+  return MongoClient.connect(context.url, clientOptions).then(client => {
+    context.testClient = client;
+    client.on('commandStarted', event => {
+      if (
+        event.databaseName === context.dbName ||
+        ['startTransaction', 'commitTransaction', 'abortTransaction'].includes(event.commandName)
+      ) {
+        commandEvents.push(event);
+      }
+
+      // very useful for debugging
+      if (displayCommands) {
+        console.dir(event, { depth: 5 });
+      }
+    });
+
+    const sessionOptions = Object.assign({}, testData.transactionOptions);
+
+    testData.sessionOptions = testData.sessionOptions || {};
+    const database = client.db();
+    const session0 = client.startSession(
+      Object.assign({}, sessionOptions, testData.sessionOptions.session0)
+    );
+    const session1 = client.startSession(
+      Object.assign({}, sessionOptions, testData.sessionOptions.session1)
+    );
+
+    // enable to see useful APM debug information at the time of actual test run
+    // displayCommands = true;
+
+    const operationContext = { database, session0, session1 };
+
+    let testPromise = Promise.resolve();
+    return testPromise
+      .then(() => testOperations(client, testData, operationContext))
+      .catch(err => {
+        // If the driver throws an exception / returns an error while executing this series
+        // of operations, store the error message.
+        throw err;
+      })
+      .then(() => {
+        session0.endSession();
+        session1.endSession();
+
+        return validateExpectations(commandEvents, testData, context, operationContext);
+      });
+  });
+}
+
+function validateExpectations(commandEvents, testData, testContext, operationContext) {
+  const session0 = operationContext.session0;
+  const session1 = operationContext.session1;
+
+  if (
+    testData.expectations &&
+    Array.isArray(testData.expectations) &&
+    testData.expectations.length > 0
+  ) {
+    const actualEvents = normalizeCommandShapes(commandEvents);
+    const rawExpectedEvents = testData.expectations.map(x =>
+      linkSessionData(x.command_started_event, { session0, session1 })
+    );
+
+    const expectedEventPlaceholders = rawExpectedEvents.map(event =>
+      findPlaceholders(event.command)
+    );
+
+    const expectedEvents = normalizeCommandShapes(rawExpectedEvents);
+    expect(actualEvents).to.have.length(expectedEvents.length);
+
+    expectedEvents.forEach((expected, idx) => {
+      const actual = actualEvents[idx];
+      const placeHolders = expectedEventPlaceholders[idx]; // eslint-disable-line
+
+      expect(actual.commandName).to.equal(expected.commandName);
+      expect(actual.databaseName).to.equal(expected.databaseName);
+
+      const actualCommand = actual.command;
+      const expectedCommand = expected.command;
+
+      // handle validation of placeholder values
+      // placeHolders.forEach(placeholder => {
+      //   const parsedActual = EJSON.parse(JSON.stringify(actualCommand), {
+      //     relaxed: true
+      //   });
+
+      //   if (placeholder.type === null) {
+      //     expect(parsedActual).to.not.have.all.nested.property(placeholder.path);
+      //   } else if (placeholder.type === 'string') {
+      //     expect(parsedActual).nested.property(placeholder.path).to.exist;
+      //     expect(parsedActual)
+      //       .nested.property(placeholder.path)
+      //       .to.have.length.greaterThan(0);
+      //   } else if (placeholder.type === 'number') {
+      //     expect(parsedActual).nested.property(placeholder.path).to.exist;
+      //     expect(parsedActual)
+      //       .nested.property(placeholder.path)
+      //       .to.be.greaterThan(0);
+      //   }
+      // });
+
+      // compare the command
+      expect(actualCommand).to.containSubset(expectedCommand);
+    });
+  }
+
+  if (testData.outcome) {
+    if (testData.outcome.collection) {
+      // use the client without transactions to verify
+      return testContext.sharedClient
+        .db()
+        .collection(testContext.collectionName)
+        .find({})
+        .toArray()
+        .then(docs => {
+          expect(docs).to.eql(testData.outcome.collection.data);
+        });
+    }
+  }
+}
 
 function linkSessionData(command, context) {
   const session = context[command.command.lsid];
@@ -298,6 +363,11 @@ function extractBulkRequests(requests) {
   return requests.map(request => ({ [request.name]: request.arguments }));
 }
 
+function translateOperationName(operationName) {
+  if (operationName === 'runCommand') return 'command';
+  return operationName;
+}
+
 /**
  *
  * @param {Object} operation the operation definition from the spec test
@@ -307,16 +377,19 @@ function extractBulkRequests(requests) {
 function testOperation(operation, obj, context) {
   const opOptions = {};
   const args = [];
+  const operationName = translateOperationName(operation.name);
+
   if (operation.arguments) {
     Object.keys(operation.arguments).forEach(key => {
       if (['filter', 'fieldName', 'document', 'documents', 'pipeline'].includes(key)) {
         return args.unshift(operation.arguments[key]);
       }
 
+      if (key === 'command') return args.unshift(operation.arguments[key]);
       if (key === 'requests') return args.unshift(extractBulkRequests(operation.arguments[key]));
       if (key === 'update' || key === 'replacement') return args.push(operation.arguments[key]);
       if (key === 'session') {
-        if (isTransactionCommand(operation.name)) return;
+        if (isTransactionCommand(operationName)) return;
         opOptions.session = context[operation.arguments.session];
         return;
       }
@@ -328,6 +401,15 @@ function testOperation(operation, obj, context) {
 
       if (key === 'options') {
         Object.assign(opOptions, operation.arguments[key]);
+        if (opOptions.readPreference) {
+          opOptions.readPreference = opOptions.readPreference.mode.toLowerCase();
+        }
+
+        return;
+      }
+
+      if (key === 'readPreference') {
+        opOptions[key] = operation.arguments[key].mode.toLowerCase();
         return;
       }
 
@@ -335,14 +417,14 @@ function testOperation(operation, obj, context) {
     });
   }
 
-  if (args.length === 0 && !isTransactionCommand(operation.name)) {
+  if (args.length === 0 && !isTransactionCommand(operationName)) {
     args.push({});
   }
 
   if (Object.keys(opOptions).length > 0) {
     // NOTE: this is awful, but in order to provide options for some methods we need to add empty
     //       query objects.
-    if (operation.name === 'distinct') {
+    if (operationName === 'distinct') {
       args.push({});
     }
 
@@ -350,28 +432,50 @@ function testOperation(operation, obj, context) {
   }
 
   let opPromise;
-  if (operation.name === 'find' || operation.name === 'aggregate') {
+  if (operationName === 'find' || operationName === 'aggregate') {
     // `find` creates a cursor, so we need to call `toArray` on it
-    const cursor = obj[operation.name].apply(obj, args);
+    const cursor = obj[operationName].apply(obj, args);
     opPromise = cursor.toArray();
-  } else if (operation.name === 'startTransaction') {
-    // `startTansaction` can throw, so we need to make sure we wrap it in a promise
-    opPromise = Promise.try(() => obj[operation.name].apply(obj, args));
   } else {
-    opPromise = obj[operation.name].apply(obj, args);
+    // wrap this in a `Promise.try` because some operations might throw
+    opPromise = Promise.try(() => obj[operationName].apply(obj, args));
   }
 
   if (operation.result) {
-    if (operation.result.errorContains || operation.result.errorCodeName) {
+    const result = operation.result;
+
+    if (
+      result.errorContains ||
+      result.errorCodeName ||
+      result.errorLabelsContain ||
+      result.errorLabelsOmit
+    ) {
       return opPromise
         .then(() => {
           throw new Error('expected an error!');
         })
         .catch(err => {
+          const errorContains = result.errorContains;
+          const errorCodeName = result.errorCodeName;
+          const errorLabelsContain = result.errorLabelsContain;
+          const errorLabelsOmit = result.errorLabelsOmit;
+
+          if (errorLabelsContain) {
+            expect(err.errorLabels).to.include.members(errorLabelsContain);
+          }
+
+          if (errorLabelsOmit) {
+            if (err.errorLabels && Array.isArray(err.errorLabels) && err.errorLabels.length !== 0) {
+              expect(err.errorLabels).to.not.include.members(errorLabelsOmit);
+            }
+          }
+
           if (operation.result.errorContains) {
-            expect(err).to.match(new RegExp(operation.result.errorContains, 'i'));
-          } else {
-            expect(err.codeName).to.equal(operation.result.errorCodeName);
+            expect(err).to.match(new RegExp(errorContains, 'i'));
+          }
+
+          if (errorCodeName) {
+            expect(err.codeName).to.equal(errorCodeName);
           }
         });
     }
@@ -385,14 +489,33 @@ function testOperation(operation, obj, context) {
   return opPromise;
 }
 
-function testOperations(client, testData, context) {
-  const coll = client.db().collection('test');
-  return testData.operations.reduce((combined, operation) => {
-    if (isTransactionCommand(operation.name)) {
-      const session = context[operation.arguments.session];
-      return combined.then(() => testOperation(operation, session, context));
+function convertCollectionOptions(options) {
+  const result = {};
+  Object.keys(options).forEach(key => {
+    if (key === 'readPreference') {
+      result[key] = options[key].mode.toLowerCase();
+    } else {
+      result[key] = options[key];
     }
+  });
 
-    return combined.then(() => testOperation(operation, coll, context));
+  return result;
+}
+
+function testOperations(client, testData, operationContext) {
+  return testData.operations.reduce((combined, operation) => {
+    return combined.then(() => {
+      if (operation.object === 'collection') {
+        const db = operationContext.database;
+        const collectionOptions = operation.collectionOptions || {};
+
+        operationContext[operation.object] = db.collection(
+          'test',
+          convertCollectionOptions(collectionOptions)
+        );
+      }
+
+      return testOperation(operation, operationContext[operation.object], operationContext);
+    });
   }, Promise.resolve());
 }

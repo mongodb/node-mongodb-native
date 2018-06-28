@@ -1588,6 +1588,10 @@ describe('Change Streams', function() {
           firstBatch: [],
           id: new Long('9064341847921713401'),
           ns: 'test.test'
+        },
+        operationTime: OPERATION_TIME,
+        $clusterTime: {
+          clusterTime: OPERATION_TIME
         }
       };
 
@@ -1651,6 +1655,11 @@ describe('Change Streams', function() {
               expect(doc)
                 .to.have.nested.property('pipeline[0].$changeStream.startAtOperationTime')
                 .that.deep.equals(OPERATION_TIME);
+              expect(doc).to.not.have.nested.property('pipeline[0].$changeStream.resumeAfter');
+            } else {
+              expect(doc).to.not.have.nested.property(
+                'pipeline[0].$changeStream.startAtOperationTime'
+              );
               expect(doc).to.not.have.nested.property('pipeline[0].$changeStream.resumeAfter');
             }
             return request.reply(AGGREGATE_RESPONSE);

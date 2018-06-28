@@ -2,6 +2,7 @@
 var format = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const expect = require('chai').expect;
 
 var restartAndDone = function(configuration, done) {
   configuration.manager.restart().then(function() {
@@ -9,6 +10,7 @@ var restartAndDone = function(configuration, done) {
   });
 };
 
+// TODO: Remove skips when NODE-1527 is resolved
 describe('ReplSet (Operations)', function() {
   before(function() {
     var configuration = this.configuration;
@@ -36,12 +38,12 @@ describe('ReplSet (Operations)', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var mongo = configuration.require,
+      const configuration = this.configuration;
+      const mongo = configuration.require,
         MongoClient = mongo.MongoClient;
 
       // Create url
-      var url = format(
+      const url = format(
         'mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s',
         format('%s:%s', configuration.host, configuration.port),
         format('%s:%s', configuration.host, configuration.port + 1),
@@ -51,50 +53,54 @@ describe('ReplSet (Operations)', function() {
       );
 
       // legacy tests
-      var executeTests = function(_db, _callback) {
+      function executeTests(_db, _callback) {
         // Get the collection
-        var col = _db.collection('batch_write_ordered_ops_0');
+        const col = _db.collection('batch_write_ordered_ops_0');
 
         // Cleanup
-        col.remove({}, function(err) {
-          test.equal(null, err);
+        col.remove({}, err => {
+          expect(err).to.not.exist;
 
           // ensure index
-          col.ensureIndex({ a: 1 }, { unique: true }, function(err) {
-            test.equal(null, err);
+          col.ensureIndex({ a: 1 }, { unique: true }, err => {
+            expect(err).to.not.exist;
 
             // Initialize the Ordered Batch
-            var batch = col.initializeOrderedBulkOp();
+            const batch = col.initializeOrderedBulkOp();
             batch.insert({ a: 1 });
             batch.insert({ a: 2 });
 
             // Execute the operations
-            batch.execute({ w: 5, wtimeout: 1 }, function(err, result) {
-              test.equal(2, result.nInserted);
-              test.equal(0, result.nMatched);
-              test.equal(0, result.nUpserted);
-              test.equal(0, result.nRemoved);
-              test.ok(result.nModified == null || result.nModified === 0);
+            batch.execute({ w: 5, wtimeout: 1 }, err => {
+              expect(err).to.exist;
+              const result = err.result;
 
-              var writeConcernError = result.getWriteConcernError();
-              test.ok(writeConcernError != null);
-              test.ok(writeConcernError.code != null);
-              test.ok(writeConcernError.errmsg != null);
+              expect(result.nInserted).to.equal(2);
+              expect(result.nMatched).to.equal(0);
+              expect(result.nUpserted).to.equal(0);
+              expect(result.nRemoved).to.equal(0);
+              expect(result.nModified).to.satisfy(nModified => {
+                return nModified == null || nModified === 0;
+              });
 
-              test.equal(0, result.getWriteErrorCount());
+              const writeConcernError = result.getWriteConcernError();
+              expect(writeConcernError).to.not.be.null;
+              expect(writeConcernError.code).to.not.be.null;
+              expect(writeConcernError.errmsg).to.not.be.null;
+              expect(result.getWriteErrorCount()).to.equal(0);
 
               // Callback
               _callback();
             });
           });
         });
-      };
+      }
 
-      MongoClient.connect(url, function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
+      MongoClient.connect(url, (err, client) => {
+        expect(err).to.not.exist;
+        const db = client.db(configuration.db);
 
-        executeTests(db, function() {
+        executeTests(db, () => {
           // Finish up test
           client.close();
           done();
@@ -106,7 +112,7 @@ describe('ReplSet (Operations)', function() {
   /**
    * @ignore
    */
-  it(
+  it.skip(
     'Should fail due to w:5 and wtimeout:1 combined with duplicate key errors with ordered batch api',
     {
       metadata: {
@@ -118,12 +124,12 @@ describe('ReplSet (Operations)', function() {
 
       // The actual test we wish to run
       test: function(done) {
-        var configuration = this.configuration;
-        var mongo = configuration.require,
+        const configuration = this.configuration;
+        const mongo = configuration.require,
           MongoClient = mongo.MongoClient;
 
         // Create url
-        var url = format(
+        const url = format(
           'mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s',
           format('%s:%s', configuration.host, configuration.port),
           format('%s:%s', configuration.host, configuration.port + 1),
@@ -133,20 +139,20 @@ describe('ReplSet (Operations)', function() {
         );
 
         // legacy tests
-        var executeTests = function(_db, _callback) {
+        function executeTests(_db, _callback) {
           // Get the collection
-          var col = _db.collection('batch_write_ordered_ops_1');
+          const col = _db.collection('batch_write_ordered_ops_1');
 
           // Cleanup
-          col.remove({}, function(err) {
-            test.equal(null, err);
+          col.remove({}, err => {
+            expect(err).to.not.exist;
 
             // ensure index
-            col.ensureIndex({ a: 1 }, { unique: true }, function(err) {
-              test.equal(null, err);
+            col.ensureIndex({ a: 1 }, { unique: true }, err => {
+              expect(err).to.not.exist;
 
               // Initialize the Ordered Batch
-              var batch = col.initializeOrderedBulkOp();
+              const batch = col.initializeOrderedBulkOp();
               batch.insert({ a: 1 });
               batch
                 .find({ a: 3 })
@@ -156,39 +162,44 @@ describe('ReplSet (Operations)', function() {
               batch.insert({ a: 2 });
 
               // Execute the operations
-              batch.execute({ w: 5, wtimeout: 1 }, function(err, result) {
-                test.equal(1, result.nInserted);
-                test.equal(0, result.nMatched);
-                test.equal(1, result.nUpserted);
-                test.equal(0, result.nRemoved);
-                test.ok(result.nModified == null || result.nModified === 0);
+              batch.execute({ w: 5, wtimeout: 1 }, err => {
+                expect(err).to.exist;
+                const result = err.result;
 
-                var writeConcernError = result.getWriteConcernError();
-                test.ok(writeConcernError != null);
-                test.ok(writeConcernError.code != null);
-                test.ok(writeConcernError.errmsg != null);
+                expect(result.nInserted).to.equal(1);
+                expect(result.nMatched).to.equal(0);
+                expect(result.nUpserted).to.equal(1);
+                expect(result.nRemoved).to.equal(0);
+                expect(result.nModified).to.satisfy(nModified => {
+                  return nModified == null || nModified === 0;
+                });
 
-                test.equal(1, result.getWriteErrorCount());
+                const writeConcernError = result.getWriteConcernError();
+                expect(writeConcernError).to.not.be.null;
+                expect(writeConcernError.code).to.not.be.null;
+                expect(writeConcernError.errmsg).to.not.be.null;
+
+                expect(result.getWriteErrorCount()).to.equal(1);
 
                 // Individual error checking
-                var error = result.getWriteErrorAt(0);
-                test.equal(2, error.index);
-                test.equal(11000, error.code);
-                test.ok(error.errmsg != null);
-                test.equal(1, error.getOperation().a);
+                const error = result.getWriteErrorAt(0);
+                expect(error.index).to.equal(2);
+                expect(error.code).to.equal(11000);
+                expect(error.errmsg).to.exist;
+                expect(error.getOperation().a).to.equal(1);
 
                 // Callback
                 _callback();
               });
             });
           });
-        };
+        }
 
-        MongoClient.connect(url, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
+        MongoClient.connect(url, (err, client) => {
+          expect(err).to.not.exist;
+          const db = client.db(configuration.db);
 
-          executeTests(db, function() {
+          executeTests(db, () => {
             // Finish up test
             client.close();
             done();
@@ -217,12 +228,12 @@ describe('ReplSet (Operations)', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var mongo = configuration.require,
+      const configuration = this.configuration;
+      const mongo = configuration.require,
         MongoClient = mongo.MongoClient;
 
       // Create url
-      var url = format(
+      const url = format(
         'mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s',
         format('%s:%s', configuration.host, configuration.port),
         format('%s:%s', configuration.host, configuration.port + 1),
@@ -232,20 +243,20 @@ describe('ReplSet (Operations)', function() {
       );
 
       // legacy tests
-      var executeTests = function(_db, _callback) {
+      function executeTests(_db, _callback) {
         // Get the collection
-        var col = _db.collection('batch_write_unordered_ops_0');
+        const col = _db.collection('batch_write_unordered_ops_0');
 
         // Cleanup
-        col.remove({}, function(err) {
-          test.equal(null, err);
+        col.remove({}, err => {
+          expect(err).to.not.exist;
 
           // ensure index
-          col.ensureIndex({ a: 1 }, { unique: true }, function(err) {
-            test.equal(null, err);
+          col.ensureIndex({ a: 1 }, { unique: true }, err => {
+            expect(err).to.not.exist;
 
             // Initialize the Ordered Batch
-            var batch = col.initializeUnorderedBulkOp();
+            const batch = col.initializeUnorderedBulkOp();
             batch.insert({ a: 1 });
             batch
               .find({ a: 3 })
@@ -254,32 +265,37 @@ describe('ReplSet (Operations)', function() {
             batch.insert({ a: 2 });
 
             // Execute the operations
-            batch.execute({ w: 5, wtimeout: 1 }, function(err, result) {
-              test.equal(2, result.nInserted);
-              test.equal(0, result.nMatched);
-              test.equal(1, result.nUpserted);
-              test.equal(0, result.nRemoved);
-              test.ok(result.nModified == null || result.nModified === 0);
+            batch.execute({ w: 5, wtimeout: 1 }, err => {
+              expect(err).to.exist;
+              const result = err.result;
 
-              var writeConcernError = result.getWriteConcernError();
-              test.ok(writeConcernError != null);
-              test.ok(writeConcernError.code != null);
-              test.ok(writeConcernError.errmsg != null);
+              expect(result.nInserted).to.equal(2);
+              expect(result.nMatched).to.equal(0);
+              expect(result.nUpserted).to.equal(1);
+              expect(result.nRemoved).to.equal(0);
+              expect(result.nModified).to.satisfy(nModified => {
+                return nModified == null || nModified === 0;
+              });
 
-              test.equal(0, result.getWriteErrorCount());
+              const writeConcernError = result.getWriteConcernError();
+              expect(writeConcernError).to.not.be.null;
+              expect(writeConcernError.code).to.not.be.null;
+              expect(writeConcernError.errmsg).to.not.be.null;
+
+              expect(result.getWriteErrorCount()).to.equal(0);
 
               // Callback
               _callback();
             });
           });
         });
-      };
+      }
 
-      MongoClient.connect(url, function(err, client) {
-        test.equal(null, err);
-        var db = client.db(configuration.db);
+      MongoClient.connect(url, (err, client) => {
+        expect(err).to.not.exist;
+        const db = client.db(configuration.db);
 
-        executeTests(db, function() {
+        executeTests(db, () => {
           // Finish up test
           client.close();
           done();
@@ -291,7 +307,7 @@ describe('ReplSet (Operations)', function() {
   /**
    * @ignore
    */
-  it(
+  it.skip(
     'Should fail due to w:5 and wtimeout:1 combined with duplicate key errors with unordered batch api',
     {
       metadata: {
@@ -303,12 +319,12 @@ describe('ReplSet (Operations)', function() {
 
       // The actual test we wish to run
       test: function(done) {
-        var configuration = this.configuration;
-        var mongo = configuration.require,
+        const configuration = this.configuration;
+        const mongo = configuration.require,
           MongoClient = mongo.MongoClient;
 
         // Create url
-        var url = format(
+        const url = format(
           'mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s',
           format('%s:%s', configuration.host, configuration.port),
           format('%s:%s', configuration.host, configuration.port + 1),
@@ -318,17 +334,17 @@ describe('ReplSet (Operations)', function() {
         );
 
         // legacy tests
-        var executeTests = function(_db, _callback) {
+        function executeTests(_db, _callback) {
           // Get the collection
-          var col = _db.collection('batch_write_unordered_ops_1');
+          const col = _db.collection('batch_write_unordered_ops_1');
 
           // Cleanup
-          col.remove({}, function(err) {
-            test.equal(null, err);
+          col.remove({}, err => {
+            expect(err).to.not.exist;
 
             // ensure index
             col.ensureIndex({ a: 1 }, { unique: true }, function(err) {
-              test.equal(null, err);
+              expect(err).to.not.exist;
 
               // Initialize the Ordered Batch
               var batch = col.initializeOrderedBulkOp();
@@ -341,29 +357,38 @@ describe('ReplSet (Operations)', function() {
               batch.insert({ a: 2 });
 
               // Execute the operations
-              batch.execute({ w: 5, wtimeout: 1 }, function(err, result) {
-                test.equal(1, result.nInserted);
-                test.equal(0, result.nMatched);
-                test.equal(1, result.nUpserted);
-                test.equal(0, result.nRemoved);
-                test.ok(result.nModified == null || result.nModified === 0);
+              batch.execute({ w: 5, wtimeout: 1 }, err => {
+                expect(err).to.exist;
+                const result = err.result;
 
-                var writeConcernError = result.getWriteConcernError();
-                test.ok(writeConcernError != null);
-                test.ok(writeConcernError.code != null);
-                test.ok(writeConcernError.errmsg != null);
+                expect(result.nInserted).to.equal(1);
+                expect(result.nMatched).to.equal(0);
+                expect(result.nUpserted).to.equal(1);
+                expect(result.nRemoved).to.equal(0);
+                expect(result.nModified).to.satisfy(nModified => {
+                  return nModified == null || nModified === 0;
+                });
+
+                const writeConcernError = result.getWriteConcernError();
+                expect(writeConcernError).to.not.be.null;
+                expect(writeConcernError.code).to.not.be.null;
+                expect(writeConcernError.errmsg).to.not.be.null;
 
                 // Might or might not have a write error depending on
                 // Unordered execution order
-                test.ok(result.getWriteErrorCount() === 0 || result.getWriteErrorCount() === 1);
+                expect(result.getWriteErrorCount()).to.satisfy(errCount => {
+                  return errCount === 0 || errCount === 1;
+                });
 
                 // If we have an error it should be a duplicate key error
                 if (result.getWriteErrorCount() === 1) {
-                  var error = result.getWriteErrorAt(0);
-                  test.ok(error.index === 0 || error.index === 2);
-                  test.equal(11000, error.code);
-                  test.ok(error.errmsg != null);
-                  test.equal(1, error.getOperation().a);
+                  const error = result.getWriteErrorAt(0);
+                  expect(error.index).to.satisfy(errIndex => {
+                    return errIndex === 0 || errIndex === 2;
+                  });
+                  expect(error.code).to.equal(11000);
+                  expect(error.errmsg).to.exist;
+                  expect(error.getOperation().a).to.equal(1);
                 }
 
                 // Callback
@@ -371,13 +396,13 @@ describe('ReplSet (Operations)', function() {
               });
             });
           });
-        };
+        }
 
-        MongoClient.connect(url, function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
+        MongoClient.connect(url, (err, client) => {
+          expect(err).to.not.exist;
+          const db = client.db(configuration.db);
 
-          executeTests(db, function() {
+          executeTests(db, () => {
             // Finish up test
             client.close();
             done();
@@ -387,7 +412,7 @@ describe('ReplSet (Operations)', function() {
     }
   );
 
-  it('Should fail to do map reduce to out collection', {
+  it.skip('Should fail to do map reduce to out collection', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>1.7.6' } },
 
     // The actual test we wish to run

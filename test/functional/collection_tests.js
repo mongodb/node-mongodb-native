@@ -1580,4 +1580,62 @@ describe('Collection', function() {
         });
     }
   });
+
+  describe('Retryable Writes on bulk ops', function() {
+    const MongoClient = require('../../lib/mongo_client');
+
+    let client;
+    let db;
+    let collection;
+
+    const metadata = { requires: { topology: ['replicaset'], mongodb: '>=3.6.0' } };
+
+    beforeEach(function() {
+      client = new MongoClient(this.configuration.url(), { retryWrites: true });
+      return client.connect().then(() => {
+        db = client.db('test_retry_writes');
+        collection = db.collection('tests');
+
+        return Promise.resolve()
+          .then(() => db.dropDatabase())
+          .then(() => collection.insert({ name: 'foobar' }));
+      });
+    });
+
+    afterEach(function() {
+      return client.close();
+    });
+
+    it('should succeed with retryWrite=true when using updateMany', {
+      metadata,
+      test: function() {
+        return collection.updateMany({ name: 'foobar' }, { $set: { name: 'fizzbuzz' } });
+      }
+    });
+
+    it('should succeed with retryWrite=true when using update with multi=true', {
+      metadata,
+      test: function() {
+        return collection.update(
+          { name: 'foobar' },
+          { $set: { name: 'fizzbuzz' } },
+          { multi: true }
+        );
+      }
+    });
+
+    it('should succeed with retryWrite=true when using remove without option single', {
+      metadata,
+      test: function() {
+        return collection.remove({ name: 'foobar' });
+      }
+    });
+
+    it('should succeed with retryWrite=true when using deleteMany', {
+      metadata,
+      test: function() {
+        return collection.deleteMany({ name: 'foobar' });
+      }
+    });
+  });
 });
