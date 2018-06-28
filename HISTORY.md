@@ -1,3 +1,22 @@
+<a name="3.0.11"></a>
+## [3.0.11](https://github.com/mongodb/node-mongodb-native/compare/v3.0.10...v3.0.11) (2018-06-28)
+
+
+### Bug Fixes
+
+* **change-stream:** fix change stream resuming with promises ([9386f3c](https://github.com/mongodb/node-mongodb-native/commit/9386f3c))
+* **createUser:** allow creating a user against 4.0 server ([708f16b](https://github.com/mongodb/node-mongodb-native/commit/708f16b))
+* **cursor:** cursor.count not respecting parent readPreference ([bf0196e](https://github.com/mongodb/node-mongodb-native/commit/bf0196e))
+* **db:** don't send session down to createIndex command ([ad6f41a](https://github.com/mongodb/node-mongodb-native/commit/ad6f41a))
+* **db:** throw readable error when creating `_id` with background: true ([aac47a1](https://github.com/mongodb/node-mongodb-native/commit/aac47a1))
+
+
+### Features
+
+* **parallelCollectionScan:** does not allow user to pass a session ([c699603](https://github.com/mongodb/node-mongodb-native/commit/c699603))
+
+
+
 <a name="3.0.10"></a>
 ## [3.0.10](https://github.com/mongodb/node-mongodb-native/compare/v3.0.9...v3.0.10) (2018-06-02)
 
