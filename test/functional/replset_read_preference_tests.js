@@ -360,7 +360,6 @@ describe.skip('ReplSet (ReadPreference)', function() {
           var gridStore = new GridStore(db, id, 'w', { w: 4 });
           var secondaries = filterSecondaries(result.hosts, result);
 
-
           // Force multiple chunks to be stored
           gridStore.chunkSize = 5000;
           var data = fs.readFileSync('./test/functional/data/test_gs_weird_bug.png');
