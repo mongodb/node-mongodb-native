@@ -193,10 +193,7 @@ function runTestSuiteTest(testData, context) {
   return MongoClient.connect(context.url, clientOptions).then(client => {
     context.testClient = client;
     client.on('commandStarted', event => {
-      if (
-        event.databaseName === context.dbName ||
-        ['startTransaction', 'commitTransaction', 'abortTransaction'].includes(event.commandName)
-      ) {
+      if (event.databaseName === context.dbName || isTransactionCommand(event.commandName)) {
         commandEvents.push(event);
       }
 
@@ -356,7 +353,7 @@ function extractCrudResult(result, operation) {
 }
 
 function isTransactionCommand(command) {
-  return ['startTransaction', 'commitTransaction', 'abortTransaction'].includes(command);
+  return ['startTransaction', 'commitTransaction', 'abortTransaction'].indexOf(command) !== -1;
 }
 
 function extractBulkRequests(requests) {
@@ -381,7 +378,7 @@ function testOperation(operation, obj, context) {
 
   if (operation.arguments) {
     Object.keys(operation.arguments).forEach(key => {
-      if (['filter', 'fieldName', 'document', 'documents', 'pipeline'].includes(key)) {
+      if (['filter', 'fieldName', 'document', 'documents', 'pipeline'].indexOf(key) !== -1) {
         return args.unshift(operation.arguments[key]);
       }
 
