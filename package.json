@@ -32,7 +32,6 @@
     "mongodb-mock-server": "^1.0.0",
     "mongodb-test-runner": "^1.1.18",
     "prettier": "~1.12.0",
-    "semver": "^5.5.0",
     "sinon": "^4.3.0",
     "worker-farm": "^1.5.0"
   },

@@ -1,8 +1,15 @@
 'use strict';
 
-const semver = require('semver');
+let supportsAsyncAwait = false;
 
-if (semver.satisfies(process.version, '>=8.0.0')) {
+try {
+  new Function('return (async function foo() {return await Promise.resolve(42);})();')();
+  supportsAsyncAwait = true;
+} catch (e) {
+  supportsAsyncAwait = false;
+}
+
+if (supportsAsyncAwait) {
   const fs = require('fs');
   const path = require('path');
 
