@@ -888,7 +888,7 @@ describe('APM', function() {
 
   describe('spec tests', function() {
     before(function() {
-      setupDatabase(this.configuration);
+      return setupDatabase(this.configuration);
     });
 
     // TODO: The worst part about this custom validation method is that it does not
