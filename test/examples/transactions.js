@@ -5,9 +5,17 @@ const MongoClient = require('../../lib/mongo_client');
 
 describe('examples(transactions):', function() {
   let client;
+  let log;
 
   before(async function() {
     await setupDatabase(this.configuration);
+    log = console.log;
+    console.log = () => {};
+  });
+
+  after(function() {
+    console.log = log;
+    log = undefined;
   });
 
   beforeEach(async function() {
