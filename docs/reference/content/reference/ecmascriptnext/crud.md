@@ -17,7 +17,7 @@ Let's take a look at the CRUD operations from the perspective of ESNext. In this
 This reference also omits methods that no longer make sense when using ESNext such as the `each` and `forEach` methods.
 
 ## Inserting Documents
-The *insertOne* and *insertMany* methods exists on the *Collection* class and is used to insert documents into MongoDB. Code speaks a thousand words so let's see two simple examples of inserting documents.
+The *insertOne* and *insertMany* methods exist on the *Collection* class and are used to insert documents into MongoDB. Code speaks a thousand words so let's see two simple examples of inserting documents.
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
@@ -94,7 +94,7 @@ const dbName = 'myproject';
 That wraps up the *insert* methods. Next let's look at the *update* methods.
 
 ## Updating Documents
-The *updateOne* and *updateMany* methods exists on the *Collection* class and is used to update and upsert documents into MongoDB. Let's look at a couple of usage examples.
+The *updateOne* and *updateMany* methods exist on the *Collection* class and are used to update and upsert documents into MongoDB. Let's look at a couple of usage examples.
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
@@ -114,7 +114,7 @@ const dbName = 'myproject';
     const col = db.collection('updates');
     let r;
 
-    // Insert a single document
+    // Insert multiple documents
     r = await col.insertMany([{a:1}, {a:2}, {a:2}]);
     assert.equal(3, r.insertedCount);
 
@@ -142,7 +142,7 @@ const dbName = 'myproject';
 ```
 
 ## Removing Documents
-The *deleteOne* and *deleteMany* methods exist on the *Collection* class and is used to remove documents from MongoDB. Let's look at a couple of usage examples.
+The *deleteOne* and *deleteMany* methods exist on the *Collection* class and are used to remove documents from MongoDB. Let's look at a couple of usage examples.
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
@@ -164,7 +164,7 @@ const dbName = 'myproject';
     const col = db.collection('removes');
     let r;
 
-    // Insert a single document
+    // Insert multiple documents
     r = await col.insertMany([{a:1}, {a:2}, {a:2}]);
     assert.equal(3, r.insertedCount);
 
@@ -172,7 +172,7 @@ const dbName = 'myproject';
     r = await col.deleteOne({a:1});
     assert.equal(1, r.deletedCount);
 
-    // Update multiple documents
+    // Remove multiple documents
     r = await col.deleteMany({a:2});
     assert.equal(2, r.deletedCount);
   } catch (err) {
@@ -185,7 +185,7 @@ const dbName = 'myproject';
 ```
 
 ## findOneAndUpdate, findOneAndDelete and findOneAndReplace
-The three methods *findOneAndUpdate*, *findOneAndDelete* and *findOneAndReplace* are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is *atomic*. Let's look at *findOneAndUpdate* first using an example.
+The three methods *findOneAndUpdate*, *findOneAndDelete* and *findOneAndReplace* are special commands that allow the user to update or upsert a document and have the modified or existing document returned. They come at a cost because the operations take a write lock for the duration of the operation as they need to ensure the modification is *atomic*. Let's look at *findOneAndUpdate* first using an example.
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
@@ -207,7 +207,7 @@ const dbName = 'myproject';
     const col = db.collection('findAndModify');
     let r;
 
-    // Insert a single document
+    // Insert multiple documents
     r = await col.insert([{a:1}, {a:2}, {a:2}]);
     assert.equal(3, r.result.n);
 
@@ -219,9 +219,6 @@ const dbName = 'myproject';
     });
     assert.equal(1, r.value.b);
 
-    // Remove and return a document
-    r = await col.findOneAndDelete({a:2});
-    assert.ok(r.value.b == null);
   } catch (err) {
     console.log(err.stack);
   }
@@ -231,7 +228,7 @@ const dbName = 'myproject';
 })();
 ```
 
-The *findOneAndDelete* function is a function especially defined to help remove a document. Let's look at an example of usage.
+The *findOneAndDelete* function is especially defined to help remove a document. Let's look at an example of usage.
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
@@ -253,12 +250,12 @@ const dbName = 'myproject';
     const col = db.collection('findAndModify');
     let r;
 
-    // Insert a single document
+    // Insert multiple documents
     r = await col.insert([{a:1}, {a:2}, {a:2}]);
     assert.equal(3, r.result.n);
 
     // Remove a document from MongoDB and return it
-    r = await col.findOneAndDelete({a:1}, {sort: [['a',1]]});
+    r = await col.findOneAndDelete({a:1});
     assert.ok(r.value.b == null);
   } catch (err) {
     console.log(err.stack);
@@ -270,7 +267,7 @@ const dbName = 'myproject';
 ```
 
 ## BulkWrite
-The *bulkWrite* function allows for a simple set of bulk operations to be done in a non fluent way as in comparison to the bulk API discussed next. Let's look at an example.
+The *bulkWrite* function allows for a simple set of bulk operations to be done in a non [fluent](https://en.wikipedia.org/wiki/Fluent_interface) way, as compared with the *bulk* API discussed next. Let's look at an example.
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
@@ -320,7 +317,7 @@ const dbName = 'myproject';
 This covers the basic write operations. Let's have a look at the Bulk write operations next.
 
 ## Bulk Write Operations
-The bulk write operations make it easy to write groups of operations together to MongoDB. There are some caveats and to get the best performance you need to be running against MongoDB *2.6* or higher that support the new write commands. Bulk operations are split into *ordered* and *unordered* bulk operations. An *ordered* bulk operation guarantees the order of execution of writes while the *unordered* bulk operation makes no assumptions about the order of execution. In the Node.js driver the *unordered* bulk operations will group operations according to type and write them in parallel. Let's have a look at how to build an ordered bulk operation.
+The bulk write operations make it easy to write groups of operations together to MongoDB. There are some caveats and to get the best performance you need to be running against MongoDB *2.6* or higher, which supports the new write commands. Bulk operations are split into *ordered* and *unordered* bulk operations. An *ordered* bulk operation guarantees the order of execution of writes while the *unordered* bulk operation makes no assumptions about the order of execution. In the Node.js driver the *unordered* bulk operations will group operations according to type and write them in parallel. Let's have a look at how to build an ordered bulk operation.
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
@@ -369,7 +366,7 @@ const dbName = 'myproject';
 
 We will not cover the results object here as it's documented in the driver API. The Bulk API handles all the splitting of operations into multiple writes.
 
-There are some important things to keep in mind when using the bulk API and especially the *ordered* bulk API mode. The write commands are single operation type. That means they can only do insert/update and remove. If you f.ex do the following combination of operations.
+There are some important things to keep in mind when using the bulk API and especially the *ordered* bulk API mode. The write commands are insert, update and remove. They will be serially executed in the order they are added, creating a new operation for each switch in types. If you have the following series of operations,
 
     Insert {a:1}
     Update {a:1} to {a:1, b:1}
@@ -377,7 +374,7 @@ There are some important things to keep in mind when using the bulk API and espe
     Remove {b:1}
     Insert {a:3}
 
-This will result in the driver issuing 4 write commands to the server.
+This will result in the driver issuing 5 write commands to the server:
 
     Insert Command with {a:1}
     Update Command {a:1} to {a:1, b:1}
@@ -385,7 +382,7 @@ This will result in the driver issuing 4 write commands to the server.
     Remove Command with {b:1}
     Insert Command with {a:3}
 
-If you instead organize your *ordered* in the following manner.
+If instead you order your operations as follows,
 
     Insert {a:1}
     Insert {a:2}
@@ -393,24 +390,24 @@ If you instead organize your *ordered* in the following manner.
     Update {a:1} to {a:1, b:1}
     Remove {b:1}
 
-The number of write commands issued by the driver will be.
+The write commands issued by the driver will be,
 
     Insert Command with {a:1}, {a:2}, {a:3}
     Update Command {a:1} to {a:1, b:1}
     Remove Command with {b:1}
 
-Allowing for more efficient and faster bulk write operation.
+Allowing for a more efficient and faster bulk write operation.
 
 For *unordered* bulk operations this is not important as the driver sorts operations by type and executes them in parallel.
 
 This covers write operations for MongoDB. Let's look at querying for documents next.
 
 ## Read Methods
-The main method for querying the database are the *find* and the *aggregate* method. In this CRUD tutorial we will focus on *find*.
+The main methods for querying the database are *find* and *aggregate*. In this CRUD tutorial we will focus on *find*.
 
-The *method* return a cursor that allows us to operate on the data. The *cursor* also implements the Node.js 0.10.x or higher stream interface allowing us to pipe the results to other streams.
+The *find* method returns a cursor that allows us to operate on the data. The *cursor* also implements the Node.js 0.10.x or higher stream interface, allowing us to pipe the results to other streams.
 
-Let's look at a simple find example that materializes all the documents from a query using the toArray but limits the number of returned results to 2 documents.
+Let's look at a simple *find* example that materializes all the documents from a query using the *toArray* method but limits the number of returned results to 2 documents.
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
@@ -431,7 +428,7 @@ const dbName = 'myproject';
     // Get the collection
     const col = db.collection('find');
 
-    // Insert a single document
+    // Insert multiple documents
     const r = await col.insertMany([{a:1}, {a:1}, {a:1}]);
     assert.equal(3, r.insertedCount);
 
@@ -447,7 +444,7 @@ const dbName = 'myproject';
 })();
 ```
 
-Next lets take a look at the *next* method and how we can iterate over the cursor in ECMAScript 6. The new `async`/`await` commands allow for what is arguably a much cleaner and easier to read iteration code.
+Next let's take a look at the *next* method and how we can iterate over the cursor in ECMAScript 6. The new `async`/`await` commands allow for what is arguably a much cleaner and easier to read iteration code.
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
@@ -468,7 +465,7 @@ const dbName = 'myproject';
     // Get the collection
     const col = db.collection('find');
 
-    // Insert a single document
+    // Insert multiple documents
     const r = await col.insertMany([{a:1}, {a:1}, {a:1}]);
     assert.equal(3, r.insertedCount);
 
@@ -490,7 +487,7 @@ const dbName = 'myproject';
 ```
 
 ## Executing Commands
-The `Db.command` method also returns a `Promise` allowing us to leverage `async`/`await` to get clear and concise code. Below is an example calling the `buildInfo` method.
+The `Db.command` method also returns a `Promise` allowing us to leverage `async`/`await` for clear and concise code. Below is an example calling the `buildInfo` method.
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
