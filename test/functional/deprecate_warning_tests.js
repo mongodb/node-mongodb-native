@@ -1,6 +1,6 @@
 'use strict';
 const setupDatabase = require('./shared').setupDatabase;
-const deprecate = require('../../lib/utils').deprecate;
+const deprecateOptions = require('../../lib/utils').deprecateOptions;
 const exec = require('child_process').exec;
 const chai = require('chai');
 const expect = chai.expect;
@@ -9,10 +9,10 @@ require('mocha-sinon');
 chai.use(sinonChai);
 
 function makeTestFunction(config) {
-  config.fn = options => {
+  const fn = options => {
     if (options) options = null;
   };
-  return deprecate(config);
+  return deprecateOptions(config, fn);
 }
 
 function ensureCalledWith(args) {
@@ -43,12 +43,12 @@ describe('Deprecation Warnings', function() {
 
   function setupMultFunctionswithSameParams() {
     const f1 = makeTestFunction({
-      fName: 'f1',
+      name: 'f1',
       deprecatedParams: deprecatedParams,
       optionsIndex: 0
     });
     const f2 = makeTestFunction({
-      fName: 'f2',
+      name: 'f2',
       deprecatedParams: deprecatedParams,
       optionsIndex: 0
     });
@@ -86,7 +86,7 @@ describe('Deprecation Warnings', function() {
 
   function setupNoParams() {
     const f = makeTestFunction({
-      fName: 'f',
+      name: 'f',
       deprecatedParams: deprecatedParams,
       optionsIndex: 0
     });
@@ -114,12 +114,12 @@ describe('Deprecation Warnings', function() {
   });
 
   function setupUserMsgHandler() {
-    const customMsgHandler = (fName, param) => {
-      return 'custom msg for function ' + fName + ' and param ' + param;
+    const customMsgHandler = (name, param) => {
+      return 'custom msg for function ' + name + ' and param ' + param;
     };
 
     const f = makeTestFunction({
-      fName: 'f',
+      name: 'f',
       deprecatedParams: deprecatedParams,
       optionsIndex: 0,
       msgHandler: customMsgHandler
@@ -160,7 +160,7 @@ describe('Deprecation Warnings', function() {
 
   function setupOncePerParameter() {
     const f = makeTestFunction({
-      fName: 'f',
+      name: 'f',
       deprecatedParams: deprecatedParams,
       optionsIndex: 0
     });
@@ -192,77 +192,6 @@ describe('Deprecation Warnings', function() {
         'f parameter [maxScan]' + defaultMessage
       ]);
       expect(console.error).to.have.been.calledTwice;
-      done();
-    }
-  });
-
-  function setupFunctionsWarnOnce() {
-    const f1 = deprecate({ fn: function() {}, fName: 'f1', deprecateFunction: true });
-    const f2 = deprecate({ fn: function() {}, fName: 'f2', deprecateFunction: true });
-    f1();
-    f2();
-    f2();
-    f1();
-  }
-
-  it('each deprecated function should warn only once', {
-    metadata: { requires: { node: '>=6.0.0' } },
-    test: function(done) {
-      setupFunctionsWarnOnce();
-      process.nextTick(() => {
-        expect(messages).to.deep.equal(['f1' + defaultMessage, 'f2' + defaultMessage]);
-        expect(messages).to.have.a.lengthOf(2);
-        done();
-      });
-    }
-  });
-
-  it('each deprecated function should warn only once', {
-    metadata: { requires: { node: '<6.0.0' } },
-    test: function(done) {
-      setupFunctionsWarnOnce();
-      ensureCalledWith(['f1' + defaultMessage, 'f2' + defaultMessage]);
-      expect(console.error).to.have.been.calledTwice;
-      done();
-    }
-  });
-
-  function setupBothDeprecation() {
-    const f = makeTestFunction({
-      fName: 'f',
-      deprecatedParams: deprecatedParams,
-      optionsIndex: 0,
-      deprecateFunction: true
-    });
-    f({ maxScan: 5, fields: 'hi' });
-  }
-
-  it('if function and some parameters are deprecated, should warn for both cases', {
-    metadata: { requires: { node: '>=6.0.0' } },
-    test: function(done) {
-      setupBothDeprecation();
-      process.nextTick(() => {
-        expect(messages).to.deep.equal([
-          'f' + defaultMessage,
-          'f parameter [maxScan]' + defaultMessage,
-          'f parameter [fields]' + defaultMessage
-        ]);
-        expect(messages).to.have.a.lengthOf(3);
-        done();
-      });
-    }
-  });
-
-  it('if function and some parameters are deprecated, should warn for both cases', {
-    metadata: { requires: { node: '<6.0.0' } },
-    test: function(done) {
-      setupBothDeprecation();
-      ensureCalledWith([
-        'f' + defaultMessage,
-        'f parameter [maxScan]' + defaultMessage,
-        'f parameter [fields]' + defaultMessage
-      ]);
-      expect(console.error).to.have.been.calledThrice;
       done();
     }
   });

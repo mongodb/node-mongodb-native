@@ -4,16 +4,18 @@ if (require.main !== module) {
   return;
 }
 
-const deprecate = require('../lib/utils.js').deprecate;
+const deprecateOptions = require('../lib/utils.js').deprecateOptions;
 
-const testDeprecationFlags = deprecate({
-  fn: options => {
-    if (options) options = null;
+const testDeprecationFlags = deprecateOptions(
+  {
+    name: 'testDeprecationFlags',
+    deprecatedParams: ['maxScan', 'snapshot', 'fields'],
+    optionsIndex: 0
   },
-  fName: 'testDeprecationFlags',
-  deprecatedParams: ['maxScan', 'snapshot', 'fields'],
-  optionsIndex: 0
-});
+  options => {
+    if (options) options = null;
+  }
+);
 
 testDeprecationFlags({ maxScan: 0 });
 
