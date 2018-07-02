@@ -29,7 +29,7 @@ describe('examples(causal-consistency):', function() {
     collection = undefined;
   });
 
-  it('CausalConsistency', {
+  it('supports causal consistency', {
     metadata: {
       requires: { topology: ['single'], mongodb: '>=3.6.0' },
       sessions: { skipLeakTests: true }
