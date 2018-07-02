@@ -18,7 +18,9 @@ var restartAndDone = function(configuration, done) {
   }, 200);
 };
 
-describe('ReplSet (Connection)', function() {
+// NOTE: skipped for dubious benefit over SDAM unit tests, as well as the disruptive nature
+//       of starting and stopping the topology. Look into coverage benefits in the future.
+describe.skip('ReplSet (Connection)', function() {
   before(function() {
     var configuration = this.configuration;
     return setupDatabase(configuration).then(function() {

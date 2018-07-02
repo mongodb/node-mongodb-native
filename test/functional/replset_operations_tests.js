@@ -13,10 +13,7 @@ var restartAndDone = function(configuration, done) {
 // TODO: Remove skips when NODE-1527 is resolved
 describe('ReplSet (Operations)', function() {
   before(function() {
-    var configuration = this.configuration;
-    return setupDatabase(configuration).then(function() {
-      return configuration.manager.restart();
-    });
+    return setupDatabase(this.configuration);
   });
 
   /*******************************************************************
@@ -495,7 +492,8 @@ describe('ReplSet (Operations)', function() {
     }
   });
 
-  it('Should Correctly group using replicaset', {
+  // NOTE: skipped for use of topology manager
+  it.skip('Should Correctly group using replicaset', {
     metadata: { requires: { topology: 'replicaset' } },
 
     // The actual test we wish to run
@@ -561,7 +559,8 @@ describe('ReplSet (Operations)', function() {
     }
   });
 
-  it('Should Correctly execute createIndex with secondary readPreference', {
+  // NOTE: skipped for use of topology manager
+  it.skip('Should Correctly execute createIndex with secondary readPreference', {
     metadata: { requires: { topology: 'replicaset' } },
 
     // The actual test we wish to run

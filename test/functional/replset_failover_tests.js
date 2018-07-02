@@ -11,7 +11,9 @@ var restartAndDone = function(configuration, done) {
   });
 };
 
-describe('ReplSet (Failover)', function() {
+// NOTE: skipped for dubious benefit over SDAM unit tests, as well as the disruptive nature
+//       of starting and stopping the topology. Look into coverage benefits in the future.
+describe.skip('ReplSet (Failover)', function() {
   before(function() {
     var configuration = this.configuration;
     return setupDatabase(configuration).then(function() {
@@ -620,7 +622,7 @@ describe('ReplSet (Failover)', function() {
             setTimeout(function() {
               // Execute createIndex
               db.collection('t').createIndex({'accessControl.get': 1}, {background: true}, function(err, r) {
- 
+
                 test.ok(err != null);
                 test.ok(err.message.indexOf('key accessControl.get must not contain') == -1);
 
