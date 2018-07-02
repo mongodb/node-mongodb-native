@@ -15,7 +15,7 @@ The official [MongoDB](https://www.mongodb.com/) driver for Node.js. Provides a 
 | what          | where                                          |
 |---------------|------------------------------------------------|
 | documentation | http://mongodb.github.io/node-mongodb-native  |
-| api-doc        | http://mongodb.github.io/node-mongodb-native/3.0/api  |
+| api-doc        | http://mongodb.github.io/node-mongodb-native/3.1/api  |
 | source        | https://github.com/mongodb/node-mongodb-native |
 | mongodb       | http://www.mongodb.org                        |
 
