@@ -1,5 +1,7 @@
 'use strict';
-var expect = require('chai').expect;
+
+const expect = require('chai').expect;
+const MongoClient = require('../..').MongoClient;
 
 describe('URI', function() {
   /**
@@ -15,7 +17,6 @@ describe('URI', function() {
       // The actual test we wish to run
       test: function(done) {
         var self = this;
-        var MongoClient = self.configuration.require.MongoClient;
 
         // Connect using the connection string
         MongoClient.connect(
@@ -57,7 +58,6 @@ describe('URI', function() {
     // The actual test we wish to run
     test: function(done) {
       var self = this;
-      var MongoClient = self.configuration.require.MongoClient;
 
       // Connect using the connection string
       MongoClient.connect('mongodb://localhost:27017/integration_tests?w=0', function(err, client) {
@@ -89,8 +89,6 @@ describe('URI', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var MongoClient = this.configuration.require.MongoClient;
-
       if (process.platform !== 'win32') {
         MongoClient.connect('mongodb://%2Ftmp%2Fmongodb-27017.sock?safe=false', function(
           err,
@@ -114,8 +112,6 @@ describe('URI', function() {
     // The actual test we wish to run
     test: function(done) {
       var self = this;
-      var MongoClient = self.configuration.require.MongoClient;
-
       MongoClient.connect('mongodb://127.0.0.1:27017/?fsync=true', function(err, client) {
         var db = client.db(self.configuration.db);
         expect(db.writeConcern.fsync).to.be.true;
@@ -133,7 +129,6 @@ describe('URI', function() {
     // The actual test we wish to run
     test: function(done) {
       var self = this;
-      var MongoClient = self.configuration.require.MongoClient;
 
       MongoClient.connect(
         'mongodb://localhost:27017/integration_tests',
@@ -162,6 +157,24 @@ describe('URI', function() {
           });
         }
       );
+    }
+  });
+
+  it('should correctly translate uri options using new parser', {
+    metadata: { requires: { topology: 'replicaset' } },
+    test: function(done) {
+      const config = this.configuration;
+      const uri = `mongodb://${config.host}:${config.port}/${config.db}?replicaSet=${
+        config.replicasetName
+      }`;
+
+      MongoClient.connect(uri, { useNewUrlParser: true }, (err, client) => {
+        if (err) console.dir(err);
+        expect(err).to.not.exist;
+        expect(client).to.exist;
+        expect(client.s.options.replicaSet).to.exist.and.equal(config.replicasetName);
+        done();
+      });
     }
   });
 });
