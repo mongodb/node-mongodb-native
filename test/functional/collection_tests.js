@@ -2,6 +2,7 @@
 const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
+const MongoClient = require('../..').MongoClient;
 
 describe('Collection', function() {
   before(function() {
@@ -1583,16 +1584,14 @@ describe('Collection', function() {
 
   it('should correctly perform estimatedDocumentCount on non-matching query', function(done) {
     const configuration = this.configuration;
-    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+    const client = new MongoClient(configuration.url(), { w: 1 });
 
     client.connect(function(err, client) {
       const db = client.db(configuration.db);
-      let collection;
+      const collection = db.collection('nonexistent_coll_1');
       const close = e => client.close(() => done(e));
 
       Promise.resolve()
-        .then(() => db.collection('nonexistent_coll_1'))
-        .then(_coll => (collection = _coll))
         .then(() => collection.estimatedDocumentCount({ a: 'b' }))
         .then(count => expect(count).to.equal(0))
         .then(() => close())
@@ -1602,16 +1601,14 @@ describe('Collection', function() {
 
   it('should correctly perform countDocuments on non-matching query', function(done) {
     const configuration = this.configuration;
-    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+    const client = new MongoClient(configuration.url(), { w: 1 });
 
     client.connect(function(err, client) {
       const db = client.db(configuration.db);
-      let collection;
+      const collection = db.collection('nonexistent_coll_2');
       const close = e => client.close(() => done(e));
 
       Promise.resolve()
-        .then(() => db.collection('nonexistent_coll_2'))
-        .then(_coll => (collection = _coll))
         .then(() => collection.countDocuments({ a: 'b' }))
         .then(count => expect(count).to.equal(0))
         .then(() => close())
