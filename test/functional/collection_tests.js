@@ -1581,6 +1581,38 @@ describe('Collection', function() {
     }
   });
 
+  it('should correctly perform estimatedDocumentCount on non-matching query', function() {
+    const self = this;
+    const MongoClient = require('../../lib/mongo_client');
+    const client = new MongoClient(self.configuration.url(), { poolSize: 1, autoReconnect: false });
+    const close = () => client.close();
+
+    return client
+      .connect()
+      .then(client => client.db(self.db))
+      .then(db => db.collection('nonexistent_coll_1'))
+      .then(collection => collection.estimatedDocumentCount({ a: 'b' }))
+      .then(count => expect(count).to.equal(0))
+      .then(close)
+      .catch(close);
+  });
+
+  it('should correctly perform countDocuments on non-matching query', function() {
+    const self = this;
+    const MongoClient = require('../../lib/mongo_client');
+    const client = new MongoClient(self.configuration.url(), { poolSize: 1, autoReconnect: false });
+    const close = () => client.close();
+
+    return client
+      .connect()
+      .then(client => client.db(self.db))
+      .then(db => db.collection('nonexistent_coll_2'))
+      .then(collection => collection.countDocuments({ a: 'b' }))
+      .then(count => expect(count).to.equal(0))
+      .then(close)
+      .catch(close);
+  });
+
   describe('Retryable Writes on bulk ops', function() {
     const MongoClient = require('../../lib/mongo_client');
 
