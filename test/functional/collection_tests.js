@@ -1581,42 +1581,36 @@ describe('Collection', function() {
     }
   });
 
-  it('should correctly perform estimatedDocumentCount on non-matching query', function(done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+  it('should correctly perform estimatedDocumentCount on non-matching query', function() {
+    const self = this;
+    const MongoClient = require('../../lib/mongo_client');
+    const client = new MongoClient(self.configuration.url(), { poolSize: 1, autoReconnect: false });
+    const close = () => client.close();
 
-    client.connect(function(err, client) {
-      const db = client.db(configuration.db);
-      let collection;
-      const close = e => client.close(() => done(e));
-
-      Promise.resolve()
-        .then(() => db.collection('nonexistent_coll_1'))
-        .then(_coll => (collection = _coll))
-        .then(() => collection.estimatedDocumentCount({ a: 'b' }))
-        .then(count => expect(count).to.equal(0))
-        .then(() => close())
-        .catch(e => close(e));
-    });
+    return client
+      .connect()
+      .then(client => client.db(self.db))
+      .then(db => db.collection('nonexistent_coll_1'))
+      .then(collection => collection.estimatedDocumentCount({ a: 'b' }))
+      .then(count => expect(count).to.equal(0))
+      .then(close)
+      .catch(close);
   });
 
-  it('should correctly perform countDocuments on non-matching query', function(done) {
-    const configuration = this.configuration;
-    const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+  it('should correctly perform countDocuments on non-matching query', function() {
+    const self = this;
+    const MongoClient = require('../../lib/mongo_client');
+    const client = new MongoClient(self.configuration.url(), { poolSize: 1, autoReconnect: false });
+    const close = () => client.close();
 
-    client.connect(function(err, client) {
-      const db = client.db(configuration.db);
-      let collection;
-      const close = e => client.close(() => done(e));
-
-      Promise.resolve()
-        .then(() => db.collection('nonexistent_coll_2'))
-        .then(_coll => (collection = _coll))
-        .then(() => collection.countDocuments({ a: 'b' }))
-        .then(count => expect(count).to.equal(0))
-        .then(() => close())
-        .catch(e => close(e));
-    });
+    return client
+      .connect()
+      .then(client => client.db(self.db))
+      .then(db => db.collection('nonexistent_coll_2'))
+      .then(collection => collection.countDocuments({ a: 'b' }))
+      .then(count => expect(count).to.equal(0))
+      .then(close)
+      .catch(close);
   });
 
   describe('Retryable Writes on bulk ops', function() {
