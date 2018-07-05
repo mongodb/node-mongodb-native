@@ -2,6 +2,7 @@
 const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
+const MongoClient = require('../..').MongoClient;
 
 describe('Collection', function() {
   before(function() {
@@ -1579,6 +1580,40 @@ describe('Collection', function() {
           return client.close();
         });
     }
+  });
+
+  it('should correctly perform estimatedDocumentCount on non-matching query', function(done) {
+    const configuration = this.configuration;
+    const client = new MongoClient(configuration.url(), { w: 1 });
+
+    client.connect(function(err, client) {
+      const db = client.db(configuration.db);
+      const collection = db.collection('nonexistent_coll_1');
+      const close = e => client.close(() => done(e));
+
+      Promise.resolve()
+        .then(() => collection.estimatedDocumentCount({ a: 'b' }))
+        .then(count => expect(count).to.equal(0))
+        .then(() => close())
+        .catch(e => close(e));
+    });
+  });
+
+  it('should correctly perform countDocuments on non-matching query', function(done) {
+    const configuration = this.configuration;
+    const client = new MongoClient(configuration.url(), { w: 1 });
+
+    client.connect(function(err, client) {
+      const db = client.db(configuration.db);
+      const collection = db.collection('nonexistent_coll_2');
+      const close = e => client.close(() => done(e));
+
+      Promise.resolve()
+        .then(() => collection.countDocuments({ a: 'b' }))
+        .then(count => expect(count).to.equal(0))
+        .then(() => close())
+        .catch(e => close(e));
+    });
   });
 
   describe('Retryable Writes on bulk ops', function() {
