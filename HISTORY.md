@@ -1,3 +1,16 @@
+<a name="3.1.1"></a>
+## [3.1.1](https://github.com/mongodb/node-mongodb-native/compare/v3.1.0...v3.1.1) (2018-07-05)
+
+
+### Bug Fixes
+
+* **client-ops:** return transform map to map rather than function ([b8b4bfa](https://github.com/mongodb/node-mongodb-native/commit/b8b4bfa))
+* **collection:** correctly shallow clone passed in options ([2e6c4fa](https://github.com/mongodb/node-mongodb-native/commit/2e6c4fa))
+* **collection:** countDocuments throws error when query doesn't match docs ([4e83556](https://github.com/mongodb/node-mongodb-native/commit/4e83556))
+* **server:** remove unnecessary print statement ([20e11b3](https://github.com/mongodb/node-mongodb-native/commit/20e11b3))
+
+
+
 <a name="3.1.0"></a>
 # [3.1.0](https://github.com/mongodb/node-mongodb-native/compare/v3.0.6...v3.1.0) (2018-06-27)
 
