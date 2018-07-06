@@ -1,10 +1,14 @@
 'use strict';
 const exec = require('child_process').exec;
+const deprecateOptions = require('../../lib/utils').deprecateOptions;
 const chai = require('chai');
 const expect = chai.expect;
 const sinonChai = require('sinon-chai');
 require('mocha-sinon');
 chai.use(sinonChai);
+beforeEach(function() {
+  this.sinon.stub(console, 'error');
+});
 
 describe('Deprecation Warnings', function() {
   const defaultMessage = ' is deprecated and will be removed in a later version.';
@@ -90,8 +94,10 @@ describe('Deprecation Warnings', function() {
   //     Logger.setLevel('warn');
 
   //     Logger.setCurrentLogger(function(msg, context) {
+  //       // console.log('LOGGER PRINT STATEMENTS HERE');
+  //       // console.log(context);
   //       expect(msg).to.exist;
-  //       console.log('warn msg: ' + msg);
+  //       // console.log('warn msg: ' + msg);
   //     });
 
   //     Promise.resolve()
@@ -104,4 +110,39 @@ describe('Deprecation Warnings', function() {
   //       .catch(e => close(e));
   //   });
   // });
+
+  // setup for logger classes
+  const Logger = require('mongodb-core').Logger;
+
+  function makeTestFunction(config) {
+    const fn = options => {
+      if (options) options = null;
+    };
+    return deprecateOptions(config, fn);
+  }
+
+  // creation of class with a logger
+  function ClassWithLogger() {
+    this.Logger = new Logger('ClassWithLogger');
+    Logger.setLevel('warn');
+  }
+
+  ClassWithLogger.prototype.f = makeTestFunction({
+    name: 'f',
+    deprecatedParams: ['maxScan', 'snapshot', 'fields'],
+    optionsIndex: 0
+  });
+
+  ClassWithLogger.prototype.getLogger = () => {
+    return this.Logger;
+  };
+
+  // creation of class without a logger
+  function ClassWithoutLogger() {}
+
+  ClassWithoutLogger.prototype.f = makeTestFunction({
+    name: 'f',
+    deprecatedParams: ['maxScan', 'snapshot', 'fields'],
+    optionsIndex: 0
+  });
 });
