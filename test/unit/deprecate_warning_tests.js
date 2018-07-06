@@ -6,16 +6,8 @@ const sinonChai = require('sinon-chai');
 require('mocha-sinon');
 chai.use(sinonChai);
 
-function makeTestFunction(config) {
-  const fn = options => {
-    if (options) options = null;
-  };
-  return deprecateOptions(config, fn);
-}
-
-function ensureCalledWith(args) {
-  args.forEach(m => expect(console.error).to.have.been.calledWith(m));
-}
+const makeTestFunction = require('../tools/utils').makeTestFunction;
+const ensureCalledWith = require('../tools/utils').ensureCalledWith;
 
 describe('Deprecation Warnings', function() {
   let messages = [];
@@ -73,7 +65,7 @@ describe('Deprecation Warnings', function() {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
       setupMultFunctionswithSameParams();
-      ensureCalledWith([
+      ensureCalledWith(console.error, [
         'f1 parameter [maxScan]' + defaultMessage,
         'f2 parameter [maxScan]' + defaultMessage
       ]);
@@ -146,7 +138,7 @@ describe('Deprecation Warnings', function() {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
       setupUserMsgHandler();
-      ensureCalledWith([
+      ensureCalledWith(console.error, [
         'custom msg for function f and param maxScan',
         'custom msg for function f and param snapshot',
         'custom msg for function f and param fields'
@@ -185,7 +177,7 @@ describe('Deprecation Warnings', function() {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
       setupOncePerParameter();
-      ensureCalledWith([
+      ensureCalledWith(console.error, [
         'f parameter [maxScan]' + defaultMessage,
         'f parameter [fields]' + defaultMessage
       ]);
@@ -238,7 +230,7 @@ describe('Deprecation Warnings', function() {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
       setupMaintainFunctionality();
-      ensureCalledWith([
+      ensureCalledWith(console.error, [
         'f parameter [multiply]' + defaultMessage,
         'f parameter [add]' + defaultMessage
       ]);

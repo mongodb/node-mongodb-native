@@ -4,7 +4,7 @@ if (require.main !== module) {
   return;
 }
 
-const deprecateOptions = require('../lib/utils.js').deprecateOptions;
+const deprecateOptions = require('../../lib/utils.js').deprecateOptions;
 
 const testDeprecationFlags = deprecateOptions(
   {

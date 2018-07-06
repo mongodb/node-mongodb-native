@@ -1,23 +1,29 @@
 'use strict';
 const exec = require('child_process').exec;
-const deprecateOptions = require('../../lib/utils').deprecateOptions;
 const chai = require('chai');
 const expect = chai.expect;
+const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
 require('mocha-sinon');
 chai.use(sinonChai);
-beforeEach(function() {
-  this.sinon.stub(console, 'error');
-});
+
+const utils = require('../tools/utils');
+const ClassWithLogger = utils.ClassWithLogger;
+const ClassWithoutLogger = utils.ClassWithoutLogger;
+const ensureCalledWith = utils.ensureCalledWith;
 
 describe('Deprecation Warnings', function() {
+  beforeEach(function() {
+    this.sinon.stub(console, 'error');
+  });
+
   const defaultMessage = ' is deprecated and will be removed in a later version.';
 
   it('node --no-deprecation flag should suppress all deprecation warnings', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
       exec(
-        'node --no-deprecation ./test/deprecate_warning_test_program.js',
+        'node --no-deprecation ./test/tools/deprecate_warning_test_program.js',
         (err, stdout, stderr) => {
           expect(err).to.be.null;
           expect(stdout).to.be.empty;
@@ -32,7 +38,7 @@ describe('Deprecation Warnings', function() {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
       exec(
-        'node --trace-deprecation ./test/deprecate_warning_test_program.js',
+        'node --trace-deprecation ./test/tools/deprecate_warning_test_program.js',
         (err, stdout, stderr) => {
           expect(err).to.be.null;
           expect(stdout).to.be.empty;
@@ -65,7 +71,7 @@ describe('Deprecation Warnings', function() {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
       exec(
-        'node --throw-deprecation ./test/deprecate_warning_test_program.js this_arg_should_never_print',
+        'node --throw-deprecation ./test/tools/deprecate_warning_test_program.js this_arg_should_never_print',
         (err, stdout, stderr) => {
           expect(stderr).to.not.be.empty;
           expect(err).to.not.be.null;
@@ -81,68 +87,23 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  // it('logger test for deprecation', function(done) {
-  //   const configuration = this.configuration;
-  //   const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-  //   const Logger = this.configuration.require.Logger;
+  it('test behavior for classes with an associated logger', function() {
+    const fakeClass = new ClassWithLogger();
+    const logger = fakeClass.getLogger();
+    const stub = sinon.stub(logger, 'warn');
 
-  //   client.connect(function(err, client) {
-  //     const db = client.db(configuration.db);
-  //     let collection, cursor;
-  //     const close = e => cursor.close(() => client.close(() => done(e)));
-
-  //     Logger.setLevel('warn');
-
-  //     Logger.setCurrentLogger(function(msg, context) {
-  //       // console.log('LOGGER PRINT STATEMENTS HERE');
-  //       // console.log(context);
-  //       expect(msg).to.exist;
-  //       // console.log('warn msg: ' + msg);
-  //     });
-
-  //     Promise.resolve()
-  //       .then(() => db.createCollection('log_test_deprecation'))
-  //       .then(() => (collection = db.collection('log_test_deprecation')))
-  //       .then(() => collection.find({}, { maxScan: 5, fields: 'hi', snapshot: true }))
-  //       .then(() => collection.find({}, { maxScan: 5, fields: 'hi', snapshot: true }))
-  //       .then(_cursor => (cursor = _cursor))
-  //       .then(() => close())
-  //       .catch(e => close(e));
-  //   });
-  // });
-
-  // setup for logger classes
-  const Logger = require('mongodb-core').Logger;
-
-  function makeTestFunction(config) {
-    const fn = options => {
-      if (options) options = null;
-    };
-    return deprecateOptions(config, fn);
-  }
-
-  // creation of class with a logger
-  function ClassWithLogger() {
-    this.Logger = new Logger('ClassWithLogger');
-    Logger.setLevel('warn');
-  }
-
-  ClassWithLogger.prototype.f = makeTestFunction({
-    name: 'f',
-    deprecatedParams: ['maxScan', 'snapshot', 'fields'],
-    optionsIndex: 0
+    fakeClass.f({ maxScan: 5, snapshot: true });
+    fakeClass.f({ maxScan: 5, snapshot: true });
+    expect(stub).to.have.been.calledTwice;
+    ensureCalledWith(stub, [
+      'f parameter [maxScan] is deprecated and will be removed in a later version.',
+      'f parameter [snapshot] is deprecated and will be removed in a later version.'
+    ]);
   });
 
-  ClassWithLogger.prototype.getLogger = () => {
-    return this.Logger;
-  };
+  it('test behavior for classes without an associated logger', function() {
+    const fakeClass = new ClassWithoutLogger();
 
-  // creation of class without a logger
-  function ClassWithoutLogger() {}
-
-  ClassWithoutLogger.prototype.f = makeTestFunction({
-    name: 'f',
-    deprecatedParams: ['maxScan', 'snapshot', 'fields'],
-    optionsIndex: 0
+    fakeClass.f({ maxScan: 5, snapshot: true });
   });
 });
