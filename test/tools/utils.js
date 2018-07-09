@@ -42,9 +42,24 @@ ClassWithoutLogger.prototype.f = makeTestFunction({
   optionsIndex: 0
 });
 
+// creation of class where getLogger returns undefined
+// creation of class without a logger
+function ClassWithUndefinedLogger() {}
+
+ClassWithUndefinedLogger.prototype.f = makeTestFunction({
+  name: 'f',
+  deprecatedParams: ['maxScan', 'snapshot', 'fields'],
+  optionsIndex: 0
+});
+
+ClassWithUndefinedLogger.prototype.getLogger = function() {
+  return undefined;
+};
+
 module.exports = {
   makeTestFunction,
   ensureCalledWith,
   ClassWithLogger,
-  ClassWithoutLogger
+  ClassWithoutLogger,
+  ClassWithUndefinedLogger
 };

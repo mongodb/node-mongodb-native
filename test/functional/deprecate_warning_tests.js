@@ -10,6 +10,7 @@ chai.use(sinonChai);
 const utils = require('../tools/utils');
 const ClassWithLogger = utils.ClassWithLogger;
 const ClassWithoutLogger = utils.ClassWithoutLogger;
+const ClassWithUndefinedLogger = utils.ClassWithUndefinedLogger;
 const ensureCalledWith = utils.ensureCalledWith;
 
 describe('Deprecation Warnings', function() {
@@ -103,6 +104,12 @@ describe('Deprecation Warnings', function() {
 
   it('test behavior for classes without an associated logger', function() {
     const fakeClass = new ClassWithoutLogger();
+
+    fakeClass.f({ maxScan: 5, snapshot: true });
+  });
+
+  it('test behavior for classes with an undefined logger', function() {
+    const fakeClass = new ClassWithUndefinedLogger();
 
     fakeClass.f({ maxScan: 5, snapshot: true });
   });
