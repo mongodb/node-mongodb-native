@@ -25,26 +25,28 @@
 </header>  
 
 <article>
-    <div class="container-overview">
-    <?js if (doc.kind === 'module' && doc.module) { ?>
-        <?js= self.partial('method.tmpl', doc.module) ?>
-    <?js } ?>
-    
-    <?js if (doc.kind === 'class') { ?>
-        <?js= self.partial('method.tmpl', doc) ?>
-    <?js } else { ?>
-        <?js if (doc.description) { ?>
-            <div class="description"><?js= doc.description ?></div>
+    <?js if (!doc.hideconstructor) { ?>
+        <div class="container-overview">
+        <?js if (doc.kind === 'module' && doc.module) { ?>
+            <?js= self.partial('method.tmpl', doc.module) ?>
         <?js } ?>
         
-        <?js= self.partial('details.tmpl', doc) ?>
-        
-        <?js if (doc.examples && doc.examples.length) { ?>
-            <h3>Example<?js= doc.examples.length > 1? 's':'' ?></h3>
-            <?js= self.partial('examples.tmpl', doc.examples) ?>
+        <?js if (doc.kind === 'class') { ?>
+            <?js= self.partial('method.tmpl', doc) ?>
+        <?js } else { ?>
+            <?js if (doc.description) { ?>
+                <div class="description"><?js= doc.description ?></div>
+            <?js } ?>
+            
+            <?js= self.partial('details.tmpl', doc) ?>
+            
+            <?js if (doc.examples && doc.examples.length) { ?>
+                <h3>Example<?js= doc.examples.length > 1? 's':'' ?></h3>
+                <?js= self.partial('examples.tmpl', doc.examples) ?>
+            <?js } ?>
         <?js } ?>
+        </div>
     <?js } ?>
-    </div>
     
     <?js if (doc.augments && doc.augments.length) { ?>
         <h3 class="subsection-title">Extends</h3>
