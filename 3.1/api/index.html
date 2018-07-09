@@ -381,6 +381,47 @@
             </ul>
         </li>
     
+        <li class="item" data-name="ClientSession">
+            <span class="title">
+                <a href="ClientSession.html">ClientSession</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="ClientSession#id"><a href="ClientSession.html#id">id</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="ClientSession#abortTransaction"><a href="ClientSession.html#abortTransaction">abortTransaction</a></li>
+            
+                <li data-name="ClientSession#advanceOperationTime"><a href="ClientSession.html#advanceOperationTime">advanceOperationTime</a></li>
+            
+                <li data-name="ClientSession#commitTransaction"><a href="ClientSession.html#commitTransaction">commitTransaction</a></li>
+            
+                <li data-name="ClientSession#endSession"><a href="ClientSession.html#endSession">endSession</a></li>
+            
+                <li data-name="ClientSession#equals"><a href="ClientSession.html#equals">equals</a></li>
+            
+                <li data-name="ClientSession#incrementTransactionNumber"><a href="ClientSession.html#incrementTransactionNumber">incrementTransactionNumber</a></li>
+            
+                <li data-name="ClientSession#inTransaction"><a href="ClientSession.html#inTransaction">inTransaction</a></li>
+            
+                <li data-name="ClientSession#startTransaction"><a href="ClientSession.html#startTransaction">startTransaction</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="Code">
             <span class="title">
                 <a href="Code.html">Code</a>
@@ -2039,16 +2080,17 @@
 </header>  
 
 <article>
-    <div class="container-overview">
     
-    
-    
+        <div class="container-overview">
         
-            <div class="description"><p>The <strong>Admin</strong> class is an internal class that allows convenient access to<br>the admin functionality and commands for MongoDB.</p>
+        
+        
+            
+                <div class="description"><p>The <strong>Admin</strong> class is an internal class that allows convenient access to<br>the admin functionality and commands for MongoDB.</p>
 <p><strong>ADMIN Cannot directly be instantiated</strong></p></div>
-        
-        
-        
+            
+            
+            
 <dl class="details">
     
         
@@ -2073,10 +2115,10 @@
     
 </dl>
 
-        
-        
-            <h3>Example</h3>
             
+            
+                <h3>Example</h3>
+                
 
     
     <pre class="prettyprint"><code><p>const MongoClient = require('mongodb').MongoClient;<br>const test = require('assert');<br>// Connection url<br>const url = 'mongodb://localhost:27017';<br>// Database Name<br>const dbName = 'test';</p>
@@ -2084,9 +2126,10 @@
 <p>  // List all the available databases<br>  adminDb.listDatabases(function(err, dbs) {<br>    test.equal(null, err);<br>    test.ok(dbs.databases.length &gt; 0);<br>    client.close();<br>  });<br>});</p></code></pre>
     
 
+            
         
+        </div>
     
-    </div>
     
     
     
@@ -2124,16 +2167,17 @@
 </header>  
 
 <article>
-    <div class="container-overview">
     
-    
-    
+        <div class="container-overview">
         
-            <div class="description"><p>The <strong>AggregationCursor</strong> class is an internal class that embodies an aggregation cursor on MongoDB<br>allowing for iteration over the results returned from the underlying query. It supports<br>one by one document iteration, conversion to an array or can be iterated as a Node 4.X<br>or higher stream</p>
+        
+        
+            
+                <div class="description"><p>The <strong>AggregationCursor</strong> class is an internal class that embodies an aggregation cursor on MongoDB<br>allowing for iteration over the results returned from the underlying query. It supports<br>one by one document iteration, conversion to an array or can be iterated as a Node 4.X<br>or higher stream</p>
 <p><strong>AGGREGATIONCURSOR Cannot directly be instantiated</strong></p></div>
-        
-        
-        
+            
+            
+            
 <dl class="details">
     
         
@@ -2158,18 +2202,19 @@
     
 </dl>
 
-        
-        
-            <h3>Example</h3>
             
+            
+                <h3>Example</h3>
+                
 
     
     <pre class="prettyprint"><code><p>const MongoClient = require('mongodb').MongoClient;<br>const test = require('assert');<br>// Connection url<br>const url = 'mongodb://localhost:27017';<br>// Database Name<br>const dbName = 'test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, client) {<br>  // Create a collection we want to drop later<br>  const col = client.db(dbName).collection('createIndexExample1');<br>  // Insert a bunch of documents<br>  col.insert([{a:1, b:1}<br>    , {a:2, b:2}, {a:3, b:3}<br>    , {a:4, b:4}], {w:1}, function(err, result) {<br>    test.equal(null, err);<br>    // Show that duplicate records got dropped<br>    col.aggregation({}, {cursor: {}}).toArray(function(err, items) {<br>      test.equal(null, err);<br>      test.equal(4, items.length);<br>      client.close();<br>    });<br>  });<br>});</p></code></pre>
     
 
+            
         
+        </div>
     
-    </div>
     
     
     
@@ -2207,16 +2252,17 @@
 </header>  
 
 <article>
-    <div class="container-overview">
     
-    
-    
+        <div class="container-overview">
         
-            <div class="description"><p>The <strong>Collection</strong> class is an internal class that embodies a MongoDB collection<br>allowing for insert/update/remove/find and other command operation on that MongoDB collection.</p>
+        
+        
+            
+                <div class="description"><p>The <strong>Collection</strong> class is an internal class that embodies a MongoDB collection<br>allowing for insert/update/remove/find and other command operation on that MongoDB collection.</p>
 <p><strong>COLLECTION Cannot directly be instantiated</strong></p></div>
-        
-        
-        
+            
+            
+            
 <dl class="details">
     
         
@@ -2241,18 +2287,19 @@
     
 </dl>
 
-        
-        
-            <h3>Example</h3>
             
+            
+                <h3>Example</h3>
+                
 
     
     <pre class="prettyprint"><code><p>const MongoClient = require('mongodb').MongoClient;<br>const test = require('assert');<br>// Connection url<br>const url = 'mongodb://localhost:27017';<br>// Database Name<br>const dbName = 'test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, client) {<br>  // Create a collection we want to drop later<br>  const col = client.db(dbName).collection('createIndexExample1');<br>  // Show that duplicate records got dropped<br>  col.find({}).toArray(function(err, items) {<br>    test.equal(null, err);<br>    test.equal(4, items.length);<br>    client.close();<br>  });<br>});</p></code></pre>
     
 
+            
         
+        </div>
     
-    </div>
     
     
     
@@ -2290,16 +2337,17 @@
 </header>  
 
 <article>
-    <div class="container-overview">
     
-    
-    
+        <div class="container-overview">
         
-            <div class="description"><p>The <strong>CommandCursor</strong> class is an internal class that embodies a<br>generalized cursor based on a MongoDB command allowing for iteration over the<br>results returned. It supports one by one document iteration, conversion to an<br>array or can be iterated as a Node 0.10.X or higher stream</p>
+        
+        
+            
+                <div class="description"><p>The <strong>CommandCursor</strong> class is an internal class that embodies a<br>generalized cursor based on a MongoDB command allowing for iteration over the<br>results returned. It supports one by one document iteration, conversion to an<br>array or can be iterated as a Node 0.10.X or higher stream</p>
 <p><strong>CommandCursor Cannot directly be instantiated</strong></p></div>
-        
-        
-        
+            
+            
+            
 <dl class="details">
     
         
@@ -2324,18 +2372,19 @@
     
 </dl>
 
-        
-        
-            <h3>Example</h3>
             
+            
+                <h3>Example</h3>
+                
 
     
     <pre class="prettyprint"><code><p>const MongoClient = require('mongodb').MongoClient;<br>const test = require('assert');<br>// Connection url<br>const url = 'mongodb://localhost:27017';<br>// Database Name<br>const dbName = 'test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, client) {<br>  // Create a collection we want to drop later<br>  const col = client.db(dbName).collection('listCollectionsExample1');<br>  // Insert a bunch of documents<br>  col.insert([{a:1, b:1}<br>    , {a:2, b:2}, {a:3, b:3}<br>    , {a:4, b:4}], {w:1}, function(err, result) {<br>    test.equal(null, err);<br>    // List the database collections available<br>    db.listCollections().toArray(function(err, items) {<br>      test.equal(null, err);<br>      client.close();<br>    });<br>  });<br>});</p></code></pre>
     
 
+            
         
+        </div>
     
-    </div>
     
     
     
@@ -2373,16 +2422,17 @@
 </header>  
 
 <article>
-    <div class="container-overview">
     
-    
-    
+        <div class="container-overview">
         
-            <div class="description"><p>The <strong>Cursor</strong> class is an internal class that embodies a cursor on MongoDB<br>allowing for iteration over the results returned from the underlying query. It supports<br>one by one document iteration, conversion to an array or can be iterated as a Node 4.X<br>or higher stream</p>
+        
+        
+            
+                <div class="description"><p>The <strong>Cursor</strong> class is an internal class that embodies a cursor on MongoDB<br>allowing for iteration over the results returned from the underlying query. It supports<br>one by one document iteration, conversion to an array or can be iterated as a Node 4.X<br>or higher stream</p>
 <p><strong>CURSORS Cannot directly be instantiated</strong></p></div>
-        
-        
-        
+            
+            
+            
 <dl class="details">
     
         
@@ -2407,18 +2457,19 @@
     
 </dl>
 
-        
-        
-            <h3>Example</h3>
             
+            
+                <h3>Example</h3>
+                
 
     
     <pre class="prettyprint"><code><p>const MongoClient = require('mongodb').MongoClient;<br>const test = require('assert');<br>// Connection url<br>const url = 'mongodb://localhost:27017';<br>// Database Name<br>const dbName = 'test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, client) {<br>  // Create a collection we want to drop later<br>  const col = client.db(dbName).collection('createIndexExample1');<br>  // Insert a bunch of documents<br>  col.insert([{a:1, b:1}<br>    , {a:2, b:2}, {a:3, b:3}<br>    , {a:4, b:4}], {w:1}, function(err, result) {<br>    test.equal(null, err);<br>    // Show that duplicate records got dropped<br>    col.find({}).toArray(function(err, items) {<br>      test.equal(null, err);<br>      test.equal(4, items.length);<br>      client.close();<br>    });<br>  });<br>});</p></code></pre>
     
 
+            
         
+        </div>
     
-    </div>
     
     
     
@@ -2456,15 +2507,16 @@
 </header>  
 
 <article>
-    <div class="container-overview">
     
-    
-    
-        
-            <div class="description"><p>The <strong>Db</strong> class is a class that represents a MongoDB Database.</p></div>
+        <div class="container-overview">
         
         
         
+            
+                <div class="description"><p>The <strong>Db</strong> class is a class that represents a MongoDB Database.</p></div>
+            
+            
+            
 <dl class="details">
     
         
@@ -2489,18 +2541,19 @@
     
 </dl>
 
-        
-        
-            <h3>Example</h3>
             
+            
+                <h3>Example</h3>
+                
 
     
     <pre class="prettyprint"><code><p>const MongoClient = require('mongodb').MongoClient;<br>// Connection url<br>const url = 'mongodb://localhost:27017';<br>// Database Name<br>const dbName = 'test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, client) {<br>  // Select the database by name<br>  const testDb = client.db(dbName);<br>  client.close();<br>});</p></code></pre>
     
 
+            
         
+        </div>
     
-    </div>
     
     
     
@@ -2538,15 +2591,16 @@
 </header>  
 
 <article>
-    <div class="container-overview">
     
-    
-    
-        
-            <div class="description"><p>GridFS is a tool for MongoDB to store files to the database.<br>Because of the restrictions of the object size the database can hold, a<br>facility to split a file into several chunks is needed. The <a href="GridStore.html"><code>GridStore</code></a><br>class offers a simplified api to interact with files while managing the<br>chunks of split files behind the scenes. More information about GridFS can be<br>found <a href="http://www.mongodb.org/display/DOCS/GridFS">here</a>.</p></div>
+        <div class="container-overview">
         
         
         
+            
+                <div class="description"><p>GridFS is a tool for MongoDB to store files to the database.<br>Because of the restrictions of the object size the database can hold, a<br>facility to split a file into several chunks is needed. The <a href="GridStore.html"><code>GridStore</code></a><br>class offers a simplified api to interact with files while managing the<br>chunks of split files behind the scenes. More information about GridFS can be<br>found <a href="http://www.mongodb.org/display/DOCS/GridFS">here</a>.</p></div>
+            
+            
+            
 <dl class="details">
     
         
@@ -2571,18 +2625,19 @@
     
 </dl>
 
-        
-        
-            <h3>Example</h3>
             
+            
+                <h3>Example</h3>
+                
 
     
     <pre class="prettyprint"><code><p>const MongoClient = require('mongodb').MongoClient;<br>const GridStore = require('mongodb').GridStore;<br>const ObjectID = require('mongodb').ObjectID;<br>const test = require('assert');<br>// Connection url<br>const url = 'mongodb://localhost:27017';<br>// Database Name<br>const dbName = 'test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, client) {<br>  const db = client.db(dbName);<br>  const gridStore = new GridStore(db, null, &quot;w&quot;);<br>  gridStore.open(function(err, gridStore) {<br>    gridStore.write(&quot;hello world!&quot;, function(err, gridStore) {<br>      gridStore.close(function(err, result) {<br>        // Let's read the file using object Id<br>        GridStore.read(db, result._id, function(err, data) {<br>          test.equal('hello world!', data);<br>          client.close();<br>          test.done();<br>        });<br>      });<br>    });<br>  });<br>});</p></code></pre>
     
 
+            
         
+        </div>
     
-    </div>
     
     
     
@@ -2620,15 +2675,16 @@
 </header>  
 
 <article>
-    <div class="container-overview">
     
-    
-    
-        
-            <div class="description"><p>The <strong>MongoClient</strong> class is a class that allows for making Connections to MongoDB.</p></div>
+        <div class="container-overview">
         
         
         
+            
+                <div class="description"><p>The <strong>MongoClient</strong> class is a class that allows for making Connections to MongoDB.</p></div>
+            
+            
+            
 <dl class="details">
     
         
@@ -2653,10 +2709,10 @@
     
 </dl>
 
-        
-        
-            <h3>Examples</h3>
             
+            
+                <h3>Examples</h3>
+                
 
     
     <pre class="prettyprint"><code><p>// Connect using a MongoClient instance<br>const MongoClient = require('mongodb').MongoClient;<br>const test = require('assert');<br>// Connection url<br>const url = 'mongodb://localhost:27017';<br>// Database Name<br>const dbName = 'test';<br>// Connect using MongoClient<br>const mongoClient = new MongoClient(url);<br>mongoClient.connect(function(err, client) {<br>  const db = client.db(dbName);<br>  client.close();<br>});</p></code></pre>
@@ -2667,9 +2723,10 @@
     <pre class="prettyprint"><code><p>// Connect using the MongoClient.connect static method<br>const MongoClient = require('mongodb').MongoClient;<br>const test = require('assert');<br>// Connection url<br>const url = 'mongodb://localhost:27017';<br>// Database Name<br>const dbName = 'test';<br>// Connect using MongoClient<br>MongoClient.connect(url, function(err, client) {<br>  const db = client.db(dbName);<br>  client.close();<br>});</p></code></pre>
     
 
+            
         
+        </div>
     
-    </div>
     
     
     
@@ -2707,16 +2764,17 @@
 </header>  
 
 <article>
-    <div class="container-overview">
     
-    
-    
+        <div class="container-overview">
         
-            <div class="description"><p>The <strong>Mongos</strong> class is a class that represents a Mongos Proxy topology and is<br>used to construct connections.</p>
+        
+        
+            
+                <div class="description"><p>The <strong>Mongos</strong> class is a class that represents a Mongos Proxy topology and is<br>used to construct connections.</p>
 <p><strong>Mongos Should not be used, use MongoClient.connect</strong></p></div>
-        
-        
-        
+            
+            
+            
 <dl class="details">
     
         
@@ -2741,10 +2799,11 @@
     
 </dl>
 
+            
+            
         
-        
+        </div>
     
-    </div>
     
     
     
@@ -2782,16 +2841,17 @@
 </header>  
 
 <article>
-    <div class="container-overview">
     
-    
-    
+        <div class="container-overview">
         
-            <div class="description"><p>The <strong>ReplSet</strong> class is a class that represents a Replicaset topology and is<br>used to construct connections.</p>
+        
+        
+            
+                <div class="description"><p>The <strong>ReplSet</strong> class is a class that represents a Replicaset topology and is<br>used to construct connections.</p>
 <p><strong>ReplSet Should not be used, use MongoClient.connect</strong></p></div>
-        
-        
-        
+            
+            
+            
 <dl class="details">
     
         
@@ -2816,10 +2876,11 @@
     
 </dl>
 
+            
+            
         
-        
+        </div>
     
-    </div>
     
     
     
@@ -2857,16 +2918,17 @@
 </header>  
 
 <article>
-    <div class="container-overview">
     
-    
-    
+        <div class="container-overview">
         
-            <div class="description"><p>The <strong>Server</strong> class is a class that represents a single server topology and is<br>used to construct connections.</p>
+        
+        
+            
+                <div class="description"><p>The <strong>Server</strong> class is a class that represents a single server topology and is<br>used to construct connections.</p>
 <p><strong>Server Should not be used, use MongoClient.connect</strong></p></div>
-        
-        
-        
+            
+            
+            
 <dl class="details">
     
         
@@ -2891,10 +2953,11 @@
     
 </dl>
 
+            
+            
         
-        
+        </div>
     
-    </div>
     
     
     
@@ -2922,7 +2985,7 @@
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Jun 27 2018 09:40:13 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Jul 09 2018 16:37:40 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

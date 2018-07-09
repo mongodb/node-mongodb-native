@@ -103,6 +103,47 @@
             </ul>
         </li>
     
+        <li class="item" data-name="ClientSession">
+            <span class="title">
+                <a href="ClientSession.html">ClientSession</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="ClientSession#id"><a href="ClientSession.html#id">id</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="ClientSession#abortTransaction"><a href="ClientSession.html#abortTransaction">abortTransaction</a></li>
+            
+                <li data-name="ClientSession#advanceOperationTime"><a href="ClientSession.html#advanceOperationTime">advanceOperationTime</a></li>
+            
+                <li data-name="ClientSession#commitTransaction"><a href="ClientSession.html#commitTransaction">commitTransaction</a></li>
+            
+                <li data-name="ClientSession#endSession"><a href="ClientSession.html#endSession">endSession</a></li>
+            
+                <li data-name="ClientSession#equals"><a href="ClientSession.html#equals">equals</a></li>
+            
+                <li data-name="ClientSession#incrementTransactionNumber"><a href="ClientSession.html#incrementTransactionNumber">incrementTransactionNumber</a></li>
+            
+                <li data-name="ClientSession#inTransaction"><a href="ClientSession.html#inTransaction">inTransaction</a></li>
+            
+                <li data-name="ClientSession#startTransaction"><a href="ClientSession.html#startTransaction">startTransaction</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="Code">
             <span class="title">
                 <a href="Code.html">Code</a>
@@ -695,7 +736,15 @@
             
             <span class="subtitle">Members</span>
             
-                <li data-name="ReadPreference.PRIMARY"><a href="ReadPreference.html#.PRIMARY">PRIMARY</a></li>
+                <li data-name="ReadPreference.nearest"><a href="ReadPreference.html#.nearest">nearest</a></li>
+            
+                <li data-name="ReadPreference.primary"><a href="ReadPreference.html#.primary">primary</a></li>
+            
+                <li data-name="ReadPreference.primaryPreferred"><a href="ReadPreference.html#.primaryPreferred">primaryPreferred</a></li>
+            
+                <li data-name="ReadPreference.secondary"><a href="ReadPreference.html#.secondary">secondary</a></li>
+            
+                <li data-name="ReadPreference.secondaryPreferred"><a href="ReadPreference.html#.secondaryPreferred">secondaryPreferred</a></li>
             
             </ul>
             <ul class="typedefs itemMembers">
@@ -706,16 +755,6 @@
             <span class="subtitle">Methods</span>
             
                 <li data-name="ReadPreference.isValid"><a href="ReadPreference.html#.isValid">isValid</a></li>
-            
-                <li data-name="ReadPreference.nearest"><a href="ReadPreference.html#.nearest">nearest</a></li>
-            
-                <li data-name="ReadPreference.primary"><a href="ReadPreference.html#.primary">primary</a></li>
-            
-                <li data-name="ReadPreference.primaryPreferred"><a href="ReadPreference.html#.primaryPreferred">primaryPreferred</a></li>
-            
-                <li data-name="ReadPreference.secondary"><a href="ReadPreference.html#.secondary">secondary</a></li>
-            
-                <li data-name="ReadPreference.secondaryPreferred"><a href="ReadPreference.html#.secondaryPreferred">secondaryPreferred</a></li>
             
                 <li data-name="ReadPreference#equals"><a href="ReadPreference.html#equals">equals</a></li>
             
@@ -1055,11 +1094,12 @@
 </header>  
 
 <article>
-    <div class="container-overview">
     
-    
-    
+        <div class="container-overview">
         
+        
+        
+            
 <dt>
     <div class="nameContainer">
         <h4 class="name" id="ReadPreference">
@@ -1069,7 +1109,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_topologies_read_preference.js.html">lib/topologies/read_preference.js</a>, <a href="lib_topologies_read_preference.js.html#line43">line 43</a>
+            <a href="lib_topologies_read_preference.js.html">lib/topologies/read_preference.js</a>, <a href="lib_topologies_read_preference.js.html#line35">line 35</a>
         </div>
         
     </div>
@@ -1080,7 +1120,7 @@
     
     
     <div class="description">
-        <p>Creates a new Pool instance</p>
+        <p>The <strong>ReadPreference</strong> class is a class that represents a MongoDB ReadPreference and is<br>used to construct connections.</p>
     </div>
     
 
@@ -1254,124 +1294,99 @@
 <dl class="details">
     
         
-        <h5 class="subsection-title">Properties:</h5>
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="https://docs.mongodb.com/manual/core/read-preference/">https://docs.mongodb.com/manual/core/read-preference/</a></li>
+        </ul>
+    </dd>
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+
+    
+    
+    
+        <h5>Example</h5>
+        
+
+    
+    <pre class="prettyprint"><code><p>const ReplSet = require('mongodb-core').ReplSet,<br>  ReadPreference = require('mongodb-core').ReadPreference,<br>  assert = require('assert');</p>
+<p>const server = new ReplSet([{host: 'localhost', port: 30000}], {setName: 'rs'});<br>// Wait for the connection event<br>server.on('connect', function(server) {<br>  const cursor = server.cursor(<br>    'db.test',<br>    { find: 'db.test', query: {} },<br>    { readPreference: new ReadPreference('secondary') }<br>  );</p>
+<p>  cursor.next(function(err, doc) {<br>    server.destroy();<br>  });<br>});</p>
+<p>// Start connecting<br>server.connect();</p></code></pre>
+    
+
+    
+</dd>
+
+        
+        </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        <h3 class="subsection-title">Members</h3>
         
         <dl>
-
-<table class="props">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
             
-                <td class="name"><code>mode</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last"><p>The read preference mode (primary|primaryPreferred|secondary|secondaryPreferred|nearest)</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>tags</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">array</span>
-
-
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last"><p>The tags object</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last"><p>Additional read preference options</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>maxStalenessSeconds</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-            
-            
-            
-            
-            
-            <td class="description last"><p>MaxStalenessSeconds value for the read preference</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table></dl>
-        
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id=".nearest"><span class="type-signature static">static</span>ReadPreference.nearest<span class="type-signature type readpreference"><a href="ReadPreference.html">ReadPreference</a></span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Nearest read preference</p>
+    </div>
+    
+    
+    
+<dl class="details">
     
         
     
@@ -1397,44 +1412,13 @@
 
     
     
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
 </dd>
 
-    
-    </div>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-        <h3 class="subsection-title">Members</h3>
         
-        <dl>
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id=".PRIMARY"><span class="type-signature static">static</span>ReadPreference.PRIMARY</h4>
+        <h4 class="name" id=".primary"><span class="type-signature static">static</span>ReadPreference.primary<span class="type-signature type readpreference"><a href="ReadPreference.html">ReadPreference</a></span> </h4>
     </div>
     
     
@@ -1442,7 +1426,142 @@
 <dd>
     
     <div class="description">
-        <p>Read preference mode constants</p>
+        <p>Primary read preference</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id=".primaryPreferred"><span class="type-signature static">static</span>ReadPreference.primaryPreferred<span class="type-signature type readpreference"><a href="ReadPreference.html">ReadPreference</a></span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Primary Preferred read preference</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id=".secondary"><span class="type-signature static">static</span>ReadPreference.secondary<span class="type-signature type readpreference"><a href="ReadPreference.html">ReadPreference</a></span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Secondary read preference</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id=".secondaryPreferred"><span class="type-signature static">static</span>ReadPreference.secondaryPreferred<span class="type-signature type readpreference"><a href="ReadPreference.html">ReadPreference</a></span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Secondary Preferred read preference</p>
     </div>
     
     
@@ -1492,7 +1611,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_topologies_read_preference.js.html">lib/topologies/read_preference.js</a>, <a href="lib_topologies_read_preference.js.html#line121">line 121</a>
+            <a href="lib_topologies_read_preference.js.html">lib/topologies/read_preference.js</a>, <a href="lib_topologies_read_preference.js.html#line113">line 113</a>
         </div>
         
     </div>
@@ -1597,385 +1716,9 @@
     
 
 
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id=".nearest">
-            
-            <span class="type-signature static">static</span>ReadPreference.nearest<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="ReadPreference.html">ReadPreference</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_topologies_read_preference.js.html">lib/topologies/read_preference.js</a>, <a href="lib_topologies_read_preference.js.html#line197">line 197</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Nearest read preference</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id=".primary">
-            
-            <span class="type-signature static">static</span>ReadPreference.primary<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="ReadPreference.html">ReadPreference</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_topologies_read_preference.js.html">lib/topologies/read_preference.js</a>, <a href="lib_topologies_read_preference.js.html#line173">line 173</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Primary read preference</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id=".primaryPreferred">
-            
-            <span class="type-signature static">static</span>ReadPreference.primaryPreferred<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="ReadPreference.html">ReadPreference</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_topologies_read_preference.js.html">lib/topologies/read_preference.js</a>, <a href="lib_topologies_read_preference.js.html#line179">line 179</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Primary Preferred read preference</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id=".secondary">
-            
-            <span class="type-signature static">static</span>ReadPreference.secondary<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="ReadPreference.html">ReadPreference</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_topologies_read_preference.js.html">lib/topologies/read_preference.js</a>, <a href="lib_topologies_read_preference.js.html#line185">line 185</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Secondary read preference</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id=".secondaryPreferred">
-            
-            <span class="type-signature static">static</span>ReadPreference.secondaryPreferred<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="ReadPreference.html">ReadPreference</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_topologies_read_preference.js.html">lib/topologies/read_preference.js</a>, <a href="lib_topologies_read_preference.js.html#line191">line 191</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Secondary Preferred read preference</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
+<h5>Returns:</h5>
+if a mode is valid
+<br />
 
     
     
@@ -1988,12 +1731,12 @@
     <div class="nameContainer">
         <h4 class="name" id="equals">
             
-            equals<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{boolean}</span>
+            equals<span class="signature">(readPreference)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{boolean}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_read_preference.js.html">lib/topologies/read_preference.js</a>, <a href="lib_topologies_read_preference.js.html#line152">line 152</a>
+            <a href="lib_topologies_read_preference.js.html">lib/topologies/read_preference.js</a>, <a href="lib_topologies_read_preference.js.html#line146">line 146</a>
         </div>
         
     </div>
@@ -2013,6 +1756,51 @@
     
     
     
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>readPreference</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="ReadPreference.html">ReadPreference</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The read preference with which to check equality</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
     
     
 <dl class="details">
@@ -2053,6 +1841,10 @@
     
 
 
+<h5>Returns:</h5>
+if the two ReadPreferences are equivalent
+<br />
+
     
     
     
@@ -2069,7 +1861,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_topologies_read_preference.js.html">lib/topologies/read_preference.js</a>, <a href="lib_topologies_read_preference.js.html#line132">line 132</a>
+            <a href="lib_topologies_read_preference.js.html">lib/topologies/read_preference.js</a>, <a href="lib_topologies_read_preference.js.html#line124">line 124</a>
         </div>
         
     </div>
@@ -2174,6 +1966,10 @@
     
 
 
+<h5>Returns:</h5>
+if a mode is valid
+<br />
+
     
     
     
@@ -2190,7 +1986,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_topologies_read_preference.js.html">lib/topologies/read_preference.js</a>, <a href="lib_topologies_read_preference.js.html#line143">line 143</a>
+            <a href="lib_topologies_read_preference.js.html">lib/topologies/read_preference.js</a>, <a href="lib_topologies_read_preference.js.html#line136">line 136</a>
         </div>
         
     </div>
@@ -2201,7 +1997,7 @@
     
     
     <div class="description">
-        <p>This needs slaveOk bit set</p>
+        <p>Indicates that this readPreference needs the &quot;slaveOk&quot; bit when sent over the wire</p>
     </div>
     
 
@@ -2231,6 +2027,13 @@
     
     
     
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#op-query">https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#op-query</a></li>
+        </ul>
+    </dd>
     
     
     
@@ -2266,7 +2069,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_topologies_read_preference.js.html">lib/topologies/read_preference.js</a>, <a href="lib_topologies_read_preference.js.html#line161">line 161</a>
+            <a href="lib_topologies_read_preference.js.html">lib/topologies/read_preference.js</a>, <a href="lib_topologies_read_preference.js.html#line155">line 155</a>
         </div>
         
     </div>
@@ -2326,6 +2129,10 @@
     
 
 
+<h5>Returns:</h5>
+JSON representation of the ReadPreference
+<br />
+
     
     
     
@@ -2345,27 +2152,8 @@
 
 
 
-                    
-                    <!-- disqus code -->
-                    <div id="disqus_thread"></div>
-                    <script type="text/javascript">
-                        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-                        var disqus_shortname = 'nodejsmongodbdriver'; // required: replace example with your forum shortname
-
-                        /* * * DON'T EDIT BELOW THIS LINE * * */
-                        (function() {
-                            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-                            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-                            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-                        })();
-                    </script>
-                    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-                    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>                    
-                    <!-- // disqus code -->
-                    
-
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Wed Jun 27 2018 09:40:23 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Jul 09 2018 16:37:49 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>
