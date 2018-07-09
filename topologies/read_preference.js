@@ -1,9 +1,14 @@
 'use strict';
 
 /**
- * @fileOverview The **ReadPreference** class is a class that represents a MongoDB ReadPreference and is
+ * The **ReadPreference** class is a class that represents a MongoDB ReadPreference and is
  * used to construct connections.
- *
+ * @class
+ * @param {string} mode A string describing the read preference mode (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
+ * @param {array} tags The tags object
+ * @param {object} [options] Additional read preference options
+ * @param {number} [options.maxStalenessSeconds] Max secondary read staleness in seconds, Minimum value is 90 seconds.
+ * @return {ReadPreference}
  * @example
  * const ReplSet = require('mongodb-core').ReplSet,
  *   ReadPreference = require('mongodb-core').ReadPreference,
@@ -25,20 +30,7 @@
  *
  * // Start connecting
  * server.connect();
- */
-
-/**
- * Creates a new Pool instance
- * @class
- * @param {string} mode A string describing the read preference mode (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
- * @param {array} tags The tags object
- * @param {object} [options] Additional read preference options
- * @param {number} [options.maxStalenessSeconds] Max secondary read staleness in seconds, Minimum value is 90 seconds.
- * @property {string} mode The read preference mode (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
- * @property {array} tags The tags object
- * @property {object} options Additional read preference options
- * @property {number} maxStalenessSeconds MaxStalenessSeconds value for the read preference
- * @return {ReadPreference}
+ * @see https://docs.mongodb.com/manual/core/read-preference/
  */
 const ReadPreference = function(mode, tags, options) {
   // TODO(major): tags MUST be an array of tagsets
@@ -91,7 +83,7 @@ Object.defineProperty(ReadPreference.prototype, 'preference', {
   }
 });
 
-/**
+/*
  * Read preference mode constants
  */
 ReadPreference.PRIMARY = 'primary';
@@ -116,7 +108,7 @@ const VALID_MODES = [
  *
  * @method
  * @param {string} mode The string representing the read preference mode.
- * @return {boolean}
+ * @return {boolean} True if a mode is valid
  */
 ReadPreference.isValid = function(mode) {
   return VALID_MODES.indexOf(mode) !== -1;
@@ -127,7 +119,7 @@ ReadPreference.isValid = function(mode) {
  *
  * @method
  * @param {string} mode The string representing the read preference mode.
- * @return {boolean}
+ * @return {boolean} True if a mode is valid
  */
 ReadPreference.prototype.isValid = function(mode) {
   return ReadPreference.isValid(typeof mode === 'string' ? mode : this.mode);
@@ -136,9 +128,10 @@ ReadPreference.prototype.isValid = function(mode) {
 const needSlaveOk = ['primaryPreferred', 'secondary', 'secondaryPreferred', 'nearest'];
 
 /**
- * This needs slaveOk bit set
+ * Indicates that this readPreference needs the "slaveOk" bit when sent over the wire
  * @method
  * @return {boolean}
+ * @see https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#op-query
  */
 ReadPreference.prototype.slaveOk = function() {
   return needSlaveOk.indexOf(this.mode) !== -1;
@@ -147,7 +140,8 @@ ReadPreference.prototype.slaveOk = function() {
 /**
  * Are the two read preference equal
  * @method
- * @return {boolean}
+ * @param {ReadPreference} readPreference The read preference with which to check equality
+ * @return {boolean} True if the two ReadPreferences are equivalent
  */
 ReadPreference.prototype.equals = function(readPreference) {
   return readPreference.mode === this.mode;
@@ -156,7 +150,7 @@ ReadPreference.prototype.equals = function(readPreference) {
 /**
  * Return JSON representation
  * @method
- * @return {Object}
+ * @return {Object} A JSON representation of the ReadPreference
  */
 ReadPreference.prototype.toJSON = function() {
   const readPreference = { mode: this.mode };
@@ -167,32 +161,32 @@ ReadPreference.prototype.toJSON = function() {
 
 /**
  * Primary read preference
- * @method
- * @return {ReadPreference}
+ * @member
+ * @type {ReadPreference}
  */
 ReadPreference.primary = new ReadPreference('primary');
 /**
  * Primary Preferred read preference
- * @method
- * @return {ReadPreference}
+ * @member
+ * @type {ReadPreference}
  */
 ReadPreference.primaryPreferred = new ReadPreference('primaryPreferred');
 /**
  * Secondary read preference
- * @method
- * @return {ReadPreference}
+ * @member
+ * @type {ReadPreference}
  */
 ReadPreference.secondary = new ReadPreference('secondary');
 /**
  * Secondary Preferred read preference
- * @method
- * @return {ReadPreference}
+ * @member
+ * @type {ReadPreference}
  */
 ReadPreference.secondaryPreferred = new ReadPreference('secondaryPreferred');
 /**
  * Nearest read preference
- * @method
- * @return {ReadPreference}
+ * @member
+ * @type {ReadPreference}
  */
 ReadPreference.nearest = new ReadPreference('nearest');
 

@@ -46,16 +46,43 @@ let stateMachine;
 })();
 
 /**
- * A class maintaining state related to a server transaction
+ * The MongoDB ReadConcern, which allows for control of the consistency and isolation properties
+ * of the data read from replica sets and replica set shards.
+ * @typedef {Object} ReadConcern
+ * @property {'local'|'available'|'majority'|'linearizable'|'snapshot'} level The readConcern Level
+ * @see https://docs.mongodb.com/manual/reference/read-concern/
+ */
+
+/**
+ * A MongoDB WriteConcern, which describes the level of acknowledgement
+ * requested from MongoDB for write operations.
+ * @typedef {Object} WriteConcern
+ * @property {number|'majority'|string} [w=1] requests acknowledgement that the write operation has
+ * propagated to a specified number of mongod hosts
+ * @property {boolean} [j=false] requests acknowledgement from MongoDB that the write operation has
+ * been written to the journal
+ * @property {number} [wtimeout] a time limit, in milliseconds, for the write concern
+ * @see https://docs.mongodb.com/manual/reference/write-concern/
+ */
+
+/**
+ * Configuration options for a transaction.
+ * @typedef {Object} TransactionOptions
+ * @property {ReadConcern} [readConcern] A default read concern for commands in this transaction
+ * @property {WriteConcern} [writeConcern] A default writeConcern for commands in this transaction
+ * @property {ReadPreference} [readPreference] A default read preference for commands in this transaction
+ */
+
+/**
+ * A class maintaining state related to a server transaction. Internal Only
+ * @ignore
  */
 class Transaction {
   /**
    * Create a transaction
    *
-   * @param {object} [options] Optional settings
-   * @param {string} [options.readConcern] A default read concern for commands in this transaction
-   * @param {object} [options.writeConcern] A default write concern for commands in this transaction
-   * @param {ReadPreference} [options.readPreference] A default read preference for commands in this transaction
+   * @ignore
+   * @param {TransactionOptions} [options] Optional settings
    */
   constructor(options) {
     options = options || {};
@@ -77,6 +104,7 @@ class Transaction {
   }
 
   /**
+   * @ignore
    * @return Whether this session is presently in a transaction
    */
   get isActive() {
@@ -87,7 +115,7 @@ class Transaction {
 
   /**
    * Transition the transaction in the state machine
-   *
+   * @ignore
    * @param {TxnState} state The new state to transition to
    */
   transition(nextState) {

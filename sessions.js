@@ -26,18 +26,32 @@ function assertAlive(session, callback) {
   return true;
 }
 
-/** A class representing a client session on the server */
+/**
+ * Options to pass when creating a Client Session
+ * @typedef {Object} SessionOptions
+ * @property {boolean} [causalConsistency=true] Whether causal consistency should be enabled on this session
+ * @property {TransactionOptions} [defaultTransactionOptions] The default TransactionOptions to use for transactions started on this session.
+ */
+
+/**
+ * A BSON document reflecting the lsid of a {@link ClientSession}
+ * @typedef {Object} SessionId
+ */
+
+/**
+ * A class representing a client session on the server
+ * WARNING: not meant to be instantiated directly.
+ * @class
+ * @hideconstructor
+ */
 class ClientSession extends EventEmitter {
   /**
    * Create a client session.
    * WARNING: not meant to be instantiated directly
    *
-   * @param {Topology} topology The current client's topology
-   * @param {ServerSessionPool} sessionPool The server session pool
-   * @param {Object} [options] Optional settings
-   * @param {Boolean} [options.causalConsistency] Whether causal consistency should be enabled on this session
-   * @param {Boolean} [options.autoStartTransaction=false] When enabled this session automatically starts a transaction with the provided defaultTransactionOptions.
-   * @param {Object} [options.defaultTransactionOptions] The default TransactionOptions to use for transactions started on this session.
+   * @param {Topology} topology The current client's topology (Internal Class)
+   * @param {ServerSessionPool} sessionPool The server session pool (Internal Class)
+   * @param {SessionOptions} [options] Optional settings
    * @param {Object} [clientOptions] Optional settings provided when creating a client in the porcelain driver
    */
   constructor(topology, sessionPool, options, clientOptions) {
@@ -78,7 +92,8 @@ class ClientSession extends EventEmitter {
   }
 
   /**
-   * Return the server id associated with this session
+   * The server id associated with this session
+   * @type {SessionId}
    */
   get id() {
     return this.serverSession.id;
@@ -87,7 +102,7 @@ class ClientSession extends EventEmitter {
   /**
    * Ends this session on the server
    *
-   * @param {Object} [options] Optional settings
+   * @param {Object} [options] Optional settings. Currently reserved for future use
    * @param {Function} [callback] Optional callback for completion of this operation
    */
   endSession(options, callback) {
@@ -117,7 +132,7 @@ class ClientSession extends EventEmitter {
   /**
    * Advances the operationTime for a ClientSession.
    *
-   * @param {object} operationTime the `BSON.Timestamp` of the operation type it is desired to advance to
+   * @param {Timestamp} operationTime the `BSON.Timestamp` of the operation type it is desired to advance to
    */
   advanceOperationTime(operationTime) {
     if (this.operationTime == null) {
@@ -132,6 +147,8 @@ class ClientSession extends EventEmitter {
 
   /**
    * Used to determine if this session equals another
+   * @param {ClientSession} session
+   * @return {boolean} true if the sessions are equal
    */
   equals(session) {
     if (!(session instanceof ClientSession)) {
@@ -149,7 +166,7 @@ class ClientSession extends EventEmitter {
   }
 
   /**
-   * @returns whether this session is current in a transaction or not
+   * @returns {boolean} whether this session is currently in a transaction or not
    */
   inTransaction() {
     return this.transaction.isActive;
@@ -158,9 +175,7 @@ class ClientSession extends EventEmitter {
   /**
    * Starts a new transaction with the given options.
    *
-   * @param {Object} options Optional settings
-   * @param {ReadConcern} [options.readConcern] The readConcern to use for this transaction
-   * @param {WriteConcern} [options.writeConcern] The writeConcern to use for this transaction
+   * @param {TransactionOptions} options Options for the transaction
    */
   startTransaction(options) {
     assertAlive(this);
@@ -221,6 +236,10 @@ class ClientSession extends EventEmitter {
     });
   }
 
+  /**
+   * This is here to ensure that ClientSession is never serialized to BSON.
+   * @ignore
+   */
   toBSON() {
     throw new Error('ClientSession cannot be serialized to BSON.');
   }
@@ -333,7 +352,9 @@ function endTransaction(session, commandName, callback) {
 }
 
 /**
- *
+ * Reflects the existence of a session on the server. Can be reused by the session pool.
+ * WARNING: not meant to be instantiated directly. For internal use only.
+ * @ignore
  */
 class ServerSession {
   constructor() {
@@ -343,8 +364,10 @@ class ServerSession {
   }
 
   /**
-   *
-   * @param {*} sessionTimeoutMinutes
+   * Determines if the server session has timed out.
+   * @ignore
+   * @param {Date} sessionTimeoutMinutes The server's "logicalSessionTimeoutMinutes"
+   * @return {boolean} true if the session has timed out.
    */
   hasTimedOut(sessionTimeoutMinutes) {
     // Take the difference of the lastUse timestamp and now, which will result in a value in
@@ -358,7 +381,9 @@ class ServerSession {
 }
 
 /**
- *
+ * Maintains a pool of Server Sessions.
+ * For internal use only
+ * @ignore
  */
 class ServerSessionPool {
   constructor(topology) {
@@ -370,6 +395,10 @@ class ServerSessionPool {
     this.sessions = [];
   }
 
+  /**
+   * Ends all sessions in the session pool.
+   * @ignore
+   */
   endAllPooledSessions() {
     if (this.sessions.length) {
       this.topology.endSessions(this.sessions.map(session => session.id));
@@ -378,6 +407,12 @@ class ServerSessionPool {
   }
 
   /**
+   * Acquire a Server Session from the pool.
+   * Iterates through each session in the pool, removing any stale sessions
+   * along the way. The first non-stale session found is removed from the
+   * pool and returned. If no non-stale session is found, a new ServerSession
+   * is created.
+   * @ignore
    * @returns {ServerSession}
    */
   acquire() {
@@ -393,8 +428,11 @@ class ServerSessionPool {
   }
 
   /**
-   *
-   * @param {*} session
+   * Release a session to the session pool
+   * Adds the session back to the session pool if the session has not timed out yet.
+   * This method also removes any stale sessions from the pool.
+   * @ignore
+   * @param {ServerSession} session The session to release to the pool
    */
   release(session) {
     const sessionTimeoutMinutes = this.topology.logicalSessionTimeoutMinutes;
