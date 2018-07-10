@@ -25,7 +25,7 @@ function ClassWithLogger() {
 
 ClassWithLogger.prototype.f = makeTestFunction({
   name: 'f',
-  deprecatedParams: ['maxScan', 'snapshot', 'fields'],
+  deprecatedOptions: ['maxScan', 'snapshot', 'fields'],
   optionsIndex: 0
 });
 
@@ -38,7 +38,7 @@ function ClassWithoutLogger() {}
 
 ClassWithoutLogger.prototype.f = makeTestFunction({
   name: 'f',
-  deprecatedParams: ['maxScan', 'snapshot', 'fields'],
+  deprecatedOptions: ['maxScan', 'snapshot', 'fields'],
   optionsIndex: 0
 });
 
@@ -48,7 +48,7 @@ function ClassWithUndefinedLogger() {}
 
 ClassWithUndefinedLogger.prototype.f = makeTestFunction({
   name: 'f',
-  deprecatedParams: ['maxScan', 'snapshot', 'fields'],
+  deprecatedOptions: ['maxScan', 'snapshot', 'fields'],
   optionsIndex: 0
 });
 

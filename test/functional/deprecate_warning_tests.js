@@ -53,10 +53,10 @@ describe('Deprecation Warnings', function() {
 
           // ensure warning is the first line printed
           expect(warning).to.equal(
-            'DeprecationWarning: testDeprecationFlags parameter [maxScan]' + defaultMessage
+            'DeprecationWarning: testDeprecationFlags option [maxScan]' + defaultMessage
           );
 
-          // ensure each following line is from the stack trace, i.e. 'at config.deprecatedParams.forEach.deprecatedParam'
+          // ensure each following line is from the stack trace, i.e. 'at config.deprecatedOptions.forEach.deprecatedOption'
           split.pop();
           split.forEach(s => {
             expect(s.trim()).to.match(/^at/);
@@ -97,8 +97,8 @@ describe('Deprecation Warnings', function() {
     fakeClass.f({ maxScan: 5, snapshot: true });
     expect(stub).to.have.been.calledTwice;
     ensureCalledWith(stub, [
-      'f parameter [maxScan] is deprecated and will be removed in a later version.',
-      'f parameter [snapshot] is deprecated and will be removed in a later version.'
+      'f option [maxScan] is deprecated and will be removed in a later version.',
+      'f option [snapshot] is deprecated and will be removed in a later version.'
     ]);
   });
 

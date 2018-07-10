@@ -11,7 +11,7 @@ const ensureCalledWith = require('../tools/utils').ensureCalledWith;
 
 describe('Deprecation Warnings', function() {
   let messages = [];
-  const deprecatedParams = ['maxScan', 'snapshot', 'fields'];
+  const deprecatedOptions = ['maxScan', 'snapshot', 'fields'];
   const defaultMessage = ' is deprecated and will be removed in a later version.';
 
   before(function() {
@@ -34,26 +34,26 @@ describe('Deprecation Warnings', function() {
   function setupMultFunctionswithSameParams() {
     const f1 = makeTestFunction({
       name: 'f1',
-      deprecatedParams: deprecatedParams,
+      deprecatedOptions: deprecatedOptions,
       optionsIndex: 0
     });
     const f2 = makeTestFunction({
       name: 'f2',
-      deprecatedParams: deprecatedParams,
+      deprecatedOptions: deprecatedOptions,
       optionsIndex: 0
     });
     f1({ maxScan: 5 });
     f2({ maxScan: 5 });
   }
 
-  it('multiple functions with the same deprecated params should both warn', {
+  it('multiple functions with the same deprecated options should both warn', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
       setupMultFunctionswithSameParams();
       process.nextTick(() => {
         expect(messages).to.deep.equal([
-          'f1 parameter [maxScan]' + defaultMessage,
-          'f2 parameter [maxScan]' + defaultMessage
+          'f1 option [maxScan]' + defaultMessage,
+          'f2 option [maxScan]' + defaultMessage
         ]);
         expect(messages).to.have.a.lengthOf(2);
         done();
@@ -61,13 +61,13 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  it('multiple functions with the same deprecated params should both warn', {
+  it('multiple functions with the same deprecated options should both warn', {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
       setupMultFunctionswithSameParams();
       ensureCalledWith(console.error, [
-        'f1 parameter [maxScan]' + defaultMessage,
-        'f2 parameter [maxScan]' + defaultMessage
+        'f1 option [maxScan]' + defaultMessage,
+        'f2 option [maxScan]' + defaultMessage
       ]);
       expect(console.error).to.have.been.calledTwice;
       done();
@@ -77,13 +77,13 @@ describe('Deprecation Warnings', function() {
   function setupNoParams() {
     const f = makeTestFunction({
       name: 'f',
-      deprecatedParams: deprecatedParams,
+      deprecatedOptions: deprecatedOptions,
       optionsIndex: 0
     });
     f({});
   }
 
-  it('should not warn if no deprecated params passed in', {
+  it('should not warn if no deprecated options passed in', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
       setupNoParams();
@@ -94,7 +94,7 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  it('should not warn if no deprecated params passed in', {
+  it('should not warn if no deprecated options passed in', {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
       setupNoParams();
@@ -104,13 +104,13 @@ describe('Deprecation Warnings', function() {
   });
 
   function setupUserMsgHandler() {
-    const customMsgHandler = (name, param) => {
-      return 'custom msg for function ' + name + ' and param ' + param;
+    const customMsgHandler = (name, option) => {
+      return 'custom msg for function ' + name + ' and option ' + option;
     };
 
     const f = makeTestFunction({
       name: 'f',
-      deprecatedParams: deprecatedParams,
+      deprecatedOptions: deprecatedOptions,
       optionsIndex: 0,
       msgHandler: customMsgHandler
     });
@@ -124,9 +124,9 @@ describe('Deprecation Warnings', function() {
       setupUserMsgHandler();
       process.nextTick(() => {
         expect(messages).to.deep.equal([
-          'custom msg for function f and param maxScan',
-          'custom msg for function f and param snapshot',
-          'custom msg for function f and param fields'
+          'custom msg for function f and option maxScan',
+          'custom msg for function f and option snapshot',
+          'custom msg for function f and option fields'
         ]);
         expect(messages).to.have.a.lengthOf(3);
         done();
@@ -139,9 +139,9 @@ describe('Deprecation Warnings', function() {
     test: function(done) {
       setupUserMsgHandler();
       ensureCalledWith(console.error, [
-        'custom msg for function f and param maxScan',
-        'custom msg for function f and param snapshot',
-        'custom msg for function f and param fields'
+        'custom msg for function f and option maxScan',
+        'custom msg for function f and option snapshot',
+        'custom msg for function f and option fields'
       ]);
       expect(console.error).to.have.been.calledThrice;
       done();
@@ -151,21 +151,21 @@ describe('Deprecation Warnings', function() {
   function setupOncePerParameter() {
     const f = makeTestFunction({
       name: 'f',
-      deprecatedParams: deprecatedParams,
+      deprecatedOptions: deprecatedOptions,
       optionsIndex: 0
     });
     f({ maxScan: 5, fields: 'hi' });
     f({ maxScan: 5, fields: 'hi' });
   }
 
-  it('each function should only warn once per deprecated parameter', {
+  it('each function should only warn once per deprecated option', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
       setupOncePerParameter();
       process.nextTick(() => {
         expect(messages).to.deep.equal([
-          'f parameter [maxScan]' + defaultMessage,
-          'f parameter [fields]' + defaultMessage
+          'f option [maxScan]' + defaultMessage,
+          'f option [fields]' + defaultMessage
         ]);
         expect(messages).to.have.a.lengthOf(2);
         done();
@@ -173,13 +173,13 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  it('each function should only warn once per deprecated parameter', {
+  it('each function should only warn once per deprecated option', {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
       setupOncePerParameter();
       ensureCalledWith(console.error, [
-        'f parameter [maxScan]' + defaultMessage,
-        'f parameter [fields]' + defaultMessage
+        'f option [maxScan]' + defaultMessage,
+        'f option [fields]' + defaultMessage
       ]);
       expect(console.error).to.have.been.calledTwice;
       done();
@@ -189,7 +189,7 @@ describe('Deprecation Warnings', function() {
   function setupMaintainFunctionality() {
     const config = {
       name: 'f',
-      deprecatedParams: ['multiply', 'add'],
+      deprecatedOptions: ['multiply', 'add'],
       optionsIndex: 0
     };
 
@@ -217,8 +217,8 @@ describe('Deprecation Warnings', function() {
       setupMaintainFunctionality();
       process.nextTick(() => {
         expect(messages).to.deep.equal([
-          'f parameter [multiply]' + defaultMessage,
-          'f parameter [add]' + defaultMessage
+          'f option [multiply]' + defaultMessage,
+          'f option [add]' + defaultMessage
         ]);
         expect(messages).to.have.a.lengthOf(2);
         done();
@@ -231,8 +231,8 @@ describe('Deprecation Warnings', function() {
     test: function(done) {
       setupMaintainFunctionality();
       ensureCalledWith(console.error, [
-        'f parameter [multiply]' + defaultMessage,
-        'f parameter [add]' + defaultMessage
+        'f option [multiply]' + defaultMessage,
+        'f option [add]' + defaultMessage
       ]);
       expect(console.error).to.have.been.calledTwice;
       done();

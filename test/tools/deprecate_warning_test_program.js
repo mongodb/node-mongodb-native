@@ -9,7 +9,7 @@ const deprecateOptions = require('../../lib/utils.js').deprecateOptions;
 const testDeprecationFlags = deprecateOptions(
   {
     name: 'testDeprecationFlags',
-    deprecatedParams: ['maxScan', 'snapshot', 'fields'],
+    deprecatedOptions: ['maxScan', 'snapshot', 'fields'],
     optionsIndex: 0
   },
   options => {
