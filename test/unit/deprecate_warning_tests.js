@@ -31,7 +31,7 @@ describe('Deprecation Warnings', function() {
     messages.length = 0;
   });
 
-  function setupMultFunctionswithSameParams() {
+  function setupMultFunctionswithSameOptions() {
     const f1 = makeTestFunction({
       name: 'f1',
       deprecatedOptions: deprecatedOptions,
@@ -49,7 +49,7 @@ describe('Deprecation Warnings', function() {
   it('multiple functions with the same deprecated options should both warn', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
-      setupMultFunctionswithSameParams();
+      setupMultFunctionswithSameOptions();
       process.nextTick(() => {
         expect(messages).to.deep.equal([
           'f1 option [maxScan]' + defaultMessage,
@@ -64,7 +64,7 @@ describe('Deprecation Warnings', function() {
   it('multiple functions with the same deprecated options should both warn', {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
-      setupMultFunctionswithSameParams();
+      setupMultFunctionswithSameOptions();
       ensureCalledWith(console.error, [
         'f1 option [maxScan]' + defaultMessage,
         'f2 option [maxScan]' + defaultMessage
@@ -74,7 +74,7 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  function setupNoParams() {
+  function setupNoOptions() {
     const f = makeTestFunction({
       name: 'f',
       deprecatedOptions: deprecatedOptions,
@@ -86,7 +86,7 @@ describe('Deprecation Warnings', function() {
   it('should not warn if no deprecated options passed in', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
-      setupNoParams();
+      setupNoOptions();
       process.nextTick(() => {
         expect(messages).to.have.a.lengthOf(0);
         done();
@@ -97,7 +97,7 @@ describe('Deprecation Warnings', function() {
   it('should not warn if no deprecated options passed in', {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
-      setupNoParams();
+      setupNoOptions();
       expect(console.error).to.have.not.been.called;
       done();
     }
@@ -148,7 +148,7 @@ describe('Deprecation Warnings', function() {
     }
   });
 
-  function setupOncePerParameter() {
+  function setupOncePerOption() {
     const f = makeTestFunction({
       name: 'f',
       deprecatedOptions: deprecatedOptions,
@@ -161,7 +161,7 @@ describe('Deprecation Warnings', function() {
   it('each function should only warn once per deprecated option', {
     metadata: { requires: { node: '>=6.0.0' } },
     test: function(done) {
-      setupOncePerParameter();
+      setupOncePerOption();
       process.nextTick(() => {
         expect(messages).to.deep.equal([
           'f option [maxScan]' + defaultMessage,
@@ -176,7 +176,7 @@ describe('Deprecation Warnings', function() {
   it('each function should only warn once per deprecated option', {
     metadata: { requires: { node: '<6.0.0' } },
     test: function(done) {
-      setupOncePerParameter();
+      setupOncePerOption();
       ensureCalledWith(console.error, [
         'f option [maxScan]' + defaultMessage,
         'f option [fields]' + defaultMessage
