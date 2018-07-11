@@ -3,6 +3,7 @@
 var retrieveBSON = require('./utils').retrieveBSON;
 var BSON = retrieveBSON();
 var Long = BSON.Long;
+const MongoError = require('../error').MongoError;
 
 // Incrementing request id
 var _requestId = 0;
@@ -483,6 +484,18 @@ Response.prototype.parse = function(options) {
 
     // Deserialize but keep the array of documents in non-parsed form
     var doc = this.bson.deserialize(document, _options);
+
+    if (doc instanceof Error) {
+      throw doc;
+    }
+
+    if (doc.errmsg) {
+      throw new MongoError(doc.errmsg);
+    }
+
+    if (!doc.cursor) {
+      throw new MongoError('Cursor not found');
+    }
 
     // Get the documents
     this.documents = doc.cursor[documentsReturnedIn];
