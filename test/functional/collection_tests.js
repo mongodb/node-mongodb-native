@@ -1,8 +1,12 @@
 'use strict';
 const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
-const expect = require('chai').expect;
+const chai = require('chai');
+const expect = chai.expect;
 const MongoClient = require('../..').MongoClient;
+const sinonChai = require('sinon-chai');
+const mock = require('mongodb-mock-server');
+chai.use(sinonChai);
 
 describe('Collection', function() {
   before(function() {
@@ -1613,6 +1617,141 @@ describe('Collection', function() {
         .then(count => expect(count).to.equal(0))
         .then(() => close())
         .catch(e => close(e));
+    });
+  });
+
+  it('countDocuments should return Promise that resolves when no callback passed', function(done) {
+    const configuration = this.configuration;
+    const client = new MongoClient(configuration.url(), { w: 1 });
+
+    client.connect(function(err, client) {
+      const db = client.db(configuration.db);
+      const collection = db.collection('countDoc_return_promise');
+      const docsPromise = collection.countDocuments();
+      const close = e => client.close(() => done(e));
+
+      expect(docsPromise).to.exist.and.to.be.an.instanceof(collection.s.promiseLibrary);
+
+      docsPromise
+        .then(result => expect(result).to.equal(0))
+        .then(() => close())
+        .catch(e => close(e));
+    });
+  });
+
+  it('countDocuments should not return a promise if callback given', function(done) {
+    const configuration = this.configuration;
+    const client = new MongoClient(configuration.url(), { w: 1 });
+
+    client.connect(function(err, client) {
+      const db = client.db(configuration.db);
+      const collection = db.collection('countDoc_no_promise');
+      const close = e => client.close(() => done(e));
+
+      const notPromise = collection.countDocuments({ a: 1 }, function() {
+        expect(notPromise).to.be.undefined;
+        close();
+      });
+    });
+  });
+
+  it('countDocuments should correctly call the given callback', function(done) {
+    const configuration = this.configuration;
+    const client = new MongoClient(configuration.url(), { w: 1 });
+
+    client.connect(function(err, client) {
+      const db = client.db(configuration.db);
+      const collection = db.collection('countDoc_callback');
+      const docs = [{ a: 1 }, { a: 2 }];
+      const close = e => client.close(() => done(e));
+
+      collection.insertMany(docs).then(() =>
+        collection.countDocuments({ a: 1 }, (err, data) => {
+          expect(data).to.equal(1);
+          close(err);
+        })
+      );
+    });
+  });
+
+  describe('countDocuments with mock server', function() {
+    let server;
+
+    beforeEach(() => {
+      return mock.createServer().then(s => {
+        server = s;
+      });
+    });
+
+    afterEach(() => mock.cleanup());
+
+    function testSkipLimit(config, done) {
+      const client = new MongoClient(`mongodb://${server.uri()}/test`);
+      const close = e => client.close(() => done(e));
+
+      server.setMessageHandler(request => {
+        const doc = request.document;
+        if (doc.aggregate) {
+          try {
+            config.replyHandler(doc);
+            request.reply(config.reply);
+          } catch (e) {
+            close(e);
+          }
+        }
+
+        if (doc.ismaster) {
+          request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
+        } else if (doc.endSessions) {
+          request.reply({ ok: 1 });
+        }
+      });
+
+      client.connect(function(err, client) {
+        const db = client.db('test');
+        const collection = db.collection('countDoc_mock');
+
+        collection.countDocuments({}, config.options, (err, data) => {
+          config.cb(err, data);
+          close();
+        });
+      });
+    }
+
+    it('countDocuments should return appropriate error if aggregation fails', function(done) {
+      const replyHandler = () => {};
+      const cb = err => {
+        expect(err).to.exist;
+        expect(err.errmsg).to.equal('aggregation error');
+      };
+
+      testSkipLimit(
+        {
+          replyHandler: replyHandler,
+          options: {},
+          cb: cb,
+          reply: { ok: 0, errmsg: 'aggregation error' }
+        },
+        done
+      );
+    });
+
+    it('countDocuments pipeline should be correct with skip and limit applied', function(done) {
+      const replyHandler = doc => {
+        expect(doc.pipeline).to.deep.include({ $skip: 1 });
+        expect(doc.pipeline).to.deep.include({ $limit: 1 });
+      };
+      const cb = () => {};
+
+      testSkipLimit(
+        {
+          replyHandler: replyHandler,
+          options: { limit: 1, skip: 1 },
+          cb: cb,
+          reply: { ok: 1 }
+        },
+        done
+      );
     });
   });
 
