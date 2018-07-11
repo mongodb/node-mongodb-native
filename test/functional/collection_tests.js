@@ -1685,7 +1685,7 @@ describe('Collection', function() {
 
     afterEach(() => mock.cleanup());
 
-    function testSkipLimit(config, done) {
+    function testCountDocMock(config, done) {
       const client = new MongoClient(`mongodb://${server.uri()}/test`);
       const close = e => client.close(() => done(e));
 
@@ -1711,26 +1711,47 @@ describe('Collection', function() {
         const db = client.db('test');
         const collection = db.collection('countDoc_mock');
 
-        collection.countDocuments({}, config.options, (err, data) => {
-          config.cb(err, data);
-          close();
-        });
+        config.executeCountDocuments(collection, close);
       });
     }
 
-    it('countDocuments should return appropriate error if aggregation fails', function(done) {
+    it('countDocuments should return appropriate error if aggregation fails with callback given', function(done) {
       const replyHandler = () => {};
-      const cb = err => {
-        expect(err).to.exist;
-        expect(err.errmsg).to.equal('aggregation error');
+      const executeCountDocuments = (collection, close) => {
+        collection.countDocuments(err => {
+          expect(err).to.exist;
+          expect(err.errmsg).to.equal('aggregation error - callback');
+          close();
+        });
       };
 
-      testSkipLimit(
+      testCountDocMock(
         {
-          replyHandler: replyHandler,
-          options: {},
-          cb: cb,
-          reply: { ok: 0, errmsg: 'aggregation error' }
+          replyHandler,
+          executeCountDocuments,
+          reply: { ok: 0, errmsg: 'aggregation error - callback' }
+        },
+        done
+      );
+    });
+
+    it('countDocuments should error if aggregation fails using Promises', function(done) {
+      const replyHandler = () => {};
+      const executeCountDocuments = (collection, close) => {
+        collection
+          .countDocuments()
+          .then(() => expect(false).to.equal(true)) // should never get here; error should be caught
+          .catch(e => {
+            expect(e.errmsg).to.equal('aggregation error - promise');
+            close();
+          });
+      };
+
+      testCountDocMock(
+        {
+          replyHandler,
+          executeCountDocuments,
+          reply: { ok: 0, errmsg: 'aggregation error - promise' }
         },
         done
       );
@@ -1741,13 +1762,17 @@ describe('Collection', function() {
         expect(doc.pipeline).to.deep.include({ $skip: 1 });
         expect(doc.pipeline).to.deep.include({ $limit: 1 });
       };
-      const cb = () => {};
+      const executeCountDocuments = (collection, close) => {
+        collection.countDocuments({}, { limit: 1, skip: 1 }, err => {
+          expect(err).to.not.exist;
+          close();
+        });
+      };
 
-      testSkipLimit(
+      testCountDocMock(
         {
-          replyHandler: replyHandler,
-          options: { limit: 1, skip: 1 },
-          cb: cb,
+          replyHandler,
+          executeCountDocuments,
           reply: { ok: 1 }
         },
         done
