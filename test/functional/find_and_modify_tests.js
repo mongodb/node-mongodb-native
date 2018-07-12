@@ -2,6 +2,7 @@
 var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const expect = require('chai').expect;
 
 describe('Find and Modify', function() {
   before(function() {
@@ -198,6 +199,33 @@ describe('Find and Modify', function() {
               done();
             });
           });
+        });
+      });
+    }
+  });
+
+  it('should allow all findAndModify commands with non-primary readPreference', {
+    // Add a tag that our runner can trigger on
+    // in this case we are setting that node needs to be higher than 0.10.X to run
+    metadata: {
+      requires: { topology: 'replicaset' }
+    },
+
+    // The actual test we wish to run
+    test: function(done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient({ readPreference: 'secondary' }, { poolSize: 1 });
+      client.connect((err, client) => {
+        const db = client.db(configuration.db);
+        expect(err).to.be.null;
+
+        const collection = db.collection('findAndModifyTEST');
+        // Execute findOneAndUpdate
+        collection.findOneAndUpdate({}, { $set: { a: 1 } }, err => {
+          expect(err).to.be.null;
+
+          client.close();
+          done();
         });
       });
     }
