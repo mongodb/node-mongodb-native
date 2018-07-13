@@ -15,7 +15,7 @@ title = "Upgrade Guide"
 - Support added for sessions
 - `MongoClient.connect` now returns a `Client` instead of a `DB`.
 
-[Full 3.0 Changes Here](https://github.com/mongodb/node-mongodb-native/blob/3.0.0/CHANGES_3.0.0.md)
+[Full 3.0 Changes Here](https://github.com/mongodb/node-mongodb-native/blob/3.0/CHANGES_3.0.0.md)
 
 # What's New in 2.3
 
@@ -62,5 +62,5 @@ Key features of the 2.0 driver include:
 
 ## Upgrading
 
-See the [3.0 Changes](https://github.com/mongodb/node-mongodb-native/blob/3.0.0/CHANGES_3.0.0.md) on how to upgrade to 3.0
+See the [3.0 Changes](https://github.com/mongodb/node-mongodb-native/blob/3.0/CHANGES_3.0.0.md) on how to upgrade to 3.0
 See the [upgrading guide]({{<ref "upgrade-migration/upgrading.md">}}) on how to upgrade to 2.0
