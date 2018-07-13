@@ -10,12 +10,12 @@ please follow it in all your interactions with the project.
 ## Commit messages
 
 Please follow the [Angular commit style][angular-commit-style].
-This helps the team automate [CHANGELOG.md][changelog] generation.
+This helps the team automate [HISTORY.md](HISTORY.md) generation.
 
 ## Pull Request Process
 
 1. Update the README.md or similar documentation with details of changes you
-   wish to make, if applicable. 
+   wish to make, if applicable.
 2. Add any appropriate tests.
 3. Make your code or other changes.
 4. Review guidelines such as
