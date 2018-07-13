@@ -209,17 +209,12 @@ describe('Connection', function() {
         Server = configuration.require.Server,
         MongoClient = configuration.require.MongoClient;
 
-      var error;
-      try {
-        var client = new MongoClient(new Server('localhost', undefined), { w: 0 });
-        client.connect(function() {});
-      } catch (err) {
-        error = err;
-      }
-
-      test.ok(error instanceof Error);
-      test.ok(/port must be specified/.test(error));
-      done();
+      var client = new MongoClient(new Server('localhost', undefined), { w: 0 });
+      client.connect(function() {
+        test.equal(27017, client.topology.s.port);
+        client.close();
+        done();
+      });
     }
   });
 
