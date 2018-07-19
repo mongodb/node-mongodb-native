@@ -1,5 +1,6 @@
 'use strict';
 
+// prevent this file from being imported; it is only for use in functional/deprecate_warning_tests.js
 if (require.main !== module) {
   return;
 }

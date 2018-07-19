@@ -45,13 +45,14 @@ describe('Deprecation Warnings', function() {
           expect(stdout).to.be.empty;
           expect(stderr).to.not.be.empty;
 
+          // split stderr into separate lines, trimming the first line to just the warning message
           const split = stderr.split('\n');
           const warning = split
             .shift()
             .split(')')[1]
             .trim();
 
-          // ensure warning is the first line printed
+          // ensure warning message matches expected
           expect(warning).to.equal(
             'DeprecationWarning: testDeprecationFlags option [maxScan]' + defaultMessage
           );

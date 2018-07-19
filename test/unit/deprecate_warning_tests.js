@@ -74,7 +74,7 @@ describe('Deprecation Warnings', function() {
     });
   });
 
-  describe('No options', function() {
+  describe('Empty options object', function() {
     beforeEach(function() {
       const f = makeTestFunction({
         name: 'f',
@@ -84,7 +84,7 @@ describe('Deprecation Warnings', function() {
       f({});
     });
 
-    it('should not warn if no deprecated options passed in', {
+    it('should not warn if empty options object passed in', {
       metadata: { requires: { node: '>=6.0.0' } },
       test: function(done) {
         process.nextTick(() => {
@@ -94,7 +94,7 @@ describe('Deprecation Warnings', function() {
       }
     });
 
-    it('should not warn if no deprecated options passed in', {
+    it('should not warn if empty options object passed in', {
       metadata: { requires: { node: '<6.0.0' } },
       test: function(done) {
         expect(console.error).to.have.not.been.called;
@@ -212,7 +212,7 @@ describe('Deprecation Warnings', function() {
       expect(add).to.equal(7);
     });
 
-    it('should maintain functions original functionality', {
+    it('wrapped functions should maintain original functionality', {
       metadata: { requires: { node: '>=6.0.0' } },
       test: function(done) {
         process.nextTick(() => {
@@ -226,7 +226,7 @@ describe('Deprecation Warnings', function() {
       }
     });
 
-    it('should maintain functions original functionality', {
+    it('wrapped functions should maintain original functionality', {
       metadata: { requires: { node: '<6.0.0' } },
       test: function(done) {
         ensureCalledWith(console.error, [
@@ -237,5 +237,25 @@ describe('Deprecation Warnings', function() {
         done();
       }
     });
+  });
+
+  it('optionsIndex pointing to undefined should not error', function(done) {
+    const f = makeTestFunction({
+      name: 'f',
+      deprecatedOptions: deprecatedOptions,
+      optionsIndex: 0
+    });
+    expect(f).to.not.throw();
+    done();
+  });
+
+  it('optionsIndex not pointing to object should not error', function(done) {
+    const f = makeTestFunction({
+      name: 'f',
+      deprecatedOptions: deprecatedOptions,
+      optionsIndex: 0
+    });
+    expect(() => f('not-an-object')).to.not.throw();
+    done();
   });
 });
