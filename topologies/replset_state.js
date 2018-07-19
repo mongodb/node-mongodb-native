@@ -878,10 +878,6 @@ function pickNearestMaxStalenessSeconds(self, readPreference) {
   // Filter by tags
   servers = filterByTags(readPreference, servers);
 
-  //
-  // Locate lowest time (picked servers are lowest time + acceptable Latency margin)
-  // var lowest = servers.length > 0 ? servers[0].lastIsMasterMS : 0;
-
   // Filter by latency
   servers = servers.filter(function(s) {
     return s.staleness <= maxStalenessMS;
@@ -889,8 +885,7 @@ function pickNearestMaxStalenessSeconds(self, readPreference) {
 
   // Sort by time
   servers.sort(function(a, b) {
-    // return a.time > b.time;
-    return a.lastIsMasterMS > b.lastIsMasterMS;
+    return a.lastIsMasterMS - b.lastIsMasterMS;
   });
 
   // No servers, default to primary
@@ -937,8 +932,7 @@ function pickNearest(self, readPreference) {
 
   // Sort by time
   servers.sort(function(a, b) {
-    // return a.time > b.time;
-    return a.lastIsMasterMS > b.lastIsMasterMS;
+    return a.lastIsMasterMS - b.lastIsMasterMS;
   });
 
   // Locate lowest time (picked servers are lowest time + acceptable Latency margin)
