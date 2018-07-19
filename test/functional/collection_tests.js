@@ -1780,6 +1780,44 @@ describe('Collection', function() {
     });
   });
 
+  it('isCapped should return false for uncapped collections', function(done) {
+    const configuration = this.configuration;
+    const client = new MongoClient(configuration.url(), { w: 1, monitorCommands: true });
+
+    client.connect(function(err, client) {
+      const db = client.db(configuration.db);
+      const close = e => client.close(() => done(e));
+      let collection;
+
+      db
+        .createCollection('uncapped', { capped: false })
+        .then(_coll => (collection = _coll))
+        .then(() => collection.isCapped())
+        .then(capped => expect(capped).to.be.false)
+        .then(() => close())
+        .catch(e => close(e));
+    });
+  });
+
+  it('isCapped should return false for collections instantiated without specifying capped', function(done) {
+    const configuration = this.configuration;
+    const client = new MongoClient(configuration.url(), { w: 1, monitorCommands: true });
+
+    client.connect(function(err, client) {
+      const db = client.db(configuration.db);
+      const close = e => client.close(() => done(e));
+      let collection;
+
+      db
+        .createCollection('uncapped2')
+        .then(_coll => (collection = _coll))
+        .then(() => collection.isCapped())
+        .then(capped => expect(capped).to.be.false)
+        .then(() => close())
+        .catch(e => close(e));
+    });
+  });
+
   describe('Retryable Writes on bulk ops', function() {
     const MongoClient = require('../../lib/mongo_client');
 
