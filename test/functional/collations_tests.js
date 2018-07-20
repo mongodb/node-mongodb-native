@@ -633,7 +633,7 @@ describe('Collation', function() {
     }
   });
 
-  it('Fail due to no support for collation', {
+  it.skip('Fail due to no support for collation', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
