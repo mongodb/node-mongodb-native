@@ -1780,6 +1780,31 @@ describe('Collection', function() {
     });
   });
 
+  function testCapped(config, done) {
+    const configuration = config.config;
+    const client = new MongoClient(configuration.url(), { w: 1 });
+
+    client.connect(function(err, client) {
+      const db = client.db(configuration.db);
+      const close = e => client.close(() => done(e));
+
+      db
+        .createCollection(config.collName, config.opts)
+        .then(collection => collection.isCapped())
+        .then(capped => expect(capped).to.be.false)
+        .then(() => close())
+        .catch(e => close(e));
+    });
+  }
+
+  it('isCapped should return false for uncapped collections', function(done) {
+    testCapped({ config: this.configuration, collName: 'uncapped', opts: { capped: false } }, done);
+  });
+
+  it('isCapped should return false for collections instantiated without specifying capped', function(done) {
+    testCapped({ config: this.configuration, collName: 'uncapped2', opts: {} }, done);
+  });
+
   describe('Retryable Writes on bulk ops', function() {
     const MongoClient = require('../../lib/mongo_client');
 
