@@ -21,7 +21,6 @@
     "chai": "^4.1.1",
     "chai-subset": "^1.6.0",
     "co": "4.6.0",
-    "conventional-changelog-cli": "^1.3.5",
     "coveralls": "^2.11.6",
     "eslint": "^4.5.0",
     "eslint-plugin-prettier": "^2.2.0",
@@ -35,6 +34,7 @@
     "semver": "5.4.1",
     "sinon": "^4.3.0",
     "sinon-chai": "^3.2.0",
+    "standard-version": "^4.4.0",
     "worker-farm": "^1.5.0"
   },
   "author": "Christian Kvalheim",
@@ -50,8 +50,13 @@
     "coverage": "istanbul cover mongodb-test-runner -- -t 60000  test/unit test/functional",
     "lint": "eslint lib test",
     "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",
-    "changelog": "conventional-changelog -p angular -i HISTORY.md -s",
+    "release": "standard-version",
     "bench": "node test/driverBench/"
+  },
+  "standard-version": {
+    "scripts": {
+      "prerelease": "[[ -z $(git status -s) ]] || false # If this fails, your working directory is dirty"
+    }
   },
   "homepage": "https://github.com/mongodb/node-mongodb-native"
 }
