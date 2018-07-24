@@ -13,6 +13,7 @@ connect.MongoNetworkError = core.MongoNetworkError;
 
 // Actual driver classes exported
 connect.Admin = require('./lib/admin');
+connect.AggregationCursor = require('./lib/aggregation_cursor');
 connect.MongoClient = require('./lib/mongo_client');
 connect.Db = require('./lib/db');
 connect.Collection = require('./lib/collection');
