@@ -633,7 +633,7 @@ describe('Collation', function() {
     }
   });
 
-  it.skip('Fail due to no support for collation', {
+  it('Fail due to no support for collation', {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
@@ -668,7 +668,6 @@ describe('Collation', function() {
             .collection('test')
             .findOne({ a: 1 }, { collation: { caseLevel: true } }, function(err) {
               test.equal(`server ${singleServer.uri()} does not support collation`, err.message);
-              singleServer.destroy();
               client.close();
               done();
             });
