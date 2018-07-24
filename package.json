@@ -50,7 +50,7 @@
     "coverage": "istanbul cover mongodb-test-runner -- -t 60000  test/unit test/functional",
     "lint": "eslint lib test",
     "format": "prettier --print-width 100 --tab-width 2 --single-quote --write 'test/**/*.js' 'lib/**/*.js'",
-    "release": "standard-version",
+    "release": "standard-version -i HISTORY.md",
     "bench": "node test/driverBench/"
   },
   "standard-version": {
