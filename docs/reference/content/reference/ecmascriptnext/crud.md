@@ -47,7 +47,9 @@ const dbName = 'myproject';
   }
 
   // Close connection
-  client.close();
+  if(client){
+    client.close();  
+  }
 })();
 ```
 
@@ -87,7 +89,9 @@ const dbName = 'myproject';
   }
 
   // Close connection
-  client.close();
+  if(client){
+    client.close();  
+  }
 })();
 ```
 
@@ -137,7 +141,9 @@ const dbName = 'myproject';
   }
 
   // Close connection
-  client.close();
+  if(client){
+    client.close();  
+  }
 })();
 ```
 
@@ -180,7 +186,9 @@ const dbName = 'myproject';
   }
 
   // Close connection
-  client.close();
+  if(client){
+    client.close();  
+  }
 })();
 ```
 
@@ -224,7 +232,9 @@ const dbName = 'myproject';
   }
 
   // Close connection
-  client.close();
+  if(client){
+    client.close();  
+  }
 })();
 ```
 
@@ -262,7 +272,9 @@ const dbName = 'myproject';
   }
 
   // Close connection
-  client.close();
+  if(client){
+    client.close();  
+  }
 })();
 ```
 
@@ -310,7 +322,9 @@ const dbName = 'myproject';
   }
 
   // Close connection
-  client.close();
+  if(client){
+    client.close();  
+  }
 })();
 ```
 
@@ -360,7 +374,9 @@ const dbName = 'myproject';
   }
 
   // Close connection
-  client.close();
+  if(client){
+    client.close();  
+  }
 })();
 ```
 
@@ -440,7 +456,9 @@ const dbName = 'myproject';
   }
 
   // Close connection
-  client.close();
+  if(client){
+    client.close();  
+  }
 })();
 ```
 
@@ -482,7 +500,9 @@ const dbName = 'myproject';
   }
 
   // Close connection
-  client.close();
+  if(client){
+    client.close();  
+  }
 })();
 ```
 
@@ -515,6 +535,8 @@ const dbName = 'myproject';
   }
 
   // Close connection
-  client.close();
+  if(client){
+    client.close();  
+  }
 })();
 ```
