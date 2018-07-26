@@ -2629,7 +2629,7 @@ describe('Find', function() {
     metadata: {
       requires: {
         mongodb: '>=3.6.0 <= 4.1.0',
-        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+        topology: ['single', 'replicaset']
       }
     },
     test: function(done) {
