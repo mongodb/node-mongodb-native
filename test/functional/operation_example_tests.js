@@ -1071,9 +1071,10 @@ describe('Operation Examples', function() {
         var collection = db.collection('test_other_drop');
 
         // Drop the collection
-        collection.drop(function(err, reply) {
-          expect(err).to.exist;
-          expect(reply).to.not.exist;
+        collection.drop(function(/*err, reply*/) {
+          // TODO: reenable once SERVER-36317 is resolved
+          // expect(err).to.exist;
+          // expect(reply).to.not.exist;
 
           // Ensure we don't have the collection in the set of names
           db.listCollections().toArray(function(err, replies) {
