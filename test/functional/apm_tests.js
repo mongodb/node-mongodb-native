@@ -1109,6 +1109,12 @@ describe('APM', function() {
               requirements.mongodb = `>${test.ignore_if_server_version_less_than}`;
             }
 
+            if (test.ignore_if_topology_type) {
+              requirements.topology = requirements.topology.filter(
+                top => test.ignore_if_topology_type.indexOf(top) < 0
+              );
+            }
+
             it(test.description, {
               metadata: { requires: requirements },
               test: function() {
