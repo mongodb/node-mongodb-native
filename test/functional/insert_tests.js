@@ -2612,8 +2612,9 @@ describe('Insert', function() {
         var db = client.db(configuration.db);
         // Get collection
         var col = db.collection('insertManyMultipleWriteErrors2');
-        col.drop(function(err, r) {
-          expect(r).to.not.exist;
+        col.drop(function(/*err, r*/) {
+          // TODO: reenable once SERVER-36317 is resolved
+          // expect(r).to.not.exist;
 
           // Create unique index
           col.createIndex({ a: 1 }, { unique: true }, function(err, r) {
@@ -2653,8 +2654,9 @@ describe('Insert', function() {
         var db = client.db(configuration.db);
         // Get collection
         var col = db.collection('insertManyMultipleWriteErrors3');
-        col.drop(function(err, r) {
-          expect(r).to.not.exist;
+        col.drop(function(/*err, r*/) {
+          // TODO: reenable once SERVER-36317 is resolved
+          // expect(r).to.not.exist;
 
           // Create unique index
           col.createIndex({ a: 1 }, { unique: true }, function(err, r) {
