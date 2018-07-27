@@ -1,7 +1,6 @@
 'use strict';
-const expect = require('chai').expect,
-  mongo = require('../..'),
-  setupDatabase = require('./shared').setupDatabase;
+const expect = require('chai').expect;
+const setupDatabase = require('./shared').setupDatabase;
 
 const ignoredCommands = ['ismaster'];
 const test = { commands: { started: [], succeeded: [] } };
@@ -10,19 +9,37 @@ describe('Sessions', function() {
     return setupDatabase(this.configuration);
   });
 
-  afterEach(() => test.listener.uninstrument());
+  function parseAPMEvent(e) {
+    // Some silly stuff for OP_QUERY
+    if (e.commandName === 'find' && e.command && e.command.find === '$cmd') {
+      const realCommand = e.command.filter;
+      return Object.assign({}, e, {
+        command: realCommand,
+        commandName: Object.keys(realCommand)[0]
+      });
+    }
+
+    return e;
+  }
+
   beforeEach(function() {
     test.commands = { started: [], succeeded: [] };
-    test.listener = mongo.instrument(err => expect(err).to.be.null);
-    test.listener.on('started', event => {
-      if (ignoredCommands.indexOf(event.commandName) === -1) test.commands.started.push(event);
+
+    test.client = this.configuration.newClient(
+      { w: 1 },
+      { poolSize: 1, auto_reconnect: false, monitorCommands: true }
+    );
+    test.client.on('commandStarted', event => {
+      if (ignoredCommands.indexOf(event.commandName) === -1) {
+        test.commands.started.push(parseAPMEvent(event));
+      }
     });
 
-    test.listener.on('succeeded', event => {
-      if (ignoredCommands.indexOf(event.commandName) === -1) test.commands.succeeded.push(event);
+    test.client.on('commandSucceeded', event => {
+      if (ignoredCommands.indexOf(event.commandName) === -1) {
+        test.commands.succeeded.push(parseAPMEvent(event));
+      }
     });
-
-    test.client = this.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
     return test.client.connect();
   });
 
@@ -96,44 +113,11 @@ describe('Sessions', function() {
         }
       ].forEach(testCase => {
         it(testCase.description, function() {
-          const client = this.configuration.newClient(
-            { w: 1 },
-            { poolSize: 1, auto_reconnect: false }
-          );
+          const client = test.client;
 
-          return client.connect().then(client => {
-            return client
-              .withSession(testCase.operation(client))
-              .catch(() => expect(client.topology.s.sessionPool.sessions).to.have.length(1))
-              .then(() => expect(client.topology.s.sessionPool.sessions).to.have.length(1))
-              .then(() => client.close())
-              .then(() => {
-                // verify that the `endSessions` command was sent
-                const lastCommand = test.commands.started[test.commands.started.length - 1];
-                expect(lastCommand.commandName).to.equal('endSessions');
-                expect(client.topology.s.sessionPool.sessions).to.have.length(0);
-              });
-          });
-        });
-      });
-
-      it('supports passing options to ClientSession', function() {
-        const client = this.configuration.newClient(
-          { w: 1 },
-          { poolSize: 1, auto_reconnect: false }
-        );
-
-        return client.connect().then(client => {
-          const promise = client.withSession({ causalConsistency: false }, session => {
-            expect(session.supports.causalConsistency).to.be.false;
-            return client
-              .db('test')
-              .collection('foo')
-              .find({}, { session })
-              .toArray();
-          });
-
-          return promise
+          return client
+            .withSession(testCase.operation(client))
+            .catch(() => expect(client.topology.s.sessionPool.sessions).to.have.length(1))
             .then(() => expect(client.topology.s.sessionPool.sessions).to.have.length(1))
             .then(() => client.close())
             .then(() => {
@@ -143,6 +127,29 @@ describe('Sessions', function() {
               expect(client.topology.s.sessionPool.sessions).to.have.length(0);
             });
         });
+      });
+
+      it('supports passing options to ClientSession', function() {
+        const client = test.client;
+
+        const promise = client.withSession({ causalConsistency: false }, session => {
+          expect(session.supports.causalConsistency).to.be.false;
+          return client
+            .db('test')
+            .collection('foo')
+            .find({}, { session })
+            .toArray();
+        });
+
+        return promise
+          .then(() => expect(client.topology.s.sessionPool.sessions).to.have.length(1))
+          .then(() => client.close())
+          .then(() => {
+            // verify that the `endSessions` command was sent
+            const lastCommand = test.commands.started[test.commands.started.length - 1];
+            expect(lastCommand.commandName).to.equal('endSessions');
+            expect(client.topology.s.sessionPool.sessions).to.have.length(0);
+          });
       });
     }
   });
