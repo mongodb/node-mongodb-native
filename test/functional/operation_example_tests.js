@@ -5129,9 +5129,6 @@ describe('Operation Examples', function() {
           expect(dbs.databases).to.include.deep.members([
             {
               name: 'admin'
-            },
-            {
-              name: 'local'
             }
           ]);
 
