@@ -43,7 +43,6 @@ ClassWithoutLogger.prototype.f = makeTestFunction({
 });
 
 // creation of class where getLogger returns undefined
-// creation of class without a logger
 function ClassWithUndefinedLogger() {}
 
 ClassWithUndefinedLogger.prototype.f = makeTestFunction({

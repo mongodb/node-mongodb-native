@@ -106,12 +106,20 @@ describe('Deprecation Warnings', function() {
   it('test behavior for classes without an associated logger', function() {
     const fakeClass = new ClassWithoutLogger();
 
-    fakeClass.f({ maxScan: 5, snapshot: true });
+    function func() {
+      fakeClass.f({ maxScan: 5, snapshot: true });
+    }
+
+    expect(func).to.not.throw();
   });
 
   it('test behavior for classes with an undefined logger', function() {
     const fakeClass = new ClassWithUndefinedLogger();
 
-    fakeClass.f({ maxScan: 5, snapshot: true });
+    function func() {
+      fakeClass.f({ maxScan: 5, snapshot: true });
+    }
+
+    expect(func).to.not.throw();
   });
 });
