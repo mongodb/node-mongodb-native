@@ -274,7 +274,7 @@ function parseConnectionString(uri, options, callback) {
 
       const result = {
         host: parsedHost.hostname,
-        port: parsedHost.port ? parseInt(parsedHost.port) : null
+        port: parsedHost.port ? parseInt(parsedHost.port) : 27017
       };
 
       if (result.port === 0) {
