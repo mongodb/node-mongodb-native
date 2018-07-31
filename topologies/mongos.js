@@ -568,13 +568,13 @@ function reconnectProxies(self, proxies, callback) {
           _self.on('parseError', handleEvent(self, 'parseError'));
 
           // Move to the connected servers
-          moveServerFrom(self.disconnectedProxies, self.connectedProxies, _self);
+          moveServerFrom(self.connectingProxies, self.connectedProxies, _self);
           // Emit topology Change
           emitTopologyDescriptionChanged(self);
           // Emit joined event
           self.emit('joined', 'mongos', _self);
         });
-      } else if (event === 'connect' && self.authenticating) {
+      } else {
         // Move from connectingProxies
         moveServerFrom(self.connectingProxies, self.disconnectedProxies, _self);
         this.destroy();
@@ -613,6 +613,9 @@ function reconnectProxies(self, proxies, callback) {
         })
       );
 
+      _server.destroy();
+      removeProxyFrom(self.disconnectedProxies, _server);
+
       // Relay the server description change
       server.on('serverDescriptionChanged', function(event) {
         self.emit('serverDescriptionChanged', event);
@@ -635,6 +638,7 @@ function reconnectProxies(self, proxies, callback) {
       relayEvents(server, self, ['commandStarted', 'commandSucceeded', 'commandFailed']);
 
       // Connect to proxy
+      self.connectingProxies.push(server);
       server.connect(self.s.connectOptions);
     }, i);
   }
