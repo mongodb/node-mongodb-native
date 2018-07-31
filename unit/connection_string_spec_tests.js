@@ -3,9 +3,11 @@
 const parseConnectionString = require('../../../lib/uri_parser');
 const fs = require('fs');
 const f = require('util').format;
-const expect = require('chai').expect;
 const punycode = require('punycode');
 const MongoParseError = require('../../../lib/error').MongoParseError;
+const chai = require('chai');
+const expect = chai.expect;
+chai.use(require('chai-subset'));
 
 // NOTE: These are cases we could never check for unless we write out own
 //       url parser. The node parser simply won't let these through, so we
@@ -22,6 +24,14 @@ const skipTests = [
 ];
 
 describe('Connection String (spec)', function() {
+  it('should provide a default port if one is not provided', function(done) {
+    parseConnectionString('mongodb://hostname', function(err, result) {
+      expect(err).to.not.exist;
+      expect(result.hosts[0].port).to.equal(27017);
+      done();
+    });
+  });
+
   const testFiles = fs
     .readdirSync(f('%s/../spec/connection-string', __dirname))
     .filter(x => x.indexOf('.json') !== -1)
@@ -63,7 +73,14 @@ describe('Connection String (spec)', function() {
                 return host;
               });
 
-              expect(result.hosts).to.eql(test.hosts);
+              // remove values that require no validation
+              test.hosts.forEach(host => {
+                Object.keys(host).forEach(key => {
+                  if (host[key] == null) delete host[key];
+                });
+              });
+
+              expect(result.hosts).to.containSubset(test.hosts);
               expect(result.auth).to.eql(test.auth);
               expect(result.options).to.eql(test.options);
             }
