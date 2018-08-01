@@ -48,10 +48,23 @@ try {
   console.warn(err.message);
 }
 
+/*
+ * Checks that collation is supported by server.
+ *
+ * @param {Server} [server] to check against
+ * @param {object} [cmd] object where collation may be specified
+ * @param {function} [callback] callback function
+ * @return true if server does not support collation
+ */
+function collationNotSupported(server, cmd) {
+  return cmd && cmd.collation && server.ismaster && server.ismaster.maxWireVersion < 5;
+}
+
 module.exports = {
   uuidV4,
   calculateDurationInMs,
   relayEvents,
   Kerberos,
-  MongoAuthProcess
+  MongoAuthProcess,
+  collationNotSupported
 };

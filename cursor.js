@@ -6,6 +6,7 @@ const MongoError = require('./error').MongoError;
 const MongoNetworkError = require('./error').MongoNetworkError;
 const mongoErrorContextSymbol = require('./error').mongoErrorContextSymbol;
 const f = require('util').format;
+const collationNotSupported = require('./utils').collationNotSupported;
 
 var BSON = retrieveBSON(),
   Long = BSON.Long;
@@ -634,9 +635,9 @@ var nextFunction = function(self, callback) {
     // Set as init
     self.cursorState.init = true;
 
-    // Server does not support server
-    if (self.cmd && self.cmd.collation && self.server.ismaster.maxWireVersion < 5) {
-      return callback(new MongoError(f('server %s does not support collation', self.server.name)));
+    // error if collation not supported
+    if (collationNotSupported(self.server, self.cmd)) {
+      return callback(new MongoError(`server ${self.server.name} does not support collation`));
     }
 
     try {

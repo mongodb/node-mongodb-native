@@ -21,6 +21,8 @@ var inherits = require('util').inherits,
   SessionMixins = require('./shared').SessionMixins,
   relayEvents = require('../utils').relayEvents;
 
+const collationNotSupported = require('../utils').collationNotSupported;
+
 function getSaslSupportedMechs(options) {
   if (!options) {
     return {};
@@ -748,9 +750,9 @@ Server.prototype.command = function(ns, cmd, options, callback) {
   // If we are not connected or have a disconnectHandler specified
   if (disconnectHandler(self, 'command', ns, cmd, options, callback)) return;
 
-  // Check if we have collation support
-  if (this.ismaster && this.ismaster.maxWireVersion < 5 && cmd.collation) {
-    return callback(new MongoError(f('server %s does not support collation', this.name)));
+  // error if collation not supported
+  if (collationNotSupported(this, cmd)) {
+    return callback(new MongoError(`server ${this.name} does not support collation`));
   }
 
   // Are we executing against a specific topology
@@ -837,9 +839,9 @@ Server.prototype.update = function(ns, ops, options, callback) {
   // If we are not connected or have a disconnectHandler specified
   if (disconnectHandler(self, 'update', ns, ops, options, callback)) return;
 
-  // Check if we have collation support
-  if (this.ismaster && this.ismaster.maxWireVersion < 5 && options.collation) {
-    return callback(new MongoError(f('server %s does not support collation', this.name)));
+  // error if collation not supported
+  if (collationNotSupported(this, options)) {
+    return callback(new MongoError(`server ${this.name} does not support collation`));
   }
 
   // Setup the docs as an array
@@ -872,9 +874,9 @@ Server.prototype.remove = function(ns, ops, options, callback) {
   // If we are not connected or have a disconnectHandler specified
   if (disconnectHandler(self, 'remove', ns, ops, options, callback)) return;
 
-  // Check if we have collation support
-  if (this.ismaster && this.ismaster.maxWireVersion < 5 && options.collation) {
-    return callback(new MongoError(f('server %s does not support collation', this.name)));
+  // error if collation not supported
+  if (collationNotSupported(this, options)) {
+    return callback(new MongoError(`server ${this.name} does not support collation`));
   }
 
   // Setup the docs as an array
