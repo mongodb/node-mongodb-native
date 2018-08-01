@@ -5,6 +5,7 @@ const fs = require('fs');
 const expect = require('chai').expect;
 const Long = require('bson').Long;
 const sinon = require('sinon');
+const ReadPreference = require('mongodb-core').ReadPreference;
 
 describe('Cursor', function() {
   before(function() {
@@ -275,6 +276,37 @@ describe('Cursor', function() {
               finished();
             });
           });
+        });
+      });
+    }
+  });
+
+  it('Should correctly execute cursor count with secondary readPreference', {
+    // Add a tag that our runner can trigger on
+    // in this case we are setting that node needs to be higher than 0.10.X to run
+    metadata: {
+      requires: { topology: 'replicaset' }
+    },
+
+    // The actual test we wish to run
+    test: function(done) {
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+
+      client.connect((err, client) => {
+        const db = client.db(configuration.db);
+
+        const internalClientCursor = sinon.spy(client.topology.s.coreTopology, 'cursor');
+        const expectedReadPreference = new ReadPreference(ReadPreference.SECONDARY);
+
+        const cursor = db.collection('countTEST').find({ qty: { $gt: 4 } });
+        cursor.count(true, { readPreference: ReadPreference.SECONDARY }, err => {
+          expect(err).to.be.null;
+          expect(internalClientCursor.getCall(0).args[2])
+            .to.have.nested.property('readPreference')
+            .that.deep.equals(expectedReadPreference);
+          client.close();
+          done();
         });
       });
     }
