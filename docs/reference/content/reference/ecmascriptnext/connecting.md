@@ -21,21 +21,19 @@ const assert = require('assert');
   const url = 'mongodb://localhost:27017/myproject';
   // Database Name
   const dbName = 'myproject';
-  let client;
+  const client = new MongoClient(url);
 
   try {
     // Use connect method to connect to the Server
-    client = await MongoClient.connect(url);
+    await client.connect();
 
     const db = client.db(dbName);
   } catch (err) {
     console.log(err.stack);
   }
 
-  if (client) {
-    client.close();
-  }
+  client.close();
 })();
 ```
 
-The `MongoClient.connect` function returns a `Promise` that we then execute using the `await` keyword inside of an `async` function. If an error happens during the `MongoClient.connect` the error is caught by the `try`/`catch` and can be handled as if it were a normal Javascript error.
+The `client.connect` function returns a `Promise` that we then execute using the `await` keyword inside of an `async` function. If an error happens during the `client.connect` the error is caught by the `try`/`catch` and can be handled as if it were a normal Javascript error.

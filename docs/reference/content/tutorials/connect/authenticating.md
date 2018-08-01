@@ -31,7 +31,6 @@ The user and password should always be **URI** encoded using `encodeURIComponent
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
-const f = require('util').format;
 const assert = require('assert');
 
 const user = encodeURIComponent('dave');
@@ -39,11 +38,13 @@ const password = encodeURIComponent('abc123');
 const authMechanism = 'DEFAULT';
 
 // Connection URL
-const url = f('mongodb://%s:%s@localhost:27017/?authMechanism=%s',
-  user, password, authMechanism);
+const url = `mongodb://${user}:${password}@localhost:27017/?authMechanism=${authMechanism}`;
+
+// Create a new MongoClient
+const client = new MongoClient(url);
 
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+client.connect(function(err) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -61,13 +62,16 @@ In the following example, the connection string specifies the user `dave`, passw
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
-const f = require('util').format;
 const assert = require('assert');
 
 // Connection URL
 const url = 'mongodb://dave:abc123@localhost:27017/?authMechanism=SCRAM-SHA-1&authSource=myprojectdb';
+
+// Create a new MongoClient
+const client = new MongoClient(url);
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+client.connect(function(err) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -90,13 +94,16 @@ In the following example, the connection string specifies the user `dave`, passw
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
-const f = require('util').format;
 const assert = require('assert');
 
 // Connection URL
 const url = 'mongodb://dave:abc123@localhost:27017/?authMechanism=MONGODB-CR&authSource=myprojectdb';
+
+// Create a new MongoClient
+const client = new MongoClient(url);
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+client.connect(function(err) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -119,12 +126,11 @@ X.509 authentication requires the use of SSL connections with certificate valida
 
 To connect using the X.509 authentication mechanism, specify `MONGODB-X509` as the mechanism in the [URI connection string](https://docs.mongodb.org/manual/reference/connection-string/), `ssl=true`, and the username. Use `enodeURIComponent` to encode the username string.
 
-In addition to the connection string, pass to the `MongoClient.connect` method a connections options for the `server` with  the X.509 certificate and other [TLS/SSL connections]({{< relref "tutorials/connect/ssl.md" >}}) options.
+In addition to the connection string, pass to the new `MongoClient` a connections options for the `server` with  the X.509 certificate and other [TLS/SSL connections]({{< relref "tutorials/connect/ssl.md" >}}) options.
 
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
-const f = require('util').format;
 const assert = require('assert');
 
 // Read the cert and key
@@ -133,15 +139,17 @@ const key = fs.readFileSync(__dirname + "/ssl/x509/client.pem");
 
 // User name
 const userName = encodeURIComponent("CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US");
+const url = `mongodb://${userName}:${password}@server:27017?authMechanism=MONGODB-X509&ssl=true`;
 
-// Connect using X509 authentication
-MongoClient.connect(f('mongodb://%s@server:27017?authMechanism=MONGODB-X509&ssl=true', userName), {
-  server: {
-      sslKey:key
-    , sslCert:cert
-    , sslValidate:false
-  }
-}, function(err, client) {
+// Create a new MongoClient
+const client = new MongoClient(url, {
+  sslKey: key,
+  sslCert: cert,
+  sslValidate: false
+});
+
+// Use connect method to connect to the Server
+client.connect(function(err) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -164,7 +172,6 @@ The following example connects to MongoDB using Kerberos for UNIX.
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
-const f = require('util').format;
 const assert = require('assert');
 
 // KDC Server
@@ -172,8 +179,12 @@ const server = "mongo-server.example.com";
 const principal = "drivers@KERBEROS.EXAMPLE.COM";
 const urlEncodedPrincipal = encodeURIComponent(principal);
 
+const url = `mongodb://${urlEncodedPrincipal}@${server}?authMechanism=GSSAPI&gssapiServiceName=mongodb`;
+
+const client = new MongoClient(url);
+
 // Let's write the actual connection code
-MongoClient.connect(f("mongodb://%s@%s?authMechanism=GSSAPI&gssapiServiceName=mongodb", urlEncodedPrincipal, server), function(err, client) {
+client.connect(function(err) {
   assert.equal(null, err);
 
   client.close();
@@ -193,7 +204,6 @@ To connect using the LDAP authentication mechanism, specify ``authMechanism=PLAI
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
-const f = require('util').format;
 const assert = require('assert');
 
 // LDAP Server
@@ -202,10 +212,13 @@ const user = "ldap-user";
 const pass = "ldap-password";
 
 // Url
-const url = f("mongodb://%s:%s@%s?authMechanism=PLAIN&maxPoolSize=1", user, pass, server);
+const url = `mongodb://${user}:${pass}@${server}?authMechanism=PLAIN&maxPoolSize=1`;
+
+// Client
+const client = new MongoClient(url);
 
 // Let's write the actual connection code
-MongoClient.connect(url, function(err, client) {
+client.connect(function(err) {
   assert.equal(null, err);
 
   client.close();

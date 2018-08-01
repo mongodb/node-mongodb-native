@@ -10,7 +10,7 @@ title = "Connect to MongoDB"
 
 # Connect to MongoDB
 
-Use the `MongoClient.connect` method to connect to a running MongoDB deployment.
+Use the `client.connect` method to connect to a running MongoDB deployment.
 
 ## Connect to a Single MongoDB Instance
 
@@ -68,7 +68,6 @@ For example, you can specify TLS/SSL and authentication setting.
 ```js
 
 const MongoClient = require('mongodb').MongoClient;
-const f = require('util').format;
 const assert = require('assert');
 const fs = require('fs');
 
@@ -79,15 +78,15 @@ const cert = fs.readFileSync(__dirname + "/ssl/client.pem");
 // Connection URL
 const url = 'mongodb://dave:password@localhost:27017?authMechanism=DEFAULT&authSource=db&ssl=true"';
 
-// Use connect method to connect to the Server passing in
-// additional options
-MongoClient.connect(url,  {
-  server: {
-      sslValidate:true
-    , sslCA:ca
-    , sslCert:cert
-  }
-}, function(err, client) {
+// Ceate a client, passing in additional options
+const client = new MongoClient(url,  {
+  sslValidate: true,
+  sslCA: ca,
+  sslCert: cert
+});
+
+// Use connect method to connect to the server
+client.connect(function(err) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
