@@ -13,7 +13,6 @@ connect.MongoNetworkError = core.MongoNetworkError;
 
 // Actual driver classes exported
 connect.Admin = require('./lib/admin');
-connect.AggregationCursor = require('./lib/aggregation_cursor');
 connect.MongoClient = require('./lib/mongo_client');
 connect.Db = require('./lib/db');
 connect.Collection = require('./lib/collection');
@@ -24,6 +23,8 @@ connect.ReadPreference = require('mongodb-core').ReadPreference;
 connect.GridStore = require('./lib/gridfs/grid_store');
 connect.Chunk = require('./lib/gridfs/chunk');
 connect.Logger = core.Logger;
+connect.AggregationCursor = require('./lib/aggregation_cursor');
+connect.CommandCursor = require('./lib/command_cursor');
 connect.Cursor = require('./lib/cursor');
 connect.GridFSBucket = require('./lib/gridfs-stream');
 // Exported to be used in tests not to be used anywhere else
