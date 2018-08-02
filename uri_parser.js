@@ -137,7 +137,7 @@ function parseSrvConnectionString(uri, options, callback) {
 function parseQueryStringItemValue(value) {
   if (Array.isArray(value)) {
     // deduplicate and simplify arrays
-    value = value.filter((value, idx) => value.indexOf(value) === idx);
+    value = value.filter((v, idx) => value.indexOf(v) === idx);
     if (value.length === 1) value = value[0];
   } else if (value.indexOf(':') > 0) {
     value = value.split(',').reduce((result, pair) => {
