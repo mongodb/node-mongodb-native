@@ -50,19 +50,17 @@ describe('Sessions', function() {
       sessions: { skipLeakTests: true }
     },
     test: function(done) {
-      var client = this.configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-      client.connect((err, client) => {
-        let sessions = [client.startSession(), client.startSession()].map(s => s.id);
+      const client = test.client;
+      let sessions = [client.startSession(), client.startSession()].map(s => s.id);
 
-        client.close(err => {
-          expect(err).to.not.exist;
-          expect(test.commands.started).to.have.length(1);
-          expect(test.commands.started[0].commandName).to.equal('endSessions');
-          expect(test.commands.started[0].command.endSessions).to.include.deep.members(sessions);
+      client.close(err => {
+        expect(err).to.not.exist;
+        expect(test.commands.started).to.have.length(1);
+        expect(test.commands.started[0].commandName).to.equal('endSessions');
+        expect(test.commands.started[0].command.endSessions).to.include.deep.members(sessions);
 
-          expect(client.s.sessions).to.have.length(0);
-          done();
-        });
+        expect(client.s.sessions).to.have.length(0);
+        done();
       });
     }
   });
