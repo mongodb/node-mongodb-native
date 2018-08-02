@@ -32,6 +32,14 @@ describe('Connection String (spec)', function() {
     });
   });
 
+  it('should correctly parse arrays', function(done) {
+    parseConnectionString('mongodb://hostname?foo=bar&foo=baz', function(err, result) {
+      expect(err).to.not.exist;
+      expect(result.options.foo).to.deep.equal(['bar', 'baz']);
+      done();
+    });
+  });
+
   const testFiles = fs
     .readdirSync(f('%s/../spec/connection-string', __dirname))
     .filter(x => x.indexOf('.json') !== -1)
