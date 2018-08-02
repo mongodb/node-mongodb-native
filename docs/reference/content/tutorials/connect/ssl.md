@@ -18,13 +18,15 @@ If the MongoDB instance does not perform any validation of the certificate chain
 ```js
 const MongoClient = require('mongodb').MongoClient;
 
-MongoClient.connect("mongodb://localhost:27017?ssl=true", function(err, client) {
+const client = new MongoClient('mongodb://localhost:27017?ssl=true');
+
+client.connect(function(err) {
   client.close();
 });
 ```
 
 ## Validate Server Certificate
-If the MongoDB instance presents a certificate, to validate the server's certificate, pass to the `MongoClient.connect` method:
+If the MongoDB instance presents a certificate, to validate the server's certificate, pass the following when creating a `MongoClient`:
 
 - A [URI Connection String ](https://docs.mongodb.org/manual/reference/connection-string/) that includes `ssl=true` setting,
 
@@ -32,24 +34,25 @@ If the MongoDB instance presents a certificate, to validate the server's certifi
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
-const f = require('util').format;
 const fs = require('fs');
 
 // Read the certificate authority
 const ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
 
-// Connect validating the returned certificates from the server
-MongoClient.connect("mongodb://localhost:27017?ssl=true", {
+const client = new MongoClient('mongodb://localhost:27017?ssl=true', {
   sslValidate:true,
   sslCA:ca
-}, function(err, client) {
+});
+
+// Connect validating the returned certificates from the server
+client.connect(function(err) {
   client.close();
 });
 ```
 
 ## Disable Hostname Verification
 By default, the driver ensures that the hostname included in the
-server's SSL certificate(s) matches the hostname(s) provided in the URI connection string. If you need to disable the hostname verification, but otherwise validate the server's certificate, pass to the `MongoClient.connect` method:
+server's SSL certificate(s) matches the hostname(s) provided in the URI connection string. If you need to disable the hostname verification, but otherwise validate the server's certificate, pass to the new `MongoClient`:
 
 - A [URI Connection String ](https://docs.mongodb.org/manual/reference/connection-string/) that includes `ssl=true` setting,
 
@@ -57,25 +60,26 @@ server's SSL certificate(s) matches the hostname(s) provided in the URI connecti
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
-const f = require('util').format;
 const fs = require('fs');
 
 // Read the certificate authority
 const ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
 
-// Connect validating the returned certificates from the server
-MongoClient.connect("mongodb://localhost:27017?ssl=true", {
+const client = new MongoClient('mongodb://localhost:27017?ssl=true', {
   sslValidate:true,
   checkServerIdentity:false,
   sslCA:ca
-}, function(err, client) {
+});
+
+// Connect validating the returned certificates from the server
+client.connect(function(err) {
   client.close();
 });
 ```
 
 ## Validate Server Certificate and Present Valid Certificate
 If the MongoDB server performs certificate validation, the client must pass its
-certificate to the server. To pass the client's certificate as well as to validate the server's certificate, pass to the `MongoClient.connect` method:
+certificate to the server. To pass the client's certificate as well as to validate the server's certificate, pass to the new `MongoClient`:
 
 - A [URI Connection String ](https://docs.mongodb.org/manual/reference/connection-string/) that includes `ssl=true` setting,
 
@@ -83,7 +87,6 @@ certificate to the server. To pass the client's certificate as well as to valida
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
-const f = require('util').format;
 const fs = require('fs');
 
 // Read the certificates
@@ -91,14 +94,16 @@ const ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
 const cert = fs.readFileSync(__dirname + "/ssl/client.pem");
 const key = fs.readFileSync(__dirname + "/ssl/client.pem");
 
-// Connect validating the returned certificates from the server
-MongoClient.connect("mongodb://localhost:27017?ssl=true", {
+const client = new MongoClient('mongodb://localhost:27017?ssl=true', {
   sslValidate:true,
   sslCA:ca,
   sslKey:key,
   sslCert:cert,
   sslPass:'10gen',
-}, function(err, client) {
+});
+
+// Connect validating the returned certificates from the server
+client.connect(function(err) {
   client.close();
 });
 ```
@@ -108,12 +113,11 @@ MongoClient.connect("mongodb://localhost:27017?ssl=true", {
 
 To connect using the X.509 authentication mechanism, specify `MONGODB-X509` as the mechanism in the [URI connection string](https://docs.mongodb.org/manual/reference/connection-string/), `ssl=true`, and the username. Use `enodeURIComponent` to encode the username string.
 
-In addition to the connection string, pass to the `MongoClient.connect` method
+In addition to the connection string, pass to the new `MongoClient`
 a connections options with  the X.509 certificate and other [TLS/SSL connections]({{< relref "reference/connecting/connection-settings.md" >}}) options.
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
-const f = require('util').format;
 const fs = require('fs');
 
 // Read the cert and key
@@ -123,12 +127,13 @@ const key = fs.readFileSync(__dirname + "/ssl/x509/client.pem");
 // User name
 const userName = "CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US";
 
-// Connect using the MONGODB-X509 authentication mechanism
-MongoClient.connect(f('mongodb://%s@server:27017?authMechanism=%s&ssl=true'
-    , encodeURIComponent(userName), 'MONGODB-X509'), {
+const client = new MongoClient(`mongodb://${encodeURIComponent(userName)}@server:27017?authMechanism=MONGODB-X509&ssl=true`, {
   sslKey:key,
   sslCert:cert,
-}, function(err, client) {
+});
+
+// Connect using the MONGODB-X509 authentication mechanism
+client.connect(function(err) {
   client.close();
 });
 ```
@@ -157,11 +162,13 @@ const ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
 const cert = fs.readFileSync(__dirname + "/ssl/client.pem");
 const key = fs.readFileSync(__dirname + "/ssl/client.pem");
 
-MongoClient.connect('mongodb://server:27017?ssl=true', {
+const client = new MongoClient('mongodb://server:27017?ssl=true', {
   sslCA:ca,
   sslKey:key,
   sslCert:cert,
-}, function(err, client) {
+});
+
+client.connect(function(err) {
   client.close();
 });
 ```
@@ -177,11 +184,13 @@ const ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
 const cert = fs.readFileSync(__dirname + "/ssl/client.pem");
 const key = fs.readFileSync(__dirname + "/ssl/client.pem");
 
-MongoClient.connect('mongodb://server:27017?replicaSet=foo&ssl=true', {
+const client = new MongoClient('mongodb://server:27017?replicaSet=foo&ssl=true', {
   sslCA:ca,
   sslKey:key,
   sslCert:cert,
-}, function(err, client) {
+});
+
+client.connect(function(err) {
   client.close();
 });
 ```
@@ -197,11 +206,13 @@ const ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
 const cert = fs.readFileSync(__dirname + "/ssl/client.pem");
 const key = fs.readFileSync(__dirname + "/ssl/client.pem");
 
-MongoClient.connect('mongodb://server:27017?ssl=true', {
+const client = new MongoClient('mongodb://server:27017?ssl=true', {
   sslCA:ca,
   sslKey:key,
   sslCert:cert,
-}, function(err, client) {
+});
+
+client.connect(function(err) {
   client.close();
 });
 ```
