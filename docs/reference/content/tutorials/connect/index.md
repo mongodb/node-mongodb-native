@@ -78,7 +78,7 @@ const cert = fs.readFileSync(__dirname + "/ssl/client.pem");
 // Connection URL
 const url = 'mongodb://dave:password@localhost:27017?authMechanism=DEFAULT&authSource=db&ssl=true"';
 
-// Ceate a client, passing in additional options
+// Create a client, passing in additional options
 const client = new MongoClient(url,  {
   sslValidate: true,
   sslCA: ca,
