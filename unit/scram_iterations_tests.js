@@ -31,7 +31,7 @@ describe('SCRAM Iterations Tests', function() {
         return request.reply({
           ok: 1,
           done: false,
-          payload: new Buffer(scramResponse)
+          payload: Buffer.from(scramResponse)
         });
       } else if (doc.saslContinue) {
         done('SHOULD NOT BE HERE');

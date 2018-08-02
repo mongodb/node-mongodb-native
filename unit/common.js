@@ -115,7 +115,7 @@ function genClusterTime(time) {
   return {
     clusterTime: new Timestamp(time),
     signature: {
-      hash: new Binary(new Buffer('testing')),
+      hash: new Binary(Buffer.from('testing')),
       keyId: 42
     }
   };

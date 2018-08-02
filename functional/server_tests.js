@@ -459,7 +459,7 @@ describe('Server tests', function() {
 
             // Write garbage, force socket closure
             try {
-              var a = new Buffer(100);
+              var a = Buffer.alloc(100);
               for (var i = 0; i < 100; i++) a[i] = i;
               result.connection.write(a);
             } catch (loopErr) {
@@ -649,7 +649,7 @@ describe('Server tests', function() {
 
             // Write garbage, force socket closure
             try {
-              var a = new Buffer(100);
+              var a = Buffer.alloc(100);
               for (var i = 0; i < 100; i++) a[i] = i;
               result.connection.write(a);
             } catch (garbageErr) {
