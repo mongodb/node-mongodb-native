@@ -49,7 +49,7 @@ function createClientInfo(options) {
   // Do we have an application specific string
   if (options.appname) {
     // Cut at 128 bytes
-    var buffer = new Buffer(options.appname);
+    var buffer = Buffer.from(options.appname);
     // Return the truncated appname
     var appname = buffer.length > 128 ? buffer.slice(0, 128).toString('utf8') : options.appname;
     // Add to the clientInfo

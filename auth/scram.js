@@ -70,8 +70,8 @@ var passwordDigest = function(username, password) {
 
 // XOR two buffers
 function xor(a, b) {
-  if (!Buffer.isBuffer(a)) a = new Buffer(a);
-  if (!Buffer.isBuffer(b)) b = new Buffer(b);
+  if (!Buffer.isBuffer(a)) a = Buffer.from(a);
+  if (!Buffer.isBuffer(b)) b = Buffer.from(b);
   const length = Math.max(a.length, b.length);
   const res = [];
 
@@ -79,7 +79,7 @@ function xor(a, b) {
     res.push(a[i] ^ b[i]);
   }
 
-  return new Buffer(res).toString('base64');
+  return Buffer.from(res).toString('base64');
 }
 
 function H(method, text) {
@@ -280,7 +280,7 @@ ScramSHA.prototype.auth = function(server, connections, db, username, password, 
         var withoutProof = f('c=biws,r=%s', rnonce);
         var saltedPassword = HI(
           processedPassword,
-          new Buffer(salt, 'base64'),
+          Buffer.from(salt, 'base64'),
           iterations,
           cryptoMethod
         );
@@ -316,7 +316,7 @@ ScramSHA.prototype.auth = function(server, connections, db, username, password, 
         const cmd = {
           saslContinue: 1,
           conversationId: r.result.conversationId,
-          payload: new Binary(new Buffer(clientFinal))
+          payload: new Binary(Buffer.from(clientFinal))
         };
 
         //
@@ -333,7 +333,7 @@ ScramSHA.prototype.auth = function(server, connections, db, username, password, 
               var cmd = {
                 saslContinue: 1,
                 conversationId: r.result.conversationId,
-                payload: new Buffer(0)
+                payload: Buffer.alloc(0)
               };
 
               // Write the commmand on the connection

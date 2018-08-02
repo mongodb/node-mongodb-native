@@ -129,7 +129,7 @@ Query.prototype.toBin = function() {
   if (self.batchSize !== self.numberToReturn) self.numberToReturn = self.batchSize;
 
   // Allocate write protocol header buffer
-  var header = new Buffer(
+  var header = Buffer.alloc(
     4 * 4 + // Header
     4 + // Flags
     Buffer.byteLength(self.ns) +
@@ -247,7 +247,7 @@ GetMore.prototype.toBin = function() {
   // Create command buffer
   var index = 0;
   // Allocate buffer
-  var _buffer = new Buffer(length);
+  var _buffer = Buffer.alloc(length);
 
   // Write header information
   // index = write32bit(index, _buffer, length);
@@ -332,7 +332,7 @@ KillCursor.prototype.toBin = function() {
 
   // Create command buffer
   var index = 0;
-  var _buffer = new Buffer(length);
+  var _buffer = Buffer.alloc(length);
 
   // Write header information
   // index = write32bit(index, _buffer, length);

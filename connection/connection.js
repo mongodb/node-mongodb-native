@@ -335,7 +335,7 @@ var dataHandler = function(self) {
           self.bytesRead = self.bytesRead + data.length;
 
           // Reset state of buffer
-          data = new Buffer(0);
+          data = Buffer.alloc(0);
         } else {
           // Copy the missing part of the data into our current buffer
           data.copy(self.buffer, self.bytesRead, 0, remainingBytesToRead);
@@ -374,7 +374,7 @@ var dataHandler = function(self) {
           // If we have enough bytes to determine the message size let's do it
           if (self.stubBuffer.length + data.length > 4) {
             // Prepad the data
-            var newData = new Buffer(self.stubBuffer.length + data.length);
+            var newData = Buffer.alloc(self.stubBuffer.length + data.length);
             self.stubBuffer.copy(newData, 0);
             data.copy(newData, self.stubBuffer.length);
             // Reassign for parsing
@@ -387,13 +387,13 @@ var dataHandler = function(self) {
             self.stubBuffer = null;
           } else {
             // Add the the bytes to the stub buffer
-            var newStubBuffer = new Buffer(self.stubBuffer.length + data.length);
+            var newStubBuffer = Buffer.alloc(self.stubBuffer.length + data.length);
             // Copy existing stub buffer
             self.stubBuffer.copy(newStubBuffer, 0);
             // Copy missing part of the data
             data.copy(newStubBuffer, self.stubBuffer.length);
             // Exit parsing loop
-            data = new Buffer(0);
+            data = Buffer.alloc(0);
           }
         } else {
           if (data.length > 4) {
@@ -423,7 +423,7 @@ var dataHandler = function(self) {
               sizeOfMessage < self.maxBsonMessageSize &&
               sizeOfMessage > data.length
             ) {
-              self.buffer = new Buffer(sizeOfMessage);
+              self.buffer = Buffer.alloc(sizeOfMessage);
               // Copy all the data into the buffer
               data.copy(self.buffer, 0);
               // Update bytes read
@@ -433,7 +433,7 @@ var dataHandler = function(self) {
               // Ensure stub buffer is null
               self.stubBuffer = null;
               // Exit parsing loop
-              data = new Buffer(0);
+              data = Buffer.alloc(0);
             } else if (
               sizeOfMessage > 4 &&
               sizeOfMessage < self.maxBsonMessageSize &&
@@ -447,7 +447,7 @@ var dataHandler = function(self) {
                 self.bytesRead = 0;
                 self.stubBuffer = null;
                 // Exit parsing loop
-                data = new Buffer(0);
+                data = Buffer.alloc(0);
                 // Emit the message
                 emitMessageHandler(self, emitBuffer);
               } catch (err) {
@@ -474,7 +474,7 @@ var dataHandler = function(self) {
               self.bytesRead = 0;
               self.stubBuffer = null;
               // Exit parsing loop
-              data = new Buffer(0);
+              data = Buffer.alloc(0);
             } else {
               emitBuffer = data.slice(0, sizeOfMessage);
               // Reset state of buffer
@@ -489,11 +489,11 @@ var dataHandler = function(self) {
             }
           } else {
             // Create a buffer that contains the space for the non-complete message
-            self.stubBuffer = new Buffer(data.length);
+            self.stubBuffer = Buffer.alloc(data.length);
             // Copy the data to the stub buffer
             data.copy(self.stubBuffer, 0);
             // Exit parsing loop
-            data = new Buffer(0);
+            data = Buffer.alloc(0);
           }
         }
       }

@@ -979,8 +979,8 @@ function addToList(self, type, ismaster, server, list) {
 }
 
 function compareObjectIds(id1, id2) {
-  var a = new Buffer(id1.toHexString(), 'hex');
-  var b = new Buffer(id2.toHexString(), 'hex');
+  var a = Buffer.from(id1.toHexString(), 'hex');
+  var b = Buffer.from(id2.toHexString(), 'hex');
 
   if (a === b) {
     return 0;

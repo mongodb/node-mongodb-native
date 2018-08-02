@@ -1057,14 +1057,14 @@ var serializeCommands = function(self, commands, result, callback) {
       if (err) return callback(err, null);
 
       // Create the msgHeader of OP_COMPRESSED
-      var msgHeader = new Buffer(MESSAGE_HEADER_SIZE);
+      var msgHeader = Buffer.alloc(MESSAGE_HEADER_SIZE);
       msgHeader.writeInt32LE(MESSAGE_HEADER_SIZE + 9 + compressedMessage.length, 0); // messageLength
       msgHeader.writeInt32LE(thisCommand.requestId, 4); // requestID
       msgHeader.writeInt32LE(0, 8); // responseTo (zero)
       msgHeader.writeInt32LE(opcodes.OP_COMPRESSED, 12); // opCode
 
       // Create the compression details of OP_COMPRESSED
-      var compressionDetails = new Buffer(9);
+      var compressionDetails = Buffer.alloc(9);
       compressionDetails.writeInt32LE(originalCommandOpCode, 0); // originalOpcode
       compressionDetails.writeInt32LE(messageToBeCompressed.length, 4); // Size of the uncompressed compressedMessage, excluding the MsgHeader
       compressionDetails.writeUInt8(compressorIDs[self.options.agreedCompressor], 8); // compressorID
