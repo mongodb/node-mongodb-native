@@ -10,7 +10,7 @@ title = "Connection Settings"
 
 # URI Connection Settings
 
-Optional connection settings are settings not covered by the [URI Connection String ](https://docs.mongodb.org/manual/reference/connection-string/). The following options are passed in the options parameter for when you create a mongo client.
+Optional connection settings are settings not covered by the [URI Connection String ](https://docs.mongodb.org/manual/reference/connection-string/). The following options are passed in the options parameter when you create a mongo client.
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
