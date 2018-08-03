@@ -238,7 +238,7 @@ Cursor.prototype._find = function(callback) {
       Array.isArray(result.documents) &&
       result.documents.length === 1 &&
       (!self.cmd.find || (self.cmd.find && self.cmd.virtual === false)) &&
-      (result.documents[0].cursor !== 'string' ||
+      (typeof result.documents[0].cursor !== 'string' ||
         result.documents[0]['$err'] ||
         result.documents[0]['errmsg'] ||
         Array.isArray(result.documents[0].result))
