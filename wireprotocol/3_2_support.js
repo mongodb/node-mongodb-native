@@ -132,7 +132,7 @@ function executeWrite(pool, bson, type, opsField, ns, ops, options, callback) {
   const opts = { command: true };
   if (typeof options.session !== 'undefined') opts.session = options.session;
   const queryOptions = { checkKeys: false, numberToSkip: 0, numberToReturn: 1 };
-  if (type === 'insert') queryOptions.checkKeys = false;
+  if (type === 'insert') queryOptions.checkKeys = true;
   if (typeof options.checkKeys === 'boolean') queryOptions.checkKeys = options.checkKeys;
 
   // Ensure we support serialization of functions

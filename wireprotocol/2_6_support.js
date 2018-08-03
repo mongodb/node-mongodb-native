@@ -51,7 +51,7 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
   var opts = { command: true };
   if (typeof options.session !== 'undefined') opts.session = options.session;
   var queryOptions = { checkKeys: false, numberToSkip: 0, numberToReturn: 1 };
-  if (type === 'insert') queryOptions.checkKeys = false;
+  if (type === 'insert') queryOptions.checkKeys = true;
   if (typeof options.checkKeys === 'boolean') queryOptions.checkKeys = options.checkKeys;
   // Ensure we support serialization of functions
   if (options.serializeFunctions) queryOptions.serializeFunctions = options.serializeFunctions;
