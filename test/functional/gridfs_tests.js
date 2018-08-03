@@ -1665,7 +1665,7 @@ describe('GridFS', function() {
         gridStore.open(function(err, gridStore) {
           expect(err).to.not.exist;
 
-          gridStore.write(new Buffer('012345678901234567890', 'utf8'), function(err, gridStore) {
+          gridStore.write(Buffer.from('012345678901234567890', 'utf8'), function(err, gridStore) {
             expect(err).to.not.exist;
 
             gridStore.close(function() {
@@ -1727,7 +1727,7 @@ describe('GridFS', function() {
         gridStore.open(function(err, gridStore) {
           expect(err).to.not.exist;
 
-          gridStore.write(new Buffer('012345678901234567890', 'utf8'), function(err, gridStore) {
+          gridStore.write(Buffer.from('012345678901234567890', 'utf8'), function(err, gridStore) {
             expect(err).to.not.exist;
 
             gridStore.close(function() {
@@ -1851,7 +1851,7 @@ describe('GridFS', function() {
           expect(err).to.not.exist;
 
           // Create a chunkSize Buffer
-          var buffer = new Buffer(chunkSize);
+          var buffer = Buffer.alloc(chunkSize);
 
           // Write the buffer
           gridStore.write(buffer, function(err, gridStore) {
@@ -2109,7 +2109,7 @@ describe('GridFS', function() {
         gridStore.open(function(err, gridStore) {
           expect(err).to.not.exist;
 
-          var d = new Buffer(5000);
+          var d = Buffer.alloc(5000);
           for (var j = 0; j < 5000; j++) {
             d[j] = 43;
           }
@@ -2174,7 +2174,7 @@ describe('GridFS', function() {
         var gridStoreR = new GridStore(db, 'test_gs_read_stream', 'r');
         var gridStoreW = new GridStore(db, 'test_gs_read_stream', 'w', { chunkSize: 56 });
         // var data = fs.readFileSync("./test/gridstore/test_gs_weird_bug.png");
-        var data = new Buffer(100);
+        var data = Buffer.alloc(100);
         for (var i = 0; i < 100; i++) {
           data[i] = i;
         }
@@ -2210,7 +2210,7 @@ describe('GridFS', function() {
                       expect(err).to.not.exist;
 
                       // Put together all the chunks
-                      var streamData = new Buffer(data.length);
+                      var streamData = Buffer.alloc(data.length);
                       var index = 0;
                       var i;
                       for (i = 0; i < chunks.length; i++) {
@@ -2374,7 +2374,7 @@ describe('GridFS', function() {
         gridStore.open(function(err, gridStore) {
           expect(err).to.not.exist;
 
-          var data = new Buffer('hello world', 'utf8');
+          var data = Buffer.from('hello world', 'utf8');
 
           gridStore.write(data, function(err, gridStore) {
             expect(err).to.not.exist;
@@ -2689,7 +2689,7 @@ describe('GridFS', function() {
         // Open the file
         gridStore.open(function(err, gridStore) {
           expect(err).to.not.exist;
-          var data = new Buffer(gridStore.chunkSize * 3);
+          var data = Buffer.alloc(gridStore.chunkSize * 3);
           // Write the binary file data to GridFS
           gridStore.write(data, function(err, gridStore) {
             expect(err).to.not.exist;
@@ -2878,7 +2878,7 @@ describe('GridFS', function() {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
         var gridStore = new GridStore(db, 'test_gs_check_high_bits', 'w');
-        var data = new Buffer(255);
+        var data = Buffer.alloc(255);
         for (var i = 0; i < 255; i++) {
           data[i] = i;
         }
@@ -2896,7 +2896,7 @@ describe('GridFS', function() {
                 // change testvalue into a string like "0,1,2,...,255"
                 test.equal(data.toString('hex'), fileData.toString('hex'));
                 // test.equal(Array.prototype.join.call(data),
-                //         Array.prototype.join.call(new Buffer(fileData, "binary")));
+                //         Array.prototype.join.call(Buffer.from(fileData, "binary")));
                 client.close();
                 done();
               });
@@ -3364,7 +3364,7 @@ describe('GridFS', function() {
 
           var write = function(left, callback) {
             if (left === 0) return callback();
-            gridStore.write(new Buffer(5000), function() {
+            gridStore.write(Buffer.alloc(5000), function() {
               left = left - 1;
               write(left, callback);
             });
@@ -3467,7 +3467,7 @@ describe('GridFS', function() {
         expect(err).to.not.exist;
         var db = client.db(configuration.db);
         // Massive data Buffer
-        var data = new Buffer(1024 * 512);
+        var data = Buffer.alloc(1024 * 512);
         // Set some data in the buffer at a point we want to read in the next chunk
         data.write('Hello world!', 1024 * 256);
 
@@ -3729,7 +3729,7 @@ describe('GridFS', function() {
           gridStore.chunkSize = 512;
 
           // Write multiple of chunk size
-          gridStore.write(new Buffer(gridStore.chunkSize * 4), function(err) {
+          gridStore.write(Buffer.alloc(gridStore.chunkSize * 4), function(err) {
             expect(err).to.not.exist;
 
             gridStore.close(function(err) {
@@ -3800,7 +3800,7 @@ describe('GridFS', function() {
             gridStore.chunkSize = 512;
 
             // Get the data
-            var data = new Buffer(gridStore.chunkSize * 2);
+            var data = Buffer.alloc(gridStore.chunkSize * 2);
             for (var i = 0; i < gridStore.chunkSize * 2; i++) {
               data[i] = 0;
             }
@@ -3873,7 +3873,7 @@ describe('GridFS', function() {
         ObjectID = configuration.require.ObjectID;
 
       // Create a test buffer
-      var buffer = new Buffer(200033);
+      var buffer = Buffer.alloc(200033);
 
       // Use connect method to connect to the Server
       MongoClient.connect(configuration.url(), { sslValidate: false }, function(err, client) {
@@ -3917,7 +3917,7 @@ describe('GridFS', function() {
       var succeeded = [];
 
       // Create a test buffer
-      var buffer = new Buffer(2000);
+      var buffer = Buffer.alloc(2000);
 
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {

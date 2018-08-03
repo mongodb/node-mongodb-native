@@ -7670,7 +7670,7 @@ describe('Operation Examples', function() {
           // Write a text string
           gridStore.write('Hello world', function(err, gridStore) {
             // Write a buffer
-            gridStore.write(new Buffer('Buffer Hello world'), function(err, gridStore) {
+            gridStore.write(Buffer.from('Buffer Hello world'), function(err, gridStore) {
               // Close the
               gridStore.close(function(err, result) {
                 test.ok(result);
@@ -8341,7 +8341,7 @@ describe('Operation Examples', function() {
         var gridStore = new GridStore(db, 'test_gs_seek_with_buffer', 'w');
         gridStore.open(function(err, gridStore) {
           // Write some content to the file
-          gridStore.write(new Buffer('hello, world!', 'utf8'), function(err, gridStore) {
+          gridStore.write(Buffer.from('hello, world!', 'utf8'), function(err, gridStore) {
             // Flush the file to GridFS
             gridStore.close(function() {
               // Open the file in read mode
@@ -8659,7 +8659,7 @@ describe('Operation Examples', function() {
         var gridStore = new GridStore(db, 'test_gs_getc_file', 'w');
         gridStore.open(function(err, gridStore) {
           // Write some content to the file
-          gridStore.write(new Buffer('hello, world!', 'utf8'), function(err, gridStore) {
+          gridStore.write(Buffer.from('hello, world!', 'utf8'), function(err, gridStore) {
             // Flush the file to GridFS
             gridStore.close(function() {
               // Open the file in read mode
@@ -8715,7 +8715,7 @@ describe('Operation Examples', function() {
         var gridStore = new GridStore(db, new ObjectID(), 'test_gs_getc_file', 'w');
         gridStore.open(function(err, gridStore) {
           // Write some content to the file
-          gridStore.write(new Buffer('hello, world!', 'utf8'), function(err, gridStore) {
+          gridStore.write(Buffer.from('hello, world!', 'utf8'), function(err, gridStore) {
             // Flush the file to GridFS
             gridStore.close(function(err, fileData) {
               test.ok(fileData);
@@ -8725,7 +8725,7 @@ describe('Operation Examples', function() {
               gridStore = new GridStore(db, new ObjectID(), 'test_gs_getc_file', 'w');
               gridStore.open(function(err, gridStore) {
                 // Write some content to the file
-                gridStore.write(new Buffer('hello, world!', 'utf8'), function(err, gridStore) {
+                gridStore.write(Buffer.from('hello, world!', 'utf8'), function(err, gridStore) {
                   // Flush the file to GridFS
                   gridStore.close(function(err, fileData) {
                     test.equal(null, err);

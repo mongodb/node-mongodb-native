@@ -1567,11 +1567,11 @@ describe('Insert', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         db.createCollection('shouldAttempToForceBsonSize', function(err, collection) {
-          // var doc = {a:1, b:new Binary(new Buffer(16777216)/5)}
+          // var doc = {a:1, b:new Binary(Buffer.alloc(16777216)/5)}
           var doc = [
-            { a: 1, b: new Binary(new Buffer(16777216 / 3)) },
-            { a: 1, b: new Binary(new Buffer(16777216 / 3)) },
-            { a: 1, b: new Binary(new Buffer(16777216 / 3)) }
+            { a: 1, b: new Binary(Buffer.alloc(16777216 / 3)) },
+            { a: 1, b: new Binary(Buffer.alloc(16777216 / 3)) },
+            { a: 1, b: new Binary(Buffer.alloc(16777216 / 3)) }
           ];
 
           collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
@@ -1782,7 +1782,7 @@ describe('Insert', function() {
           symbol: new Symbol('abcdefghijkl'),
           objid: new ObjectID('abcdefghijkl'),
           double: new Double(1),
-          binary: new Binary(new Buffer('hello world')),
+          binary: new Binary(Buffer.from('hello world')),
           minkey: new MinKey(),
           maxkey: new MaxKey(),
           code: new Code('function () {}', { a: 55 })
@@ -1804,7 +1804,7 @@ describe('Insert', function() {
                 test.equal(null, err);
                 test.equal(1, doc.double);
 
-                collection.findOne({ binary: new Binary(new Buffer('hello world')) }, function(
+                collection.findOne({ binary: new Binary(Buffer.from('hello world')) }, function(
                   err,
                   doc
                 ) {
@@ -1872,7 +1872,7 @@ describe('Insert', function() {
           symbol: new Symbol('abcdefghijkl'),
           objid: new ObjectID('abcdefghijkl'),
           double: new Double(1),
-          binary: new Binary(new Buffer('hello world')),
+          binary: new Binary(Buffer.from('hello world')),
           minkey: new MinKey(),
           maxkey: new MaxKey(),
           code: new Code('function () {}', { a: 55 })
@@ -1894,7 +1894,7 @@ describe('Insert', function() {
                 test.equal(null, err);
                 test.equal(1, doc.double);
 
-                collection.findOne({ binary: new Binary(new Buffer('hello world')) }, function(
+                collection.findOne({ binary: new Binary(Buffer.from('hello world')) }, function(
                   err,
                   doc
                 ) {
@@ -2095,7 +2095,7 @@ describe('Insert', function() {
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
-        var k = new Buffer(15);
+        var k = Buffer.alloc(15);
         for (var i = 0; i < 15; i++) k[i] = 0;
 
         k.write('hello');
