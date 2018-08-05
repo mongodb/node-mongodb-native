@@ -395,8 +395,8 @@ function randomSelection(array) {
 
 /**
  * Selects servers using the provided selector
- * NOTE: this is an internal helper, not meant to be used directly
  *
+ * @private
  * @param {Topology} topology The topology to select servers from
  * @param {function} selector The actual predicate used for selecting servers
  * @param {Number} timeout The max time we are willing wait for selection
@@ -426,7 +426,7 @@ function selectServers(topology, selector, timeout, start, callback) {
   }
 
   const retrySelection = () => {
-    // ensure all server monitors are attempting monitoring immediately
+    // ensure all server monitors attempt monitoring immediately
     topology.s.servers.forEach(server => server.monitor());
 
     const iterationTimer = setTimeout(() => {
