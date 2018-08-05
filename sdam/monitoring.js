@@ -176,29 +176,30 @@ function monitorServer(server) {
   // run the actual monitoring loop
   server.s.monitoring = true;
   checkServer((err, isMaster) => {
-    if (err) {
-      // According to the SDAM specification's "Network error during server check" section, if
-      // an ismaster call fails we reset the server's pool. If a server was once connected,
-      // change its type to `Unknown` only after retrying once.
-
-      // TODO: we need to reset the pool here
-
-      return checkServer((err, isMaster) => {
-        if (err) {
-          server.s.monitoring = false;
-
-          // we revert to an `Unknown` by emitting a default description with no isMaster
-          server.emit('descriptionReceived', new ServerDescription(server.description.address));
-
-          // we do not reschedule monitoring in this case
-          return;
-        }
-
-        successHandler(isMaster);
-      });
+    if (!err) {
+      successHandler(isMaster);
+      return;
     }
 
-    successHandler(isMaster);
+    // According to the SDAM specification's "Network error during server check" section, if
+    // an ismaster call fails we reset the server's pool. If a server was once connected,
+    // change its type to `Unknown` only after retrying once.
+
+    // TODO: we need to reset the pool here
+
+    return checkServer((err, isMaster) => {
+      if (err) {
+        server.s.monitoring = false;
+
+        // revert to `Unknown` by emitting a default description with no isMaster
+        server.emit('descriptionReceived', new ServerDescription(server.description.address));
+
+        // do not reschedule monitoring in this case
+        return;
+      }
+
+      successHandler(isMaster);
+    });
   });
 }
 
