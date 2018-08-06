@@ -145,6 +145,10 @@ function parseQueryStringItemValue(value) {
       result[parts[0]] = parseQueryStringItemValue(parts[1]);
       return result;
     }, {});
+  } else if (value.indexOf(',') > 0) {
+    value = value.split(',').map(v => {
+      return parseQueryStringItemValue(v);
+    });
   } else if (value.toLowerCase() === 'true' || value.toLowerCase() === 'false') {
     value = value.toLowerCase() === 'true';
   } else if (!Number.isNaN(value)) {
