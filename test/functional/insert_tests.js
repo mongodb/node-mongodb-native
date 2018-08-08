@@ -1,9 +1,9 @@
 'use strict';
-const test = require('./shared').assert,
-  setupDatabase = require('./shared').setupDatabase,
-  Script = require('vm'),
-  expect = require('chai').expect,
-  normalizedFunctionString = require('bson/lib/bson/parser/utils').normalizedFunctionString;
+const test = require('./shared').assert;
+const setupDatabase = require('./shared').setupDatabase;
+const Script = require('vm');
+const expect = require('chai').expect;
+const normalizedFunctionString = require('bson/lib/bson/parser/utils').normalizedFunctionString;
 
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.
@@ -2884,5 +2884,19 @@ describe('Insert', function() {
         });
       });
     }
+  });
+
+  it('should not allow dots in field names', function(done) {
+    const configuration = this.configuration;
+    const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+    client.connect((err, client) => {
+      const db = client.db(configuration.db);
+      const collection = db.collection('dots_in_field_names');
+      collection.insertOne({ 'a.x': 1 }, configuration.writeConcernMax(), err => {
+        expect(err).to.exist;
+        client.close();
+        done();
+      });
+    });
   });
 });
