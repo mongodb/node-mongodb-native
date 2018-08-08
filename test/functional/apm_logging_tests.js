@@ -179,17 +179,39 @@ describe('APM Logging', function() {
     runTestClient(this, '?monitor=all&monitorOut=apm_test_log', cb);
   });
 
-  it('should call callback with error when log filename cannot be resolved', function(done) {
-    const configuration = this.configuration;
-    const url = configuration.url() + '?monitor=all&monitorOut=invalid:name';
-    const client = new MongoClient(url, { w: 1, useNewUrlParser: true });
+  it('should call callback with error when log filename cannot be resolved', {
+    metadata: { requires: { node: '<10.0.0' } },
+    test: function(done) {
+      const configuration = this.configuration;
+      const url = configuration.url() + '?monitor=all&monitorOut=invalid:name';
+      const client = new MongoClient(url, { w: 1, useNewUrlParser: true });
 
-    client.connect(function(err) {
-      expect(err).to.exist;
-      expect(err.name).to.equal('TypeError');
-      expect(err.message).to.equal(`Path must be a string. Received { invalid: 'name' }`);
-      done();
-    });
+      client.connect(function(err) {
+        expect(err).to.exist;
+        console.log(err);
+        expect(err.name).to.equal('TypeError');
+        expect(err.message).to.equal(`Path must be a string. Received { invalid: 'name' }`);
+        done();
+      });
+    }
+  });
+
+  it('should call callback with error when log filename cannot be resolved', {
+    metadata: { requires: { node: '>=10.0.0' } },
+    test: function(done) {
+      const configuration = this.configuration;
+      const url = configuration.url() + '?monitor=all&monitorOut=invalid:name';
+      const client = new MongoClient(url, { w: 1, useNewUrlParser: true });
+
+      client.connect(function(err) {
+        expect(err).to.exist;
+        expect(err.name).to.equal('TypeError [ERR_INVALID_ARG_TYPE]');
+        expect(err.message).to.equal(
+          `The "path" argument must be of type string. Received type object`
+        );
+        done();
+      });
+    }
   });
 
   // TODO: how to test throwing errors if we don't know exactly when the error will be thrown?
