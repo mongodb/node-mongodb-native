@@ -1055,7 +1055,7 @@ describe('GridFS Stream', function() {
                 testSpec.act.arguments.filename,
                 testSpec.act.arguments.options
               );
-              var buf = new Buffer(testSpec.act.arguments.source.$hex, 'hex');
+              var buf = Buffer.from(testSpec.act.arguments.source.$hex, 'hex');
 
               res.on('error', function(err) {
                 test.equal(null, err);
@@ -1112,7 +1112,7 @@ describe('GridFS Stream', function() {
 
               var _runTest = function() {
                 var bucket = new GridFSBucket(db, { bucketName: BUCKET_NAME });
-                var res = new Buffer(0);
+                var res = Buffer.alloc(0);
 
                 var download = bucket.openDownloadStream(
                   EJSON.parse(JSON.stringify(testSpec.act.arguments.id), { relaxed: true })
@@ -1235,7 +1235,7 @@ describe('GridFS Stream', function() {
     keys.forEach(function(key) {
       if (doc[key] && typeof doc[key] === 'object') {
         if (doc[key].$hex != null) {
-          doc[key] = new Buffer(doc[key].$hex, 'hex');
+          doc[key] = Buffer.from(doc[key].$hex, 'hex');
         } else {
           convert$hexToBuffer(doc[key]);
         }

@@ -2196,7 +2196,7 @@ describe('Cursor', function() {
               if (++i === 5) {
                 client.topology
                   .connections()[0]
-                  .write(new Buffer('312312321321askdjljsaNCKnablibh'));
+                  .write(Buffer.from('312312321321askdjljsaNCKnablibh'));
               }
             });
 

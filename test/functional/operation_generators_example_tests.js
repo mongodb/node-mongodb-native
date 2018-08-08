@@ -5200,7 +5200,7 @@ describe('Operation (Generators)', function() {
         yield gridStore.write('Hello world');
 
         // Write a buffer
-        yield gridStore.write(new Buffer('Buffer Hello world'));
+        yield gridStore.write(Buffer.from('Buffer Hello world'));
 
         // Close the
         yield gridStore.close();
@@ -5548,7 +5548,7 @@ describe('Operation (Generators)', function() {
         var gridStore = new GridStore(db, 'test_gs_seek_with_buffer', 'w');
         yield gridStore.open();
         // Write some content to the file
-        yield gridStore.write(new Buffer('hello, world!', 'utf8'));
+        yield gridStore.write(Buffer.from('hello, world!', 'utf8'));
         // Flush the file to GridFS
         yield gridStore.close();
 
@@ -5777,7 +5777,7 @@ describe('Operation (Generators)', function() {
         var gridStore = new GridStore(db, 'test_gs_getc_file', 'w');
         yield gridStore.open();
         // Write some content to the file
-        yield gridStore.write(new Buffer('hello, world!', 'utf8'));
+        yield gridStore.write(Buffer.from('hello, world!', 'utf8'));
         // Flush the file to GridFS
         yield gridStore.close();
         // Open the file in read mode
@@ -5830,7 +5830,7 @@ describe('Operation (Generators)', function() {
         var gridStore = new GridStore(db, new ObjectID(), 'test_gs_getc_file', 'w');
         yield gridStore.open();
         // Write some content to the file
-        yield gridStore.write(new Buffer('hello, world!', 'utf8'));
+        yield gridStore.write(Buffer.from('hello, world!', 'utf8'));
         // Flush the file to GridFS
         yield gridStore.close();
 
@@ -5838,7 +5838,7 @@ describe('Operation (Generators)', function() {
         gridStore = new GridStore(db, new ObjectID(), 'test_gs_getc_file', 'w');
         yield gridStore.open();
         // Write some content to the file
-        yield gridStore.write(new Buffer('hello, world!', 'utf8'));
+        yield gridStore.write(Buffer.from('hello, world!', 'utf8'));
         // Flush the file to GridFS
         var fileData = yield gridStore.close();
 

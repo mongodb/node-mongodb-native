@@ -5740,7 +5740,7 @@ describe('Operation (Promises)', function() {
           })
           .then(function(gridStore) {
             // Write a buffer
-            return gridStore.write(new Buffer('Buffer Hello world'));
+            return gridStore.write(Buffer.from('Buffer Hello world'));
           })
           .then(function(gridStore) {
             // Close the
@@ -6109,7 +6109,7 @@ describe('Operation (Promises)', function() {
           .open()
           .then(function(gridStore) {
             // Write some content to the file
-            return gridStore.write(new Buffer('hello, world!', 'utf8'));
+            return gridStore.write(Buffer.from('hello, world!', 'utf8'));
           })
           .then(function(gridStore) {
             // Flush the file to GridFS
@@ -6383,7 +6383,7 @@ describe('Operation (Promises)', function() {
           .open()
           .then(function(gridStore) {
             // Write some content to the file
-            return gridStore.write(new Buffer('hello, world!', 'utf8'));
+            return gridStore.write(Buffer.from('hello, world!', 'utf8'));
           })
           .then(function(gridStore) {
             // Flush the file to GridFS
@@ -6444,7 +6444,7 @@ describe('Operation (Promises)', function() {
           .open()
           .then(function(gridStore) {
             // Write some content to the file
-            return gridStore.write(new Buffer('hello, world!', 'utf8'));
+            return gridStore.write(Buffer.from('hello, world!', 'utf8'));
           })
           .then(function(gridStore) {
             // Flush the file to GridFS
@@ -6458,7 +6458,7 @@ describe('Operation (Promises)', function() {
           .then(function(gridStore) {
             test.ok(gridStore);
             // Write some content to the file
-            return gridStoreDupe.write(new Buffer('hello, world!', 'utf8'));
+            return gridStoreDupe.write(Buffer.from('hello, world!', 'utf8'));
           })
           .then(function(gridStore) {
             test.ok(gridStore);

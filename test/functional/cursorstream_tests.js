@@ -101,7 +101,7 @@ describe('Cursor Streams', function() {
       var docs = [];
 
       for (var i = 0; i < 10000; i++) {
-        docs.push({ a: i, bin: new Binary(new Buffer(256)) });
+        docs.push({ a: i, bin: new Binary(Buffer.alloc(256)) });
       }
 
       var j = 0;
@@ -179,7 +179,7 @@ describe('Cursor Streams', function() {
       var counter2 = 0;
 
       for (var i = 0; i < 1000; i++) {
-        docs.push({ a: i, bin: new Binary(new Buffer(256)) });
+        docs.push({ a: i, bin: new Binary(Buffer.alloc(256)) });
       }
 
       var client = self.configuration.newClient(self.configuration.writeConcernMax(), {
@@ -238,7 +238,7 @@ describe('Cursor Streams', function() {
         var docs = [];
 
         for (var i = 0; i < 2000; i++) {
-          docs.push({ a: i, b: new Binary(new Buffer(1024)) });
+          docs.push({ a: i, b: new Binary(Buffer.alloc(1024)) });
         }
 
         var allDocs = [];
