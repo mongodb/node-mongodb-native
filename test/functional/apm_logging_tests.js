@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const stream = require('stream');
 const setupDatabase = require('./shared').setupDatabase;
 const chai = require('chai');
 const expect = chai.expect;
@@ -10,7 +11,6 @@ const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 
-const testLogFile = process.cwd() + '/apm_test_log';
 const loggingEvents = [
   'commandStarted',
   'commandSucceeded',
@@ -30,27 +30,16 @@ function stringify(obj) {
   return EJSON.stringify(obj, { relaxed: true });
 }
 
-function removeTestLogs() {
-  fs
-    .readdirSync(process.cwd())
-    .filter(x => x.indexOf('apm_test_log') !== -1)
-    .forEach(file => fs.unlinkSync(file));
-}
-
-function getFileData(file) {
-  return file
-    .trim()
-    .split('\n')
-    .reduce(
-      (data, current) => {
-        const event = EJSON.parse(current);
-        data.eventStrings.push(stringify(event.object));
-        data[event.type].push(event);
-        data.numLines += 1;
-        return data;
-      },
-      { numLines: 0, command: [], sdam: [], eventStrings: [] }
-    );
+function getLogData(logArray) {
+  return logArray.reduce(
+    (data, event) => {
+      data.eventStrings.push(stringify(event.object));
+      data[event.category].push(event);
+      data.numLines += 1;
+      return data;
+    },
+    { numLines: 0, command: [], sdam: [], eventStrings: [] }
+  );
 }
 
 function runTestClient(context, urlOptions, closeCb) {
@@ -66,39 +55,80 @@ function runTestClient(context, urlOptions, closeCb) {
     client.close(err => {
       // set timeout to make sure all file writes are completed
       setTimeout(() => {
-        closeCb(err, events);
+        const data = getLogData(fakeLogFile);
+        closeCb(err, data, events);
       }, 10);
     });
   });
 }
 
+const testLogFileName = `${process.cwd()}/apm_test_log`;
+const defaultFileName = `${process.cwd()}/monitor.log`;
+const fakeLogFile = [];
+
 describe('APM Logging', function() {
+  let createStreamStub;
+
   before(function() {
+    const fakeStream = new stream.Writable();
+    // fake stream will 'write' data to our internal variable, fakeLogFile
+    sinon.stub(fakeStream, 'write').callsFake(data => {
+      fakeLogFile.push(EJSON.parse(data));
+    });
+    // avoid writing to file system & enable checking which file write streams are created on
+    createStreamStub = sinon.stub(fs, 'createWriteStream').callsFake(() => {
+      return fakeStream;
+    });
     return setupDatabase(this.configuration);
   });
 
+  beforeEach(function() {
+    fakeLogFile.length = 0;
+  });
+
   after(function() {
-    removeTestLogs();
+    createStreamStub.restore();
+  });
+
+  it('should append timestamp to a pre-existing log filename to avoid overwriting', function(done) {
+    // suppress and spy on the renaming function
+    const renameStub = sinon.stub(fs, 'renameSync');
+    // trick the code into thinking log files already exist
+    const existsStub = sinon.stub(fs, 'existsSync').callsFake(() => {
+      return true;
+    });
+    const testStartStamp = new Date();
+    const cb = err => {
+      const renameArgs = renameStub.lastCall.args;
+      const fileTimestamp = new Date(renameArgs[1].substring(renameArgs[1].length - 24));
+      expect(renameArgs[0]).to.equal(testLogFileName);
+      // ensure the date was appended to the file after this test started
+      expect(fileTimestamp).to.be.above(testStartStamp);
+      existsStub.restore();
+      renameStub.restore();
+      done(err);
+    };
+    runTestClient(this, '?monitor=command&monitorOut=apm_test_log', cb);
   });
 
   it('should create stream to default location if monitorOut not specified', function(done) {
-    const configuration = this.configuration;
-    const url = configuration.url() + '?monitor=command';
-    const client = new MongoClient(url, { w: 1, useNewUrlParser: true });
+    const cb = err => {
+      expect(createStreamStub.lastCall).to.have.been.calledWith(defaultFileName);
+      done(err);
+    };
+    runTestClient(this, '?monitor=command', cb);
+  });
 
-    // avoid overwriting any of the user's pre-existing logs at the default location
-    const stub = sinon.stub(fs, 'createWriteStream');
-    const defaultFile = process.cwd() + '/monitor.log';
-
-    client.connect(function() {
-      expect(stub).to.have.been.calledWith(defaultFile);
-      stub.restore();
-      done();
-    });
+  it('should create stream to custom location if monitorOut specified', function(done) {
+    const cb = err => {
+      expect(createStreamStub.lastCall).to.have.been.calledWith(testLogFileName);
+      done(err);
+    };
+    runTestClient(this, '?monitor=command&monitorOut=apm_test_log', cb);
   });
 
   it('should log to stdout if specified', function(done) {
-    const spy = sinon.spy(process.stdout, 'write');
+    const spy = sinon.stub(process.stdout, 'write');
     const cb = err => {
       expect(spy).to.have.been.calledTwice;
       spy.restore();
@@ -108,7 +138,7 @@ describe('APM Logging', function() {
   });
 
   it('should log to stderr if specified', function(done) {
-    const spy = sinon.spy(process.stderr, 'write');
+    const spy = sinon.stub(process.stderr, 'write');
     const cb = err => {
       expect(spy).to.have.been.calledTwice;
       spy.restore();
@@ -117,11 +147,16 @@ describe('APM Logging', function() {
     runTestClient(this, '?monitor=command&monitorOut=stderr', cb);
   });
 
-  it('log only sdam events', function(done) {
-    const cb = err => {
-      const logFile = fs.readFileSync(testLogFile, 'utf8');
-      const data = getFileData(logFile);
+  it('should log correct event objects in the same order they were emitted', function(done) {
+    const cb = (err, data, events) => {
+      expect(events).to.deep.equal(data.eventStrings);
+      done(err);
+    };
+    runTestClient(this, '?monitor=all&monitorOut=apm_test_log', cb);
+  });
 
+  it('log only sdam events', function(done) {
+    const cb = (err, data) => {
       expect(data.numLines).to.equal(6);
       expect(data.command).to.be.empty;
       done(err);
@@ -130,10 +165,7 @@ describe('APM Logging', function() {
   });
 
   it('log only command events', function(done) {
-    const cb = err => {
-      const logFile = fs.readFileSync(testLogFile, 'utf8');
-      const data = getFileData(logFile);
-
+    const cb = (err, data) => {
       expect(data.numLines).to.equal(2);
       expect(data.sdam).to.be.empty;
       done(err);
@@ -141,12 +173,9 @@ describe('APM Logging', function() {
     runTestClient(this, '?monitor=command&monitorOut=apm_test_log', cb);
   });
 
-  // skip for now: this test depends on the new fixes in the core uri-parser
+  // skip for now: this test depends on the new fixes in the core uri parser
   it.skip('log both command and sdam events using `monitor=command,sdam`', function(done) {
-    const cb = err => {
-      const logFile = fs.readFileSync(testLogFile, 'utf8');
-      const data = getFileData(logFile);
-
+    const cb = (err, data) => {
       expect(data.numLines).to.equal(8);
       expect(data.sdam).to.not.be.empty;
       expect(data.command).to.not.be.empty;
@@ -156,10 +185,7 @@ describe('APM Logging', function() {
   });
 
   it('log both command and sdam events using `monitor=all`', function(done) {
-    const cb = err => {
-      const logFile = fs.readFileSync(testLogFile, 'utf8');
-      const data = getFileData(logFile);
-
+    const cb = (err, data) => {
       expect(data.numLines).to.equal(8);
       expect(data.sdam).to.not.be.empty;
       expect(data.command).to.not.be.empty;
@@ -168,50 +194,16 @@ describe('APM Logging', function() {
     runTestClient(this, '?monitor=all&monitorOut=apm_test_log', cb);
   });
 
-  it('should log correct event objects in the same order they were emitted', function(done) {
-    const cb = (err, events) => {
-      const logFile = fs.readFileSync(testLogFile, 'utf8');
-      const data = getFileData(logFile);
+  it('should call callback with error when log filename cannot be resolved', function(done) {
+    const configuration = this.configuration;
+    const url = configuration.url() + '?monitor=all&monitorOut=invalid:name';
+    const client = new MongoClient(url, { w: 1, useNewUrlParser: true });
 
-      expect(events).to.deep.equal(data.eventStrings);
-      done(err);
-    };
-    runTestClient(this, '?monitor=all&monitorOut=apm_test_log', cb);
-  });
-
-  it('should call callback with error when log filename cannot be resolved', {
-    metadata: { requires: { node: '<10.0.0' } },
-    test: function(done) {
-      const configuration = this.configuration;
-      const url = configuration.url() + '?monitor=all&monitorOut=invalid:name';
-      const client = new MongoClient(url, { w: 1, useNewUrlParser: true });
-
-      client.connect(function(err) {
-        expect(err).to.exist;
-        console.log(err);
-        expect(err.name).to.equal('TypeError');
-        expect(err.message).to.equal(`Path must be a string. Received { invalid: 'name' }`);
-        done();
-      });
-    }
-  });
-
-  it('should call callback with error when log filename cannot be resolved', {
-    metadata: { requires: { node: '>=10.0.0' } },
-    test: function(done) {
-      const configuration = this.configuration;
-      const url = configuration.url() + '?monitor=all&monitorOut=invalid:name';
-      const client = new MongoClient(url, { w: 1, useNewUrlParser: true });
-
-      client.connect(function(err) {
-        expect(err).to.exist;
-        expect(err.name).to.equal('TypeError [ERR_INVALID_ARG_TYPE]');
-        expect(err.message).to.equal(
-          `The "path" argument must be of type string. Received type object`
-        );
-        done();
-      });
-    }
+    client.connect(function(err) {
+      expect(err).to.exist;
+      expect(err).to.be.an.instanceOf(TypeError);
+      done();
+    });
   });
 
   // TODO: how to test throwing errors if we don't know exactly when the error will be thrown?
