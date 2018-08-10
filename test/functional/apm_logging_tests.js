@@ -46,7 +46,7 @@ const testLogFileName = `${process.cwd()}/apm_test_log`;
 const defaultFileName = `${process.cwd()}/monitor.log`;
 
 describe('APM Logging', function() {
-  describe('Stubbed streams', function() {
+  describe('Functionality tests', function() {
     const fakeLogFile = [];
     let createStreamStub;
 
