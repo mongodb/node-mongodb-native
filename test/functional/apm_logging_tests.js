@@ -53,8 +53,7 @@ describe('APM Logging', function() {
     before(function() {
       const fakeStream = new stream.Writable();
       // fake stream will 'write' data to our internal variable, fakeLogFile
-      const writeStreamStub = sinon.stub(fakeStream, 'write');
-      writeStreamStub.callsFake(data => {
+      sinon.stub(fakeStream, 'write').callsFake(data => {
         fakeLogFile.push(EJSON.parse(data));
       });
       // avoid writing to file system & enable checking which file write streams are created on
@@ -175,20 +174,20 @@ describe('APM Logging', function() {
 
     it('should append timestamp to a pre-existing log filename to avoid overwriting', function(done) {
       // suppress and spy on the renaming function
-      const renameStub = sinon.stub(fs, 'renameSync');
+      sinon.stub(fs, 'renameSync');
       // trick the code into thinking log files already exist
-      const existsStub = sinon.stub(fs, 'existsSync').callsFake(() => {
+      sinon.stub(fs, 'existsSync').callsFake(() => {
         return true;
       });
       const testStartStamp = new Date();
       const cb = err => {
-        const renameArgs = renameStub.lastCall.args;
+        const renameArgs = fs.renameSync.lastCall.args;
         const fileTimestamp = new Date(renameArgs[1].substring(renameArgs[1].length - 24));
         expect(renameArgs[0]).to.equal(testLogFileName);
         // ensure the date was appended to the file at the same time or after this test started
         expect(fileTimestamp).to.be.at.least(testStartStamp);
-        existsStub.restore();
-        renameStub.restore();
+        fs.existsSync.restore();
+        fs.renameSync.restore();
         done(err);
       };
       runTestClient(this, '?monitor=command&monitorOut=apm_test_log', cb);
@@ -196,8 +195,22 @@ describe('APM Logging', function() {
   });
 
   describe('Error handling', function() {
+    let writeStream;
+
     before(function() {
+      writeStream = new stream.Writable();
+      sinon.stub(writeStream, 'write');
+
+      // give us access to the write stream in order to manipulate it
+      sinon.stub(fs, 'createWriteStream').callsFake(() => {
+        return writeStream;
+      });
+
       return setupDatabase(this.configuration);
+    });
+
+    after(function() {
+      fs.createWriteStream.restore();
     });
 
     it('should call callback with error when log filename cannot be resolved', function(done) {
@@ -217,27 +230,18 @@ describe('APM Logging', function() {
       const url = configuration.url() + '?monitor=all';
       const client = new MongoClient(url, { w: 1, useNewUrlParser: true });
 
-      const writeStream = new stream.Writable();
-      sinon.stub(writeStream, 'write');
-      const createStreamStub = sinon.stub(fs, 'createWriteStream');
-
-      // give us access to the write stream in order to manipulate it
-      createStreamStub.callsFake(() => {
-        return writeStream;
-      });
-
       client.connect((err, client) => {
         expect(err).to.be.null;
 
         // inspect parameters when client closes
-        sinon.stub(client, 'close').callsFake((force, fn) => {
+        client.close.callsFake((force, fn) => {
           expect(force).to.equal(true);
           expect(fn).to.throw();
-          createStreamStub.restore();
+          client.close.restore();
           done();
         });
 
-        // force stream to error
+        // force stream to error and close client
         writeStream.destroy(new Error('error after connecting'));
       });
     });
