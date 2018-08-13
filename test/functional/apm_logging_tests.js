@@ -42,9 +42,6 @@ function getLogData(logArray) {
   );
 }
 
-const testLogFileName = `${process.cwd()}/apm_test_log`;
-const defaultFileName = `${process.cwd()}/monitor.log`;
-
 describe('APM Logging', function() {
   describe('Functionality tests', function() {
     const fakeLogFile = [];
@@ -89,9 +86,20 @@ describe('APM Logging', function() {
       });
     }
 
-    it('should create stream to default location if monitorOut not specified', function(done) {
+    it('should create stream to default out file with timestamp', function(done) {
+      const testStartStamp = new Date();
       const cb = err => {
-        expect(createStreamStub.lastCall).to.have.been.calledWith(defaultFileName);
+        const defaultFileNameBase = `${process.cwd()}/mongodb-monitoring-`;
+        const fileNameArg = createStreamStub.lastCall.args[0];
+        // splice out base of filename
+        const fileNameBase = fileNameArg.substring(0, fileNameArg.length - 28);
+        // splice out timestamp from filename
+        const fileNameTimestamp = new Date(
+          fileNameArg.substring(fileNameArg.length - 28, fileNameArg.length - 4)
+        );
+        expect(fileNameBase).to.equal(defaultFileNameBase);
+        // ensure the date was appended to the file at the same time or after this test started
+        expect(fileNameTimestamp).to.be.at.least(testStartStamp);
         done(err);
       };
       runTestClient(this, '?monitor=command', cb);
@@ -99,7 +107,8 @@ describe('APM Logging', function() {
 
     it('should create stream to custom file if specified', function(done) {
       const cb = err => {
-        expect(createStreamStub.lastCall).to.have.been.calledWith(testLogFileName);
+        const customFileName = `${process.cwd()}/apm_test_log`;
+        expect(createStreamStub.lastCall).to.have.been.calledWith(customFileName);
         done(err);
       };
       runTestClient(this, '?monitor=command&monitorOut=apm_test_log', cb);
@@ -170,27 +179,6 @@ describe('APM Logging', function() {
         done(err);
       };
       runTestClient(this, '?monitor=all&monitorOut=apm_test_log', cb);
-    });
-
-    it('should append timestamp to a pre-existing log filename to avoid overwriting', function(done) {
-      // suppress and spy on the renaming function
-      sinon.stub(fs, 'renameSync');
-      // trick the code into thinking log files already exist
-      sinon.stub(fs, 'existsSync').callsFake(() => {
-        return true;
-      });
-      const testStartStamp = new Date();
-      const cb = err => {
-        const renameArgs = fs.renameSync.lastCall.args;
-        const fileTimestamp = new Date(renameArgs[1].substring(renameArgs[1].length - 24));
-        expect(renameArgs[0]).to.equal(testLogFileName);
-        // ensure the date was appended to the file at the same time or after this test started
-        expect(fileTimestamp).to.be.at.least(testStartStamp);
-        fs.existsSync.restore();
-        fs.renameSync.restore();
-        done(err);
-      };
-      runTestClient(this, '?monitor=command&monitorOut=apm_test_log', cb);
     });
   });
 
