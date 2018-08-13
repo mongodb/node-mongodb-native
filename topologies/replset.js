@@ -1130,29 +1130,23 @@ ReplSet.prototype.isDestroyed = function() {
 };
 
 /**
- * Get server
+ * Selects a server
+ *
  * @method
+ * @param {function} selector Unused
  * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
- * @return {Server}
+ * @param {function} callback
  */
-ReplSet.prototype.getServer = function(options) {
-  // Ensure we have no options
+ReplSet.prototype.selectServer = function(selector, options, callback) {
+  if (typeof selector === 'function' && typeof callback === 'undefined')
+    (callback = selector), (selector = undefined), (options = {});
+  if (typeof options === 'function')
+    (callback = options), (options = selector), (selector = undefined);
   options = options || {};
-  // Pick the right server based on readPreference
-  var server = this.s.replicaSetState.pickServer(options.readPreference);
-  if (this.s.debug) this.emit('pickedServer', options.readPreference, server);
-  return server;
-};
 
-/**
- * Get a direct connection
- * @method
- * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
- * @return {Connection}
- */
-ReplSet.prototype.getConnection = function(options) {
-  var server = this.getServer(options);
-  if (server) return server.getConnection();
+  const server = this.s.replicaSetState.pickServer(options.readPreference);
+  if (this.s.debug) this.emit('pickedServer', options.readPreference, server);
+  callback(null, server);
 };
 
 /**

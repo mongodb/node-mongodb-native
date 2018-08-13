@@ -1280,24 +1280,23 @@ Mongos.prototype.logout = function(dbName, callback) {
 };
 
 /**
- * Get server
+ * Selects a server
+ *
  * @method
- * @return {Server}
+ * @param {function} selector Unused
+ * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @param {function} callback
  */
-Mongos.prototype.getServer = function() {
-  var server = pickProxy(this);
-  if (this.s.debug) this.emit('pickedServer', null, server);
-  return server;
-};
+Mongos.prototype.selectServer = function(selector, options, callback) {
+  if (typeof selector === 'function' && typeof callback === 'undefined')
+    (callback = selector), (selector = undefined), (options = {});
+  if (typeof options === 'function')
+    (callback = options), (options = selector), (selector = undefined);
+  options = options || {};
 
-/**
- * Get a direct connection
- * @method
- * @return {Connection}
- */
-Mongos.prototype.getConnection = function() {
-  var server = this.getServer();
-  if (server) return server.getConnection();
+  const server = pickProxy(this);
+  if (this.s.debug) this.emit('pickedServer', null, server);
+  callback(null, server);
 };
 
 /**

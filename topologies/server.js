@@ -979,21 +979,16 @@ Server.prototype.connections = function() {
 };
 
 /**
- * Get server
- * @method
+ * Selects a server
  * @return {Server}
  */
-Server.prototype.getServer = function() {
-  return this;
-};
+Server.prototype.selectServer = function(selector, options, callback) {
+  if (typeof selector === 'function' && typeof callback === 'undefined')
+    (callback = selector), (selector = undefined), (options = {});
+  if (typeof options === 'function')
+    (callback = options), (options = selector), (selector = undefined);
 
-/**
- * Get connection
- * @method
- * @return {Connection}
- */
-Server.prototype.getConnection = function() {
-  return this.s.pool.get();
+  callback(null, this);
 };
 
 var listeners = ['close', 'error', 'timeout', 'parseError', 'connect'];

@@ -588,74 +588,7 @@ var nextFunction = function(self, callback) {
 
   // We have just started the cursor
   if (!self.cursorState.init) {
-    // Topology is not connected, save the call in the provided store to be
-    // Executed at some point when the handler deems it's reconnected
-    if (!self.topology.isConnected(self.options)) {
-      // Only need this for single server, because repl sets and mongos
-      // will always continue trying to reconnect
-      if (self.topology._type === 'server' && !self.topology.s.options.reconnect) {
-        // Reconnect is disabled, so we'll never reconnect
-        return callback(new MongoError('no connection available'));
-      }
-
-      if (self.disconnectHandler != null) {
-        if (self.topology.isDestroyed()) {
-          // Topology was destroyed, so don't try to wait for it to reconnect
-          return callback(new MongoError('Topology was destroyed'));
-        }
-
-        return self.disconnectHandler.addObjectAndMethod(
-          'cursor',
-          self,
-          'next',
-          [callback],
-          callback
-        );
-      }
-    }
-
-    try {
-      self.server = self.topology.getServer(self.options);
-    } catch (err) {
-      // Handle the error and add object to next method call
-      if (self.disconnectHandler != null) {
-        return self.disconnectHandler.addObjectAndMethod(
-          'cursor',
-          self,
-          'next',
-          [callback],
-          callback
-        );
-      }
-
-      // Otherwise return the error
-      return callback(err);
-    }
-
-    // Set as init
-    self.cursorState.init = true;
-
-    // error if collation not supported
-    if (collationNotSupported(self.server, self.cmd)) {
-      return callback(new MongoError(`server ${self.server.name} does not support collation`));
-    }
-
-    try {
-      self.query = self.server.wireProtocolHandler.command(
-        self.bson,
-        self.ns,
-        self.cmd,
-        self.cursorState,
-        self.topology,
-        self.options
-      );
-
-      if (self.query instanceof MongoError) {
-        return callback(self.query);
-      }
-    } catch (err) {
-      return callback(err);
-    }
+    return initializeCursor(self, callback);
   }
 
   // If we don't have a cursorId execute the first query
@@ -815,6 +748,81 @@ var nextFunction = function(self, callback) {
     handleCallback(callback, null, doc);
   }
 };
+
+function initializeCursor(cursor, callback) {
+  // Topology is not connected, save the call in the provided store to be
+  // Executed at some point when the handler deems it's reconnected
+  if (!cursor.topology.isConnected(cursor.options)) {
+    // Only need this for single server, because repl sets and mongos
+    // will always continue trying to reconnect
+    if (cursor.topology._type === 'server' && !cursor.topology.s.options.reconnect) {
+      // Reconnect is disabled, so we'll never reconnect
+      return callback(new MongoError('no connection available'));
+    }
+
+    if (cursor.disconnectHandler != null) {
+      if (cursor.topology.isDestroyed()) {
+        // Topology was destroyed, so don't try to wait for it to reconnect
+        return callback(new MongoError('Topology was destroyed'));
+      }
+
+      return cursor.disconnectHandler.addObjectAndMethod(
+        'cursor',
+        cursor,
+        'next',
+        [callback],
+        callback
+      );
+    }
+  }
+
+  return cursor.topology.selectServer(cursor.options, (err, server) => {
+    if (err) {
+      // Handle the error and add object to next method call
+      if (cursor.disconnectHandler != null) {
+        return cursor.disconnectHandler.addObjectAndMethod(
+          'cursor',
+          cursor,
+          'next',
+          [callback],
+          callback
+        );
+      }
+
+      return callback(err);
+    }
+
+    cursor.server = server;
+
+    // Set as init
+    cursor.cursorState.init = true;
+
+    // error if collation not supported
+    if (collationNotSupported(cursor.server, cursor.cmd)) {
+      return callback(new MongoError(`server ${cursor.server.name} does not support collation`));
+    }
+
+    try {
+      cursor.query = cursor.server.wireProtocolHandler.command(
+        cursor.bson,
+        cursor.ns,
+        cursor.cmd,
+        cursor.cursorState,
+        cursor.topology,
+        cursor.options
+      );
+
+      if (cursor.query instanceof MongoError) {
+        return callback(cursor.query);
+      }
+
+      // call `nextFunction` again now that we are initialized
+      nextFunction(cursor, callback);
+    } catch (err) {
+      return callback(err);
+    }
+  });
+}
 
 /**
  * Retrieve the next document from the cursor
