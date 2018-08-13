@@ -238,7 +238,9 @@ describe('Change Stream Spec', function() {
         return;
       }
 
-      expect(actual).to.be.a(Array.isArray(expected) ? 'array' : typeof expected);
+      const expectedType =
+        expected && expected.code ? 'error' : Array.isArray(expected) ? 'array' : typeof expected;
+      expect(actual).to.be.a(expectedType);
 
       if (expected == null) {
         expect(actual).to.not.exist;
