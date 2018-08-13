@@ -529,97 +529,142 @@ function merge(options1, options2) {
   }
 }
 
-function makeSSLConnection(self, _options) {
-  let sslOptions = {
-    socket: self.connection,
-    rejectUnauthorized: self.rejectUnauthorized
-  };
-
-  // Merge in options
-  merge(sslOptions, self.options);
-  merge(sslOptions, _options);
-
-  // Set options for ssl
-  if (self.ca) sslOptions.ca = self.ca;
-  if (self.crl) sslOptions.crl = self.crl;
-  if (self.cert) sslOptions.cert = self.cert;
-  if (self.key) sslOptions.key = self.key;
-  if (self.passphrase) sslOptions.passphrase = self.passphrase;
-
-  // Override checkServerIdentity behavior
-  if (self.checkServerIdentity === false) {
-    // Skip the identiy check by retuning undefined as per node documents
-    // https://nodejs.org/api/tls.html#tls_tls_connect_options_callback
-    sslOptions.checkServerIdentity = function() {
-      return undefined;
+function prepareConnectionOptions(self, _options) {
+  let options;
+  if (self.ssl) {
+    options = {
+      socket: self.connection,
+      rejectUnauthorized: self.rejectUnauthorized
     };
-  } else if (typeof self.checkServerIdentity === 'function') {
-    sslOptions.checkServerIdentity = self.checkServerIdentity;
-  }
 
-  // Set default sni servername to be the same as host
-  if (sslOptions.servername == null) {
-    sslOptions.servername = self.host;
-  }
+    // Merge in options
+    merge(options, self.options);
+    merge(options, _options);
 
-  // Attempt SSL connection
-  const connection = tls.connect(self.port, self.host, sslOptions, function() {
-    // Error on auth or skip
-    if (connection.authorizationError && self.rejectUnauthorized) {
-      return self.emit('error', connection.authorizationError, self, { ssl: true });
+    // Set options for ssl
+    if (self.ca) options.ca = self.ca;
+    if (self.crl) options.crl = self.crl;
+    if (self.cert) options.cert = self.cert;
+    if (self.key) options.key = self.key;
+    if (self.passphrase) options.passphrase = self.passphrase;
+
+    // Override checkServerIdentity behavior
+    if (self.checkServerIdentity === false) {
+      // Skip the identiy check by retuning undefined as per node documents
+      // https://nodejs.org/api/tls.html#tls_tls_connect_options_callback
+      options.checkServerIdentity = function() {
+        return undefined;
+      };
+    } else if (typeof self.checkServerIdentity === 'function') {
+      options.checkServerIdentity = self.checkServerIdentity;
     }
 
-    // Set socket timeout instead of connection timeout
-    connection.setTimeout(self.socketTimeout);
-    // We are done emit connect
-    self.emit('connect', self);
-  });
+    // Set default sni servername to be the same as host
+    if (options.servername == null) {
+      options.servername = self.host;
+    }
 
-  // Set the options for the connection
-  connection.setKeepAlive(self.keepAlive, self.keepAliveInitialDelay);
-  connection.setTimeout(self.connectionTimeout);
-  connection.setNoDelay(self.noDelay);
+    options = Object.assign({}, options, { host: self.host, port: self.port });
 
-  return connection;
-}
-
-function makeUnsecureConnection(self, family) {
-  // Create new connection instance
-  let connection_options;
-  if (self.domainSocket) {
-    connection_options = { path: self.host };
+    return options;
   } else {
-    connection_options = { port: self.port, host: self.host };
-    connection_options.family = family;
+    if (self.domainSocket) {
+      options = { path: self.host };
+    } else {
+      options = { port: self.port, host: self.host };
+    }
+    return options;
   }
+}
 
-  const connection = net.createConnection(connection_options);
+function makeConnection(self, options, callback) {
+  const module = options.ssl ? tls : net;
+
+  const connection = module.connect(options, function() {
+    if (self.ssl) {
+      // Error on auth or skip
+      if (connection.authorizationError && self.rejectUnauthorized) {
+        return self.emit('error', connection.authorizationError, self, { ssl: true });
+      }
+    }
+    // Set socket timeout instead of connection timeout
+
+    connection.setTimeout(self.socketTimeout);
+    return callback(null, connection);
+  });
 
   // Set the options for the connection
   connection.setKeepAlive(self.keepAlive, self.keepAliveInitialDelay);
   connection.setTimeout(self.connectionTimeout);
   connection.setNoDelay(self.noDelay);
-
-  connection.once('connect', function() {
-    // Set socket timeout instead of connection timeout
-    connection.setTimeout(self.socketTimeout);
-    // Emit connect event
-    self.emit('connect', self);
-  });
-
-  return connection;
-}
-
-function doConnect(self, family, _options, _errorHandler) {
-  self.connection = self.ssl
-    ? makeSSLConnection(self, _options)
-    : makeUnsecureConnection(self, family);
 
   // Add handlers for events
-  self.connection.once('error', _errorHandler);
-  self.connection.once('timeout', timeoutHandler(self));
-  self.connection.once('close', closeHandler(self));
-  self.connection.on('data', dataHandler(self));
+  connection.once('error', err =>
+    callback({ err: err, type: 'error', family: options.family }, null)
+  );
+  connection.once('timeout', err => callback({ err: err, type: 'timeout' }, null));
+  connection.once('close', err => callback({ err: err, type: 'close' }, null));
+  connection.on('data', err => callback({ err: err, type: 'data' }, null));
+  return;
+}
+
+function fastFallback(self, _options, callback) {
+  const options = prepareConnectionOptions(self, _options);
+
+  let connection;
+  const connectionHandler = (err, _connection) => {
+    const _errorHandler = errorHandler(self);
+    const _timeoutHandler = timeoutHandler(self);
+    const _closeHandler = closeHandler(self);
+    const _dataHandler = dataHandler(self);
+
+    if (err) {
+      switch (err.type) {
+        case 'error':
+          if (err.family === 6) {
+            return function() {
+              if (self.logger.isDebug()) {
+                self.logger.debug(
+                  f(
+                    'connection %s for [%s:%s] errored out with [%s]',
+                    self.id,
+                    self.host,
+                    self.port,
+                    JSON.stringify(err)
+                  )
+                );
+              }
+            };
+          } else {
+            return _errorHandler(err.err);
+          }
+        case 'timeout':
+          return _timeoutHandler(err.err);
+        case 'close':
+          return _closeHandler(err.err);
+        case 'data':
+          return _dataHandler(err.err);
+      }
+    }
+
+    if (connection) {
+      _connection.removeAllListeners('error');
+      _connection.removeAllListeners('timeout');
+      _connection.removeAllListeners('close');
+      _connection.removeAllListeners('data');
+      _connection.end();
+      _connection.unref();
+    } else {
+      connection = _connection;
+    }
+
+    return callback(null, connection);
+  };
+
+  makeConnection(self, Object.assign({}, { family: 6 }, options), connectionHandler);
+  setTimeout(() => {
+    makeConnection(self, Object.assign({}, { family: 4 }, options), connectionHandler);
+  }, 250);
 }
 
 /**
@@ -637,33 +682,18 @@ Connection.prototype.connect = function(_options) {
     this.responseOptions.promoteBuffers = _options.promoteBuffers;
   }
 
-  const _errorHandler = errorHandler(this);
-
-  if (this.family !== void 0) {
-    return doConnect(this, this.family, _options, _errorHandler);
-  }
-
-  return doConnect(this, 6, _options, err => {
-    if (this.logger.isDebug()) {
-      this.logger.debug(
-        f(
-          'connection %s for [%s:%s] errored out with [%s]',
-          this.id,
-          this.host,
-          this.port,
-          JSON.stringify(err)
-        )
-      );
+  return fastFallback(this, _options, (err, connection) => {
+    if (err) {
+      return;
     }
-
-    // clean up existing event handlers
-    this.connection.removeAllListeners('error');
-    this.connection.removeAllListeners('timeout');
-    this.connection.removeAllListeners('close');
-    this.connection.removeAllListeners('data');
-    this.connection = undefined;
-
-    return doConnect(this, 4, _options, _errorHandler);
+    // Add handlers for events
+    connection.once('error', errorHandler(this));
+    connection.once('timeout', timeoutHandler(this));
+    connection.once('close', closeHandler(this));
+    connection.on('data', dataHandler(this));
+    this.connection = connection;
+    this.emit('connect', this);
+    return;
   });
 };
 
