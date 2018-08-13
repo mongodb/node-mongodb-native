@@ -1,30 +1,22 @@
 'use strict';
 
-var expect = require('chai').expect,
-  f = require('util').format,
-  fs = require('fs'),
-  Mongos = require('../../../lib/topologies/mongos'),
-  ReadPreference = require('../../../lib/topologies/read_preference'),
-  Server = require('../../../lib/topologies/server');
+const expect = require('chai').expect;
+const path = require('path');
+const fs = require('fs');
+const Mongos = require('../../../lib/topologies/mongos');
+const ReadPreference = require('../../../lib/topologies/read_preference');
+const Server = require('../../../lib/topologies/server');
 
 describe('Mongos server selection tests', function() {
-  it('should correctly execute server selection tests using Mongos Topology', {
-    metadata: { requires: { topology: 'single' } },
+  var specPath = `${__dirname}/../spec/server-selection/server_selection/Sharded/read`;
+  var entries = fs.readdirSync(specPath).filter(function(x) {
+    return x.indexOf('.json') !== -1;
+  });
 
-    test: function(done) {
-      var path = f('%s/../spec/server-selection/server_selection/Sharded/read', __dirname);
-      console.dir(path);
-      var entries = fs.readdirSync(path).filter(function(x) {
-        return x.indexOf('.json') !== -1;
-      });
-
-      // Execute each of the entries
-      entries.forEach(function(x) {
-        executeEntry(x, f('%s/%s', path, x));
-      });
-
-      done();
-    }
+  entries.forEach(entry => {
+    it(path.basename(entry, '.json'), function(done) {
+      executeEntry(entry, `${specPath}/${entry}`, done);
+    });
   });
 });
 
@@ -34,14 +26,13 @@ function convert(mode) {
   return mode.toLowerCase();
 }
 
-function executeEntry(file, path) {
-  console.log('= file :: ' + file);
+function executeEntry(file, path, done) {
   // Read and parse the json file
   file = require(path);
   // Let's pick out the parts of the selection specification
   var topologyDescription = file.topology_description;
   var inLatencyWindow = file.in_latency_window;
-  var readPreference = file.read_preference;
+  var readPreferenceSpec = file.read_preference;
 
   try {
     // Create a Replset and populate it with dummy topology servers
@@ -65,27 +56,30 @@ function executeEntry(file, path) {
     });
 
     // Create read preference
-    var rp = new ReadPreference(convert(readPreference.mode), readPreference.tag_sets);
+    var readPreference = new ReadPreference(
+      convert(readPreferenceSpec.mode),
+      readPreferenceSpec.tag_sets
+    );
+
     // Perform a pickServer
-    var server = topology.getServer(rp);
-    var foundWindow = null;
+    topology.selectServer({ readPreference }, (err, server) => {
+      if (err) return done(err);
+      var foundWindow = null;
 
-    // server should be in the latency window
-    for (var i = 0; i < inLatencyWindow.length; i++) {
-      var w = inLatencyWindow[i];
+      // server should be in the latency window
+      for (var i = 0; i < inLatencyWindow.length; i++) {
+        var w = inLatencyWindow[i];
 
-      if (server.name === w.address) {
-        foundWindow = w;
-        break;
+        if (server.name === w.address) {
+          foundWindow = w;
+          break;
+        }
       }
-    }
 
-    // console.log('--- 0')
-    // console.dir(foundWindow)
-    // console.dir(server)
-    expect(foundWindow).to.not.be.null;
+      expect(foundWindow).to.not.be.null;
+      done();
+    });
   } catch (err) {
-    console.log(err.stack);
-    process.exit(0);
+    done(err);
   }
 }
