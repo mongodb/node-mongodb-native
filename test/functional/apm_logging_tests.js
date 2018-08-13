@@ -242,7 +242,7 @@ describe('APM Logging', function() {
         });
 
         // force stream to error and close client
-        writeStream.destroy(new Error('error after connecting'));
+        writeStream.emit('error', new Error('Error after connect'));
       });
     });
   });
