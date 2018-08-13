@@ -228,60 +228,60 @@ function addConnection(id, connection) {
 
 //
 // Connection handlers
-var errorHandler = function(self) {
+var errorHandler = function(conn) {
   return function(err) {
-    if (connectionAccounting) deleteConnection(self.id);
+    if (connectionAccounting) deleteConnection(conn.id);
     // Debug information
-    if (self.logger.isDebug())
-      self.logger.debug(
+    if (conn.logger.isDebug())
+      conn.logger.debug(
         f(
           'connection %s for [%s:%s] errored out with [%s]',
-          self.id,
-          self.host,
-          self.port,
+          conn.id,
+          conn.host,
+          conn.port,
           JSON.stringify(err)
         )
       );
     // Emit the error
-    if (self.listeners('error').length > 0) self.emit('error', new MongoNetworkError(err), self);
+    if (conn.listeners('error').length > 0) conn.emit('error', new MongoNetworkError(err), conn);
   };
 };
 
-var timeoutHandler = function(self) {
+var timeoutHandler = function(conn) {
   return function() {
-    if (connectionAccounting) deleteConnection(self.id);
+    if (connectionAccounting) deleteConnection(conn.id);
     // Debug information
-    if (self.logger.isDebug())
-      self.logger.debug(f('connection %s for [%s:%s] timed out', self.id, self.host, self.port));
+    if (conn.logger.isDebug())
+      conn.logger.debug(f('connection %s for [%s:%s] timed out', conn.id, conn.host, conn.port));
     // Emit timeout error
-    self.emit(
+    conn.emit(
       'timeout',
-      new MongoNetworkError(f('connection %s to %s:%s timed out', self.id, self.host, self.port)),
-      self
+      new MongoNetworkError(f('connection %s to %s:%s timed out', conn.id, conn.host, conn.port)),
+      conn
     );
   };
 };
 
-var closeHandler = function(self) {
+var closeHandler = function(conn) {
   return function(hadError) {
-    if (connectionAccounting) deleteConnection(self.id);
+    if (connectionAccounting) deleteConnection(conn.id);
     // Debug information
-    if (self.logger.isDebug())
-      self.logger.debug(f('connection %s with for [%s:%s] closed', self.id, self.host, self.port));
+    if (conn.logger.isDebug())
+      conn.logger.debug(f('connection %s with for [%s:%s] closed', conn.id, conn.host, conn.port));
 
     // Emit close event
     if (!hadError) {
-      self.emit(
+      conn.emit(
         'close',
-        new MongoNetworkError(f('connection %s to %s:%s closed', self.id, self.host, self.port)),
-        self
+        new MongoNetworkError(f('connection %s to %s:%s closed', conn.id, conn.host, conn.port)),
+        conn
       );
     }
   };
 };
 
 // Handle a message once it is recieved
-var emitMessageHandler = function(self, message) {
+var emitMessageHandler = function(conn, message) {
   var msgHeader = parseHeader(message);
   if (msgHeader.opCode === OP_COMPRESSED) {
     msgHeader.fromCompressed = true;
@@ -301,98 +301,98 @@ var emitMessageHandler = function(self, message) {
           'Decompressing a compressed message from the server failed. The message is corrupt.'
         );
       }
-      self.messageHandler(
-        new Response(self.bson, message, msgHeader, decompressedMsgBody, self.responseOptions),
-        self
+      conn.messageHandler(
+        new Response(conn.bson, message, msgHeader, decompressedMsgBody, conn.responseOptions),
+        conn
       );
     });
   } else {
-    self.messageHandler(
+    conn.messageHandler(
       new Response(
-        self.bson,
+        conn.bson,
         message,
         msgHeader,
         message.slice(MESSAGE_HEADER_SIZE),
-        self.responseOptions
+        conn.responseOptions
       ),
-      self
+      conn
     );
   }
 };
 
-var dataHandler = function(self) {
+var dataHandler = function(conn) {
   return function(data) {
     // Parse until we are done with the data
     while (data.length > 0) {
       // If we still have bytes to read on the current message
-      if (self.bytesRead > 0 && self.sizeOfMessage > 0) {
+      if (conn.bytesRead > 0 && conn.sizeOfMessage > 0) {
         // Calculate the amount of remaining bytes
-        var remainingBytesToRead = self.sizeOfMessage - self.bytesRead;
+        var remainingBytesToRead = conn.sizeOfMessage - conn.bytesRead;
         // Check if the current chunk contains the rest of the message
         if (remainingBytesToRead > data.length) {
           // Copy the new data into the exiting buffer (should have been allocated when we know the message size)
-          data.copy(self.buffer, self.bytesRead);
+          data.copy(conn.buffer, conn.bytesRead);
           // Adjust the number of bytes read so it point to the correct index in the buffer
-          self.bytesRead = self.bytesRead + data.length;
+          conn.bytesRead = conn.bytesRead + data.length;
 
           // Reset state of buffer
           data = Buffer.alloc(0);
         } else {
           // Copy the missing part of the data into our current buffer
-          data.copy(self.buffer, self.bytesRead, 0, remainingBytesToRead);
+          data.copy(conn.buffer, conn.bytesRead, 0, remainingBytesToRead);
           // Slice the overflow into a new buffer that we will then re-parse
           data = data.slice(remainingBytesToRead);
 
           // Emit current complete message
           try {
-            var emitBuffer = self.buffer;
+            var emitBuffer = conn.buffer;
             // Reset state of buffer
-            self.buffer = null;
-            self.sizeOfMessage = 0;
-            self.bytesRead = 0;
-            self.stubBuffer = null;
+            conn.buffer = null;
+            conn.sizeOfMessage = 0;
+            conn.bytesRead = 0;
+            conn.stubBuffer = null;
 
-            emitMessageHandler(self, emitBuffer);
+            emitMessageHandler(conn, emitBuffer);
           } catch (err) {
             var errorObject = {
               err: 'socketHandler',
               trace: err,
-              bin: self.buffer,
+              bin: conn.buffer,
               parseState: {
-                sizeOfMessage: self.sizeOfMessage,
-                bytesRead: self.bytesRead,
-                stubBuffer: self.stubBuffer
+                sizeOfMessage: conn.sizeOfMessage,
+                bytesRead: conn.bytesRead,
+                stubBuffer: conn.stubBuffer
               }
             };
             // We got a parse Error fire it off then keep going
-            self.emit('parseError', errorObject, self);
+            conn.emit('parseError', errorObject, conn);
           }
         }
       } else {
         // Stub buffer is kept in case we don't get enough bytes to determine the
         // size of the message (< 4 bytes)
-        if (self.stubBuffer != null && self.stubBuffer.length > 0) {
+        if (conn.stubBuffer != null && conn.stubBuffer.length > 0) {
           // If we have enough bytes to determine the message size let's do it
-          if (self.stubBuffer.length + data.length > 4) {
+          if (conn.stubBuffer.length + data.length > 4) {
             // Prepad the data
-            var newData = Buffer.alloc(self.stubBuffer.length + data.length);
-            self.stubBuffer.copy(newData, 0);
-            data.copy(newData, self.stubBuffer.length);
+            var newData = Buffer.alloc(conn.stubBuffer.length + data.length);
+            conn.stubBuffer.copy(newData, 0);
+            data.copy(newData, conn.stubBuffer.length);
             // Reassign for parsing
             data = newData;
 
             // Reset state of buffer
-            self.buffer = null;
-            self.sizeOfMessage = 0;
-            self.bytesRead = 0;
-            self.stubBuffer = null;
+            conn.buffer = null;
+            conn.sizeOfMessage = 0;
+            conn.bytesRead = 0;
+            conn.stubBuffer = null;
           } else {
             // Add the the bytes to the stub buffer
-            var newStubBuffer = Buffer.alloc(self.stubBuffer.length + data.length);
+            var newStubBuffer = Buffer.alloc(conn.stubBuffer.length + data.length);
             // Copy existing stub buffer
-            self.stubBuffer.copy(newStubBuffer, 0);
+            conn.stubBuffer.copy(newStubBuffer, 0);
             // Copy missing part of the data
-            data.copy(newStubBuffer, self.stubBuffer.length);
+            data.copy(newStubBuffer, conn.stubBuffer.length);
             // Exit parsing loop
             data = Buffer.alloc(0);
           }
@@ -402,59 +402,59 @@ var dataHandler = function(self) {
             // var sizeOfMessage = data.readUInt32LE(0);
             var sizeOfMessage = data[0] | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
             // If we have a negative sizeOfMessage emit error and return
-            if (sizeOfMessage < 0 || sizeOfMessage > self.maxBsonMessageSize) {
+            if (sizeOfMessage < 0 || sizeOfMessage > conn.maxBsonMessageSize) {
               errorObject = {
                 err: 'socketHandler',
                 trace: '',
-                bin: self.buffer,
+                bin: conn.buffer,
                 parseState: {
                   sizeOfMessage: sizeOfMessage,
-                  bytesRead: self.bytesRead,
-                  stubBuffer: self.stubBuffer
+                  bytesRead: conn.bytesRead,
+                  stubBuffer: conn.stubBuffer
                 }
               };
               // We got a parse Error fire it off then keep going
-              self.emit('parseError', errorObject, self);
+              conn.emit('parseError', errorObject, conn);
               return;
             }
 
             // Ensure that the size of message is larger than 0 and less than the max allowed
             if (
               sizeOfMessage > 4 &&
-              sizeOfMessage < self.maxBsonMessageSize &&
+              sizeOfMessage < conn.maxBsonMessageSize &&
               sizeOfMessage > data.length
             ) {
-              self.buffer = Buffer.alloc(sizeOfMessage);
+              conn.buffer = Buffer.alloc(sizeOfMessage);
               // Copy all the data into the buffer
-              data.copy(self.buffer, 0);
+              data.copy(conn.buffer, 0);
               // Update bytes read
-              self.bytesRead = data.length;
+              conn.bytesRead = data.length;
               // Update sizeOfMessage
-              self.sizeOfMessage = sizeOfMessage;
+              conn.sizeOfMessage = sizeOfMessage;
               // Ensure stub buffer is null
-              self.stubBuffer = null;
+              conn.stubBuffer = null;
               // Exit parsing loop
               data = Buffer.alloc(0);
             } else if (
               sizeOfMessage > 4 &&
-              sizeOfMessage < self.maxBsonMessageSize &&
+              sizeOfMessage < conn.maxBsonMessageSize &&
               sizeOfMessage === data.length
             ) {
               try {
                 emitBuffer = data;
                 // Reset state of buffer
-                self.buffer = null;
-                self.sizeOfMessage = 0;
-                self.bytesRead = 0;
-                self.stubBuffer = null;
+                conn.buffer = null;
+                conn.sizeOfMessage = 0;
+                conn.bytesRead = 0;
+                conn.stubBuffer = null;
                 // Exit parsing loop
                 data = Buffer.alloc(0);
                 // Emit the message
-                emitMessageHandler(self, emitBuffer);
+                emitMessageHandler(conn, emitBuffer);
               } catch (err) {
-                self.emit('parseError', err, self);
+                conn.emit('parseError', err, conn);
               }
-            } else if (sizeOfMessage <= 4 || sizeOfMessage > self.maxBsonMessageSize) {
+            } else if (sizeOfMessage <= 4 || sizeOfMessage > conn.maxBsonMessageSize) {
               errorObject = {
                 err: 'socketHandler',
                 trace: null,
@@ -467,32 +467,32 @@ var dataHandler = function(self) {
                 }
               };
               // We got a parse Error fire it off then keep going
-              self.emit('parseError', errorObject, self);
+              conn.emit('parseError', errorObject, conn);
 
               // Clear out the state of the parser
-              self.buffer = null;
-              self.sizeOfMessage = 0;
-              self.bytesRead = 0;
-              self.stubBuffer = null;
+              conn.buffer = null;
+              conn.sizeOfMessage = 0;
+              conn.bytesRead = 0;
+              conn.stubBuffer = null;
               // Exit parsing loop
               data = Buffer.alloc(0);
             } else {
               emitBuffer = data.slice(0, sizeOfMessage);
               // Reset state of buffer
-              self.buffer = null;
-              self.sizeOfMessage = 0;
-              self.bytesRead = 0;
-              self.stubBuffer = null;
+              conn.buffer = null;
+              conn.sizeOfMessage = 0;
+              conn.bytesRead = 0;
+              conn.stubBuffer = null;
               // Copy rest of message
               data = data.slice(sizeOfMessage);
               // Emit the message
-              emitMessageHandler(self, emitBuffer);
+              emitMessageHandler(conn, emitBuffer);
             }
           } else {
             // Create a buffer that contains the space for the non-complete message
-            self.stubBuffer = Buffer.alloc(data.length);
+            conn.stubBuffer = Buffer.alloc(data.length);
             // Copy the data to the stub buffer
-            data.copy(self.stubBuffer, 0);
+            data.copy(conn.stubBuffer, 0);
             // Exit parsing loop
             data = Buffer.alloc(0);
           }
@@ -529,141 +529,112 @@ function merge(options1, options2) {
   }
 }
 
-function prepareConnectionOptions(self, _options) {
+function prepareConnectionOptions(conn, _options) {
   let options;
-  if (self.ssl) {
+  if (conn.ssl) {
     options = {
-      socket: self.connection,
-      rejectUnauthorized: self.rejectUnauthorized
+      socket: conn.connection,
+      rejectUnauthorized: conn.rejectUnauthorized
     };
 
     // Merge in options
-    merge(options, self.options);
+    merge(options, conn.options);
     merge(options, _options);
 
     // Set options for ssl
-    if (self.ca) options.ca = self.ca;
-    if (self.crl) options.crl = self.crl;
-    if (self.cert) options.cert = self.cert;
-    if (self.key) options.key = self.key;
-    if (self.passphrase) options.passphrase = self.passphrase;
+    if (conn.ca) options.ca = conn.ca;
+    if (conn.crl) options.crl = conn.crl;
+    if (conn.cert) options.cert = conn.cert;
+    if (conn.key) options.key = conn.key;
+    if (conn.passphrase) options.passphrase = conn.passphrase;
 
     // Override checkServerIdentity behavior
-    if (self.checkServerIdentity === false) {
+    if (conn.checkServerIdentity === false) {
       // Skip the identiy check by retuning undefined as per node documents
       // https://nodejs.org/api/tls.html#tls_tls_connect_options_callback
       options.checkServerIdentity = function() {
         return undefined;
       };
-    } else if (typeof self.checkServerIdentity === 'function') {
-      options.checkServerIdentity = self.checkServerIdentity;
+    } else if (typeof conn.checkServerIdentity === 'function') {
+      options.checkServerIdentity = conn.checkServerIdentity;
     }
 
     // Set default sni servername to be the same as host
     if (options.servername == null) {
-      options.servername = self.host;
+      options.servername = conn.host;
     }
 
-    options = Object.assign({}, options, { host: self.host, port: self.port });
-
-    return options;
+    options = Object.assign({}, options, { host: conn.host, port: conn.port });
   } else {
-    if (self.domainSocket) {
-      options = { path: self.host };
+    if (conn.domainSocket) {
+      options = { path: conn.host };
     } else {
-      options = { port: self.port, host: self.host };
+      options = { port: conn.port, host: conn.host };
     }
-    return options;
   }
+  return options;
 }
 
-function makeConnection(self, options, callback) {
+function makeConnection(conn, options, callback) {
   const module = options.ssl ? tls : net;
 
   const connection = module.connect(options, function() {
-    if (self.ssl) {
+    if (conn.ssl) {
       // Error on auth or skip
-      if (connection.authorizationError && self.rejectUnauthorized) {
-        return self.emit('error', connection.authorizationError, self, { ssl: true });
+      if (connection.authorizationError && conn.rejectUnauthorized) {
+        return conn.emit('error', connection.authorizationError, conn, { ssl: true });
       }
     }
     // Set socket timeout instead of connection timeout
 
-    connection.setTimeout(self.socketTimeout);
+    connection.setTimeout(conn.socketTimeout);
     return callback(null, connection);
   });
 
   // Set the options for the connection
-  connection.setKeepAlive(self.keepAlive, self.keepAliveInitialDelay);
-  connection.setTimeout(self.connectionTimeout);
-  connection.setNoDelay(self.noDelay);
+  connection.setKeepAlive(conn.keepAlive, conn.keepAliveInitialDelay);
+  connection.setTimeout(conn.connectionTimeout);
+  connection.setNoDelay(conn.noDelay);
 
   // Add handlers for events
-  connection.once('error', err =>
-    callback({ err: err, type: 'error', family: options.family }, null)
-  );
-  connection.once('timeout', err => callback({ err: err, type: 'timeout' }, null));
-  connection.once('close', err => callback({ err: err, type: 'close' }, null));
-  connection.on('data', err => callback({ err: err, type: 'data' }, null));
+  connection.once('error', err => callback(err, null));
+  connection.once('timeout', err => callback(err, null));
+  connection.once('close', err => callback(err, null));
   return;
 }
 
-function fastFallback(self, _options, callback) {
-  const options = prepareConnectionOptions(self, _options);
+function fastFallbackConnect(conn, _options, callback) {
+  const options = prepareConnectionOptions(conn, _options);
 
   let connection;
   const connectionHandler = (err, _connection) => {
-    const _errorHandler = errorHandler(self);
-    const _timeoutHandler = timeoutHandler(self);
-    const _closeHandler = closeHandler(self);
-    const _dataHandler = dataHandler(self);
-
-    if (err) {
-      switch (err.type) {
-        case 'error':
-          if (err.family === 6) {
-            return function() {
-              if (self.logger.isDebug()) {
-                self.logger.debug(
-                  f(
-                    'connection %s for [%s:%s] errored out with [%s]',
-                    self.id,
-                    self.host,
-                    self.port,
-                    JSON.stringify(err)
-                  )
-                );
-              }
-            };
-          } else {
-            return _errorHandler(err.err);
-          }
-        case 'timeout':
-          return _timeoutHandler(err.err);
-        case 'close':
-          return _closeHandler(err.err);
-        case 'data':
-          return _dataHandler(err.err);
+    if (_connection) {
+      if (connection) {
+        ['error', 'timeout', 'close'].forEach(event => _connection.removeAllListeners(event));
+        _connection.end();
+        _connection.unref();
+        return;
       }
-    }
-
-    if (connection) {
-      _connection.removeAllListeners('error');
-      _connection.removeAllListeners('timeout');
-      _connection.removeAllListeners('close');
-      _connection.removeAllListeners('data');
-      _connection.end();
-      _connection.unref();
-    } else {
       connection = _connection;
+      return callback(null, connection);
+    } else if (err) {
+      if (conn.logger.isDebug()) {
+        conn.logger.debug(
+          `connection ${conn.id} for [${conn.host}:${conn.port}] errored out with [${JSON.stringify(
+            err
+          )}]`
+        );
+      }
+      return;
     }
-
-    return callback(null, connection);
+    return;
   };
 
-  makeConnection(self, Object.assign({}, { family: 6 }, options), connectionHandler);
+  makeConnection(conn, Object.assign({}, { family: 6 }, options), connectionHandler);
+
+  // IPv4 attempts to connect 250ms after IPv6 to give IPv6 preference
   setTimeout(() => {
-    makeConnection(self, Object.assign({}, { family: 4 }, options), connectionHandler);
+    makeConnection(conn, Object.assign({}, { family: 4 }, options), connectionHandler);
   }, 250);
 }
 
@@ -682,7 +653,7 @@ Connection.prototype.connect = function(_options) {
     this.responseOptions.promoteBuffers = _options.promoteBuffers;
   }
 
-  return fastFallback(this, _options, (err, connection) => {
+  return fastFallbackConnect(this, _options, (err, connection) => {
     if (err) {
       return;
     }
@@ -705,9 +676,9 @@ Connection.prototype.connect = function(_options) {
 Connection.prototype.unref = function() {
   if (this.connection) this.connection.unref();
   else {
-    var self = this;
+    var conn = this;
     this.once('connect', function() {
-      self.connection.unref();
+      conn.connection.unref();
     });
   }
 };
