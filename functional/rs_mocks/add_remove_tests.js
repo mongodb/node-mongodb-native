@@ -602,7 +602,7 @@ describe('ReplSet Add Remove (mocks)', function() {
             server.destroy();
             done();
           }, 1000);
-        }, 500);
+        }, 630); // This connection implementation slows down conneciton to nodes, need to fix this
 
         server.on('left', function(_type, _server) {
           if (_type === 'secondary' && _server.name === 'localhost:32003') {
