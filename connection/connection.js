@@ -599,13 +599,14 @@ function makeConnection(conn, options, callback) {
   // Add handlers for events
   connection.once('error', err => callback(err, null));
   connection.once('timeout', err => callback(err, null));
-  connection.once('close', err => callback(err, null));
+  // connection.once('close', err => callback(err, null));
   return;
 }
 
 function fastFallbackConnect(conn, _options, callback) {
   const options = prepareConnectionOptions(conn, _options);
 
+  let errors = [];
   let connection;
   const connectionHandler = (err, _connection) => {
     if (_connection) {
@@ -618,16 +619,20 @@ function fastFallbackConnect(conn, _options, callback) {
       connection = _connection;
       return callback(null, connection);
     } else if (err) {
-      if (conn.logger.isDebug()) {
-        conn.logger.debug(
-          `connection ${conn.id} for [${conn.host}:${conn.port}] errored out with [${JSON.stringify(
-            err
-          )}]`
-        );
+      if (errors.length > 0) {
+        // an error occurred for the second time, we have officially failed
+
+        //empty errors array
+        errors = [];
+
+        // return mongo error to be emitted
+        return callback(new MongoNetworkError('failed to connect'), null);
       }
+
+      // otherwise push the error, and wait for subsequent connects
+      errors.push(err);
       return;
     }
-    return;
   };
 
   makeConnection(conn, Object.assign({}, { family: 6 }, options), connectionHandler);
@@ -655,6 +660,7 @@ Connection.prototype.connect = function(_options) {
 
   return fastFallbackConnect(this, _options, (err, connection) => {
     if (err) {
+      this.emit('error', err, this);
       return;
     }
     // Add handlers for events
