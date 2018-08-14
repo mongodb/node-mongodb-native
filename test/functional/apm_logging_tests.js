@@ -221,13 +221,21 @@ describe('APM Logging', function() {
       client.connect((err, client) => {
         expect(err).to.be.null;
 
-        // inspect parameters when client closes
-        client.close.callsFake((force, fn) => {
-          expect(force).to.equal(true);
-          expect(fn).to.throw();
-          client.close.restore();
-          done();
-        });
+        // client.close is stubbed in session_leak_test.js beforeEach hook;
+        // we need to redefine it to add extra functionality
+        const $clientClose = client.close;
+        client.close = function(force, fn) {
+          // call the original stubbed function
+          $clientClose
+            .call(this)
+            .then(() => {
+              // extra checks for this test
+              expect(force).to.equal(true);
+              expect(fn).to.throw();
+              done();
+            })
+            .catch(e => done(e));
+        };
 
         // force stream to error and close client
         writeStream.emit('error', new Error('Error after connect'));
