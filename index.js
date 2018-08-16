@@ -2,7 +2,7 @@
 
 // Core module
 const core = require('mongodb-core');
-const Instrumentation = require('./lib/apm');
+const Instrumentation = require('./lib/apm').Instrumentation;
 
 // Set up the connect function
 const connect = require('./lib/mongo_client').connect;
