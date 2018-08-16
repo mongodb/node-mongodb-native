@@ -160,8 +160,7 @@ describe('APM Logging', function() {
       runTestClient(this, '?monitor=command&monitorOut=apm_test_log', cb);
     });
 
-    // skip for now: this test depends on the new fixes in the core uri parser
-    it.skip('log both command and sdam events using `monitor=command,sdam`', function(done) {
+    it('log both command and sdam events using `monitor=command,sdam`', function(done) {
       const cb = (err, data) => {
         expect(data.numLines).to.equal(8);
         expect(data.sdam).to.not.be.empty;
