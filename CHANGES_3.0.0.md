@@ -19,8 +19,8 @@ of host names. Full details can be found in the [Seedlist Discovery Specificatio
 ### Change Streams
 
 Support has been added for creating a stream to track changes to a particular collection. This is a
-new feature in MongoDB 3.6. Full details can be found in the [Change Stream Specification](https://github.com/mongodb/specifications/blob/master/source/change-streams.rst) as
-well as [examples in the test directory](https://github.com/mongodb/node-mongodb-native/blob/3.0.0/test/functional/operation_changestream_example_tests.js).
+new feature in MongoDB 3.6. Full details can be found in the [Change Stream Specification](https://github.com/mongodb/specifications/blob/master/source/change-streams/change-streams.rst) as
+well as [examples in the test directory](https://github.com/mongodb/node-mongodb-native/blob/master/test/examples/change_streams.js).
 
 ### Sessions
 
