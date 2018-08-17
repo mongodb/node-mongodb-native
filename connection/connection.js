@@ -572,6 +572,7 @@ function prepareConnectionOptions(conn, _options) {
       options = { port: conn.port, host: conn.host };
     }
   }
+
   return options;
 }
 
@@ -598,19 +599,13 @@ function makeConnection(conn, options, callback) {
 
   // Add handlers for events
   connection.once('error', err => callback(err, null));
-
-  return;
 }
 
 function normalConnect(conn, family, _options, callback) {
   const options = prepareConnectionOptions(conn, _options);
   makeConnection(conn, Object.assign({}, { family: family }, options), (err, connection) => {
-    if (connection) {
-      return callback(null, connection);
-    }
-    if (err) {
-      return callback(err, null);
-    }
+    if (err) return callback(err, null);
+    callback(null, connection);
   });
 }
 
@@ -620,26 +615,27 @@ function fastFallbackConnect(conn, _options, callback) {
   let errors = [];
   let connection;
   const connectionHandler = (err, _connection) => {
+    if (err) {
+      if (errors.length > 0) {
+        // an error occurred for the second time, we have officially failed
+        // return mongo error to be emitted
+        return callback(err, null);
+      }
+
+      // otherwise push the error, and wait for subsequent connects
+      errors.push(err);
+      return;
+    }
+
     if (_connection) {
       if (connection) {
         _connection.removeAllListeners('error');
         _connection.unref();
         return;
       }
+
       connection = _connection;
       return callback(null, connection);
-    }
-    if (err) {
-      if (errors.length > 0) {
-        // an error occurred for the second time, we have officially failed
-
-        // return mongo error to be emitted
-        return callback(err, null);
-      }
-      // otherwise push the error, and wait for subsequent connects
-      // if (connectionAccounting) deleteConnection(conn.id);
-      errors.push(err);
-      return;
     }
   };
 
@@ -667,13 +663,15 @@ Connection.prototype.connect = function(_options) {
   }
 
   const connectHandler = (err, connection) => {
+    const connectionErrorHandler = errorHandler(this);
+
     if (err) {
-      const _errorHandler = errorHandler(this);
-      _errorHandler(err);
+      connectionErrorHandler(err);
       return;
     }
+
     // Add handlers for events
-    connection.once('error', errorHandler(this));
+    connection.once('error', connectionErrorHandler);
     connection.once('timeout', timeoutHandler(this));
     connection.once('close', closeHandler(this));
     connection.on('data', dataHandler(this));
