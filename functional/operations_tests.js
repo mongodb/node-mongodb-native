@@ -1,9 +1,25 @@
 'use strict';
 
-var expect = require('chai').expect,
-  f = require('util').format;
+const expect = require('chai').expect;
+const f = require('util').format;
+const mock = require('mongodb-mock-server');
+const ConnectionSpy = require('./shared').ConnectionSpy;
+const Connection = require('../../../lib/connection/connection');
 
+const test = {};
 describe('Operation tests', function() {
+  beforeEach(() => {
+    test.spy = new ConnectionSpy();
+    Connection.enableConnectionAccounting(test.spy);
+  });
+
+  afterEach(() => {
+    return mock.cleanup(test.spy).then(() => {
+      test.spy = undefined;
+      Connection.disableConnectionAccounting();
+    });
+  });
+
   it('should correctly connect using server object', {
     metadata: {
       requires: { topology: ['single', 'replicaset', 'sharded'] }
@@ -547,8 +563,6 @@ describe('Operation tests', function() {
 
     test: function(done) {
       var self = this;
-      var Connection = require('../../../lib/connection/connection');
-
       self.configuration.newTopology(function(err, server) {
         // console.log('================ -- 1')
         // Add event listeners
@@ -563,9 +577,6 @@ describe('Operation tests', function() {
             // Number of operations left
             if (left === 0) {
               self.configuration.newTopology(function(topologyErr, innerServer) {
-                // Enable connections accounting
-                Connection.enableConnectionAccounting();
-
                 // Add event listeners
                 innerServer.on('connect', function(_innerServer) {
                   _innerServer.command(
@@ -576,12 +587,7 @@ describe('Operation tests', function() {
                       expect(result.result.n).to.equal(100);
 
                       _innerServer.destroy();
-
-                      setTimeout(function() {
-                        expect(Object.keys(Connection.connections()).length).to.equal(0);
-                        Connection.disableConnectionAccounting();
-                        done();
-                      }, 1000);
+                      done();
                     }
                   );
                 });
