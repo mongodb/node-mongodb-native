@@ -6,11 +6,15 @@ const mock = require('mongodb-mock-server');
 const genClusterTime = require('../common').genClusterTime;
 
 const Connection = require('../../../../lib/connection/connection');
+const ConnectionSpy = require('../../functional/shared').ConnectionSpy;
 
 describe('Reconnect (Mongos)', function() {
   const fixture = {};
 
   function startServer() {
+    fixture.spy = new ConnectionSpy();
+    Connection.enableConnectionAccounting(fixture.spy);
+
     return mock.createServer(fixture.port).then(mockServer => {
       mockServer.setMessageHandler(request => {
         request.reply(
@@ -26,12 +30,11 @@ describe('Reconnect (Mongos)', function() {
   }
 
   function stopServer() {
+    Connection.disableConnectionAccounting();
     return mock.cleanup();
   }
 
   beforeEach(() => startServer());
-  beforeEach(() => Connection.enableConnectionAccounting());
-  afterEach(() => Connection.disableConnectionAccounting());
   afterEach(() => stopServer());
 
   it('should not connection swarm when reconnecting', function(done) {
@@ -98,8 +101,21 @@ describe('Reconnect (Mongos)', function() {
       .then(() => runIsMaster(assertError))
       .then(() => delay(haInterval * 2))
       .then(() => startServer())
-      .then(() => delay(haInterval * 2))
-      .then(() => expect(Object.keys(Connection.connections())).to.have.a.lengthOf(1))
+      .then(() => {
+        return new Promise((resolve, reject) => {
+          const timeoutTimer = setTimeout(
+            () => reject(new Error('timed out waiting for connection count')),
+            5000
+          );
+
+          fixture.spy.on('connectionRemoved', () => {
+            if (fixture.spy.connectionCount() === 1) {
+              clearTimeout(timeoutTimer);
+              resolve();
+            }
+          });
+        });
+      })
       .then(() => cleanup(), cleanup)
       .then(done);
   });
