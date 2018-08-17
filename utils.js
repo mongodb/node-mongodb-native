@@ -48,6 +48,30 @@ try {
   console.warn(err.message);
 }
 
+// Throw an error if an attempt to use EJSON is made when it is not installed
+const noEJSONError = function() {
+  throw new Error('The `mongodb-extjson` package was not found. Please install it and try again.');
+};
+
+// Facilitate loading EJSON optionally
+const retrieveEJSON = function() {
+  let EJSON = null;
+  try {
+    EJSON = requireOptional('mongodb-extjson');
+  } catch (error) {} // eslint-disable-line
+  if (!EJSON) {
+    EJSON = {
+      parse: noEJSONError,
+      deserialize: noEJSONError,
+      serialize: noEJSONError,
+      stringify: noEJSONError,
+      setBSONModule: noEJSONError,
+      BSON: noEJSONError
+    };
+  }
+  return EJSON;
+};
+
 /*
  * Checks that collation is supported by server.
  *
@@ -66,5 +90,6 @@ module.exports = {
   relayEvents,
   Kerberos,
   MongoAuthProcess,
-  collationNotSupported
+  collationNotSupported,
+  retrieveEJSON
 };
