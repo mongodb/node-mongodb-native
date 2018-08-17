@@ -37,6 +37,9 @@
     "sinon-chai": "^3.2.0",
     "worker-farm": "^1.5.0"
   },
+  "peerOptionalDependencies": {
+    "mongodb-extjson": "^2.1.1"
+  },
   "author": "Christian Kvalheim",
   "license": "Apache-2.0",
   "engines": {

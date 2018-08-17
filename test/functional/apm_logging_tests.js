@@ -6,7 +6,7 @@ const setupDatabase = require('./shared').setupDatabase;
 const chai = require('chai');
 const expect = chai.expect;
 const MongoClient = require('../..').MongoClient;
-const EJSON = require('mongodb-extjson');
+const EJSON = require('mongodb-core').EJSON;
 const sinon = require('sinon');
 const sinonChai = require('sinon-chai');
 chai.use(sinonChai);
