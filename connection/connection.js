@@ -602,6 +602,26 @@ function makeConnection(conn, options, callback) {
   return;
 }
 
+function normalConnect(conn, family, _options) {
+  const options = prepareConnectionOptions(conn, _options);
+  makeConnection(conn, Object.assign({}, { family: family }, options), (err, connection) => {
+    if (connection) {
+      // Add handlers for events
+      connection.once('error', errorHandler(conn));
+      connection.once('timeout', timeoutHandler(conn));
+      connection.once('close', closeHandler(conn));
+      connection.on('data', dataHandler(conn));
+      conn.connection = connection;
+      conn.emit('connect', conn);
+      conn;
+    }
+    if (err) {
+      const _errorHandler = errorHandler(conn);
+      _errorHandler(err);
+    }
+  });
+}
+
 function fastFallbackConnect(conn, _options, callback) {
   const options = prepareConnectionOptions(conn, _options);
 
@@ -652,6 +672,10 @@ Connection.prototype.connect = function(_options) {
     this.responseOptions.promoteLongs = _options.promoteLongs;
     this.responseOptions.promoteValues = _options.promoteValues;
     this.responseOptions.promoteBuffers = _options.promoteBuffers;
+  }
+
+  if (this.family !== void 0) {
+    return normalConnect(this, this.family, _options);
   }
 
   return fastFallbackConnect(this, _options, (err, connection) => {
