@@ -550,7 +550,7 @@ function prepareConnectionOptions(conn, _options) {
 
     // Override checkServerIdentity behavior
     if (conn.checkServerIdentity === false) {
-      // Skip the identiy check by retuning undefined as per node documents
+      // Skip the identiy check by returning undefined as per node documents
       // https://nodejs.org/api/tls.html#tls_tls_connect_options_callback
       options.checkServerIdentity = function() {
         return undefined;
@@ -602,22 +602,14 @@ function makeConnection(conn, options, callback) {
   return;
 }
 
-function normalConnect(conn, family, _options) {
+function normalConnect(conn, family, _options, callback) {
   const options = prepareConnectionOptions(conn, _options);
   makeConnection(conn, Object.assign({}, { family: family }, options), (err, connection) => {
     if (connection) {
-      // Add handlers for events
-      connection.once('error', errorHandler(conn));
-      connection.once('timeout', timeoutHandler(conn));
-      connection.once('close', closeHandler(conn));
-      connection.on('data', dataHandler(conn));
-      conn.connection = connection;
-      conn.emit('connect', conn);
-      conn;
+      return callback(null, connection);
     }
     if (err) {
-      const _errorHandler = errorHandler(conn);
-      _errorHandler(err);
+      return callback(err, null);
     }
   });
 }
@@ -638,14 +630,14 @@ function fastFallbackConnect(conn, _options, callback) {
       return callback(null, connection);
     }
     if (err) {
-      if (connectionAccounting) deleteConnection(conn.id);
       if (errors.length > 0) {
         // an error occurred for the second time, we have officially failed
 
         // return mongo error to be emitted
-        return callback(new MongoNetworkError('failed to connect'), null);
+        return callback(err, null);
       }
       // otherwise push the error, and wait for subsequent connects
+      // if (connectionAccounting) deleteConnection(conn.id);
       errors.push(err);
       return;
     }
@@ -674,13 +666,10 @@ Connection.prototype.connect = function(_options) {
     this.responseOptions.promoteBuffers = _options.promoteBuffers;
   }
 
-  if (this.family !== void 0) {
-    return normalConnect(this, this.family, _options);
-  }
-
-  return fastFallbackConnect(this, _options, (err, connection) => {
+  const connectHandler = (err, connection) => {
     if (err) {
-      this.emit('error', err, this);
+      const _errorHandler = errorHandler(this);
+      _errorHandler(err);
       return;
     }
     // Add handlers for events
@@ -691,7 +680,13 @@ Connection.prototype.connect = function(_options) {
     this.connection = connection;
     this.emit('connect', this);
     return;
-  });
+  };
+
+  if (this.family !== void 0) {
+    return normalConnect(this, this.family, _options, connectHandler);
+  }
+
+  return fastFallbackConnect(this, _options, connectHandler);
 };
 
 /**
