@@ -598,8 +598,7 @@ function makeConnection(conn, options, callback) {
 
   // Add handlers for events
   connection.once('error', err => callback(err, null));
-  connection.once('timeout', err => callback(err, null));
-  // connection.once('close', err => callback(err, null));
+
   return;
 }
 
@@ -612,23 +611,20 @@ function fastFallbackConnect(conn, _options, callback) {
     if (_connection) {
       if (connection) {
         ['error', 'timeout', 'close'].forEach(event => _connection.removeAllListeners(event));
-        _connection.end();
         _connection.unref();
         return;
       }
       connection = _connection;
       return callback(null, connection);
-    } else if (err) {
+    }
+    if (err) {
+      if (connectionAccounting) deleteConnection(conn.id);
       if (errors.length > 0) {
         // an error occurred for the second time, we have officially failed
-
-        //empty errors array
-        errors = [];
 
         // return mongo error to be emitted
         return callback(new MongoNetworkError('failed to connect'), null);
       }
-
       // otherwise push the error, and wait for subsequent connects
       errors.push(err);
       return;
