@@ -630,7 +630,7 @@ function fastFallbackConnect(conn, _options, callback) {
   const connectionHandler = (err, _connection) => {
     if (_connection) {
       if (connection) {
-        ['error', 'timeout', 'close'].forEach(event => _connection.removeAllListeners(event));
+        _connection.removeAllListeners('error');
         _connection.unref();
         return;
       }
