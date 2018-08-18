@@ -5,7 +5,8 @@ const test = require('./shared').assert,
   fs = require('fs'),
   format = require('util').format,
   child_process = require('child_process'),
-  expect = require('chai').expect;
+  expect = require('chai').expect,
+  Buffer = require('safe-buffer').Buffer;
 
 describe('GridFS', function() {
   before(function() {

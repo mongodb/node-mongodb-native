@@ -3,7 +3,8 @@ const test = require('./shared').assert,
   setupDatabase = require('./shared').setupDatabase,
   Script = require('vm'),
   expect = require('chai').expect,
-  normalizedFunctionString = require('bson/lib/bson/parser/utils').normalizedFunctionString;
+  normalizedFunctionString = require('bson/lib/bson/parser/utils').normalizedFunctionString,
+  Buffer = require('safe-buffer').Buffer;
 
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.

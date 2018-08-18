@@ -1,7 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
-var Buffer = require('buffer').Buffer;
+var Buffer = require('safe-buffer').Buffer;
 
 describe('Promote Buffers', function() {
   before(function() {

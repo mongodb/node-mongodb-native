@@ -1,6 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+var Buffer = require('safe-buffer').Buffer;
 
 /**************************************************************************
  *

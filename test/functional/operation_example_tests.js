@@ -2,7 +2,8 @@
 const test = require('./shared').assert,
   setupDatabase = require('./shared').setupDatabase,
   f = require('util').format,
-  expect = require('chai').expect;
+  expect = require('chai').expect,
+  Buffer = require('safe-buffer').Buffer;
 
 describe('Operation Examples', function() {
   before(function() {

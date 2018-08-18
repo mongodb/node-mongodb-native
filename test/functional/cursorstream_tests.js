@@ -1,5 +1,6 @@
 'use strict';
 var expect = require('chai').expect;
+var Buffer = require('safe-buffer').Buffer;
 
 describe('Cursor Streams', function() {
   before(function() {
