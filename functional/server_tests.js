@@ -7,6 +7,7 @@ const Server = require('../../../lib/topologies/server');
 const Bson = require('bson');
 const Connection = require('../../../lib/connection/connection');
 const mock = require('mongodb-mock-server');
+const Buffer = require('safe-buffer').Buffer;
 
 describe('Server tests', function() {
   it('should correctly connect server to single instance', {

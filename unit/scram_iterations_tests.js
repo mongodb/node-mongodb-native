@@ -3,6 +3,7 @@
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
 const Server = require('../../../lib/topologies/server');
+const Buffer = require('safe-buffer').Buffer;
 
 describe('SCRAM Iterations Tests', function() {
   const test = {};
