@@ -3,6 +3,7 @@ const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
 const MongoClient = require('../../lib/mongo_client');
+const Buffer = require('safe-buffer').Buffer;
 
 describe('Find', function() {
   before(function() {

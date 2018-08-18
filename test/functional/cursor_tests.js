@@ -6,6 +6,7 @@ const expect = require('chai').expect;
 const Long = require('bson').Long;
 const sinon = require('sinon');
 const ReadPreference = require('mongodb-core').ReadPreference;
+const Buffer = require('safe-buffer').Buffer;
 
 describe('Cursor', function() {
   before(function() {

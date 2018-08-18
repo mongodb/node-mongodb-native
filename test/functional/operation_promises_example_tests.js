@@ -3,6 +3,7 @@ var fs = require('fs');
 var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+var Buffer = require('safe-buffer').Buffer;
 
 var delay = function(ms) {
   return new Promise(function(resolve) {
