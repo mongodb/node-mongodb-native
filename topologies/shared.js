@@ -3,6 +3,7 @@
 const os = require('os');
 const f = require('util').format;
 const ReadPreference = require('./read_preference');
+const Buffer = require('safe-buffer').Buffer;
 
 /**
  * Emit event if it exists

@@ -6,7 +6,8 @@ var inherits = require('util').inherits,
   EventEmitter = require('events').EventEmitter,
   Logger = require('../connection/logger'),
   ReadPreference = require('./read_preference'),
-  MongoError = require('../error').MongoError;
+  MongoError = require('../error').MongoError,
+  Buffer = require('safe-buffer').Buffer;
 
 var TopologyType = {
   Single: 'Single',

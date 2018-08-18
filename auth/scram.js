@@ -4,7 +4,8 @@ var f = require('util').format,
   crypto = require('crypto'),
   retrieveBSON = require('../connection/utils').retrieveBSON,
   Query = require('../connection/commands').Query,
-  MongoError = require('../error').MongoError;
+  MongoError = require('../error').MongoError,
+  Buffer = require('safe-buffer').Buffer;
 
 let saslprep;
 

@@ -4,6 +4,7 @@ var retrieveBSON = require('./utils').retrieveBSON;
 var BSON = retrieveBSON();
 var Long = BSON.Long;
 const MongoError = require('../error').MongoError;
+const Buffer = require('safe-buffer').Buffer;
 
 // Incrementing request id
 var _requestId = 0;

@@ -13,7 +13,8 @@ var inherits = require('util').inherits,
   MongoNetworkError = require('../error').MongoNetworkError,
   Logger = require('./logger'),
   OP_COMPRESSED = require('../wireprotocol/shared').opcodes.OP_COMPRESSED,
-  MESSAGE_HEADER_SIZE = require('../wireprotocol/shared').MESSAGE_HEADER_SIZE;
+  MESSAGE_HEADER_SIZE = require('../wireprotocol/shared').MESSAGE_HEADER_SIZE,
+  Buffer = require('safe-buffer').Buffer;
 
 var _id = 0;
 var debugFields = [

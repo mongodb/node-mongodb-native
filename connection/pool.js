@@ -18,6 +18,7 @@ const uncompressibleCommands = require('../wireprotocol/compression').uncompress
 const resolveClusterTime = require('../topologies/shared').resolveClusterTime;
 const apm = require('./apm');
 const defaultAuthProviders = require('../auth/defaultAuthProviders').defaultAuthProviders;
+const Buffer = require('safe-buffer').Buffer;
 
 var DISCONNECTED = 'disconnected';
 var CONNECTING = 'connecting';
