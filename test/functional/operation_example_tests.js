@@ -7,7 +7,7 @@ const test = require('./shared').assert,
 
 describe('Operation Examples', function() {
   before(function() {
-    return setupDatabase(this.configuration);
+    return setupDatabase(this.configuration, ['integration_tests_2']);
   });
 
   /**************************************************************************
