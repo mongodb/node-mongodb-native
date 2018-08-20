@@ -141,13 +141,13 @@ describe.skip('SDAM', function() {
 
       client.connect(function(err, client) {
         test.equal(null, err);
-        client.close(true);
+        client.close(true, () => {
+          for (var name in operations) {
+            test.ok(operations[name].length > 0);
+          }
 
-        for (var name in operations) {
-          test.ok(operations[name].length > 0);
-        }
-
-        done();
+          done();
+        });
       });
     }
   });
