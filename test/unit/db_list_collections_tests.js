@@ -10,7 +10,6 @@ describe('db.listCollections', function() {
     return mock.createServer().then(server => {
       server.setMessageHandler(request => {
         const doc = request.document;
-
         if (doc.ismaster) {
           return request.reply(Object.assign({}, mock.DEFAULT_ISMASTER));
         }
@@ -63,20 +62,19 @@ describe('db.listCollections', function() {
         monitorCommands: true
       });
 
+      client.on('commandStarted', e => {
+        if (e.commandName === 'listCollections') {
+          try {
+            expect(e).to.have.nested.property('command.nameOnly', config.listCollectionsValue);
+            client.close(done);
+          } catch (err) {
+            client.close(() => done(err));
+          }
+        }
+      });
+
       client.connect((err, client) => {
         const db = client.db('foo');
-
-        client.on('commandStarted', e => {
-          if (e.commandName === 'listCollections') {
-            try {
-              expect(e).to.have.nested.property('command.nameOnly', config.listCollectionsValue);
-              client.close(done);
-            } catch (err) {
-              client.close(() => done(err));
-            }
-          }
-        });
-
         config.command(db);
       });
     }
