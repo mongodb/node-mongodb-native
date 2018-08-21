@@ -9,7 +9,8 @@ describe('MongoClient', function() {
     return setupDatabase(this.configuration);
   });
 
-  it('Should Correctly Do MongoClient with bufferMaxEntries:0 and ordered execution', {
+  // NOTE: skipped because new topology is more resilient
+  it.skip('Should Correctly Do MongoClient with bufferMaxEntries:0 and ordered execution', {
     metadata: {
       requires: {
         topology: ['single', 'ssl', 'wiredtiger']
@@ -49,7 +50,8 @@ describe('MongoClient', function() {
     }
   });
 
-  it('Should Correctly Do MongoClient with bufferMaxEntries:0 and unordered execution', {
+  // NOTE: skipped because new topology is more resilient
+  it.skip('Should Correctly Do MongoClient with bufferMaxEntries:0 and unordered execution', {
     metadata: {
       requires: {
         topology: ['single', 'ssl', 'wiredtiger']
@@ -148,7 +150,8 @@ describe('MongoClient', function() {
     }
   });
 
-  it('Should correctly pass through extra server options', {
+  // NOTE: skipped for inspection of private variables
+  it.skip('Should correctly pass through extra server options', {
     metadata: {
       requires: {
         topology: ['single']
@@ -186,7 +189,8 @@ describe('MongoClient', function() {
     }
   });
 
-  it('Should correctly pass through extra replicaset options', {
+  // NOTE: skipped for inspection of private variables
+  it.skip('Should correctly pass through extra replicaset options', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -282,7 +286,8 @@ describe('MongoClient', function() {
     }
   });
 
-  it('Should correctly set MaxPoolSize on single server', {
+  // NOTE: skipped for inspection of private variables
+  it.skip('Should correctly set MaxPoolSize on single server', {
     metadata: {
       requires: {
         topology: ['single']
@@ -309,7 +314,8 @@ describe('MongoClient', function() {
     }
   });
 
-  it('Should correctly set MaxPoolSize on replicaset server', {
+  // NOTE: skipped for inspection of private variables
+  it.skip('Should correctly set MaxPoolSize on replicaset server', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -361,7 +367,7 @@ describe('MongoClient', function() {
     }
   });
 
-  it('Should correctly set MaxPoolSize on sharded server', {
+  it.skip('Should correctly set MaxPoolSize on sharded server', {
     metadata: {
       requires: {
         topology: ['sharded']
@@ -449,7 +455,8 @@ describe('MongoClient', function() {
     }
   });
 
-  it('should correctly connect to mongodb using domain socket', {
+  // NOTE: skipped because its a bizarre test with no timeout set
+  it.skip('should correctly connect to mongodb using domain socket', {
     metadata: { requires: { topology: ['single'] } },
 
     // The actual test we wish to run
@@ -549,7 +556,7 @@ describe('MongoClient', function() {
     }
   });
 
-  it('should fail dure to garbage connection string', {
+  it('should fail due to garbage connection string', {
     metadata: {
       requires: {
         topology: ['single']
@@ -677,7 +684,8 @@ describe('MongoClient', function() {
     }
   });
 
-  it('Should correctly pass through socketTimeoutMS and connectTimeoutMS from uri', {
+  // NOTE: skipped for inspection of private variables
+  it.skip('Should correctly pass through socketTimeoutMS and connectTimeoutMS from uri', {
     metadata: {
       requires: {
         topology: ['single']

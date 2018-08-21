@@ -11,7 +11,8 @@ describe('MongoClient Options', function() {
   /**
    * @ignore
    */
-  it('pass in server and db top level options', {
+  // NOTE: skipped for inspection of private variables
+  it.skip('pass in server and db top level options', {
     metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
@@ -36,7 +37,8 @@ describe('MongoClient Options', function() {
   /**
    * @ignore
    */
-  it('pass in server and db top level options', {
+  // NOTE: skipped for inspection of private variables
+  it.skip('pass in server and db top level options', {
     metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
