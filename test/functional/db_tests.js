@@ -196,8 +196,8 @@ describe('Db', function() {
     test: function(done) {
       var configuration = this.configuration;
       var client = configuration.newClient(
-        { w: 1, bufferMaxEntries: 0 },
-        { poolSize: 1, auto_reconnect: true }
+        { w: 1 },
+        { poolSize: 1, auto_reconnect: true, bufferMaxEntries: 0 }
       );
 
       client.connect(function(err, client) {
