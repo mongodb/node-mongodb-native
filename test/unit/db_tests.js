@@ -3,7 +3,7 @@
 const EventEmitter = require('events');
 const expect = require('chai').expect;
 const sinon = require('sinon');
-
+const ReadPreference = require('mongodb-core').ReadPreference;
 class MockTopology extends EventEmitter {
   constructor() {
     super();
@@ -36,7 +36,7 @@ describe('Database', function() {
     test: function() {
       sinon.stub(test.utils, 'executeOperation').callsFake((topology, operation, args) => {
         const options = args[args.length - 2];
-        expect(options.readPreference).to.equal('primary');
+        expect(options.readPreference.equals(ReadPreference.primary)).to.be.ok;
       });
 
       const Db = require('../../lib/db');
