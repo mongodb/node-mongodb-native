@@ -15,12 +15,10 @@ describe('Ignore Undefined', function() {
 
     test: function(done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(
-        Object.assign({}, configuration.writeConcernMax(), {
-          poolSize: 1,
-          ignoreUndefined: true
-        })
-      );
+      var client = configuration.newClient(configuration.writeConcernMax(), {
+        poolSize: 1,
+        ignoreUndefined: true
+      });
 
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -108,12 +106,10 @@ describe('Ignore Undefined', function() {
       var configuration = this.configuration;
       var ObjectId = configuration.require.ObjectID;
 
-      var client = configuration.newClient(
-        Object.assign({}, configuration.writeConcernMax(), {
-          poolSize: 1,
-          ignoreUndefined: true
-        })
-      );
+      var client = configuration.newClient(configuration.writeConcernMax(), {
+        poolSize: 1,
+        ignoreUndefined: true
+      });
 
       client.connect(function(err, client) {
         var db = client.db(configuration.db);

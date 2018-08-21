@@ -129,8 +129,8 @@ describe('Decimal128', function() {
       var domainInstance = Domain.create();
       var configuration = this.configuration;
       var client = configuration.newClient(
-        { w: 0, bufferMaxEntries: 0 },
-        { poolSize: 1, auto_reconnect: true, domainsEnabled: true }
+        { w: 0 },
+        { poolSize: 1, auto_reconnect: true, domainsEnabled: true, bufferMaxEntries: 0 }
       );
 
       client.connect(function(err, client) {
@@ -168,8 +168,8 @@ describe('Decimal128', function() {
       var domainInstance = Domain.create();
       var configuration = this.configuration;
       var client = configuration.newClient(
-        { w: 1, bufferMaxEntries: 0 },
-        { poolSize: 1, auto_reconnect: true, domainsEnabled: true }
+        { w: 1 },
+        { poolSize: 1, auto_reconnect: true, domainsEnabled: true, bufferMaxEntries: 0 }
       );
 
       client.connect(function(err, client) {
