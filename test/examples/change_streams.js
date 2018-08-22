@@ -28,9 +28,10 @@ describe('examples(change-stream):', function() {
   it('Open A Change Stream', {
     metadata: { requires: { topology: ['replicaset'], mongodb: '>=3.6.0' } },
     test: async function() {
+      await db.collection('inventory').insertOne({ a: 1 });
       setTimeout(async function() {
         await db.collection('inventory').insertOne({ a: 1 });
-      });
+      }, 250);
 
       // Start Changestream Example 1
       const collection = db.collection('inventory');
@@ -52,7 +53,7 @@ describe('examples(change-stream):', function() {
       await db.collection('inventory').insertOne({ a: 1, b: 2 });
       setTimeout(async function() {
         await db.collection('inventory').updateOne({ a: 1 }, { $set: { a: 2 } });
-      });
+      }, 250);
 
       // Start Changestream Example 2
       const collection = db.collection('inventory');
@@ -77,7 +78,7 @@ describe('examples(change-stream):', function() {
       setTimeout(async function() {
         await db.collection('inventory').insertOne({ a: 1 });
         await db.collection('inventory').insertOne({ b: 2 });
-      });
+      }, 250);
 
       // Start Changestream Example 3
       const collection = db.collection('inventory');
@@ -103,7 +104,7 @@ describe('examples(change-stream):', function() {
     test: async function() {
       setTimeout(async function() {
         await db.collection('inventory').insertOne({ username: 'alice' });
-      });
+      }, 250);
 
       // Start Changestream Example 4
       const pipeline = [
