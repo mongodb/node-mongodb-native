@@ -67,6 +67,10 @@ class NativeConfiguration extends ConfigurationBase {
       dbHost = qs.escape(dbHost);
     }
 
+    if (this.options.setName) {
+      Object.assign(dbOptions, { replicaSet: this.options.setName, auto_reconnect: false });
+    }
+
     const connectionString = url.format({
       protocol: 'mongodb',
       slashes: true,
