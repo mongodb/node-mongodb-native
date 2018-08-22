@@ -42,18 +42,15 @@ describe('SDAM', function() {
         });
       });
 
-      client.on('fullsetup', function(topology) {
-        topology.close(true);
+      client.connect(function(err) {
+        test.equal(null, err);
 
+        client.close(true);
         for (var name in operations) {
           test.ok(operations[name].length > 0);
         }
 
         done();
-      });
-
-      client.connect(function(err) {
-        test.equal(null, err);
       });
     }
   });
