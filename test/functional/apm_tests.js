@@ -266,7 +266,7 @@ describe('APM', function() {
       client.on('commandStarted', filterForCommands(desiredEvents, started));
       client.on('commandSucceeded', filterForCommands(desiredEvents, succeeded));
 
-      client.on('fullsetup', client => {
+      client.connect().then(() => {
         const db = client.db(self.configuration.db);
 
         db
@@ -295,8 +295,6 @@ describe('APM', function() {
             done();
           });
       });
-
-      client.connect();
     }
   });
 
