@@ -4542,15 +4542,18 @@ describe('Cursor', function() {
     const ReadPreference = this.configuration.require.ReadPreference;
     const client = configuration.newClient(
       { w: 1, readPreference: ReadPreference.SECONDARY },
-      { poolSize: 1, auto_reconnect: false }
+      { poolSize: 1, auto_reconnect: false, connectWithNoPrimary: true }
     );
 
     client.connect(function(err, client) {
+      expect(err).to.not.exist;
+
       const db = client.db(configuration.db);
       let collection, cursor, spy;
       const close = e => cursor.close(() => client.close(() => done(e)));
 
       Promise.resolve()
+        .then(() => new Promise(resolve => setTimeout(() => resolve(), 500)))
         .then(() => db.createCollection('test_count_readPreference'))
         .then(() => (collection = db.collection('test_count_readPreference')))
         .then(() => collection.find())
