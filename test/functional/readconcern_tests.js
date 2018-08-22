@@ -2,6 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 var f = require('util').format;
+const expect = require('chai').expect;
 
 describe('ReadConcern', function() {
   before(function(done) {
@@ -33,14 +34,14 @@ describe('ReadConcern', function() {
       // Get a new instance
       var configuration = this.configuration;
       var client = configuration.newClient(
-        { w: 1, readConcern: { level: 'local' } },
-        { poolSize: 1 }
+        { w: 1 },
+        { poolSize: 1, readConcern: { level: 'local' } }
       );
 
       client.connect(function(err, client) {
-        var db = client.db(configuration.db);
+        expect(err).to.not.exist;
 
-        test.equal(null, err);
+        var db = client.db(configuration.db);
         test.deepEqual({ level: 'local' }, db.s.readConcern);
 
         // Get a collection
@@ -79,13 +80,14 @@ describe('ReadConcern', function() {
       // Get a new instance
       var configuration = this.configuration;
       var client = configuration.newClient(
-        { w: 1, readConcern: { level: 'majority' } },
-        { poolSize: 1 }
+        { w: 1 },
+        { poolSize: 1, readConcern: { level: 'majority' } }
       );
 
       client.connect(function(err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(configuration.db);
-        test.equal(null, err);
         test.deepEqual({ level: 'majority' }, db.s.readConcern);
 
         // Get a collection
@@ -125,8 +127,9 @@ describe('ReadConcern', function() {
       var configuration = this.configuration;
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(configuration.db);
-        test.equal(null, err);
         // Get a collection
         var collection = db.collection('readConcernCollection', {
           readConcern: { level: 'local' }
@@ -166,13 +169,14 @@ describe('ReadConcern', function() {
       // Get a new instance
       var configuration = this.configuration;
       var client = configuration.newClient(
-        { w: 1, readConcern: { level: 'majority' } },
-        { poolSize: 1 }
+        { w: 1 },
+        { poolSize: 1, readConcern: { level: 'majority' } }
       );
 
       client.connect(function(err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(configuration.db);
-        test.equal(null, err);
         // Get a collection
         var collection = db.collection('readConcernCollection', {
           readConcern: { level: 'majority' }
@@ -218,8 +222,9 @@ describe('ReadConcern', function() {
 
       // Connect using mongoclient
       MongoClient.connect(url, function(err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(configuration.db);
-        test.equal(null, err);
         test.deepEqual({ level: 'local' }, db.s.readConcern);
 
         // Get a collection
@@ -265,8 +270,9 @@ describe('ReadConcern', function() {
 
       // Connect using mongoclient
       MongoClient.connect(url, function(err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(configuration.db);
-        test.equal(null, err);
         test.deepEqual({ level: 'majority' }, db.s.readConcern);
 
         // Get a collection
@@ -313,8 +319,9 @@ describe('ReadConcern', function() {
 
       // Connect using mongoclient
       MongoClient.connect(url, options, function(err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(configuration.db);
-        test.equal(null, err);
         test.deepEqual({ level: 'majority' }, db.s.readConcern);
 
         // Get a collection
@@ -354,13 +361,14 @@ describe('ReadConcern', function() {
       // Get a new instance
       var configuration = this.configuration;
       var client = configuration.newClient(
-        { w: 1, readConcern: { level: 'majority' } },
-        { poolSize: 1 }
+        { w: 1 },
+        { poolSize: 1, readConcern: { level: 'majority' } }
       );
 
       client.connect(function(err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(configuration.db);
-        test.equal(null, err);
         test.deepEqual({ level: 'majority' }, db.s.readConcern);
 
         // Get a collection
@@ -397,13 +405,14 @@ describe('ReadConcern', function() {
       // Get a new instance
       var configuration = this.configuration;
       var client = configuration.newClient(
-        { w: 1, readConcern: { level: 'majority' } },
-        { poolSize: 1 }
+        { w: 1 },
+        { poolSize: 1, readConcern: { level: 'majority' } }
       );
 
       client.connect(function(err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(configuration.db);
-        test.equal(null, err);
         test.deepEqual({ level: 'majority' }, db.s.readConcern);
 
         // Get a collection
@@ -449,13 +458,14 @@ describe('ReadConcern', function() {
       // Get a new instance
       var configuration = this.configuration;
       var client = configuration.newClient(
-        { w: 1, readConcern: { level: 'majority' } },
-        { poolSize: 1 }
+        { w: 1 },
+        { poolSize: 1, readConcern: { level: 'majority' } }
       );
 
       client.connect(function(err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(configuration.db);
-        test.equal(null, err);
         test.deepEqual({ level: 'majority' }, db.s.readConcern);
 
         // Get a collection
@@ -514,13 +524,14 @@ describe('ReadConcern', function() {
       // Get a new instance
       var configuration = this.configuration;
       var client = configuration.newClient(
-        { w: 1, readConcern: { level: 'majority' } },
-        { poolSize: 1 }
+        { w: 1 },
+        { poolSize: 1, readConcern: { level: 'majority' } }
       );
 
       client.connect(function(err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(configuration.db);
-        test.equal(null, err);
         test.deepEqual({ level: 'majority' }, db.s.readConcern);
 
         // Get the collection
@@ -577,13 +588,14 @@ describe('ReadConcern', function() {
       // Get a new instance
       var configuration = this.configuration;
       var client = configuration.newClient(
-        { w: 1, readConcern: { level: 'majority' } },
-        { poolSize: 1 }
+        { w: 1 },
+        { poolSize: 1, readConcern: { level: 'majority' } }
       );
 
       client.connect(function(err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(configuration.db);
-        test.equal(null, err);
         test.deepEqual({ level: 'majority' }, db.s.readConcern);
 
         // Get the collection
@@ -643,13 +655,14 @@ describe('ReadConcern', function() {
       // Get a new instance
       var configuration = this.configuration;
       var client = configuration.newClient(
-        { w: 1, readConcern: { level: 'majority' } },
-        { poolSize: 1 }
+        { w: 1 },
+        { poolSize: 1, readConcern: { level: 'majority' } }
       );
 
       client.connect(function(err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(configuration.db);
-        test.equal(null, err);
         test.deepEqual({ level: 'majority' }, db.s.readConcern);
 
         // Get the collection
@@ -709,13 +722,14 @@ describe('ReadConcern', function() {
       // Get a new instance
       var configuration = this.configuration;
       var client = configuration.newClient(
-        { w: 1, readConcern: { level: 'majority' } },
-        { poolSize: 1 }
+        { w: 1 },
+        { poolSize: 1, readConcern: { level: 'majority' } }
       );
 
       client.connect(function(err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(configuration.db);
-        test.equal(null, err);
         test.deepEqual({ level: 'majority' }, db.s.readConcern);
 
         // Get the collection
@@ -781,13 +795,14 @@ describe('ReadConcern', function() {
       // Get a new instance
       var configuration = this.configuration;
       var client = configuration.newClient(
-        { w: 1, readConcern: { level: 'majority' } },
-        { poolSize: 1 }
+        { w: 1 },
+        { poolSize: 1, readConcern: { level: 'majority' } }
       );
 
       client.connect(function(err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(configuration.db);
-        test.equal(null, err);
         test.deepEqual({ level: 'majority' }, db.s.readConcern);
 
         // Get the collection
@@ -847,13 +862,14 @@ describe('ReadConcern', function() {
       // Get a new instance
       var configuration = this.configuration;
       var client = configuration.newClient(
-        { w: 1, readConcern: { level: 'majority' } },
-        { poolSize: 1 }
+        { w: 1 },
+        { poolSize: 1, readConcern: { level: 'majority' } }
       );
 
       client.connect(function(err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(configuration.db);
-        test.equal(null, err);
         test.deepEqual({ level: 'majority' }, db.s.readConcern);
 
         // Get the collection
