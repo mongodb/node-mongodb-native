@@ -28,6 +28,7 @@ beforeEach('Session Leak Before Each - setup session tracking', function() {
   const _acquire = ServerSessionPool.prototype.acquire;
   sandbox.stub(ServerSessionPool.prototype, 'acquire').callsFake(function() {
     const session = _acquire.apply(this, arguments);
+    session.trace = new Error().stack;
     activeSessions.add(sessionId(session.id));
     return session;
   });
@@ -71,15 +72,27 @@ afterEach('Session Leak After Each - ensure no leaks', function() {
   }
 
   try {
+    if (activeSessionsBeforeClose.size) {
+      console.dir(activeSessionsBeforeClose, { depth: 5 });
+    }
+
     expect(
       activeSessionsBeforeClose.size,
       `test is leaking ${activeSessionsBeforeClose.size} active sessions while running client`
     ).to.equal(0);
 
+    if (activeSessions.size) {
+      console.dir(activeSessions, { depth: 5 });
+    }
+
     expect(
       activeSessions.size,
       `client close failed to clean up ${activeSessions.size} active sessions`
     ).to.equal(0);
+
+    if (pooledSessions.size) {
+      console.dir(pooledSessions, { depth: 5 });
+    }
 
     expect(
       pooledSessions.size,
