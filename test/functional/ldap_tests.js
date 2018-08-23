@@ -18,7 +18,6 @@ describe('LDAP', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
 
       // KDC Server
       var server = 'ldaptest.10gen.cc';
@@ -33,8 +32,8 @@ describe('LDAP', function() {
         server
       );
 
-      // Let's write the actual connection code
-      MongoClient.connect(url, function(err, client) {
+      const client = configuration.newClient(url);
+      client.connect(function(err, client) {
         test.equal(null, err);
 
         client
@@ -60,7 +59,6 @@ describe('LDAP', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
 
       // KDC Server
       var server = 'ldaptest.10gen.cc';
@@ -75,8 +73,8 @@ describe('LDAP', function() {
         server
       );
 
-      // Let's write the actual connection code
-      MongoClient.connect(url, function(err, client) {
+      const client = configuration.newClient(url);
+      client.connect(function(err, client) {
         test.equal(null, err);
 
         client

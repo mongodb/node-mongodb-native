@@ -53,30 +53,24 @@ describe('Decimal128', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var Domain = require('domain');
       var domainInstance = Domain.create();
 
-      MongoClient.connect(
-        configuration.url(),
-        {
-          domainsEnabled: true
-        },
-        function(err, client) {
-          test.ok(!err);
-          var db = client.db(configuration.db);
-          var collection = db.collection('test');
-          domainInstance.run(function() {
-            collection.count({}, function(err) {
-              test.ok(!err);
-              test.ok(domainInstance === process.domain);
-              domainInstance.exit();
-              client.close();
-              done();
-            });
+      const client = configuration.newClient({}, { domainsEnabled: true });
+      client.connect(function(err, client) {
+        test.ok(!err);
+        var db = client.db(configuration.db);
+        var collection = db.collection('test');
+        domainInstance.run(function() {
+          collection.count({}, function(err) {
+            test.ok(!err);
+            test.ok(domainInstance === process.domain);
+            domainInstance.exit();
+            client.close();
+            done();
           });
-        }
-      );
+        });
+      });
     }
   });
 

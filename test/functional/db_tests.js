@@ -232,13 +232,10 @@ describe('Db', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient,
-        Server = configuration.require.Server;
+      var fs_client = configuration.newClient('mongodb://127.0.0.1:25117/test', {
+        auto_reconnect: false
+      });
 
-      var fs_client = new MongoClient(
-        new Server('127.0.0.1', 25117, { auto_reconnect: false }),
-        configuration.writeConcernMax()
-      );
       fs_client.connect(function(err) {
         test.ok(err != null);
         done();
@@ -426,13 +423,11 @@ describe('Db', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient,
-        Server = configuration.require.Server;
+      var client = configuration.newClient(`mongodb://127.0.0.1:27088/test`, {
+        auto_reconnect: false,
+        poolSize: 4
+      });
 
-      var client = new MongoClient(
-        new Server('127.0.0.1', 27088, { auto_reconnect: false, poolSize: 4 }),
-        configuration.writeConcernMax()
-      );
       // Establish connection to db
       client.connect(function(err) {
         test.ok(err != null);

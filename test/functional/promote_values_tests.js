@@ -67,40 +67,34 @@ describe('Promote Values', function() {
       var configuration = this.configuration;
       var Long = configuration.require.Long,
         Int32 = configuration.require.Int32,
-        Double = configuration.require.Double,
-        MongoClient = configuration.require.MongoClient;
+        Double = configuration.require.Double;
 
-      MongoClient.connect(
-        configuration.url(),
-        {
-          promoteValues: false
-        },
-        function(err, client) {
-          var db = client.db(configuration.db);
-          db.collection('shouldCorrectlyHonorPromoteValues').insert(
-            {
-              doc: Long.fromNumber(10),
-              int: 10,
-              double: 2.2222,
-              array: [[Long.fromNumber(10)]]
-            },
-            function(err) {
+      const client = configuration.newClient({}, { promoteValues: false });
+      client.connect(function(err, client) {
+        var db = client.db(configuration.db);
+        db.collection('shouldCorrectlyHonorPromoteValues').insert(
+          {
+            doc: Long.fromNumber(10),
+            int: 10,
+            double: 2.2222,
+            array: [[Long.fromNumber(10)]]
+          },
+          function(err) {
+            test.equal(null, err);
+
+            db.collection('shouldCorrectlyHonorPromoteValues').findOne(function(err, doc) {
               test.equal(null, err);
 
-              db.collection('shouldCorrectlyHonorPromoteValues').findOne(function(err, doc) {
-                test.equal(null, err);
+              test.deepEqual(Long.fromNumber(10), doc.doc);
+              test.deepEqual(new Int32(10), doc.int);
+              test.deepEqual(new Double(2.2222), doc.double);
 
-                test.deepEqual(Long.fromNumber(10), doc.doc);
-                test.deepEqual(new Int32(10), doc.int);
-                test.deepEqual(new Double(2.2222), doc.double);
-
-                client.close();
-                done();
-              });
-            }
-          );
-        }
-      );
+              client.close();
+              done();
+            });
+          }
+        );
+      });
     }
   });
 
@@ -116,43 +110,37 @@ describe('Promote Values', function() {
       var configuration = this.configuration;
       var Long = configuration.require.Long,
         Int32 = configuration.require.Int32,
-        Double = configuration.require.Double,
-        MongoClient = configuration.require.MongoClient;
+        Double = configuration.require.Double;
 
-      MongoClient.connect(
-        configuration.url(),
-        {
-          promoteValues: false
-        },
-        function(err, client) {
-          var db = client.db(configuration.db);
-          db.collection('shouldCorrectlyHonorPromoteValues').insert(
-            {
-              doc: Long.fromNumber(10),
-              int: 10,
-              double: 2.2222,
-              array: [[Long.fromNumber(10)]]
-            },
-            function(err) {
-              test.equal(null, err);
+      const client = configuration.newClient({}, { promoteValues: false });
+      client.connect(function(err, client) {
+        var db = client.db(configuration.db);
+        db.collection('shouldCorrectlyHonorPromoteValues').insert(
+          {
+            doc: Long.fromNumber(10),
+            int: 10,
+            double: 2.2222,
+            array: [[Long.fromNumber(10)]]
+          },
+          function(err) {
+            test.equal(null, err);
 
-              db
-                .collection('shouldCorrectlyHonorPromoteValues')
-                .find()
-                .next(function(err, doc) {
-                  test.equal(null, err);
+            db
+              .collection('shouldCorrectlyHonorPromoteValues')
+              .find()
+              .next(function(err, doc) {
+                test.equal(null, err);
 
-                  test.deepEqual(Long.fromNumber(10), doc.doc);
-                  test.deepEqual(new Int32(10), doc.int);
-                  test.deepEqual(new Double(2.2222), doc.double);
+                test.deepEqual(Long.fromNumber(10), doc.doc);
+                test.deepEqual(new Int32(10), doc.int);
+                test.deepEqual(new Double(2.2222), doc.double);
 
-                  client.close();
-                  done();
-                });
-            }
-          );
-        }
-      );
+                client.close();
+                done();
+              });
+          }
+        );
+      });
     }
   });
 
@@ -168,10 +156,10 @@ describe('Promote Values', function() {
       var configuration = this.configuration;
       var Long = configuration.require.Long,
         Int32 = configuration.require.Int32,
-        Double = configuration.require.Double,
-        MongoClient = configuration.require.MongoClient;
+        Double = configuration.require.Double;
 
-      MongoClient.connect(configuration.url(), {}, function(err, client) {
+      const client = configuration.newClient();
+      client.connect(function(err, client) {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteValues').insert(
           {
@@ -214,10 +202,10 @@ describe('Promote Values', function() {
       var configuration = this.configuration;
       var Long = configuration.require.Long,
         Int32 = configuration.require.Int32,
-        Double = configuration.require.Double,
-        MongoClient = configuration.require.MongoClient;
+        Double = configuration.require.Double;
 
-      MongoClient.connect(configuration.url(), {}, function(err, client) {
+      const client = configuration.newClient();
+      client.connect(function(err, client) {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteValues2').insert(
           {
@@ -258,10 +246,10 @@ describe('Promote Values', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var Long = configuration.require.Long;
 
-      MongoClient.connect(configuration.url(), function(err, client) {
+      const client = configuration.newClient();
+      client.connect(function(err, client) {
         var docs = new Array(150).fill(0).map(function(_, i) {
           return {
             _id: 'needle_' + i,

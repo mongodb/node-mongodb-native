@@ -1,6 +1,5 @@
 'use strict';
 
-const MongoClient = require('../..').MongoClient;
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
 
@@ -14,8 +13,8 @@ describe('bypass document validation', function() {
   afterEach(() => mock.cleanup());
 
   // general test for aggregate function
-  function testAggregate(config, done) {
-    const client = new MongoClient(`mongodb://${test.server.uri()}/test`);
+  function testAggregate(testConfiguration, config, done) {
+    const client = testConfiguration.newClient(`mongodb://${test.server.uri()}/test`);
     let close = e => {
       close = () => {};
       client.close(() => done(e));
@@ -63,16 +62,16 @@ describe('bypass document validation', function() {
   }
   // aggregate
   it('should only set bypass document validation if strictly true in aggregate', function(done) {
-    testAggregate({ expected: true, actual: true }, done);
+    testAggregate(this.configuration, { expected: true, actual: true }, done);
   });
 
   it('should not set bypass document validation if not strictly true in aggregate', function(done) {
-    testAggregate({ expected: undefined, actual: false }, done);
+    testAggregate(this.configuration, { expected: undefined, actual: false }, done);
   });
 
   // general test for mapReduce function
-  function testMapReduce(config, done) {
-    const client = new MongoClient(`mongodb://${test.server.uri()}/test`);
+  function testMapReduce(testConfiguration, config, done) {
+    const client = testConfiguration.newClient(`mongodb://${test.server.uri()}/test`);
     let close = e => {
       close = () => {};
       client.close(() => done(e));
@@ -116,16 +115,16 @@ describe('bypass document validation', function() {
   }
   // map reduce
   it('should only set bypass document validation if strictly true in mapReduce', function(done) {
-    testMapReduce({ expected: true, actual: true }, done);
+    testMapReduce(this.configuration, { expected: true, actual: true }, done);
   });
 
   it('should not set bypass document validation if not strictly true in mapReduce', function(done) {
-    testMapReduce({ expected: undefined, actual: false }, done);
+    testMapReduce(this.configuration, { expected: undefined, actual: false }, done);
   });
 
   // general test for findAndModify function
-  function testFindAndModify(config, done) {
-    const client = new MongoClient(`mongodb://${test.server.uri()}/test`);
+  function testFindAndModify(testConfiguration, config, done) {
+    const client = testConfiguration.newClient(`mongodb://${test.server.uri()}/test`);
     let close = e => {
       close = () => {};
       client.close(() => done(e));
@@ -171,16 +170,16 @@ describe('bypass document validation', function() {
   }
   // find and modify
   it('should only set bypass document validation if strictly true in findAndModify', function(done) {
-    testFindAndModify({ expected: true, actual: true }, done);
+    testFindAndModify(this.configuration, { expected: true, actual: true }, done);
   });
 
   it('should not set bypass document validation if not strictly true in findAndModify', function(done) {
-    testFindAndModify({ expected: undefined, actual: false }, done);
+    testFindAndModify(this.configuration, { expected: undefined, actual: false }, done);
   });
 
   // general test for BlukWrite to test changes made in ordered.js and unordered.js
-  function testBulkWrite(config, done) {
-    const client = new MongoClient(`mongodb://${test.server.uri()}/test`);
+  function testBulkWrite(testConfiguration, config, done) {
+    const client = testConfiguration.newClient(`mongodb://${test.server.uri()}/test`);
     let close = e => {
       close = () => {};
       client.close(() => done(e));
@@ -221,19 +220,19 @@ describe('bypass document validation', function() {
   }
   // ordered bulk write, testing change in ordered.js
   it('should only set bypass document validation if strictly true in ordered bulkWrite', function(done) {
-    testBulkWrite({ expected: true, actual: true, ordered: true }, done);
+    testBulkWrite(this.configuration, { expected: true, actual: true, ordered: true }, done);
   });
 
   it('should not set bypass document validation if not strictly true in ordered bulkWrite', function(done) {
-    testBulkWrite({ expected: undefined, actual: false, ordered: true }, done);
+    testBulkWrite(this.configuration, { expected: undefined, actual: false, ordered: true }, done);
   });
 
   // unordered bulk write, testing change in ordered.js
   it('should only set bypass document validation if strictly true in unordered bulkWrite', function(done) {
-    testBulkWrite({ expected: true, actual: true, ordered: false }, done);
+    testBulkWrite(this.configuration, { expected: true, actual: true, ordered: false }, done);
   });
 
   it('should not set bypass document validation if not strictly true in unordered bulkWrite', function(done) {
-    testBulkWrite({ expected: undefined, actual: false, ordered: false }, done);
+    testBulkWrite(this.configuration, { expected: undefined, actual: false, ordered: false }, done);
   });
 });

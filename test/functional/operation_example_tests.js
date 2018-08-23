@@ -40,7 +40,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -133,7 +134,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -221,7 +223,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -309,7 +312,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -401,7 +405,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -491,7 +496,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -587,7 +593,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -674,7 +681,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -731,7 +739,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -799,7 +808,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -855,7 +865,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -921,7 +932,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -985,7 +997,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -1045,7 +1058,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -1105,7 +1119,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -1151,7 +1166,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -1218,7 +1234,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -1286,7 +1303,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -1353,7 +1371,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -1406,7 +1425,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -1458,7 +1478,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -1521,7 +1542,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -1614,7 +1636,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -1674,7 +1697,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -1725,7 +1749,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -1791,7 +1816,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -2014,7 +2040,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -2089,7 +2116,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -2161,7 +2189,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -2258,7 +2287,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -2353,7 +2383,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -2411,7 +2442,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -2473,7 +2505,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -2544,7 +2577,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -2613,7 +2647,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -2661,7 +2696,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -2714,7 +2750,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -2776,7 +2813,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -2848,7 +2886,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -2895,7 +2934,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -2943,7 +2983,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -3018,7 +3059,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -3086,7 +3128,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -3136,7 +3179,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -3185,7 +3229,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -3300,7 +3345,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -3347,7 +3393,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -3412,7 +3459,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -3467,7 +3515,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -3518,7 +3567,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -3580,7 +3630,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -3632,7 +3683,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -3714,7 +3766,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -3752,7 +3805,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -3808,7 +3862,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -3932,7 +3987,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -3991,7 +4047,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -4032,7 +4089,8 @@ describe('Operation Examples', function() {
 
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -4068,7 +4126,8 @@ describe('Operation Examples', function() {
         test.equal(null, err);
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -4121,7 +4180,8 @@ describe('Operation Examples', function() {
         test.equal(null, err);
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -4175,7 +4235,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -4238,7 +4299,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -4278,7 +4340,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -4320,12 +4383,13 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
+
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -4341,15 +4405,16 @@ describe('Operation Examples', function() {
           test.equal(null, err);
           client.close();
 
-          MongoClient.connect('mongodb://user:name@localhost:27017/integration_tests', function(
-            err,
-            client
-          ) {
+          const secondClient = configuration.newClient(
+            'mongodb://user:name@localhost:27017/integration_tests'
+          );
+
+          secondClient.connect(function(err) {
             test.equal(null, err);
-            var db = client.db(configuration.db);
+            var db = secondClient.db(configuration.db);
 
             // Logout the db
-            client.logout(function(err, result) {
+            secondClient.logout(function(err, result) {
               test.equal(true, result);
 
               // Remove the user from the db
@@ -4357,17 +4422,17 @@ describe('Operation Examples', function() {
                 test.ok(result);
                 test.equal(null, err);
 
-                const oldClient = client;
-                // Authenticate
-                MongoClient.connect(
-                  'mongodb://user:name@localhost:27017/integration_tests',
-                  function(err, client) {
-                    expect(err).to.exist;
-                    expect(client).to.not.exist;
-                    oldClient.close();
-                    done();
-                  }
+                const oldClient = secondClient;
+                const thirdClient = configuration.newClient(
+                  'mongodb://user:name@localhost:27017/integration_tests'
                 );
+
+                // Authenticate
+                thirdClient.connect(function(err) {
+                  expect(err).to.exist;
+                  oldClient.close();
+                  done();
+                });
               });
             });
           });
@@ -4396,7 +4461,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -4447,7 +4513,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -4520,7 +4587,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -4562,7 +4630,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -4645,7 +4714,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -4714,7 +4784,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -4781,7 +4852,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -4852,7 +4924,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -4893,7 +4966,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -4970,7 +5044,8 @@ describe('Operation Examples', function() {
         test.equal(null, err);
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -5007,7 +5082,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -5049,7 +5125,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -5090,7 +5167,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -5143,7 +5221,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -5215,7 +5294,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -5265,7 +5345,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -5306,7 +5387,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -5349,7 +5431,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -5397,7 +5480,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -5436,7 +5520,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -5484,7 +5569,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -5536,7 +5622,8 @@ describe('Operation Examples', function() {
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -5598,7 +5685,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -5649,7 +5737,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -5709,7 +5798,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -5769,7 +5859,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -5836,7 +5927,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -5890,7 +5982,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -5957,7 +6050,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -6015,7 +6109,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -6074,7 +6169,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -6133,7 +6229,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -6220,7 +6317,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -6275,7 +6373,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -6336,7 +6435,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -6403,7 +6503,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -6467,7 +6568,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -6537,7 +6639,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -6589,7 +6692,6 @@ describe('Operation Examples', function() {
    * Example of a simple url connection string to a replicaset, with acknowledgement of writes.
    *
    * @example-class MongoClient
-   * @example-method MongoClient.connect
    * @ignore
    */
   it('Should correctly connect to a replicaset', {
@@ -6598,8 +6700,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var mongo = configuration.require,
-        MongoClient = mongo.MongoClient;
 
       // Create url
       var url = f(
@@ -6611,11 +6711,13 @@ describe('Operation Examples', function() {
         'primary'
       );
 
-      MongoClient.connect(url, function(err, client) {
+      const client = configuration.newClient(url);
+      client.connect(function(err, client) {
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -6643,7 +6745,6 @@ describe('Operation Examples', function() {
    * Example of a simple url connection string to a shard, with acknowledgement of writes.
    *
    * @example-class MongoClient
-   * @example-method MongoClient.connect
    * @ignore
    */
   it('Should connect to mongos proxies using connectiong string', {
@@ -6652,8 +6753,6 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-
       var url = f(
         'mongodb://%s:%s,%s:%s/sharded_test_db?w=1',
         configuration.host,
@@ -6662,10 +6761,12 @@ describe('Operation Examples', function() {
         configuration.port + 1
       );
 
-      MongoClient.connect(url, function(err, client) {
+      const client = configuration.newClient(url);
+      client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -6694,7 +6795,6 @@ describe('Operation Examples', function() {
    * Example of a simple url connection string for a single server connection
    *
    * @example-class MongoClient
-   * @example-method MongoClient.connect
    * @ignore
    */
   it('Should correctly connect using MongoClient to a single server using connect', {
@@ -6705,37 +6805,36 @@ describe('Operation Examples', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
+      const client = configuration.newClient('mongodb://localhost:27017/integration_tests', {
+        native_parser: true
+      });
 
       // DOC_START
       // Connect using the connection string
-      MongoClient.connect(
-        'mongodb://localhost:27017/integration_tests',
-        { native_parser: true },
-        function(err, client) {
-          // LINE var MongoClient = require('mongodb').MongoClient,
-          // LINE   test = require('assert');
-          // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
-          // LINE   var db = client.db('test);
-          // REPLACE configuration.writeConcernMax() WITH {w:1}
-          // REMOVE-LINE restartAndDone
-          // REMOVE-LINE done();
-          // REMOVE-LINE var db = client.db(configuration.db);
-          // BEGIN
-          var db = client.db(configuration.db);
-          test.equal(null, err);
+      client.connect(function(err, client) {
+        // LINE var MongoClient = require('mongodb').MongoClient,
+        // LINE   test = require('assert');
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
+        // LINE   var db = client.db('test);
+        // REPLACE configuration.writeConcernMax() WITH {w:1}
+        // REMOVE-LINE restartAndDone
+        // REMOVE-LINE done();
+        // REMOVE-LINE var db = client.db(configuration.db);
+        // BEGIN
+        var db = client.db(configuration.db);
+        test.equal(null, err);
 
-          db
-            .collection('mongoclient_test')
-            .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true }, function(err, result) {
-              test.equal(null, err);
-              test.equal(1, result.result.n);
+        db
+          .collection('mongoclient_test')
+          .updateOne({ a: 1 }, { $set: { b: 1 } }, { upsert: true }, function(err, result) {
+            test.equal(null, err);
+            test.equal(1, result.result.n);
 
-              client.close();
-              done();
-            });
-        }
-      );
+            client.close();
+            done();
+          });
+      });
       // END
     }
   });
@@ -6980,7 +7079,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -7051,7 +7151,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -7187,7 +7288,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -7239,7 +7341,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -7327,7 +7430,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -7396,7 +7500,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -7456,7 +7561,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -7519,7 +7625,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -7582,7 +7689,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -7652,7 +7760,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -7715,7 +7824,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -7770,7 +7880,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -7822,7 +7933,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -7892,7 +8004,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -7944,7 +8057,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -8010,7 +8124,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -8079,7 +8194,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -8134,7 +8250,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -8207,7 +8324,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -8259,7 +8377,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -8330,7 +8449,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -8454,7 +8574,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -8531,7 +8652,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -8584,7 +8706,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -8648,7 +8771,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -8704,7 +8828,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -8784,7 +8909,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -8856,7 +8982,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -8944,7 +9071,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -9017,7 +9145,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -9084,7 +9213,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -9159,7 +9289,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -9200,7 +9331,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -9241,7 +9373,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -9283,7 +9416,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -9332,7 +9466,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -9378,7 +9513,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -9426,7 +9562,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -9490,7 +9627,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -9540,7 +9678,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -9598,7 +9737,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone
@@ -9656,7 +9796,8 @@ describe('Operation Examples', function() {
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect(function(err, client) {
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE restartAndDone

@@ -1,8 +1,6 @@
 'use strict';
 
 const Promise = require('bluebird');
-const mongodb = require('../..');
-const MongoClient = mongodb.MongoClient;
 const path = require('path');
 const fs = require('fs');
 const chai = require('chai');
@@ -100,7 +98,7 @@ describe('Transactions (spec)', function() {
       config.replicasetName
     }`;
 
-    testContext.sharedClient = new MongoClient(testContext.url);
+    testContext.sharedClient = config.newClient(testContext.url);
     return testContext.sharedClient.connect();
   });
 
@@ -190,7 +188,8 @@ function runTestSuiteTest(testData, context) {
   clientOptions.autoReconnect = false;
   clientOptions.haInterval = 100;
 
-  return MongoClient.connect(context.url, clientOptions).then(client => {
+  const client = this.configuration.newClient(context.url, clientOptions);
+  return client.connect().then(client => {
     context.testClient = client;
     client.on('commandStarted', event => {
       if (event.databaseName === context.dbName || isTransactionCommand(event.commandName)) {

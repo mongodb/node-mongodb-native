@@ -13,7 +13,6 @@ describe('SDAM', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var operations = {
         serverDescriptionChanged: [],
         serverHeartbeatStarted: [],
@@ -25,7 +24,7 @@ describe('SDAM', function() {
         topologyClosed: []
       };
 
-      var client = new MongoClient(configuration.url());
+      var client = configuration.newClient();
       var events = [
         'serverDescriptionChanged',
         'serverHeartbeatStarted',
@@ -61,7 +60,6 @@ describe('SDAM', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var operations = {
         serverDescriptionChanged: [],
         serverHeartbeatStarted: [],
@@ -73,7 +71,7 @@ describe('SDAM', function() {
         topologyClosed: []
       };
 
-      var client = new MongoClient(configuration.url(), { haInterval: 500 });
+      var client = configuration.newClient({}, { haInterval: 500 });
       var events = [
         'serverDescriptionChanged',
         'serverHeartbeatStarted',
@@ -114,7 +112,6 @@ describe('SDAM', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var operations = {
         serverDescriptionChanged: [],
         serverOpening: [],
@@ -124,7 +121,7 @@ describe('SDAM', function() {
         topologyClosed: []
       };
 
-      var client = new MongoClient(configuration.url());
+      var client = configuration.newClient();
       var events = [
         'serverDescriptionChanged',
         'serverOpening',

@@ -209,7 +209,6 @@ describe.skip('Errors', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var domain = require('domain');
       var d = domain.create();
       d.on('error', function(err) {
@@ -218,7 +217,8 @@ describe.skip('Errors', function() {
       });
 
       d.run(function() {
-        MongoClient.connect(configuration.url(), function() {
+        const client = configuration.newClient();
+        client.connect(function() {
           testdfdma(); // eslint-disable-line
           test.ok(false);
         });
@@ -234,11 +234,9 @@ describe.skip('Errors', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-      MongoClient.connect(configuration.url(), { server: { sslValidate: false } }, function(
-        err,
-        client
-      ) {
+
+      const client = configuration.newClient({}, { server: { sslValidate: false } });
+      client.connect(function(err, client) {
         var db = client.db(configuration.db);
 
         process.once('uncaughtException', function(err) {
@@ -265,8 +263,6 @@ describe.skip('Errors', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var client = null;
-
       // TODO: check exception and fix test
       process.once('uncaughtException', function() {
         client.close();
@@ -274,31 +270,30 @@ describe.skip('Errors', function() {
       });
 
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-      MongoClient.connect(
-        configuration.url(),
+      const client = configuration.newClient(
+        {},
         {
           server: { sslValidate: false },
           replset: { sslValidate: false },
           mongos: { sslValidate: false }
-        },
-        function(err, _client) {
-          test.equal(null, err);
-          client = _client;
-          var db = client.db(configuration.db);
-
-          db.collection('throwerrorduringoperation').insert([{ a: 1 }, { a: 1 }], function(err) {
-            test.equal(null, err);
-
-            db
-              .collection('throwerrorduringoperation')
-              .find()
-              .toArray(function() {
-                err = a; // eslint-disable-line
-              });
-          });
         }
       );
+
+      client.connect(function(err) {
+        test.equal(null, err);
+        var db = client.db(configuration.db);
+
+        db.collection('throwerrorduringoperation').insert([{ a: 1 }, { a: 1 }], function(err) {
+          test.equal(null, err);
+
+          db
+            .collection('throwerrorduringoperation')
+            .find()
+            .toArray(function() {
+                err = a; // eslint-disable-line
+            });
+        });
+      });
     }
   });
 

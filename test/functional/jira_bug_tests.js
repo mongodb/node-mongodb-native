@@ -99,72 +99,68 @@ describe('JIRA bugs', function() {
   /**
    * @ignore
    */
-  it(
-    'NODE-746 should correctly connect using MongoClient.connect to single primary/secondary with both hosts in uri',
-    {
-      metadata: { requires: { topology: ['auth'] } },
+  it('NODE-746 should correctly connect to single primary/secondary with both hosts in uri', {
+    metadata: { requires: { topology: ['auth'] } },
 
-      // The actual test we wish to run
-      test: function(done) {
-        var configuration = this.configuration;
-        var Db = configuration.require.Db,
-          MongoClient = configuration.require.MongoClient,
-          Server = configuration.require.Server,
-          ReplSet = configuration.require.ReplSet;
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var Db = configuration.require.Db,
+        Server = configuration.require.Server,
+        ReplSet = configuration.require.ReplSet;
 
-        setUp(configuration, function(err, replicasetManager) {
-          var replSet = new ReplSet(
-            [new Server('localhost', 31000), new Server('localhost', 31001)],
-            {
-              rs_name: 'rs',
-              poolSize: 1
-            }
-          );
+      setUp(configuration, function(err, replicasetManager) {
+        var replSet = new ReplSet(
+          [new Server('localhost', 31000), new Server('localhost', 31001)],
+          {
+            rs_name: 'rs',
+            poolSize: 1
+          }
+        );
 
-          // Connect
-          new Db('replicaset_test_auth', replSet, { w: 1 }).open(function(err, db) {
-            // Add a user
-            db.admin().addUser('root', 'root', { w: 3, wtimeout: 25000 }, function(err) {
-              test.equal(null, err);
-              db.close();
+        // Connect
+        new Db('replicaset_test_auth', replSet, { w: 1 }).open(function(err, db) {
+          // Add a user
+          db.admin().addUser('root', 'root', { w: 3, wtimeout: 25000 }, function(err) {
+            test.equal(null, err);
+            db.close();
 
-              // shut down one of the secondaries
-              replicasetManager.secondaries().then(function(managers) {
-                // Remove the secondary server
-                replicasetManager
-                  .removeMember(
-                    managers[1],
-                    {
-                      returnImmediately: false,
-                      force: true,
-                      skipWait: false
-                    },
-                    {
-                      provider: 'scram-sha-1',
-                      db: 'admin',
-                      user: 'root',
-                      password: 'root'
-                    }
-                  )
-                  .then(function() {
-                    // Attempt to connect
-                    MongoClient.connect(
-                      'mongodb://root:root@localhost:31000,localhost:31001/admin?replicaSet=rs',
-                      function(err, db) {
-                        test.equal(null, err);
-                        db.close();
+            // shut down one of the secondaries
+            replicasetManager.secondaries().then(function(managers) {
+              // Remove the secondary server
+              replicasetManager
+                .removeMember(
+                  managers[1],
+                  {
+                    returnImmediately: false,
+                    force: true,
+                    skipWait: false
+                  },
+                  {
+                    provider: 'scram-sha-1',
+                    db: 'admin',
+                    user: 'root',
+                    password: 'root'
+                  }
+                )
+                .then(function() {
+                  // Attempt to connect
+                  const client = configuration.newClient(
+                    'mongodb://root:root@localhost:31000,localhost:31001/admin?replicaSet=rs'
+                  );
+                  client.connect(function(err, db) {
+                    test.equal(null, err);
+                    db.close();
 
-                        replicasetManager.stop().then(function() {
-                          done();
-                        });
-                      }
-                    );
+                    replicasetManager.stop().then(function() {
+                      done();
+                    });
                   });
-              });
+                });
             });
           });
         });
-      }
+      });
     }
-  );
+  });
 });

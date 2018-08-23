@@ -30,23 +30,14 @@ describe.skip('ReplSet (ReadPreference)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
-        ReadPreference = mongo.ReadPreference,
-        ReplSet = mongo.ReplSet,
-        Server = mongo.Server;
-
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { secondaryAcceptableLatencyMS: 5, rs_name: configuration.replicasetName, debug: true }
-      );
+        ReadPreference = mongo.ReadPreference;
 
       // Open the database
-      var client = new MongoClient(replSet, { w: 1 });
+      const client = configuration.newClient(
+        {},
+        { secondaryAcceptableLatencyMS: 5, debug: true, w: 1 }
+      );
+
       // Trigger test once whole set is up
       client.on('fullsetup', function(client) {
         var db = client.db(configuration.db);
@@ -171,27 +162,14 @@ describe.skip('ReplSet (ReadPreference)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
-        ReadPreference = mongo.ReadPreference,
-        ReplSet = mongo.ReplSet,
-        Server = mongo.Server;
-
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        {
-          readPreference: ReadPreference.NEAREST,
-          rs_name: configuration.replicasetName,
-          debug: true
-        }
-      );
+        ReadPreference = mongo.ReadPreference;
 
       // Open the database
-      var client = new MongoClient(replSet, { w: 1, readPreference: ReadPreference.NEAREST });
+      const client = configuration.newClient(
+        {},
+        { w: 1, readPreference: ReadPreference.NEAREST, debug: true }
+      );
+
       client.on('fullsetup', function() {
         var db = client.db(configuration.db);
         // Servers viewed
@@ -244,23 +222,14 @@ describe.skip('ReplSet (ReadPreference)', function() {
       test: function(done) {
         var configuration = this.configuration;
         var mongo = configuration.require,
-          MongoClient = mongo.MongoClient,
-          ReadPreference = mongo.ReadPreference,
-          ReplSet = mongo.ReplSet,
-          Server = mongo.Server;
-
-        // Replica configuration
-        var replSet = new ReplSet(
-          [
-            new Server(configuration.host, configuration.port),
-            new Server(configuration.host, configuration.port + 1),
-            new Server(configuration.host, configuration.port + 2)
-          ],
-          { rs_name: configuration.replicasetName, debug: true }
-        );
+          ReadPreference = mongo.ReadPreference;
 
         // Open the database
-        var client = new MongoClient(replSet, { w: 1, readPreference: ReadPreference.NEAREST });
+        var client = configuration.newClient(
+          {},
+          { w: 1, readPreference: ReadPreference.NEAREST, debug: true }
+        );
+
         client.on('fullsetup', function() {
           var db = client.db(configuration.db);
           // Servers viewed
@@ -328,29 +297,20 @@ describe.skip('ReplSet (ReadPreference)', function() {
       var configuration = this.configuration;
       var GridStore = configuration.require.GridStore,
         ObjectID = configuration.require.ObjectID,
-        MongoClient = configuration.require.MongoClient,
-        ReadPreference = configuration.require.ReadPreference,
-        ReplSet = configuration.require.ReplSet,
-        Server = configuration.require.Server;
-
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        {
-          readPreference: ReadPreference.NEAREST,
-          rs_name: configuration.replicasetName,
-          debug: true
-        }
-      );
+        ReadPreference = configuration.require.ReadPreference;
 
       // Create an id
       var id = new ObjectID();
       // Open the database
-      var client = new MongoClient(replSet, { w: 1 });
+      var client = configuration.newClient(
+        {},
+        {
+          w: 1,
+          readPreference: ReadPreference.NEAREST,
+          debug: true
+        }
+      );
+
       client.on('fullsetup', function() {
         var db = client.db(configuration.db);
 
@@ -414,23 +374,14 @@ describe.skip('ReplSet (ReadPreference)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
-        ReadPreference = mongo.ReadPreference,
-        ReplSet = mongo.ReplSet,
-        Server = mongo.Server;
-
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName, debug: true }
-      );
+        ReadPreference = mongo.ReadPreference;
 
       // Create db instance
-      var client = new MongoClient(replSet, { w: 0, readPreference: ReadPreference.PRIMARY });
+      var client = configuration.newClient(
+        {},
+        { w: 0, readPreference: ReadPreference.PRIMARY, debug: true }
+      );
+
       // Logger.setLevel('info');
       // Trigger test once whole set is up
       client.on('fullsetup', function(client) {
@@ -472,23 +423,10 @@ describe.skip('ReplSet (ReadPreference)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
-        ReadPreference = mongo.ReadPreference,
-        ReplSet = mongo.ReplSet,
-        Server = mongo.Server;
-
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName, debug: true }
-      );
+        ReadPreference = mongo.ReadPreference;
 
       // Create db instance
-      var client = new MongoClient(replSet, { w: 0 });
+      var client = configuration.newClient({}, { w: 0, debug: true });
       // Connect to the db
       client.on('fullsetup', function(client) {
         var db = client.db(configuration.db);
@@ -535,23 +473,10 @@ describe.skip('ReplSet (ReadPreference)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
-        ReadPreference = mongo.ReadPreference,
-        ReplSet = mongo.ReplSet,
-        Server = mongo.Server;
-
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName, debug: true }
-      );
+        ReadPreference = mongo.ReadPreference;
 
       // Create db instance
-      var client = new MongoClient(replSet, { w: 0 });
+      var client = configuration.newClient({}, { w: 0, debug: true });
       // Connect to the db
       client.on('fullsetup', function() {
         var db = client.db(configuration.db);
@@ -602,23 +527,10 @@ describe.skip('ReplSet (ReadPreference)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
-        ReadPreference = mongo.ReadPreference,
-        ReplSet = mongo.ReplSet,
-        Server = mongo.Server;
-
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName, debug: true }
-      );
+        ReadPreference = mongo.ReadPreference;
 
       // Create db instance
-      var client = new MongoClient(replSet, { w: 0 });
+      var client = configuration.newClient({}, { w: 0, debug: true });
       // Connect to the db
       client.on('fullsetup', function() {
         var db = client.db(configuration.db);
@@ -665,23 +577,9 @@ describe.skip('ReplSet (ReadPreference)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
-        ReadPreference = mongo.ReadPreference,
-        ReplSet = mongo.ReplSet,
-        Server = mongo.Server;
+        ReadPreference = mongo.ReadPreference;
 
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName, debug: true }
-      );
-
-      // Create db instance
-      var client = new MongoClient(replSet, { w: 0 });
+      const client = configuration.newClient({}, { w: 0, debug: true });
       // Connect to the db
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -724,26 +622,13 @@ describe.skip('ReplSet (ReadPreference)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
-        ReadPreference = mongo.ReadPreference,
-        ReplSet = mongo.ReplSet,
-        Server = mongo.Server;
+        ReadPreference = mongo.ReadPreference;
 
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName, debug: true }
+      const client = configuration.newClient(
+        {},
+        { w: 0, debug: true, readPreference: new ReadPreference(ReadPreference.SECONDARY) }
       );
 
-      // Create db instance
-      var client = new MongoClient(replSet, {
-        w: 0,
-        readPreference: new ReadPreference(ReadPreference.SECONDARY)
-      });
       // Connect to the db
       client.on('fullsetup', function() {
         var db = client.db(configuration.db);
@@ -787,23 +672,10 @@ describe.skip('ReplSet (ReadPreference)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
-        ReadPreference = mongo.ReadPreference,
-        ReplSet = mongo.ReplSet,
-        Server = mongo.Server;
+        ReadPreference = mongo.ReadPreference;
 
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName, debug: true, haInterval: 100 }
-      );
+      const client = configuration.newClient({}, { w: 0, debug: true, haInterval: 100 });
 
-      // Create db instance
-      var client = new MongoClient(replSet, { w: 0 });
       // Connect to the db
       client.on('fullsetup', function(client) {
         var db = client.db(configuration.db);
@@ -849,26 +721,18 @@ describe.skip('ReplSet (ReadPreference)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
-        ReadPreference = mongo.ReadPreference,
-        ReplSet = mongo.ReplSet,
-        Server = mongo.Server;
-
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName, debug: true }
-      );
+        ReadPreference = mongo.ReadPreference;
 
       // Open the database
-      var client = new MongoClient(replSet, {
-        w: 0,
-        readPreference: new ReadPreference(ReadPreference.SECONDARY, { loc: 'ny' })
-      });
+      const client = configuration.newClient(
+        {},
+        {
+          w: 0,
+          debug: true,
+          readPreference: new ReadPreference(ReadPreference.SECONDARY, { loc: 'ny' })
+        }
+      );
+
       // Trigger test once whole set is up
       client.on('fullsetup', function() {
         client.topology.replset.once('pickedServer', function(readPreference) {
@@ -903,26 +767,18 @@ describe.skip('ReplSet (ReadPreference)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
-        ReadPreference = mongo.ReadPreference,
-        ReplSet = mongo.ReplSet,
-        Server = mongo.Server;
-
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName, debug: true }
-      );
+        ReadPreference = mongo.ReadPreference;
 
       // Open the database
-      var client = new MongoClient(replSet, {
-        w: 1,
-        readPreference: new ReadPreference(ReadPreference.NEAREST, { loc: 'ny' })
-      });
+      const client = configuration(
+        {},
+        {
+          w: 1,
+          debug: true,
+          readPreference: new ReadPreference(ReadPreference.NEAREST, { loc: 'ny' })
+        }
+      );
+
       var success = false;
       // Trigger test once whole set is up
       client.on('fullsetup', function(client) {
@@ -960,26 +816,16 @@ describe.skip('ReplSet (ReadPreference)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
-        ReadPreference = mongo.ReadPreference,
-        ReplSet = mongo.ReplSet,
-        Server = mongo.Server;
-
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName, debug: true }
-      );
+        ReadPreference = mongo.ReadPreference;
 
       // Open the database
-      var client = new MongoClient(replSet, {
-        w: 0,
-        readPreference: new ReadPreference(ReadPreference.SECONDARY_PREFERRED)
-      });
+      const client = configuration.newClient(
+        {},
+        {
+          w: 0,
+          readPreference: new ReadPreference(ReadPreference.SECONDARY_PREFERRED)
+        }
+      );
 
       // Trigger test once whole set is up
       client.on('fullsetup', function(client) {
@@ -1007,27 +853,16 @@ describe.skip('ReplSet (ReadPreference)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
-        ReplSet = mongo.ReplSet,
         Server = mongo.Server,
         ReadPreference = mongo.ReadPreference;
 
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        {
-          readPreference: ReadPreference.NEAREST,
-          rs_name: configuration.replicasetName,
-          debug: true
-        }
-      );
-
       // Open the database
-      var client = new MongoClient(replSet, { w: 'majority', wtimeout: 10000 });
+      const client = configuration.newClient({
+        w: 'majority',
+        wtimeout: 10000,
+        readPreference: ReadPreference.NEAREST
+      });
+
       client.on('fullsetup', function(client) {
         var db = client.db(configuration.db);
 
@@ -1047,16 +882,17 @@ describe.skip('ReplSet (ReadPreference)', function() {
                 );
 
                 // Connect using the MongoClient
-                MongoClient.connect(url, function(err, client) {
+                const client2 = configuration.newClient(url);
+                client2.connect(url, function(err, client2) {
                   test.equal(null, err);
-                  var db = client.db(configuration.db);
-                  test.ok(client.topology instanceof Server);
+                  var db = client2.db(configuration.db);
+                  test.ok(client2.topology instanceof Server);
 
                   db.collection('direct_secondary_read_test').count(function(err, n) {
                     test.equal(null, err);
                     test.ok(n > 0);
 
-                    client.close();
+                    client2.close();
                     done();
                   });
                 });
@@ -1089,7 +925,8 @@ describe.skip('ReplSet (ReadPreference)', function() {
       var url = format('mongodb://localhost:%s/integration_test_?slaveOk=true', configuration.port);
 
       // Connect using the MongoClient
-      MongoClient.connect(url, function(err, client) {
+      const client = configuration.newClient(url);
+      client.connect(function(err, client) {
         test.equal(null, err);
         test.ok(client != null);
 

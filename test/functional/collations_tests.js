@@ -27,8 +27,7 @@ describe('Collation', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      var configuration = this.configuration;
 
       // Primary server states
       var primary = [Object.assign({}, defaultFields)];
@@ -50,7 +49,8 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -79,8 +79,7 @@ describe('Collation', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      var configuration = this.configuration;
 
       // Primary server states
       var primary = [Object.assign({}, defaultFields)];
@@ -102,7 +101,8 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -123,8 +123,7 @@ describe('Collation', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      var configuration = this.configuration;
 
       // Primary server states
       var primary = [Object.assign({}, defaultFields)];
@@ -148,7 +147,8 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -174,8 +174,7 @@ describe('Collation', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      var configuration = this.configuration;
 
       // Primary server states
       var primary = [Object.assign({}, defaultFields)];
@@ -199,7 +198,8 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -222,8 +222,7 @@ describe('Collation', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      var configuration = this.configuration;
 
       // Primary server states
       var primary = [Object.assign({}, defaultFields)];
@@ -247,7 +246,8 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -280,7 +280,6 @@ describe('Collation', function() {
 
     test: function(done) {
       var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient,
         Code = configuration.require.Code;
 
       // Primary server states
@@ -305,7 +304,8 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -338,8 +338,7 @@ describe('Collation', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      var configuration = this.configuration;
 
       // Primary server states
       var primary = [Object.assign({}, defaultFields)];
@@ -363,7 +362,8 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -384,8 +384,7 @@ describe('Collation', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      var configuration = this.configuration;
 
       // Primary server states
       var primary = [Object.assign({}, defaultFields)];
@@ -409,7 +408,8 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -434,8 +434,7 @@ describe('Collation', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      var configuration = this.configuration;
 
       // Primary server states
       var primary = [Object.assign({}, defaultFields)];
@@ -459,7 +458,8 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -483,8 +483,7 @@ describe('Collation', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      var configuration = this.configuration;
 
       // Primary server states
       var primary = [Object.assign({}, defaultFields)];
@@ -508,7 +507,8 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -533,8 +533,7 @@ describe('Collation', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      var configuration = this.configuration;
 
       // Primary server states
       var primary = [Object.assign({}, defaultFields)];
@@ -558,7 +557,8 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -582,7 +582,6 @@ describe('Collation', function() {
 
     test: function(done) {
       var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient,
         Long = configuration.require.Long;
 
       // Primary server states
@@ -616,7 +615,8 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -637,8 +637,7 @@ describe('Collation', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      var configuration = this.configuration;
 
       // Primary server states
       var primary = [Object.assign({}, defaultFields, { maxWireVersion: 4 })];
@@ -659,7 +658,8 @@ describe('Collation', function() {
         });
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -681,8 +681,7 @@ describe('Collation', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      var configuration = this.configuration;
 
       // Primary server states
       var primary = [Object.assign({}, defaultFields, { maxWireVersion: 4 })];
@@ -703,7 +702,8 @@ describe('Collation', function() {
         });
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -723,8 +723,7 @@ describe('Collation', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      var configuration = this.configuration;
 
       // Primary server states
       var primary = [Object.assign({}, defaultFields)];
@@ -750,7 +749,8 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -785,8 +785,7 @@ describe('Collation', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      var configuration = this.configuration;
 
       // Primary server states
       var primary = [Object.assign({}, defaultFields, { maxWireVersion: 4 })];
@@ -808,7 +807,8 @@ describe('Collation', function() {
         });
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -843,7 +843,6 @@ describe('Collation', function() {
 
     test: function(done) {
       var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient,
         ObjectId = configuration.require.ObjectId;
 
       var electionIds = [new ObjectId(), new ObjectId()];
@@ -930,35 +929,36 @@ describe('Collation', function() {
 
         setTimeout(() => {
           // Connect to the mocks
-          MongoClient.connect(
-            'mongodb://localhost:32000,localhost:32001/test?replicaSet=rs',
-            function(err, client) {
-              test.equal(null, err);
-              var db = client.db(configuration.db);
-
-              db.collection('test').bulkWrite(
-                [
-                  {
-                    updateOne: {
-                      q: { a: 2 },
-                      u: { $set: { a: 2 } },
-                      upsert: true,
-                      collation: { caseLevel: true }
-                    }
-                  },
-                  { deleteOne: { q: { c: 1 } } }
-                ],
-                { ordered: true },
-                function(err) {
-                  test.ok(err);
-                  test.equal('server/primary/mongos does not support collation', err.message);
-
-                  client.close();
-                  done();
-                }
-              );
-            }
+          const client = configuration.newClient(
+            'mongodb://localhost:32000,localhost:32001/test?replicaSet=rs'
           );
+
+          client.connect(function(err, client) {
+            test.equal(null, err);
+            var db = client.db(configuration.db);
+
+            db.collection('test').bulkWrite(
+              [
+                {
+                  updateOne: {
+                    q: { a: 2 },
+                    u: { $set: { a: 2 } },
+                    upsert: true,
+                    collation: { caseLevel: true }
+                  }
+                },
+                { deleteOne: { q: { c: 1 } } }
+              ],
+              { ordered: true },
+              function(err) {
+                test.ok(err);
+                test.equal('server/primary/mongos does not support collation', err.message);
+
+                client.close();
+                done();
+              }
+            );
+          });
         }, 500);
       });
     }
@@ -968,8 +968,7 @@ describe('Collation', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      var configuration = this.configuration;
 
       // Primary server states
       var primary = [Object.assign({}, defaultFields)];
@@ -991,7 +990,8 @@ describe('Collation', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -1017,8 +1017,7 @@ describe('Collation', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      var configuration = this.configuration;
 
       // Primary server states
       var primary = [Object.assign({}, defaultFields, { maxWireVersion: 4 })];
@@ -1039,7 +1038,8 @@ describe('Collation', function() {
         });
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -1062,8 +1062,7 @@ describe('Collation', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      var configuration = this.configuration;
 
       // Primary server states
       var primary = [Object.assign({}, defaultFields, { maxWireVersion: 4 })];
@@ -1084,7 +1083,8 @@ describe('Collation', function() {
         });
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           test.equal(null, err);
           var db = client.db(configuration.db);
 
@@ -1142,11 +1142,11 @@ describe('Collation', function() {
     metadata: { requires: { topology: 'single', mongodb: '>=3.3.12' } },
 
     test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      var configuration = this.configuration;
 
       // Connect to the mocks
-      MongoClient.connect(configuration.url(), function(err, client) {
+      const client = configuration.newClient();
+      client.connect(function(err, client) {
         test.equal(null, err);
         var db = client.db(configuration.db);
 
@@ -1184,11 +1184,11 @@ describe('Collation', function() {
     metadata: { requires: { topology: 'single', mongodb: '>=3.3.12' } },
 
     test: function(done) {
-      var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient;
+      var configuration = this.configuration;
 
       // Connect to the mocks
-      MongoClient.connect(configuration.url(), function(err, client) {
+      const client = configuration.newClient();
+      client.connect(function(err, client) {
         test.equal(null, err);
         var db = client.db(configuration.db);
 

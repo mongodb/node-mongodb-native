@@ -4,7 +4,6 @@ const EJSON = require('mongodb-extjson');
 const chai = require('chai');
 const fs = require('fs');
 const camelCase = require('lodash.camelcase');
-const MongoClient = require('../../lib/mongo_client');
 const setupDatabase = require('./shared').setupDatabase;
 const delay = require('./shared').delay;
 const expect = chai.expect;
@@ -17,8 +16,9 @@ describe('Change Stream Spec', function() {
   let events;
 
   before(function() {
-    return setupDatabase(this.configuration).then(() => {
-      globalClient = new MongoClient(this.configuration.url());
+    const configuration = this.configuration;
+    return setupDatabase(configuration).then(() => {
+      globalClient = configuration.newClient();
       return globalClient.connect();
     });
   });
@@ -43,11 +43,10 @@ describe('Change Stream Spec', function() {
           const gc = globalClient;
           const sDB = specData.database_name;
           const sColl = specData.collection_name;
+          const configuration = this.configuration;
           return Promise.all(ALL_DBS.map(db => gc.db(db).dropDatabase()))
             .then(() => gc.db(sDB).createCollection(sColl))
-            .then(() =>
-              new MongoClient(this.configuration.url(), { monitorCommands: true }).connect()
-            )
+            .then(() => configuration.newClient({}, { monitorCommands: true }).connect())
             .then(client => {
               ctx = { gc, client };
               events = [];

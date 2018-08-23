@@ -19,8 +19,6 @@ describe('Sharding (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-
       var url = f(
         'mongodb://%s:%s,%s:%s/sharded_test_db?w=1&readPreference=secondaryPreferred&readPreferenceTags=sf%3A1&readPreferenceTags=',
         configuration.host,
@@ -28,34 +26,33 @@ describe('Sharding (Connection)', function() {
         configuration.host,
         configuration.port + 1
       );
-      MongoClient.connect(
-        url,
-        {
-          mongos: {
-            haInterval: 500
-          }
-        },
-        function(err, client) {
-          test.equal(null, err);
-          test.equal(500, client.topology.haInterval);
-          var db = client.db(configuration.db);
 
-          db
-            .collection('replicaset_mongo_client_collection')
-            .update({ a: 1 }, { b: 1 }, { upsert: true }, function(err, result) {
-              test.equal(null, err);
-              test.equal(1, result.result.n);
-
-              // Perform fetch of document
-              db.collection('replicaset_mongo_client_collection').findOne(function(err) {
-                test.equal(null, err);
-
-                client.close();
-                done();
-              });
-            });
+      const client = configuration.newClient(url, {
+        mongos: {
+          haInterval: 500
         }
-      );
+      });
+
+      client.connect(function(err, client) {
+        test.equal(null, err);
+        test.equal(500, client.topology.haInterval);
+        var db = client.db(configuration.db);
+
+        db
+          .collection('replicaset_mongo_client_collection')
+          .update({ a: 1 }, { b: 1 }, { upsert: true }, function(err, result) {
+            test.equal(null, err);
+            test.equal(1, result.result.n);
+
+            // Perform fetch of document
+            db.collection('replicaset_mongo_client_collection').findOne(function(err) {
+              test.equal(null, err);
+
+              client.close();
+              done();
+            });
+          });
+      });
     }
   });
 
@@ -68,8 +65,6 @@ describe('Sharding (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-
       var url = f(
         'mongodb://%s:%s,%s:%s,localhost:50002/sharded_test_db?w=1',
         configuration.host,
@@ -78,7 +73,8 @@ describe('Sharding (Connection)', function() {
         configuration.port + 1
       );
 
-      MongoClient.connect(url, {}, function(err, client) {
+      const client = configuration.newClient(url);
+      client.connect(function(err, client) {
         setTimeout(function() {
           test.equal(null, err);
           client.close();
@@ -97,8 +93,6 @@ describe('Sharding (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-
       var url = f(
         'mongodb://%s:%s,%s:%s/sharded_test_db?w=1&readPreference=secondaryPreferred&readPreferenceTags=sf%3A1&readPreferenceTags=',
         configuration.host,
@@ -106,27 +100,21 @@ describe('Sharding (Connection)', function() {
         configuration.host,
         configuration.port + 1
       );
-      MongoClient.connect(
-        url,
-        {
-          mongos: {
-            haInterval: 500
-          }
-        },
-        function(err, client) {
-          test.equal(null, err);
-          test.equal(500, client.topology.haInterval);
-          test.ok(client.topology.capabilities() != null);
-          test.equal(true, client.topology.isConnected());
-          test.ok(client.topology.lastIsMaster() != null);
-          test.ok(client.topology.connections() != null);
-          test.ok(client.topology.isMasterDoc != null);
-          test.ok(client.topology.bson != null);
 
-          client.close();
-          done();
-        }
-      );
+      const client = configuration.newClient(url, { mongos: { haInterval: 500 } });
+      client.connect(function(err, client) {
+        test.equal(null, err);
+        test.equal(500, client.topology.haInterval);
+        test.ok(client.topology.capabilities() != null);
+        test.equal(true, client.topology.isConnected());
+        test.ok(client.topology.lastIsMaster() != null);
+        test.ok(client.topology.connections() != null);
+        test.ok(client.topology.isMasterDoc != null);
+        test.ok(client.topology.bson != null);
+
+        client.close();
+        done();
+      });
     }
   });
 
@@ -139,9 +127,6 @@ describe('Sharding (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var mongo = configuration.require,
-        MongoClient = mongo.MongoClient;
-
       var url = f(
         'mongodb://%s:%s,%s:%s/sharded_test_db?w=1&readPreference=secondaryPreferred&readPreferenceTags=sf%3A1&readPreferenceTags=',
         configuration.host,
@@ -150,24 +135,19 @@ describe('Sharding (Connection)', function() {
         configuration.port + 1
       );
 
-      MongoClient.connect(
-        url,
-        {
-          reconnectTries: 10
-        },
-        function(err, client) {
-          test.equal(null, err);
-          test.ok(client != null);
+      const client = configuration.newClient(url, { reconnectTries: 10 });
+      client.connect(function(err, client) {
+        test.equal(null, err);
+        test.ok(client != null);
 
-          var servers = client.topology.s.coreTopology.connectedProxies;
-          for (var i = 0; i < servers.length; i++) {
-            test.equal(10, servers[i].s.pool.options.reconnectTries);
-          }
-
-          client.close();
-          done();
+        var servers = client.topology.s.coreTopology.connectedProxies;
+        for (var i = 0; i < servers.length; i++) {
+          test.equal(10, servers[i].s.pool.options.reconnectTries);
         }
-      );
+
+        client.close();
+        done();
+      });
     }
   });
 
@@ -180,8 +160,6 @@ describe('Sharding (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var mongo = configuration.require;
-      var MongoClient = mongo.MongoClient;
       var manager = configuration.manager;
       var mongos = manager.proxies;
 
@@ -194,7 +172,8 @@ describe('Sharding (Connection)', function() {
           configuration.port + 1
         );
 
-        var client = yield MongoClient.connect(url);
+        const client = configuration.newClient(url);
+        yield client.connect();
 
         var doc = { answer: 42 };
         var db = client.db('Test');

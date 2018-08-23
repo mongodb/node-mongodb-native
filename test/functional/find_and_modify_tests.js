@@ -147,7 +147,6 @@ describe('Find and Modify', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var started = [];
       var succeeded = [];
 
@@ -167,7 +166,8 @@ describe('Find and Modify', function() {
       url = url.indexOf('?') !== -1 ? f('%s&%s', url, 'fsync=true') : f('%s?%s', url, 'fsync=true');
 
       // Establish connection to db
-      MongoClient.connect(url, { sslValidate: false }, function(err, client) {
+      const client = configuration.newClient(url);
+      client.connect(function(err, client) {
         test.equal(null, err);
         var db = client.db(configuration.db);
         var collection = db.collection('findAndModifyTEST');

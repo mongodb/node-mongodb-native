@@ -1,6 +1,5 @@
 'use strict';
 
-const MongoClient = require('../../..').MongoClient;
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
 
@@ -26,7 +25,8 @@ describe('Sessions', function() {
           }
         });
 
-        MongoClient.connect(`mongodb://${test.server.uri()}/test`, function(err, client) {
+        const client = this.configuration.newClient(`mongodb://${test.server.uri()}/test`);
+        client.connect(function(err, client) {
           expect(err).to.not.exist;
           expect(() => {
             client.startSession();
@@ -55,7 +55,8 @@ describe('Sessions', function() {
           }
         });
 
-        MongoClient.connect(`mongodb://${test.server.uri()}/test`, function(err, client) {
+        const client = this.configuration.newClient(`mongodb://${test.server.uri()}/test`);
+        client.connect(function(err, client) {
           expect(err).to.not.exist;
           let session = client.startSession();
           expect(session).to.exist;

@@ -18,14 +18,14 @@ describe('Promises (Cursor)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=100')
           : f('%s?%s', url, 'maxPoolSize=100');
 
-      MongoClient.connect(url).then(function(client) {
+      const client = configuration.newClient(url);
+      client.connect().then(function(client) {
         var db = client.db(configuration.db);
         test.equal(1, client.topology.connections().length);
 

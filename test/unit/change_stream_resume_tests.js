@@ -2,7 +2,6 @@
 
 const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
-const MongoClient = require('../../lib/mongo_client');
 const ObjectId = require('../../index').ObjectId;
 const Timestamp = require('../../index').Timestamp;
 const Long = require('../../index').Long;
@@ -183,8 +182,9 @@ describe('Change Stream Resume Tests', function() {
     it(config.description, {
       metadata: { requires: { mongodb: '>=3.6.0' } },
       test: function() {
+        const configuration = this.configuration;
         test.server.setMessageHandler(makeServerHandler(config));
-        client = new MongoClient(`mongodb://${test.server.uri()}`, {
+        client = configuration.newClient(`mongodb://${test.server.uri()}`, {
           socketTimeoutMS: 300
         });
         return client

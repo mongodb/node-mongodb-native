@@ -12,13 +12,18 @@ describe('BYO Promises', function() {
     // The actual test we wish to run
     test: function(done) {
       var self = this;
-      var MongoClient = self.configuration.require.MongoClient;
+      const configuration = this.configuration;
       var Promise = require('bluebird');
 
-      MongoClient.connect(self.configuration.url(), {
-        promiseLibrary: Promise,
-        sslValidate: false
-      }).then(function(client) {
+      const client = configuration.newClient(
+        {},
+        {
+          promiseLibrary: Promise,
+          sslValidate: false
+        }
+      );
+
+      client.connect().then(function(client) {
         var db = client.db(self.configuration.db);
         var promise = db.collection('test').insert({ a: 1 });
         expect(promise).to.be.an.instanceOf(Promise);

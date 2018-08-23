@@ -3,7 +3,6 @@ const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const chai = require('chai');
 const expect = chai.expect;
-const MongoClient = require('../..').MongoClient;
 const sinonChai = require('sinon-chai');
 const mock = require('mongodb-mock-server');
 chai.use(sinonChai);
@@ -1588,7 +1587,7 @@ describe('Collection', function() {
 
   it('should correctly perform estimatedDocumentCount on non-matching query', function(done) {
     const configuration = this.configuration;
-    const client = new MongoClient(configuration.url(), { w: 1 });
+    const client = configuration.newClient({}, { w: 1 });
 
     client.connect(function(err, client) {
       const db = client.db(configuration.db);
@@ -1605,7 +1604,7 @@ describe('Collection', function() {
 
   it('should correctly perform countDocuments on non-matching query', function(done) {
     const configuration = this.configuration;
-    const client = new MongoClient(configuration.url(), { w: 1 });
+    const client = configuration.newClient({}, { w: 1 });
 
     client.connect(function(err, client) {
       const db = client.db(configuration.db);
@@ -1622,7 +1621,7 @@ describe('Collection', function() {
 
   it('countDocuments should return Promise that resolves when no callback passed', function(done) {
     const configuration = this.configuration;
-    const client = new MongoClient(configuration.url(), { w: 1 });
+    const client = configuration.newClient({}, { w: 1 });
 
     client.connect(function(err, client) {
       const db = client.db(configuration.db);
@@ -1641,7 +1640,7 @@ describe('Collection', function() {
 
   it('countDocuments should not return a promise if callback given', function(done) {
     const configuration = this.configuration;
-    const client = new MongoClient(configuration.url(), { w: 1 });
+    const client = configuration.newClient({}, { w: 1 });
 
     client.connect(function(err, client) {
       const db = client.db(configuration.db);
@@ -1657,7 +1656,7 @@ describe('Collection', function() {
 
   it('countDocuments should correctly call the given callback', function(done) {
     const configuration = this.configuration;
-    const client = new MongoClient(configuration.url(), { w: 1 });
+    const client = configuration.newClient({}, { w: 1 });
 
     client.connect(function(err, client) {
       const db = client.db(configuration.db);
@@ -1685,8 +1684,8 @@ describe('Collection', function() {
 
     afterEach(() => mock.cleanup());
 
-    function testCountDocMock(config, done) {
-      const client = new MongoClient(`mongodb://${server.uri()}/test`);
+    function testCountDocMock(testConfiguration, config, done) {
+      const client = testConfiguration.newClient(`mongodb://${server.uri()}/test`);
       const close = e => client.close(() => done(e));
 
       server.setMessageHandler(request => {
@@ -1726,6 +1725,7 @@ describe('Collection', function() {
       };
 
       testCountDocMock(
+        this.configuration,
         {
           replyHandler,
           executeCountDocuments,
@@ -1748,6 +1748,7 @@ describe('Collection', function() {
       };
 
       testCountDocMock(
+        this.configuration,
         {
           replyHandler,
           executeCountDocuments,
@@ -1770,6 +1771,7 @@ describe('Collection', function() {
       };
 
       testCountDocMock(
+        this.configuration,
         {
           replyHandler,
           executeCountDocuments,
@@ -1780,9 +1782,9 @@ describe('Collection', function() {
     });
   });
 
-  function testCapped(config, done) {
+  function testCapped(testConfiguration, config, done) {
     const configuration = config.config;
-    const client = new MongoClient(configuration.url(), { w: 1 });
+    const client = testConfiguration.newClient({}, { w: 1 });
 
     client.connect(function(err, client) {
       const db = client.db(configuration.db);
@@ -1798,16 +1800,22 @@ describe('Collection', function() {
   }
 
   it('isCapped should return false for uncapped collections', function(done) {
-    testCapped({ config: this.configuration, collName: 'uncapped', opts: { capped: false } }, done);
+    testCapped(
+      this.configuration,
+      { config: this.configuration, collName: 'uncapped', opts: { capped: false } },
+      done
+    );
   });
 
   it('isCapped should return false for collections instantiated without specifying capped', function(done) {
-    testCapped({ config: this.configuration, collName: 'uncapped2', opts: {} }, done);
+    testCapped(
+      this.configuration,
+      { config: this.configuration, collName: 'uncapped2', opts: {} },
+      done
+    );
   });
 
   describe('Retryable Writes on bulk ops', function() {
-    const MongoClient = require('../../lib/mongo_client');
-
     let client;
     let db;
     let collection;
@@ -1815,7 +1823,7 @@ describe('Collection', function() {
     const metadata = { requires: { topology: ['replicaset'], mongodb: '>=3.6.0' } };
 
     beforeEach(function() {
-      client = new MongoClient(this.configuration.url(), { retryWrites: true });
+      client = this.configuration.newClient({}, { retryWrites: true });
       return client.connect().then(() => {
         db = client.db('test_retry_writes');
         collection = db.collection('tests');
