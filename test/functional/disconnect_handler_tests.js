@@ -11,9 +11,9 @@ describe('Disconnect Handler', function() {
 
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
 
-      MongoClient.connect(configuration.url(), {}, function(err, client) {
+      const client = configuration.newCLient();
+      client.connect(function(err, client) {
         test.equal(null, err);
         var db = client.db(configuration.db);
 

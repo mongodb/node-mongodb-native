@@ -2,7 +2,6 @@
 const test = require('./shared').assert;
 const setupDatabase = require('./shared').setupDatabase;
 const expect = require('chai').expect;
-const MongoClient = require('../../lib/mongo_client');
 const Buffer = require('safe-buffer').Buffer;
 
 describe('Find', function() {
@@ -2635,7 +2634,7 @@ describe('Find', function() {
     },
     test: function(done) {
       const configuration = this.configuration;
-      const client = new MongoClient(configuration.url());
+      const client = configuration.newClient();
 
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -3096,35 +3095,29 @@ describe('Find', function() {
       });
 
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-      MongoClient.connect(
-        configuration.url(),
-        {
-          ignoreUndefined: true
-        },
-        function(err, client) {
-          var db = client.db(configuration.db);
-          var collection = db.collection('test_find_simple_cursor_inheritance');
+      const client = configuration.newClient({}, { ignoreUndefined: true });
+      client.connect(function(err, client) {
+        var db = client.db(configuration.db);
+        var collection = db.collection('test_find_simple_cursor_inheritance');
 
-          // Insert some test documents
-          collection.insert([{ a: 2 }, { b: 3, c: undefined }], function(err) {
-            test.equal(null, err);
-            // Ensure correct insertion testing via the cursor and the count function
-            var cursor = collection.find({ c: undefined });
-            test.equal(true, cursor.s.options.ignoreUndefined);
+        // Insert some test documents
+        collection.insert([{ a: 2 }, { b: 3, c: undefined }], function(err) {
+          test.equal(null, err);
+          // Ensure correct insertion testing via the cursor and the count function
+          var cursor = collection.find({ c: undefined });
+          test.equal(true, cursor.s.options.ignoreUndefined);
 
-            cursor.toArray(function(err, documents) {
-              test.equal(2, documents.length);
-              // process.exit(0)
-              listener.uninstrument();
+          cursor.toArray(function(err, documents) {
+            test.equal(2, documents.length);
+            // process.exit(0)
+            listener.uninstrument();
 
-              // Let's close the db
-              client.close();
-              done();
-            });
+            // Let's close the db
+            client.close();
+            done();
           });
-        }
-      );
+        });
+      });
     }
   });
 });

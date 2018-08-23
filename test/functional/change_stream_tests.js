@@ -25,8 +25,7 @@ describe('Change Streams', function() {
 
   beforeEach(function() {
     const configuration = this.configuration;
-    const MongoClient = configuration.require.MongoClient;
-    const client = new MongoClient(configuration.url());
+    const client = configuration.newClient();
 
     return client.connect().then(() => {
       const db = client.db('integration_tests');
@@ -40,8 +39,7 @@ describe('Change Streams', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-      var client = new MongoClient(configuration.url());
+      var client = configuration.newClient();
 
       client.connect(function(err, client) {
         assert.ifError(err);
@@ -95,8 +93,7 @@ describe('Change Streams', function() {
       // The actual test we wish to run
       test: function(done) {
         var configuration = this.configuration;
-        var MongoClient = configuration.require.MongoClient;
-        var client = new MongoClient(configuration.url());
+        const client = configuration.newClient();
 
         client.connect(function(err, client) {
           assert.ifError(err);
@@ -155,8 +152,7 @@ describe('Change Streams', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-      var client = new MongoClient(configuration.url());
+      const client = configuration.newClient();
 
       client.connect(function(err, client) {
         assert.ifError(err);
@@ -242,8 +238,7 @@ describe('Change Streams', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-      var client = new MongoClient(configuration.url());
+      const client = configuration.newClient();
 
       client.connect(function(err, client) {
         assert.ifError(err);
@@ -274,8 +269,7 @@ describe('Change Streams', function() {
       // The actual test we wish to run
       test: function(done) {
         var configuration = this.configuration;
-        var MongoClient = configuration.require.MongoClient;
-        var client = new MongoClient(configuration.url());
+        const client = configuration.newClient();
 
         client.connect(function(err, client) {
           assert.ifError(err);
@@ -302,8 +296,7 @@ describe('Change Streams', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-      var client = new MongoClient(configuration.url());
+      const client = configuration.newClient();
 
       client.connect(function(err, client) {
         assert.ifError(err);
@@ -342,8 +335,7 @@ describe('Change Streams', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-      var client = new MongoClient(configuration.url());
+      const client = configuration.newClient();
 
       return client.connect().then(function() {
         var theDatabase = client.db('integration_tests');
@@ -380,8 +372,7 @@ describe('Change Streams', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-      var client = new MongoClient(configuration.url());
+      const client = configuration.newClient();
 
       client.connect(function(err, client) {
         assert.ifError(err);
@@ -417,8 +408,7 @@ describe('Change Streams', function() {
       // The actual test we wish to run
       test: function(done) {
         var configuration = this.configuration;
-        var MongoClient = configuration.require.MongoClient;
-        var client = new MongoClient(configuration.url());
+        const client = configuration.newClient();
 
         client.connect(function(err, client) {
           assert.ifError(err);
@@ -465,8 +455,8 @@ describe('Change Streams', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-      var client = new MongoClient(configuration.url());
+      const client = configuration.newClient();
+
       client.connect(function(err, client) {
         assert.ifError(err);
 
@@ -508,8 +498,7 @@ describe('Change Streams', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-      var client = new MongoClient(configuration.url());
+      const client = configuration.newClient();
 
       client.connect(function(err, client) {
         assert.ifError(err);
@@ -564,8 +553,7 @@ describe('Change Streams', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-      var client = new MongoClient(configuration.url());
+      const client = configuration.newClient();
 
       client.connect(function(err, client) {
         assert.ifError(err);
@@ -610,8 +598,7 @@ describe('Change Streams', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-      var client = new MongoClient(configuration.url());
+      const client = configuration.newClient();
 
       client.connect(function(err, client) {
         assert.ifError(err);
@@ -664,8 +651,7 @@ describe('Change Streams', function() {
 
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient,
-        ObjectId = configuration.require.ObjectId;
+      const ObjectId = configuration.require.ObjectId;
 
       // Contain mock server
       var primaryServer = null;
@@ -712,8 +698,7 @@ describe('Change Streams', function() {
       });
 
       const mockServerURL = 'mongodb://localhost:32000/';
-
-      var client = new MongoClient(mockServerURL);
+      var client = configuration.newClient(mockServerURL);
 
       client.connect(function(err, client) {
         assert.ifError(err);
@@ -763,8 +748,7 @@ describe('Change Streams', function() {
     },
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient,
-        ObjectId = configuration.require.ObjectId;
+      const ObjectId = configuration.require.ObjectId;
 
       // Contain mock server
       var primaryServer = null;
@@ -815,39 +799,37 @@ describe('Change Streams', function() {
         });
       });
 
-      MongoClient.connect(
-        'mongodb://localhost:32000/',
-        {
-          socketTimeoutMS: 500,
-          validateOptions: true
-        },
-        function(err, client) {
-          assert.ifError(err);
+      const client = configuration.newClient('mongodb://localhost:32000/', {
+        socketTimeoutMS: 500,
+        validateOptions: true
+      });
 
-          var theDatabase = client.db('integration_tests');
-          var theCollection = theDatabase.collection('MongoNetworkErrorTestPromises');
-          var thisChangeStream = theCollection.watch(pipeline);
+      client.connect(function(err, client) {
+        assert.ifError(err);
 
-          thisChangeStream.next(function(err, change) {
-            assert.ok(err instanceof MongoNetworkError);
-            assert.ok(err.message);
-            assert.ok(err.message.indexOf('timed out') > -1);
+        var theDatabase = client.db('integration_tests');
+        var theCollection = theDatabase.collection('MongoNetworkErrorTestPromises');
+        var thisChangeStream = theCollection.watch(pipeline);
 
-            assert.equal(
-              change,
-              null,
-              'ChangeStream.next() returned a change document but it should have returned a MongoNetworkError'
-            );
+        thisChangeStream.next(function(err, change) {
+          assert.ok(err instanceof MongoNetworkError);
+          assert.ok(err.message);
+          assert.ok(err.message.indexOf('timed out') > -1);
 
-            thisChangeStream.close(function(err) {
-              assert.ifError(err);
-              thisChangeStream.close();
+          assert.equal(
+            change,
+            null,
+            'ChangeStream.next() returned a change document but it should have returned a MongoNetworkError'
+          );
 
-              client.close(() => mock.cleanup(() => done()));
-            });
+          thisChangeStream.close(function(err) {
+            assert.ifError(err);
+            thisChangeStream.close();
+
+            client.close(() => mock.cleanup(() => done()));
           });
-        }
-      );
+        });
+      });
     }
   });
 
@@ -861,10 +843,9 @@ describe('Change Streams', function() {
     },
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient,
-        ObjectId = configuration.require.ObjectId,
-        Timestamp = configuration.require.Timestamp,
-        Long = configuration.require.Long;
+      const ObjectId = configuration.require.ObjectId;
+      const Timestamp = configuration.require.Timestamp;
+      const Long = configuration.require.Long;
 
       // Contain mock server
       var primaryServer = null;
@@ -939,11 +920,13 @@ describe('Change Streams', function() {
       });
 
       let finalError = undefined;
-
-      MongoClient.connect('mongodb://localhost:32000/', {
+      const client = configuration.newClient('mongodb://localhost:32000/', {
         socketTimeoutMS: 500,
         validateOptions: true
-      })
+      });
+
+      client
+        .connect()
         .then(client => {
           var database = client.db('integration_tests');
           var collection = database.collection('MongoNetworkErrorTestPromises');
@@ -990,8 +973,7 @@ describe('Change Streams', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-      var client = new MongoClient(configuration.url());
+      const client = configuration.newClient();
 
       return client.connect().then(client => {
         var database = client.db('integration_tests');
@@ -1081,8 +1063,7 @@ describe('Change Streams', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-      var client = new MongoClient(configuration.url());
+      const client = configuration.newClient();
 
       return client.connect().then(client => {
         var database = client.db('integration_tests');
@@ -1137,8 +1118,7 @@ describe('Change Streams', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-      var client = new MongoClient(configuration.url());
+      const client = configuration.newClient();
 
       return client.connect().then(client => {
         var database = client.db('integration_tests');
@@ -1206,9 +1186,8 @@ describe('Change Streams', function() {
     // The actual test we wish to run
     test: function() {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var ReadPreference = configuration.require.ReadPreference;
-      var client = new MongoClient(configuration.url());
+      const client = configuration.newClient();
 
       return client.connect().then(client => {
         // Should get preference from database
@@ -1256,8 +1235,7 @@ describe('Change Streams', function() {
     test: function(done) {
       var configuration = this.configuration;
       var fs = require('fs');
-      var MongoClient = configuration.require.MongoClient;
-      var client = new MongoClient(configuration.url());
+      const client = configuration.newClient();
 
       client.connect(function(err, client) {
         assert.ifError(err);
@@ -1304,10 +1282,9 @@ describe('Change Streams', function() {
     },
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient,
-        ObjectId = configuration.require.ObjectId,
-        Timestamp = configuration.require.Timestamp,
-        Long = configuration.require.Long;
+      const ObjectId = configuration.require.ObjectId;
+      const Timestamp = configuration.require.Timestamp;
+      const Long = configuration.require.Long;
 
       // Contain mock server
       var primaryServer = null;
@@ -1403,44 +1380,42 @@ describe('Change Streams', function() {
           }
         });
 
-        MongoClient.connect(
-          `mongodb://${primaryServer.uri()}/`,
-          {
-            socketTimeoutMS: 500,
-            validateOptions: true
-          },
-          function(err, client) {
-            assert.ifError(err);
+        const client = configuration.newClient(`mongodb://${primaryServer.uri()}/`, {
+          socketTimeoutMS: 500,
+          validateOptions: true
+        });
 
-            var fs = require('fs');
-            var theDatabase = client.db('integration_tests5');
-            var theCollection = theDatabase.collection('MongoNetworkErrorTestPromises');
-            var thisChangeStream = theCollection.watch(pipeline);
+        client.connect(function(err, client) {
+          assert.ifError(err);
 
-            var filename = '/tmp/_nodemongodbnative_resumepipe.txt';
-            var outStream = fs.createWriteStream(filename);
+          var fs = require('fs');
+          var theDatabase = client.db('integration_tests5');
+          var theCollection = theDatabase.collection('MongoNetworkErrorTestPromises');
+          var thisChangeStream = theCollection.watch(pipeline);
 
-            thisChangeStream.stream({ transform: JSON.stringify }).pipe(outStream);
+          var filename = '/tmp/_nodemongodbnative_resumepipe.txt';
+          var outStream = fs.createWriteStream(filename);
 
-            // Listen for changes to the file
-            var watcher = fs.watch(filename, function(eventType) {
-              assert.equal(eventType, 'change');
+          thisChangeStream.stream({ transform: JSON.stringify }).pipe(outStream);
 
-              var fileContents = fs.readFileSync(filename, 'utf8');
+          // Listen for changes to the file
+          var watcher = fs.watch(filename, function(eventType) {
+            assert.equal(eventType, 'change');
 
-              var parsedFileContents = JSON.parse(fileContents);
-              assert.equal(parsedFileContents.fullDocument.a, 1);
+            var fileContents = fs.readFileSync(filename, 'utf8');
 
-              watcher.close();
+            var parsedFileContents = JSON.parse(fileContents);
+            assert.equal(parsedFileContents.fullDocument.a, 1);
 
-              thisChangeStream.close(function(err) {
-                assert.ifError(err);
+            watcher.close();
 
-                mock.cleanup(() => done());
-              });
+            thisChangeStream.close(function(err) {
+              assert.ifError(err);
+
+              mock.cleanup(() => done());
             });
-          }
-        );
+          });
+        });
       });
     }
   });
@@ -1452,8 +1427,7 @@ describe('Change Streams', function() {
     test: function(done) {
       var configuration = this.configuration;
       var crypto = require('crypto');
-      var MongoClient = configuration.require.MongoClient;
-      var client = new MongoClient(configuration.url(), {
+      var client = configuration.newClient(configuration.url(), {
         poolSize: 1,
         autoReconnect: false
       });
@@ -1512,8 +1486,7 @@ describe('Change Streams', function() {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
     test: function(done) {
       const configuration = this.configuration;
-      const MongoClient = configuration.require.MongoClient;
-      const client = new MongoClient(configuration.url());
+      const client = configuration.newClient();
 
       const collectionName = 'resumeAfterKillCursor';
 
@@ -1552,7 +1525,6 @@ describe('Change Streams', function() {
     metadata: { requires: { topology: 'replicaset', mongodb: '>=3.7.3' } },
     test: function(done) {
       const configuration = this.configuration;
-      const MongoClient = configuration.require.MongoClient;
       const ObjectId = configuration.require.ObjectId;
       const Timestamp = configuration.require.Timestamp;
       const Long = configuration.require.Long;
@@ -1630,9 +1602,9 @@ describe('Change Streams', function() {
         validateOptions: true
       };
 
+      const client = configuration.newClient(`mongodb://${server.uri()}`, connectOptions);
       let getMoreCounter = 0;
       let aggregateCounter = 0;
-      let client;
       let changeStream;
       let server;
 
@@ -1681,8 +1653,7 @@ describe('Change Streams', function() {
         .createServer()
         .then(_server => (server = _server))
         .then(() => server.setMessageHandler(primaryServerHandler))
-        .then(() => MongoClient.connect(`mongodb://${server.uri()}`, connectOptions))
-        .then(_client => (client = _client))
+        .then(() => client.connect())
         .then(() => client.db(dbName))
         .then(db => db.collection(collectionName))
         .then(col => col.watch(pipeline))

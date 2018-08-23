@@ -36,8 +36,6 @@ describe('ReplSet (Operations)', function() {
     // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
-      const mongo = configuration.require,
-        MongoClient = mongo.MongoClient;
 
       // Create url
       const url = format(
@@ -93,7 +91,8 @@ describe('ReplSet (Operations)', function() {
         });
       }
 
-      MongoClient.connect(url, (err, client) => {
+      const client = configuration.newClient(url);
+      client.connect((err, client) => {
         expect(err).to.not.exist;
         const db = client.db(configuration.db);
 
@@ -122,8 +121,6 @@ describe('ReplSet (Operations)', function() {
       // The actual test we wish to run
       test: function(done) {
         const configuration = this.configuration;
-        const mongo = configuration.require,
-          MongoClient = mongo.MongoClient;
 
         // Create url
         const url = format(
@@ -192,7 +189,8 @@ describe('ReplSet (Operations)', function() {
           });
         }
 
-        MongoClient.connect(url, (err, client) => {
+        const client = configuration.newClient(url);
+        client.connect((err, client) => {
           expect(err).to.not.exist;
           const db = client.db(configuration.db);
 
@@ -226,8 +224,6 @@ describe('ReplSet (Operations)', function() {
     // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
-      const mongo = configuration.require,
-        MongoClient = mongo.MongoClient;
 
       // Create url
       const url = format(
@@ -288,7 +284,8 @@ describe('ReplSet (Operations)', function() {
         });
       }
 
-      MongoClient.connect(url, (err, client) => {
+      const client = configuration.newClient(url);
+      client.connect((err, client) => {
         expect(err).to.not.exist;
         const db = client.db(configuration.db);
 
@@ -317,8 +314,6 @@ describe('ReplSet (Operations)', function() {
       // The actual test we wish to run
       test: function(done) {
         const configuration = this.configuration;
-        const mongo = configuration.require,
-          MongoClient = mongo.MongoClient;
 
         // Create url
         const url = format(
@@ -395,7 +390,8 @@ describe('ReplSet (Operations)', function() {
           });
         }
 
-        MongoClient.connect(url, (err, client) => {
+        const client = configuration.newClient(url);
+        client.connect((err, client) => {
           expect(err).to.not.exist;
           const db = client.db(configuration.db);
 
@@ -416,7 +412,6 @@ describe('ReplSet (Operations)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
         ReadPreference = mongo.ReadPreference;
 
       // Create url
@@ -429,7 +424,8 @@ describe('ReplSet (Operations)', function() {
         'primary'
       );
 
-      MongoClient.connect(url, function(err, client) {
+      const client = configuration.newClient(url);
+      client.connect(function(err, client) {
         test.equal(null, err);
         var db = client.db(configuration.db);
 
@@ -474,12 +470,11 @@ describe('ReplSet (Operations)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var mongo = configuration.require,
-        MongoClient = mongo.MongoClient;
-
-      MongoClient.connect(
+      const client = configuration.newClient(
         'mongodb://localhost:31001/integration_test_?replicaSet=rs&readPreference=primaryPreferred'
-      ).then(function(client) {
+      );
+
+      client.connect().then(function(client) {
         var db = client.db(configuration.db);
         var collection = db.collection('ensureIndexWithPrimaryPreferred');
         collection.ensureIndex({ a: 1 }, function(err) {
@@ -500,7 +495,6 @@ describe('ReplSet (Operations)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
         ReadPreference = mongo.ReadPreference;
 
       // Create url
@@ -515,7 +509,8 @@ describe('ReplSet (Operations)', function() {
 
       var manager = configuration.manager;
 
-      MongoClient.connect(url, function(err, client) {
+      const client = configuration.newClient(url);
+      client.connect(function(err, client) {
         test.equal(null, err);
         var db = client.db(configuration.db);
 
@@ -567,7 +562,6 @@ describe('ReplSet (Operations)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
         ReadPreference = mongo.ReadPreference;
 
       // Create url
@@ -580,7 +574,8 @@ describe('ReplSet (Operations)', function() {
         'secondary'
       );
 
-      MongoClient.connect(url, function(err, client) {
+      const client = configuration.newClient(url);
+      client.connect(function(err, client) {
         test.equal(null, err);
         var db = client.db(configuration.db);
 

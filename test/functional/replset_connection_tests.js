@@ -59,27 +59,17 @@ describe.skip('ReplSet (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ReplSet = configuration.require.ReplSet,
-        Server = configuration.require.Server,
-        MongoClient = configuration.require.MongoClient,
-        CoreServer = configuration.require.CoreServer,
+      var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       // Accounting tests
       CoreServer.enableServerAccounting();
       CoreConnection.enableConnectionAccounting();
 
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server('localhost', 28390),
-          new Server('localhost', 28391),
-          new Server('localhost', 28392)
-        ],
-        { rs_name: configuration.replicasetName }
+      var client = configuration.newClient(
+        'mongodb://localhost:28390,localhost:28391,localhost:38392/test?replicaSet=rs',
+        { w: 0 }
       );
-
-      var client = new MongoClient(replSet, { w: 0 });
       client.connect(function(err) {
         test.ok(err != null);
 
@@ -102,10 +92,7 @@ describe.skip('ReplSet (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ReplSet = configuration.require.ReplSet,
-        Server = configuration.require.Server,
-        MongoClient = configuration.require.MongoClient,
-        CoreServer = configuration.require.CoreServer,
+      var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       // Replset start port
@@ -115,17 +102,7 @@ describe.skip('ReplSet (Connection)', function() {
           CoreServer.enableServerAccounting();
           CoreConnection.enableConnectionAccounting();
 
-          // Replica configuration
-          var replSet = new ReplSet(
-            [
-              new Server(configuration.host, configuration.port),
-              new Server(configuration.host, configuration.port + 1),
-              new Server(configuration.host, configuration.port + 2)
-            ],
-            { rs_name: configuration.replicasetName }
-          );
-
-          var client = new MongoClient(replSet, { w: 0 });
+          const client = configuration.newClient({}, { w: 0 });
           client.connect(function(err, client) {
             test.equal(null, err);
             client.close();
@@ -145,10 +122,7 @@ describe.skip('ReplSet (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ReplSet = configuration.require.ReplSet,
-        Server = configuration.require.Server,
-        MongoClient = configuration.require.MongoClient,
-        CoreServer = configuration.require.CoreServer,
+      var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       // Replset start port
@@ -158,17 +132,7 @@ describe.skip('ReplSet (Connection)', function() {
           CoreServer.enableServerAccounting();
           CoreConnection.enableConnectionAccounting();
 
-          // Replica configuration
-          var replSet = new ReplSet(
-            [
-              new Server(configuration.host, configuration.port),
-              new Server(configuration.host, configuration.port + 1),
-              new Server(configuration.host, configuration.port + 2)
-            ],
-            {}
-          );
-
-          var client = new MongoClient(replSet, { w: 0 });
+          const client = configuration.newClient({}, { w: 0 });
           client.connect(function(err, client) {
             test.equal(null, err);
             client.close();
@@ -186,30 +150,17 @@ describe.skip('ReplSet (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ReplSet = configuration.require.ReplSet,
-        Server = configuration.require.Server,
-        MongoClient = configuration.require.MongoClient,
-        CoreServer = configuration.require.CoreServer,
+      var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       // Accounting tests
       CoreServer.enableServerAccounting();
       CoreConnection.enableConnectionAccounting();
-
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        {
-          socketOptions: { keepAlive: true, keepAliveInitialDelay: 100 },
-          rs_name: configuration.replicasetName
-        }
+      const client = configuration.newClient(
+        {},
+        { w: 0, keepAlive: true, keepAliveInitialDelay: 100 }
       );
 
-      var client = new MongoClient(replSet, { w: 0 });
       client.connect(function(err, client) {
         test.equal(null, err);
         // Get a connection
@@ -228,27 +179,15 @@ describe.skip('ReplSet (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ReplSet = configuration.require.ReplSet,
-        Server = configuration.require.Server,
-        MongoClient = configuration.require.MongoClient,
-        CoreServer = configuration.require.CoreServer,
+      var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       // Accounting tests
       CoreServer.enableServerAccounting();
       CoreConnection.enableConnectionAccounting();
 
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName }
-      );
-
-      new MongoClient(replSet, { w: 0 }).connect(function(err, client) {
+      const client = configuration.newClient({}, { w: 0 });
+      client.connect(function(err, client) {
         test.equal(null, err);
         var dbCloseCount = 0;
         client.on('close', function() {
@@ -278,27 +217,15 @@ describe.skip('ReplSet (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ReplSet = configuration.require.ReplSet,
-        Server = configuration.require.Server,
-        MongoClient = configuration.require.MongoClient,
-        CoreServer = configuration.require.CoreServer,
+      var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       // Accounting tests
       CoreServer.enableServerAccounting();
       CoreConnection.enableConnectionAccounting();
 
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName }
-      );
-
-      new MongoClient(replSet, { w: 0 }).connect(function(err, client) {
+      const client = configuration.newClient({}, { w: 0 });
+      client.connect(function(err, client) {
         test.equal(null, err);
         var dbCloseCount = 0;
         client.on('close', function() {
@@ -328,21 +255,7 @@ describe.skip('ReplSet (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ReplSet = configuration.require.ReplSet,
-        Server = configuration.require.Server,
-        MongoClient = configuration.require.MongoClient;
-
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName + '-wrong' }
-      );
-
-      var client = new MongoClient(replSet, { w: 0 });
+      const client = configuration.newClient({}, { rs_name: 'wrong' });
       client.connect(function(err) {
         test.notEqual(null, err);
         done();
@@ -352,26 +265,12 @@ describe.skip('ReplSet (Connection)', function() {
 
   var retries = 120;
   var ensureConnection = function(configuration, numberOfTries, callback) {
-    var ReplSet = configuration.require.ReplSet,
-      Server = configuration.require.Server,
-      MongoClient = configuration.require.MongoClient;
-
-    // Replica configuration
-    var replSet = new ReplSet(
-      [
-        new Server(configuration.host, configuration.port),
-        new Server(configuration.host, configuration.port + 1),
-        new Server(configuration.host, configuration.port + 2)
-      ],
-      { rs_name: configuration.replicasetName, socketOptions: { connectTimeoutMS: 1000 } }
-    );
-
     if (numberOfTries <= 0) {
       return callback(new Error('could not connect correctly'), null);
     }
 
     // Open the db
-    var client = new MongoClient(replSet, { w: 0 });
+    const client = configuration.newClient({}, { w: 0, connectTimeoutMS: 1000 });
     client.connect(function(err, client) {
       if (err != null) {
         // Wait for a sec and retry
@@ -392,25 +291,12 @@ describe.skip('ReplSet (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ReplSet = configuration.require.ReplSet,
-        Server = configuration.require.Server,
-        MongoClient = configuration.require.MongoClient,
-        CoreServer = configuration.require.CoreServer,
+      var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       // Accounting tests
       CoreServer.enableServerAccounting();
       CoreConnection.enableConnectionAccounting();
-
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName }
-      );
 
       // // Step down primary server
       configuration.manager
@@ -420,7 +306,8 @@ describe.skip('ReplSet (Connection)', function() {
           ensureConnection(configuration, retries, function(err) {
             test.equal(null, err);
 
-            new MongoClient(replSet, { w: 0 }).connect(function(err, client) {
+            const client = configuration.newClient({}, { w: 0 });
+            client.connect(function(err, client) {
               test.ok(err == null);
               // Get a connection
               var connection = client.topology.connections()[0];
@@ -441,10 +328,7 @@ describe.skip('ReplSet (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ReplSet = configuration.require.ReplSet,
-        Server = configuration.require.Server,
-        MongoClient = configuration.require.MongoClient,
-        CoreServer = configuration.require.CoreServer,
+      var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       // Replset start port
@@ -454,21 +338,12 @@ describe.skip('ReplSet (Connection)', function() {
           CoreServer.enableServerAccounting();
           CoreConnection.enableConnectionAccounting();
 
-          // Replica configuration
-          var replSet = new ReplSet(
-            [
-              new Server(configuration.host, configuration.port),
-              new Server(configuration.host, configuration.port + 1),
-              new Server(configuration.host, configuration.port + 2)
-            ],
-            { rs_name: configuration.replicasetName }
-          );
-
           // Wait for new primary to pop up
           ensureConnection(configuration, retries, function(err) {
             test.equal(null, err);
 
-            new MongoClient(replSet, { w: 0 }).connect(function(err, client) {
+            const client = configuration.newClient({}, { w: 0 });
+            client.connect(function(err, client) {
               test.ok(err == null);
               // Get a connection
               var connection = client.topology.connections()[0];
@@ -490,10 +365,7 @@ describe.skip('ReplSet (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ReplSet = configuration.require.ReplSet,
-        Server = configuration.require.Server,
-        MongoClient = configuration.require.MongoClient,
-        CoreServer = configuration.require.CoreServer,
+      var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       // Replset start port
@@ -503,21 +375,12 @@ describe.skip('ReplSet (Connection)', function() {
           CoreServer.enableServerAccounting();
           CoreConnection.enableConnectionAccounting();
 
-          // Replica configuration
-          var replSet = new ReplSet(
-            [
-              new Server(configuration.host, configuration.port),
-              new Server(configuration.host, configuration.port + 1),
-              new Server(configuration.host, configuration.port + 2)
-            ],
-            { rs_name: configuration.replicasetName }
-          );
-
           // Wait for new primary to pop up
           ensureConnection(configuration, retries, function(err) {
             test.equal(null, err);
 
-            new MongoClient(replSet, { w: 0 }).connect(function(err, client) {
+            const client = configuration.newClient({}, { w: 0 });
+            client.connect(function(err, client) {
               test.ok(err == null);
               // Get a connection
               var connection = client.topology.connections()[0];
@@ -539,10 +402,7 @@ describe.skip('ReplSet (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ReplSet = configuration.require.ReplSet,
-        Server = configuration.require.Server,
-        MongoClient = configuration.require.MongoClient,
-        CoreServer = configuration.require.CoreServer,
+      var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       var openCalled = false;
@@ -550,17 +410,7 @@ describe.skip('ReplSet (Connection)', function() {
       CoreServer.enableServerAccounting();
       CoreConnection.enableConnectionAccounting();
 
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName }
-      );
-
-      var client = new MongoClient(replSet, { w: 0 });
+      const client = configuration.newClient({}, { w: 0 });
       client.once('open', function(_err) {
         test.equal(null, _err);
         openCalled = true;
@@ -595,34 +445,23 @@ describe.skip('ReplSet (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ReplSet = configuration.require.ReplSet,
-        Server = configuration.require.Server,
-        MongoClient = configuration.require.MongoClient,
-        CoreServer = configuration.require.CoreServer,
+      var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       // Accounting tests
       CoreServer.enableServerAccounting();
       CoreConnection.enableConnectionAccounting();
 
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
+      const client = configuration.newClient(
+        {},
         {
-          socketOptions: {
-            connectTimeoutMS: 1000,
-            socketTimeoutMS: 3000,
-            noDelay: false
-          },
-          rs_name: configuration.replicasetName
+          w: 0,
+          connectTimeoutMS: 1000,
+          socketTimeoutMS: 3000,
+          noDelay: false
         }
       );
 
-      var client = new MongoClient(replSet, { w: 0 });
       client.connect(function(err, client) {
         test.equal(null, err);
         // Get a connection
@@ -651,28 +490,15 @@ describe.skip('ReplSet (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ReplSet = configuration.require.ReplSet,
-        Server = configuration.require.Server,
-        MongoClient = configuration.require.MongoClient,
-        CoreServer = configuration.require.CoreServer,
+      var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       // Accounting tests
       CoreServer.enableServerAccounting();
       CoreConnection.enableConnectionAccounting();
 
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName }
-      );
-
       // Connect to the replicaset
-      var client = new MongoClient(replSet, { w: 0 });
+      const client = configuration.newClient({}, { w: 0 });
       client.connect(function(err, client) {
         // Kill the secondary
         // Replset start port
@@ -694,28 +520,15 @@ describe.skip('ReplSet (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ReplSet = configuration.require.ReplSet,
-        Server = configuration.require.Server,
-        MongoClient = configuration.require.MongoClient,
-        CoreServer = configuration.require.CoreServer,
+      var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       // Accounting tests
       CoreServer.enableServerAccounting();
       CoreConnection.enableConnectionAccounting();
 
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName }
-      );
-
       // Connect to the replicaset
-      var client = new MongoClient(replSet, { w: 1, bufferMaxEntries: 0 });
+      const client = configuration.newClient({}, { w: 1, bufferMaxEntries: 0 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
 
@@ -752,11 +565,9 @@ describe.skip('ReplSet (Connection)', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
-        CoreServer = configuration.require.CoreServer,
-        CoreConnection = configuration.require.CoreConnection;
+      const configuration = this.configuration;
+      const CoreServer = configuration.require.CoreServer;
+      const CoreConnection = configuration.require.CoreConnection;
 
       var url = f(
         'mongodb://localhost:%s,localhost:%s,localhost:%s/integration_test_?replicaSet=%s',
@@ -770,43 +581,41 @@ describe.skip('ReplSet (Connection)', function() {
       CoreServer.enableServerAccounting();
       CoreConnection.enableConnectionAccounting();
 
-      MongoClient.connect(
-        url,
-        {
-          replSet: {
-            haInterval: 500,
-            socketOptions: {
-              connectTimeoutMS: 500
-            }
+      const client = configuration.newClient(url, {
+        replSet: {
+          haInterval: 500,
+          socketOptions: {
+            connectTimeoutMS: 500
           }
-        },
-        function(err, client) {
-          test.equal(null, err);
-          var db = client.db(configuration.db);
-
-          test.equal(500, client.topology.connections()[0].connectionTimeout);
-          test.equal(360000, client.topology.connections()[0].socketTimeout);
-
-          db
-            .collection('replicaset_mongo_client_collection')
-            .update({ a: 1 }, { b: 1 }, { upsert: true }, function(err, result) {
-              test.equal(null, err);
-              test.equal(1, result.result.n);
-
-              client.close();
-
-              setTimeout(function() {
-                // Connection account tests
-                test.equal(0, Object.keys(CoreConnection.connections()).length);
-                test.equal(0, Object.keys(CoreServer.servers()).length);
-                CoreServer.disableServerAccounting();
-                CoreConnection.disableConnectionAccounting();
-
-                done();
-              }, 200);
-            });
         }
-      );
+      });
+
+      client.connect(function(err, client) {
+        test.equal(null, err);
+        var db = client.db(configuration.db);
+
+        test.equal(500, client.topology.connections()[0].connectionTimeout);
+        test.equal(360000, client.topology.connections()[0].socketTimeout);
+
+        db
+          .collection('replicaset_mongo_client_collection')
+          .update({ a: 1 }, { b: 1 }, { upsert: true }, function(err, result) {
+            test.equal(null, err);
+            test.equal(1, result.result.n);
+
+            client.close();
+
+            setTimeout(function() {
+              // Connection account tests
+              test.equal(0, Object.keys(CoreConnection.connections()).length);
+              test.equal(0, Object.keys(CoreServer.servers()).length);
+              CoreServer.disableServerAccounting();
+              CoreConnection.disableConnectionAccounting();
+
+              done();
+            }, 200);
+          });
+      });
     }
   });
 
@@ -818,11 +627,9 @@ describe.skip('ReplSet (Connection)', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
-        CoreServer = configuration.require.CoreServer,
-        CoreConnection = configuration.require.CoreConnection;
+      const configuration = this.configuration;
+      const CoreServer = configuration.require.CoreServer;
+      const CoreConnection = configuration.require.CoreConnection;
 
       // Create url
       var url = f(
@@ -838,7 +645,8 @@ describe.skip('ReplSet (Connection)', function() {
       CoreServer.enableServerAccounting();
       CoreConnection.enableConnectionAccounting();
 
-      MongoClient.connect(url, function(err, client) {
+      const client = configuration.newClient(url);
+      client.connect(function(err, client) {
         var db = client.db(configuration.db);
 
         db.collection('test_collection').insert({ a: 1 }, function(err) {
@@ -869,9 +677,6 @@ describe.skip('ReplSet (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var mongo = configuration.require,
-        MongoClient = mongo.MongoClient;
-
       var url = f(
         'mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s',
         'nolocalhost:30000',
@@ -881,7 +686,8 @@ describe.skip('ReplSet (Connection)', function() {
         'primary'
       );
 
-      MongoClient.connect(url, function(err) {
+      const client = configuration.newClient(url);
+      client.connect(function(err) {
         test.ok(err != null);
         done();
       });
@@ -900,7 +706,6 @@ describe.skip('ReplSet (Connection)', function() {
       test: function(done) {
         var configuration = this.configuration;
         var mongo = configuration.require,
-          MongoClient = mongo.MongoClient,
           GridStore = mongo.GridStore,
           ObjectID = mongo.ObjectID,
           CoreServer = configuration.require.CoreServer,
@@ -920,7 +725,8 @@ describe.skip('ReplSet (Connection)', function() {
         CoreServer.enableServerAccounting();
         CoreConnection.enableConnectionAccounting();
 
-        MongoClient.connect(url, function(err, client) {
+        const client = configuration.newClient(url);
+        client.connect(function(err, client) {
           var db = client.db(configuration.db);
           var gs = new GridStore(db, new ObjectID());
           test.equal('majority', gs.writeConcern.w);
@@ -950,28 +756,15 @@ describe.skip('ReplSet (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var ReplSet = configuration.require.ReplSet,
-        Server = configuration.require.Server,
-        MongoClient = configuration.require.MongoClient,
-        CoreServer = configuration.require.CoreServer,
+      var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       // Accounting tests
       CoreServer.enableServerAccounting();
       CoreConnection.enableConnectionAccounting();
 
-      // Replica configuration
-      var replSet = new ReplSet(
-        [
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        { rs_name: configuration.replicasetName, socketTimeoutMS: 5000 }
-      );
-
       // Open the db connection
-      var client = new MongoClient(replSet, { w: 1 });
+      const client = configuration.newClient({}, { w: 1, socketTimeoutMS: 5000 });
       client.on('fullsetup', function(client) {
         var db = client.db(configuration.db);
         db.command({ ismaster: true }, function(err, result) {
@@ -984,7 +777,7 @@ describe.skip('ReplSet (Connection)', function() {
           // Get the arbiters
           var host = secondaries[0].split(':')[0];
           var port = parseInt(secondaries[0].split(':')[1], 10);
-          var client1 = new MongoClient(new Server(host, port), { w: 1 });
+          var client1 = configuration.newClient({}, { host, port, w: 1 });
           var finished = false;
 
           client.topology.on('left', function(t) {
@@ -1039,7 +832,6 @@ describe.skip('ReplSet (Connection)', function() {
     test: function(done) {
       var configuration = this.configuration;
       var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
         Server = mongo.Server,
         CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
@@ -1050,7 +842,8 @@ describe.skip('ReplSet (Connection)', function() {
       CoreServer.enableServerAccounting();
       CoreConnection.enableConnectionAccounting();
 
-      MongoClient.connect(url, function(err, client) {
+      const client = configuration.newClient(url);
+      client.connect(function(err, client) {
         test.equal(null, err);
         test.ok(client.topology instanceof Server);
         client.close();
@@ -1097,10 +890,7 @@ describe.skip('ReplSet (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var mongo = configuration.require,
-        Server = mongo.Server,
-        MongoClient = configuration.require.MongoClient,
-        CoreServer = configuration.require.CoreServer,
+      var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       // Replset start port
@@ -1113,7 +903,7 @@ describe.skip('ReplSet (Connection)', function() {
         var host = managers[0].host;
         var port = managers[0].port;
 
-        var client = new MongoClient(new Server(host, port), { w: 1 });
+        var client = configuration.newClient({}, { host, port, w: 1 });
         client.connect(function(err, client) {
           var db = client.db(configuration.db);
           test.equal(null, err);
@@ -1139,10 +929,7 @@ describe.skip('ReplSet (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var mongo = configuration.require,
-        Server = mongo.Server,
-        MongoClient = configuration.require.MongoClient,
-        CoreServer = configuration.require.CoreServer,
+      var CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
       configuration.manager.secondaries().then(function(managers) {
@@ -1154,7 +941,7 @@ describe.skip('ReplSet (Connection)', function() {
         var host = managers[0].host;
         var port = managers[0].port;
 
-        var client = new MongoClient(new Server(host, port), { w: 1 });
+        var client = configuration.newClient({}, { host, port, w: 1 });
         client.connect(function(err, client) {
           var db = client.db(configuration.db);
           test.equal(null, err);
@@ -1180,7 +967,6 @@ describe.skip('ReplSet (Connection)', function() {
       var configuration = this.configuration;
       var ReplSet = configuration.require.ReplSet,
         ServerManager = require('mongodb-topology-manager').Server,
-        MongoClient = configuration.require.MongoClient,
         CoreServer = configuration.require.CoreServer,
         CoreConnection = configuration.require.CoreConnection;
 
@@ -1213,7 +999,8 @@ describe.skip('ReplSet (Connection)', function() {
                 CoreConnection.enableConnectionAccounting();
 
                 // Attempt to connect using MongoClient uri
-                MongoClient.connect(url, function(err, client) {
+                const client = configuration.newClient(url);
+                client.connect(function(err, client) {
                   test.equal(null, err);
                   test.ok(client.topology instanceof ReplSet);
                   client.close();
@@ -1239,13 +1026,10 @@ describe.skip('ReplSet (Connection)', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var mongo = configuration.require,
-        MongoClient = mongo.MongoClient,
-        CoreServer = configuration.require.CoreServer,
-        CoreConnection = configuration.require.CoreConnection;
-
-      var url = f(
+      const configuration = this.configuration;
+      const CoreServer = configuration.require.CoreServer;
+      const CoreConnection = configuration.require.CoreConnection;
+      const url = f(
         'mongodb://localhost:%s,localhost:%s,localhost:%s/integration_test_?replicaSet=%s',
         configuration.port,
         configuration.port + 1,
@@ -1257,33 +1041,28 @@ describe.skip('ReplSet (Connection)', function() {
       CoreServer.enableServerAccounting();
       CoreConnection.enableConnectionAccounting();
 
-      MongoClient.connect(
-        url,
-        {
-          reconnectTries: 10
-        },
-        function(err, client) {
-          test.equal(null, err);
+      const client = configuration.newClient(url, { reconnectTries: 10 });
+      client.connect(function(err, client) {
+        test.equal(null, err);
 
-          var servers = client.topology.s.coreTopology.s.replicaSetState.allServers();
-          for (var i = 0; i < servers.length; i++) {
-            test.equal(10, servers[i].s.pool.options.reconnectTries);
-          }
-
-          // Destroy the pool
-          client.close();
-
-          setTimeout(function() {
-            // Connection account tests
-            test.equal(0, Object.keys(CoreConnection.connections()).length);
-            test.equal(0, Object.keys(CoreServer.servers()).length);
-            CoreServer.disableServerAccounting();
-            CoreConnection.disableConnectionAccounting();
-
-            done();
-          }, 200);
+        var servers = client.topology.s.coreTopology.s.replicaSetState.allServers();
+        for (var i = 0; i < servers.length; i++) {
+          test.equal(10, servers[i].s.pool.options.reconnectTries);
         }
-      );
+
+        // Destroy the pool
+        client.close();
+
+        setTimeout(function() {
+          // Connection account tests
+          test.equal(0, Object.keys(CoreConnection.connections()).length);
+          test.equal(0, Object.keys(CoreServer.servers()).length);
+          CoreServer.disableServerAccounting();
+          CoreConnection.disableConnectionAccounting();
+
+          done();
+        }, 200);
+      });
     }
   });
 
@@ -1298,9 +1077,6 @@ describe.skip('ReplSet (Connection)', function() {
       // The actual test we wish to run
       test: function(done) {
         var configuration = this.configuration;
-        var mongo = configuration.require,
-          MongoClient = mongo.MongoClient;
-
         var url = f(
           'mongodb://me:secret@localhost:%s,localhost:%s/integration_test_?replicaSet=%s',
           configuration.port + 1,
@@ -1308,22 +1084,20 @@ describe.skip('ReplSet (Connection)', function() {
           configuration.replicasetName
         );
 
-        MongoClient.connect(
-          url,
-          {
-            connectWithNoPrimary: true,
-            bufferMaxEntries: 0
-          },
-          function(err) {
-            test.ok(err);
-            test.ok(
-              err.message.indexOf(
-                'no connection available for operation and number of stored operation'
-              ) === -1
-            );
-            done();
-          }
-        );
+        const client = configuration.newClient(url, {
+          connectWithNoPrimary: true,
+          bufferMaxEntries: 0
+        });
+
+        client.connect(function(err) {
+          test.ok(err);
+          test.ok(
+            err.message.indexOf(
+              'no connection available for operation and number of stored operation'
+            ) === -1
+          );
+          done();
+        });
       }
     }
   );

@@ -1,6 +1,5 @@
 'use strict';
 
-const MongoClient = require('../..').MongoClient;
 const instrument = require('../..').instrument;
 const path = require('path');
 const fs = require('fs');
@@ -94,7 +93,7 @@ describe('APM', function() {
     }
   );
 
-  it('should support legacy `instrument`/`uninstrument` methods with MongoClient.connect', {
+  it('should support legacy `instrument`/`uninstrument` methods with MongoClient `connect`', {
     metadata: { requires: { topology: ['single', 'replicaset', 'sharded'] } },
 
     // The actual test we wish to run
@@ -106,8 +105,9 @@ describe('APM', function() {
       instrumentation.on('started', filterForCommands('insert', started));
       instrumentation.on('succeeded', filterForCommands('insert', succeeded));
 
-      const uri = this.configuration.url();
-      return MongoClient.connect(uri, { monitorCommands: true }).then(client => {
+      const firstClient = this.configuration.newClient({}, { monitorCommands: true });
+      const secondClient = this.configuration.newClient({}, { monitorCommands: true });
+      return firstClient.connect().then(client => {
         return client
           .db(this.configuration.db)
           .collection('apm_test')
@@ -124,7 +124,7 @@ describe('APM', function() {
           .then(() => {
             started = [];
             succeeded = [];
-            return MongoClient.connect(uri, { monitorCommands: true });
+            return secondClient.connect();
           })
           .then(newClient => {
             return newClient
@@ -1108,9 +1108,8 @@ describe('APM', function() {
             it(test.description, {
               metadata: { requires: requirements },
               test: function() {
-                return MongoClient.connect(this.configuration.url(), {
-                  monitorCommands: true
-                }).then(client => {
+                const client = this.configuration.newClient({}, { monitorCommands: true });
+                return client.connect().then(client => {
                   expect(client).to.exist;
                   return executeOperation(client, scenario, test).then(() => client.close());
                 });

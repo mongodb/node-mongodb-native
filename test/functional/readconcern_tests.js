@@ -207,7 +207,6 @@ describe('ReadConcern', function() {
 
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var listener = require('../..').instrument(function(err) {
         test.equal(null, err);
       });
@@ -221,7 +220,8 @@ describe('ReadConcern', function() {
           : f('%s?%s', url, 'readConcernLevel=local');
 
       // Connect using mongoclient
-      MongoClient.connect(url, function(err, client) {
+      const client = configuration.newClient(url);
+      client.connect(function(err, client) {
         expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
@@ -255,7 +255,6 @@ describe('ReadConcern', function() {
 
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var listener = require('../..').instrument(function(err) {
         test.equal(null, err);
       });
@@ -269,7 +268,8 @@ describe('ReadConcern', function() {
           : f('%s?%s', url, 'readConcernLevel=majority');
 
       // Connect using mongoclient
-      MongoClient.connect(url, function(err, client) {
+      const client = configuration.newClient(url);
+      client.connect(function(err, client) {
         expect(err).to.not.exist;
 
         var db = client.db(configuration.db);
@@ -303,7 +303,6 @@ describe('ReadConcern', function() {
 
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var listener = require('../..').instrument(function(err) {
         test.equal(null, err);
       });
@@ -318,7 +317,8 @@ describe('ReadConcern', function() {
       };
 
       // Connect using mongoclient
-      MongoClient.connect(url, options, function(err, client) {
+      const client = configuration.newClient(url, options);
+      client.connect(function(err, client) {
         expect(err).to.not.exist;
 
         var db = client.db(configuration.db);

@@ -169,8 +169,8 @@ describe('Multiple Databases', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-      MongoClient.connect(configuration.url(), { sslValidate: false }, function(err, client) {
+      const client = configuration.newClient({}, { sslValidate: false });
+      client.connect(function(err, client) {
         for (var i = 0; i < 100; i++) {
           client.db('test');
         }

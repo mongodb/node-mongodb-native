@@ -8,7 +8,7 @@ describe('Promises (Db)', function() {
     return setupDatabase(this.configuration);
   });
 
-  it('Should correctly connect with MongoClient.connect using Promise', {
+  it('Should correctly connect with MongoClient `connect` using Promise', {
     metadata: {
       requires: {
         topology: ['single']
@@ -18,14 +18,14 @@ describe('Promises (Db)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=100')
           : f('%s?%s', url, 'maxPoolSize=100');
 
-      MongoClient.connect(url).then(function(client) {
+      const client = configuration.newClient(url);
+      client.connect().then(function(client) {
         test.equal(1, client.topology.connections().length);
 
         client.close();
@@ -62,14 +62,14 @@ describe('Promises (Db)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
-      MongoClient.connect(url).then(function(client) {
+      const client = configuration.newClient(url);
+      client.connect().then(function(client) {
         // Execute ismaster
         client
           .db(configuration.db)
@@ -94,14 +94,14 @@ describe('Promises (Db)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
-      MongoClient.connect(url).then(function(client) {
+      const client = configuration.newClient(url);
+      client.connect().then(function(client) {
         // Execute ismaster
         client
           .db(configuration.db)
@@ -127,14 +127,14 @@ describe('Promises (Db)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
-      MongoClient.connect(url).then(function(client) {
+      const client = configuration.newClient(url);
+      client.connect().then(function(client) {
         client
           .db(configuration.db)
           .createCollection('promiseCollection')
@@ -161,14 +161,14 @@ describe('Promises (Db)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
-      MongoClient.connect(url).then(function(client) {
+      const client = configuration.newClient(url);
+      client.connect().then(function(client) {
         client
           .db(configuration.db)
           .stats()
@@ -192,14 +192,14 @@ describe('Promises (Db)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
-      MongoClient.connect(url).then(function(client) {
+      const client = configuration.newClient(url);
+      client.connect().then(function(client) {
         client
           .db(configuration.db)
           .eval('function (x) {return x;}', [3], { nolock: true })
@@ -223,14 +223,14 @@ describe('Promises (Db)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
-      MongoClient.connect(url).then(function(client) {
+      const client = configuration.newClient(url);
+      client.connect().then(function(client) {
         var db = client.db(configuration.db);
 
         db.createCollection('promiseCollection1').then(function(col) {
@@ -262,14 +262,14 @@ describe('Promises (Db)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
-      MongoClient.connect(url).then(function(client) {
+      const client = configuration.newClient(url);
+      client.connect().then(function(client) {
         client
           .db(configuration.db)
           .dropDatabase()
@@ -296,14 +296,14 @@ describe('Promises (Db)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
-      MongoClient.connect(url).then(function(client) {
+      const client = configuration.newClient(url);
+      client.connect().then(function(client) {
         var db = client.db(configuration.db);
 
         db.createCollection('promiseCollectionCollections1').then(function(col) {
@@ -334,14 +334,14 @@ describe('Promises (Db)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
-      MongoClient.connect(url).then(function(client) {
+      const client = configuration.newClient(url);
+      client.connect().then(function(client) {
         client
           .db(configuration.db)
           .executeDbAdminCommand({ ismaster: true })
@@ -365,14 +365,14 @@ describe('Promises (Db)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
-      MongoClient.connect(url).then(function(client) {
+      const client = configuration.newClient(url);
+      client.connect().then(function(client) {
         // Create an index
         client
           .db(configuration.db)
@@ -397,14 +397,14 @@ describe('Promises (Db)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=5')
           : f('%s?%s', url, 'maxPoolSize=5');
 
-      MongoClient.connect(url).then(function(client) {
+      const client = configuration.newClient(url);
+      client.connect().then(function(client) {
         // Create an index
         client
           .db(configuration.db)
@@ -429,14 +429,13 @@ describe('Promises (Db)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var db = null;
-      var client = null;
       var BlueBird = require('bluebird');
 
-      MongoClient.connect(configuration.url(), { promiseLibrary: BlueBird })
-        .then(function(_client) {
-          client = _client;
+      const client = configuration.newClient({}, { promiseLibrary: BlueBird });
+      client
+        .connect()
+        .then(function() {
           db = client.db(configuration.db);
           return db.createCollection('test');
         })

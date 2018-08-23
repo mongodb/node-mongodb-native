@@ -48,6 +48,11 @@ class NativeConfiguration extends ConfigurationBase {
   }
 
   newClient(dbOptions, serverOptions) {
+    // support MongoClient contructor form (url, options) for `newClient`
+    if (typeof dbOptions === 'string') {
+      return new this.mongo.MongoClient(dbOptions, serverOptions);
+    }
+
     serverOptions = Object.assign({}, { haInterval: 100 }, serverOptions);
 
     // Override implementation

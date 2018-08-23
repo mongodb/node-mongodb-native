@@ -8,9 +8,9 @@ describe('Views', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
-      var self = this,
-        MongoClient = self.configuration.mongo.MongoClient,
-        Long = self.configuration.mongo.Long;
+      var self = this;
+      const configuration = this.configuration;
+      const Long = configuration.mongo.Long;
 
       // Default message fields
       var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER);
@@ -46,7 +46,8 @@ describe('Views', function() {
         var commandResult = null;
 
         // Connect to the mocks
-        MongoClient.connect(`mongodb://${singleServer.uri()}/test`, function(err, client) {
+        const client = configuration.newClient(`mongodb://${singleServer.uri()}/test`);
+        client.connect(function(err, client) {
           expect(err).to.not.exist;
           var db = client.db(self.configuration.db);
 

@@ -19,8 +19,8 @@ const testContext = {};
 describe('CRUD spec', function() {
   beforeEach(function() {
     const configuration = this.configuration;
-    const MongoClient = configuration.require.MongoClient;
-    return MongoClient.connect(configuration.url()).then(client => {
+    const client = configuration.newClient();
+    return client.connect().then(client => {
       testContext.client = client;
       testContext.db = client.db(configuration.db);
     });

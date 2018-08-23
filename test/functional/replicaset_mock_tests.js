@@ -62,9 +62,7 @@ describe('ReplSet (mocks)', function() {
 
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient,
-        Logger = configuration.require.Logger;
-
+      var Logger = configuration.require.Logger;
       var logger = Logger.currentLogger();
       Logger.setLevel('warn');
       Logger.setCurrentLogger(function(msg, state) {
@@ -74,10 +72,10 @@ describe('ReplSet (mocks)', function() {
         );
       });
 
-      MongoClient.connect(`mongodb://${test.mongos1.uri()},${test.mongos2.uri()}/test`, function(
-        err,
-        client
-      ) {
+      const client = configuration.newClient(
+        `mongodb://${test.mongos1.uri()},${test.mongos2.uri()}/test`
+      );
+      client.connect(function(err, client) {
         Logger.setCurrentLogger(logger);
         Logger.reset();
         expect(err).to.not.exist;
@@ -99,9 +97,7 @@ describe('ReplSet (mocks)', function() {
 
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient,
-        Logger = configuration.require.Logger;
-
+      var Logger = configuration.require.Logger;
       var warnings = [];
       var logger = Logger.currentLogger();
       Logger.setLevel('warn');
@@ -110,10 +106,11 @@ describe('ReplSet (mocks)', function() {
         warnings.push(state);
       });
 
-      MongoClient.connect(`mongodb://${test.mongos1.uri()},${test.mongos2.uri()}/test`, function(
-        err,
-        client
-      ) {
+      const client = configuration.newClient(
+        `mongodb://${test.mongos1.uri()},${test.mongos2.uri()}/test`
+      );
+
+      client.connect(function(err, client) {
         Logger.setCurrentLogger(logger);
         Logger.reset();
 
@@ -155,19 +152,18 @@ describe('ReplSet (mocks)', function() {
 
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-
-      MongoClient.connect(
-        `mongodb://${test.mongos1.uri()},${test.mongos2.uri()}/test?socketTimeoutMS=120000&connectTimeoutMS=15000`,
-        function(err, client) {
-          expect(err).to.not.exist;
-          expect(client.topology.s.coreTopology.s.options.connectionTimeout).to.equal(15000);
-          expect(client.topology.s.coreTopology.s.options.socketTimeout).to.equal(120000);
-
-          client.close();
-          done();
-        }
+      const client = configuration.newClient(
+        `mongodb://${test.mongos1.uri()},${test.mongos2.uri()}/test?socketTimeoutMS=120000&connectTimeoutMS=15000`
       );
+
+      client.connect(function(err, client) {
+        expect(err).to.not.exist;
+        expect(client.topology.s.coreTopology.s.options.connectionTimeout).to.equal(15000);
+        expect(client.topology.s.coreTopology.s.options.socketTimeout).to.equal(120000);
+
+        client.close();
+        done();
+      });
     }
   });
 });
