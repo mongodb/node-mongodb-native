@@ -1805,7 +1805,10 @@ describe('Operation Examples', function() {
    */
   it('shouldCorrectlyExecuteGroupFunction', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: {
+        mongodb: '<=4.1.0',
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+      }
     },
 
     // The actual test we wish to run
@@ -3850,7 +3853,10 @@ describe('Operation Examples', function() {
    */
   it('shouldCorrectlyExecuteEvalFunctions', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: {
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'],
+        mongodb: '<=4.1.0'
+      }
     },
 
     // The actual test we wish to run
@@ -3976,7 +3982,10 @@ describe('Operation Examples', function() {
    */
   it('shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunction', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: {
+        mongodb: '<=4.1.0',
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+      }
     },
 
     // The actual test we wish to run
