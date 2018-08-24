@@ -45,11 +45,13 @@ describe('SDAM', function() {
         test.equal(null, err);
 
         client.close(true, function() {
-          for (var name in operations) {
-            test.ok(operations[name].length > 0);
-          }
+          setTimeout(() => {
+            for (var name in operations) {
+              test.ok(operations[name].length > 0);
+            }
 
-          done();
+            done();
+          }, 1000);
         });
       });
     }
