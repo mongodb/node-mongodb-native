@@ -2,7 +2,7 @@
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
 
-describe('SDAM', function() {
+describe.skip('SDAM', function() {
   before(function() {
     return setupDatabase(this.configuration);
   });
