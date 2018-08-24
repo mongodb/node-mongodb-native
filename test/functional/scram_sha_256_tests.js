@@ -178,7 +178,7 @@ describe('SCRAM-SHA-256 auth', function() {
 
       return withClient(
         this.configuration.newClient(options),
-        () => Promise.reject('This request should have failed to authenticate'),
+        () => Promise.reject(new Error('This request should have failed to authenticate')),
         err => expect(err).to.not.be.null
       );
     }
@@ -206,7 +206,7 @@ describe('SCRAM-SHA-256 auth', function() {
       const getErrorMsg = options =>
         withClient(
           this.configuration.newClient(options),
-          () => Promise.reject('This request should have failed to authenticate'),
+          () => Promise.reject(new Error('This request should have failed to authenticate')),
           err => expect(err).to.be.an.instanceof(MongoError)
         );
 
