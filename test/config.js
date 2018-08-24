@@ -53,6 +53,7 @@ class NativeConfiguration extends ConfigurationBase {
       return new this.mongo.MongoClient(dbOptions, serverOptions);
     }
 
+    dbOptions = dbOptions || {};
     serverOptions = Object.assign({}, { haInterval: 100 }, serverOptions);
 
     // Override implementation
