@@ -67,7 +67,7 @@ describe.skip('ReplSet (Connection)', function() {
       CoreConnection.enableConnectionAccounting();
 
       var client = configuration.newClient(
-        'mongodb://localhost:28390,localhost:28391,localhost:38392/test?replicaSet=rs',
+        'mongodb://localhost:28390,localhost:28391,localhost:28392/test?replicaSet=rs',
         { w: 0 }
       );
       client.connect(function(err) {

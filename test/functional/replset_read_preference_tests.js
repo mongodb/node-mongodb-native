@@ -823,6 +823,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
         {},
         {
           w: 0,
+          debug: true,
           readPreference: new ReadPreference(ReadPreference.SECONDARY_PREFERRED)
         }
       );
@@ -860,6 +861,7 @@ describe.skip('ReplSet (ReadPreference)', function() {
       const client = configuration.newClient({
         w: 'majority',
         wtimeout: 10000,
+        debug: true,
         readPreference: ReadPreference.NEAREST
       });
 
