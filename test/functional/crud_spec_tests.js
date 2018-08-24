@@ -227,17 +227,14 @@ describe('CRUD spec', function() {
     });
     const options = Object.assign({}, args.options);
 
-    collection
+    return collection
       .bulkWrite(operations, options)
       .then(result =>
         Object.keys(scenarioTest.outcome.result).forEach(resultName =>
           test.deepEqual(result[resultName], scenarioTest.outcome.result[resultName])
         )
-      );
-
-    return collection
-      .find({})
-      .toArray()
+      )
+      .then(() => collection.find({}).toArray())
       .then(results => test.deepEqual(results, scenarioTest.outcome.collection.data));
   }
 
