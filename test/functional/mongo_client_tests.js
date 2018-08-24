@@ -345,7 +345,7 @@ describe('MongoClient', function() {
 
         secondClient.connect(function(err) {
           test.equal(null, err);
-          test.ok(client.topology.connections().length >= 1);
+          test.ok(secondClient.topology.connections().length >= 1);
 
           var connections = secondClient.topology.connections();
 
