@@ -2628,7 +2628,7 @@ describe('Find', function() {
   it('Should not use a session when using parallelCollectionScan', {
     metadata: {
       requires: {
-        mongodb: '>=3.6.0',
+        mongodb: '>=3.6.0 <= 4.1.0',
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
     },

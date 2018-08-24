@@ -1126,7 +1126,7 @@ describe('Operation (Generators)', function() {
    * @ignore
    */
   it('shouldCorrectlyExecuteGroupFunctionWithGenerators', {
-    metadata: { requires: { generators: true, topology: ['single'] } },
+    metadata: { requires: { generators: true, topology: ['single'], mongodb: '<=4.1.0' } },
 
     // The actual test we wish to run
     test: function() {
@@ -2979,7 +2979,7 @@ describe('Operation (Generators)', function() {
    * @ignore
    */
   it('shouldCorrectlyExecuteEvalFunctionsWithGenerators', {
-    metadata: { requires: { generators: true, topology: ['single'] } },
+    metadata: { requires: { generators: true, topology: ['single'], mongodb: '<=4.1.0' } },
 
     // The actual test we wish to run
     test: function() {
@@ -3090,7 +3090,7 @@ describe('Operation (Generators)', function() {
    * @ignore
    */
   it('shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunctionWithGenerators', {
-    metadata: { requires: { generators: true, topology: ['single'] } },
+    metadata: { requires: { generators: true, topology: ['single'], mongodb: '<=4.1.0' } },
 
     // The actual test we wish to run
     test: function() {

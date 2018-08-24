@@ -1148,7 +1148,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyExecuteGroupFunctionWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
+    metadata: { requires: { topology: ['single'], mongodb: '<=4.1.0' } },
 
     // The actual test we wish to run
     test: function() {
@@ -3047,7 +3047,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyExecuteEvalFunctionsWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
+    metadata: { requires: { topology: ['single'], mongodb: '<=4.1.0' } },
 
     // The actual test we wish to run
     test: function() {
@@ -3157,7 +3157,7 @@ describe('Operation (Promises)', function() {
    * @ignore
    */
   it('shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunctionWithPromises', {
-    metadata: { requires: { topology: ['single'] } },
+    metadata: { requires: { topology: ['single'], mongodb: '<=4.1.0' } },
 
     // The actual test we wish to run
     test: function() {

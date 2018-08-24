@@ -12,7 +12,10 @@ describe('MapReduce', function() {
    */
   it('shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: {
+        mongodb: '<=4.1.0',
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+      }
     },
 
     // The actual test we wish to run
@@ -414,7 +417,10 @@ describe('MapReduce', function() {
    */
   it('shouldCorrectlyReturnNestedKeys', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: {
+        mongodb: '<=4.1.0', // Because of use of `group` command
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+      }
     },
 
     // The actual test we wish to run
