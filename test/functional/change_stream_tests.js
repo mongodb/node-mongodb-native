@@ -519,12 +519,11 @@ describe('Change Streams', function() {
           );
 
           // Attach second event listener
-          changeStream.once('change', function(change) {
-            // Check the cursor invalidation has occured
-            assert.equal(change.operationType, 'invalidate');
-
-            // now expect the server to close the stream
-            changeStream.once('close', () => client.close(done));
+          changeStream.on('change', function(change) {
+            if (change.operationType === 'invalidate') {
+              // now expect the server to close the stream
+              changeStream.once('close', () => client.close(done));
+            }
           });
 
           // Trigger the second database event
@@ -534,7 +533,7 @@ describe('Change Streams', function() {
               .rename('renamedDocs', { dropTarget: true }, function(err) {
                 assert.ifError(err);
               });
-          });
+          }, 250);
         });
 
         // Trigger the first database event
@@ -574,18 +573,28 @@ describe('Change Streams', function() {
           database.dropDatabase(function(err) {
             assert.ifError(err);
 
-            changeStream.next(function(err, change) {
-              assert.ifError(err);
-
-              // Check the cursor invalidation has occured
-              assert.equal(change.operationType, 'invalidate');
-
+            function completeStream() {
               changeStream.hasNext(function(err, hasNext) {
                 assert.equal(hasNext, false);
                 assert.equal(changeStream.isClosed(), true);
                 client.close(done);
               });
-            });
+            }
+
+            function checkInvalidate() {
+              changeStream.next(function(err, change) {
+                assert.ifError(err);
+
+                // Check the cursor invalidation has occured
+                if (change.operationType === 'invalidate') {
+                  return completeStream();
+                }
+
+                checkInvalidate();
+              });
+            }
+
+            checkInvalidate();
           });
         });
       });
@@ -600,6 +609,16 @@ describe('Change Streams', function() {
       var configuration = this.configuration;
       const client = configuration.newClient();
 
+      function checkInvalidate(changeStream) {
+        return changeStream.next().then(change => {
+          if (change.operationType === 'invalidate') {
+            return Promise.resolve();
+          }
+
+          return checkInvalidate(changeStream);
+        });
+      }
+
       client.connect(function(err, client) {
         assert.ifError(err);
         var database = client.db('integration_tests');
@@ -613,21 +632,16 @@ describe('Change Streams', function() {
             .then(function() {
               return delay(200);
             });
-        });
+        }, 200);
+
         return changeStream
           .next()
           .then(function(change) {
             assert.equal(change.operationType, 'insert');
             return database.dropCollection('invalidateCollectionDropPromises');
           })
-          .then(function() {
-            return changeStream.next();
-          })
-          .then(function(change) {
-            // Check the cursor invalidation has occured
-            assert.equal(change.operationType, 'invalidate');
-            return changeStream.hasNext();
-          })
+          .then(() => checkInvalidate(changeStream))
+          .then(() => changeStream.hasNext())
           .then(function(hasNext) {
             assert.equal(hasNext, false);
             assert.equal(changeStream.isClosed(), true);
@@ -1602,11 +1616,11 @@ describe('Change Streams', function() {
         validateOptions: true
       };
 
-      const client = configuration.newClient(`mongodb://${server.uri()}`, connectOptions);
       let getMoreCounter = 0;
       let aggregateCounter = 0;
       let changeStream;
       let server;
+      let client;
 
       let finish = err => {
         finish = () => {};
@@ -1624,9 +1638,9 @@ describe('Change Streams', function() {
             return request.reply(makeIsMaster(server));
           } else if (doc.aggregate) {
             if (aggregateCounter++ > 0) {
-              expect(doc)
-                .to.have.nested.property('pipeline[0].$changeStream.startAtOperationTime')
-                .that.deep.equals(OPERATION_TIME);
+              expect(doc).to.have.nested.property('pipeline[0].$changeStream.startAtOperationTime');
+              expect(doc.pipeline[0].$changeStream.startAtOperationTime.equals(OPERATION_TIME)).to
+                .be.ok;
               expect(doc).to.not.have.nested.property('pipeline[0].$changeStream.resumeAfter');
             } else {
               expect(doc).to.not.have.nested.property(
@@ -1653,6 +1667,7 @@ describe('Change Streams', function() {
         .createServer()
         .then(_server => (server = _server))
         .then(() => server.setMessageHandler(primaryServerHandler))
+        .then(() => (client = configuration.newClient(`mongodb://${server.uri()}`, connectOptions)))
         .then(() => client.connect())
         .then(() => client.db(dbName))
         .then(db => db.collection(collectionName))
