@@ -39,7 +39,7 @@ describe('Change Streams', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var client = configuration.newClient();
+      const client = configuration.newClient();
 
       client.connect(function(err, client) {
         assert.ifError(err);
@@ -712,7 +712,7 @@ describe('Change Streams', function() {
       });
 
       const mockServerURL = 'mongodb://localhost:32000/';
-      var client = configuration.newClient(mockServerURL);
+      const client = configuration.newClient(mockServerURL);
 
       client.connect(function(err, client) {
         assert.ifError(err);
@@ -1441,7 +1441,7 @@ describe('Change Streams', function() {
     test: function(done) {
       var configuration = this.configuration;
       var crypto = require('crypto');
-      var client = configuration.newClient(configuration.url(), {
+      const client = configuration.newClient(configuration.url(), {
         poolSize: 1,
         autoReconnect: false
       });
