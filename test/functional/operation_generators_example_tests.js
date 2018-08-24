@@ -45,9 +45,6 @@ describe('Operation (Generators)', function() {
         // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
         // LINE   yield client.connect();
         // LINE
-        // LINE   const client = new MongoClient('mongodb://localhost:27017/test');
-        // LINE   yield client.connect();
-        // LINE
         // LINE   var db = client.db('test');
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // BEGIN
