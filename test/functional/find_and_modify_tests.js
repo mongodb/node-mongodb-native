@@ -166,7 +166,7 @@ describe('Find and Modify', function() {
       url = url.indexOf('?') !== -1 ? f('%s&%s', url, 'fsync=true') : f('%s?%s', url, 'fsync=true');
 
       // Establish connection to db
-      const client = configuration.newClient(url);
+      const client = configuration.newClient(url, { sslValidate: false });
       client.connect(function(err, client) {
         test.equal(null, err);
         var db = client.db(configuration.db);
