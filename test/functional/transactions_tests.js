@@ -121,7 +121,9 @@ describe('Transactions (spec)', function() {
             }
 
             // run the actual test
-            testPromise = testPromise.then(() => runTestSuiteTest(testData, testContext));
+            testPromise = testPromise.then(() =>
+              runTestSuiteTest(this.configuration, testData, testContext)
+            );
 
             if (testData.failPoint) {
               testPromise = testPromise.then(() =>
@@ -178,7 +180,7 @@ function disableFailPoint(failPoint, testContext) {
 }
 
 let displayCommands = false;
-function runTestSuiteTest(testData, context) {
+function runTestSuiteTest(configuration, testData, context) {
   const commandEvents = [];
   const clientOptions = translateClientOptions(
     Object.assign({ monitorCommands: true }, testData.clientOptions)
@@ -188,7 +190,7 @@ function runTestSuiteTest(testData, context) {
   clientOptions.autoReconnect = false;
   clientOptions.haInterval = 100;
 
-  const client = this.configuration.newClient(context.url, clientOptions);
+  const client = configuration.newClient(context.url, clientOptions);
   return client.connect().then(client => {
     context.testClient = client;
     client.on('commandStarted', event => {
