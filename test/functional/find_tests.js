@@ -2413,7 +2413,7 @@ describe('Find', function() {
   it('Should correctly execute parallelCollectionScan with multiple cursors using each', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { mongodb: '>2.5.5', topology: ['single', 'replicaset'] } },
+    metadata: { requires: { mongodb: '>2.5.5 <=4.1.0', topology: ['single', 'replicaset'] } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -2478,7 +2478,7 @@ describe('Find', function() {
   it('Should correctly execute parallelCollectionScan with multiple cursors using next', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { mongodb: '>2.5.5', topology: ['single', 'replicaset'] } },
+    metadata: { requires: { mongodb: '>2.5.5 <=4.1.0', topology: ['single', 'replicaset'] } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -2536,7 +2536,7 @@ describe('Find', function() {
   it('Should correctly execute parallelCollectionScan with single cursor and close', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { mongodb: '>2.5.5', topology: ['single', 'replicaset'] } },
+    metadata: { requires: { mongodb: '>2.5.5 <=4.1.0', topology: ['single', 'replicaset'] } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -2580,7 +2580,7 @@ describe('Find', function() {
   it('Should correctly execute parallelCollectionScan with single cursor streaming', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
-    metadata: { requires: { mongodb: '>2.5.5', topology: ['single', 'replicaset'] } },
+    metadata: { requires: { mongodb: '>2.5.5 <=4.1.0', topology: ['single', 'replicaset'] } },
 
     // The actual test we wish to run
     test: function(done) {
@@ -2754,7 +2754,7 @@ describe('Find', function() {
     {
       // Add a tag that our runner can trigger on
       // in this case we are setting that node needs to be higher than 0.10.X to run
-      metadata: { requires: { mongodb: '>2.5.5', topology: ['single', 'replicaset'] } },
+      metadata: { requires: { mongodb: '>2.5.5 <=4.1.0', topology: ['single', 'replicaset'] } },
 
       // The actual test we wish to run
       test: function(done) {

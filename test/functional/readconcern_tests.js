@@ -782,7 +782,7 @@ describe('ReadConcern', function() {
   });
 
   it('Should set majority readConcern parallelCollectionScan command', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0 <=4.1.0' } },
 
     test: function(done) {
       var listener = require('../..').instrument(function(err) {
