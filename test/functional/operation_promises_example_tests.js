@@ -2240,7 +2240,7 @@ describe('Operation (Promises)', function() {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: {
-      requires: { mongodb: '>2.5.5', topology: ['single', 'replicaset'] }
+      requires: { mongodb: '>2.5.5 <=4.1.0', topology: ['single', 'replicaset'] }
     },
 
     // The actual test we wish to run
