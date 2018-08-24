@@ -44,12 +44,13 @@ describe('SDAM', function() {
       client.connect(function(err) {
         test.equal(null, err);
 
-        client.close(true);
-        for (var name in operations) {
-          test.ok(operations[name].length > 0);
-        }
+        client.close(true, function() {
+          for (var name in operations) {
+            test.ok(operations[name].length > 0);
+          }
 
-        done();
+          done();
+        });
       });
     }
   });
