@@ -414,7 +414,6 @@ describe('APM', function() {
               .limit(100)
               .batchSize(2)
               .comment('some comment')
-              .maxScan(1000)
               .maxTimeMS(5000)
               .setReadPreference(ReadPreference.PRIMARY)
               .addCursorFlag('noCursorTimeout', true)
@@ -489,7 +488,6 @@ describe('APM', function() {
               .limit(100)
               .batchSize(2)
               .comment('some comment')
-              .maxScan(1000)
               .maxTimeMS(5000)
               .setReadPreference(ReadPreference.PRIMARY)
               .addCursorFlag('noCursorTimeout', true)
@@ -1001,11 +999,17 @@ describe('APM', function() {
           expect(data).to.have.length(r.insertedCount);
 
           // Set up the listeners
-          client.on('commandStarted', filterOutCommands('endSessions', monitoringResults.starts));
-          client.on('commandFailed', filterOutCommands('endSessions', monitoringResults.failures));
+          client.on(
+            'commandStarted',
+            filterOutCommands(['ismaster', 'endSessions'], monitoringResults.starts)
+          );
+          client.on(
+            'commandFailed',
+            filterOutCommands(['ismaster', 'endSessions'], monitoringResults.failures)
+          );
           client.on(
             'commandSucceeded',
-            filterOutCommands('endSessions', monitoringResults.successes)
+            filterOutCommands(['ismaster', 'endSessions'], monitoringResults.successes)
           );
 
           // Unpack the operation
