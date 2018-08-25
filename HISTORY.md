@@ -1,3 +1,28 @@
+# Change Log
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+<a name="3.1.4"></a>
+## [3.1.4](https://github.com/mongodb/node-mongodb-native/compare/v3.1.3...v3.1.4) (2018-08-25)
+
+
+### Bug Fixes
+
+* **buffer:** use safe-buffer polyfill to maintain compatibility ([327da95](https://github.com/mongodb/node-mongodb-native/commit/327da95))
+* **change-stream:** properly support resumablity in stream mode ([c43a34b](https://github.com/mongodb/node-mongodb-native/commit/c43a34b))
+* **connect:** correct replacement of topology on connect callback ([918a1e0](https://github.com/mongodb/node-mongodb-native/commit/918a1e0))
+* **cursor:** remove deprecated notice on forEach ([a474158](https://github.com/mongodb/node-mongodb-native/commit/a474158))
+* **url-parser:** bail early on validation when using domain socket ([3cb3da3](https://github.com/mongodb/node-mongodb-native/commit/3cb3da3))
+
+
+### Features
+
+* **client-ops:** allow bypassing creation of topologies on connect ([fe39b93](https://github.com/mongodb/node-mongodb-native/commit/fe39b93))
+* **core:** update mongodb-core to 3.1.3 ([a029047](https://github.com/mongodb/node-mongodb-native/commit/a029047))
+* **test:** use connection strings for all calls to `newClient` ([1dac18f](https://github.com/mongodb/node-mongodb-native/commit/1dac18f))
+
+
+
 <a name="3.1.3"></a>
 ## [3.1.3](https://github.com/mongodb/node-mongodb-native/compare/v3.1.2...v3.1.3) (2018-08-13)
 
