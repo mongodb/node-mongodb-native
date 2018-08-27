@@ -89,7 +89,14 @@ describe('Connection String (spec)', function() {
               });
 
               expect(result.hosts).to.containSubset(test.hosts);
-              expect(result.auth).to.eql(test.auth);
+              if (test.auth) {
+                if (test.auth.db !== null) {
+                  expect(result.auth).to.eql(test.auth);
+                } else {
+                  expect(result.auth.username).to.eql(test.auth.username);
+                  expect(result.auth.password).to.eql(test.auth.password);
+                }
+              }
               expect(result.options).to.eql(test.options);
             }
 
