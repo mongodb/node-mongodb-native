@@ -234,7 +234,7 @@ function parseConnectionString(uri, options, callback) {
   }
 
   parsedOptions = Object.assign({}, parsedOptions, options);
-  const auth = { username: null, password: null, db: db && db !== '' ? qs.unescape(db) : null };
+  const auth = { username: null, password: null, db: db && db !== '' ? qs.unescape(db) : 'admin' };
   if (cap[4].split('?')[0].indexOf('@') !== -1) {
     return callback(new MongoParseError('Unescaped slash in userinfo section'));
   }
