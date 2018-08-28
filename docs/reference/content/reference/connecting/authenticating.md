@@ -29,7 +29,7 @@ var MongoClient = require('mongodb').MongoClient,
   assert = require('assert');
 
 // Connection URL
-var url = 'mongodb://dave:password@localhost:27017?authMechanism=DEFAULT&authSource=db';
+var url = 'mongodb://dave:password@localhost:27017/?authMechanism=DEFAULT&authSource=db';
 // Use connect method to connect to the Server
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
@@ -49,7 +49,7 @@ var MongoClient = require('mongodb').MongoClient,
   assert = require('assert');
 
 // Connection URL
-var url = 'mongodb://dave:password@localhost:27017?authMechanism=SCRAM-SHA-1&authSource=db';
+var url = 'mongodb://dave:password@localhost:27017/?authMechanism=SCRAM-SHA-1&authSource=db';
 // Use connect method to connect to the Server
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
@@ -71,7 +71,7 @@ var MongoClient = require('mongodb').MongoClient,
   assert = require('assert');
 
 // Connection URL
-var url = 'mongodb://dave:password@localhost:27017?authMechanism=MONGODB-CR&authSource=db';
+var url = 'mongodb://dave:password@localhost:27017/?authMechanism=MONGODB-CR&authSource=db';
 // Use connect method to connect to the Server
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
