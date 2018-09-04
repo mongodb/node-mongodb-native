@@ -603,7 +603,7 @@ function makeConnection(conn, options, callback) {
 
 function normalConnect(conn, family, _options, callback) {
   const options = prepareConnectionOptions(conn, _options);
-  makeConnection(conn, Object.assign({}, { family: family }, options), (err, connection) => {
+  makeConnection(conn, Object.assign({ family }, options), (err, connection) => {
     if (err) return callback(err, null);
     callback(null, connection);
   });
@@ -639,11 +639,11 @@ function fastFallbackConnect(conn, _options, callback) {
     }
   };
 
-  makeConnection(conn, Object.assign({}, { family: 6 }, options), connectionHandler);
+  makeConnection(conn, Object.assign({ family: 6 }, options), connectionHandler);
 
   // IPv4 attempts to connect 250ms after IPv6 to give IPv6 preference
   setTimeout(() => {
-    makeConnection(conn, Object.assign({}, { family: 4 }, options), connectionHandler);
+    makeConnection(conn, Object.assign({ family: 4 }, options), connectionHandler);
   }, 250);
 }
 
