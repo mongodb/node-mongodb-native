@@ -577,9 +577,9 @@ function prepareConnectionOptions(conn, _options) {
 }
 
 function makeConnection(conn, options, callback) {
-  const module = options.ssl ? tls : net;
+  const netModule = options.ssl ? tls : net;
 
-  const connection = module.connect(options, function() {
+  const connection = netModule.connect(options, function() {
     if (conn.ssl) {
       // Error on auth or skip
       if (connection.authorizationError && conn.rejectUnauthorized) {
