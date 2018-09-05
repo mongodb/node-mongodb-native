@@ -179,7 +179,7 @@ const server = "mongo-server.example.com";
 const principal = "drivers@KERBEROS.EXAMPLE.COM";
 const urlEncodedPrincipal = encodeURIComponent(principal);
 
-const url = `mongodb://${urlEncodedPrincipal}@${server}?authMechanism=GSSAPI&gssapiServiceName=mongodb`;
+const url = `mongodb://${urlEncodedPrincipal}@${server}/?authMechanism=GSSAPI&gssapiServiceName=mongodb`;
 
 const client = new MongoClient(url);
 
