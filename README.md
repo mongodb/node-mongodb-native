@@ -6,9 +6,9 @@
 
 # Description
 
-The official [MongoDB](https://www.mongodb.com/) driver for Node.js. Provides a high-level API on top of [mongodb-core](https://www.npmjs.com/package/mongodb-core) that is meant for end users.
+The official [MongoDB](https://www.mongodb.com/) driver for Node.js. MongoDB provides a high-level API on top of [mongodb-core](https://www.npmjs.com/package/mongodb-core) that is meant for end users.
 
-**NOTE: v3.x was recently released with breaking API changes. You can find a list of changes [here](CHANGES_3.0.0.md).**
+**NOTE: v3.x was recently released with breaking API changes. You can find a list of changes at [here](CHANGES_3.0.0.md).**
 
 ## MongoDB Node.JS Driver
 
@@ -24,9 +24,9 @@ The official [MongoDB](https://www.mongodb.com/) driver for Node.js. Provides a 
 Think you’ve found a bug? Want to see a new feature in `node-mongodb-native`? Please open a
 case in our issue management tool, JIRA:
 
-- Create an account and login [jira.mongodb.org](https://jira.mongodb.org).
+- Create an account and login into [jira.mongodb.org](https://jira.mongodb.org).
 - Navigate to the NODE project [jira.mongodb.org/browse/NODE](https://jira.mongodb.org/browse/NODE).
-- Click **Create Issue** - Please provide as much information as possible about the issue type and how to reproduce it.
+- Click **Create Issue** - Please do not hestitate to provide us as much information as possible about the issue type and how to reproduce it.
 
 Bug reports in JIRA for all driver projects (i.e. NODE, PYTHON, CSHARP, JAVA) and the
 Core Server (i.e. SERVER) project are **public**.
@@ -42,7 +42,7 @@ Change history can be found in [`HISTORY.md`](HISTORY.md).
 
 # Installation
 
-The recommended way to get started using the Node.js 3.0 driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
+The most recommended way to get started using the Node.js 3.0 driver is by using the `npm` (Node Package Manager) to install the dependency in your project.
 
 ## MongoDB Driver
 
@@ -52,7 +52,7 @@ Given that you have created your own project using `npm init` we install the Mon
 npm install mongodb --save
 ```
 
-This will download the MongoDB driver and add a dependency entry in your `package.json` file.
+This will enable you to download the MongoDB driver and add a dependency entry in your `package.json` file.
 
 You can also use the [Yarn](https://yarnpkg.com/en) package manager.
 
@@ -71,7 +71,7 @@ The `kerberos` package is a C++ extension that requires a build environment to b
 
 ### Diagnosing on UNIX
 
-If you don’t have the build-essentials, this module won’t build. In the case of Linux, you will need gcc, g++, Node.js with all the headers and Python. The easiest way to figure out what’s missing is by trying to build the Kerberos project. You can do this by performing the following steps.
+If you don’t have the build-essentials, this module won’t build. In the case of Linux, you will need gcc, g++, Node.js with all the headers and Python. Therefore, the easiest way to figure out what’s missing is by trying to build the Kerberos project. You can do this by performing the following steps:
 
 ```bash
 git clone https://github.com/mongodb-js/kerberos
@@ -79,7 +79,7 @@ cd kerberos
 npm install
 ```
 
-If all the steps complete, you have the right toolchain installed. If you get the error "node-gyp not found," you need to install `node-gyp` globally:
+If all the steps are completed, you have the right toolchain installed. If you get the error "node-gyp not found," you need to install `node-gyp` globally:
 
 ```bash
 npm install -g node-gyp
@@ -92,7 +92,7 @@ cd yourproject
 npm install mongodb --save
 ```
 
-If it still fails the next step is to examine the npm log. Rerun the command but in this case in verbose mode.
+If it still fails, the next step is to examine the npm log. Rerun the command but in this case in verbose mode.
 
 ```bash
 npm --loglevel verbose install mongodb
@@ -102,7 +102,7 @@ This will print out all the steps npm is performing while trying to install the 
 
 ### Diagnosing on Windows
 
-A compiler tool chain known to work for compiling `kerberos` on Windows is the following.
+A compiler tool chain known to work for compiling `kerberos` on Windows is the following requirement:
 
 * Visual Studio C++ 2010 (do not use higher versions)
 * Windows 7 64bit SDK
@@ -160,7 +160,7 @@ You should see **NPM** download a lot of files. Once it's done you'll find all t
 
 ### Start a MongoDB Server
 
-For complete MongoDB installation instructions, see [the manual](https://docs.mongodb.org/manual/installation/).
+For complete MongoDB installation instructions, please check [the manual](https://docs.mongodb.org/manual/installation/).
 
 1. Download the right MongoDB version from [MongoDB](https://www.mongodb.org/downloads)
 2. Create a database directory (in this case under **/data**).
@@ -477,7 +477,7 @@ MongoClient.connect(url, function(err, client) {
 });
 ```
 
-For more detailed information, see the [tutorials](docs/reference/content/tutorials/main.md).
+For more detailed information, please take a look at [tutorials](docs/reference/content/tutorials/main.md).
 
 ## Next Steps
 
