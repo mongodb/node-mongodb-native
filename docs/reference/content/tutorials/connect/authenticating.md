@@ -166,7 +166,7 @@ For more information, refer to the MongoDB manual
 
 [MongoDB Enterprise](http://www.mongodb.com/products/mongodb-enterprise) supports proxy authentication through a Kerberos service. The Node.js driver supports Kerberos on UNIX via the MIT Kerberos library and on Windows via the SSPI API.
 
-To connect using the X.509 authentication mechanism, specify ``authMechanism=GSSAPI`` as the mechanism in the [URI connection string](https://docs.mongodb.org/manual/reference/connection-string/). Specify the user principal and the service name in the connection string.  Use `enodeURIComponent` to encode the user principal string.
+To connect using the GSSAPI authentication mechanism, specify ``authMechanism=GSSAPI`` as the mechanism in the [URI connection string](https://docs.mongodb.org/manual/reference/connection-string/). Specify the user principal and the service name in the connection string.  Use `enodeURIComponent` to encode the user principal string.
 
 The following example connects to MongoDB using Kerberos for UNIX.
 
