@@ -46,7 +46,8 @@ GSSAPI.prototype.auth = function(server, connections, db, username, password, op
   var self = this;
   // We don't have the Kerberos library
   if (Kerberos == null) return callback(new Error('Kerberos library is not installed'));
-  var gssapiServiceName = options['gssapiServiceName'] || 'mongodb';
+  // TODO: remove this once we fix URI parsing
+  var gssapiServiceName = options['gssapiservicename'] || options['gssapiServiceName'] || 'mongodb';
   // Total connections
   var count = connections.length;
   if (count === 0) return callback(null, null);
