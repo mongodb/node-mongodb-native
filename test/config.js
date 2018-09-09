@@ -16,6 +16,10 @@ class NativeConfiguration extends ConfigurationBase {
     return new _mongo.Server(serverHost, serverPort, serverOpts || {});
   }
 
+  usingUnifiedTopology() {
+    return !!process.env.MONGODB_UNIFIED_TOPOLOGY;
+  }
+
   start(callback) {
     const self = this;
     if (this.skipStart) return callback();
@@ -50,11 +54,17 @@ class NativeConfiguration extends ConfigurationBase {
   newClient(dbOptions, serverOptions) {
     // support MongoClient contructor form (url, options) for `newClient`
     if (typeof dbOptions === 'string') {
-      return new this.mongo.MongoClient(dbOptions, serverOptions);
+      return new this.mongo.MongoClient(
+        dbOptions,
+        this.usingUnifiedTopology()
+          ? Object.assign({ useUnifiedTopology: true }, serverOptions)
+          : serverOptions
+      );
     }
 
     dbOptions = dbOptions || {};
     serverOptions = Object.assign({}, { haInterval: 100 }, serverOptions);
+    if (this.usingUnifiedTopology()) serverOptions.useUnifiedTopology = true;
 
     // Override implementation
     if (this.options.newDbInstance) {
