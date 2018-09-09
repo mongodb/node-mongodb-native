@@ -1,7 +1,6 @@
 'use strict';
-const test = require('./shared').assert,
-  setupDatabase = require('./shared').setupDatabase,
-  expect = require('chai').expect;
+const setupDatabase = require('./shared').setupDatabase;
+const expect = require('chai').expect;
 
 describe('Connection', function() {
   before(function() {
@@ -13,19 +12,17 @@ describe('Connection', function() {
    */
   it('should correctly start monitoring for single server connection', {
     metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(
+      const configuration = this.configuration;
+      const client = configuration.newClient(
         { w: 1 },
         { poolSize: 1, host: '/tmp/mongodb-27017.sock' }
       );
 
-      client.connect(function(err, client) {
-        test.equal(null, err);
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
 
-        client.topology.once('monitoring', function() {
+        client.topology.once('monitoring', () => {
           client.close();
           done();
         });
@@ -39,18 +36,16 @@ describe('Connection', function() {
   // NOTE: skipped for direct variable inspection
   it.skip('should correctly disable monitoring for single server connection', {
     metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(
+      const configuration = this.configuration;
+      const client = configuration.newClient(
         { w: 1 },
         { poolSize: 1, host: '/tmp/mongodb-27017.sock', monitoring: false }
       );
 
-      client.connect(function(err, client) {
-        test.equal(null, err);
-        test.equal(false, client.topology.s.coreTopology.s.monitoring);
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+        expect(client.topology.s.coreTopology.s.monitoring).to.equal(false);
 
         client.close();
         done();
@@ -63,28 +58,26 @@ describe('Connection', function() {
    */
   it('should correctly connect to server using domain socket', {
     metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(
+      const configuration = this.configuration;
+      const client = configuration.newClient(
         { w: 1 },
         { poolSize: 1, host: '/tmp/mongodb-27017.sock' }
       );
 
-      client.connect(function(err, client) {
-        var db = client.db(configuration.db);
-        test.equal(null, err);
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
 
-        db.collection('domainSocketCollection0').insert({ a: 1 }, { w: 1 }, function(err) {
-          test.equal(null, err);
+        const db = client.db(configuration.db);
+        db.collection('domainSocketCollection0').insert({ a: 1 }, { w: 1 }, err => {
+          expect(err).to.not.exist;
 
           db
             .collection('domainSocketCollection0')
             .find({ a: 1 })
-            .toArray(function(err, items) {
-              test.equal(null, err);
-              test.equal(1, items.length);
+            .toArray((err, items) => {
+              expect(err).to.not.exist;
+              expect(items).to.have.length(1);
 
               client.close();
               done();
@@ -102,12 +95,11 @@ describe('Connection', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: true });
+      const configuration = this.configuration;
+      const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: true });
 
-      client.on('open', function() {
+      client.on('open', () => {
         client.close();
         done();
       });
@@ -124,14 +116,12 @@ describe('Connection', function() {
       requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
     },
 
-    // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: true });
+      const configuration = this.configuration;
+      const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: true });
 
       client.connect().then(() => {
-        test.equal('js', client.topology.parserType);
-
+        expect(client.topology.parserType).to.equal('js');
         client.close();
         done();
       });
@@ -147,11 +137,10 @@ describe('Connection', function() {
       ignore: { travis: true }
     },
 
-    // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient({ w: 1 }, { poolSize: 2000, auto_reconnect: true });
-      client.on('open', function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient({ w: 1 }, { poolSize: 2000, auto_reconnect: true });
+      client.on('open', () => {
         client.close();
         done();
       });
@@ -166,27 +155,26 @@ describe('Connection', function() {
   it('should connect to server using domain socket with undefined port', {
     metadata: { requires: { topology: 'single' } },
 
-    // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(
+      const configuration = this.configuration;
+      const client = configuration.newClient(
         { w: 1 },
         { poolSize: 1, host: '/tmp/mongodb-27017.sock', port: undefined }
       );
 
-      client.connect(function(err, client) {
-        var db = client.db(configuration.db);
-        test.equal(null, err);
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
 
-        db.collection('domainSocketCollection1').insert({ x: 1 }, { w: 1 }, function(err) {
-          test.equal(null, err);
+        const db = client.db(configuration.db);
+        db.collection('domainSocketCollection1').insert({ x: 1 }, { w: 1 }, err => {
+          expect(err).to.not.exist;
 
           db
             .collection('domainSocketCollection1')
             .find({ x: 1 })
-            .toArray(function(err, items) {
-              test.equal(null, err);
-              test.equal(1, items.length);
+            .toArray((err, items) => {
+              expect(err).to.not.exist;
+              expect(items).to.have.length(1);
 
               client.close();
               done();
@@ -201,23 +189,21 @@ describe('Connection', function() {
    */
   it('should fail to connect using non-domain socket with undefined port', {
     metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration,
-        Server = configuration.require.Server,
-        MongoClient = configuration.require.MongoClient;
+      const configuration = this.configuration;
+      const Server = configuration.require.Server;
+      const MongoClient = configuration.require.MongoClient;
 
-      var error;
+      let error;
       try {
-        var client = new MongoClient(new Server('localhost', undefined), { w: 0 });
-        client.connect(function() {});
+        const client = new MongoClient(new Server('localhost', undefined), { w: 0 });
+        client.connect(() => {});
       } catch (err) {
         error = err;
       }
 
-      test.ok(error instanceof Error);
-      test.ok(/port must be specified/.test(error));
+      expect(error).to.be.instanceOf(Error);
+      expect(error.message).to.match(/port must be specified/);
       done();
     }
   });
@@ -226,19 +212,20 @@ describe('Connection', function() {
    * @ignore
    */
   function connectionTester(configuration, testName, callback) {
-    return function(err, client) {
-      var db = client.db(configuration.db);
-      test.equal(err, null);
+    return (err, client) => {
+      expect(err).to.not.exist;
 
-      db.collection(testName, function(err, collection) {
-        test.equal(err, null);
+      const db = client.db(configuration.db);
+      db.collection(testName, (err, collection) => {
+        expect(err).to.not.exist;
 
-        collection.insert({ foo: 123 }, { w: 1 }, function(err) {
-          test.equal(err, null);
+        collection.insert({ foo: 123 }, { w: 1 }, err => {
+          expect(err).to.not.exist;
 
-          db.dropDatabase(function(err, dropped) {
-            test.equal(err, null);
-            test.ok(dropped);
+          db.dropDatabase((err, dropped) => {
+            expect(err).to.not.exist;
+            expect(dropped).to.be.true;
+
             if (callback) return callback(client);
           });
         });
@@ -251,15 +238,12 @@ describe('Connection', function() {
    */
   it('test connect no options', {
     metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var connect = configuration.require;
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.url());
 
-      connect(
-        configuration.url(),
-        connectionTester(configuration, 'testConnectNoOptions', function(client) {
+      client.connect(
+        connectionTester(configuration, 'testConnectNoOptions', client => {
           client.close();
           done();
         })
@@ -273,19 +257,19 @@ describe('Connection', function() {
   // NOTE: skipped for direct variable inspection
   it.skip('test connect server options', {
     metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var connect = configuration.require;
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.url(), {
+        auto_reconnect: true,
+        poolSize: 4
+      });
 
-      connect(
-        configuration.url(),
-        { auto_reconnect: true, poolSize: 4 },
-        connectionTester(configuration, 'testConnectServerOptions', function(client) {
-          test.ok(client.topology.poolSize >= 1);
-          test.equal(4, client.topology.s.coreTopology.s.pool.size);
-          test.equal(true, client.topology.autoReconnect);
+      client.connect(
+        connectionTester(configuration, 'testConnectServerOptions', client => {
+          expect(client.topology.poolSize).to.be.at.least(1);
+          expect(client.topology.s.coreTopology.s.pool.size).to.equal(4);
+          expect(client.topology.autoReconnect).to.equal(true);
+
           client.close();
           done();
         })
@@ -299,23 +283,20 @@ describe('Connection', function() {
   // NOTE: skipped for direct variable inspection
   it.skip('testConnectAllOptions', {
     metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var connect = configuration.require;
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.url(), {
+        auto_reconnect: true,
+        poolSize: 4,
+        native_parser: process.env['TEST_NATIVE'] != null
+      });
 
-      connect(
-        configuration.url(),
-        {
-          auto_reconnect: true,
-          poolSize: 4,
-          native_parser: process.env['TEST_NATIVE'] != null
-        },
-        connectionTester(configuration, 'testConnectAllOptions', function(client) {
-          test.ok(client.topology.poolSize >= 1);
-          test.equal(4, client.topology.s.coreTopology.s.pool.size);
-          test.equal(true, client.topology.autoReconnect);
+      client.connect(
+        connectionTester(configuration, 'testConnectAllOptions', client => {
+          expect(client.topology.poolSize).to.be.at.least(1);
+          expect(client.topology.s.coreTopology.s.pool.size).to.equal(4);
+          expect(client.topology.autoReconnect).to.equal(true);
+
           client.close();
           done();
         })
@@ -328,30 +309,28 @@ describe('Connection', function() {
    */
   it('test connect good auth', {
     metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var connect = configuration.require;
-      var user = 'testConnectGoodAuth',
-        password = 'password';
+      const configuration = this.configuration;
+      const user = 'testConnectGoodAuth';
+      const password = 'password';
+      const client = configuration.newClient(configuration.url());
 
       // First add a user.
-      connect(configuration.url(), function(err, client) {
-        test.equal(err, null);
-        var db = client.db(configuration.db);
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
 
-        db.addUser(user, password, function(err) {
-          test.equal(err, null);
+        const db = client.db(configuration.db);
+        db.addUser(user, password, err => {
+          expect(err).to.not.exist;
           client.close();
           restOfTest();
         });
       });
 
       function restOfTest() {
-        connect(
-          configuration.url(user, password),
-          connectionTester(configuration, 'testConnectGoodAuth', function(client) {
+        const secondClient = configuration.newClient(configuration.url(user, password));
+        secondClient.connect(
+          connectionTester(configuration, 'testConnectGoodAuth', client => {
             client.close();
             done();
           })
@@ -365,32 +344,31 @@ describe('Connection', function() {
    */
   it('test connect good auth as option', {
     metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var connect = configuration.require;
-      var user = 'testConnectGoodAuthAsOption',
-        password = 'password';
+      const configuration = this.configuration;
+      const user = 'testConnectGoodAuthAsOption';
+      const password = 'password';
+      const client = configuration.newClient(configuration.url());
 
       // First add a user.
-      connect(configuration.url(), function(err, client) {
-        test.equal(err, null);
-        var db = client.db(configuration.db);
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
 
-        db.addUser(user, password, function(err) {
-          test.equal(err, null);
+        const db = client.db(configuration.db);
+        db.addUser(user, password, err => {
+          expect(err).to.not.exist;
           client.close();
           restOfTest();
         });
       });
 
       function restOfTest() {
-        var opts = { auth: { user: user, password: password } };
-        connect(
-          configuration.url('baduser', 'badpassword'),
-          opts,
-          connectionTester(configuration, 'testConnectGoodAuthAsOption', function(client) {
+        const secondClient = configuration.newClient(configuration.url('baduser', 'badpassword'), {
+          auth: { user: user, password: password }
+        });
+
+        secondClient.connect(
+          connectionTester(configuration, 'testConnectGoodAuthAsOption', client => {
             client.close();
             done();
           })
@@ -404,13 +382,11 @@ describe('Connection', function() {
    */
   it('test connect bad auth', {
     metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var connect = configuration.require;
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.url('slithy', 'toves'));
 
-      connect(configuration.url('slithy', 'toves'), function(err, client) {
+      client.connect((err, client) => {
         expect(err).to.exist;
         expect(client).to.not.exist;
         done();
@@ -423,18 +399,11 @@ describe('Connection', function() {
    */
   it('test connect bad url', {
     metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var connect = configuration.require;
+      const configuration = this.configuration;
+      const client = configuration.newClient('mangodb://localhost:27017/test?safe=false');
 
-      test.throws(function() {
-        connect('mangodb://localhost:27017/test?safe=false', function() {
-          test.ok(false, 'Bad URL!');
-        });
-      });
-
+      expect(() => client.connect(() => {})).to.throw;
       done();
     }
   });
@@ -444,12 +413,10 @@ describe('Connection', function() {
    */
   it('should correctly return false on `isConnected` before connection happened', {
     metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
-      test.equal(false, client.isConnected());
+      const configuration = this.configuration;
+      const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: false });
+      expect(client.isConnected()).to.equal(false);
       done();
     }
   });
@@ -459,47 +426,43 @@ describe('Connection', function() {
    */
   it('should correctly reconnect and finish query operation', {
     metadata: { requires: { topology: 'single' } },
-
-    // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // The unified topology deprecates autoReconnect, this test depends on the `reconnect` event
+        return this.skip();
+      }
 
-      var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: true });
-      client.connect(function(err, client) {
-        var db = client.db(configuration.db);
-        test.equal(null, err);
+      const client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: true });
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
 
-        db.collection('test_reconnect').insert({ a: 1 }, function(err) {
-          test.equal(null, err);
-          // Signal db reconnect
-          var dbReconnect = 0;
-          var dbClose = 0;
+        const db = client.db(configuration.db);
+        db.collection('test_reconnect').insert({ a: 1 }, err => {
+          expect(err).to.not.exist;
 
-          db.on('reconnect', function() {
-            ++dbReconnect;
-          });
+          let dbReconnect = 0;
+          let dbClose = 0;
+          db.on('reconnect', () => ++dbReconnect);
+          db.on('close', () => ++dbClose);
 
-          db.on('close', function() {
-            ++dbClose;
-          });
-
-          client.topology.once('reconnect', function() {
+          client.topology.once('reconnect', () => {
             // Await reconnect and re-authentication
-            db.collection('test_reconnect').findOne(function(err, doc) {
-              test.equal(null, err);
-              test.equal(1, doc.a);
-              test.equal(1, dbReconnect);
-              test.equal(1, dbClose);
+            db.collection('test_reconnect').findOne((err, doc) => {
+              expect(err).to.not.exist;
+              expect(doc.a).to.equal(1);
+              expect(dbReconnect).to.equal(1);
+              expect(dbClose).to.equal(1);
 
               // Attempt disconnect again
               client.topology.connections()[0].destroy();
 
               // Await reconnect and re-authentication
-              db.collection('test_reconnect').findOne(function(err, doc) {
-                test.equal(null, err);
-                test.equal(1, doc.a);
-                test.equal(2, dbReconnect);
-                test.equal(2, dbClose);
+              db.collection('test_reconnect').findOne((err, doc) => {
+                expect(err).to.not.exist;
+                expect(doc.a).to.equal(1);
+                expect(dbReconnect).to.equal(2);
+                expect(dbClose).to.equal(2);
 
                 client.close();
                 done();
