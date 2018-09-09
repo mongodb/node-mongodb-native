@@ -1,7 +1,6 @@
 'use strict';
 
 const setupDatabase = require('../functional/shared').setupDatabase;
-const MongoClient = require('../../lib/mongo_client');
 
 describe('examples(transactions):', function() {
   let client;
@@ -19,7 +18,8 @@ describe('examples(transactions):', function() {
   });
 
   beforeEach(async function() {
-    client = await MongoClient.connect(this.configuration.url());
+    client = this.configuration.newClient();
+    await client.connect();
     await client.db('hr').dropDatabase();
     await client.db('hr').createCollection('employees');
     await client.db('reporting').dropDatabase();
