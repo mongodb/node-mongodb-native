@@ -155,6 +155,11 @@ describe('Db', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // The unified topology deprecates autoReconnect
+        return this.skip();
+      }
+
       var client = configuration.newClient(configuration.writeConcernMax(), {
         poolSize: 1,
         auto_reconnect: true
@@ -195,6 +200,11 @@ describe('Db', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // The unified topology does not use a store
+        return this.skip();
+      }
+
       var client = configuration.newClient(
         { w: 1 },
         { poolSize: 1, auto_reconnect: true, bufferMaxEntries: 0 }

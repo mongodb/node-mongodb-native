@@ -3974,6 +3974,11 @@ describe('Operation Examples', function() {
     test: function(done) {
       var configuration = this.configuration;
 
+      if (configuration.usingUnifiedTopology()) {
+        // The unified topology does not presently support authentication
+        return this.skip();
+      }
+
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         // LINE var MongoClient = require('mongodb').MongoClient,

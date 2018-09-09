@@ -1,6 +1,7 @@
 'use strict';
-var test = require('./shared').assert;
-var setupDatabase = require('./shared').setupDatabase;
+const test = require('./shared').assert;
+const setupDatabase = require('./shared').setupDatabase;
+const expect = require('chai').expect;
 
 describe('Decimal128', function() {
   before(function() {
@@ -24,6 +25,7 @@ describe('Decimal128', function() {
         poolSize: 1,
         domainsEnabled: true
       });
+
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         test.ok(!err);
@@ -122,12 +124,19 @@ describe('Decimal128', function() {
       var Domain = require('domain');
       var domainInstance = Domain.create();
       var configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // The unified topology does not use a store
+        return this.skip();
+      }
+
       var client = configuration.newClient(
         { w: 0 },
         { poolSize: 1, auto_reconnect: true, domainsEnabled: true, bufferMaxEntries: 0 }
       );
 
       client.connect(function(err, client) {
+        expect(err).to.not.exist;
+
         var db = client.db(configuration.db);
         var connection = client.topology.connections()[0];
         var collection = db.collection('test');
@@ -161,6 +170,11 @@ describe('Decimal128', function() {
       var Domain = require('domain');
       var domainInstance = Domain.create();
       var configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // The unified topology does not use a store
+        return this.skip();
+      }
+
       var client = configuration.newClient(
         { w: 1 },
         { poolSize: 1, auto_reconnect: true, domainsEnabled: true, bufferMaxEntries: 0 }

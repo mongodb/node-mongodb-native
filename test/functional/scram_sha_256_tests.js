@@ -40,11 +40,21 @@ describe('SCRAM-SHA-256 auth', function() {
   afterEach(() => test.sandbox.restore());
 
   before(function() {
+    if (this.configuration.usingUnifiedTopology()) {
+      // The unified topology does not presently support authentication
+      return this.skip();
+    }
+
     test.sandbox = sinon.sandbox.create();
     return setupDatabase(this.configuration);
   });
 
   before(function() {
+    if (this.configuration.usingUnifiedTopology()) {
+      // The unified topology does not presently support authentication
+      return this.skip();
+    }
+
     return withClient(this.configuration.newClient(), client => {
       test.oldDbName = this.configuration.db;
       this.configuration.db = 'admin';
@@ -62,6 +72,11 @@ describe('SCRAM-SHA-256 auth', function() {
   });
 
   after(function() {
+    if (this.configuration.usingUnifiedTopology()) {
+      // The unified topology does not presently support authentication
+      return this.skip();
+    }
+
     return withClient(this.configuration.newClient(), client => {
       const db = client.db(this.configuration.db);
       this.configuration.db = test.oldDbName;
