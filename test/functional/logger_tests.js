@@ -1,6 +1,5 @@
 'use strict';
 var expect = require('chai').expect;
-var connectToDb = require('./shared').connectToDb;
 
 describe('Logger', function() {
   /**
@@ -60,22 +59,20 @@ describe('Logger', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var self = this,
-        Logger = self.configuration.require.Logger;
+      const configuration = this.configuration;
+      const Logger = configuration.require.Logger;
 
       // set a custom logger per http://mongodb.github.io/node-mongodb-native/2.0/tutorials/logging/
-      Logger.setCurrentLogger(function() {});
+      Logger.setCurrentLogger(() => {});
       Logger.setLevel('debug');
 
-      connectToDb('mongodb://localhost:27017/test', self.configuration.db, function(
-        err,
-        db,
-        client
-      ) {
+      const client = configuration.newClient('mongodb://localhost:27017/test');
+      client.connect(err => {
         expect(err).to.not.exist;
+        const db = client.db(configuration.db);
 
         // perform any operation that gets logged
-        db.collection('foo').findOne({}, function(err) {
+        db.collection('foo').findOne({}, err => {
           expect(err).to.not.exist;
 
           // Clean up
@@ -96,15 +93,13 @@ describe('Logger', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var self = this,
-        Logger = self.configuration.require.Logger;
+      const configuration = this.configuration;
+      const Logger = configuration.require.Logger;
+      const client = configuration.newClient('mongodb://localhost:27017/test');
 
-      connectToDb('mongodb://localhost:27017/test', self.configuration.db, function(
-        err,
-        db,
-        client
-      ) {
+      client.connect(err => {
         expect(err).to.not.exist;
+        const db = client.db(configuration.db);
 
         // Status
         var logged = false;
@@ -147,36 +142,34 @@ describe('Logger', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var self = this,
-        Logger = self.configuration.require.Logger;
+      const configuration = this.configuration;
+      const Logger = configuration.require.Logger;
 
       Logger.filter('class', ['Cursor']);
-      var logged = false;
+      let logged = false;
 
-      connectToDb(
-        'mongodb://localhost:27017/test',
-        self.configuration.db,
-        {
-          loggerLevel: 'debug',
-          logger: function() {
-            logged = true;
-          }
-        },
-        function(err, db, client) {
-          expect(err).to.not.exist;
-
-          // perform any operation that gets logged
-          db.collection('foo').findOne({}, function(err) {
-            expect(err).to.not.exist;
-            expect(logged).to.be.true;
-
-            // Clean up
-            Logger.reset();
-            client.close();
-            done();
-          });
+      const client = configuration.newClient('mongodb://localhost:27017/test', {
+        loggerLevel: 'debug',
+        logger: function() {
+          logged = true;
         }
-      );
+      });
+
+      client.connect(err => {
+        expect(err).to.not.exist;
+        const db = client.db(configuration.db);
+
+        // perform any operation that gets logged
+        db.collection('foo').findOne({}, err => {
+          expect(err).to.not.exist;
+          expect(logged).to.be.true;
+
+          // Clean up
+          Logger.reset();
+          client.close();
+          done();
+        });
+      });
     }
   });
 });

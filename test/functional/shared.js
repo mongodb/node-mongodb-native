@@ -1,19 +1,6 @@
 'use strict';
 
-const MongoClient = require('../../').MongoClient;
 const expect = require('chai').expect;
-
-function connectToDb(url, db, options, callback) {
-  if (typeof options === 'function') {
-    callback = options;
-    options = {};
-  }
-
-  MongoClient.connect(url, options || {}, function(err, client) {
-    if (err) return callback(err);
-    callback(null, client.db(db), client);
-  });
-}
 
 function setupDatabase(configuration, dbsToClean) {
   dbsToClean = Array.isArray(dbsToClean) ? dbsToClean : [];
@@ -101,9 +88,8 @@ var delay = function(timeout) {
 };
 
 module.exports = {
-  connectToDb: connectToDb,
-  setupDatabase: setupDatabase,
-  assert: assert,
-  delay: delay,
+  setupDatabase,
+  assert,
+  delay,
   withClient
 };
