@@ -3126,6 +3126,11 @@ describe('Operation (Promises)', function() {
     test: function() {
       var configuration = this.configuration;
 
+      if (configuration.usingUnifiedTopology()) {
+        // The unified topology does not presently support authentication
+        return this.skip();
+      }
+
       const client = configuration.newClient();
       return client.connect().then(function(client) {
         var db = client.db(configuration.db);

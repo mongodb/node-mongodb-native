@@ -132,6 +132,11 @@ describe('URI', function() {
     test: function(done) {
       var self = this;
       const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // The unified topology does not presently support authentication
+        return this.skip();
+      }
+
       const client = configuration.newClient('mongodb://localhost:27017/integration_tests', {
         native_parser: true
       });

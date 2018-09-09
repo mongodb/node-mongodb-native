@@ -6,6 +6,12 @@ var setupDatabase = require('./shared').setupDatabase;
 
 describe('Authentication', function() {
   before(function() {
+    const configuration = this.configuration;
+    if (configuration.usingUnifiedTopology()) {
+      // The unified topology does not currently support authentication
+      return this.skip();
+    }
+
     return setupDatabase(this.configuration);
   });
 
