@@ -2,7 +2,6 @@
 
 const setupDatabase = require('../functional/shared').setupDatabase;
 const expect = require('chai').expect;
-const MongoClient = require('../../lib/mongo_client');
 
 describe('examples(causal-consistency):', function() {
   let client;
@@ -14,7 +13,8 @@ describe('examples(causal-consistency):', function() {
   });
 
   beforeEach(async function() {
-    client = await MongoClient.connect(this.configuration.url());
+    client = this.configuration.newClient();
+    await client.connect();
     collection = client.db(this.configuration.db).collection('arrayFilterUpdateExample');
   });
 

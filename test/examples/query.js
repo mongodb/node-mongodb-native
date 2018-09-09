@@ -2,7 +2,6 @@
 
 const setupDatabase = require('../functional/shared').setupDatabase;
 const expect = require('chai').expect;
-const MongoClient = require('../../lib/mongo_client');
 
 describe('examples(query):', function() {
   let client;
@@ -13,9 +12,10 @@ describe('examples(query):', function() {
   });
 
   beforeEach(async function() {
-    client = await MongoClient.connect(this.configuration.url());
-    db = client.db(this.configuration.db);
+    client = this.configuration.newClient();
+    await client.connect();
 
+    db = client.db(this.configuration.db);
     await db.collection('inventory').deleteMany({});
     // Start Example 6
     await db.collection('inventory').insertMany([
