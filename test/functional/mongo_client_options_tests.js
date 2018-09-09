@@ -1,7 +1,6 @@
 'use strict';
-const test = require('./shared').assert,
-  setupDatabase = require('./shared').setupDatabase,
-  expect = require('chai').expect;
+const setupDatabase = require('./shared').setupDatabase;
+const expect = require('chai').expect;
 
 describe('MongoClient Options', function() {
   before(function() {
@@ -17,16 +16,18 @@ describe('MongoClient Options', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var connect = configuration.require;
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.url(), {
+        autoReconnect: true,
+        poolSize: 4
+      });
 
-      connect(
-        configuration.url(),
-        { autoReconnect: true, poolSize: 4 },
-        connectionTester(configuration, 'testConnectServerOptions', function(client) {
-          test.ok(client.topology.poolSize >= 1);
-          test.equal(4, client.topology.s.coreTopology.s.pool.size);
-          test.equal(true, client.topology.autoReconnect);
+      client.connect(
+        connectionTester(configuration, 'testConnectServerOptions', client => {
+          expect(client.topology.poolSize).to.be.at.least(1);
+          expect(client.topology.s.coreTopology.s.pool.size).to.equal(4);
+          expect(client.topology.autoReconnect).to.equal(true);
+
           client.close();
           done();
         })
@@ -43,16 +44,18 @@ describe('MongoClient Options', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var connect = configuration.require;
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.url(), {
+        autoReconnect: true,
+        poolSize: 4
+      });
 
-      connect(
-        configuration.url(),
-        { autoReconnect: true, poolSize: 4 },
-        connectionTester(configuration, 'testConnectServerOptions', function(client) {
-          test.ok(client.topology.poolSize >= 1);
-          test.equal(4, client.topology.s.coreTopology.s.pool.size);
-          test.equal(true, client.topology.autoReconnect);
+      client.connect(
+        connectionTester(configuration, 'testConnectServerOptions', client => {
+          expect(client.topology.poolSize).to.be.at.least(1);
+          expect(client.topology.s.coreTopology.s.pool.size).to.equal(4);
+          expect(client.topology.autoReconnect).to.equal(true);
+
           client.close();
           done();
         })
@@ -68,23 +71,20 @@ describe('MongoClient Options', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var connect = configuration.require;
+      const configuration = this.configuration;
+      const client = configuration.newClient(configuration.url(), {
+        autoReconnect: true,
+        poolSize: 4,
+        notlegal: {},
+        validateOptions: true
+      });
 
-      connect(
-        configuration.url(),
-        {
-          autoReconnect: true,
-          poolSize: 4,
-          notlegal: {},
-          validateOptions: true
-        },
-        function(err, client) {
-          test.ok(err.message.indexOf('option notlegal is not supported') !== -1);
-          expect(client).to.not.exist;
-          done();
-        }
-      );
+      client.connect((err, _client) => {
+        expect(err.message).to.match(/option notlegal is not supported/);
+        expect(_client).to.not.exist;
+
+        done();
+      });
     }
   });
 
@@ -92,18 +92,19 @@ describe('MongoClient Options', function() {
    * @ignore
    */
   function connectionTester(configuration, testName, callback) {
-    return function(err, client) {
-      test.equal(err, null);
-      var db = client.db(configuration.db);
+    return (err, client) => {
+      expect(err).to.not.exist;
 
-      db.collection(testName, function(err, collection) {
-        test.equal(err, null);
+      const db = client.db(configuration.db);
+      db.collection(testName, (err, collection) => {
+        expect(err).to.not.exist;
 
-        collection.insert({ foo: 123 }, { w: 1 }, function(err) {
-          test.equal(err, null);
-          db.dropDatabase(function(err, dropped) {
-            test.equal(err, null);
-            test.ok(dropped);
+        collection.insert({ foo: 123 }, { w: 1 }, err => {
+          expect(err).to.not.exist;
+
+          db.dropDatabase((err, dropped) => {
+            expect(err).to.not.exist;
+            expect(dropped).to.equal(true);
             if (callback) return callback(client);
           });
         });
