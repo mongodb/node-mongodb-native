@@ -76,12 +76,18 @@ const extractCommand = command => {
   }
 
   if (command.query && command.query.$query) {
-    // upconvert legacy find command
-    const result = { find: collectionName(command) };
-    Object.keys(LEGACY_FIND_QUERY_MAP).forEach(key => {
-      if (typeof command.query[key] !== 'undefined')
-        result[LEGACY_FIND_QUERY_MAP[key]] = command.query[key];
-    });
+    let result;
+    if (command.ns === 'admin.$cmd') {
+      // upconvert legacy command
+      result = Object.assign({}, command.query.$query);
+    } else {
+      // upconvert legacy find command
+      result = { find: collectionName(command) };
+      Object.keys(LEGACY_FIND_QUERY_MAP).forEach(key => {
+        if (typeof command.query[key] !== 'undefined')
+          result[LEGACY_FIND_QUERY_MAP[key]] = command.query[key];
+      });
+    }
 
     Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
       if (typeof command.options[key] !== 'undefined')
