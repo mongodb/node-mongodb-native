@@ -5,6 +5,7 @@ const test = require('./shared').assert,
   expect = require('chai').expect,
   normalizedFunctionString = require('bson/lib/bson/parser/utils').normalizedFunctionString,
   Buffer = require('safe-buffer').Buffer;
+const setValidationLevel = require('../../lib/options_validator').setValidationLevel;
 
 /**
  * Module for parsing an ISO 8601 formatted string into a Date object.
@@ -2883,6 +2884,33 @@ describe('Insert', function() {
               done();
             });
         });
+      });
+    }
+  });
+
+  it('Should correctly validate forceServerObjectId for insertOne', {
+    metadata: { requires: { topology: ['single'] } },
+
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      client.connect(function(err, client) {
+        var db = client.db(configuration.db);
+        expect(err).to.be.null;
+
+        setValidationLevel('error');
+        let coll = db.collection('insert_tests');
+        try {
+          coll.insertOne({ a: 1 }, { forceServerObjectId: 1 });
+        } catch (err) {
+          expect(err).to.not.be.null;
+          expect(err.message).to.equal(
+            'forceServerObjectId should be of type boolean, but is of type number.'
+          );
+        }
+        client.close();
+        done();
       });
     }
   });
