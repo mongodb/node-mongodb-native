@@ -74,6 +74,19 @@ function translateClientOptions(options) {
   return options;
 }
 
+function translateSessionOptions(sessionOptions) {
+  Object.keys(sessionOptions).forEach(session => {
+    const options = sessionOptions[session];
+    if (options.defaultTransactionOptions && options.defaultTransactionOptions.readPreference) {
+      options.defaultTransactionOptions.readPreference = translateReadPreference(
+        options.defaultTransactionOptions.readPreference
+      );
+    }
+  });
+
+  return sessionOptions;
+}
+
 // Main test runner
 describe('Transactions (spec)', function() {
   const testContext = {
@@ -206,7 +219,7 @@ function runTestSuiteTest(configuration, testData, context) {
 
     const sessionOptions = Object.assign({}, testData.transactionOptions);
 
-    testData.sessionOptions = testData.sessionOptions || {};
+    testData.sessionOptions = translateSessionOptions(testData.sessionOptions || {});
     const database = client.db();
     const session0 = client.startSession(
       Object.assign({}, sessionOptions, testData.sessionOptions.session0)
@@ -366,6 +379,14 @@ function translateOperationName(operationName) {
   return operationName;
 }
 
+function translateReadPreference(mode) {
+  if (typeof mode === 'object' && mode.mode) {
+    return translateReadPreference(mode.mode);
+  }
+
+  return mode.charAt(0).toLowerCase() + mode.substr(1);
+}
+
 /**
  *
  * @param {Object} operation the operation definition from the spec test
@@ -400,14 +421,14 @@ function testOperation(operation, obj, context) {
       if (key === 'options') {
         Object.assign(opOptions, operation.arguments[key]);
         if (opOptions.readPreference) {
-          opOptions.readPreference = opOptions.readPreference.mode.toLowerCase();
+          opOptions.readPreference = translateReadPreference(opOptions.readPreference.mode);
         }
 
         return;
       }
 
       if (key === 'readPreference') {
-        opOptions[key] = operation.arguments[key].mode.toLowerCase();
+        opOptions[key] = translateReadPreference(operation.arguments[key].mode);
         return;
       }
 
@@ -491,7 +512,7 @@ function convertCollectionOptions(options) {
   const result = {};
   Object.keys(options).forEach(key => {
     if (key === 'readPreference') {
-      result[key] = options[key].mode.toLowerCase();
+      result[key] = translateReadPreference(options[key].mode);
     } else {
       result[key] = options[key];
     }
