@@ -297,9 +297,14 @@ describe('Cursor', function() {
       client.connect((err, client) => {
         const db = client.db(configuration.db);
 
-        const internalClientCursor = sinon.spy(client.topology.s.coreTopology, 'cursor');
-        const expectedReadPreference = new ReadPreference(ReadPreference.SECONDARY);
+        let internalClientCursor;
+        if (configuration.usingUnifiedTopology()) {
+          internalClientCursor = sinon.spy(client.topology, 'cursor');
+        } else {
+          internalClientCursor = sinon.spy(client.topology.s.coreTopology, 'cursor');
+        }
 
+        const expectedReadPreference = new ReadPreference(ReadPreference.SECONDARY);
         const cursor = db.collection('countTEST').find({ qty: { $gt: 4 } });
         cursor.count(true, { readPreference: ReadPreference.SECONDARY }, err => {
           expect(err).to.be.null;
