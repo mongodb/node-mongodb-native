@@ -584,6 +584,12 @@ describe('MongoClient', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // The unified topology fixes this old broken behavior
+        this.skip();
+        return;
+      }
+
       var url = configuration
         .url()
         .replace('rs_name=rs', '')
