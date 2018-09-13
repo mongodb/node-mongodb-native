@@ -2886,4 +2886,30 @@ describe('Insert', function() {
       });
     }
   });
+
+  it('Should correctly validate forceServerObjectId for insertOne', {
+    metadata: { requires: { topology: ['single'] } },
+
+    // The actual test we wish to run
+    test: function(done) {
+      var configuration = this.configuration;
+      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      client.connect(function(err, client) {
+        var db = client.db(configuration.db);
+        expect(err).to.be.null;
+
+        let coll = db.collection('insert_tests');
+        try {
+          coll.insertOne({ a: 1 }, { forceServerObjectId: 1 });
+        } catch (err) {
+          expect(err).to.not.be.null;
+          expect(err.message).to.equal(
+            'forceServerObjectId should be of type boolean, but is of type number.'
+          );
+        }
+        client.close();
+        done();
+      });
+    }
+  });
 });
