@@ -145,7 +145,7 @@ describe('Options Validation', function() {
     const validatedObject = objectValidator(testObject, { validationLevel: 'warn' });
 
     expect(stub).to.have.been.calledOnce;
-    expect(stub).to.have.been.calledWith('required option "a" was not found.');
+    expect(stub).to.have.been.calledWith('required option [a] was not found.');
     expect(validatedObject).to.deep.equal(testObject);
     expect(validatedObject).to.be.frozen;
 
@@ -177,7 +177,7 @@ describe('Options Validation', function() {
       expect(validatedObject).to.be.frozen;
     } catch (err) {
       expect(err).to.not.be.null;
-      expect(err.message).to.equal('required option "a" was not found.');
+      expect(err.message).to.equal('required option [a] was not found.');
     }
   });
 
@@ -192,5 +192,25 @@ describe('Options Validation', function() {
     expect(validatedObject.a).to.equal(true);
     expect(validatedObject.b).to.equal(3);
     expect(validatedObject).to.be.frozen;
+  });
+
+  it('Should deprecate options', function() {
+    const stub = sinon.stub(console, 'warn');
+
+    const objectValidator = createValidationFunction({
+      a: { deprecated: true }
+    });
+
+    const testObject = { a: 3 };
+
+    const validatedObject = objectValidator(testObject);
+    expect(stub).to.have.been.calledOnce;
+    expect(stub).to.have.been.calledWith(
+      'option [a] is deprecated and will be removed in a later version.'
+    );
+    expect(validatedObject).to.deep.equal(testObject);
+    expect(validatedObject).to.be.frozen;
+
+    console.warn.restore();
   });
 });
