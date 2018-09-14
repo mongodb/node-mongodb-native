@@ -42,7 +42,7 @@ describe('examples(transactions):', function() {
           console.log('Transaction aborted. Caught exception during transaction.');
 
           // If transient error, retry the whole transaction
-          if (error.errorLabels && error.errorLabels.indexOf('TransientTransactionError') < 0) {
+          if (error.errorLabels && error.errorLabels.indexOf('TransientTransactionError') >= 0) {
             console.log('TransientTransactionError, retrying transaction ...');
             await runTransactionWithRetry(txnFunc, client, session);
           } else {
@@ -99,7 +99,7 @@ describe('examples(transactions):', function() {
         } catch (error) {
           if (
             error.errorLabels &&
-            error.errorLabels.indexOf('UnknownTransactionCommitResult') < 0
+            error.errorLabels.indexOf('UnknownTransactionCommitResult') >= 0
           ) {
             console.log('UnknownTransactionCommitResult, retrying commit operation ...');
             await commitWithRetry(session);
@@ -156,7 +156,7 @@ describe('examples(transactions):', function() {
         } catch (error) {
           if (
             error.errorLabels &&
-            error.errorLabels.indexOf('UnknownTransactionCommitResult') < 0
+            error.errorLabels.indexOf('UnknownTransactionCommitResult') >= 0
           ) {
             console.log('UnknownTransactionCommitResult, retrying commit operation ...');
             await commitWithRetry(session);
@@ -174,7 +174,7 @@ describe('examples(transactions):', function() {
           console.log('Transaction aborted. Caught exception during transaction.');
 
           // If transient error, retry the whole transaction
-          if (error.errorLabels && error.errorLabels.indexOf('TransientTransactionError') < 0) {
+          if (error.errorLabels && error.errorLabels.indexOf('TransientTransactionError') >= 0) {
             console.log('TransientTransactionError, retrying transaction ...');
             await runTransactionWithRetry(txnFunc, client, session);
           } else {
