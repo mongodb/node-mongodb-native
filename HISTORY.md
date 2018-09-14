@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.1.5"></a>
+## [3.1.5](https://github.com/mongodb/node-mongodb-native/compare/v3.1.4...v3.1.5) (2018-09-14)
+
+
+### Bug Fixes
+
+* **cursor:** allow `$meta` based sort when passing an array to `sort()` ([f93a8c3](https://github.com/mongodb/node-mongodb-native/commit/f93a8c3))
+* **utils:** only set retryWrites to true for valid operations ([3b725ef](https://github.com/mongodb/node-mongodb-native/commit/3b725ef))
+
+
+### Features
+
+* **core:** bump core to v3.1.4 ([805d58a](https://github.com/mongodb/node-mongodb-native/commit/805d58a))
+
+
+
 <a name="3.1.4"></a>
 ## [3.1.4](https://github.com/mongodb/node-mongodb-native/compare/v3.1.3...v3.1.4) (2018-08-25)
 
