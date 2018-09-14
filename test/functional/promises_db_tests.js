@@ -182,37 +182,6 @@ describe('Promises (Db)', function() {
     }
   });
 
-  it('Should correctly execute eval using Promise', {
-    metadata: {
-      requires: {
-        topology: ['single']
-      }
-    },
-
-    // The actual test we wish to run
-    test: function(done) {
-      var configuration = this.configuration;
-      var url = configuration.url();
-      url =
-        url.indexOf('?') !== -1
-          ? f('%s&%s', url, 'maxPoolSize=5')
-          : f('%s?%s', url, 'maxPoolSize=5');
-
-      const client = configuration.newClient(url);
-      client.connect().then(function(client) {
-        client
-          .db(configuration.db)
-          .eval('function (x) {return x;}', [3], { nolock: true })
-          .then(function(result) {
-            test.ok(result != null);
-
-            client.close();
-            done();
-          });
-      });
-    }
-  });
-
   it('Should correctly rename and drop collection using Promise', {
     metadata: {
       requires: {
