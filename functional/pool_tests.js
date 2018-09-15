@@ -48,6 +48,46 @@ describe('Pool tests', function() {
     }
   });
 
+  it('Should only listen on connect once', {
+    metadata: { requires: { topology: 'single' } },
+
+    test: function(done) {
+      // Attempt to connect
+      var pool = new Pool(null, {
+        host: this.configuration.host,
+        port: this.configuration.port,
+        bson: new Bson(),
+        messageHandler: function() {}
+      });
+
+      let connection;
+
+      // Add event listeners
+      pool.on('connect', function() {
+        var connections = pool.allConnections();
+
+        process.nextTick(() => {
+          // Now that we are in next tick, connection should still exist, but there
+          // should be no connect listeners
+          expect(connection.connection.listenerCount('connect')).to.equal(0);
+          expect(connections).to.have.lengthOf(1);
+
+          pool.destroy();
+          done();
+        });
+      });
+
+      expect(pool.allConnections()).to.have.lengthOf(0);
+
+      // Start connection
+      pool.connect();
+
+      expect(pool.allConnections()).to.have.lengthOf(1);
+      connection = pool.allConnections()[0];
+      expect(connection.connection.listenerCount('connect')).to.equal(1);
+    }
+  });
+
   it('should correctly write ismaster operation to the server', {
     metadata: { requires: { topology: 'single' } },
 
