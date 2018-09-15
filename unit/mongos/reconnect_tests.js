@@ -37,7 +37,8 @@ describe('Reconnect (Mongos)', function() {
   beforeEach(() => startServer());
   afterEach(() => stopServer());
 
-  it('should not connection swarm when reconnecting', function(done) {
+  // NOTE: skipped due to flakiness and extremely long test runs
+  it.skip('should not connection swarm when reconnecting', function(done) {
     const reconnectInterval = 500;
     const socketTimeout = reconnectInterval * 5;
     const haInterval = reconnectInterval * 10;
