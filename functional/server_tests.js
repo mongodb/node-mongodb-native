@@ -745,42 +745,6 @@ describe('Server tests', function() {
     }
   });
 
-  it('should correctly connect execute 5 evals in parallel', {
-    metadata: { requires: { topology: 'single' } },
-
-    test: function(done) {
-      // Attempt to connect
-      var server = new Server({
-        host: this.configuration.host,
-        port: this.configuration.port,
-        size: 10,
-        bson: new Bson()
-      });
-
-      // Add event listeners
-      server.on('connect', function() {
-        var left = 5;
-        var leftDecrement = function(err, r) {
-          expect(err).to.not.exist;
-          expect(r).to.exist;
-
-          left = left - 1;
-          if (left === 0) {
-            server.destroy();
-            done();
-          }
-        };
-
-        for (var i = 0; i < left; i++) {
-          server.command('system.$cmd', { eval: 'sleep(100);' }, leftDecrement);
-        }
-      });
-
-      // Start connection
-      server.connect();
-    }
-  });
-
   it('should correctly promoteValues when calling getMore on queries', {
     metadata: {
       requires: {
