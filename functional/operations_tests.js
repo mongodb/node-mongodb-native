@@ -366,7 +366,7 @@ describe('Operation tests', function() {
   it('should correctly execute query against cursorId', {
     metadata: {
       requires: {
-        mongodb: '>=2.6.0',
+        mongodb: '>=2.6.0 < 4.1.x',
         topology: ['single', 'replicaset']
       }
     },
