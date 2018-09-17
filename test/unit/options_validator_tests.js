@@ -195,7 +195,9 @@ describe('Options Validation', function() {
   });
 
   it('Should deprecate options', function() {
-    const stub = sinon.stub(process, 'emitWarning');
+    const stub = process.emitWarning
+      ? sinon.stub(process, 'emitWarning')
+      : sinon.stub(console, 'error');
 
     const objectValidator = createValidationFunction({
       a: { deprecated: true }
@@ -211,6 +213,6 @@ describe('Options Validation', function() {
     expect(validatedObject).to.deep.equal(testObject);
     expect(validatedObject).to.be.frozen;
 
-    process.emitWarning.restore();
+    process.emitWarning ? process.emitWarning.restore() : console.error.restore();
   });
 });
