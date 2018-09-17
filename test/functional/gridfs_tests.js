@@ -1568,7 +1568,6 @@ describe('GridFS', function() {
                     test.equal('llo world!', chunk.toString());
                   });
 
-                  stream.on('readable', function() {});
                   stream.on('end', function() {
                     client.close();
                     done();
