@@ -115,6 +115,8 @@ describe('Options Validation', function() {
     expect(stub).to.have.been.calledWith('a should be of type boolean, but is of type number.');
     expect(validatedObject).to.deep.equal(testObject);
     expect(validatedObject).to.be.frozen;
+
+    console.warn.restore();
   });
 
   it('Should error if validationLevel is error', function() {
@@ -131,5 +133,86 @@ describe('Options Validation', function() {
       expect(err).to.not.be.null;
       expect(err.message).to.equal('a should be of type boolean, but is of type number.');
     }
+  });
+
+  it('Should fail validation if required option is not present', function() {
+    const stub = sinon.stub(console, 'warn');
+    const objectValidator = createValidationFunction({
+      a: { required: true }
+    });
+
+    const testObject = { b: 45 };
+    const validatedObject = objectValidator(testObject, { validationLevel: 'warn' });
+
+    expect(stub).to.have.been.calledOnce;
+    expect(stub).to.have.been.calledWith('required option [a] was not found.');
+    expect(validatedObject).to.deep.equal(testObject);
+    expect(validatedObject).to.be.frozen;
+
+    console.warn.restore();
+  });
+
+  it('Should validate an object with required and type fields', function() {
+    const objectValidator = createValidationFunction({
+      a: { type: 'boolean', required: true }
+    });
+
+    const testObject = { a: true };
+    const validatedObject = objectValidator(testObject, { validationLevel: testValidationLevel });
+
+    expect(validatedObject).to.deep.equal(testObject);
+    expect(validatedObject).to.be.frozen;
+  });
+
+  it('Should fail validation if required or type fails', function() {
+    const objectValidator = createValidationFunction({
+      a: { type: 'boolean', required: true }
+    });
+
+    const testObject = { b: 1 };
+
+    try {
+      const validatedObject = objectValidator(testObject, { validationLevel: testValidationLevel });
+      expect(validatedObject).to.deep.equal(testObject);
+      expect(validatedObject).to.be.frozen;
+    } catch (err) {
+      expect(err).to.not.be.null;
+      expect(err.message).to.equal('required option [a] was not found.');
+    }
+  });
+
+  it('Should set defaults', function() {
+    const objectValidator = createValidationFunction({
+      a: { default: true }
+    });
+
+    const testObject = { b: 3 };
+
+    const validatedObject = objectValidator(testObject, { validationLevel: testValidationLevel });
+    expect(validatedObject.a).to.equal(true);
+    expect(validatedObject.b).to.equal(3);
+    expect(validatedObject).to.be.frozen;
+  });
+
+  it('Should deprecate options', function() {
+    const stub = process.emitWarning
+      ? sinon.stub(process, 'emitWarning')
+      : sinon.stub(console, 'error');
+
+    const objectValidator = createValidationFunction({
+      a: { deprecated: true }
+    });
+
+    const testObject = { a: 3 };
+
+    const validatedObject = objectValidator(testObject);
+    expect(stub).to.have.been.calledOnce;
+    expect(stub).to.have.been.calledWith(
+      'option [a] is deprecated and will be removed in a later version.'
+    );
+    expect(validatedObject).to.deep.equal(testObject);
+    expect(validatedObject).to.be.frozen;
+
+    process.emitWarning ? process.emitWarning.restore() : console.error.restore();
   });
 });
