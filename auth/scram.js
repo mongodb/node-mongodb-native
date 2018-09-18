@@ -1,49 +1,20 @@
 'use strict';
 
-var f = require('util').format,
-  crypto = require('crypto'),
-  retrieveBSON = require('../connection/utils').retrieveBSON,
-  MongoError = require('../error').MongoError,
-  Buffer = require('safe-buffer').Buffer;
+const crypto = require('crypto');
+const Buffer = require('safe-buffer').Buffer;
+const retrieveBSON = require('../connection/utils').retrieveBSON;
+const MongoError = require('../error').MongoError;
+const AuthProvider = require('./auth_provider').AuthProvider;
+
+const BSON = retrieveBSON();
+const Binary = BSON.Binary;
 
 let saslprep;
-
 try {
   saslprep = require('saslprep');
 } catch (e) {
   // don't do anything;
 }
-
-var BSON = retrieveBSON(),
-  Binary = BSON.Binary;
-
-var AuthSession = function(db, username, password) {
-  this.db = db;
-  this.username = username;
-  this.password = password;
-};
-
-AuthSession.prototype.equal = function(session) {
-  return (
-    session.db === this.db &&
-    session.username === this.username &&
-    session.password === this.password
-  );
-};
-
-var id = 0;
-
-/**
- * Creates a new ScramSHA authentication mechanism
- * @class
- * @return {ScramSHA} A cursor instance
- */
-var ScramSHA = function(bson, cryptoMethod) {
-  this.bson = bson;
-  this.authStore = [];
-  this.id = id++;
-  this.cryptoMethod = cryptoMethod || 'sha1';
-};
 
 var parsePayload = function(payload) {
   var dict = {};
@@ -135,52 +106,48 @@ function HI(data, salt, iterations, cryptoMethod) {
 }
 
 /**
- * Authenticate
- * @method
- * @param {function} runCommand A method called to run commands directly on a connection, bypassing any message queue
- * @param {[]Connections} connections Connections to authenticate using this authenticator
- * @param {string} db Name of the database
- * @param {string} username Username
- * @param {string} password Password
- * @param {authResultCallback} callback The callback to return the result from the authentication
- * @return {object}
+ * Creates a new ScramSHA authentication mechanism
+ * @class
+ * @extends AuthProvider
  */
-ScramSHA.prototype.auth = function(runCommand, connections, db, username, password, callback) {
-  var self = this;
-  // Total connections
-  var count = connections.length;
-  if (count === 0) return callback(null, null);
-
-  // Valid connections
-  var numberOfValidConnections = 0;
-  var errorObject = null;
-
-  const cryptoMethod = this.cryptoMethod;
-  let mechanism = 'SCRAM-SHA-1';
-  let processedPassword;
-
-  if (cryptoMethod === 'sha256') {
-    mechanism = 'SCRAM-SHA-256';
-
-    let saslprepFn = saslprep;
-    if (saslprepFn) {
-      processedPassword = saslprepFn(password);
-    } else {
-      console.warn('Warning: no saslprep library specified. Passwords will not be sanitized');
-      processedPassword = password;
-    }
-  } else {
-    processedPassword = passwordDigest(username, password);
+class ScramSHA extends AuthProvider {
+  constructor(bson, cryptoMethod) {
+    super(bson);
+    this.cryptoMethod = cryptoMethod || 'sha1';
   }
 
-  // Execute MongoCR
-  var executeScram = function(connection) {
+  static _getError(err, r) {
+    if (err) {
+      return err;
+    }
+
+    if (r.result['$err'] || r.result['errmsg']) {
+      return r.result;
+    }
+  }
+
+  /**
+   * @ignore
+   */
+  _executeScram(sendAuthCommand, connection, credentials, nonce, callback) {
+    let username = credentials.username;
+    const password = credentials.password;
+    const db = credentials.source;
+
+    const cryptoMethod = this.cryptoMethod;
+    let mechanism = 'SCRAM-SHA-1';
+    let processedPassword;
+
+    if (cryptoMethod === 'sha256') {
+      mechanism = 'SCRAM-SHA-256';
+
+      processedPassword = saslprep ? saslprep(password) : password;
+    } else {
+      processedPassword = passwordDigest(username, password);
+    }
+
     // Clean up the user
     username = username.replace('=', '=3D').replace(',', '=2C');
-
-    // Create a random nonce
-    var nonce = crypto.randomBytes(24).toString('base64');
-    // var nonce = 'MsQUY9iw0T9fx2MUEz6LZPwGuhVvWAhc'
 
     // NOTE: This is done b/c Javascript uses UTF-16, but the server is hashing in UTF-8.
     // Since the username is not sasl-prep-d, we need to do this here.
@@ -192,86 +159,28 @@ ScramSHA.prototype.auth = function(runCommand, connections, db, username, passwo
     ]);
 
     // Build command structure
-    var cmd = {
+    const saslStartCmd = {
       saslStart: 1,
-      mechanism: mechanism,
+      mechanism,
       payload: new Binary(Buffer.concat([Buffer.from('n,,', 'utf8'), firstBare])),
       autoAuthorize: 1
     };
 
-    // Handle the error
-    var handleError = function(err, r) {
-      if (err) {
-        numberOfValidConnections = numberOfValidConnections - 1;
-        errorObject = err;
-        return false;
-      } else if (r.result['$err']) {
-        errorObject = r.result;
-        return false;
-      } else if (r.result['errmsg']) {
-        errorObject = r.result;
-        return false;
-      } else {
-        numberOfValidConnections = numberOfValidConnections + 1;
-      }
-
-      return true;
-    };
-
-    // Finish up
-    var finish = function(_count, _numberOfValidConnections) {
-      if (_count === 0 && _numberOfValidConnections > 0) {
-        // Store the auth details
-        addAuthSession(self.authStore, new AuthSession(db, username, password));
-        // Return correct authentication
-        return callback(null, true);
-      } else if (_count === 0) {
-        if (errorObject == null)
-          errorObject = new MongoError(f('failed to authenticate using scram'));
-        return callback(errorObject, false);
-      }
-    };
-
-    var handleEnd = function(_err, _r) {
-      // Handle any error
-      handleError(_err, _r);
-      // Adjust the number of connections
-      count = count - 1;
-      // Execute the finish
-      finish(count, numberOfValidConnections);
-    };
-
     // Write the commmand on the connection
-    runCommand(connection, `${db}.$cmd`, cmd, (err, r) => {
-      // Do we have an error, handle it
-      if (handleError(err, r) === false) {
-        count = count - 1;
-
-        if (count === 0 && numberOfValidConnections > 0) {
-          // Store the auth details
-          addAuthSession(self.authStore, new AuthSession(db, username, password));
-          // Return correct authentication
-          return callback(null, true);
-        } else if (count === 0) {
-          if (errorObject == null)
-            errorObject = new MongoError(f('failed to authenticate using scram'));
-          return callback(errorObject, false);
-        }
-
-        return;
+    sendAuthCommand(connection, `${db}.$cmd`, saslStartCmd, (err, r) => {
+      let tmpError = ScramSHA._getError(err, r);
+      if (tmpError) {
+        return callback(tmpError, null);
       }
 
-      // Get the dictionary
-      var dict = parsePayload(r.result.payload.value());
-
-      // Unpack dictionary
-      var iterations = parseInt(dict.i, 10);
-      var salt = dict.s;
-      var rnonce = dict.r;
+      const dict = parsePayload(r.result.payload.value());
+      const iterations = parseInt(dict.i, 10);
+      const salt = dict.s;
+      const rnonce = dict.r;
 
       // Set up start of proof
-      var withoutProof = f('c=biws,r=%s', rnonce);
-      var saltedPassword = HI(
+      const withoutProof = `c=biws,r=${rnonce}`;
+      const saltedPassword = HI(
         processedPassword,
         Buffer.from(salt, 'base64'),
         iterations,
@@ -283,133 +192,97 @@ ScramSHA.prototype.auth = function(runCommand, connections, db, username, passwo
         return callback(error, false);
       }
 
-      // Create the client key
       const clientKey = HMAC(cryptoMethod, saltedPassword, 'Client Key');
-
-      // Create the stored key
       const storedKey = H(cryptoMethod, clientKey);
-
-      // Create the authentication message
       const authMessage = [
         firstBare,
         r.result.payload.value().toString('base64'),
         withoutProof
       ].join(',');
 
-      // Create client signature
       const clientSignature = HMAC(cryptoMethod, storedKey, authMessage);
-
-      // Create client proof
-      const clientProof = f('p=%s', xor(clientKey, clientSignature));
-
-      // Create client final
+      const clientProof = `p=${xor(clientKey, clientSignature)}`;
       const clientFinal = [withoutProof, clientProof].join(',');
-
-      // Create continue message
-      const cmd = {
+      const saslContinueCmd = {
         saslContinue: 1,
         conversationId: r.result.conversationId,
         payload: new Binary(Buffer.from(clientFinal))
       };
 
-      //
-      // Execute sasl continue
-      // Write the commmand on the connection
-      runCommand(connection, `${db}.$cmd`, cmd, (err, r) => {
-        if (r && r.result.done === false) {
-          var cmd = {
-            saslContinue: 1,
-            conversationId: r.result.conversationId,
-            payload: Buffer.alloc(0)
-          };
-
-          // Write the commmand on the connection
-          runCommand(connection, `${db}.$cmd`, cmd, (err, r) => {
-            handleEnd(err, r);
-          });
-        } else {
-          handleEnd(err, r);
+      sendAuthCommand(connection, `${db}.$cmd`, saslContinueCmd, (err, r) => {
+        if (!r || r.result.done !== false) {
+          return callback(err, r);
         }
+
+        const retrySaslContinueCmd = {
+          saslContinue: 1,
+          conversationId: r.result.conversationId,
+          payload: Buffer.alloc(0)
+        };
+
+        sendAuthCommand(connection, `${db}.$cmd`, retrySaslContinueCmd, callback);
       });
     });
-  };
-
-  var _execute = function(_connection) {
-    process.nextTick(function() {
-      executeScram(_connection);
-    });
-  };
-
-  // For each connection we need to authenticate
-  while (connections.length > 0) {
-    _execute(connections.shift());
   }
-};
 
-// Add to store only if it does not exist
-var addAuthSession = function(authStore, session) {
-  var found = false;
+  /**
+   * Implementation of authentication for a single connection
+   * @override
+   */
+  _authenticateSingleConnection(sendAuthCommand, connection, credentials, callback) {
+    // Create a random nonce
+    crypto.randomBytes(24, (err, buff) => {
+      if (err) {
+        return callback(err, null);
+      }
 
-  for (var i = 0; i < authStore.length; i++) {
-    if (authStore[i].equal(session)) {
-      found = true;
-      break;
+      return this._executeScram(
+        sendAuthCommand,
+        connection,
+        credentials,
+        buff.toString('base64'),
+        callback
+      );
+    });
+  }
+
+  /**
+   * Authenticate
+   * @override
+   * @method
+   */
+  auth(sendAuthCommand, connections, credentials, callback) {
+    this._checkSaslprep();
+    super.auth(sendAuthCommand, connections, credentials, callback);
+  }
+
+  _checkSaslprep() {
+    const cryptoMethod = this.cryptoMethod;
+
+    if (cryptoMethod === 'sha256') {
+      if (!saslprep) {
+        console.warn('Warning: no saslprep library specified. Passwords will not be sanitized');
+      }
     }
   }
-
-  if (!found) authStore.push(session);
-};
+}
 
 /**
- * Remove authStore credentials
- * @method
- * @param {string} db Name of database we are removing authStore details about
- * @return {object}
+ * Creates a new ScramSHA1 authentication mechanism
+ * @class
+ * @extends ScramSHA
  */
-ScramSHA.prototype.logout = function(dbName) {
-  this.authStore = this.authStore.filter(function(x) {
-    return x.db !== dbName;
-  });
-};
-
-/**
- * Re authenticate pool
- * @method
- * @param {function} runCommand A method called to run commands directly on a connection, bypassing any message queue
- * @param {[]Connections} connections Connections to authenticate using this authenticator
- * @param {authResultCallback} callback The callback to return the result from the authentication
- * @return {object}
- */
-ScramSHA.prototype.reauthenticate = function(runCommand, connections, callback) {
-  var authStore = this.authStore.slice(0);
-  var count = authStore.length;
-  // No connections
-  if (count === 0) return callback(null, null);
-  // Iterate over all the auth details stored
-  for (var i = 0; i < authStore.length; i++) {
-    this.auth(
-      runCommand,
-      connections,
-      authStore[i].db,
-      authStore[i].username,
-      authStore[i].password,
-      function(err) {
-        count = count - 1;
-        // Done re-authenticating
-        if (count === 0) {
-          callback(err, null);
-        }
-      }
-    );
-  }
-};
-
 class ScramSHA1 extends ScramSHA {
   constructor(bson) {
     super(bson, 'sha1');
   }
 }
 
+/**
+ * Creates a new ScramSHA256 authentication mechanism
+ * @class
+ * @extends ScramSHA
+ */
 class ScramSHA256 extends ScramSHA {
   constructor(bson) {
     super(bson, 'sha256');

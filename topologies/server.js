@@ -22,14 +22,15 @@ var inherits = require('util').inherits,
 const collationNotSupported = require('../utils').collationNotSupported;
 
 function getSaslSupportedMechs(options) {
-  if (!options) {
+  if (!(options && options.credentials)) {
     return {};
   }
 
-  const authArray = options.auth || [];
-  const authMechanism = authArray[0] || options.authMechanism;
-  const authSource = authArray[1] || options.authSource || options.dbName || 'admin';
-  const user = authArray[2] || options.user;
+  const credentials = options.credentials;
+
+  const authMechanism = credentials.mechanism;
+  const authSource = credentials.source || options.dbName || 'admin';
+  const user = credentials.username || options.user;
 
   if (typeof authMechanism === 'string' && authMechanism.toUpperCase() !== 'DEFAULT') {
     return {};
@@ -40,26 +41,6 @@ function getSaslSupportedMechs(options) {
   }
 
   return { saslSupportedMechs: `${authSource}.${user}` };
-}
-
-function getDefaultAuthMechanism(ismaster) {
-  if (ismaster) {
-    // If ismaster contains saslSupportedMechs, use scram-sha-256
-    // if it is available, else scram-sha-1
-    if (Array.isArray(ismaster.saslSupportedMechs)) {
-      return ismaster.saslSupportedMechs.indexOf('SCRAM-SHA-256') >= 0
-        ? 'scram-sha-256'
-        : 'scram-sha-1';
-    }
-
-    // Fallback to legacy selection method. If wire version >= 3, use scram-sha-1
-    if (ismaster.maxWireVersion >= 3) {
-      return 'scram-sha-1';
-    }
-  }
-
-  // Default for wireprotocol < 3
-  return 'mongocr';
 }
 
 function extractIsMasterError(err, result) {
@@ -564,7 +545,7 @@ var eventHandler = function(self, event) {
 /**
  * Initiate server connect
  * @method
- * @param {array} [options.auth=null] Array of auth options to apply on connect
+ * @param {MongoCredentials} [options.credentials] MongoCredentials object for auth
  */
 Server.prototype.connect = function(options) {
   var self = this;
@@ -605,11 +586,7 @@ Server.prototype.connect = function(options) {
   });
 
   // Connect with optional auth settings
-  if (options.auth) {
-    self.s.pool.connect.apply(self.s.pool, options.auth);
-  } else {
-    self.s.pool.connect();
-  }
+  self.s.pool.connect(options.credentials);
 };
 
 /**
@@ -872,27 +849,14 @@ Server.prototype.logout = function(dbName, callback) {
 /**
  * Authenticate using a specified mechanism
  * @method
- * @param {string} mechanism The Auth mechanism we are invoking
- * @param {string} db The db we are invoking the mechanism against
- * @param {...object} param Parameters for the specific mechanism
+ * @param {MongoCredentials} credentials Authentication credentials for login
  * @param {authResultCallback} callback A callback function
  */
-Server.prototype.auth = function(mechanism, db) {
-  var self = this;
-
-  if (mechanism === 'default') {
-    mechanism = getDefaultAuthMechanism(self.ismaster);
-  }
-
-  // Slice all the arguments off
-  var args = Array.prototype.slice.call(arguments, 0);
-  // Set the mechanism
-  args[0] = mechanism;
-  // Get the callback
-  var callback = args[args.length - 1];
+Server.prototype.auth = function(credentials, callback) {
+  credentials.resolveAuthMechanism(this.ismaster);
 
   // If we are not connected or have a disconnectHandler specified
-  if (disconnectHandler(self, 'auth', db, args, {}, callback)) {
+  if (disconnectHandler(this, 'auth', credentials.source, [credentials, callback], {}, callback)) {
     return;
   }
 
@@ -902,7 +866,7 @@ Server.prototype.auth = function(mechanism, db) {
   }
 
   // Apply the arguments to the pool
-  self.s.pool.auth.apply(self.s.pool, args);
+  this.s.pool.auth(credentials, callback);
 };
 
 /**

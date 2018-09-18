@@ -216,22 +216,33 @@ function stateTransition(self, newState) {
   }
 }
 
-function authenticate(pool, auth, connection, cb) {
-  if (auth[0] === undefined) return cb(null);
+function authenticate(pool, credentials, connection, cb) {
+  // If there are no credentials, do not authenticate
+  if (!credentials) {
+    return cb(null);
+  }
+
+  // HACK: Due to combination of mechanism resolution and auth on connect, it is possible
+  // for credentials to not be resolved by the time they get here. These will be eventually
+  // resolved and auth-d at that time, but for right now we don't know the mechanism,
+  // so we should not try to auth now.
+  if (credentials.mechanism === 'default') {
+    return cb(null);
+  }
+
   // We need to authenticate the server
-  var mechanism = auth[0];
-  var db = auth[1];
+  const mechanism = credentials.mechanism;
   // Validate if the mechanism exists
   if (!pool.authProviders[mechanism]) {
     throw new MongoError(f('authMechanism %s not supported', mechanism));
   }
 
   // Get the provider
-  var provider = pool.authProviders[mechanism];
+  const provider = pool.authProviders[mechanism];
 
   // Authenticate using the provided mechanism
   const runCommand = makeCommandWriter(pool);
-  provider.auth.apply(provider, [runCommand, [connection], db].concat(auth.slice(2)).concat([cb]));
+  provider.auth(runCommand, [connection], credentials, cb);
 }
 
 // The write function used by the authentication mechanism (bypasses external)
@@ -694,9 +705,10 @@ Pool.prototype.isDisconnected = function() {
 
 /**
  * Connect pool
+ * @param {MongoCredentials} [credentials] Authentication credentials if there is a desire to authenticate after connection
  * @method
  */
-Pool.prototype.connect = function() {
+Pool.prototype.connect = function(credentials) {
   if (this.state !== DISCONNECTED) {
     throw new MongoError('connection in unlawful state ' + this.state);
   }
@@ -704,8 +716,6 @@ Pool.prototype.connect = function() {
   var self = this;
   // Transition to connecting state
   stateTransition(this, CONNECTING);
-  // Create an array of the arguments
-  var args = Array.prototype.slice.call(arguments, 0);
   // Create a connection
   var connection = new Connection(messageHandler(self), this.options);
   // Add to list of connections
@@ -741,7 +751,7 @@ Pool.prototype.connect = function() {
       }
 
       // Authenticate
-      authenticate(self, args, connection, function(err) {
+      authenticate(self, credentials, connection, function(err) {
         if (self.state === DESTROYED || self.state === DESTROYING) return self.destroy();
 
         // We have an error emit it
@@ -787,15 +797,12 @@ Pool.prototype.connect = function() {
 /**
  * Authenticate using a specified mechanism
  * @method
- * @param {string} mechanism The Auth mechanism we are invoking
- * @param {string} db The db we are invoking the mechanism against
- * @param {...object} param Parameters for the specific mechanism
+ * @param {MongoCredentials} credentials Authentication credentials
  * @param {authResultCallback} callback A callback function
  */
-Pool.prototype.auth = function(mechanism) {
+Pool.prototype.auth = function(credentials, callback) {
   var self = this;
-  var args = Array.prototype.slice.call(arguments, 0);
-  var callback = args.pop();
+  const mechanism = credentials ? credentials.mechanism : '';
 
   // If we don't have the mechanism fail
   if (self.authProviders[mechanism] == null && mechanism !== 'default') {
@@ -807,7 +814,7 @@ Pool.prototype.auth = function(mechanism) {
   this.authenticatingTimestamp = new Date().getTime();
 
   // Authenticate all live connections
-  function authenticateLiveConnections(self, args, cb) {
+  function authenticateLiveConnections(self, credentials, cb) {
     // Get the current viable connections
     var connections = self.allConnections();
     // Allow nothing else to use the connections while we authenticate them
@@ -825,7 +832,7 @@ Pool.prototype.auth = function(mechanism) {
 
     // Authenticate the connections
     for (var i = 0; i < connections.length; i++) {
-      authenticate(self, args, connections[i], function(err, result) {
+      authenticate(self, credentials, connections[i], function(err, result) {
         connectionsCount = connectionsCount - 1;
 
         // Store the error
@@ -870,7 +877,7 @@ Pool.prototype.auth = function(mechanism) {
   // Wait for loggout to finish
   waitForLogout(self, function() {
     // Authenticate all live connections
-    authenticateLiveConnections(self, args, function(err, result) {
+    authenticateLiveConnections(self, credentials, function(err, result) {
       // Credentials correctly stored in auth provider if successful
       // Any new connections will now reauthenticate correctly
       self.authenticating = false;

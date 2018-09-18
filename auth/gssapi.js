@@ -1,127 +1,61 @@
 'use strict';
 
-const f = require('util').format;
-const MongoError = require('../error').MongoError;
+const AuthProvider = require('./auth_provider').AuthProvider;
 const retrieveKerberos = require('../utils').retrieveKerberos;
-
-var AuthSession = function(db, username, password, options) {
-  this.db = db;
-  this.username = username;
-  this.password = password;
-  this.options = options;
-};
-
-AuthSession.prototype.equal = function(session) {
-  return (
-    session.db === this.db &&
-    session.username === this.username &&
-    session.password === this.password
-  );
-};
+let kerberos;
 
 /**
  * Creates a new GSSAPI authentication mechanism
  * @class
- * @return {GSSAPI} A cursor instance
+ * @extends AuthProvider
  */
-var GSSAPI = function(bson) {
-  this.bson = bson;
-  this.authStore = [];
-};
+class GSSAPI extends AuthProvider {
+  /**
+   * Implementation of authentication for a single connection
+   * @override
+   */
+  _authenticateSingleConnection(sendAuthCommand, connection, credentials, callback) {
+    const source = credentials.source;
+    const username = credentials.username;
+    const password = credentials.password;
+    const mechanismProperties = credentials.mechanismProperties;
+    const gssapiServiceName =
+      mechanismProperties['gssapiservicename'] ||
+      mechanismProperties['gssapiServiceName'] ||
+      'mongodb';
 
-/**
- * Authenticate
- * @method
- * @param {function} runCommand A method called to run commands directly on a connection, bypassing any message queue
- * @param {[]Connections} connections Connections to authenticate using this authenticator
- * @param {string} db Name of the database
- * @param {string} username Username
- * @param {string} password Password
- * @param {authResultCallback} callback The callback to return the result from the authentication
- * @return {object}
- */
-GSSAPI.prototype.auth = function(
-  runCommand,
-  connections,
-  db,
-  username,
-  password,
-  options,
-  callback
-) {
-  var self = this;
-  let kerberos;
-  try {
-    kerberos = retrieveKerberos();
-  } catch (e) {
-    return callback(e, null);
+    GSSAPIInitialize(
+      this,
+      kerberos.processes.MongoAuthProcess,
+      source,
+      username,
+      password,
+      source,
+      gssapiServiceName,
+      sendAuthCommand,
+      connection,
+      mechanismProperties,
+      callback
+    );
   }
 
-  // TODO: remove this once we fix URI parsing
-  var gssapiServiceName = options['gssapiservicename'] || options['gssapiServiceName'] || 'mongodb';
-  // Total connections
-  var count = connections.length;
-  if (count === 0) return callback(null, null);
+  /**
+   * Authenticate
+   * @override
+   * @method
+   */
+  auth(sendAuthCommand, connections, credentials, callback) {
+    if (kerberos == null) {
+      try {
+        kerberos = retrieveKerberos();
+      } catch (e) {
+        return callback(e, null);
+      }
+    }
 
-  // Valid connections
-  var numberOfValidConnections = 0;
-  var errorObject = null;
-
-  // For each connection we need to authenticate
-  while (connections.length > 0) {
-    // Execute MongoCR
-    var execute = function(connection) {
-      // Start Auth process for a connection
-      GSSAPIInitialize(
-        self,
-        kerberos.processes.MongoAuthProcess,
-        db,
-        username,
-        password,
-        db,
-        gssapiServiceName,
-        runCommand,
-        connection,
-        options,
-        function(err, r) {
-          // Adjust count
-          count = count - 1;
-
-          // If we have an error
-          if (err) {
-            errorObject = err;
-          } else if (r.result['$err']) {
-            errorObject = r.result;
-          } else if (r.result['errmsg']) {
-            errorObject = r.result;
-          } else {
-            numberOfValidConnections = numberOfValidConnections + 1;
-          }
-
-          // We have authenticated all connections
-          if (count === 0 && numberOfValidConnections > 0) {
-            // Store the auth details
-            addAuthSession(self.authStore, new AuthSession(db, username, password, options));
-            // Return correct authentication
-            callback(null, true);
-          } else if (count === 0) {
-            if (errorObject == null)
-              errorObject = new MongoError(f('failed to authenticate using mongocr'));
-            callback(errorObject, false);
-          }
-        }
-      );
-    };
-
-    var _execute = function(_connection) {
-      process.nextTick(function() {
-        execute(_connection);
-      });
-    };
-
-    _execute(connections.shift());
+    super.auth(sendAuthCommand, connections, credentials, callback);
   }
-};
+}
 
 //
 // Initialize step
@@ -133,7 +67,7 @@ var GSSAPIInitialize = function(
   password,
   authdb,
   gssapiServiceName,
-  runCommand,
+  sendAuthCommand,
   connection,
   options,
   callback
@@ -163,7 +97,7 @@ var GSSAPIInitialize = function(
         username,
         password,
         authdb,
-        runCommand,
+        sendAuthCommand,
         connection,
         callback
       );
@@ -181,7 +115,7 @@ var MongoDBGSSAPIFirstStep = function(
   username,
   password,
   authdb,
-  runCommand,
+  sendAuthCommand,
   connection,
   callback
 ) {
@@ -194,7 +128,7 @@ var MongoDBGSSAPIFirstStep = function(
   };
 
   // Write the commmand on the connection
-  runCommand(connection, '$external.$cmd', command, (err, r) => {
+  sendAuthCommand(connection, '$external.$cmd', command, (err, r) => {
     if (err) return callback(err, false);
     var doc = r.result;
     // Execute mongodb transition
@@ -211,7 +145,7 @@ var MongoDBGSSAPIFirstStep = function(
         username,
         password,
         authdb,
-        runCommand,
+        sendAuthCommand,
         connection,
         callback
       );
@@ -230,7 +164,7 @@ var MongoDBGSSAPISecondStep = function(
   username,
   password,
   authdb,
-  runCommand,
+  sendAuthCommand,
   connection,
   callback
 ) {
@@ -243,7 +177,7 @@ var MongoDBGSSAPISecondStep = function(
 
   // Execute the command
   // Write the commmand on the connection
-  runCommand(connection, '$external.$cmd', command, (err, r) => {
+  sendAuthCommand(connection, '$external.$cmd', command, (err, r) => {
     if (err) return callback(err, false);
     var doc = r.result;
     // Call next transition for kerberos
@@ -260,7 +194,7 @@ var MongoDBGSSAPISecondStep = function(
         username,
         password,
         authdb,
-        runCommand,
+        sendAuthCommand,
         connection,
         callback
       );
@@ -277,7 +211,7 @@ var MongoDBGSSAPIThirdStep = function(
   username,
   password,
   authdb,
-  runCommand,
+  sendAuthCommand,
   connection,
   callback
 ) {
@@ -289,71 +223,13 @@ var MongoDBGSSAPIThirdStep = function(
   };
 
   // Execute the command
-  runCommand(connection, '$external.$cmd', command, (err, r) => {
+  sendAuthCommand(connection, '$external.$cmd', command, (err, r) => {
     if (err) return callback(err, false);
     mongo_auth_process.transition(null, function(err) {
       if (err) return callback(err, null);
       callback(null, r);
     });
   });
-};
-
-// Add to store only if it does not exist
-var addAuthSession = function(authStore, session) {
-  var found = false;
-
-  for (var i = 0; i < authStore.length; i++) {
-    if (authStore[i].equal(session)) {
-      found = true;
-      break;
-    }
-  }
-
-  if (!found) authStore.push(session);
-};
-
-/**
- * Remove authStore credentials
- * @method
- * @param {string} db Name of database we are removing authStore details about
- * @return {object}
- */
-GSSAPI.prototype.logout = function(dbName) {
-  this.authStore = this.authStore.filter(function(x) {
-    return x.db !== dbName;
-  });
-};
-
-/**
- * Re authenticate pool
- * @method
- * @param {function} runCommand A method called to run commands directly on a connection, bypassing any message queue
- * @param {[]Connections} connections Connections to authenticate using this authenticator
- * @param {authResultCallback} callback The callback to return the result from the authentication
- * @return {object}
- */
-GSSAPI.prototype.reauthenticate = function(runCommand, connections, callback) {
-  var authStore = this.authStore.slice(0);
-  var count = authStore.length;
-  if (count === 0) return callback(null, null);
-  // Iterate over all the auth details stored
-  for (var i = 0; i < authStore.length; i++) {
-    this.auth(
-      runCommand,
-      connections,
-      authStore[i].db,
-      authStore[i].username,
-      authStore[i].password,
-      authStore[i].options,
-      function(err) {
-        count = count - 1;
-        // Done re-authenticating
-        if (count === 0) {
-          callback(err, null);
-        }
-      }
-    );
-  }
 };
 
 /**

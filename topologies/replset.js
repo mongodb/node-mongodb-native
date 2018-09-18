@@ -738,26 +738,20 @@ function applyAuthenticationContexts(self, server, callback) {
 
   // Copy contexts to ensure no modificiation in the middle of
   // auth process.
-  var authContexts = self.s.authenticationContexts.slice(0);
+  var authCredentials = self.s.authenticationContexts.slice(0);
 
   // Apply one of the contexts
-  function applyAuth(authContexts, server, callback) {
-    if (authContexts.length === 0) return callback();
-    // Get the first auth context
-    var authContext = authContexts.shift();
-    // Copy the params
-    var customAuthContext = authContext.slice(0);
-    // Push our callback handler
-    customAuthContext.push(function(/* err */) {
-      applyAuth(authContexts, server, callback);
-    });
+  function applyAuth(authCredentials, server, callback) {
+    if (authCredentials.length === 0) return callback();
+    // Get credentials
+    const credentials = authCredentials.shift();
 
     // Attempt authentication
-    server.auth.apply(server, customAuthContext);
+    server.auth(credentials, () => applyAuth(authCredentials, server, callback));
   }
 
   // Apply all auth contexts
-  applyAuth(authContexts, server, callback);
+  applyAuth(authCredentials, server, callback);
 }
 
 function shouldTriggerConnect(self) {
@@ -954,7 +948,7 @@ function emitSDAMEvent(self, event, description) {
 /**
  * Initiate server connect
  * @method
- * @param {array} [options.auth=null] Array of auth options to apply on connect
+ * @param {MongoCredentials} [options.credentials=null] Auth credentials
  */
 ReplSet.prototype.connect = function(options) {
   var self = this;
@@ -1384,19 +1378,14 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
 };
 
 /**
- * Authenticate using a specified mechanism
+ * Authenticate the topology.
  * @method
- * @param {string} mechanism The Auth mechanism we are invoking
- * @param {string} db The db we are invoking the mechanism against
- * @param {...object} param Parameters for the specific mechanism
+ * @param {MongoCredentials} credentials The credentials for authentication we are using
  * @param {authResultCallback} callback A callback function
  */
-ReplSet.prototype.auth = function(mechanism, db) {
-  var allArgs = Array.prototype.slice.call(arguments, 0).slice(0);
-  var self = this;
-  var args = Array.prototype.slice.call(arguments, 2);
-  var callback = args.pop();
-  var currentContextIndex = 0;
+ReplSet.prototype.auth = function(credentials, callback) {
+  const mechanism = credentials.mechanism;
+  const source = credentials.source;
 
   // If we don't have the mechanism fail
   if (this.authProviders[mechanism] == null && mechanism !== 'default') {
@@ -1410,82 +1399,81 @@ ReplSet.prototype.auth = function(mechanism, db) {
 
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected
-  if (!this.isConnected() && self.s.disconnectHandler != null) {
-    if (!self.s.replicaSetState.hasPrimary() && !self.s.options.secondaryOnlyConnectionAllowed) {
-      return self.s.disconnectHandler.add('auth', db, allArgs, {}, callback);
+  if (!this.isConnected() && this.s.disconnectHandler != null) {
+    if (!this.s.replicaSetState.hasPrimary() && !this.s.options.secondaryOnlyConnectionAllowed) {
+      return this.s.disconnectHandler.add('auth', source, [credentials, callback], {}, callback);
     } else if (
-      !self.s.replicaSetState.hasSecondary() &&
-      self.s.options.secondaryOnlyConnectionAllowed
+      !this.s.replicaSetState.hasSecondary() &&
+      this.s.options.secondaryOnlyConnectionAllowed
     ) {
-      return self.s.disconnectHandler.add('auth', db, allArgs, {}, callback);
+      return this.s.disconnectHandler.add('auth', source, [credentials, callback], {}, callback);
     }
   }
+
+  // Get all the servers
+  const servers = this.s.replicaSetState.allServers();
+
+  // Get total count
+  let count = servers.length;
+
+  // No servers return
+  if (count === 0) {
+    this.authenticating = false;
+    return callback(null, true);
+  }
+
+  // Save current context index
+  const currentContextIndex = this.s.authenticationContexts.length;
+
+  // All errors
+  const errors = [];
 
   // Set to authenticating
   this.authenticating = true;
-  // All errors
-  var errors = [];
 
-  // Get all the servers
-  var servers = this.s.replicaSetState.allServers();
-  // No servers return
-  if (servers.length === 0) {
-    this.authenticating = false;
-    callback(null, true);
-  }
+  // Store the auth context and return the last index
+  this.s.authenticationContexts.push(credentials);
 
   // Authenticate
-  function auth(server) {
-    // Arguments without a callback
-    var argsWithoutCallback = [mechanism, db].concat(args.slice(0));
-    // Create arguments
-    var finalArguments = argsWithoutCallback.concat([
-      function(err) {
-        count = count - 1;
-        // Save all the errors
-        if (err) errors.push({ name: server.name, err: err });
-        // We are done
-        if (count === 0) {
-          // Auth is done
-          self.authenticating = false;
-
-          // Return the auth error
-          if (errors.length) {
-            // Remove the entry from the stored authentication contexts
-            self.s.authenticationContexts.splice(currentContextIndex, 0);
-            // Return error
-            return callback(
-              new MongoError({
-                message: 'authentication fail',
-                errors: errors
-              }),
-              false
-            );
-          }
-
-          // Successfully authenticated session
-          callback(null, self);
-        }
+  const auth = server => {
+    const handleEnd = err => {
+      count = count - 1;
+      // Save all the errors
+      if (err) {
+        errors.push({ name: server.name, err: err });
       }
-    ]);
+      // We are done
+      if (count === 0) {
+        // Auth is done
+        this.authenticating = false;
+
+        // Return the auth error
+        if (errors.length) {
+          // Remove the entry from the stored authentication contexts
+          this.s.authenticationContexts.splice(currentContextIndex, 0);
+          // Return error
+          return callback(
+            new MongoError({
+              message: 'authentication fail',
+              errors
+            }),
+            false
+          );
+        }
+
+        // Successfully authenticated session
+        callback(null, this);
+      }
+    };
 
     if (!server.lastIsMaster().arbiterOnly) {
       // Execute the auth only against non arbiter servers
-      server.auth.apply(server, finalArguments);
+      server.auth(credentials, handleEnd);
     } else {
       // If we are authenticating against an arbiter just ignore it
-      finalArguments.pop()(null);
+      handleEnd(null);
     }
-  }
-
-  // Get total count
-  var count = servers.length;
-
-  // Save current context index
-  currentContextIndex = this.s.authenticationContexts.length;
-
-  // Store the auth context and return the last index
-  this.s.authenticationContexts.push([mechanism, db].concat(args.slice(0)));
+  };
 
   // Authenticate against all servers
   while (servers.length > 0) {
@@ -1516,8 +1504,8 @@ ReplSet.prototype.logout = function(dbName, callback) {
   }
 
   // Clear out any contexts associated with the db
-  self.s.authenticationContexts = self.s.authenticationContexts.filter(function(context) {
-    return context[1] !== dbName;
+  self.s.authenticationContexts = self.s.authenticationContexts.filter(function(credentials) {
+    return credentials.source !== dbName;
   });
 
   // Now logout all the servers
