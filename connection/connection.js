@@ -280,7 +280,7 @@ var closeHandler = function(self) {
   };
 };
 
-// Handle a message once it is recieved
+// Handle a message once it is received
 var emitMessageHandler = function(self, message) {
   var msgHeader = parseHeader(message);
   if (msgHeader.opCode === OP_COMPRESSED) {
