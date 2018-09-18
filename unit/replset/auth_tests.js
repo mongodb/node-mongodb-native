@@ -4,6 +4,7 @@ const ReplSet = require('../../../../lib/topologies/replset');
 const mock = require('mongodb-mock-server');
 const ReplSetFixture = require('../common').ReplSetFixture;
 const ReadPreference = require('../../../../lib/topologies/read_preference');
+const MongoCredentials = require('../../../../lib/auth/mongo_credentials').MongoCredentials;
 
 describe('Auth (ReplSet)', function() {
   let test;
@@ -19,6 +20,13 @@ describe('Auth (ReplSet)', function() {
   };
 
   it('should not stall on authentication when you are connected', function(done) {
+    const credentials = new MongoCredentials({
+      mechanism: 'default',
+      source: 'db',
+      username: 'user',
+      password: 'pencil'
+    });
+
     let finish = err => {
       finish = () => {};
       done(err);
@@ -55,7 +63,7 @@ describe('Auth (ReplSet)', function() {
     );
 
     replSet.once('error', finish);
-    replSet.once('connect', () => replSet.auth('default', 'db', 'user', 'pencil', () => {}));
+    replSet.once('connect', () => replSet.auth(credentials, () => {}));
     replSet.connect({
       readPreference: new ReadPreference('primary'),
       checkServerIdentity: true,

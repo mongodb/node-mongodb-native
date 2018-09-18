@@ -7,6 +7,7 @@ const Bson = require('bson');
 const Connection = require('../../../lib/connection/connection');
 const mock = require('mongodb-mock-server');
 const Buffer = require('safe-buffer').Buffer;
+const MongoCredentials = require('../../../lib/auth/mongo_credentials').MongoCredentials;
 
 describe('Server tests', function() {
   it('should correctly connect server to single instance', {
@@ -846,6 +847,13 @@ describe('Server tests', function() {
           locateAuthMethod(self.configuration, function(err, method) {
             expect(err).to.be.null;
 
+            const credentials = new MongoCredentials({
+              mechanism: method,
+              source: 'admin',
+              username: 'root',
+              password: 'root'
+            });
+
             // Attempt to connect
             executeCommand(
               self.configuration,
@@ -892,7 +900,7 @@ describe('Server tests', function() {
                   });
                 });
 
-                server.connect({ auth: [method, 'admin', 'root', 'root'] });
+                server.connect({ credentials });
               }
             );
           });
@@ -916,6 +924,13 @@ describe('Server tests', function() {
         this.configuration.manager.restart(true).then(function() {
           locateAuthMethod(self.configuration, function(err, method) {
             expect(err).to.be.null;
+
+            const credentials = new MongoCredentials({
+              mechanism: method,
+              source: 'admin',
+              username: 'root',
+              password: 'root'
+            });
 
             // Attempt to connect
             executeCommand(
@@ -945,7 +960,7 @@ describe('Server tests', function() {
                   done();
                 });
 
-                server.connect({ auth: [method, 'admin', 'root2', 'root'] });
+                server.connect({ credentials });
               }
             );
           });

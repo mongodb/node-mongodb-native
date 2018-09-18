@@ -7,6 +7,8 @@ var expect = require('chai').expect,
   ReplSet = require('../../../lib/topologies/replset'),
   Connection = require('../../../lib/connection/connection');
 
+const MongoCredentials = require('../../../lib/auth/mongo_credentials').MongoCredentials;
+
 var setUp = function(configuration, options, callback) {
   var ReplSetManager = require('mongodb-topology-manager').ReplSet;
 
@@ -110,6 +112,13 @@ describe.skip('Basic replica set server auth tests', function() {
         locateAuthMethod(self.configuration, function(locateErr, method) {
           expect(locateErr).to.not.exist;
 
+          const credentials = new MongoCredentials({
+            mechanism: method,
+            source: 'admin',
+            username: 'root',
+            password: 'root'
+          });
+
           executeCommand(
             self.configuration,
             'admin',
@@ -156,7 +165,7 @@ describe.skip('Basic replica set server auth tests', function() {
                     dropUser: 'root'
                   },
                   {
-                    auth: [method, 'admin', 'root', 'root'],
+                    credentials,
                     host: 'localhost',
                     port: 31000
                   },
@@ -170,7 +179,7 @@ describe.skip('Basic replica set server auth tests', function() {
                 );
               });
 
-              server.connect({ auth: [method, 'admin', 'root2', 'root'] });
+              server.connect({ credentials });
             }
           );
         });
@@ -190,6 +199,13 @@ describe.skip('Basic replica set server auth tests', function() {
 
         locateAuthMethod(self.configuration, function(locateErr, method) {
           expect(locateErr).to.not.exist;
+
+          const credentials = new MongoCredentials({
+            mechanism: method,
+            source: 'admin',
+            username: 'root',
+            password: 'root'
+          });
 
           executeCommand(
             self.configuration,
@@ -237,7 +253,7 @@ describe.skip('Basic replica set server auth tests', function() {
                       dropUser: 'root'
                     },
                     {
-                      auth: [method, 'admin', 'root', 'root'],
+                      credentials,
                       host: 'localhost',
                       port: 31000
                     },
@@ -257,7 +273,7 @@ describe.skip('Basic replica set server auth tests', function() {
                 });
               });
 
-              server.connect({ auth: [method, 'admin', 'root', 'root'] });
+              server.connect({ credentials });
             }
           );
         });
@@ -277,6 +293,13 @@ describe.skip('Basic replica set server auth tests', function() {
 
         locateAuthMethod(self.configuration, function(locateErr, method) {
           expect(locateErr).to.not.exist;
+
+          const credentials = new MongoCredentials({
+            mechanism: method,
+            source: 'admin',
+            username: 'root',
+            password: 'root'
+          });
 
           executeCommand(
             self.configuration,
@@ -311,7 +334,7 @@ describe.skip('Basic replica set server auth tests', function() {
               server.on('connect', function(_server) {
                 //{auth: [method, 'admin', 'root', 'root']}
                 // Attempt authentication
-                _server.auth(method, 'admin', 'root', 'root', function(authErr, authRes) {
+                _server.auth(credentials, function(authErr, authRes) {
                   expect(authRes).to.exist;
                   expect(authErr).to.not.exist;
 
@@ -326,7 +349,7 @@ describe.skip('Basic replica set server auth tests', function() {
                         dropUser: 'root'
                       },
                       {
-                        auth: [method, 'admin', 'root', 'root'],
+                        credentials,
                         host: 'localhost',
                         port: 31000
                       },
@@ -370,6 +393,13 @@ describe.skip('Basic replica set server auth tests', function() {
         locateAuthMethod(self.configuration, function(locateErr, method) {
           expect(locateErr).to.not.exist;
 
+          const credentials = new MongoCredentials({
+            mechanism: method,
+            source: 'admin',
+            username: 'root',
+            password: 'root'
+          });
+
           executeCommand(
             self.configuration,
             'admin',
@@ -402,7 +432,7 @@ describe.skip('Basic replica set server auth tests', function() {
 
               server.on('connect', function(_server) {
                 // Attempt authentication
-                _server.auth(method, 'admin', 'root', 'root', function(authErr, authRes) {
+                _server.auth(credentials, function(authErr, authRes) {
                   expect(authErr).to.exist;
                   expect(authRes).to.not.exist;
 
@@ -427,7 +457,7 @@ describe.skip('Basic replica set server auth tests', function() {
                             dropUser: 'root'
                           },
                           {
-                            auth: [method, 'admin', 'root', 'root'],
+                            credentials,
                             host: 'localhost',
                             port: 31000
                           },

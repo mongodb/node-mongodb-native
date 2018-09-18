@@ -47,7 +47,7 @@ function executeCommand(configuration, db, cmd, options, cb) {
     );
   });
 
-  pool.connect.apply(pool, options.auth);
+  pool.connect(options.credentials);
 }
 
 function locateAuthMethod(configuration, cb) {

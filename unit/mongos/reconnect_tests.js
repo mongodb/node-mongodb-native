@@ -8,7 +8,7 @@ const genClusterTime = require('../common').genClusterTime;
 const Connection = require('../../../../lib/connection/connection');
 const ConnectionSpy = require('../../functional/shared').ConnectionSpy;
 
-describe('Reconnect (Mongos)', function() {
+describe.skip('Reconnect (Mongos)', function() {
   const fixture = {};
 
   function startServer() {

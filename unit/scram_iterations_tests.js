@@ -4,6 +4,7 @@ const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
 const Server = require('../../../lib/topologies/server');
 const Buffer = require('safe-buffer').Buffer;
+const MongoCredentials = require('../../../lib/auth/mongo_credentials').MongoCredentials;
 
 describe('SCRAM Iterations Tests', function() {
   const test = {};
@@ -19,6 +20,14 @@ describe('SCRAM Iterations Tests', function() {
   it('should error if iteration count is less than 4096', function(_done) {
     const scramResponse =
       'r=IE+xNFeOcslsupAA+zkDVzHd5HfwoRuP7Wi8S4py+erf8PcNm7XIdXQyT52Nj3+M,s=AzomrlMs99A7oFxDLpgFvVb+CSvdyXuNagoWVw==,i=4000';
+
+    const credentials = new MongoCredentials({
+      mechanism: 'default',
+      source: 'db',
+      username: 'user',
+      password: 'pencil'
+    });
+
     let done = e => {
       done = () => {};
       return _done(e);
@@ -42,7 +51,7 @@ describe('SCRAM Iterations Tests', function() {
     const client = new Server(test.server.address());
     client.on('error', done);
     client.once('connect', server => {
-      server.auth('default', 'db', 'user', 'pencil', (err, result) => {
+      server.auth(credentials, (err, result) => {
         let testErr;
         try {
           expect(err).to.not.be.null;
