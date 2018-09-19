@@ -150,8 +150,7 @@ describe('MongoClient', function() {
     }
   });
 
-  // NOTE: skipped for inspection of private variables
-  it.skip('Should correctly pass through extra server options', {
+  it('Should correctly pass through extra server options', {
     metadata: {
       requires: {
         topology: ['single']
@@ -161,6 +160,11 @@ describe('MongoClient', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
+
       const client = configuration.newClient(
         {},
         {
@@ -189,8 +193,7 @@ describe('MongoClient', function() {
     }
   });
 
-  // NOTE: skipped for inspection of private variables
-  it.skip('Should correctly pass through extra replicaset options', {
+  it('Should correctly pass through extra replicaset options', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -200,6 +203,11 @@ describe('MongoClient', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
+
       var url = configuration.url().replace('rs_name=rs', 'rs_name=rs1');
       const client = configuration.newClient(url, {
         replSet: {
@@ -286,8 +294,7 @@ describe('MongoClient', function() {
     }
   });
 
-  // NOTE: skipped for inspection of private variables
-  it.skip('Should correctly set MaxPoolSize on single server', {
+  it('Should correctly set MaxPoolSize on single server', {
     metadata: {
       requires: {
         topology: ['single']
@@ -297,6 +304,11 @@ describe('MongoClient', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
+
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
@@ -314,8 +326,7 @@ describe('MongoClient', function() {
     }
   });
 
-  // NOTE: skipped for inspection of private variables
-  it.skip('Should correctly set MaxPoolSize on replicaset server', {
+  it('Should correctly set MaxPoolSize on replicaset server', {
     metadata: {
       requires: {
         topology: ['replicaset']
@@ -325,6 +336,11 @@ describe('MongoClient', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
+
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
@@ -690,8 +706,7 @@ describe('MongoClient', function() {
     }
   });
 
-  // NOTE: skipped for inspection of private variables
-  it.skip('Should correctly pass through socketTimeoutMS and connectTimeoutMS from uri', {
+  it('Should correctly pass through socketTimeoutMS and connectTimeoutMS from uri', {
     metadata: {
       requires: {
         topology: ['single']
@@ -701,8 +716,12 @@ describe('MongoClient', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var uri = f('%s?socketTimeoutMS=120000&connectTimeoutMS=15000', configuration.url());
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
 
+      var uri = f('%s?socketTimeoutMS=120000&connectTimeoutMS=15000', configuration.url());
       const client = configuration.newClient(uri);
       client.connect(function(err, client) {
         test.equal(null, err);

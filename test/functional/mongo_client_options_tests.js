@@ -10,13 +10,17 @@ describe('MongoClient Options', function() {
   /**
    * @ignore
    */
-  // NOTE: skipped for inspection of private variables
-  it.skip('pass in server and db top level options', {
+  it('pass in server and db top level options', {
     metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
+
       const client = configuration.newClient(configuration.url(), {
         autoReconnect: true,
         poolSize: 4
@@ -38,13 +42,17 @@ describe('MongoClient Options', function() {
   /**
    * @ignore
    */
-  // NOTE: skipped for inspection of private variables
-  it.skip('pass in server and db top level options', {
+  it('pass in server and db top level options', {
     metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
+
       const client = configuration.newClient(configuration.url(), {
         autoReconnect: true,
         poolSize: 4

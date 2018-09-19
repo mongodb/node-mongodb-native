@@ -10,14 +10,17 @@ describe('Reconnect', function() {
   /**
    * @ignore
    */
-  // NOTE: skipped for use of topology manager
-  it.skip('Should correctly stop reconnection attempts after limit reached', {
+  it('Should correctly stop reconnection attempts after limit reached', {
     metadata: { requires: { topology: ['single'] }, ignore: { travis: true } },
 
     // The actual test we wish to run
     test: function(done) {
-      // Create a new db instance
       var configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
+
       var client = configuration.newClient(
         { w: 1 },
         {
@@ -48,13 +51,17 @@ describe('Reconnect', function() {
   /**
    * @ignore
    */
-  // NOTE: skipped for use of topology manager
-  it.skip('Should correctly recover when bufferMaxEntries: -1 and multiple restarts', {
+  it('Should correctly recover when bufferMaxEntries: -1 and multiple restarts', {
     metadata: { requires: { topology: ['single'] }, ignore: { travis: true } },
 
     // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
+
       const client = configuration.newClient('mongodb://localhost:27017/test', {
         db: { native_parser: true, bufferMaxEntries: -1 },
         server: {

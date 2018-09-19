@@ -2099,8 +2099,7 @@ describe('Cursor', function() {
    * @ignore
    * @api private
    */
-  // NOTE: skipped for use of topology manager
-  it.skip('cursor stream errors', {
+  it('cursor stream errors', {
     // Add a tag that our runner can trigger on
     // in this case we are setting that node needs to be higher than 0.10.X to run
     metadata: { requires: { topology: ['single'] } },
@@ -2108,6 +2107,11 @@ describe('Cursor', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
+
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);

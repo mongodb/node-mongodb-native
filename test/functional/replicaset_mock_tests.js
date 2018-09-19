@@ -142,8 +142,7 @@ describe('ReplSet (mocks)', function() {
     }
   });
 
-  // NOTE: skipped for inspection of private variables
-  it.skip('Should correctly set socketTimeoutMS and connectTimeoutMS for mongos', {
+  it('Should correctly set socketTimeoutMS and connectTimeoutMS for mongos', {
     metadata: {
       requires: {
         generators: true,
@@ -153,6 +152,11 @@ describe('ReplSet (mocks)', function() {
 
     test: function(done) {
       var configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
+
       const client = configuration.newClient(
         `mongodb://${test.mongos1.uri()},${test.mongos2.uri()}/test?socketTimeoutMS=120000&connectTimeoutMS=15000`
       );
