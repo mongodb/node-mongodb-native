@@ -33,11 +33,15 @@ describe('Connection', function() {
   /**
    * @ignore
    */
-  // NOTE: skipped for direct variable inspection
-  it.skip('should correctly disable monitoring for single server connection', {
+  it('should correctly disable monitoring for single server connection', {
     metadata: { requires: { topology: 'single' } },
     test: function(done) {
       const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
+
       const client = configuration.newClient(
         { w: 1 },
         { poolSize: 1, host: '/tmp/mongodb-27017.sock', monitoring: false }
@@ -254,11 +258,15 @@ describe('Connection', function() {
   /**
    * @ignore
    */
-  // NOTE: skipped for direct variable inspection
-  it.skip('test connect server options', {
+  it('test connect server options', {
     metadata: { requires: { topology: 'single' } },
     test: function(done) {
       const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
+
       const client = configuration.newClient(configuration.url(), {
         auto_reconnect: true,
         poolSize: 4
@@ -280,11 +288,15 @@ describe('Connection', function() {
   /**
    * @ignore
    */
-  // NOTE: skipped for direct variable inspection
-  it.skip('testConnectAllOptions', {
+  it('testConnectAllOptions', {
     metadata: { requires: { topology: 'single' } },
     test: function(done) {
       const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
+
       const client = configuration.newClient(configuration.url(), {
         auto_reconnect: true,
         poolSize: 4,

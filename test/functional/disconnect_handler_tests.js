@@ -5,12 +5,15 @@ describe('Disconnect Handler', function() {
   /**
    * @ignore
    */
-  // NOTE: skipped for use of topology manager
-  it.skip('Should correctly recover when bufferMaxEntries: -1 and restart', {
+  it('Should correctly recover when bufferMaxEntries: -1 and restart', {
     metadata: { requires: { topology: ['single', 'replicaset'] }, ignore: { travis: true } },
 
     test: function(done) {
       var configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
 
       const client = configuration.newCLient();
       client.connect(function(err, client) {
