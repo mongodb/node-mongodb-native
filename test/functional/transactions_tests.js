@@ -480,6 +480,7 @@ function testOperation(operation, obj, context) {
           const errorLabelsOmit = result.errorLabelsOmit;
 
           if (errorLabelsContain) {
+            expect(err).to.have.property('errorLabels');
             expect(err.errorLabels).to.include.members(errorLabelsContain);
           }
 
