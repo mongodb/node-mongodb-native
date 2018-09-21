@@ -3,6 +3,7 @@ const URL = require('url');
 const qs = require('querystring');
 const dns = require('dns');
 const MongoParseError = require('./error').MongoParseError;
+const ReadPreference = require('./topologies/read_preference');
 
 /**
  * The following regular expression validates a connection string and breaks the
@@ -161,6 +162,99 @@ function parseQueryStringItemValue(value) {
   return value;
 }
 
+// Options that are known boolean types
+const BOOLEAN_OPTIONS = new Set([
+  'slaveOk',
+  'slave_ok',
+  'sslValidate',
+  'fsync',
+  'safe',
+  'retryWrites',
+  'j'
+]);
+
+// Supported text representations of auth mechanisms
+// NOTE: this list exists in native already, if it is merged here we should deduplicate
+const AUTH_MECHANISMS = new Set([
+  'GSSAPI',
+  'MONGODB-X509',
+  'MONGODB-CR',
+  'DEFAULT',
+  'SCRAM-SHA-1',
+  'SCRAM-SHA-256',
+  'PLAIN'
+]);
+
+/**
+ * Sets the value for `key`, allowing for any required translation
+ *
+ * @param {object} obj The object to set the key on
+ * @param {string} key The key to set the value for
+ * @param {*} value The value to set
+ */
+function applyConnectionStringOption(obj, key, value) {
+  // simple key translation
+  if (key === 'journal') {
+    key = 'j';
+  } else if (key === 'wtimeoutMS') {
+    key = 'wtimeout';
+  }
+
+  // more complicated translation
+  if (BOOLEAN_OPTIONS.has(key)) {
+    value = value === 'true' || value === true;
+  } else if (key === 'appname') {
+    value = decodeURIComponent(value);
+  } else if (key === 'readConcernLevel') {
+    key = 'readConcern';
+    value = { level: value };
+  }
+
+  // simple validation
+  if (key === 'compressors') {
+    value = Array.isArray(value) ? value : [value];
+
+    if (!value.every(c => c === 'snappy' || c === 'zlib')) {
+      return new MongoParseError(
+        'Value for `compressors` must be at least one of: `snappy`, `zlib`'
+      );
+    }
+  }
+
+  if (key === 'authMechanism' && !AUTH_MECHANISMS.has(value)) {
+    return new MongoParseError(
+      'Value for `authMechanism` must be one of: `DEFAULT`, `GSSAPI`, `PLAIN`, `MONGODB-X509`, `SCRAM-SHA-1`, `SCRAM-SHA-256`'
+    );
+  }
+
+  if (key === 'readPreference' && !ReadPreference.isValid(value)) {
+    return new MongoParseError(
+      'Value for `readPreference` must be one of: `primary`, `primaryPreferred`, `secondary`, `secondaryPreferred`, `nearest`'
+    );
+  }
+
+  if (key === 'zlibCompressionLevel' && (value < -1 || value > 9)) {
+    return new MongoParseError('zlibCompressionLevel must be an integer between -1 and 9');
+  }
+
+  // special cases
+  if (key === 'compressors' || key === 'zlibCompressionLevel') {
+    obj.compression = obj.compression || {};
+    obj = obj.compression;
+  }
+
+  if (key === 'authMechanismProperties') {
+    if (typeof value.SERVICE_NAME === 'string') obj.gssapiServiceName = value.SERVICE_NAME;
+    if (typeof value.SERVICE_REALM === 'string') obj.gssapiServiceRealm = value.SERVICE_REALM;
+    if (typeof value.CANONICALIZE_HOST_NAME !== 'undefined') {
+      obj.gssapiCanonicalizeHostName = value.CANONICALIZE_HOST_NAME;
+    }
+  }
+
+  // set the actual value
+  obj[key.toLowerCase()] = value;
+}
+
 /**
  * Parses a query string according the connection string spec.
  *
@@ -177,7 +271,11 @@ function parseQueryString(query) {
       return new MongoParseError('Incomplete key value pair for option');
     }
 
-    result[key.toLowerCase()] = parseQueryStringItemValue(value);
+    const parsedValue = parseQueryStringItemValue(value);
+    const applyResult = applyConnectionStringOption(result, key, parsedValue);
+    if (applyResult instanceof MongoParseError) {
+      return applyResult;
+    }
   }
 
   // special cases for known deprecated options
