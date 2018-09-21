@@ -46,15 +46,15 @@ describe('Connection String', function() {
   it('should parse boolean values', function(done) {
     parseConnectionString('mongodb://hostname?retryWrites=1', function(err, result) {
       expect(err).to.not.exist;
-      expect(result.options.retrywrites).to.equal(false);
+      expect(result.options.retryWrites).to.equal(false);
 
       parseConnectionString('mongodb://hostname?retryWrites=false', function(err, result) {
         expect(err).to.not.exist;
-        expect(result.options.retrywrites).to.equal(false);
+        expect(result.options.retryWrites).to.equal(false);
 
         parseConnectionString('mongodb://hostname?retryWrites=true', function(err, result) {
           expect(err).to.not.exist;
-          expect(result.options.retrywrites).to.equal(true);
+          expect(result.options.retryWrites).to.equal(true);
           done();
         });
       });
@@ -69,7 +69,7 @@ describe('Connection String', function() {
         expect(result.options).to.have.property('compression');
         expect(result.options.compression).to.eql({
           compressors: ['zlib'],
-          zlibcompressionlevel: 4
+          zlibCompressionLevel: 4
         });
 
         done();
@@ -80,8 +80,8 @@ describe('Connection String', function() {
   it('should parse `readConcernLevel`', function(done) {
     parseConnectionString('mongodb://localhost/?readConcernLevel=local', (err, result) => {
       expect(err).to.not.exist;
-      expect(result.options).to.have.property('readconcern');
-      expect(result.options.readconcern).to.eql({ level: 'local' });
+      expect(result.options).to.have.property('readConcern');
+      expect(result.options.readConcern).to.eql({ level: 'local' });
       done();
     });
   });
@@ -99,8 +99,8 @@ describe('Connection String', function() {
           gssapiCanonicalizeHostName: true
         });
 
-        expect(options).to.have.property('authmechanism');
-        expect(options.authmechanism).to.equal('GSSAPI');
+        expect(options).to.have.property('authMechanism');
+        expect(options.authMechanism).to.equal('GSSAPI');
 
         done();
       }
@@ -157,7 +157,7 @@ describe('Connection String', function() {
             }
 
             const valid = test.valid;
-            parseConnectionString(test.uri, function(err, result) {
+            parseConnectionString(test.uri, { caseTranslate: false }, function(err, result) {
               if (valid === false) {
                 expect(err).to.exist;
                 expect(err).to.be.instanceOf(MongoParseError);
