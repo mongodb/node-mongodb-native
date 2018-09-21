@@ -20,10 +20,13 @@ const skipTests = [
   // These tests are only relevant to the native driver which
   // cares about specific keys, and validating their values
   'Unrecognized option keys are ignored',
-  'Unsupported option values are ignored'
+  'Unsupported option values are ignored',
+
+  // We don't actually support `wtimeoutMS` which this test depends upon
+  'Deprecated (or unknown) options are ignored if replacement exists'
 ];
 
-describe('Connection String (spec)', function() {
+describe('Connection String', function() {
   it('should provide a default port if one is not provided', function(done) {
     parseConnectionString('mongodb://hostname', function(err, result) {
       expect(err).to.not.exist;
@@ -40,70 +43,168 @@ describe('Connection String (spec)', function() {
     });
   });
 
-  const testFiles = fs
-    .readdirSync(f('%s/../spec/connection-string', __dirname))
-    .filter(x => x.indexOf('.json') !== -1)
-    .map(x => JSON.parse(fs.readFileSync(f('%s/../spec/connection-string/%s', __dirname, x))));
+  it('should parse boolean values', function(done) {
+    parseConnectionString('mongodb://hostname?retryWrites=1', function(err, result) {
+      expect(err).to.not.exist;
+      expect(result.options.retrywrites).to.equal(false);
 
-  // Execute the tests
-  for (let i = 0; i < testFiles.length; i++) {
-    const testFile = testFiles[i];
+      parseConnectionString('mongodb://hostname?retryWrites=false', function(err, result) {
+        expect(err).to.not.exist;
+        expect(result.options.retrywrites).to.equal(false);
 
-    // Get each test
-    for (let j = 0; j < testFile.tests.length; j++) {
-      const test = testFile.tests[j];
-      if (skipTests.indexOf(test.description) !== -1) {
-        continue;
+        parseConnectionString('mongodb://hostname?retryWrites=true', function(err, result) {
+          expect(err).to.not.exist;
+          expect(result.options.retrywrites).to.equal(true);
+          done();
+        });
+      });
+    });
+  });
+
+  it('should parse compression options', function(done) {
+    parseConnectionString(
+      'mongodb://localhost/?compressors=zlib&zlibCompressionLevel=4',
+      (err, result) => {
+        expect(err).to.not.exist;
+        expect(result.options).to.have.property('compression');
+        expect(result.options.compression).to.eql({
+          compressors: ['zlib'],
+          zlibcompressionlevel: 4
+        });
+
+        done();
       }
+    );
+  });
 
-      it(test.description, {
-        metadata: { requires: { topology: 'single' } },
-        test: function(done) {
-          const valid = test.valid;
+  it('should parse `readConcernLevel`', function(done) {
+    parseConnectionString('mongodb://localhost/?readConcernLevel=local', (err, result) => {
+      expect(err).to.not.exist;
+      expect(result.options).to.have.property('readconcern');
+      expect(result.options.readconcern).to.eql({ level: 'local' });
+      done();
+    });
+  });
 
-          parseConnectionString(test.uri, function(err, result) {
-            if (valid === false) {
-              expect(err).to.exist;
-              expect(err).to.be.instanceOf(MongoParseError);
-              expect(result).to.not.exist;
-            } else {
-              expect(err).to.not.exist;
-              expect(result).to.exist;
+  it('should parse `authMechanismProperties`', function(done) {
+    parseConnectionString(
+      'mongodb://user%40EXAMPLE.COM:secret@localhost/?authMechanismProperties=SERVICE_NAME:other,SERVICE_REALM:blah,CANONICALIZE_HOST_NAME:true&authMechanism=GSSAPI',
+      (err, result) => {
+        expect(err).to.not.exist;
 
-              // remove data we don't track
-              if (test.auth && test.auth.password === '') {
-                test.auth.password = null;
-              }
+        const options = result.options;
+        expect(options).to.deep.include({
+          gssapiServiceName: 'other',
+          gssapiServiceRealm: 'blah',
+          gssapiCanonicalizeHostName: true
+        });
 
-              test.hosts = test.hosts.map(host => {
-                delete host.type;
-                host.host = punycode.toASCII(host.host);
-                return host;
-              });
+        expect(options).to.have.property('authmechanism');
+        expect(options.authmechanism).to.equal('GSSAPI');
 
-              // remove values that require no validation
-              test.hosts.forEach(host => {
-                Object.keys(host).forEach(key => {
-                  if (host[key] == null) delete host[key];
-                });
-              });
+        done();
+      }
+    );
+  });
 
-              expect(result.hosts).to.containSubset(test.hosts);
-              if (test.auth) {
-                if (test.auth.db !== null) {
-                  expect(result.auth).to.eql(test.auth);
-                } else {
-                  expect(result.auth.username).to.eql(test.auth.username);
-                  expect(result.auth.password).to.eql(test.auth.password);
-                }
-              }
-              expect(result.options).to.eql(test.options);
+  describe('validation', function() {
+    it('should validate compression options', function(done) {
+      parseConnectionString('mongodb://localhost/?zlibCompressionLevel=15', err => {
+        expect(err).to.exist;
+
+        parseConnectionString('mongodb://localhost/?compressors=bunnies', err => {
+          expect(err).to.exist;
+
+          done();
+        });
+      });
+    });
+
+    it('should validate authMechanism', function(done) {
+      parseConnectionString('mongodb://localhost/?authMechanism=DOGS', err => {
+        expect(err).to.exist;
+        done();
+      });
+    });
+
+    it('should validate readPreference', function(done) {
+      parseConnectionString('mongodb://localhost/?readPreference=llamasPreferred', err => {
+        expect(err).to.exist;
+        done();
+      });
+    });
+  });
+
+  describe('spec tests', function() {
+    const testFiles = fs
+      .readdirSync(f('%s/../spec/connection-string', __dirname))
+      .filter(x => x.indexOf('.json') !== -1)
+      .map(x => JSON.parse(fs.readFileSync(f('%s/../spec/connection-string/%s', __dirname, x))));
+
+    // Execute the tests
+    for (let i = 0; i < testFiles.length; i++) {
+      const testFile = testFiles[i];
+
+      // Get each test
+      for (let j = 0; j < testFile.tests.length; j++) {
+        const test = testFile.tests[j];
+
+        it(test.description, {
+          metadata: { requires: { topology: 'single' } },
+          test: function(done) {
+            if (skipTests.indexOf(test.description) !== -1) {
+              return this.skip();
             }
 
-            done();
-          });
-        }
-      });
+            const valid = test.valid;
+            parseConnectionString(test.uri, function(err, result) {
+              if (valid === false) {
+                expect(err).to.exist;
+                expect(err).to.be.instanceOf(MongoParseError);
+                expect(result).to.not.exist;
+              } else {
+                expect(err).to.not.exist;
+                expect(result).to.exist;
+
+                // remove data we don't track
+                if (test.auth && test.auth.password === '') {
+                  test.auth.password = null;
+                }
+
+                test.hosts = test.hosts.map(host => {
+                  delete host.type;
+                  host.host = punycode.toASCII(host.host);
+                  return host;
+                });
+
+                // remove values that require no validation
+                test.hosts.forEach(host => {
+                  Object.keys(host).forEach(key => {
+                    if (host[key] == null) delete host[key];
+                  });
+                });
+
+                expect(result.hosts).to.containSubset(test.hosts);
+                if (test.auth) {
+                  if (test.auth.db !== null) {
+                    expect(result.auth).to.eql(test.auth);
+                  } else {
+                    expect(result.auth.username).to.eql(test.auth.username);
+                    expect(result.auth.password).to.eql(test.auth.password);
+                  }
+                }
+
+                if (test.options !== null) {
+                  // it's possible we have options which are not explicitly included in the spec test
+                  expect(result.options).to.deep.include(test.options);
+                }
+              }
+
+              done();
+            });
+          }
+        });
+      }
     }
-  }
+  });
 });
