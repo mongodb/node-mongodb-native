@@ -132,10 +132,11 @@ function parseSrvConnectionString(uri, options, callback) {
 /**
  * Parses a query string item according to the connection string spec
  *
+ * @param {string} key The key for the parsed value
  * @param {Array|String} value The value to parse
  * @return {Array|Object|String} The parsed value
  */
-function parseQueryStringItemValue(value) {
+function parseQueryStringItemValue(key, value) {
   if (Array.isArray(value)) {
     // deduplicate and simplify arrays
     value = value.filter((v, idx) => value.indexOf(v) === idx);
@@ -143,16 +144,16 @@ function parseQueryStringItemValue(value) {
   } else if (value.indexOf(':') > 0) {
     value = value.split(',').reduce((result, pair) => {
       const parts = pair.split(':');
-      result[parts[0]] = parseQueryStringItemValue(parts[1]);
+      result[parts[0]] = parseQueryStringItemValue(key, parts[1]);
       return result;
     }, {});
   } else if (value.indexOf(',') > 0) {
     value = value.split(',').map(v => {
-      return parseQueryStringItemValue(v);
+      return parseQueryStringItemValue(key, v);
     });
   } else if (value.toLowerCase() === 'true' || value.toLowerCase() === 'false') {
     value = value.toLowerCase() === 'true';
-  } else if (!Number.isNaN(value)) {
+  } else if (!Number.isNaN(value) && !STRING_OPTIONS.has(key)) {
     const numericValue = parseFloat(value);
     if (!Number.isNaN(numericValue)) {
       value = parseFloat(value);
@@ -172,6 +173,9 @@ const BOOLEAN_OPTIONS = new Set([
   'retrywrites',
   'j'
 ]);
+
+// Known string options, only used to bypass Number coercion in `parseQueryStringItemValue`
+const STRING_OPTIONS = new Set(['authsource']);
 
 // Supported text representations of auth mechanisms
 // NOTE: this list exists in native already, if it is merged here we should deduplicate
@@ -225,27 +229,25 @@ const CASE_TRANSLATION = {
  * @param {object} options The options used for option parsing
  */
 function applyConnectionStringOption(obj, key, value, options) {
-  let normalizedKey = key.toLowerCase();
-
   // simple key translation
-  if (normalizedKey === 'journal') {
-    normalizedKey = 'j';
-  } else if (normalizedKey === 'wtimeoutms') {
-    normalizedKey = 'wtimeout';
+  if (key === 'journal') {
+    key = 'j';
+  } else if (key === 'wtimeoutms') {
+    key = 'wtimeout';
   }
 
   // more complicated translation
-  if (BOOLEAN_OPTIONS.has(normalizedKey)) {
+  if (BOOLEAN_OPTIONS.has(key)) {
     value = value === 'true' || value === true;
-  } else if (normalizedKey === 'appname') {
+  } else if (key === 'appname') {
     value = decodeURIComponent(value);
-  } else if (normalizedKey === 'readconcernlevel') {
-    normalizedKey = 'readconcern';
+  } else if (key === 'readconcernlevel') {
+    key = 'readconcern';
     value = { level: value };
   }
 
   // simple validation
-  if (normalizedKey === 'compressors') {
+  if (key === 'compressors') {
     value = Array.isArray(value) ? value : [value];
 
     if (!value.every(c => c === 'snappy' || c === 'zlib')) {
@@ -255,29 +257,29 @@ function applyConnectionStringOption(obj, key, value, options) {
     }
   }
 
-  if (normalizedKey === 'authmechanism' && !AUTH_MECHANISMS.has(value)) {
+  if (key === 'authmechanism' && !AUTH_MECHANISMS.has(value)) {
     return new MongoParseError(
       'Value for `authMechanism` must be one of: `DEFAULT`, `GSSAPI`, `PLAIN`, `MONGODB-X509`, `SCRAM-SHA-1`, `SCRAM-SHA-256`'
     );
   }
 
-  if (normalizedKey === 'readpreference' && !ReadPreference.isValid(value)) {
+  if (key === 'readpreference' && !ReadPreference.isValid(value)) {
     return new MongoParseError(
       'Value for `readPreference` must be one of: `primary`, `primaryPreferred`, `secondary`, `secondaryPreferred`, `nearest`'
     );
   }
 
-  if (normalizedKey === 'zlibcompressionlevel' && (value < -1 || value > 9)) {
+  if (key === 'zlibcompressionlevel' && (value < -1 || value > 9)) {
     return new MongoParseError('zlibCompressionLevel must be an integer between -1 and 9');
   }
 
   // special cases
-  if (normalizedKey === 'compressors' || normalizedKey === 'zlibcompressionlevel') {
+  if (key === 'compressors' || key === 'zlibcompressionlevel') {
     obj.compression = obj.compression || {};
     obj = obj.compression;
   }
 
-  if (normalizedKey === 'authmechanismproperties') {
+  if (key === 'authmechanismproperties') {
     if (typeof value.SERVICE_NAME === 'string') obj.gssapiServiceName = value.SERVICE_NAME;
     if (typeof value.SERVICE_REALM === 'string') obj.gssapiServiceRealm = value.SERVICE_REALM;
     if (typeof value.CANONICALIZE_HOST_NAME !== 'undefined') {
@@ -286,12 +288,12 @@ function applyConnectionStringOption(obj, key, value, options) {
   }
 
   // set the actual value
-  if (options.caseTranslate && CASE_TRANSLATION[normalizedKey]) {
-    obj[CASE_TRANSLATION[normalizedKey]] = value;
+  if (options.caseTranslate && CASE_TRANSLATION[key]) {
+    obj[CASE_TRANSLATION[key]] = value;
     return;
   }
 
-  obj[normalizedKey] = value;
+  obj[key] = value;
 }
 
 /**
@@ -311,8 +313,9 @@ function parseQueryString(query, options) {
       return new MongoParseError('Incomplete key value pair for option');
     }
 
-    const parsedValue = parseQueryStringItemValue(value);
-    const applyResult = applyConnectionStringOption(result, key, parsedValue, options);
+    const normalizedKey = key.toLowerCase();
+    const parsedValue = parseQueryStringItemValue(normalizedKey, value);
+    const applyResult = applyConnectionStringOption(result, normalizedKey, parsedValue, options);
     if (applyResult instanceof MongoParseError) {
       return applyResult;
     }
