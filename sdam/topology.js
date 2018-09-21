@@ -86,7 +86,7 @@ class Topology extends EventEmitter {
       description: new TopologyDescription(
         topologyType,
         serverDescriptions,
-        options.replicaset,
+        options.replicaSet,
         null,
         null,
         options
@@ -384,8 +384,8 @@ Topology.prototype.destroy = deprecate(
 );
 
 function topologyTypeFromSeedlist(seedlist, options) {
-  if (seedlist.length === 1 && !options.replicaset) return TopologyType.Single;
-  if (options.replicaset) return TopologyType.ReplicaSetNoPrimary;
+  if (seedlist.length === 1 && !options.replicaSet) return TopologyType.Single;
+  if (options.replicaSet) return TopologyType.ReplicaSetNoPrimary;
   return TopologyType.Unknown;
 }
 
