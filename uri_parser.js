@@ -124,7 +124,7 @@ function parseSrvConnectionString(uri, options, callback) {
         connectionString += `?${connectionStringOptions.join('&')}`;
       }
 
-      parseConnectionString(connectionString, callback);
+      parseConnectionString(connectionString, options, callback);
     });
   });
 }
