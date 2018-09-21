@@ -107,6 +107,16 @@ describe('Connection String', function() {
     );
   });
 
+  it('should parse a numeric authSource with variable width', function(done) {
+    parseConnectionString('mongodb://localhost/?authSource=0001', (err, result) => {
+      expect(err).to.not.exist;
+      expect(result.options).to.have.property('authSource');
+      expect(result.options.authSource).to.equal('0001');
+
+      done();
+    });
+  });
+
   describe('validation', function() {
     it('should validate compression options', function(done) {
       parseConnectionString('mongodb://localhost/?zlibCompressionLevel=15', err => {
