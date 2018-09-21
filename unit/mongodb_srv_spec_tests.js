@@ -27,7 +27,7 @@ describe('mongodb+srv (spec)', function() {
     it(test[1].comment, {
       metadata: { requires: { topology: ['single'] } },
       test: function(done) {
-        parseConnectionString(test[1].uri, (err, result) => {
+        parseConnectionString(test[1].uri, { caseTranslate: false }, (err, result) => {
           if (test[1].error) {
             expect(err).to.exist;
             expect(result).to.not.exist;
