@@ -164,12 +164,12 @@ function parseQueryStringItemValue(value) {
 
 // Options that are known boolean types
 const BOOLEAN_OPTIONS = new Set([
-  'slaveOk',
+  'slaveok',
   'slave_ok',
-  'sslValidate',
+  'sslvalidate',
   'fsync',
   'safe',
-  'retryWrites',
+  'retrywrites',
   'j'
 ]);
 
@@ -185,33 +185,67 @@ const AUTH_MECHANISMS = new Set([
   'PLAIN'
 ]);
 
+// Lookup table used to translate normalized (lower-cased) forms of connection string
+// options to their expected camelCase version
+const CASE_TRANSLATION = {
+  replicaset: 'replicaSet',
+  connecttimeoutms: 'connectTimeoutMS',
+  sockettimeoutms: 'socketTimeoutMS',
+  maxpoolsize: 'maxPoolSize',
+  minpoolsize: 'minPoolSize',
+  maxidletimems: 'maxIdleTimeMS',
+  waitqueuemultiple: 'waitQueueMultiple',
+  waitqueuetimeoutms: 'waitQueueTimeoutMS',
+  wtimeoutms: 'wtimeoutMS',
+  readconcern: 'readConcern',
+  readconcernlevel: 'readConcernLevel',
+  readpreference: 'readPreference',
+  maxstalenessseconds: 'maxStalenessSeconds',
+  readpreferencetags: 'readPreferenceTags',
+  authsource: 'authSource',
+  authmechanism: 'authMechanism',
+  authmechanismproperties: 'authMechanismProperties',
+  gssapiservicename: 'gssapiServiceName',
+  localthresholdms: 'localThresholdMS',
+  serverselectiontimeoutms: 'serverSelectionTimeoutMS',
+  serverselectiontryonce: 'serverSelectionTryOnce',
+  heartbeatfrequencyms: 'heartbeatFrequencyMS',
+  appname: 'appName',
+  retrywrites: 'retryWrites',
+  uuidrepresentation: 'uuidRepresentation',
+  zlibcompressionlevel: 'zlibCompressionLevel'
+};
+
 /**
  * Sets the value for `key`, allowing for any required translation
  *
  * @param {object} obj The object to set the key on
  * @param {string} key The key to set the value for
  * @param {*} value The value to set
+ * @param {object} options The options used for option parsing
  */
-function applyConnectionStringOption(obj, key, value) {
+function applyConnectionStringOption(obj, key, value, options) {
+  let normalizedKey = key.toLowerCase();
+
   // simple key translation
-  if (key === 'journal') {
-    key = 'j';
-  } else if (key === 'wtimeoutMS') {
-    key = 'wtimeout';
+  if (normalizedKey === 'journal') {
+    normalizedKey = 'j';
+  } else if (normalizedKey === 'wtimeoutms') {
+    normalizedKey = 'wtimeout';
   }
 
   // more complicated translation
-  if (BOOLEAN_OPTIONS.has(key)) {
+  if (BOOLEAN_OPTIONS.has(normalizedKey)) {
     value = value === 'true' || value === true;
-  } else if (key === 'appname') {
+  } else if (normalizedKey === 'appname') {
     value = decodeURIComponent(value);
-  } else if (key === 'readConcernLevel') {
-    key = 'readConcern';
+  } else if (normalizedKey === 'readconcernlevel') {
+    normalizedKey = 'readconcern';
     value = { level: value };
   }
 
   // simple validation
-  if (key === 'compressors') {
+  if (normalizedKey === 'compressors') {
     value = Array.isArray(value) ? value : [value];
 
     if (!value.every(c => c === 'snappy' || c === 'zlib')) {
@@ -221,29 +255,29 @@ function applyConnectionStringOption(obj, key, value) {
     }
   }
 
-  if (key === 'authMechanism' && !AUTH_MECHANISMS.has(value)) {
+  if (normalizedKey === 'authmechanism' && !AUTH_MECHANISMS.has(value)) {
     return new MongoParseError(
       'Value for `authMechanism` must be one of: `DEFAULT`, `GSSAPI`, `PLAIN`, `MONGODB-X509`, `SCRAM-SHA-1`, `SCRAM-SHA-256`'
     );
   }
 
-  if (key === 'readPreference' && !ReadPreference.isValid(value)) {
+  if (normalizedKey === 'readpreference' && !ReadPreference.isValid(value)) {
     return new MongoParseError(
       'Value for `readPreference` must be one of: `primary`, `primaryPreferred`, `secondary`, `secondaryPreferred`, `nearest`'
     );
   }
 
-  if (key === 'zlibCompressionLevel' && (value < -1 || value > 9)) {
+  if (normalizedKey === 'zlibcompressionlevel' && (value < -1 || value > 9)) {
     return new MongoParseError('zlibCompressionLevel must be an integer between -1 and 9');
   }
 
   // special cases
-  if (key === 'compressors' || key === 'zlibCompressionLevel') {
+  if (normalizedKey === 'compressors' || normalizedKey === 'zlibcompressionlevel') {
     obj.compression = obj.compression || {};
     obj = obj.compression;
   }
 
-  if (key === 'authMechanismProperties') {
+  if (normalizedKey === 'authmechanismproperties') {
     if (typeof value.SERVICE_NAME === 'string') obj.gssapiServiceName = value.SERVICE_NAME;
     if (typeof value.SERVICE_REALM === 'string') obj.gssapiServiceRealm = value.SERVICE_REALM;
     if (typeof value.CANONICALIZE_HOST_NAME !== 'undefined') {
@@ -252,16 +286,22 @@ function applyConnectionStringOption(obj, key, value) {
   }
 
   // set the actual value
-  obj[key.toLowerCase()] = value;
+  if (options.caseTranslate && CASE_TRANSLATION[normalizedKey]) {
+    obj[CASE_TRANSLATION[normalizedKey]] = value;
+    return;
+  }
+
+  obj[normalizedKey] = value;
 }
 
 /**
  * Parses a query string according the connection string spec.
  *
  * @param {String} query The query string to parse
+ * @param {object} [options] The options used for options parsing
  * @return {Object|Error} The parsed query string as an object, or an error if one was encountered
  */
-function parseQueryString(query) {
+function parseQueryString(query, options) {
   const result = {};
   let parsedQueryString = qs.parse(query);
 
@@ -272,7 +312,7 @@ function parseQueryString(query) {
     }
 
     const parsedValue = parseQueryStringItemValue(value);
-    const applyResult = applyConnectionStringOption(result, key, parsedValue);
+    const applyResult = applyConnectionStringOption(result, key, parsedValue, options);
     if (applyResult instanceof MongoParseError) {
       return applyResult;
     }
@@ -296,11 +336,12 @@ const SUPPORTED_PROTOCOLS = [PROTOCOL_MONGODB, PROTOCOL_MONGODB_SRV];
  *
  * @param {*} uri the MongoDB connection string to parse
  * @param {object} [options] Optional settings.
+ * @param {boolean} [options.caseTranslate] Whether the parser should translate options back into camelCase after normalization
  * @param {parseCallback} callback
  */
 function parseConnectionString(uri, options, callback) {
   if (typeof options === 'function') (callback = options), (options = {});
-  options = options || {};
+  options = Object.assign({}, { caseTranslate: true }, options);
 
   // Check for bad uris before we parse
   try {
@@ -326,7 +367,7 @@ function parseConnectionString(uri, options, callback) {
   const dbAndQuery = cap[4].split('?');
   const db = dbAndQuery.length > 0 ? dbAndQuery[0] : null;
   const query = dbAndQuery.length > 1 ? dbAndQuery[1] : null;
-  let parsedOptions = parseQueryString(query);
+  let parsedOptions = parseQueryString(query, options);
   if (parsedOptions instanceof MongoParseError) {
     return callback(parsedOptions);
   }
