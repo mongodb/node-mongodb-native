@@ -4,12 +4,16 @@ const f = require('util').format;
 const url = require('url');
 const qs = require('querystring');
 class NativeConfiguration extends ConfigurationBase {
-  constructor(options) {
-    super(options);
+  constructor(environment) {
+    super(environment);
 
     this.type = 'native';
-    this.topology = options.topology || this.defaultTopology;
-    this.replicasetName = options.replicasetName || 'rs';
+    this.topology = environment.topology || this.defaultTopology;
+    this.environment = environment;
+
+    if (environment.setName) {
+      this.replicasetName = environment.setName || 'rs';
+    }
   }
 
   defaultTopology(serverHost, serverPort, serverOpts, _mongo) {
