@@ -12,51 +12,52 @@ describe('A server', function() {
 
     test: function(done) {
       var self = this;
-      this.configuration.newTopology(function(err, server) {
-        // Add event listeners
-        server.on('connect', function(_server) {
-          // Drop collection
-          _server.command(f('%s.$cmd', self.configuration.db), { drop: 'insert1' }, function() {
-            var ns = f('%s.insert1', self.configuration.db);
-            var objectId = new ObjectId();
-            // Execute the write
-            _server.insert(
-              ns,
-              [{ _id: objectId, a: 1, b: undefined }],
-              {
-                writeConcern: { w: 1 },
-                ordered: true,
-                ignoreUndefined: true
-              },
-              function(insertErr, results) {
-                expect(insertErr).to.be.null;
-                expect(results.result.n).to.eql(1);
+      const config = this.configuration;
+      const server = config.newTopology();
 
-                // Execute find
-                var cursor = _server.cursor(ns, {
-                  find: f('%s.insert1', self.configuration.db),
-                  query: { _id: objectId },
-                  batchSize: 2
-                });
+      // Add event listeners
+      server.on('connect', function(_server) {
+        // Drop collection
+        _server.command(f('%s.$cmd', self.configuration.db), { drop: 'insert1' }, function() {
+          var ns = f('%s.insert1', self.configuration.db);
+          var objectId = new ObjectId();
+          // Execute the write
+          _server.insert(
+            ns,
+            [{ _id: objectId, a: 1, b: undefined }],
+            {
+              writeConcern: { w: 1 },
+              ordered: true,
+              ignoreUndefined: true
+            },
+            function(insertErr, results) {
+              expect(insertErr).to.be.null;
+              expect(results.result.n).to.eql(1);
 
-                // Execute next
-                cursor.next(function(nextErr, d) {
-                  expect(nextErr).to.be.null;
-                  expect(d.b).to.be.undefined;
+              // Execute find
+              var cursor = _server.cursor(ns, {
+                find: f('%s.insert1', self.configuration.db),
+                query: { _id: objectId },
+                batchSize: 2
+              });
 
-                  // Destroy the connection
-                  _server.destroy();
-                  // Finish the test
-                  done();
-                });
-              }
-            );
-          });
+              // Execute next
+              cursor.next(function(nextErr, d) {
+                expect(nextErr).to.be.null;
+                expect(d.b).to.be.undefined;
+
+                // Destroy the connection
+                _server.destroy();
+                // Finish the test
+                done();
+              });
+            }
+          );
         });
-
-        // Start connection
-        server.connect();
       });
+
+      // Start connection
+      server.connect();
     }
   });
 
@@ -67,55 +68,56 @@ describe('A server', function() {
 
     test: function(done) {
       var self = this;
-      this.configuration.newTopology(function(err, server) {
-        // Add event listeners
-        server.on('connect', function(_server) {
-          // Drop collection
-          _server.command(f('%s.$cmd', self.configuration.db), { drop: 'update1' }, function() {
-            var ns = f('%s.update1', self.configuration.db);
-            var objectId = new ObjectId();
-            // Execute the write
-            _server.update(
-              ns,
-              {
-                q: { _id: objectId, a: 1, b: undefined },
-                u: { $set: { a: 1, b: undefined } },
-                upsert: true
-              },
-              {
-                writeConcern: { w: 1 },
-                ordered: true,
-                ignoreUndefined: true
-              },
-              function(insertErr, results) {
-                expect(insertErr).to.be.null;
-                expect(results.result.n).to.eql(1);
+      const config = this.configuration;
+      const server = config.newTopology();
 
-                // Execute find
-                var cursor = _server.cursor(ns, {
-                  find: f('%s.update1', self.configuration.db),
-                  query: { _id: objectId },
-                  batchSize: 2
-                });
+      // Add event listeners
+      server.on('connect', function(_server) {
+        // Drop collection
+        _server.command(f('%s.$cmd', self.configuration.db), { drop: 'update1' }, function() {
+          var ns = f('%s.update1', self.configuration.db);
+          var objectId = new ObjectId();
+          // Execute the write
+          _server.update(
+            ns,
+            {
+              q: { _id: objectId, a: 1, b: undefined },
+              u: { $set: { a: 1, b: undefined } },
+              upsert: true
+            },
+            {
+              writeConcern: { w: 1 },
+              ordered: true,
+              ignoreUndefined: true
+            },
+            function(insertErr, results) {
+              expect(insertErr).to.be.null;
+              expect(results.result.n).to.eql(1);
 
-                // Execute next
-                cursor.next(function(nextErr, d) {
-                  expect(nextErr).to.be.null;
-                  expect(d.b).to.be.undefined;
+              // Execute find
+              var cursor = _server.cursor(ns, {
+                find: f('%s.update1', self.configuration.db),
+                query: { _id: objectId },
+                batchSize: 2
+              });
 
-                  // Destroy the connection
-                  _server.destroy();
-                  // Finish the test
-                  done();
-                });
-              }
-            );
-          });
+              // Execute next
+              cursor.next(function(nextErr, d) {
+                expect(nextErr).to.be.null;
+                expect(d.b).to.be.undefined;
+
+                // Destroy the connection
+                _server.destroy();
+                // Finish the test
+                done();
+              });
+            }
+          );
         });
-
-        // Start connection
-        server.connect();
       });
+
+      // Start connection
+      server.connect();
     }
   });
 
@@ -126,57 +128,58 @@ describe('A server', function() {
 
     test: function(done) {
       var self = this;
-      this.configuration.newTopology(function(err, server) {
-        // Add event listeners
-        server.on('connect', function(_server) {
-          var ns = f('%s.remove1', self.configuration.db);
-          var objectId = new ObjectId();
+      const config = this.configuration;
+      const server = config.newTopology();
 
-          _server.command(f('%s.$cmd', self.configuration.db), { drop: 'remove1' }, function() {
-            // Execute the write
-            _server.insert(
-              ns,
-              [{ id: objectId, a: 1, b: undefined }, { id: objectId, a: 2, b: 1 }],
-              {
-                writeConcern: { w: 1 },
-                ordered: true
-              },
-              function(insertErr, results) {
-                expect(insertErr).to.be.null;
-                expect(results.result.n).to.eql(2);
+      // Add event listeners
+      server.on('connect', function(_server) {
+        var ns = f('%s.remove1', self.configuration.db);
+        var objectId = new ObjectId();
 
-                // Execute the write
-                _server.remove(
-                  ns,
-                  [
-                    {
-                      q: { b: undefined },
-                      limit: 0
-                    }
-                  ],
+        _server.command(f('%s.$cmd', self.configuration.db), { drop: 'remove1' }, function() {
+          // Execute the write
+          _server.insert(
+            ns,
+            [{ id: objectId, a: 1, b: undefined }, { id: objectId, a: 2, b: 1 }],
+            {
+              writeConcern: { w: 1 },
+              ordered: true
+            },
+            function(insertErr, results) {
+              expect(insertErr).to.be.null;
+              expect(results.result.n).to.eql(2);
+
+              // Execute the write
+              _server.remove(
+                ns,
+                [
                   {
-                    writeConcern: { w: 1 },
-                    ordered: true,
-                    ignoreUndefined: true
-                  },
-                  function(removeErr, removeResults) {
-                    expect(removeErr).to.be.null;
-                    expect(removeResults.result.n).to.eql(2);
-
-                    // Destroy the connection
-                    _server.destroy();
-                    // Finish the test
-                    done();
+                    q: { b: undefined },
+                    limit: 0
                   }
-                );
-              }
-            );
-          });
-        });
+                ],
+                {
+                  writeConcern: { w: 1 },
+                  ordered: true,
+                  ignoreUndefined: true
+                },
+                function(removeErr, removeResults) {
+                  expect(removeErr).to.be.null;
+                  expect(removeResults.result.n).to.eql(2);
 
-        // Start connection
-        server.connect();
+                  // Destroy the connection
+                  _server.destroy();
+                  // Finish the test
+                  done();
+                }
+              );
+            }
+          );
+        });
       });
+
+      // Start connection
+      server.connect();
     }
   });
 
@@ -187,56 +190,57 @@ describe('A server', function() {
 
     test: function(done) {
       var self = this;
-      this.configuration.newTopology(function(err, server) {
-        // Add event listeners
-        server.on('connect', function(_server) {
-          var ns = f('%s.remove2', self.configuration.db);
-          var objectId = new ObjectId();
+      const config = this.configuration;
+      const server = config.newTopology();
 
-          _server.command(f('%s.$cmd', self.configuration.db), { drop: 'remove2' }, function() {
-            // Execute the write
-            _server.insert(
-              ns,
-              [{ id: objectId, a: 1, b: undefined }, { id: objectId, a: 2, b: 1 }],
-              {
-                writeConcern: { w: 1 },
-                ordered: true
-              },
-              function(insertErr, results) {
-                expect(insertErr).to.be.null;
-                expect(results.result.n).to.eql(2);
+      // Add event listeners
+      server.on('connect', function(_server) {
+        var ns = f('%s.remove2', self.configuration.db);
+        var objectId = new ObjectId();
 
-                // Execute the write
-                _server.remove(
-                  ns,
-                  [
-                    {
-                      q: { b: null },
-                      limit: 0
-                    }
-                  ],
+        _server.command(f('%s.$cmd', self.configuration.db), { drop: 'remove2' }, function() {
+          // Execute the write
+          _server.insert(
+            ns,
+            [{ id: objectId, a: 1, b: undefined }, { id: objectId, a: 2, b: 1 }],
+            {
+              writeConcern: { w: 1 },
+              ordered: true
+            },
+            function(insertErr, results) {
+              expect(insertErr).to.be.null;
+              expect(results.result.n).to.eql(2);
+
+              // Execute the write
+              _server.remove(
+                ns,
+                [
                   {
-                    writeConcern: { w: 1 },
-                    ordered: true
-                  },
-                  function(removeErr, removeResults) {
-                    expect(removeErr).to.be.null;
-                    expect(removeResults.result.n).to.eql(1);
-
-                    // Destroy the connection
-                    _server.destroy();
-                    // Finish the test
-                    done();
+                    q: { b: null },
+                    limit: 0
                   }
-                );
-              }
-            );
-          });
-        });
+                ],
+                {
+                  writeConcern: { w: 1 },
+                  ordered: true
+                },
+                function(removeErr, removeResults) {
+                  expect(removeErr).to.be.null;
+                  expect(removeResults.result.n).to.eql(1);
 
-        // Start connection
-        server.connect();
+                  // Destroy the connection
+                  _server.destroy();
+                  // Finish the test
+                  done();
+                }
+              );
+            }
+          );
+        });
       });
+
+      // Start connection
+      server.connect();
     }
   });
 });

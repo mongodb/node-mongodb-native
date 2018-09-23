@@ -23,10 +23,10 @@ describe('Server operation example tests', function() {
     },
 
     test: function(done) {
-      var Server = this.configuration.mongo.Server;
+      const config = this.configuration;
 
       // Attempt to connect
-      var server = new Server({
+      var server = config.newTopology({
         host: this.configuration.host,
         port: this.configuration.port,
         reconnect: true,
@@ -79,10 +79,10 @@ describe('Server operation example tests', function() {
     },
 
     test: function(done) {
-      var Server = this.configuration.require.Server;
+      const config = this.configuration;
 
       // Attempt to connect
-      var server = new Server({
+      var server = config.newTopology({
         host: this.configuration.host,
         port: this.configuration.port,
         reconnect: true,
@@ -154,10 +154,10 @@ describe('Server operation example tests', function() {
     },
 
     test: function(done) {
-      var Server = this.configuration.require.Server;
+      const config = this.configuration;
 
       // Attempt to connect
-      var server = new Server({
+      var server = config.newTopology({
         host: this.configuration.host,
         port: this.configuration.port,
         reconnect: true,
@@ -229,10 +229,10 @@ describe('Server operation example tests', function() {
     },
 
     test: function(done) {
-      var Server = this.configuration.require.Server;
+      const config = this.configuration;
 
       // Attempt to connect
-      var server = new Server({
+      var server = config.newTopology({
         host: this.configuration.host,
         port: this.configuration.port,
         reconnect: true,
@@ -297,10 +297,10 @@ describe('Server operation example tests', function() {
     },
 
     test: function(done) {
-      var Server = this.configuration.require.Server;
+      const config = this.configuration;
 
       // Attempt to connect
-      var server = new Server({
+      var server = config.newTopology({
         host: this.configuration.host,
         port: this.configuration.port,
         reconnect: true,

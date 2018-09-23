@@ -15,7 +15,7 @@ describe('Single Timeout (mocks)', function() {
     },
 
     test: function(done) {
-      var Server = this.configuration.mongo.Server;
+      const config = this.configuration;
 
       // Current index for the ismaster
       var currentStep = 0;
@@ -58,8 +58,7 @@ describe('Single Timeout (mocks)', function() {
           stopRespondingPrimary = true;
         }, 5000);
 
-        // Attempt to connect
-        var replset = new Server(
+        var replset = config.newTopology(
           Object.assign({}, server.address(), {
             connectionTimeout: 5000,
             socketTimeout: 1000,
@@ -110,7 +109,7 @@ describe('Single Timeout (mocks)', function() {
     },
 
     test: function(done) {
-      var Server = this.configuration.mongo.Server;
+      const config = this.configuration;
 
       // Current index for the ismaster
       var currentStep = 0;
@@ -153,8 +152,7 @@ describe('Single Timeout (mocks)', function() {
           }
         });
 
-        // Attempt to connect
-        const server = new Server(
+        var server = config.newTopology(
           Object.assign({}, mockServer.address(), {
             connectionTimeout: 3000,
             socketTimeout: 2000,
@@ -265,7 +263,7 @@ describe('Single Timeout (mocks)', function() {
       },
 
       test: function(done) {
-        var Server = this.configuration.mongo.Server;
+        const config = this.configuration;
 
         // Current index for the ismaster
         var currentStep = 0;
@@ -294,8 +292,7 @@ describe('Single Timeout (mocks)', function() {
             }
           });
 
-          // Attempt to connect
-          const server = new Server(
+          var server = config.newTopology(
             Object.assign({}, mockServer.address(), {
               connectionTimeout: 2000,
               socketTimeout: 1000,

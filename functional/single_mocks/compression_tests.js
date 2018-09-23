@@ -1,8 +1,7 @@
 'use strict';
-var Server = require('../../../../lib/topologies/server'),
-  expect = require('chai').expect,
-  co = require('co'),
-  mock = require('mongodb-mock-server');
+const expect = require('chai').expect;
+const co = require('co');
+const mock = require('mongodb-mock-server');
 
 describe('Single Compression (mocks)', function() {
   afterEach(() => mock.cleanup());
@@ -18,6 +17,7 @@ describe('Single Compression (mocks)', function() {
     test: function(done) {
       // Prepare the server's response
       var serverResponse = Object.assign({}, mock.DEFAULT_ISMASTER);
+      const config = this.configuration;
 
       // Boot the mock
       co(function*() {
@@ -28,8 +28,7 @@ describe('Single Compression (mocks)', function() {
           request.reply(serverResponse);
         });
 
-        // Attempt to connect
-        var client = new Server(
+        const client = config.newTopology(
           Object.assign({}, server.address(), {
             connectionTimeout: 5000,
             socketTimeout: 1000,
@@ -59,6 +58,7 @@ describe('Single Compression (mocks)', function() {
       },
 
       test: function(done) {
+        const config = this.configuration;
         var currentStep = 0;
 
         // Prepare the server's response
@@ -95,7 +95,7 @@ describe('Single Compression (mocks)', function() {
           });
 
           // Attempt to connect
-          var client = new Server(
+          var client = config.newTopology(
             Object.assign({}, server.address(), {
               connectionTimeout: 5000,
               socketTimeout: 1000,
@@ -152,6 +152,7 @@ describe('Single Compression (mocks)', function() {
       },
 
       test: function(done) {
+        const config = this.configuration;
         var currentStep = 0;
 
         // Prepare the server's response
@@ -188,8 +189,7 @@ describe('Single Compression (mocks)', function() {
             currentStep++;
           });
 
-          // Attempt to connect
-          var client = new Server(
+          var client = config.newTopology(
             Object.assign({}, server.address(), {
               connectionTimeout: 5000,
               socketTimeout: 1000,
@@ -246,7 +246,7 @@ describe('Single Compression (mocks)', function() {
       },
 
       test: function(done) {
-        // Contain mock server
+        const config = this.configuration;
         var server = null;
         var currentStep = 0;
 
@@ -285,7 +285,7 @@ describe('Single Compression (mocks)', function() {
           });
 
           // Attempt to connect
-          var client = new Server(
+          var client = config.newTopology(
             Object.assign({}, server.address(), {
               connectionTimeout: 5000,
               socketTimeout: 1000,
@@ -340,7 +340,7 @@ describe('Single Compression (mocks)', function() {
     },
 
     test: function(done) {
-      // Contain mock server
+      const config = this.configuration;
       var server = null;
       var currentStep = 0;
 
@@ -371,8 +371,7 @@ describe('Single Compression (mocks)', function() {
           currentStep++;
         });
 
-        // Attempt to connect
-        var client = new Server(
+        var client = config.newTopology(
           Object.assign({}, server.address(), {
             connectionTimeout: 5000,
             socketTimeout: 1000,

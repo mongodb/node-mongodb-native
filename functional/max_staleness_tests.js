@@ -4,10 +4,10 @@ const expect = require('chai').expect,
   p = require('path'),
   f = require('util').format,
   fs = require('fs'),
+  Server = require('../../../lib/topologies/server'),
   ReplSetState = require('../../../lib/topologies/replset_state'),
   MongoError = require('../../../lib/error').MongoError,
-  ReadPreference = require('../../../lib/topologies/read_preference'),
-  Server = require('../../../lib/topologies/server');
+  ReadPreference = require('../../../lib/topologies/read_preference');
 
 const rsWithPrimaryPath = f('%s/../spec/max-staleness/ReplicaSetWithPrimary', __dirname);
 const rsWithoutPrimaryPath = f('%s/../spec/max-staleness/ReplicaSetNoPrimary', __dirname);
@@ -19,7 +19,7 @@ describe('Max Staleness', function() {
       .filter(x => x.indexOf('.json') !== -1)
       .forEach(x => {
         it(p.basename(x, '.json'), function(done) {
-          executeEntry(x, f('%s/%s', rsWithoutPrimaryPath, x), done);
+          executeEntry(f('%s/%s', rsWithoutPrimaryPath, x), done);
         });
       });
   });
@@ -31,7 +31,7 @@ describe('Max Staleness', function() {
       .filter(x => x.indexOf('LongHeartbeat2.json') === -1)
       .forEach(x => {
         it(p.basename(x, '.json'), function(done) {
-          executeEntry(x, f('%s/%s', rsWithPrimaryPath, x), done);
+          executeEntry(f('%s/%s', rsWithPrimaryPath, x), done);
         });
       });
   });
@@ -44,7 +44,7 @@ function convert(mode) {
   return mode.toLowerCase();
 }
 
-function executeEntry(entry, path, callback) {
+function executeEntry(path, callback) {
   // Read and parse the json file
   var file = require(path);
 

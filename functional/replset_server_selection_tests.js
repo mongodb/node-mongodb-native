@@ -5,14 +5,14 @@ var expect = require('chai').expect,
   fs = require('fs'),
   ReplSetState = require('../../../lib/topologies/replset_state'),
   MongoError = require('../../../lib/error').MongoError,
-  ReadPreference = require('../../../lib/topologies/read_preference'),
-  Server = require('../../../lib/topologies/server');
+  ReadPreference = require('../../../lib/topologies/read_preference');
 
 describe('A replicaset with no primary', function() {
   it('should correctly execute server selection tests', {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
+      const config = this.configuration;
       var path = f(
         '%s/../spec/server-selection/server_selection/ReplicaSetNoPrimary/read',
         __dirname
@@ -23,7 +23,7 @@ describe('A replicaset with no primary', function() {
 
       // Execute each of the entries
       entries.forEach(function(x) {
-        executeEntry(x, f('%s/%s', path, x));
+        executeEntry(config, x, f('%s/%s', path, x));
       });
 
       done();
@@ -36,6 +36,7 @@ describe('A replicaset with a primary', function() {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
+      const config = this.configuration;
       var path = f(
         '%s/../spec/server-selection/server_selection/ReplicaSetWithPrimary/read',
         __dirname
@@ -46,7 +47,7 @@ describe('A replicaset with a primary', function() {
 
       // Execute each of the entries
       entries.forEach(function(x) {
-        executeEntry(x, f('%s/%s', path, x));
+        executeEntry(config, x, f('%s/%s', path, x));
       });
 
       done();
@@ -60,7 +61,7 @@ function convert(mode) {
   return mode.toLowerCase();
 }
 
-function executeEntry(file, path) {
+function executeEntry(config, file, path) {
   // Read and parse the json file
   file = require(path);
 
@@ -75,7 +76,7 @@ function executeEntry(file, path) {
     replset.topologyType = topologyDescription.type;
     // For each server add them to the state
     topologyDescription.servers.forEach(function(s) {
-      var server = new Server({
+      var server = config.newTopology({
         host: s.address.split(':')[0],
         port: parseInt(s.address.split(':')[1], 10)
       });

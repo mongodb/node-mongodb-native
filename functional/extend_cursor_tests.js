@@ -7,13 +7,12 @@ var expect = require('chai').expect,
 describe('Extend cursor tests', function() {
   it('should correctly extend the cursor with custom implementation', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single'] }
     },
 
     test: function(done) {
       var self = this;
-
-      var Server = this.configuration.mongo.Server;
+      const config = this.configuration;
       var Cursor = this.configuration.mongo.Cursor;
 
       // Create an extended cursor that adds a toArray function
@@ -46,7 +45,7 @@ describe('Extend cursor tests', function() {
       inherits(ExtendedCursor, Cursor);
 
       // Attempt to connect, adding a custom cursor creator
-      var server = new Server({
+      var server = config.newTopology({
         host: this.configuration.host,
         port: this.configuration.port,
         cursorFactory: ExtendedCursor
@@ -71,6 +70,8 @@ describe('Extend cursor tests', function() {
               find: f('%s.inserts_extend_cursors', self.configuration.db),
               query: {}
             });
+
+            console.log(cursor);
 
             // Force a single
             // Logger.setLevel('debug');

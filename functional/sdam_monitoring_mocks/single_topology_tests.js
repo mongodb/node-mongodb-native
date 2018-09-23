@@ -15,7 +15,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
     },
 
     test: function(done) {
-      var Server = this.configuration.mongo.Server;
+      const config = this.configuration;
 
       // Contain mock server
       var server = null;
@@ -49,7 +49,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       });
 
       // Attempt to connect
-      server = new Server(
+      server = config.newTopology(
         Object.assign({}, mockServer.address(), {
           connectionTimeout: 3000,
           socketTimeout: 1000,
@@ -161,7 +161,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
     metadata: { requires: { generators: true, topology: 'single' } },
 
     test: function(done) {
-      var Server = this.configuration.mongo.Server;
+      const config = this.configuration;
 
       // Contain mock server
       var server = null;
@@ -196,7 +196,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       });
 
       // Attempt to connect
-      server = new Server(
+      server = config.newTopology(
         Object.assign({}, mockServer.address(), {
           connectionTimeout: 3000,
           socketTimeout: 1000,

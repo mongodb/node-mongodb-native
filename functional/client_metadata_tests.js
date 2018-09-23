@@ -1,7 +1,6 @@
 'use strict';
 
 var expect = require('chai').expect,
-  Server = require('../../../lib/topologies/server'),
   Bson = require('bson'),
   Mongos = require('../../../lib/topologies/mongos');
 
@@ -11,7 +10,7 @@ describe('Client metadata tests', function() {
 
     test: function(done) {
       // Attempt to connect
-      var server = new Server({
+      var server = this.configuration.newTopology({
         host: this.configuration.host,
         port: this.configuration.port,
         bson: new Bson(),

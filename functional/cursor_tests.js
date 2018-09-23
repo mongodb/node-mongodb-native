@@ -2,8 +2,6 @@
 
 const expect = require('chai').expect;
 const f = require('util').format;
-const Server = require('../../../lib/topologies/server');
-const Bson = require('bson');
 const setupDatabase = require('./shared').setupDatabase;
 
 describe('Cursor tests', function() {
@@ -17,14 +15,7 @@ describe('Cursor tests', function() {
     },
 
     test: function(done) {
-      // Attempt to connect
-      var server = new Server({
-        host: this.configuration.host,
-        port: this.configuration.port,
-        bson: new Bson()
-      });
-
-      // Add event listeners
+      const server = this.configuration.newTopology();
       server.on('connect', function(_server) {
         var ns = f('integration_tests.cursor1');
         // Execute the write
@@ -78,13 +69,7 @@ describe('Cursor tests', function() {
     },
 
     test: function(done) {
-      // Attempt to connect
-      var server = new Server({
-        host: this.configuration.host,
-        port: this.configuration.port,
-        bson: new Bson()
-      });
-
+      const server = this.configuration.newTopology();
       var ns = f('%s.cursor2', this.configuration.db);
       // Add event listeners
       server.on('connect', function(_server) {
@@ -142,13 +127,7 @@ describe('Cursor tests', function() {
     },
 
     test: function(done) {
-      // Attempt to connect
-      var server = new Server({
-        host: this.configuration.host,
-        port: this.configuration.port,
-        bson: new Bson()
-      });
-
+      const server = this.configuration.newTopology();
       var ns = f('%s.cursor3', this.configuration.db);
       // Add event listeners
       server.on('connect', function(_server) {
@@ -202,13 +181,7 @@ describe('Cursor tests', function() {
     },
 
     test: function(done) {
-      // Attempt to connect
-      var server = new Server({
-        host: this.configuration.host,
-        port: this.configuration.port,
-        bson: new Bson()
-      });
-
+      const server = this.configuration.newTopology();
       var ns = f('%s.cursor4', this.configuration.db);
       // Add event listeners
       server.on('connect', function(_server) {
@@ -262,13 +235,7 @@ describe('Cursor tests', function() {
     },
 
     test: function(done) {
-      // Attempt to connect
-      var server = new Server({
-        host: this.configuration.host,
-        port: this.configuration.port,
-        bson: new Bson()
-      });
-
+      const server = this.configuration.newTopology();
       var ns = f('%s.cursor4', this.configuration.db);
       // Add event listeners
       server.on('connect', function(_server) {
@@ -397,13 +364,7 @@ describe('Cursor tests', function() {
     },
 
     test: function(done) {
-      // Attempt to connect
-      var server = new Server({
-        host: this.configuration.host,
-        port: this.configuration.port,
-        bson: new Bson()
-      });
-
+      const server = this.configuration.newTopology();
       var ns = f('%s.cursor6', this.configuration.db);
       // Add event listeners
       server.on('connect', function(_server) {
@@ -463,17 +424,11 @@ describe('Cursor tests', function() {
 
   it('Should not leak connnection workItem elements when using killCursor', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded'] }
+      requires: { topology: ['single'] }
     },
 
     test: function(done) {
-      // Attempt to connect
-      var server = new Server({
-        host: this.configuration.host,
-        port: this.configuration.port,
-        bson: new Bson()
-      });
-
+      const server = this.configuration.newTopology();
       var ns = f('%s.cursor4', this.configuration.db);
       // Add event listeners
       server.on('connect', function(_server) {

@@ -1,10 +1,10 @@
 'use strict';
 const EventEmitter = require('events');
-const Server = require('../../../lib/topologies/server');
 const Pool = require('../../../lib/connection/pool');
 const f = require('util').format;
 const bson = require('bson');
 const Query = require('../../../lib/connection/commands').Query;
+const ReadPreference = require('../../../lib/topologies/read_preference');
 
 function executeCommand(configuration, db, cmd, options, cb) {
   // Optional options
@@ -29,6 +29,7 @@ function executeCommand(configuration, db, cmd, options, cb) {
       numberToSkip: 0,
       numberToReturn: 1
     });
+
     _pool.write(
       query,
       {
@@ -146,15 +147,10 @@ function setupDatabase(configuration, dbsToClean) {
   return new Promise((resolve, reject) => {
     dbsToClean = Array.isArray(dbsToClean) ? dbsToClean : [];
     const configDbName = configuration.db;
-    const server = new Server({
-      host: configuration.host,
-      port: configuration.port,
-      bson: new bson()
-    });
 
+    const topology = configuration.newTopology();
     dbsToClean.push(configDbName);
-
-    server.on('connect', function() {
+    topology.on('connect', function() {
       let cleanedCount = 0;
       const dropHandler = err => {
         if (err) return reject(err);
@@ -163,11 +159,16 @@ function setupDatabase(configuration, dbsToClean) {
       };
 
       dbsToClean.forEach(dbName => {
-        server.command(`${dbName}.$cmd`, { dropDatabase: 1 }, dropHandler);
+        topology.command(
+          `${dbName}.$cmd`,
+          { dropDatabase: 1 },
+          { readPreference: ReadPreference.primary },
+          dropHandler
+        );
       });
     });
 
-    server.connect();
+    topology.connect();
   });
 }
 
