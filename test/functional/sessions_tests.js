@@ -9,19 +9,6 @@ describe('Sessions', function() {
     return setupDatabase(this.configuration);
   });
 
-  function parseAPMEvent(e) {
-    // Some silly stuff for OP_QUERY
-    if (e.commandName === 'find' && e.command && e.command.find === '$cmd') {
-      const realCommand = e.command.filter;
-      return Object.assign({}, e, {
-        command: realCommand,
-        commandName: Object.keys(realCommand)[0]
-      });
-    }
-
-    return e;
-  }
-
   beforeEach(function() {
     test.commands = { started: [], succeeded: [] };
 
@@ -31,13 +18,13 @@ describe('Sessions', function() {
     );
     test.client.on('commandStarted', event => {
       if (ignoredCommands.indexOf(event.commandName) === -1) {
-        test.commands.started.push(parseAPMEvent(event));
+        test.commands.started.push(event);
       }
     });
 
     test.client.on('commandSucceeded', event => {
       if (ignoredCommands.indexOf(event.commandName) === -1) {
-        test.commands.succeeded.push(parseAPMEvent(event));
+        test.commands.succeeded.push(event);
       }
     });
     return test.client.connect();
