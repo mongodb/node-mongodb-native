@@ -205,7 +205,7 @@ describe('Options Validation', function() {
 
     const testObject = { a: 3 };
 
-    const validatedObject = objectValidator(testObject);
+    const validatedObject = objectValidator(testObject, { validationLevel: testValidationLevel });
     expect(stub).to.have.been.calledOnce;
     expect(stub).to.have.been.calledWith(
       'option [a] is deprecated and will be removed in a later version.'
@@ -214,5 +214,86 @@ describe('Options Validation', function() {
     expect(validatedObject).to.be.frozen;
 
     process.emitWarning ? process.emitWarning.restore() : console.error.restore();
+  });
+
+  it('Should override options with value in overrideOptions', function() {
+    function CustomObject() {
+      this.a = 'custom';
+      this.b = 'override';
+    }
+    const customObject = new CustomObject();
+
+    const objectValidator = createValidationFunction({
+      a: { type: 'string' },
+      b: { type: 'string' }
+    });
+
+    const testObject = {};
+
+    const validatedObject = objectValidator(
+      testObject,
+      { a: customObject.a, b: customObject.b },
+      { validationLevel: testValidationLevel }
+    );
+
+    expect(validatedObject).to.deep.equal({ a: 'custom', b: 'override' });
+    expect(validatedObject).to.be.frozen;
+
+    const validatedObject2 = objectValidator(
+      testObject,
+      { a: customObject.a, b: customObject.b },
+      { validationLevel: 'none' }
+    );
+
+    expect(validatedObject2).to.deep.equal({ a: 'custom', b: 'override' });
+    expect(validatedObject2).to.be.frozen;
+  });
+
+  it('Should not override a provided option', function() {
+    function CustomObject() {
+      this.a = 'custom';
+    }
+    const customObject = new CustomObject();
+
+    const objectValidator = createValidationFunction({ a: { type: 'string' } });
+
+    const testObject = { a: 'hello' };
+
+    const validatedObject = objectValidator(
+      testObject,
+      { a: customObject.a },
+      { validationLevel: testValidationLevel }
+    );
+
+    expect(validatedObject).to.deep.equal(testObject);
+    expect(validatedObject).to.be.frozen;
+  });
+
+  it('Should warn for override and default', function() {
+    const stub = sinon.stub(console, 'warn');
+
+    function CustomObject() {
+      this.a = 'custom';
+    }
+    const customObject = new CustomObject();
+
+    const objectValidator = createValidationFunction({ a: { type: 'string', default: 'default' } });
+
+    const testObject = {};
+
+    const validatedObject = objectValidator(
+      testObject,
+      { a: customObject.a },
+      { validationLevel: testValidationLevel }
+    );
+
+    expect(stub).have.been.calledOnce;
+    expect(stub).to.have.been.calledWith(
+      'A default value and override value were provided for option [a]. The override value will be used.'
+    );
+    expect(validatedObject).to.deep.equal({ a: 'custom' });
+    expect(validatedObject).to.be.frozen;
+
+    console.warn.restore();
   });
 });
