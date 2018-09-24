@@ -296,14 +296,7 @@ describe('Cursor tests', function() {
 
     test: function(done) {
       var self = this;
-
-      // Attempt to connect
-      var server = new Server({
-        host: this.configuration.host,
-        port: this.configuration.port,
-        bson: new Bson()
-      });
-
+      const server = this.configuration.newTopology();
       var ns = f('%s.cursor5', this.configuration.db);
       // Add event listeners
       server.on('connect', function(_server) {
