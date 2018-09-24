@@ -219,21 +219,34 @@ describe('Options Validation', function() {
   it('Should override options with value in overrideOptions', function() {
     function CustomObject() {
       this.a = 'custom';
+      this.b = 'override';
     }
     const customObject = new CustomObject();
 
-    const objectValidator = createValidationFunction({ a: { type: 'string' } });
+    const objectValidator = createValidationFunction({
+      a: { type: 'string' },
+      b: { type: 'string' }
+    });
 
-    const testObject = { b: 1 };
+    const testObject = {};
 
     const validatedObject = objectValidator(
       testObject,
-      { a: customObject.a },
+      { a: customObject.a, b: customObject.b },
       { validationLevel: testValidationLevel }
     );
 
-    expect(validatedObject).to.deep.equal({ a: 'custom', b: 1 });
+    expect(validatedObject).to.deep.equal({ a: 'custom', b: 'override' });
     expect(validatedObject).to.be.frozen;
+
+    const validatedObject2 = objectValidator(
+      testObject,
+      { a: customObject.a, b: customObject.b },
+      { validationLevel: 'none' }
+    );
+
+    expect(validatedObject2).to.deep.equal({ a: 'custom', b: 'override' });
+    expect(validatedObject2).to.be.frozen;
   });
 
   it('Should not override a provided option', function() {
@@ -242,9 +255,9 @@ describe('Options Validation', function() {
     }
     const customObject = new CustomObject();
 
-    const objectValidator = createValidationFunction({ a: { type: 'number' } });
+    const objectValidator = createValidationFunction({ a: { type: 'string' } });
 
-    const testObject = { a: 1 };
+    const testObject = { a: 'hello' };
 
     const validatedObject = objectValidator(
       testObject,
@@ -254,5 +267,33 @@ describe('Options Validation', function() {
 
     expect(validatedObject).to.deep.equal(testObject);
     expect(validatedObject).to.be.frozen;
+  });
+
+  it('Should warn for override and default', function() {
+    const stub = sinon.stub(console, 'warn');
+
+    function CustomObject() {
+      this.a = 'custom';
+    }
+    const customObject = new CustomObject();
+
+    const objectValidator = createValidationFunction({ a: { type: 'string', default: 'default' } });
+
+    const testObject = {};
+
+    const validatedObject = objectValidator(
+      testObject,
+      { a: customObject.a },
+      { validationLevel: testValidationLevel }
+    );
+
+    expect(stub).have.been.calledOnce;
+    expect(stub).to.have.been.calledWith(
+      'A default value and override value were provided for option [a]. The override value will be used.'
+    );
+    expect(validatedObject).to.deep.equal({ a: 'custom' });
+    expect(validatedObject).to.be.frozen;
+
+    console.warn.restore();
   });
 });
