@@ -296,6 +296,76 @@ function applyConnectionStringOption(obj, key, value, options) {
   obj[key] = value;
 }
 
+const USERNAME_REQUIRED_MECHANISMS = new Set([
+  'GSSAPI',
+  'MONGODB-CR',
+  'PLAIN',
+  'SCRAM-SHA-1',
+  'SCRAM-SHA-256'
+]);
+
+/**
+ * Modifies the parsed connection string object taking into account expectations we
+ * have for authentication-related options.
+ *
+ * @param {object} parsed The parsed connection string result
+ * @return The parsed connection string result possibly modified for auth expectations
+ */
+function applyAuthExpectations(parsed) {
+  if (parsed.options == null) {
+    return;
+  }
+
+  const options = parsed.options;
+  const authSource = options.authsource || options.authSource;
+  if (authSource != null) {
+    parsed.auth = Object.assign({}, parsed.auth, { db: authSource });
+  }
+
+  const authMechanism = options.authmechanism || options.authMechanism;
+  if (authMechanism != null) {
+    if (
+      USERNAME_REQUIRED_MECHANISMS.has(authMechanism) &&
+      (!parsed.auth || parsed.auth.username == null)
+    ) {
+      throw new MongoParseError(`Username required for mechanism \`${authMechanism}\``);
+    }
+
+    if (authMechanism === 'GSSAPI') {
+      if (authSource != null && authSource !== '$external') {
+        throw new MongoParseError(`Invalid auth source \`${authMechanism}\` specified`);
+      }
+
+      parsed.auth = Object.assign({}, parsed.auth, { db: '$external' });
+    }
+
+    if (authMechanism === 'MONGODB-X509') {
+      if (parsed.auth && parsed.auth.password != null) {
+        throw new MongoParseError(`Password not allowed for mechanism \`${authMechanism}\``);
+      }
+
+      if (authSource != null && authSource !== '$external') {
+        throw new MongoParseError(`Invalid auth source \`${authMechanism}\` specified`);
+      }
+
+      parsed.auth = Object.assign({}, parsed.auth, { db: '$external' });
+    }
+
+    if (authMechanism === 'PLAIN') {
+      if (parsed.auth && parsed.auth.db == null) {
+        parsed.auth = Object.assign({}, parsed.auth, { db: '$external' });
+      }
+    }
+  }
+
+  // default to `admin` if nothing else was resolved
+  if (parsed.auth && parsed.auth.db == null) {
+    parsed.auth = Object.assign({}, parsed.auth, { db: 'admin' });
+  }
+
+  return parsed;
+}
+
 /**
  * Parses a query string according the connection string spec.
  *
@@ -376,7 +446,7 @@ function parseConnectionString(uri, options, callback) {
   }
 
   parsedOptions = Object.assign({}, parsedOptions, options);
-  const auth = { username: null, password: null, db: db && db !== '' ? qs.unescape(db) : 'admin' };
+  const auth = { username: null, password: null, db: db && db !== '' ? qs.unescape(db) : null };
   if (cap[4].split('?')[0].indexOf('@') !== -1) {
     return callback(new MongoParseError('Unescaped slash in userinfo section'));
   }
@@ -450,11 +520,19 @@ function parseConnectionString(uri, options, callback) {
     return callback(new MongoParseError('No hostname or hostnames provided in connection string'));
   }
 
-  callback(null, {
+  const result = {
     hosts: hosts,
     auth: auth.db || auth.username ? auth : null,
     options: Object.keys(parsedOptions).length ? parsedOptions : null
-  });
+  };
+
+  try {
+    applyAuthExpectations(result);
+  } catch (authError) {
+    return callback(authError);
+  }
+
+  callback(null, result);
 }
 
 module.exports = parseConnectionString;
