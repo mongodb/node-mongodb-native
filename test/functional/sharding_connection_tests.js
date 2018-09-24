@@ -18,7 +18,7 @@ describe('Sharding (Connection)', function() {
     test: function(done) {
       const configuration = this.configuration;
 
-      const url = `${configuration.url()}?w=1&readPreference=secondaryPreferred&readPreferenceTags=sf%3A1&readPreferenceTags=`;
+      const url = `${configuration.url()}?w=1&readPreference=secondaryPreferred&readPreferenceTags=sf%3A1`;
 
       const client = configuration.newClient(url, { haInterval: 500, useNewUrlParser: true });
 
@@ -82,7 +82,7 @@ describe('Sharding (Connection)', function() {
     test: function(done) {
       const configuration = this.configuration;
 
-      const url = `${configuration.url()}?w=1&readPreference=secondaryPreferred&readPreferenceTags=sf%3A1&readPreferenceTags=`;
+      const url = `${configuration.url()}?w=1&readPreference=secondaryPreferred&readPreferenceTags=sf%3A1`;
 
       const client = configuration.newClient(url, { useNewUrlParser: true, haInterval: 500 });
       client.connect(function(err) {
@@ -95,7 +95,6 @@ describe('Sharding (Connection)', function() {
 
         expect(topology).to.have.property('haInterval', 500);
         expect(topology).to.have.property('bson').that.does.exist;
-        expect(topology).to.have.property('isMasterDoc').that.does.exist;
 
         expect(topology)
           .to.have.property('isConnected')
@@ -124,7 +123,7 @@ describe('Sharding (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
-      const url = `${configuration.url()}?w=1&readPreference=secondaryPreferred&readPreferenceTags=sf%3A1&readPreferenceTags=`;
+      const url = `${configuration.url()}?w=1&readPreference=secondaryPreferred&readPreferenceTags=sf%3A1`;
 
       const client = configuration.newClient(url, { useNewUrlParser: true, reconnectTries: 10 });
       client.connect(function(err) {
