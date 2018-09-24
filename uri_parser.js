@@ -251,26 +251,26 @@ function applyConnectionStringOption(obj, key, value, options) {
     value = Array.isArray(value) ? value : [value];
 
     if (!value.every(c => c === 'snappy' || c === 'zlib')) {
-      return new MongoParseError(
+      throw new MongoParseError(
         'Value for `compressors` must be at least one of: `snappy`, `zlib`'
       );
     }
   }
 
   if (key === 'authmechanism' && !AUTH_MECHANISMS.has(value)) {
-    return new MongoParseError(
+    throw new MongoParseError(
       'Value for `authMechanism` must be one of: `DEFAULT`, `GSSAPI`, `PLAIN`, `MONGODB-X509`, `SCRAM-SHA-1`, `SCRAM-SHA-256`'
     );
   }
 
   if (key === 'readpreference' && !ReadPreference.isValid(value)) {
-    return new MongoParseError(
+    throw new MongoParseError(
       'Value for `readPreference` must be one of: `primary`, `primaryPreferred`, `secondary`, `secondaryPreferred`, `nearest`'
     );
   }
 
   if (key === 'zlibcompressionlevel' && (value < -1 || value > 9)) {
-    return new MongoParseError('zlibCompressionLevel must be an integer between -1 and 9');
+    throw new MongoParseError('zlibCompressionLevel must be an integer between -1 and 9');
   }
 
   // special cases
@@ -310,15 +310,12 @@ function parseQueryString(query, options) {
   for (const key in parsedQueryString) {
     const value = parsedQueryString[key];
     if (value === '' || value == null) {
-      return new MongoParseError('Incomplete key value pair for option');
+      throw new MongoParseError('Incomplete key value pair for option');
     }
 
     const normalizedKey = key.toLowerCase();
     const parsedValue = parseQueryStringItemValue(normalizedKey, value);
-    const applyResult = applyConnectionStringOption(result, normalizedKey, parsedValue, options);
-    if (applyResult instanceof MongoParseError) {
-      return applyResult;
-    }
+    applyConnectionStringOption(result, normalizedKey, parsedValue, options);
   }
 
   // special cases for known deprecated options
@@ -370,9 +367,12 @@ function parseConnectionString(uri, options, callback) {
   const dbAndQuery = cap[4].split('?');
   const db = dbAndQuery.length > 0 ? dbAndQuery[0] : null;
   const query = dbAndQuery.length > 1 ? dbAndQuery[1] : null;
-  let parsedOptions = parseQueryString(query, options);
-  if (parsedOptions instanceof MongoParseError) {
-    return callback(parsedOptions);
+
+  let parsedOptions;
+  try {
+    parsedOptions = parseQueryString(query, options);
+  } catch (parseError) {
+    return callback(parseError);
   }
 
   parsedOptions = Object.assign({}, parsedOptions, options);
