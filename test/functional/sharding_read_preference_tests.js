@@ -21,7 +21,7 @@ describe('Sharding (Read Preference)', function() {
       const configuration = this.configuration;
 
       // Connect using the mongos connections
-      var client = new MongoClient(configuration.url(), { w: 0 });
+      var client = new MongoClient(configuration.url(), { w: 0, monitorCommands: true });
       client.connect(function(err) {
         expect(err).to.not.exist;
         const db = client.db(configuration.db);
@@ -29,7 +29,7 @@ describe('Sharding (Read Preference)', function() {
         // Perform a simple insert into a collection
         const collection = db.collection('shard_test1');
         // Insert a simple doc
-        collection.insert({ test: 1 }, { w: 'majority', wtimeout: 10000 }, function(err) {
+        collection.insertOne({ test: 1 }, { w: 'majority', wtimeout: 10000 }, function(err) {
           expect(err).to.not.exist;
 
           // Set debug level for the driver
@@ -87,7 +87,7 @@ describe('Sharding (Read Preference)', function() {
         // Perform a simple insert into a collection
         const collection = db.collection('shard_test2');
         // Insert a simple doc
-        collection.insert({ test: 1 }, { w: 'majority', wtimeout: 10000 }, function(err) {
+        collection.insertOne({ test: 1 }, { w: 'majority', wtimeout: 10000 }, function(err) {
           expect(err).to.not.exist;
 
           // Set debug level for the driver
@@ -143,7 +143,7 @@ describe('Sharding (Read Preference)', function() {
         // Perform a simple insert into a collection
         const collection = db.collection('shard_test3');
         // Insert a simple doc
-        collection.insert({ test: 1 }, { w: 'majority', wtimeout: 10000 }, function(err) {
+        collection.insertOne({ test: 1 }, { w: 'majority', wtimeout: 10000 }, function(err) {
           expect(err).to.not.exist;
 
           // Set debug level for the driver
@@ -206,7 +206,7 @@ describe('Sharding (Read Preference)', function() {
         // Perform a simple insert into a collection
         const collection = db.collection('shard_test4');
         // Insert a simple doc
-        collection.insert({ test: 1 }, { w: 'majority', wtimeout: 10000 }, function(err) {
+        collection.insertOne({ test: 1 }, { w: 'majority', wtimeout: 10000 }, function(err) {
           expect(err).to.not.exist;
 
           // Set debug level for the driver
