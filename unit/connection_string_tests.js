@@ -2,7 +2,6 @@
 
 const parseConnectionString = require('../../../lib/uri_parser');
 const fs = require('fs');
-const f = require('util').format;
 const punycode = require('punycode');
 const MongoParseError = require('../../../lib/error').MongoParseError;
 const chai = require('chai');
@@ -23,7 +22,10 @@ const skipTests = [
   'Unsupported option values are ignored',
 
   // We don't actually support `wtimeoutMS` which this test depends upon
-  'Deprecated (or unknown) options are ignored if replacement exists'
+  'Deprecated (or unknown) options are ignored if replacement exists',
+
+  // We already handle this case in different ways
+  'may support deprecated gssapiServiceName option (GSSAPI)'
 ];
 
 describe('Connection String', function() {
@@ -145,11 +147,17 @@ describe('Connection String', function() {
     });
   });
 
-  describe('spec tests', function() {
-    const testFiles = fs
-      .readdirSync(f('%s/../spec/connection-string', __dirname))
+  function collectTests(path) {
+    return fs
+      .readdirSync(`${__dirname}/${path}`)
       .filter(x => x.indexOf('.json') !== -1)
-      .map(x => JSON.parse(fs.readFileSync(f('%s/../spec/connection-string/%s', __dirname, x))));
+      .map(x => JSON.parse(fs.readFileSync(`${__dirname}/${path}/${x}`)));
+  }
+
+  describe('spec tests', function() {
+    const testFiles = collectTests('../spec/connection-string').concat(
+      collectTests('../spec/auth')
+    );
 
     // Execute the tests
     for (let i = 0; i < testFiles.length; i++) {
@@ -181,25 +189,36 @@ describe('Connection String', function() {
                   test.auth.password = null;
                 }
 
-                test.hosts = test.hosts.map(host => {
-                  delete host.type;
-                  host.host = punycode.toASCII(host.host);
-                  return host;
-                });
-
-                // remove values that require no validation
-                test.hosts.forEach(host => {
-                  Object.keys(host).forEach(key => {
-                    if (host[key] == null) delete host[key];
+                if (test.hosts != null) {
+                  test.hosts = test.hosts.map(host => {
+                    delete host.type;
+                    host.host = punycode.toASCII(host.host);
+                    return host;
                   });
-                });
 
-                expect(result.hosts).to.containSubset(test.hosts);
+                  // remove values that require no validation
+                  test.hosts.forEach(host => {
+                    Object.keys(host).forEach(key => {
+                      if (host[key] == null) delete host[key];
+                    });
+                  });
+
+                  expect(result.hosts).to.containSubset(test.hosts);
+                }
+
                 if (test.auth) {
-                  if (test.auth.db !== null) {
-                    expect(result.auth).to.eql(test.auth);
-                  } else {
+                  if (test.auth.db != null) {
+                    expect(result.auth).to.have.property('db');
+                    expect(result.auth.db).to.eql(test.auth.db);
+                  }
+
+                  if (test.auth.username != null) {
+                    expect(result.auth).to.have.property('username');
                     expect(result.auth.username).to.eql(test.auth.username);
+                  }
+
+                  if (test.auth.password != null) {
+                    expect(result.auth).to.have.property('password');
                     expect(result.auth.password).to.eql(test.auth.password);
                   }
                 }
