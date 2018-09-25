@@ -1,7 +1,9 @@
 'use strict';
 
-const expect = require('chai').expect;
+const arity = require('../../lib/options_validator').arity;
+const assertArity = require('../../lib/options_validator').assertArity;
 const createValidationFunction = require('../../lib/options_validator').createValidationFunction;
+const expect = require('chai').expect;
 const sinonChai = require('sinon-chai');
 const sinon = require('sinon');
 const chai = require('chai');
@@ -295,5 +297,208 @@ describe('Options Validation', function() {
     expect(validatedObject).to.be.frozen;
 
     console.warn.restore();
+  });
+
+  it('Should error if too many arguments are provided', function() {
+    /* eslint-disable-next-line no-unused-vars */
+    function failArity0(optionalArgument1, optionalArgument2) {
+      assertArity(arguments, 0);
+    }
+
+    try {
+      failArity0('optional', 'optional', 'extraArgument');
+    } catch (err) {
+      expect(err).to.not.be.null;
+      expect(err.message).to.equal(
+        'This operation has a required arity of 0, but 3 arguments were provided.'
+      );
+    }
+
+    /* eslint-disable-next-line no-unused-vars */
+    function failArity1(requiredArgument, optionalArgument1, optionalArgument2) {
+      assertArity(arguments, 1);
+    }
+
+    try {
+      failArity1('required', 'optional', 'optional', 'extraArgument');
+    } catch (err) {
+      expect(err).to.not.be.null;
+      expect(err.message).to.equal(
+        'This operation has a required arity of 1, but 4 arguments were provided.'
+      );
+    }
+
+    /* eslint-disable no-unused-vars */
+    function failArity2(
+      requiredArgument1,
+      requiredArgument2,
+      optionalArgument1,
+      optionalArgument2
+    ) {
+      assertArity(arguments, 2);
+    }
+    /* eslint-disable no-unused-vars */
+
+    try {
+      failArity2('required', 'required', 'optional', 'optional', 'extraArgument');
+    } catch (err) {
+      expect(err).to.not.be.null;
+      expect(err.message).to.equal(
+        'This operation has a required arity of 2, but 5 arguments were provided.'
+      );
+    }
+  });
+
+  it('Should error if too few arguments are provided', function() {
+    /* eslint-disable-next-line no-unused-vars */
+    function failArity1(requiredArgument, optionalArgument1, optionalArgument2) {
+      assertArity(arguments, 1);
+    }
+
+    try {
+      failArity1();
+    } catch (err) {
+      expect(err).to.not.be.null;
+      expect(err.message).to.equal(
+        'This operation has a required arity of 1, but 0 arguments were provided.'
+      );
+    }
+
+    /* eslint-disable no-unused-vars */
+    function failArity2(
+      requiredArgument1,
+      requiredArgument2,
+      optionalArgument1,
+      optionalArgument2
+    ) {
+      assertArity(arguments, 2);
+    }
+    /* eslint-disable no-unused-vars */
+
+    try {
+      failArity2('required');
+    } catch (err) {
+      expect(err).to.not.be.null;
+      expect(err.message).to.equal(
+        'This operation has a required arity of 2, but 1 arguments were provided.'
+      );
+    }
+  });
+
+  it('Should assert arity of 0', function() {
+    /* eslint-disable-next-line no-unused-vars */
+    function passArity0(optionalArgument1, optionalArgument2) {
+      assertArity(arguments, 0);
+    }
+
+    try {
+      passArity0({ option1: false });
+    } catch (err) {
+      expect(err).to.be.null;
+    }
+    try {
+      passArity0(callback => {
+        console.log(callback);
+      });
+    } catch (err) {
+      expect(err).to.be.null;
+    }
+    try {
+      passArity0({ option1: false }, callback => {
+        console.log(callback);
+      });
+    } catch (err) {
+      expect(err).to.be.null;
+    }
+  });
+
+  it('Should assert arity of 1', function() {
+    /* eslint-disable-next-line no-unused-vars */
+    function passArity1(requiredArgument, optionalArgument1, optionalArgument2) {
+      assertArity(arguments, 1);
+    }
+
+    try {
+      passArity1('required');
+    } catch (err) {
+      expect(err).to.be.null;
+    }
+    try {
+      passArity1('required', { option1: false });
+    } catch (err) {
+      expect(err).to.be.null;
+    }
+    try {
+      passArity1('required', callback => {
+        console.log(callback);
+      });
+    } catch (err) {
+      expect(err).to.be.null;
+    }
+    try {
+      passArity1('required', { option1: false }, callback => {
+        console.log(callback);
+      });
+    } catch (err) {
+      expect(err).to.be.null;
+    }
+  });
+
+  it('Should assert arity of 2', function() {
+    /* eslint-disable no-unused-vars */
+    function passArity2(
+      requiredArgument1,
+      requiredArgument2,
+      optionalArgument1,
+      optionalArgument2
+    ) {
+      assertArity(arguments, 2);
+    }
+    /* eslint-disable no-unused-vars */
+
+    try {
+      passArity2('required1', 'required2');
+    } catch (err) {
+      expect(err).to.be.null;
+    }
+    try {
+      passArity2('required1', 'required2', { option1: false });
+    } catch (err) {
+      expect(err).to.be.null;
+    }
+    try {
+      passArity2('required', 'required2', callback => {
+        console.log(callback);
+      });
+    } catch (err) {
+      expect(err).to.be.null;
+    }
+    try {
+      passArity2('required', 'required2', { option1: false }, callback => {
+        console.log(callback);
+      });
+    } catch (err) {
+      expect(err).to.be.null;
+    }
+  });
+
+  it('Should validate options using OperationBuilder', function() {
+    const testOperationBuilder = arity(1)
+      .options({ a: { type: 'boolean' } })
+      .build(
+        function(a) {
+          return a;
+        },
+        { validationLevel: 'error' }
+      );
+
+    const testObject = { a: 3 };
+
+    try {
+      testOperationBuilder(testObject);
+    } catch (err) {
+      expect(err).to.not.be.null;
+      expect(err.message).to.equal('a should be of type boolean, but is of type number.');
+    }
   });
 });
