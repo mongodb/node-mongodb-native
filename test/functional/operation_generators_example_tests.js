@@ -3267,11 +3267,6 @@ describe('Operation (Generators)', function() {
       var configuration = this.configuration;
       var co = require('co');
 
-      if (configuration.usingUnifiedTopology()) {
-        // The unified topology does not presently support authentication
-        return this.skip();
-      }
-
       return co(function*() {
         // Connect
         var client = yield configuration
