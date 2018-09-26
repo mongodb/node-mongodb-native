@@ -333,7 +333,9 @@ function applyAuthExpectations(parsed) {
 
     if (authMechanism === 'GSSAPI') {
       if (authSource != null && authSource !== '$external') {
-        throw new MongoParseError(`Invalid auth source \`${authMechanism}\` specified`);
+        throw new MongoParseError(
+          `Invalid source \`${authSource}\` for mechanism \`${authMechanism}\` specified.`
+        );
       }
 
       parsed.auth = Object.assign({}, parsed.auth, { db: '$external' });
@@ -345,7 +347,9 @@ function applyAuthExpectations(parsed) {
       }
 
       if (authSource != null && authSource !== '$external') {
-        throw new MongoParseError(`Invalid auth source \`${authMechanism}\` specified`);
+        throw new MongoParseError(
+          `Invalid source \`${authSource}\` for mechanism \`${authMechanism}\` specified.`
+        );
       }
 
       parsed.auth = Object.assign({}, parsed.auth, { db: '$external' });
