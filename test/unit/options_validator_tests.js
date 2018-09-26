@@ -298,186 +298,73 @@ describe('Options Validation', function() {
     console.warn.restore();
   });
 
-  it('Should error if too many arguments are provided', function() {
-    /* eslint-disable-next-line no-unused-vars */
-    function failArity0(optionalArgument1, optionalArgument2) {
-      assertArity(arguments, 0);
+  [
+    {
+      description: 'Should fail arity 0 if too many arguments are provided',
+      func: args => assertArity(args, 0),
+      numberOfArgs: 2,
+      errorMessageMatch: /This operation has a required arity of 0, but 2 arguments were provided./
+    },
+    {
+      description: 'Should fail arity 1 if too many arguments are provided',
+      func: args => assertArity(args, 1),
+      numberOfArgs: 3,
+      errorMessageMatch: /This operation has a required arity of 1, but 3 arguments were provided./
+    },
+    {
+      description: 'Should fail arity 2 if too many arguments are provided',
+      func: args => assertArity(args, 2),
+      numberOfArgs: 4,
+      errorMessageMatch: /This operation has a required arity of 2, but 4 arguments were provided./
+    },
+    {
+      description: 'Should fail arity 1 if too few arguments are provided',
+      func: args => assertArity(args, 1),
+      numberOfArgs: 0,
+      errorMessageMatch: /This operation has a required arity of 1, but 0 arguments were provided./
+    },
+    {
+      description: 'Should fail arity 2 if too few arguments are provided',
+      func: args => assertArity(args, 2),
+      numberOfArgs: 1,
+      errorMessageMatch: /This operation has a required arity of 2, but 1 arguments were provided./
+    },
+    {
+      description: 'Should pass arity 0',
+      func: args => assertArity(args, 0),
+      numberOfArgs: 0
+    },
+    {
+      description: 'Should pass arity 1',
+      func: args => assertArity(args, 1),
+      numberOfArgs: 1
+    },
+    {
+      description: 'Should pass arity 2',
+      func: args => assertArity(args, 2),
+      numberOfArgs: 2
     }
-
-    try {
-      failArity0('optional', 'optional', 'extraArgument');
-    } catch (err) {
-      expect(err).to.not.be.null;
-      expect(err.message).to.equal(
-        'This operation has a required arity of 0, but 3 arguments were provided.'
-      );
-    }
-
-    /* eslint-disable-next-line no-unused-vars */
-    function failArity1(requiredArgument, optionalArgument1, optionalArgument2) {
-      assertArity(arguments, 1);
-    }
-
-    try {
-      failArity1('required', 'optional', 'optional', 'extraArgument');
-    } catch (err) {
-      expect(err).to.not.be.null;
-      expect(err.message).to.equal(
-        'This operation has a required arity of 1, but 4 arguments were provided.'
-      );
-    }
-
-    /* eslint-disable no-unused-vars */
-    function failArity2(
-      requiredArgument1,
-      requiredArgument2,
-      optionalArgument1,
-      optionalArgument2
-    ) {
-      assertArity(arguments, 2);
-    }
-    /* eslint-disable no-unused-vars */
-
-    try {
-      failArity2('required', 'required', 'optional', 'optional', 'extraArgument');
-    } catch (err) {
-      expect(err).to.not.be.null;
-      expect(err.message).to.equal(
-        'This operation has a required arity of 2, but 5 arguments were provided.'
-      );
-    }
-  });
-
-  it('Should error if too few arguments are provided', function() {
-    /* eslint-disable-next-line no-unused-vars */
-    function failArity1(requiredArgument, optionalArgument1, optionalArgument2) {
-      assertArity(arguments, 1);
-    }
-
-    try {
-      failArity1();
-    } catch (err) {
-      expect(err).to.not.be.null;
-      expect(err.message).to.equal(
-        'This operation has a required arity of 1, but 0 arguments were provided.'
-      );
-    }
-
-    /* eslint-disable no-unused-vars */
-    function failArity2(
-      requiredArgument1,
-      requiredArgument2,
-      optionalArgument1,
-      optionalArgument2
-    ) {
-      assertArity(arguments, 2);
-    }
-    /* eslint-disable no-unused-vars */
-
-    try {
-      failArity2('required');
-    } catch (err) {
-      expect(err).to.not.be.null;
-      expect(err.message).to.equal(
-        'This operation has a required arity of 2, but 1 arguments were provided.'
-      );
-    }
-  });
-
-  it('Should assert arity of 0', function() {
-    /* eslint-disable-next-line no-unused-vars */
-    function passArity0(optionalArgument1, optionalArgument2) {
-      assertArity(arguments, 0);
-    }
-
-    try {
-      passArity0({ option1: false });
-    } catch (err) {
-      expect(err).to.be.null;
-    }
-    try {
-      passArity0(callback => {
-        console.log(callback);
-      });
-    } catch (err) {
-      expect(err).to.be.null;
-    }
-    try {
-      passArity0({ option1: false }, callback => {
-        console.log(callback);
-      });
-    } catch (err) {
-      expect(err).to.be.null;
-    }
-  });
-
-  it('Should assert arity of 1', function() {
-    /* eslint-disable-next-line no-unused-vars */
-    function passArity1(requiredArgument, optionalArgument1, optionalArgument2) {
-      assertArity(arguments, 1);
-    }
-
-    try {
-      passArity1('required');
-    } catch (err) {
-      expect(err).to.be.null;
-    }
-    try {
-      passArity1('required', { option1: false });
-    } catch (err) {
-      expect(err).to.be.null;
-    }
-    try {
-      passArity1('required', callback => {
-        console.log(callback);
-      });
-    } catch (err) {
-      expect(err).to.be.null;
-    }
-    try {
-      passArity1('required', { option1: false }, callback => {
-        console.log(callback);
-      });
-    } catch (err) {
-      expect(err).to.be.null;
-    }
-  });
-
-  it('Should assert arity of 2', function() {
-    /* eslint-disable no-unused-vars */
-    function passArity2(
-      requiredArgument1,
-      requiredArgument2,
-      optionalArgument1,
-      optionalArgument2
-    ) {
-      assertArity(arguments, 2);
-    }
-    /* eslint-disable no-unused-vars */
-
-    try {
-      passArity2('required1', 'required2');
-    } catch (err) {
-      expect(err).to.be.null;
-    }
-    try {
-      passArity2('required1', 'required2', { option1: false });
-    } catch (err) {
-      expect(err).to.be.null;
-    }
-    try {
-      passArity2('required', 'required2', callback => {
-        console.log(callback);
-      });
-    } catch (err) {
-      expect(err).to.be.null;
-    }
-    try {
-      passArity2('required', 'required2', { option1: false }, callback => {
-        console.log(callback);
-      });
-    } catch (err) {
-      expect(err).to.be.null;
-    }
+  ].forEach(test => {
+    it(test.description, function() {
+      let args = [];
+      if (test.errorMessageMatch) {
+        for (let i = 0; i < test.numberOfArgs; i++) {
+          args.push(i);
+        }
+        expect(() => test.func(args)).to.throw(test.errorMessageMatch);
+      } else {
+        // test that it passes with only the required arguments
+        for (let i = 0; i < test.numberOfArgs; i++) {
+          args.push(i);
+        }
+        expect(() => test.func(args)).to.not.throw;
+        // test that it passes with one optional argument (options)
+        args.push(test.numberOfArgs);
+        expect(() => test.func(args)).to.not.throw;
+        // test that it passes with a callback and an optional argument
+        args.push(() => console.log('callback'));
+        expect(() => test.func(args)).to.not.throw;
+      }
+    });
   });
 });
