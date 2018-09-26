@@ -19,6 +19,11 @@ describe('Connection', function() {
         { poolSize: 1, host: '/tmp/mongodb-27017.sock' }
       );
 
+      if (configuration.usingUnifiedTopology()) {
+        // Skipped because new SDAM layer emits this signal at a different time
+        return this.skip();
+      }
+
       client.connect((err, client) => {
         expect(err).to.not.exist;
 
@@ -323,11 +328,6 @@ describe('Connection', function() {
     metadata: { requires: { topology: 'single' } },
     test: function(done) {
       const configuration = this.configuration;
-      if (configuration.usingUnifiedTopology()) {
-        // The unified topology does not currently support authentication
-        return this.skip();
-      }
-
       const user = 'testConnectGoodAuth';
       const password = 'password';
       const client = configuration.newClient(configuration.url());
@@ -363,11 +363,6 @@ describe('Connection', function() {
     metadata: { requires: { topology: 'single' } },
     test: function(done) {
       const configuration = this.configuration;
-      if (configuration.usingUnifiedTopology()) {
-        // The unified topology does not currently support authentication
-        return this.skip();
-      }
-
       const user = 'testConnectGoodAuthAsOption';
       const password = 'password';
       const client = configuration.newClient(configuration.url());
@@ -406,11 +401,6 @@ describe('Connection', function() {
     metadata: { requires: { topology: 'single' } },
     test: function(done) {
       const configuration = this.configuration;
-      if (configuration.usingUnifiedTopology()) {
-        // The unified topology does not currently support authentication
-        return this.skip();
-      }
-
       const client = configuration.newClient(configuration.url('slithy', 'toves'));
       client.connect((err, client) => {
         expect(err).to.exist;
