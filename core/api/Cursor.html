@@ -590,10 +590,6 @@
             
                 <li data-name="Mongos#destroy"><a href="Mongos.html#destroy">destroy</a></li>
             
-                <li data-name="Mongos#getConnection"><a href="Mongos.html#getConnection">getConnection</a></li>
-            
-                <li data-name="Mongos#getServer"><a href="Mongos.html#getServer">getServer</a></li>
-            
                 <li data-name="Mongos#insert"><a href="Mongos.html#insert">insert</a></li>
             
                 <li data-name="Mongos#isConnected"><a href="Mongos.html#isConnected">isConnected</a></li>
@@ -605,6 +601,8 @@
                 <li data-name="Mongos#logout"><a href="Mongos.html#logout">logout</a></li>
             
                 <li data-name="Mongos#remove"><a href="Mongos.html#remove">remove</a></li>
+            
+                <li data-name="Mongos#selectServer"><a href="Mongos.html#selectServer">selectServer</a></li>
             
                 <li data-name="Mongos#unref"><a href="Mongos.html#unref">unref</a></li>
             
@@ -797,10 +795,6 @@
             
                 <li data-name="ReplSet#destroy"><a href="ReplSet.html#destroy">destroy</a></li>
             
-                <li data-name="ReplSet#getConnection"><a href="ReplSet.html#getConnection">getConnection</a></li>
-            
-                <li data-name="ReplSet#getServer"><a href="ReplSet.html#getServer">getServer</a></li>
-            
                 <li data-name="ReplSet#getServers"><a href="ReplSet.html#getServers">getServers</a></li>
             
                 <li data-name="ReplSet#insert"><a href="ReplSet.html#insert">insert</a></li>
@@ -814,6 +808,8 @@
                 <li data-name="ReplSet#logout"><a href="ReplSet.html#logout">logout</a></li>
             
                 <li data-name="ReplSet#remove"><a href="ReplSet.html#remove">remove</a></li>
+            
+                <li data-name="ReplSet#selectServer"><a href="ReplSet.html#selectServer">selectServer</a></li>
             
                 <li data-name="ReplSet#unref"><a href="ReplSet.html#unref">unref</a></li>
             
@@ -894,11 +890,7 @@
             
                 <li data-name="Server#equals"><a href="Server.html#equals">equals</a></li>
             
-                <li data-name="Server#getConnection"><a href="Server.html#getConnection">getConnection</a></li>
-            
                 <li data-name="Server#getDescription"><a href="Server.html#getDescription">getDescription</a></li>
-            
-                <li data-name="Server#getServer"><a href="Server.html#getServer">getServer</a></li>
             
                 <li data-name="Server#insert"><a href="Server.html#insert">insert</a></li>
             
@@ -911,6 +903,8 @@
                 <li data-name="Server#logout"><a href="Server.html#logout">logout</a></li>
             
                 <li data-name="Server#remove"><a href="Server.html#remove">remove</a></li>
+            
+                <li data-name="Server#selectServer"><a href="Server.html#selectServer">selectServer</a></li>
             
                 <li data-name="Server#unref"><a href="Server.html#unref">unref</a></li>
             
@@ -1109,7 +1103,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line74">line 74</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line75">line 75</a>
         </div>
         
     </div>
@@ -1742,7 +1736,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line401">line 401</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line402">line 402</a>
         </div>
         
     </div>
@@ -1822,7 +1816,7 @@ number of items in the buffered documents
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line365">line 365</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line366">line 366</a>
         </div>
         
     </div>
@@ -1898,7 +1892,7 @@ number of items in the buffered documents
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line374">line 374</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line375">line 375</a>
         </div>
         
     </div>
@@ -1978,7 +1972,7 @@ boolean signifying if the cursor is dead or not
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line383">line 383</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line384">line 384</a>
         </div>
         
     </div>
@@ -2058,7 +2052,7 @@ boolean signifying if the cursor was killed by the application
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line392">line 392</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line393">line 393</a>
         </div>
         
     </div>
@@ -2138,7 +2132,7 @@ boolean signifying if the cursor notified the callback
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line449">line 449</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line450">line 450</a>
         </div>
         
     </div>
@@ -2254,7 +2248,7 @@ boolean signifying if the cursor notified the callback
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line823">line 823</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line832">line 832</a>
         </div>
         
     </div>
@@ -2370,7 +2364,7 @@ boolean signifying if the cursor notified the callback
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line410">line 410</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line411">line 411</a>
         </div>
         
     </div>
@@ -2450,7 +2444,7 @@ array of buffered documents
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line477">line 477</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line478">line 478</a>
         </div>
         
     </div>
@@ -2530,7 +2524,7 @@ array of buffered documents
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Jul 19 2018 13:04:45 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Oct 01 2018 09:50:16 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

@@ -1416,7 +1416,7 @@
 
 
    
-<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.1/docs/reference/content/quick-start/quick-start.md" target="_blank" title="Edit quick-start/quick-start.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.0.0/docs/reference/content/quick-start/quick-start.md" target="_blank" title="Edit quick-start/quick-start.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
 
 
 
@@ -1497,8 +1497,11 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
-// Use connect method to connect to the server
-MongoClient.connect(url, function(err, client) {
+// Create a new MongoClient
+const client = new MongoClient(url);
+
+// Use connect method to connect to the Server
+client.connect(function(err) {
   assert.equal(null, err);
   console.log("Connected successfully to server");
 
@@ -1555,9 +1558,10 @@ const url = 'mongodb://localhost:27017';
 
 // Database Name
 const dbName = 'myproject';
+const client = new MongoClient(url);
 
 // Use connect method to connect to the server
-MongoClient.connect(url, function(err, client) {
+client.connect(url, function(err) {
   assert.equal(null, err);
   console.log(&quot;Connected successfully to server&quot;);
 
@@ -1602,7 +1606,7 @@ Changed console.dir to console.log, since most users will be running these examp
 rather than from within a browser console, and console.log returns better formatting.
 -->
 
-<p>This query returns all the documents in the <strong>documents</strong> collection. Add the <strong>findDocument</strong> method to the <strong>MongoClient.connect</strong> callback:</p>
+<p>This query returns all the documents in the <strong>documents</strong> collection. Add the <strong>findDocument</strong> method to the <strong>client.connect</strong> callback:</p>
 
 <!---
 Removed the assert line for number of documents returned on the grounds that it's too brittle.
@@ -1619,8 +1623,9 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
+const client = new MongoClient(url);
 // Use connect method to connect to the server
-MongoClient.connect(url, function(err, client) {
+client.connect(function(err) {
   assert.equal(null, err);
   console.log(&quot;Connected correctly to server&quot;);
 
@@ -1671,7 +1676,7 @@ MongoClient.connect(url, function(err, client) {
 }
 </code></pre>
 
-<p>The method updates the first document where the field <strong>a</strong> is equal to <strong>2</strong> by adding a new field <strong>b</strong> to the document set to <strong>1</strong>. Next, update the callback function from <strong>MongoClient.connect</strong> to include the update method.</p>
+<p>The method updates the first document where the field <strong>a</strong> is equal to <strong>2</strong> by adding a new field <strong>b</strong> to the document set to <strong>1</strong>. Next, update the callback function from <strong>client.connect</strong> to include the update method.</p>
 
 <pre><code class="language-js">const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
@@ -1682,8 +1687,9 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
+const client = new MongoClient(url);
 // Use connect method to connect to the server
-MongoClient.connect(url, function(err, client) {
+client.connect(function(err) {
   assert.equal(null, err);
   console.log(&quot;Connected successfully to server&quot;);
 
@@ -1714,7 +1720,7 @@ MongoClient.connect(url, function(err, client) {
 }
 </code></pre>
 
-<p>Add the new method to the <strong>MongoClient.connect</strong> callback function.</p>
+<p>Add the new method to the <strong>client.connect</strong> callback function.</p>
 
 <pre><code class="language-js">const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
@@ -1725,8 +1731,9 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
+const client = new MongoClient(url);
 // Use connect method to connect to the server
-MongoClient.connect(url, function(err, client) {
+client.connect(function(err) {
   assert.equal(null, err);
   console.log(&quot;Connected successfully to server&quot;);
 
@@ -1770,8 +1777,9 @@ const url = 'mongodb://localhost:27017';
 
 const dbName = 'myproject';
 
+const client = new MongoClient(url);
 // Use connect method to connect to the server
-MongoClient.connect(url, function(err, client) {
+client.connect(function(err) {
   assert.equal(null, err);
   console.log(&quot;Connected successfully to server&quot;);
 

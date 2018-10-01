@@ -1447,7 +1447,7 @@
 
 
    
-<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.1/docs/reference/content/tutorials/connect/index.md" target="_blank" title="Edit tutorials/connect/index.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.0.0/docs/reference/content/tutorials/connect/index.md" target="_blank" title="Edit tutorials/connect/index.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
 
 
 
@@ -1475,7 +1475,7 @@
 
 <h1 id="connect-to-mongodb">Connect to MongoDB</h1>
 
-<p>Use the <code>MongoClient.connect</code> method to connect to a running MongoDB deployment.</p>
+<p>Use the <code>client.connect</code> method to connect to a running MongoDB deployment.</p>
 
 <h2 id="connect-to-a-single-mongodb-instance">Connect to a Single MongoDB Instance</h2>
 
@@ -1497,8 +1497,11 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
-// Use connect method to connect to the server
-MongoClient.connect(url, function(err, client) {
+// Create a new MongoClient
+const client = new MongoClient(url);
+
+// Use connect method to connect to the Server
+client.connect(function(err) {
   assert.equal(null, err);
   console.log("Connected successfully to server");
 
@@ -1529,8 +1532,11 @@ const url = 'mongodb://localhost:27017,localhost:27018/?replicaSet=foo';
 // Database Name
 const dbName = 'myproject';
 
+// Create a new MongoClient
+const client = new MongoClient(url);
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+client.connect(function(err) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -1558,8 +1564,11 @@ const url = 'mongodb://localhost:50000,localhost:50001';
 // Database Name
 const dbName = 'myproject';
 
+// Create a new MongoClient
+const client = new MongoClient(url);
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+client.connect(function(err, client) {
   assert.equal(null, err);
   console.log("Connected successfully to server");
 
@@ -1581,7 +1590,6 @@ String </a>.</p>
 
 <pre><code class="language-js">
 const MongoClient = require('mongodb').MongoClient;
-const f = require('util').format;
 const assert = require('assert');
 const fs = require('fs');
 
@@ -1592,15 +1600,15 @@ const cert = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
 // Connection URL
 const url = 'mongodb://dave:password@localhost:27017?authMechanism=DEFAULT&amp;authSource=db&amp;ssl=true&quot;';
 
-// Use connect method to connect to the Server passing in
-// additional options
-MongoClient.connect(url,  {
-  server: {
-      sslValidate:true
-    , sslCA:ca
-    , sslCert:cert
-  }
-}, function(err, client) {
+// Create a client, passing in additional options
+const client = new MongoClient(url,  {
+  sslValidate: true,
+  sslCA: ca,
+  sslCert: cert
+});
+
+// Use connect method to connect to the server
+client.connect(function(err) {
   assert.equal(null, err);
   console.log(&quot;Connected correctly to server&quot;);
 

@@ -590,10 +590,6 @@
             
                 <li data-name="Mongos#destroy"><a href="Mongos.html#destroy">destroy</a></li>
             
-                <li data-name="Mongos#getConnection"><a href="Mongos.html#getConnection">getConnection</a></li>
-            
-                <li data-name="Mongos#getServer"><a href="Mongos.html#getServer">getServer</a></li>
-            
                 <li data-name="Mongos#insert"><a href="Mongos.html#insert">insert</a></li>
             
                 <li data-name="Mongos#isConnected"><a href="Mongos.html#isConnected">isConnected</a></li>
@@ -605,6 +601,8 @@
                 <li data-name="Mongos#logout"><a href="Mongos.html#logout">logout</a></li>
             
                 <li data-name="Mongos#remove"><a href="Mongos.html#remove">remove</a></li>
+            
+                <li data-name="Mongos#selectServer"><a href="Mongos.html#selectServer">selectServer</a></li>
             
                 <li data-name="Mongos#unref"><a href="Mongos.html#unref">unref</a></li>
             
@@ -797,10 +795,6 @@
             
                 <li data-name="ReplSet#destroy"><a href="ReplSet.html#destroy">destroy</a></li>
             
-                <li data-name="ReplSet#getConnection"><a href="ReplSet.html#getConnection">getConnection</a></li>
-            
-                <li data-name="ReplSet#getServer"><a href="ReplSet.html#getServer">getServer</a></li>
-            
                 <li data-name="ReplSet#getServers"><a href="ReplSet.html#getServers">getServers</a></li>
             
                 <li data-name="ReplSet#insert"><a href="ReplSet.html#insert">insert</a></li>
@@ -814,6 +808,8 @@
                 <li data-name="ReplSet#logout"><a href="ReplSet.html#logout">logout</a></li>
             
                 <li data-name="ReplSet#remove"><a href="ReplSet.html#remove">remove</a></li>
+            
+                <li data-name="ReplSet#selectServer"><a href="ReplSet.html#selectServer">selectServer</a></li>
             
                 <li data-name="ReplSet#unref"><a href="ReplSet.html#unref">unref</a></li>
             
@@ -894,11 +890,7 @@
             
                 <li data-name="Server#equals"><a href="Server.html#equals">equals</a></li>
             
-                <li data-name="Server#getConnection"><a href="Server.html#getConnection">getConnection</a></li>
-            
                 <li data-name="Server#getDescription"><a href="Server.html#getDescription">getDescription</a></li>
-            
-                <li data-name="Server#getServer"><a href="Server.html#getServer">getServer</a></li>
             
                 <li data-name="Server#insert"><a href="Server.html#insert">insert</a></li>
             
@@ -911,6 +903,8 @@
                 <li data-name="Server#logout"><a href="Server.html#logout">logout</a></li>
             
                 <li data-name="Server#remove"><a href="Server.html#remove">remove</a></li>
+            
+                <li data-name="Server#selectServer"><a href="Server.html#selectServer">selectServer</a></li>
             
                 <li data-name="Server#unref"><a href="Server.html#unref">unref</a></li>
             
@@ -1656,13 +1650,13 @@ function reconnectProxies(self, proxies, callback) {
           _self.on('parseError', handleEvent(self, 'parseError'));
 
           // Move to the connected servers
-          moveServerFrom(self.disconnectedProxies, self.connectedProxies, _self);
+          moveServerFrom(self.connectingProxies, self.connectedProxies, _self);
           // Emit topology Change
           emitTopologyDescriptionChanged(self);
           // Emit joined event
           self.emit('joined', 'mongos', _self);
         });
-      } else if (event === 'connect' &amp;&amp; self.authenticating) {
+      } else {
         // Move from connectingProxies
         moveServerFrom(self.connectingProxies, self.disconnectedProxies, _self);
         this.destroy();
@@ -1701,6 +1695,9 @@ function reconnectProxies(self, proxies, callback) {
         })
       );
 
+      _server.destroy();
+      removeProxyFrom(self.disconnectedProxies, _server);
+
       // Relay the server description change
       server.on('serverDescriptionChanged', function(event) {
         self.emit('serverDescriptionChanged', event);
@@ -1723,6 +1720,7 @@ function reconnectProxies(self, proxies, callback) {
       relayEvents(server, self, ['commandStarted', 'commandSucceeded', 'commandFailed']);
 
       // Connect to proxy
+      self.connectingProxies.push(server);
       server.connect(self.s.connectOptions);
     }, i);
   }
@@ -2368,24 +2366,23 @@ Mongos.prototype.logout = function(dbName, callback) {
 };
 
 /**
- * Get server
+ * Selects a server
+ *
  * @method
- * @return {Server}
+ * @param {function} selector Unused
+ * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @param {function} callback
  */
-Mongos.prototype.getServer = function() {
-  var server = pickProxy(this);
-  if (this.s.debug) this.emit('pickedServer', null, server);
-  return server;
-};
+Mongos.prototype.selectServer = function(selector, options, callback) {
+  if (typeof selector === 'function' &amp;&amp; typeof callback === 'undefined')
+    (callback = selector), (selector = undefined), (options = {});
+  if (typeof options === 'function')
+    (callback = options), (options = selector), (selector = undefined);
+  options = options || {};
 
-/**
- * Get a direct connection
- * @method
- * @return {Connection}
- */
-Mongos.prototype.getConnection = function() {
-  var server = this.getServer();
-  if (server) return server.getConnection();
+  const server = pickProxy(this);
+  if (this.s.debug) this.emit('pickedServer', null, server);
+  callback(null, server);
 };
 
 /**
@@ -2599,7 +2596,7 @@ module.exports = Mongos;
 
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Jul 19 2018 13:04:45 GMT-0400 (EDT)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Oct 01 2018 09:50:16 GMT-0400 (EDT)
                     </footer>
                 </div>
             </td>

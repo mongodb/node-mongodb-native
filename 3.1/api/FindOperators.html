@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Class: Decimal128</title>
+    <title>Class: FindOperators</title>
     
     
     
@@ -2089,7 +2089,7 @@
             </td>
             <td valign='top'>        
                 <div class="main">
-                    <h1 class="page-title" data-filename="Decimal128.html">Class: Decimal128</h1>
+                    <h1 class="page-title" data-filename="FindOperators.html">Class: FindOperators</h1>
                     
 
 
@@ -2098,8 +2098,10 @@
     
 <header>
     <h2>
-    Decimal128
+    FindOperators
     </h2>
+    
+        <div class="class-description"><p>Handles the find operators for the bulk operations</p></div>
     
 </header>  
 
@@ -2112,14 +2114,14 @@
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="Decimal128">
+        <h4 class="name" id="FindOperators">
             
-            new Decimal128<span class="signature">(bytes)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Double.html">Double</a>}</span>
+            new FindOperators<span class="signature">(bulkOperation)</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="node_modules_bson_lib_bson_decimal128.js.html">node_modules/bson/lib/bson/decimal128.js</a>, <a href="node_modules_bson_lib_bson_decimal128.js.html#line181">line 181</a>
+            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line535">line 535</a>
         </div>
         
     </div>
@@ -2128,10 +2130,6 @@
 </dt>
 <dd>
     
-    
-    <div class="description">
-        <p>A class representation of the BSON Decimal128 type.</p>
-    </div>
     
 
     
@@ -2161,13 +2159,16 @@
 	
         <tr>
             
-                <td class="name"><code>bytes</code></td>
+                <td class="name"><code>bulkOperation</code></td>
             
             
             <td class="type">
             
                 
-<span class="param-type">Buffer</span>
+<span class="param-type"><a href="OrderedBulkOperation.html">OrderedBulkOperation</a></span>
+|
+
+<span class="param-type"><a href="UnorderedBulkOperation.html">UnorderedBulkOperation</a></span>
 
 
             
@@ -2177,7 +2178,7 @@
             
             <td class="description last">
                 
-                <p>a buffer containing the raw Decimal128 bytes.</p></td>
+                </td>
         </tr>
 	
 	
@@ -2219,11 +2220,6 @@
     
     
     
-    
-    
-    
-
-
     
     
     
@@ -2252,14 +2248,14 @@
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="toString">
+        <h4 class="name" id="delete">
             
-            toString<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{string}</span>
+            delete<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="OrderedBulkOperation.html">OrderedBulkOperation</a>|UnordedBulkOperation}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="node_modules_bson_lib_bson_decimal128.js.html">node_modules/bson/lib/bson/decimal128.js</a>, <a href="node_modules_bson_lib_bson_decimal128.js.html#line600">line 600</a>
+            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line643">line 643</a>
         </div>
         
     </div>
@@ -2270,7 +2266,189 @@
     
     
     <div class="description">
-        <p>Create a string representation of the raw Decimal128 value</p>
+        <p>Add a delete operation to the bulk operation</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    <h5>Throws:</h5>
+    
+            
+
+    <div class="param-desc">
+    
+        
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
+
+
+    
+    </div>
+
+
+        
+    
+    
+    
+    
+
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="deleteOne">
+            
+            deleteOne<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="OrderedBulkOperation.html">OrderedBulkOperation</a>|UnordedBulkOperation}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line624">line 624</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add a delete one operation to the bulk operation</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    <h5>Throws:</h5>
+    
+            
+
+    <div class="param-desc">
+    
+        
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
+
+
+    
+    </div>
+
+
+        
+    
+    
+    
+    
+
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="remove">
+            
+            remove<span class="signature">()</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line665">line 665</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>backwards compatability for delete</p>
     </div>
     
 
@@ -2317,29 +2495,20 @@
     
     
     
-
-
-<h5>Returns:</h5>
-a Decimal128 string representation.
-<br />
-
-    
-    
-    
 </dd>
 
         
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id=".fromString">
+        <h4 class="name" id="removeOne">
             
-            <span class="type-signature static">static</span>Decimal128.fromString<span class="signature">(string)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Decimal128.html">Decimal128</a>}</span>
+            removeOne<span class="signature">()</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="node_modules_bson_lib_bson_decimal128.js.html">node_modules/bson/lib/bson/decimal128.js</a>, <a href="node_modules_bson_lib_bson_decimal128.js.html#line193">line 193</a>
+            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line658">line 658</a>
         </div>
         
     </div>
@@ -2350,7 +2519,78 @@ a Decimal128 string representation.
     
     
     <div class="description">
-        <p>Create a Decimal128 instance from a string representation</p>
+        <p>backwards compatability for deleteOne</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="replaceOne">
+            
+            replaceOne<span class="signature">(updateDocument)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="OrderedBulkOperation.html">OrderedBulkOperation</a>|<a href="UnorderedBulkOperation.html">UnorderedBulkOperation</a>}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line601">line 601</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add a replace one operation to the bulk operation</p>
     </div>
     
 
@@ -2381,13 +2621,13 @@ a Decimal128 string representation.
 	
         <tr>
             
-                <td class="name"><code>string</code></td>
+                <td class="name"><code>updateDocument</code></td>
             
             
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">object</span>
 
 
             
@@ -2397,7 +2637,7 @@ a Decimal128 string representation.
             
             <td class="description last">
                 
-                <p>a numeric string representation.</p></td>
+                <p>the new document to replace the existing one with</p></td>
         </tr>
 	
 	
@@ -2438,15 +2678,389 @@ a Decimal128 string representation.
     
     
     
+    <h5>Throws:</h5>
+    
+            
+
+    <div class="param-desc">
+    
+        
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
+
+
+    
+    </div>
+
+
+        
     
     
     
     
 
 
-<h5>Returns:</h5>
-a Decimal128 instance.
-<br />
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="update">
+            
+            update<span class="signature">(updateDocument)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="OrderedBulkOperation.html">OrderedBulkOperation</a>|UnordedBulkOperation}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line551">line 551</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add a single update document to the bulk operation</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>updateDocument</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>update operations</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    <h5>Throws:</h5>
+    
+            
+
+    <div class="param-desc">
+    
+        
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
+
+
+    
+    </div>
+
+
+        
+    
+    
+    
+    
+
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="updateOne">
+            
+            updateOne<span class="signature">(updateDocument)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="OrderedBulkOperation.html">OrderedBulkOperation</a>|UnordedBulkOperation}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line576">line 576</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add a single update one document to the bulk operation</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>updateDocument</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>update operations</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    <h5>Throws:</h5>
+    
+            
+
+    <div class="param-desc">
+    
+        
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
+
+
+    
+    </div>
+
+
+        
+    
+    
+    
+    
+
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="upsert">
+            
+            upsert<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="FindOperators.html">FindOperators</a>}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_bulk_common.js.html">lib/bulk/common.js</a>, <a href="lib_bulk_common.js.html#line612">line 612</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Upsert modifier for update bulk operation</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    <h5>Throws:</h5>
+    
+            
+
+    <div class="param-desc">
+    
+        
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
+
+
+    
+    </div>
+
+
+        
+    
+    
+    
+    
+
 
     
     

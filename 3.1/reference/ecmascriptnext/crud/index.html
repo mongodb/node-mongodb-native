@@ -1955,7 +1955,7 @@
 
 
    
-<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.1/docs/reference/content/reference/ecmascriptnext/crud.md" target="_blank" title="Edit reference/ecmascriptnext/crud.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.0.0/docs/reference/content/reference/ecmascriptnext/crud.md" target="_blank" title="Edit reference/ecmascriptnext/crud.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
 
 
 
@@ -2002,10 +2002,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log(&quot;Connected correctly to server&quot;);
 
     const db = client.db(dbName);
@@ -2035,10 +2035,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log(&quot;Connected correctly to server&quot;);
 
     const db = client.db(dbName);
@@ -2078,10 +2078,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log(&quot;Connected correctly to server&quot;);
 
     const db = client.db(dbName);
@@ -2126,10 +2126,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log(&quot;Connected correctly to server&quot;);
 
     const db = client.db(dbName);
@@ -2169,10 +2169,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log(&quot;Connected correctly to server&quot;);
 
     const db = client.db(dbName);
@@ -2211,10 +2211,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log(&quot;Connected correctly to server&quot;);
 
     const db = client.db(dbName);
@@ -2250,10 +2250,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log(&quot;Connected correctly to server&quot;);
 
     const db = client.db(dbName);
@@ -2300,10 +2300,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log(&quot;Connected correctly to server&quot;);
 
     const db = client.db(dbName);
@@ -2394,10 +2394,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log(&quot;Connected correctly to server&quot;);
 
     const db = client.db(dbName);
@@ -2430,10 +2430,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log(&quot;Connected correctly to server&quot;);
 
     const db = client.db(dbName);
@@ -2473,10 +2473,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log(&quot;Connected correctly to server&quot;);
 
     const db = client.db(dbName);

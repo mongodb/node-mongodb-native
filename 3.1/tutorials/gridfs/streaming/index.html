@@ -1786,7 +1786,7 @@
 
 
    
-<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.1/docs/reference/content/tutorials/gridfs/streaming.md" target="_blank" title="Edit tutorials/gridfs/streaming.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.0.0/docs/reference/content/tutorials/gridfs/streaming.md" target="_blank" title="Edit tutorials/gridfs/streaming.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
 
 
 
@@ -1832,7 +1832,8 @@ can just download a <a href="https://musopen.org/music/213/richard-wagner/die-me
 <p>In order to use the streaming GridFS API, you first need to create
 a <code>GridFSBucket</code>.</p>
 
-<pre><code class="language-javascript">mongodb.MongoClient.connect(uri, function(error, client) {
+<pre><code class="language-javascript">const client = new mongodb.MongoClient(uri);
+client.connect(function(error) {
   assert.ifError(error);
 
   const db = client.db(dbName);
@@ -1855,7 +1856,9 @@ const mongodb = require('mongodb');
 const uri = 'mongodb://localhost:27017';
 const dbName = 'test';
 
-mongodb.MongoClient.connect(uri, function(error, client) {
+const client = new mongodb.MongoClient(uri);
+
+client.connect(unction(error) {
   assert.ifError(error);
 
   const db = client.db(dbName);

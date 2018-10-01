@@ -2018,7 +2018,7 @@
 
 
    
-<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.1/docs/reference/content/reference/management/logging.md" target="_blank" title="Edit reference/management/logging.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.0.0/docs/reference/content/reference/management/logging.md" target="_blank" title="Edit reference/management/logging.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
 
 
 
@@ -2064,8 +2064,9 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myprojeect';
 
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+const client = new MongoClient(url);
+// Use connect method to connect to the server
+client.connect(function(err) {
   assert.equal(null, err);
   console.log(&quot;Connected correctly to server&quot;);
 
@@ -2096,8 +2097,9 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myprojeect';
 
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+const client = new MongoClient(url);
+// Use connect method to connect to the server
+client.connect(function(err) {
   assert.equal(null, err);
   console.log(&quot;Connected correctly to server&quot;);
 
@@ -2164,8 +2166,9 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myprojeect';
 
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+const client = new MongoClient(url);
+// Use connect method to connect to the server
+client.connect(function(err) {
   assert.equal(null, err);
   console.log(&quot;Connected correctly to server&quot;);
 

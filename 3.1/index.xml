@@ -71,7 +71,7 @@ Capped Collection Capped collections have maximum size or document counts that p
       
       <guid>/node-mongodb-native/3.1/tutorials/commands/</guid>
       <description>Database Commands Database commands allow you to perform a wide range of diagnostic and administrative tasks with the Node.js driver. For example, the dbStats command returns storage statistics for a given database. Use the command function to access database commands.
-// set up a command function function getDbStats(db, callback) { db.command({&#39;dbStats&#39;: 1}, function(err, results) { console.log(results); callback(); }); }; // use the function const MongoClient = require(&#39;mongodb&#39;).MongoClient; const assert = require(&#39;assert&#39;); // Connection URL const url = &#39;mongodb://localhost:27017&#39;; // Database Name const dbName = &#39;myproject&#39;; // Use connect method to connect to the Server MongoClient.</description>
+// set up a command function function getDbStats(db, callback) { db.command({&#39;dbStats&#39;: 1}, function(err, results) { console.log(results); callback(); }); }; // use the function const MongoClient = require(&#39;mongodb&#39;).MongoClient; const assert = require(&#39;assert&#39;); // Connection URL const url = &#39;mongodb://localhost:27017&#39;; // Database Name const dbName = &#39;myproject&#39;; // Create a new MongoClient const client = new MongoClient(url); // Use connect method to connect to the Server client.</description>
     </item>
     
     <item>
@@ -180,7 +180,7 @@ cote &amp;lt; côte &amp;lt; coté &amp;lt; côté  If collation is unspecified,
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
       
       <guid>/node-mongodb-native/3.1/tutorials/connect/</guid>
-      <description>Connect to MongoDB Use the MongoClient.connect method to connect to a running MongoDB deployment.
+      <description>Connect to MongoDB Use the client.connect method to connect to a running MongoDB deployment.
 Connect to a Single MongoDB Instance To connect to a single MongoDB instance, specify the URI of the MongoDB instance to connect to.
 In the following example, the URI connection string specifies connecting to a MongoDB instance that is running on localhost using port 27017. The myproject indicates the database to use.
 const MongoClient = require(&#39;mongodb&#39;).</description>
@@ -193,7 +193,7 @@ const MongoClient = require(&#39;mongodb&#39;).</description>
       
       <guid>/node-mongodb-native/3.1/reference/ecmascriptnext/connecting/</guid>
       <description>Connecting The MongoClient connection method returns a Promise if no callback is passed to it. Below is an example using the async/await commands.
-const MongoClient = require(&#39;mongodb&#39;).MongoClient; const assert = require(&#39;assert&#39;); (async function() { // Connection URL const url = &#39;mongodb://localhost:27017/myproject&#39;; // Database Name const dbName = &#39;myproject&#39;; let client; try { // Use connect method to connect to the Server client = await MongoClient.connect(url); const db = client.db(dbName); } catch (err) { console.</description>
+const MongoClient = require(&#39;mongodb&#39;).MongoClient; const assert = require(&#39;assert&#39;); (async function() { // Connection URL const url = &#39;mongodb://localhost:27017/myproject&#39;; // Database Name const dbName = &#39;myproject&#39;; const client = new MongoClient(url); try { // Use connect method to connect to the Server await client.connect(); const db = client.</description>
     </item>
     
     <item>
@@ -212,8 +212,8 @@ const MongoClient = require(&#39;mongodb&#39;).MongoClient; const assert = requi
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
       
       <guid>/node-mongodb-native/3.1/reference/connecting/connection-settings/</guid>
-      <description>URI Connection Settings Optional connection settings are settings not covered by the URI Connection String . The following options are passed in the options parameter in the MongoClient.connect function.
-const MongoClient = require(&#39;mongodb&#39;).MongoClient; const assert = require(&#39;assert&#39;); // Connection URL const url = &#39;mongodb://localhost:50000,localhost:50001&#39;; // Database Name const dbName = &#39;myproject&#39;; // Use connect method to connect to the Server passing in // additional options MongoClient.connect(url, { poolSize: 10, ssl: true }, function(err, client) { assert.</description>
+      <description>URI Connection Settings Optional connection settings are settings not covered by the URI Connection String . The following options are passed in the options parameter when you create a mongo client.
+const MongoClient = require(&#39;mongodb&#39;).MongoClient; const assert = require(&#39;assert&#39;); // Connection URL const url = &#39;mongodb://localhost:50000,localhost:50001&#39;; // Database Name const dbName = &#39;myproject&#39;; // create a client, passing in additional options const client = new MongoClient(url, { poolSize: 10, ssl: true }); // Use connect method to connect to the server client.</description>
     </item>
     
     <item>
@@ -233,7 +233,7 @@ This section exposes how to use the MongoDB Node.js driver with ESNext, leveragi
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
       
       <guid>/node-mongodb-native/3.1/reference/faq/</guid>
-      <description>What is the difference between connectTimeoutMS, socketTimeoutMS and maxTimeMS ?    Setting Default Value MongoClient.connect Description     connectTimeoutMS 30000 The connectTimeoutMS sets the number of milliseconds a socket stays inactive before closing during the connection phase of the driver. That is to say, when the application initiates a connection, when a replica set connects to new members, or when a replica set reconnects to members.</description>
+      <description>What is the difference between connectTimeoutMS, socketTimeoutMS and maxTimeMS ?    Setting Default Value client.connect Description     connectTimeoutMS 30000 The connectTimeoutMS sets the number of milliseconds a socket stays inactive before closing during the connection phase of the driver. That is to say, when the application initiates a connection, when a replica set connects to new members, or when a replica set reconnects to members.</description>
     </item>
     
     <item>
@@ -265,7 +265,7 @@ const listener = require(&#39;mongodb&#39;).instrument({ operationIdGenerator: {
       <guid>/node-mongodb-native/3.1/tutorials/connect/ssl/</guid>
       <description>TLS/SSL The Node.js driver supports TLS/SSL connections to MongoDB that support TLS/SSL support.
 No Certificate Validation If the MongoDB instance does not perform any validation of the certificate chain, include the ssl=true in the URI Connection String .
-const MongoClient = require(&#39;mongodb&#39;).MongoClient; MongoClient.connect(&amp;quot;mongodb://localhost:27017?ssl=true&amp;quot;, function(err, client) { client.close(); });  Validate Server Certificate If the MongoDB instance presents a certificate, to validate the server&amp;rsquo;s certificate, pass to the MongoClient.connect method:</description>
+const MongoClient = require(&#39;mongodb&#39;).MongoClient; const client = new MongoClient(&#39;mongodb://localhost:27017?ssl=true&#39;); client.connect(function(err) { client.close(); });  Validate Server Certificate If the MongoDB instance presents a certificate, to validate the server&amp;rsquo;s certificate, pass the following when creating a MongoClient:</description>
     </item>
     
     <item>
@@ -297,7 +297,7 @@ For a full explanation and a complete list of pipeline stages and operators, see
       <guid>/node-mongodb-native/3.1/reference/management/logging/</guid>
       <description>Logging You can change the log level, filter on classes to allow only specific classes to log, and provide your own logger implementation.
 Setting Log level The driver allows logging at three different levels: debug, info and error. The default level is error. The following example demonstrates how to set the logger to debug.
-const MongoClient = require(&#39;mongodb&#39;).MongoClient; const Logger = require(&#39;mongodb&#39;).Logger; const assert = require(&#39;assert&#39;); // Connection URL const url = &#39;mongodb://localhost:27017&#39;; // Database Name const dbName = &#39;myprojeect&#39;; // Use connect method to connect to the Server MongoClient.</description>
+const MongoClient = require(&#39;mongodb&#39;).MongoClient; const Logger = require(&#39;mongodb&#39;).Logger; const assert = require(&#39;assert&#39;); // Connection URL const url = &#39;mongodb://localhost:27017&#39;; // Database Name const dbName = &#39;myprojeect&#39;; const client = new MongoClient(url); // Use connect method to connect to the server client.</description>
     </item>
     
     <item>

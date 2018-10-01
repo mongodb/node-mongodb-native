@@ -71,7 +71,7 @@ Capped Collection Capped collections have maximum size or document counts that p
       
       <guid>/node-mongodb-native/3.1/tutorials/commands/</guid>
       <description>Database Commands Database commands allow you to perform a wide range of diagnostic and administrative tasks with the Node.js driver. For example, the dbStats command returns storage statistics for a given database. Use the command function to access database commands.
-// set up a command function function getDbStats(db, callback) { db.command({&#39;dbStats&#39;: 1}, function(err, results) { console.log(results); callback(); }); }; // use the function const MongoClient = require(&#39;mongodb&#39;).MongoClient; const assert = require(&#39;assert&#39;); // Connection URL const url = &#39;mongodb://localhost:27017&#39;; // Database Name const dbName = &#39;myproject&#39;; // Use connect method to connect to the Server MongoClient.</description>
+// set up a command function function getDbStats(db, callback) { db.command({&#39;dbStats&#39;: 1}, function(err, results) { console.log(results); callback(); }); }; // use the function const MongoClient = require(&#39;mongodb&#39;).MongoClient; const assert = require(&#39;assert&#39;); // Connection URL const url = &#39;mongodb://localhost:27017&#39;; // Database Name const dbName = &#39;myproject&#39;; // Create a new MongoClient const client = new MongoClient(url); // Use connect method to connect to the Server client.</description>
     </item>
     
     <item>
@@ -139,7 +139,7 @@ cote &amp;lt; côte &amp;lt; coté &amp;lt; côté  If collation is unspecified,
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
       
       <guid>/node-mongodb-native/3.1/tutorials/connect/</guid>
-      <description>Connect to MongoDB Use the MongoClient.connect method to connect to a running MongoDB deployment.
+      <description>Connect to MongoDB Use the client.connect method to connect to a running MongoDB deployment.
 Connect to a Single MongoDB Instance To connect to a single MongoDB instance, specify the URI of the MongoDB instance to connect to.
 In the following example, the URI connection string specifies connecting to a MongoDB instance that is running on localhost using port 27017. The myproject indicates the database to use.
 const MongoClient = require(&#39;mongodb&#39;).</description>
@@ -153,7 +153,7 @@ const MongoClient = require(&#39;mongodb&#39;).</description>
       <guid>/node-mongodb-native/3.1/tutorials/connect/ssl/</guid>
       <description>TLS/SSL The Node.js driver supports TLS/SSL connections to MongoDB that support TLS/SSL support.
 No Certificate Validation If the MongoDB instance does not perform any validation of the certificate chain, include the ssl=true in the URI Connection String .
-const MongoClient = require(&#39;mongodb&#39;).MongoClient; MongoClient.connect(&amp;quot;mongodb://localhost:27017?ssl=true&amp;quot;, function(err, client) { client.close(); });  Validate Server Certificate If the MongoDB instance presents a certificate, to validate the server&amp;rsquo;s certificate, pass to the MongoClient.connect method:</description>
+const MongoClient = require(&#39;mongodb&#39;).MongoClient; const client = new MongoClient(&#39;mongodb://localhost:27017?ssl=true&#39;); client.connect(function(err) { client.close(); });  Validate Server Certificate If the MongoDB instance presents a certificate, to validate the server&amp;rsquo;s certificate, pass the following when creating a MongoClient:</description>
     </item>
     
     <item>

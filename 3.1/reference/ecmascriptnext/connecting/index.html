@@ -1931,7 +1931,7 @@
 
 
    
-<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.1/docs/reference/content/reference/ecmascriptnext/connecting.md" target="_blank" title="Edit reference/ecmascriptnext/connecting.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.0.0/docs/reference/content/reference/ecmascriptnext/connecting.md" target="_blank" title="Edit reference/ecmascriptnext/connecting.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
 
 
 
@@ -1969,24 +1969,22 @@ const assert = require('assert');
   const url = 'mongodb://localhost:27017/myproject';
   // Database Name
   const dbName = 'myproject';
-  let client;
+  const client = new MongoClient(url);
 
   try {
     // Use connect method to connect to the Server
-    client = await MongoClient.connect(url);
+    await client.connect();
 
     const db = client.db(dbName);
   } catch (err) {
     console.log(err.stack);
   }
 
-  if (client) {
-    client.close();
-  }
+  client.close();
 })();
 </code></pre>
 
-<p>The <code>MongoClient.connect</code> function returns a <code>Promise</code> that we then execute using the <code>await</code> keyword inside of an <code>async</code> function. If an error happens during the <code>MongoClient.connect</code> the error is caught by the <code>try</code>/<code>catch</code> and can be handled as if it were a normal Javascript error.</p>
+<p>The <code>client.connect</code> function returns a <code>Promise</code> that we then execute using the <code>await</code> keyword inside of an <code>async</code> function. If an error happens during the <code>client.connect</code> the error is caught by the <code>try</code>/<code>catch</code> and can be handled as if it were a normal Javascript error.</p>
 
 
 

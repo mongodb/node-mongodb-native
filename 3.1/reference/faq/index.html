@@ -2109,7 +2109,7 @@
 
 
    
-<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.1/docs/reference/content/reference/faq/index.md" target="_blank" title="Edit reference/faq/index.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.0.0/docs/reference/content/reference/faq/index.md" target="_blank" title="Edit reference/faq/index.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
 
 
 
@@ -2141,7 +2141,7 @@
 <thead>
 <tr>
 <th align="left">Setting</th>
-<th align="left">Default Value MongoClient.connect</th>
+<th align="left">Default Value client.connect</th>
 <th align="left">Description</th>
 </tr>
 </thead>
@@ -2265,12 +2265,13 @@ allowing the driver to detect that the socket is closed.</li>
 <li>The firewall should allow keepAlive probes.</li>
 </ol>
 
-<h1 id="i-m-getting-econnreset-when-calling-mongoclient-connect">I&rsquo;m getting ECONNRESET when calling MongoClient.connect</h1>
+<h1 id="i-m-getting-econnreset-when-calling-client-connect">I&rsquo;m getting ECONNRESET when calling client.connect</h1>
 
 <p>This can occur if the connection pool is too large.</p>
 
-<pre><code class="language-js">MongoClient.connect('mongodb://localhost:27017/test?maxPoolSize=5000',
-  function(err, client) {
+<pre><code class="language-js">const client = new MongoClient('mongodb://localhost:27017/test?maxPoolSize=5000');
+client.connect('mongodb://localhost:27017/test?maxPoolSize=5000',
+  function(err) {
     // connection
   });
 </code></pre>
@@ -2374,7 +2375,7 @@ operations.</p>
 <li><a href="#on-misconfigured-firewalls">On misconfigured firewalls</a></li>
 </ul></li>
 </ul></li>
-<li><a href="#i-m-getting-econnreset-when-calling-mongoclient-connect">I&rsquo;m getting ECONNRESET when calling MongoClient.connect</a></li>
+<li><a href="#i-m-getting-econnreset-when-calling-client-connect">I&rsquo;m getting ECONNRESET when calling client.connect</a></li>
 <li><a href="#how-can-i-prevent-a-slow-operation-from-delaying-other-operations">How can I prevent a slow operation from delaying other operations?</a></li>
 <li><a href="#ensure-your-connection-string-is-valid-for-replica-set">Ensure your connection string is valid for Replica Set</a></li>
 </ul>

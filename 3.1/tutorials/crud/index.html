@@ -1603,7 +1603,7 @@
 
 
    
-<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.1/docs/reference/content/tutorials/crud.md" target="_blank" title="Edit tutorials/crud.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/3.0.0/docs/reference/content/tutorials/crud.md" target="_blank" title="Edit tutorials/crud.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
 
 
 
@@ -1661,8 +1661,11 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
+// Create a new MongoClient
+const client = new MongoClient(url);
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+client.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -1693,9 +1696,11 @@ const url = 'mongodb://localhost:27017';
 // Database name
 const dbName = 'myproject';
 
+const client = new MongoClient(url);
+
 (async function() {
   try {
-    const client = await MongoClient.connect(url);
+    await client.connect(url);
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -1778,8 +1783,11 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
+// Create a new MongoClient
+const client = new MongoClient(url);
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+client.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -1809,9 +1817,11 @@ const url = 'mongodb://localhost:27017';
 // Database name
 const dbName = 'myproject';
 
+const client = new MongoClient(url);
+
 (async function() {
   try {
-    const client = await MongoClient.connect(url);
+    await client.connect(url);
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -1861,8 +1871,11 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
+// Create a new MongoClient
+const client = new MongoClient(url);
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+client.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -1892,9 +1905,11 @@ const url = 'mongodb://localhost:27017';
 // Database name
 const dbName = 'myproject';
 
+const client = new MongoClient(url);
+
 (async function() {
   try {
-    const client = await MongoClient.connect(url);
+    await client.connect(url);
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -1934,8 +1949,11 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
+// Create a new MongoClient
+const client = new MongoClient(url);
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+client.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -1982,9 +2000,11 @@ const url = 'mongodb://localhost:27017';
 // Database name
 const dbName = 'myproject';
 
+const client = new MongoClient(url);
+
 (async function() {
   try {
-    const client = await MongoClient.connect(url);
+    await client.connect(url);
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -2079,8 +2099,11 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
+// Create a new MongoClient
+const client = new MongoClient(url);
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+client.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -2116,9 +2139,11 @@ const url = 'mongodb://localhost:27017';
 // Database name
 const dbName = 'myproject';
 
+const client = new MongoClient(url);
+
 (async function() {
   try {
-    const client = await MongoClient.connect(url);
+    await client.connect(url);
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -2201,8 +2226,11 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
+// Create a new MongoClient
+const client = new MongoClient(url);
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+client.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -2242,9 +2270,11 @@ const url = 'mongodb://localhost:27017';
 // Database name
 const dbName = 'myproject';
 
+const client = new MongoClient(url);
+
 (async function() {
   try {
-    const client = await MongoClient.connect(url);
+    await client.connect(url);
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -2342,8 +2372,11 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
+// Create a new MongoClient
+const client = new MongoClient(url);
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+client.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -2376,9 +2409,11 @@ const url = 'mongodb://localhost:27017';
 // Database name
 const dbName = 'myproject';
 
+const client = new MongoClient(url);
+
 (async function() {
   try {
-    const client = await MongoClient.connect(url);
+    await client.connect(url);
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -2454,8 +2489,11 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
+// Create a new MongoClient
+const client = new MongoClient(url);
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+client.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -2494,9 +2532,11 @@ const url = 'mongodb://localhost:27017';
 // Database name
 const dbName = 'myproject';
 
+const client = new MongoClient(url);
+
 (async function() {
   try {
-    const client = await MongoClient.connect(url);
+    await client.connect(url);
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -2578,8 +2618,11 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
+// Create a new MongoClient
+const client = new MongoClient(url);
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+client.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -2617,9 +2660,11 @@ const url = 'mongodb://localhost:27017';
 // Database name
 const dbName = 'myproject';
 
+const client = new MongoClient(url);
+
 (async function() {
   try {
-    const client = await MongoClient.connect(url);
+    await client.connect(url);
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -2709,8 +2754,11 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
+// Create a new MongoClient
+const client = new MongoClient(url);
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+client.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -2740,9 +2788,11 @@ const url = 'mongodb://localhost:27017';
 // Database name
 const dbName = 'myproject';
 
+const client = new MongoClient(url);
+
 (async function() {
   try {
-    const client = await MongoClient.connect(url);
+    await client.connect(url);
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -2807,8 +2857,11 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
+// Create a new MongoClient
+const client = new MongoClient(url);
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+client.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -2842,9 +2895,11 @@ const url = 'mongodb://localhost:27017';
 // Database name
 const dbName = 'myproject';
 
+const client = new MongoClient(url);
+
 (async function() {
   try {
-    const client = await MongoClient.connect(url);
+    await client.connect(url);
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -2884,8 +2939,11 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
+// Create a new MongoClient
+const client = new MongoClient(url);
+
 // Use connect method to connect to the Server
-MongoClient.connect(url, function(err, client) {
+client.connect(url, function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
