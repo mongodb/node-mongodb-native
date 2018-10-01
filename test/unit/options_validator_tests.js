@@ -299,26 +299,6 @@ describe('Options Validation', function() {
     console.warn.restore();
   });
 
-  it('Should validate options using OperationBuilder', function() {
-    const testOperationBuilder = arity(1)
-      .options({ a: { type: 'boolean' } })
-      .build(
-        function(a) {
-          return a;
-        },
-        { validationLevel: 'error' }
-      );
-
-    const testObject = { a: 3 };
-
-    try {
-      testOperationBuilder(testObject);
-    } catch (err) {
-      expect(err).to.not.be.null;
-      expect(err.message).to.equal('a should be of type boolean, but is of type number.');
-    }
-  });
-
   [
     {
       description: 'Should fail arity 0 if too many arguments are provided',
@@ -387,5 +367,25 @@ describe('Options Validation', function() {
         expect(() => test.func(args)).to.not.throw;
       }
     });
+  });
+
+  it('Should validate options using OperationBuilder', function() {
+    const testOperationBuilder = arity(1)
+      .options({ a: { type: 'boolean' } })
+      .build(
+        function(a) {
+          return a;
+        },
+        { validationLevel: 'error' }
+      );
+
+    const testObject = { a: 3 };
+
+    try {
+      testOperationBuilder(testObject);
+    } catch (err) {
+      expect(err).to.not.be.null;
+      expect(err.message).to.equal('a should be of type boolean, but is of type number.');
+    }
   });
 });
