@@ -124,7 +124,7 @@ const RETRYABLE_ERROR_CODES = new Set([
 /**
  * Determines whether an error is something the driver should attempt to retry
  *
- * @param {(MongoError|Error})} error
+ * @param {MongoError|Error} error
  */
 function isRetryableError(error) {
   return (
