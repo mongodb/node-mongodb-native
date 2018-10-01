@@ -1,7 +1,8 @@
 'use strict';
 
-const expect = require('chai').expect;
+const assertArity = require('../../lib/options_validator').assertArity;
 const createValidationFunction = require('../../lib/options_validator').createValidationFunction;
+const expect = require('chai').expect;
 const sinonChai = require('sinon-chai');
 const sinon = require('sinon');
 const chai = require('chai');
@@ -295,5 +296,75 @@ describe('Options Validation', function() {
     expect(validatedObject).to.be.frozen;
 
     console.warn.restore();
+  });
+
+  [
+    {
+      description: 'Should fail arity 0 if too many arguments are provided',
+      func: args => assertArity(args, 0),
+      numberOfArgs: 2,
+      errorMessageMatch: /This operation has a required arity of 0, but 2 arguments were provided./
+    },
+    {
+      description: 'Should fail arity 1 if too many arguments are provided',
+      func: args => assertArity(args, 1),
+      numberOfArgs: 3,
+      errorMessageMatch: /This operation has a required arity of 1, but 3 arguments were provided./
+    },
+    {
+      description: 'Should fail arity 2 if too many arguments are provided',
+      func: args => assertArity(args, 2),
+      numberOfArgs: 4,
+      errorMessageMatch: /This operation has a required arity of 2, but 4 arguments were provided./
+    },
+    {
+      description: 'Should fail arity 1 if too few arguments are provided',
+      func: args => assertArity(args, 1),
+      numberOfArgs: 0,
+      errorMessageMatch: /This operation has a required arity of 1, but 0 arguments were provided./
+    },
+    {
+      description: 'Should fail arity 2 if too few arguments are provided',
+      func: args => assertArity(args, 2),
+      numberOfArgs: 1,
+      errorMessageMatch: /This operation has a required arity of 2, but 1 arguments were provided./
+    },
+    {
+      description: 'Should pass arity 0',
+      func: args => assertArity(args, 0),
+      numberOfArgs: 0
+    },
+    {
+      description: 'Should pass arity 1',
+      func: args => assertArity(args, 1),
+      numberOfArgs: 1
+    },
+    {
+      description: 'Should pass arity 2',
+      func: args => assertArity(args, 2),
+      numberOfArgs: 2
+    }
+  ].forEach(test => {
+    it(test.description, function() {
+      let args = [];
+      if (test.errorMessageMatch) {
+        for (let i = 0; i < test.numberOfArgs; i++) {
+          args.push(i);
+        }
+        expect(() => test.func(args)).to.throw(test.errorMessageMatch);
+      } else {
+        // test that it passes with only the required arguments
+        for (let i = 0; i < test.numberOfArgs; i++) {
+          args.push(i);
+        }
+        expect(() => test.func(args)).to.not.throw;
+        // test that it passes with one optional argument (options)
+        args.push(test.numberOfArgs);
+        expect(() => test.func(args)).to.not.throw;
+        // test that it passes with a callback and an optional argument
+        args.push(() => console.log('callback'));
+        expect(() => test.func(args)).to.not.throw;
+      }
+    });
   });
 });
