@@ -1,6 +1,8 @@
 'use strict';
 
+const arityZero = require('../../lib/options_validator').arityZero;
 const arityOne = require('../../lib/options_validator').arityOne;
+const arityTwo = require('../../lib/options_validator').arityTwo;
 const assertArity = require('../../lib/options_validator').assertArity;
 const validate = require('../../lib/options_validator').validate;
 const expect = require('chai').expect;
@@ -432,7 +434,7 @@ describe('Options Validation', function() {
 
     const customObject = new CustomObject();
 
-    TestClass.prototype.testOperation = arityOne()
+    TestClass.prototype.testOperation = arityZero()
       .options({ a: { type: 'string' } })
       .overrides({ a: customObject.a })
       .build(function(a) {
@@ -444,5 +446,52 @@ describe('Options Validation', function() {
     const testClass = new TestClass();
     const validatedObject = testClass.testOperation(testObject);
     expect(validatedObject).to.deep.equal({ a: 'override' });
+  });
+
+  it('Should properly validate when no options are provided', function() {
+    class TestClass {
+      constructor() {
+        this.s = { options: { validationLevel: 'error' } };
+      }
+    }
+
+    TestClass.prototype.testOperation = arityOne()
+      .options({ a: { type: 'string' } })
+      .build(function(requiredArgument) {
+        return requiredArgument;
+      });
+
+    TestClass.prototype.testOperationTwo = arityTwo()
+      .options({ a: { type: 'string' } })
+      .build(function(requiredArgument, requiredArgumentTwo) {
+        return requiredArgument + requiredArgumentTwo;
+      });
+
+    const testClass = new TestClass();
+    const testResult = testClass.testOperation(1);
+    expect(testResult).to.equal(1);
+
+    const testResultTwo = testClass.testOperationTwo(1, 2);
+    expect(testResultTwo).to.equal(3);
+  });
+
+  it('Should fail with an object in the options position', function() {
+    class TestClass {
+      constructor() {
+        this.s = { options: { validationLevel: 'error' } };
+      }
+    }
+
+    TestClass.prototype.testOperation = arityOne()
+      .options({})
+      .build(function(requiredArgument) {
+        return requiredArgument;
+      });
+
+    const errorMessage = 'This operation has a required arity of 1, but 4 arguments were provided.';
+    const testClass = new TestClass();
+    expect(() => {
+      testClass.testOperation({ a: 1 }, { b: 2 }, () => {}, () => {});
+    }).to.throw(errorMessage);
   });
 });
