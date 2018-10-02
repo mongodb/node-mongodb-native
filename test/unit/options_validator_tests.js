@@ -1,7 +1,8 @@
 'use strict';
 
+const arityOne = require('../../lib/options_validator').arityOne;
 const assertArity = require('../../lib/options_validator').assertArity;
-const createValidationFunction = require('../../lib/options_validator').createValidationFunction;
+const validate = require('../../lib/options_validator').validate;
 const expect = require('chai').expect;
 const sinonChai = require('sinon-chai');
 const sinon = require('sinon');
@@ -12,42 +13,50 @@ describe('Options Validation', function() {
   const testValidationLevel = 'error';
 
   it('Should validate a basic object with type number', function() {
-    const objectValidator = createValidationFunction({
+    const validationSchema = {
       a: { type: 'number' }
-    });
+    };
 
     const testObject = { a: 1 };
-    const validatedObject = objectValidator(testObject, { validationLevel: testValidationLevel });
+    const validatedObject = validate(validationSchema, testObject, {
+      validationLevel: testValidationLevel
+    });
 
     expect(validatedObject).to.deep.equal({ a: 1 });
     expect(validatedObject).to.be.frozen;
   });
 
   it('Should validate a basic object with type object', function() {
-    const objectValidator = createValidationFunction({
+    const validationSchema = {
       a: { type: 'object' }
-    });
+    };
 
     const testObject = { a: { b: 1 } };
-    const validatedObject = objectValidator(testObject, { validationLevel: testValidationLevel });
+    const validatedObject = validate(validationSchema, testObject, {
+      validationLevel: testValidationLevel
+    });
 
     expect(validatedObject).to.deep.equal(testObject);
     expect(validatedObject).to.be.frozen;
   });
 
   it('Should validate a basic object with array of types', function() {
-    const objectValidator = createValidationFunction({
+    const validationSchema = {
       a: { type: ['number', 'object'] }
-    });
+    };
 
     const testObject1 = { a: 1 };
-    const validatedObject1 = objectValidator(testObject1, { validationLevel: testValidationLevel });
+    const validatedObject1 = validate(validationSchema, testObject1, {
+      validationLevel: testValidationLevel
+    });
 
     expect(validatedObject1).to.deep.equal(testObject1);
     expect(validatedObject1).to.be.frozen;
 
     const testObject2 = { a: { b: true } };
-    const validatedObject2 = objectValidator(testObject2, { validationLevel: testValidationLevel });
+    const validatedObject2 = validate(validationSchema, testObject2, {
+      validationLevel: testValidationLevel
+    });
 
     expect(validatedObject2).to.deep.equal(testObject2);
     expect(validatedObject2).to.be.frozen;
@@ -58,46 +67,50 @@ describe('Options Validation', function() {
       this.type = 'custom';
     }
 
-    const objectValidator = createValidationFunction({ a: { type: CustomType } });
+    const validationSchema = { a: { type: CustomType } };
 
     const testObject = { a: new CustomType() };
-    const validatedObject = objectValidator(testObject, { validationLevel: testValidationLevel });
+    const validatedObject = validate(validationSchema, testObject, {
+      validationLevel: testValidationLevel
+    });
 
     expect(validatedObject).to.deep.equal(testObject);
     expect(validatedObject).to.be.frozen;
   });
 
   it('Should ignore fields not in schema', function() {
-    const objectValidator = createValidationFunction({
+    const validationSchema = {
       a: { type: 'boolean' }
-    });
+    };
 
     const testObject = { b: 1 };
-    const validatedObject = objectValidator(testObject, { validationLevel: testValidationLevel });
+    const validatedObject = validate(validationSchema, testObject, {
+      validationLevel: testValidationLevel
+    });
 
     expect(validatedObject).to.deep.equal(testObject);
     expect(validatedObject).to.be.frozen;
   });
 
   it('Should use default validationLevel', function() {
-    const objectValidator = createValidationFunction({
+    const validationSchema = {
       a: { type: 'boolean' }
-    });
+    };
 
     const testObject = { b: 1 };
-    const validatedObject = objectValidator(testObject);
+    const validatedObject = validate(validationSchema, testObject);
 
     expect(validatedObject).to.deep.equal(testObject);
     expect(validatedObject).to.be.frozen;
   });
 
   it('Should skip validation if validationLevel is none', function() {
-    const objectValidator = createValidationFunction({
+    const validationSchema = {
       a: { type: 'boolean' }
-    });
+    };
 
     const testObject = { a: 45 };
-    const validatedObject = objectValidator(testObject, { validationLevel: 'none' });
+    const validatedObject = validate(validationSchema, testObject, { validationLevel: 'none' });
 
     expect(validatedObject).to.deep.equal(testObject);
     expect(validatedObject).to.be.frozen;
@@ -105,12 +118,12 @@ describe('Options Validation', function() {
 
   it('Should warn if validationLevel is warn', function() {
     const stub = sinon.stub(console, 'warn');
-    const objectValidator = createValidationFunction({
+    const validationSchema = {
       a: { type: 'boolean' }
-    });
+    };
 
     const testObject = { a: 45 };
-    const validatedObject = objectValidator(testObject, { validationLevel: 'warn' });
+    const validatedObject = validate(validationSchema, testObject, { validationLevel: 'warn' });
 
     expect(stub).to.have.been.calledOnce;
     expect(stub).to.have.been.calledWith('a should be of type boolean, but is of type number.');
@@ -121,13 +134,13 @@ describe('Options Validation', function() {
   });
 
   it('Should error if validationLevel is error', function() {
-    const objectValidator = createValidationFunction({
+    const validationSchema = {
       a: { type: 'boolean' }
-    });
+    };
 
     const testObject = { a: 45 };
     try {
-      const validatedObject = objectValidator(testObject, { validationLevel: 'error' });
+      const validatedObject = validate(validationSchema, testObject, { validationLevel: 'error' });
       expect(validatedObject).to.deep.equal(testObject);
       expect(validatedObject).to.be.frozen;
     } catch (err) {
@@ -138,12 +151,12 @@ describe('Options Validation', function() {
 
   it('Should fail validation if required option is not present', function() {
     const stub = sinon.stub(console, 'warn');
-    const objectValidator = createValidationFunction({
+    const validationSchema = {
       a: { required: true }
-    });
+    };
 
     const testObject = { b: 45 };
-    const validatedObject = objectValidator(testObject, { validationLevel: 'warn' });
+    const validatedObject = validate(validationSchema, testObject, { validationLevel: 'warn' });
 
     expect(stub).to.have.been.calledOnce;
     expect(stub).to.have.been.calledWith('required option [a] was not found.');
@@ -154,26 +167,30 @@ describe('Options Validation', function() {
   });
 
   it('Should validate an object with required and type fields', function() {
-    const objectValidator = createValidationFunction({
+    const validationSchema = {
       a: { type: 'boolean', required: true }
-    });
+    };
 
     const testObject = { a: true };
-    const validatedObject = objectValidator(testObject, { validationLevel: testValidationLevel });
+    const validatedObject = validate(validationSchema, testObject, {
+      validationLevel: testValidationLevel
+    });
 
     expect(validatedObject).to.deep.equal(testObject);
     expect(validatedObject).to.be.frozen;
   });
 
   it('Should fail validation if required or type fails', function() {
-    const objectValidator = createValidationFunction({
+    const validationSchema = {
       a: { type: 'boolean', required: true }
-    });
+    };
 
     const testObject = { b: 1 };
 
     try {
-      const validatedObject = objectValidator(testObject, { validationLevel: testValidationLevel });
+      const validatedObject = validate(validationSchema, testObject, {
+        validationLevel: testValidationLevel
+      });
       expect(validatedObject).to.deep.equal(testObject);
       expect(validatedObject).to.be.frozen;
     } catch (err) {
@@ -183,13 +200,15 @@ describe('Options Validation', function() {
   });
 
   it('Should set defaults', function() {
-    const objectValidator = createValidationFunction({
+    const validationSchema = {
       a: { default: true }
-    });
+    };
 
     const testObject = { b: 3 };
 
-    const validatedObject = objectValidator(testObject, { validationLevel: testValidationLevel });
+    const validatedObject = validate(validationSchema, testObject, {
+      validationLevel: testValidationLevel
+    });
     expect(validatedObject.a).to.equal(true);
     expect(validatedObject.b).to.equal(3);
     expect(validatedObject).to.be.frozen;
@@ -200,13 +219,15 @@ describe('Options Validation', function() {
       ? sinon.stub(process, 'emitWarning')
       : sinon.stub(console, 'error');
 
-    const objectValidator = createValidationFunction({
+    const validationSchema = {
       a: { deprecated: true }
-    });
+    };
 
     const testObject = { a: 3 };
 
-    const validatedObject = objectValidator(testObject, { validationLevel: testValidationLevel });
+    const validatedObject = validate(validationSchema, testObject, {
+      validationLevel: testValidationLevel
+    });
     expect(stub).to.have.been.calledOnce;
     expect(stub).to.have.been.calledWith(
       'option [a] is deprecated and will be removed in a later version.'
@@ -224,14 +245,15 @@ describe('Options Validation', function() {
     }
     const customObject = new CustomObject();
 
-    const objectValidator = createValidationFunction({
+    const validationSchema = {
       a: { type: 'string' },
       b: { type: 'string' }
-    });
+    };
 
     const testObject = {};
 
-    const validatedObject = objectValidator(
+    const validatedObject = validate(
+      validationSchema,
       testObject,
       { a: customObject.a, b: customObject.b },
       { validationLevel: testValidationLevel }
@@ -240,7 +262,8 @@ describe('Options Validation', function() {
     expect(validatedObject).to.deep.equal({ a: 'custom', b: 'override' });
     expect(validatedObject).to.be.frozen;
 
-    const validatedObject2 = objectValidator(
+    const validatedObject2 = validate(
+      validationSchema,
       testObject,
       { a: customObject.a, b: customObject.b },
       { validationLevel: 'none' }
@@ -256,11 +279,12 @@ describe('Options Validation', function() {
     }
     const customObject = new CustomObject();
 
-    const objectValidator = createValidationFunction({ a: { type: 'string' } });
+    const validationSchema = { a: { type: 'string' } };
 
     const testObject = { a: 'hello' };
 
-    const validatedObject = objectValidator(
+    const validatedObject = validate(
+      validationSchema,
       testObject,
       { a: customObject.a },
       { validationLevel: testValidationLevel }
@@ -278,11 +302,12 @@ describe('Options Validation', function() {
     }
     const customObject = new CustomObject();
 
-    const objectValidator = createValidationFunction({ a: { type: 'string', default: 'default' } });
+    const validationSchema = { a: { type: 'string', default: 'default' } };
 
     const testObject = {};
 
-    const validatedObject = objectValidator(
+    const validatedObject = validate(
+      validationSchema,
       testObject,
       { a: customObject.a },
       { validationLevel: testValidationLevel }
@@ -366,5 +391,58 @@ describe('Options Validation', function() {
         expect(() => test.func(args)).to.not.throw;
       }
     });
+  });
+
+  it('Should validate options using OperationBuilder', function() {
+    class TestClass {
+      constructor() {
+        this.s = { options: { validationLevel: 'error' } };
+      }
+    }
+
+    TestClass.prototype.testOperation = arityOne()
+      .options({ a: { type: 'boolean' } })
+      .build(function(a) {
+        return a;
+      });
+
+    const testObject = { a: 3 };
+
+    const testClass = new TestClass();
+    try {
+      testClass.testOperation(testObject);
+    } catch (err) {
+      expect(err).to.not.be.null;
+      expect(err.message).to.equal('a should be of type boolean, but is of type number.');
+    }
+  });
+
+  it('Should override options using OperationBuilder', function() {
+    class TestClass {
+      constructor() {
+        this.s = { options: { validationLevel: 'error' } };
+      }
+    }
+
+    class CustomObject {
+      constructor() {
+        this.a = 'override';
+      }
+    }
+
+    const customObject = new CustomObject();
+
+    TestClass.prototype.testOperation = arityOne()
+      .options({ a: { type: 'string' } })
+      .overrides({ a: customObject.a })
+      .build(function(a) {
+        return a;
+      });
+
+    const testObject = {};
+
+    const testClass = new TestClass();
+    const validatedObject = testClass.testOperation(testObject);
+    expect(validatedObject).to.deep.equal({ a: 'override' });
   });
 });
