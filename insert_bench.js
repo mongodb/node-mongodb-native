@@ -27,7 +27,8 @@ MongoClient.connect('mongodb://localhost:27017/bench', function(err, db) {
 
   var col = db.collection('inserts');
 
-  function execute(col, callback) {
+  function execute(col, callback) 
+  {
     var start = new Date().getTime();
 
     col.find({}).limit(100).toArray(function(e, docs) {
