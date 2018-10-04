@@ -494,4 +494,58 @@ describe('Options Validation', function() {
       testClass.testOperation({ a: 1 }, { b: 2 }, () => {}, () => {});
     }).to.throw(errorMessage);
   });
+
+  it('Should correctly handle a promise', function() {
+    class TestClass {
+      constructor() {
+        this.s = { options: { validationLevel: 'error' } };
+      }
+    }
+
+    TestClass.prototype.testOperation = arityOne()
+      .options({ b: { type: 'boolean', default: false } })
+      .build(function(requiredArgument, options, callback) {
+        return this.testOperation2(requiredArgument, options, callback);
+      });
+
+    TestClass.prototype.testOperation2 = arityOne()
+      .options({ b: { type: 'boolean' } })
+      .build(function(requiredArgument, options, callback) {
+        return executeTestOperation(testOperation2, [this, requiredArgument, options, callback]);
+      });
+
+    function testOperation2(requiredArgument) {
+      return requiredArgument;
+    }
+
+    function executeTestOperation(operation, args) {
+      return new Promise(function(resolve, reject) {
+        args[args.length - 1] = (err, result) => (err ? reject(err) : resolve(result));
+        return operation.apply(null, args);
+      });
+    }
+
+    const testClass = new TestClass();
+    testClass.testOperation({ a: 1 }).then(result => {
+      expect(result).to.deep.equal({ a: 1 });
+    });
+  });
+
+  it('Should allow a boolean default', function() {
+    class TestClass {
+      constructor() {
+        this.s = { options: { validationLevel: 'error' } };
+      }
+    }
+
+    TestClass.prototype.testOperation = arityZero()
+      .options({ a: { type: 'boolean', default: false } })
+      .build(function(requiredArgument) {
+        return requiredArgument;
+      });
+
+    const testClass = new TestClass();
+    const testResult = testClass.testOperation();
+    expect(testResult).to.deep.equal({ a: false });
+  });
 });
