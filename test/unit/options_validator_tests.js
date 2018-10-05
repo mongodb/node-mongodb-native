@@ -548,4 +548,29 @@ describe('Options Validation', function() {
     const testResult = testClass.testOperation();
     expect(testResult).to.deep.equal({ a: false });
   });
+
+  it('Should handle an operation with optional arguments', function() {
+    class TestClass {
+      constructor() {
+        this.s = { options: { validationLevel: 'error' } };
+      }
+    }
+
+    TestClass.prototype.testOperation = arityOne()
+      .optionalArguments({
+        a: { type: 'number', index: 0 }
+      })
+      .options({
+        b: { type: 'boolean' }
+      })
+      .build(function(optionalArgument) {
+        return optionalArgument;
+      });
+
+    const testClass = new TestClass();
+    const resultNoArgs = testClass.testOperation();
+    expect(resultNoArgs).to.deep.equal({});
+    const resultOneArg = testClass.testOperation({ a: 1 }, { b: true });
+    expect(resultOneArg).to.deep.equal({ a: 1 });
+  });
 });
