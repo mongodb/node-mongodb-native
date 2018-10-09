@@ -548,4 +548,26 @@ describe('Options Validation', function() {
     const testResult = testClass.testOperation();
     expect(testResult).to.deep.equal({ a: false });
   });
+
+  it('Should warn and correct a deprecated alias', function() {
+    const stub = sinon.stub(console, 'warn');
+
+    class TestClass {
+      constructor() {
+        this.s = { options: { validationLevel: 'error' } };
+      }
+    }
+
+    TestClass.prototype.testOperation = arityZero()
+      .options({ a: { type: 'boolean', deprecatedAliases: ['oldA', 'b'] } })
+      .build(function(options) {
+        return options;
+      });
+
+    const testClass = new TestClass();
+    const testResult = testClass.testOperation({ oldA: false });
+    expect(testResult).to.deep.equal({ a: false });
+    expect(stub).to.have.been.calledOnce;
+    expect(stub).to.have.been.calledWith('[oldA] is deprecated. Use [a] instead.');
+  });
 });
