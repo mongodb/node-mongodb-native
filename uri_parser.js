@@ -530,6 +530,10 @@ function parseConnectionString(uri, options, callback) {
     options: Object.keys(parsedOptions).length ? parsedOptions : null
   };
 
+  if (result.auth && result.auth.db) {
+    result.defaultDatabase = result.auth.db;
+  }
+
   try {
     applyAuthExpectations(result);
   } catch (authError) {
