@@ -1,6 +1,5 @@
 'use strict';
 const setupDatabase = require('./shared').setupDatabase;
-const co = require('co');
 const mock = require('mongodb-mock-server');
 const expect = require('chai').expect;
 
@@ -612,7 +611,7 @@ describe('Collation', function() {
     test: function() {
       const configuration = this.configuration;
       const client = configuration.newClient(`mongodb://${testContext.server.uri()}/test`);
-      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 4 } )];
+      const primary = [Object.assign({}, mock.DEFAULT_ISMASTER, { maxWireVersion: 4 })];
 
       testContext.server.setMessageHandler(request => {
         const doc = request.document;
