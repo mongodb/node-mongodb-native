@@ -1,9 +1,9 @@
 # Contributors
 
   - Christian Kvalheim
-  - Matt Broadstone <mbroadst@mongodb.com>
-  - Dan Aprahamian <daniel.aprahamian@mongodb.com>
-  - Katherine Walker <katherine.walker@mongodb.com>
+  - Matt Broadstone <<mbroadst@mongodb.com>>
+  - Dan Aprahamian <<daniel.aprahamian@mongodb.com>>
+  - Katherine Walker <<katherine.walker@mongodb.com>>
   - Aaron Heckmann
   - Christoph Pojer
   - Pau Ramon Revilla
