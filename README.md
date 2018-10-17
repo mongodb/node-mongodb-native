@@ -488,5 +488,6 @@ For more detailed information, see the [tutorials](docs/reference/content/tutori
 ## License
 
 [Apache 2.0](LICENSE.md)
-© 2009-2012 Christian Amor Kvalheim
-© 2012-present MongoDB [Contributors](CONTRIBUTORS.md).
+
+© 2009-2012 Christian Amor Kvalheim  
+© 2012-present MongoDB [Contributors](CONTRIBUTORS.md)
