@@ -43,7 +43,6 @@
     "standard-version": "^4.4.0",
     "worker-farm": "^1.5.0"
   },
-  "author": "Christian Kvalheim",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=4"
