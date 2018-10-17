@@ -45,11 +45,11 @@ describe('GridFS Stream', function() {
           test.equal(error, null);
 
           var bucket = new GridFSBucket(db);
-          var readStream = fs.createReadStream('./LICENSE');
+          var readStream = fs.createReadStream('./LICENSE.md');
 
           var uploadStream = bucket.openUploadStream('test.dat');
 
-          var license = fs.readFileSync('./LICENSE');
+          var license = fs.readFileSync('./LICENSE.md');
           var id = uploadStream.id;
 
           // Wait for stream to finish
@@ -129,11 +129,11 @@ describe('GridFS Stream', function() {
           test.equal(error, null);
 
           var bucket = new GridFSBucket(db);
-          var readStream = fs.createReadStream('./LICENSE');
+          var readStream = fs.createReadStream('./LICENSE.md');
 
           var uploadStream = bucket.openUploadStreamWithId(1, 'test.dat');
 
-          var license = fs.readFileSync('./LICENSE');
+          var license = fs.readFileSync('./LICENSE.md');
           var id = uploadStream.id;
           test.equal(1, id);
 
@@ -214,11 +214,11 @@ describe('GridFS Stream', function() {
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
         var CHUNKS_COLL = 'gridfsdownload.chunks';
         var FILES_COLL = 'gridfsdownload.files';
-        var readStream = fs.createReadStream('./LICENSE');
+        var readStream = fs.createReadStream('./LICENSE.md');
 
         var uploadStream = bucket.openUploadStream('test.dat');
 
-        var license = fs.readFileSync('./LICENSE');
+        var license = fs.readFileSync('./LICENSE.md');
         var id = uploadStream.id;
 
         uploadStream.once('finish', function() {
@@ -324,7 +324,7 @@ describe('GridFS Stream', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
-        var readStream = fs.createReadStream('./LICENSE');
+        var readStream = fs.createReadStream('./LICENSE.md');
         var uploadStream = bucket.openUploadStream('test.dat');
 
         uploadStream.once('finish', function() {
@@ -382,7 +382,7 @@ describe('GridFS Stream', function() {
           chunkSizeBytes: 2
         });
 
-        var readStream = fs.createReadStream('./LICENSE');
+        var readStream = fs.createReadStream('./LICENSE.md');
         var uploadStream = bucket.openUploadStream('teststart.dat');
 
         uploadStream.once('finish', function() {
@@ -449,7 +449,7 @@ describe('GridFS Stream', function() {
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
         var CHUNKS_COLL = 'gridfsdownload.chunks';
         var FILES_COLL = 'gridfsdownload.files';
-        var readStream = fs.createReadStream('./LICENSE');
+        var readStream = fs.createReadStream('./LICENSE.md');
 
         var uploadStream = bucket.openUploadStream('test.dat');
         var id = uploadStream.id;
@@ -634,7 +634,7 @@ describe('GridFS Stream', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsdestroy', chunkSizeBytes: 10 });
-        var readStream = fs.createReadStream('./LICENSE');
+        var readStream = fs.createReadStream('./LICENSE.md');
         var uploadStream = bucket.openUploadStream('test.dat');
 
         // Wait for stream to finish
@@ -708,7 +708,7 @@ describe('GridFS Stream', function() {
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
         var CHUNKS_COLL = 'gridfsdownload.chunks';
         var FILES_COLL = 'gridfsdownload.files';
-        var readStream = fs.createReadStream('./LICENSE');
+        var readStream = fs.createReadStream('./LICENSE.md');
 
         var uploadStream = bucket.openUploadStream('test.dat');
         var id = uploadStream.id;
@@ -807,7 +807,7 @@ describe('GridFS Stream', function() {
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
         var CHUNKS_COLL = 'gridfsdownload.chunks';
         var FILES_COLL = 'gridfsdownload.files';
-        var readStream = fs.createReadStream('./LICENSE');
+        var readStream = fs.createReadStream('./LICENSE.md');
 
         var uploadStream = bucket.openUploadStream('test.dat');
         var id = uploadStream.id;
@@ -869,7 +869,7 @@ describe('GridFS Stream', function() {
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
         var CHUNKS_COLL = 'gridfsdownload.chunks';
         var FILES_COLL = 'gridfsdownload.files';
-        var readStream = fs.createReadStream('./LICENSE');
+        var readStream = fs.createReadStream('./LICENSE.md');
 
         var uploadStream = bucket.openUploadStream('test.dat');
         var id = uploadStream.id;
@@ -927,7 +927,7 @@ describe('GridFS Stream', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload_2' });
-        var readStream = fs.createReadStream('./LICENSE');
+        var readStream = fs.createReadStream('./LICENSE.md');
 
         var uploadStream = bucket.openUploadStream('test.dat');
 
@@ -974,7 +974,7 @@ describe('GridFS Stream', function() {
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload_3' });
-        var readStream = fs.createReadStream('./LICENSE');
+        var readStream = fs.createReadStream('./LICENSE.md');
 
         var uploadStream = bucket.openUploadStream('test.dat');
         var id = uploadStream.id;
@@ -1373,7 +1373,7 @@ describe('GridFS Stream', function() {
           chunkSizeBytes: 20
         });
 
-        var readStream = fs.createReadStream('./LICENSE');
+        var readStream = fs.createReadStream('./LICENSE.md');
         var uploadStream = bucket.openUploadStream('teststart.dat');
 
         uploadStream.once('finish', function() {
