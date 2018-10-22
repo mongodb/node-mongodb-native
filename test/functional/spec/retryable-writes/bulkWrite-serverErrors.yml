@@ -37,6 +37,7 @@ tests:
         outcome:
             result:
                 deletedCount: 1
+                insertedCount: 1
                 insertedIds: { 1: 3 }
                 matchedCount: 1
                 modifiedCount: 1
@@ -79,6 +80,7 @@ tests:
         outcome:
             result:
                 deletedCount: 1
+                insertedCount: 1
                 insertedIds: { 1: 3 }
                 matchedCount: 1
                 modifiedCount: 1
