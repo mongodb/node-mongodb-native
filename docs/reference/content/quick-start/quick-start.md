@@ -109,7 +109,7 @@ const dbName = 'myproject';
 const client = new MongoClient(url);
 
 // Use connect method to connect to the server
-client.connect(url, function(err) {
+client.connect(function(err) {
   assert.equal(null, err);
   console.log("Connected successfully to server");
 

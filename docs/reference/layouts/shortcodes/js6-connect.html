@@ -10,6 +10,6 @@ const client = new MongoClient(url);
 
 (async function() {
   try {
-    await client.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
     const db = client.db(dbName);
