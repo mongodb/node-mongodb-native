@@ -1,0 +1,53 @@
+# Contributors
+
+  - Christian Kvalheim
+  - Matt Broadstone <<mbroadst@mongodb.com>>
+  - Dan Aprahamian <<daniel.aprahamian@mongodb.com>>
+  - Katherine Walker <<katherine.walker@mongodb.com>>
+  - Aaron Heckmann
+  - Christoph Pojer
+  - Pau Ramon Revilla
+  - Nathan White
+  - Emmerman
+  - Seth LaForge
+  - Boris Filipov
+  - Stefan Schärmeli
+  - Tedde Lundgren
+  - renctan
+  - Sergey Ukustov
+  - Ciaran Jessup
+  - kuno
+  - srimonti
+  - Erik Abele
+  - Pratik Daga
+  - Slobodan Utvic
+  - Kristina Chodorow
+  - Yonathan Randolph
+  - Brian Noguchi
+  - Sam Epstein
+  - James Harrison Fisher
+  - Vladimir Dronnikov
+  - Ben Hockey
+  - Henrik Johansson
+  - Simon Weare
+  - Alex Gorbatchev
+  - Shimon Doodkin
+  - Kyle Mueller
+  - Eran Hammer-Lahav
+  - Marcin Ciszak
+  - François de Metz
+  - Vinay Pulim
+  - nstielau
+  - Adam Wiggins
+  - entrinzikyl
+  - Jeremy Selier
+  - Ian Millington
+  - Public Keating
+  - andrewjstone
+  - Christopher Stott
+  - Corey Jewett
+  - brettkiefer
+  - Rob Holland
+  - Senmiao Liu
+  - heroic
+  - gitfy

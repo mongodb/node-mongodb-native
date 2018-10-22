@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.1.8"></a>
+## [3.1.8](https://github.com/mongodb/node-mongodb-native/compare/v3.1.7...v3.1.8) (2018-10-10)
+
+
+### Bug Fixes
+
+* **connect:** use reported default databse from new uri parser ([811f8f8](https://github.com/mongodb/node-mongodb-native/commit/811f8f8))
+
+
+### Features
+
+* **core:** update to mongodb-core v3.1.7 ([dbfc905](https://github.com/mongodb/node-mongodb-native/commit/dbfc905))
+
+
+
+<a name="3.1.7"></a>
+## [3.1.7](https://github.com/mongodb/node-mongodb-native/compare/v3.1.6...v3.1.7) (2018-10-09)
+
+
+### Features
+
+* **core:** update mongodb-core to v3.1.6 ([61b054e](https://github.com/mongodb/node-mongodb-native/commit/61b054e))
+
+
+
 <a name="3.1.6"></a>
 ## [3.1.6](https://github.com/mongodb/node-mongodb-native/compare/v3.1.5...v3.1.6) (2018-09-15)
 
