@@ -24,7 +24,7 @@ the cluster.
 Server Fail Point
 =================
 
-The tests depend on a server fail point, ``onPrimaryTransactionalWrite``, which
+Some tests depend on a server fail point, ``onPrimaryTransactionalWrite``, which
 allows us to force a network error before the server would return a write result
 to the client. The fail point also allows control whether the server will
 successfully commit the write via its ``failBeforeCommitExceptionCode`` option.
@@ -140,8 +140,8 @@ Each YAML file has the following keys:
 
   - ``clientOptions``: Parameters to pass to MongoClient().
 
-  - ``failPoint``: The ``configureFailPoint`` command document to run to
-    configure a fail point on the primary server. Drivers must ensure that
+  - ``failPoint`` (optional): The ``configureFailPoint`` command document to run
+    to configure a fail point on the primary server. Drivers must ensure that
     ``configureFailPoint`` is the first field in the command.
 
   - ``operation``: Document describing the operation to be executed. The
