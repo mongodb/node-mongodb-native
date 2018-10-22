@@ -1,3 +1,13 @@
+<a name="2.2.37"></a>
+## [2.2.37](https://github.com/mongodb/node-mongodb-native/compare/v2.2.37...v2.2.37) (2018-10-22)
+
+
+### Features
+
+* **db, addUser**: Allow user creation with MongoDB versions > 4.0; automatically setting digest parameter and controlling digestion
+
+
+
 <a name="2.2.35"></a>
 ## [2.2.35](https://github.com/mongodb/node-mongodb-native/compare/v2.2.34...v2.2.35) (2018-02-26)
 
@@ -1616,9 +1626,9 @@
 * Reworked socket handling code to emit errors on unparsable messages
 * Added logger option for Db class, lets you pass in a function in the shape
     {
-        log : function(message, object) {},
-        error : function(errorMessage, errorObject) {},
-        debug : function(debugMessage, object) {},
+    ​    log : function(message, object) {},
+    ​    error : function(errorMessage, errorObject) {},
+    ​    debug : function(debugMessage, object) {},
     }
 
   Usage is new Db(new Server(..), {logger: loggerInstance})
