@@ -2270,10 +2270,9 @@ allowing the driver to detect that the socket is closed.</li>
 <p>This can occur if the connection pool is too large.</p>
 
 <pre><code class="language-js">const client = new MongoClient('mongodb://localhost:27017/test?maxPoolSize=5000');
-client.connect('mongodb://localhost:27017/test?maxPoolSize=5000',
-  function(err) {
-    // connection
-  });
+client.connect(function(err) {
+	// connection
+});
 </code></pre>
 
 <p>If this operation causes an <code>ECONNRESET</code> error, you may have run into

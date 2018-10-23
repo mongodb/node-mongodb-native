@@ -1665,7 +1665,7 @@ const dbName = 'myproject';
 const client = new MongoClient(url);
 
 // Use connect method to connect to the Server
-client.connect(url, function(err, client) {
+client.connect(function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -1700,7 +1700,7 @@ const client = new MongoClient(url);
 
 (async function() {
   try {
-    await client.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -1787,7 +1787,7 @@ const dbName = 'myproject';
 const client = new MongoClient(url);
 
 // Use connect method to connect to the Server
-client.connect(url, function(err, client) {
+client.connect(function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -1821,7 +1821,7 @@ const client = new MongoClient(url);
 
 (async function() {
   try {
-    await client.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -1875,7 +1875,7 @@ const dbName = 'myproject';
 const client = new MongoClient(url);
 
 // Use connect method to connect to the Server
-client.connect(url, function(err, client) {
+client.connect(function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -1909,7 +1909,7 @@ const client = new MongoClient(url);
 
 (async function() {
   try {
-    await client.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -1953,7 +1953,7 @@ const dbName = 'myproject';
 const client = new MongoClient(url);
 
 // Use connect method to connect to the Server
-client.connect(url, function(err, client) {
+client.connect(function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -2004,7 +2004,7 @@ const client = new MongoClient(url);
 
 (async function() {
   try {
-    await client.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -2103,7 +2103,7 @@ const dbName = 'myproject';
 const client = new MongoClient(url);
 
 // Use connect method to connect to the Server
-client.connect(url, function(err, client) {
+client.connect(function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -2143,7 +2143,7 @@ const client = new MongoClient(url);
 
 (async function() {
   try {
-    await client.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -2230,7 +2230,7 @@ const dbName = 'myproject';
 const client = new MongoClient(url);
 
 // Use connect method to connect to the Server
-client.connect(url, function(err, client) {
+client.connect(function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -2274,7 +2274,7 @@ const client = new MongoClient(url);
 
 (async function() {
   try {
-    await client.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -2376,7 +2376,7 @@ const dbName = 'myproject';
 const client = new MongoClient(url);
 
 // Use connect method to connect to the Server
-client.connect(url, function(err, client) {
+client.connect(function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -2413,7 +2413,7 @@ const client = new MongoClient(url);
 
 (async function() {
   try {
-    await client.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -2493,7 +2493,7 @@ const dbName = 'myproject';
 const client = new MongoClient(url);
 
 // Use connect method to connect to the Server
-client.connect(url, function(err, client) {
+client.connect(function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -2536,7 +2536,7 @@ const client = new MongoClient(url);
 
 (async function() {
   try {
-    await client.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -2622,7 +2622,7 @@ const dbName = 'myproject';
 const client = new MongoClient(url);
 
 // Use connect method to connect to the Server
-client.connect(url, function(err, client) {
+client.connect(function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -2664,7 +2664,7 @@ const client = new MongoClient(url);
 
 (async function() {
   try {
-    await client.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -2758,7 +2758,7 @@ const dbName = 'myproject';
 const client = new MongoClient(url);
 
 // Use connect method to connect to the Server
-client.connect(url, function(err, client) {
+client.connect(function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -2792,7 +2792,7 @@ const client = new MongoClient(url);
 
 (async function() {
   try {
-    await client.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -2861,7 +2861,7 @@ const dbName = 'myproject';
 const client = new MongoClient(url);
 
 // Use connect method to connect to the Server
-client.connect(url, function(err, client) {
+client.connect(function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -2899,7 +2899,7 @@ const client = new MongoClient(url);
 
 (async function() {
   try {
-    await client.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
     const db = client.db(dbName);
 
@@ -2943,7 +2943,7 @@ const dbName = 'myproject';
 const client = new MongoClient(url);
 
 // Use connect method to connect to the Server
-client.connect(url, function(err, client) {
+client.connect(function(err, client) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
