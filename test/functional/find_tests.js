@@ -2737,14 +2737,11 @@ describe('Find', function() {
         var db = client.db(configuration.db);
         var collection = db.collection('shouldNotMutateUserOptions');
         var options = { raw: 'TEST' };
-        collection.find({}, options, function(error) {
-          test.equal(null, error);
-          test.equal(undefined, options.skip);
-          test.equal(undefined, options.limit);
-          test.equal('TEST', options.raw);
-          client.close();
-          done();
-        });
+        expect(() => collection.find({}, options)).to.throw(
+          'raw should be of type boolean, but is of type string.'
+        );
+        client.close();
+        done();
       });
     }
   });
