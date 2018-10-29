@@ -128,14 +128,12 @@ describe('Connection', function() {
       var configuration = this.configuration;
       var client = configuration.newClient({ w: 1 }, { poolSize: 1, auto_reconnect: true });
 
-      client.on('open', function(client) {
+      client.connect().then(() => {
         test.equal('js', client.topology.parserType);
 
         client.close();
         done();
       });
-
-      client.connect();
     }
   });
 

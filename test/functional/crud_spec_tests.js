@@ -19,8 +19,8 @@ const testContext = {};
 describe('CRUD spec', function() {
   beforeEach(function() {
     const configuration = this.configuration;
-    const MongoClient = configuration.require.MongoClient;
-    return MongoClient.connect(configuration.url()).then(client => {
+    const client = configuration.newClient();
+    return client.connect().then(client => {
       testContext.client = client;
       testContext.db = client.db(configuration.db);
     });
@@ -227,17 +227,14 @@ describe('CRUD spec', function() {
     });
     const options = Object.assign({}, args.options);
 
-    collection
+    return collection
       .bulkWrite(operations, options)
       .then(result =>
         Object.keys(scenarioTest.outcome.result).forEach(resultName =>
           test.deepEqual(result[resultName], scenarioTest.outcome.result[resultName])
         )
-      );
-
-    return collection
-      .find({})
-      .toArray()
+      )
+      .then(() => collection.find({}).toArray())
       .then(results => test.deepEqual(results, scenarioTest.outcome.collection.data));
   }
 

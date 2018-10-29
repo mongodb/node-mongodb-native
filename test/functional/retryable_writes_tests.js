@@ -57,7 +57,6 @@ function loadTestFiles() {
 }
 
 function executeScenarioSetup(scenario, test, config, ctx) {
-  const MongoClient = config.require.MongoClient;
   const url = config.url();
   const options = Object.assign({}, test.clientOptions, {
     haInterval: 100,
@@ -67,7 +66,9 @@ function executeScenarioSetup(scenario, test, config, ctx) {
 
   ctx.failPointName = test.failPoint && test.failPoint.configureFailPoint;
 
-  return MongoClient.connect(url, options)
+  const client = config.newClient(url, options);
+  return client
+    .connect()
     .then(client => (ctx.client = client))
     .then(() => (ctx.db = ctx.client.db(config.db)))
     .then(

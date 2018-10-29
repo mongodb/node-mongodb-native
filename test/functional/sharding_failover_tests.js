@@ -20,8 +20,6 @@ describe.skip('Sharding (Failover)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-
       var manager = configuration.manager;
       var url = f(
         'mongodb://%s:%s,%s:%s/sharded_test_db?w=1',
@@ -31,7 +29,8 @@ describe.skip('Sharding (Failover)', function() {
         configuration.port + 1
       );
 
-      MongoClient.connect(url, {}, function(err, client) {
+      const client = configuration.newClient(url);
+      client.connect(function(err, client) {
         test.equal(null, err);
         var db = client.db(configuration.db);
 
@@ -187,8 +186,6 @@ describe.skip('Sharding (Failover)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-
       var manager = configuration.manager;
       var url = f(
         'mongodb://%s:%s,%s:%s/sharded_test_db?w=1',
@@ -198,7 +195,8 @@ describe.skip('Sharding (Failover)', function() {
         configuration.port + 1
       );
 
-      MongoClient.connect(url, {}, function(err, client) {
+      const client = this.configuration.newClient(url);
+      client.connect(function(err, client) {
         test.equal(null, err);
         test.ok(client != null);
         var db = client.db(configuration.db);

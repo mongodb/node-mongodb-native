@@ -106,9 +106,10 @@ const url = 'mongodb://localhost:27017';
 
 // Database Name
 const dbName = 'myproject';
+const client = new MongoClient(url);
 
 // Use connect method to connect to the server
-MongoClient.connect(url, function(err, client) {
+client.connect(function(err) {
   assert.equal(null, err);
   console.log("Connected successfully to server");
 
@@ -156,7 +157,7 @@ rather than from within a browser console, and console.log returns better format
 -->
 
 
-This query returns all the documents in the **documents** collection. Add the **findDocument** method to the **MongoClient.connect** callback:
+This query returns all the documents in the **documents** collection. Add the **findDocument** method to the **client.connect** callback:
 
 <!---
 Removed the assert line for number of documents returned on the grounds that it's too brittle.
@@ -174,8 +175,9 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
+const client = new MongoClient(url);
 // Use connect method to connect to the server
-MongoClient.connect(url, function(err, client) {
+client.connect(function(err) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -229,7 +231,7 @@ const updateDocument = function(db, callback) {
 }
 ```
 
-The method updates the first document where the field **a** is equal to **2** by adding a new field **b** to the document set to **1**. Next, update the callback function from **MongoClient.connect** to include the update method.
+The method updates the first document where the field **a** is equal to **2** by adding a new field **b** to the document set to **1**. Next, update the callback function from **client.connect** to include the update method.
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
@@ -241,8 +243,9 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
+const client = new MongoClient(url);
 // Use connect method to connect to the server
-MongoClient.connect(url, function(err, client) {
+client.connect(function(err) {
   assert.equal(null, err);
   console.log("Connected successfully to server");
 
@@ -274,7 +277,7 @@ const removeDocument = function(db, callback) {
 }
 ```
 
-Add the new method to the **MongoClient.connect** callback function.
+Add the new method to the **client.connect** callback function.
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
@@ -286,8 +289,9 @@ const url = 'mongodb://localhost:27017';
 // Database Name
 const dbName = 'myproject';
 
+const client = new MongoClient(url);
 // Use connect method to connect to the server
-MongoClient.connect(url, function(err, client) {
+client.connect(function(err) {
   assert.equal(null, err);
   console.log("Connected successfully to server");
 
@@ -325,8 +329,9 @@ const url = 'mongodb://localhost:27017';
 
 const dbName = 'myproject';
 
+const client = new MongoClient(url);
 // Use connect method to connect to the server
-MongoClient.connect(url, function(err, client) {
+client.connect(function(err) {
   assert.equal(null, err);
   console.log("Connected successfully to server");
 

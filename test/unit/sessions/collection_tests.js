@@ -1,8 +1,7 @@
 'use strict';
-const MongoClient = require('../../..').MongoClient,
-  Timestamp = require('bson').Timestamp,
-  expect = require('chai').expect,
-  mock = require('mongodb-mock-server');
+const Timestamp = require('bson').Timestamp;
+const expect = require('chai').expect;
+const mock = require('mongodb-mock-server');
 
 const test = {};
 describe('Sessions', function() {
@@ -34,7 +33,8 @@ describe('Sessions', function() {
           }
         });
 
-        return MongoClient.connect(`mongodb://${test.server.uri()}/test`).then(client => {
+        const client = this.configuration.newClient(`mongodb://${test.server.uri()}/test`);
+        return client.connect().then(client => {
           const session = client.startSession({ causalConsistency: true });
           const coll = client.db('foo').collection('bar');
 
@@ -66,7 +66,8 @@ describe('Sessions', function() {
           }
         });
 
-        return MongoClient.connect(`mongodb://${test.server.uri()}/test`).then(client => {
+        const client = this.configuration.newClient(`mongodb://${test.server.uri()}/test`);
+        return client.connect().then(client => {
           const coll = client.db('foo').collection('bar');
 
           return coll.count({}, options).then(() => {

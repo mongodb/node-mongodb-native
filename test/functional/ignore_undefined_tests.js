@@ -15,12 +15,10 @@ describe('Ignore Undefined', function() {
 
     test: function(done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(
-        Object.assign({}, configuration.writeConcernMax(), {
-          poolSize: 1,
-          ignoreUndefined: true
-        })
-      );
+      var client = configuration.newClient(configuration.writeConcernMax(), {
+        poolSize: 1,
+        ignoreUndefined: true
+      });
 
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
@@ -52,48 +50,47 @@ describe('Ignore Undefined', function() {
 
       test: function(done) {
         var configuration = this.configuration;
-        var MongoClient = configuration.require.MongoClient;
-
-        MongoClient.connect(
-          configuration.url(),
+        const client = configuration.newClient(
+          {},
           {
             bufferMaxEntries: 0,
             ignoreUndefined: true,
             sslValidate: false
-          },
-          function(err, client) {
-            var db = client.db(configuration.db);
-            var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue1');
-            collection.insert({ a: 1, b: undefined }, function(err) {
-              test.equal(null, err);
+          }
+        );
 
-              collection.findOne(function(err, item) {
-                test.equal(1, item.a);
-                test.ok(item.b === undefined);
+        client.connect(function(err, client) {
+          var db = client.db(configuration.db);
+          var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue1');
+          collection.insert({ a: 1, b: undefined }, function(err) {
+            test.equal(null, err);
 
-                collection.insertOne({ a: 2, b: undefined }, function(err) {
-                  test.equal(null, err);
+            collection.findOne(function(err, item) {
+              test.equal(1, item.a);
+              test.ok(item.b === undefined);
 
-                  collection.findOne({ a: 2 }, function(err, item) {
-                    test.equal(2, item.a);
-                    test.ok(item.b === undefined);
+              collection.insertOne({ a: 2, b: undefined }, function(err) {
+                test.equal(null, err);
 
-                    collection.insertMany([{ a: 3, b: undefined }], function(err) {
-                      test.equal(null, err);
+                collection.findOne({ a: 2 }, function(err, item) {
+                  test.equal(2, item.a);
+                  test.ok(item.b === undefined);
 
-                      collection.findOne({ a: 3 }, function(err, item) {
-                        test.equal(3, item.a);
-                        test.ok(item.b === undefined);
-                        client.close();
-                        done();
-                      });
+                  collection.insertMany([{ a: 3, b: undefined }], function(err) {
+                    test.equal(null, err);
+
+                    collection.findOne({ a: 3 }, function(err, item) {
+                      test.equal(3, item.a);
+                      test.ok(item.b === undefined);
+                      client.close();
+                      done();
                     });
                   });
                 });
               });
             });
-          }
-        );
+          });
+        });
       }
     }
   );
@@ -108,12 +105,10 @@ describe('Ignore Undefined', function() {
       var configuration = this.configuration;
       var ObjectId = configuration.require.ObjectID;
 
-      var client = configuration.newClient(
-        Object.assign({}, configuration.writeConcernMax(), {
-          poolSize: 1,
-          ignoreUndefined: true
-        })
-      );
+      var client = configuration.newClient(configuration.writeConcernMax(), {
+        poolSize: 1,
+        ignoreUndefined: true
+      });
 
       client.connect(function(err, client) {
         var db = client.db(configuration.db);

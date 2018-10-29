@@ -18,14 +18,14 @@ describe('Promises (Collection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=100')
           : f('%s?%s', url, 'maxPoolSize=100');
 
-      MongoClient.connect(url).then(function(client) {
+      const client = configuration.newClient(url);
+      client.connect().then(function(client) {
         test.equal(1, client.topology.connections().length);
         var db = client.db(configuration.db);
 
@@ -61,7 +61,9 @@ describe('Promises (Collection)', function() {
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect().then(() => {
+        // LINE
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
@@ -108,7 +110,9 @@ describe('Promises (Collection)', function() {
         var db = client.db(configuration.db);
         // LINE var MongoClient = require('mongodb').MongoClient,
         // LINE   test = require('assert');
-        // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+        // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+        // LINE client.connect().then(() => {
+        // LINE
         // LINE   var db = client.db('test);
         // REPLACE configuration.writeConcernMax() WITH {w:1}
         // REMOVE-LINE done();
@@ -157,7 +161,9 @@ describe('Promises (Collection)', function() {
           var db = client.db(configuration.db);
           // LINE var MongoClient = require('mongodb').MongoClient,
           // LINE   test = require('assert');
-          // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, client) {
+          // LINE const client = new MongoClient('mongodb://localhost:27017/test');
+          // LINE client.connect().then(() => {
+          // LINE
           // LINE   var db = client.db('test);
           // REPLACE configuration.writeConcernMax() WITH {w:1}
           // REMOVE-LINE done();
@@ -237,14 +243,14 @@ describe('Promises (Collection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=100')
           : f('%s?%s', url, 'maxPoolSize=100');
 
-      MongoClient.connect(url).then(function(client) {
+      const client = configuration.newClient(url);
+      client.connect().then(function(client) {
         var db = client.db(configuration.db);
         db
           .collection('insertMany_Promise_error')
@@ -270,14 +276,14 @@ describe('Promises (Collection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=100')
           : f('%s?%s', url, 'maxPoolSize=100');
 
-      MongoClient.connect(url).then(function(client) {
+      const client = configuration.newClient(url);
+      client.connect().then(function(client) {
         var db = client.db(configuration.db);
         db
           .collection('insertOne_Promise_error')
@@ -303,14 +309,14 @@ describe('Promises (Collection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=100')
           : f('%s?%s', url, 'maxPoolSize=100');
 
-      MongoClient.connect(url).then(function(client) {
+      const client = configuration.newClient(url);
+      client.connect().then(function(client) {
         var db = client.db(configuration.db);
         var bulk = db.collection('unordered_bulk_promise_form').initializeUnorderedBulkOp({ w: 1 });
         bulk.insert({ a: 1 });
@@ -335,14 +341,14 @@ describe('Promises (Collection)', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
           ? f('%s&%s', url, 'maxPoolSize=100')
           : f('%s?%s', url, 'maxPoolSize=100');
 
-      MongoClient.connect(url).then(function(client) {
+      const client = configuration.newClient(url);
+      client.connect().then(function(client) {
         var db = client.db(configuration.db);
         var bulk = db.collection('unordered_bulk_promise_form').initializeOrderedBulkOp({ w: 1 });
         bulk.insert({ a: 1 });

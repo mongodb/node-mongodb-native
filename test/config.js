@@ -1,7 +1,8 @@
 'use strict';
 const ConfigurationBase = require('mongodb-test-runner').ConfigurationBase;
 const f = require('util').format;
-
+const url = require('url');
+const qs = require('querystring');
 class NativeConfiguration extends ConfigurationBase {
   constructor(options) {
     super(options);
@@ -47,6 +48,12 @@ class NativeConfiguration extends ConfigurationBase {
   }
 
   newClient(dbOptions, serverOptions) {
+    // support MongoClient contructor form (url, options) for `newClient`
+    if (typeof dbOptions === 'string') {
+      return new this.mongo.MongoClient(dbOptions, serverOptions);
+    }
+
+    dbOptions = dbOptions || {};
     serverOptions = Object.assign({}, { haInterval: 100 }, serverOptions);
 
     // Override implementation
@@ -59,17 +66,27 @@ class NativeConfiguration extends ConfigurationBase {
     if (keys.indexOf('sslOnNormalPorts') !== -1) serverOptions.ssl = true;
 
     // Fall back
-    const dbHost = (serverOptions && serverOptions.host) || 'localhost';
+    let dbHost = (serverOptions && serverOptions.host) || 'localhost';
     const dbPort = (serverOptions && serverOptions.port) || this.options.port || 27017;
 
-    // Default topology
-    const DbTopology = this.options.topology ? this.options.topology : this.mongo.Server;
+    if (dbHost.indexOf('.sock') !== -1) {
+      dbHost = qs.escape(dbHost);
+    }
 
-    // Return a new MongoClient instance
-    return new this.mongo.MongoClient(
-      new DbTopology(dbHost, dbPort, serverOptions, this.mongo),
-      dbOptions
-    );
+    if (this.options.setName) {
+      Object.assign(dbOptions, { replicaSet: this.options.setName, auto_reconnect: false });
+    }
+
+    const connectionString = url.format({
+      protocol: 'mongodb',
+      slashes: true,
+      hostname: dbHost,
+      port: dbPort,
+      query: dbOptions,
+      pathname: '/'
+    });
+
+    return new this.mongo.MongoClient(connectionString, serverOptions);
   }
 
   url(username, password) {

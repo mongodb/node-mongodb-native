@@ -30,7 +30,8 @@ In order to use the streaming GridFS API, you first need to create
 a `GridFSBucket`.
 
 ```javascript
-mongodb.MongoClient.connect(uri, function(error, client) {
+const client = new mongodb.MongoClient(uri);
+client.connect(function(error) {
   assert.ifError(error);
 
   const db = client.db(dbName);
@@ -54,7 +55,9 @@ const mongodb = require('mongodb');
 const uri = 'mongodb://localhost:27017';
 const dbName = 'test';
 
-mongodb.MongoClient.connect(uri, function(error, client) {
+const client = new mongodb.MongoClient(uri);
+
+client.connect(unction(error) {
   assert.ifError(error);
 
   const db = client.db(dbName);

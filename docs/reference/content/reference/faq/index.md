@@ -10,7 +10,7 @@ title = "Frequently Asked Questions"
 
 # What is the difference between connectTimeoutMS, socketTimeoutMS and maxTimeMS ?
 
-| Setting | Default Value MongoClient.connect | Description |
+| Setting | Default Value client.connect | Description |
 | :----------| :------------- | :------------- |
 | connectTimeoutMS | 30000 | The connectTimeoutMS sets the number of milliseconds a socket stays inactive before closing during the connection phase of the driver. That is to say, when the application initiates a connection, when a replica set connects to new members, or when a replica set reconnects to members. A value of 10000 milliseconds would mean the driver would wait up to 10 seconds for a response from a MongoDB server.|
 | socketTimeoutMS | 360000 | The socketTimeoutMS sets the number of milliseconds a socket stays inactive after the driver has successfully connected before closing. If the value is set to 360000 milliseconds, the socket closes if there is no activity during a 6 minutes window.|
@@ -106,14 +106,14 @@ are some things to check:
 allowing the driver to detect that the socket is closed.
 2. The firewall should allow keepAlive probes.
 
-# I'm getting ECONNRESET when calling MongoClient.connect
+# I'm getting ECONNRESET when calling client.connect
 This can occur if the connection pool is too large.
 
 ```js
-MongoClient.connect('mongodb://localhost:27017/test?maxPoolSize=5000',
-  function(err, client) {
-    // connection
-  });
+const client = new MongoClient('mongodb://localhost:27017/test?maxPoolSize=5000');
+client.connect(function(err) {
+	// connection
+});
 ```
 If this operation causes an `ECONNRESET` error, you may have run into
 the file descriptor limit for your Node.js process.
