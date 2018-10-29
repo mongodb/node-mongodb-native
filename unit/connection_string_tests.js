@@ -119,6 +119,16 @@ describe('Connection String', function() {
     });
   });
 
+  it('should parse a replicaSet with a leading number', function(done) {
+    parseConnectionString('mongodb://localhost/?replicaSet=123abc', (err, result) => {
+      expect(err).to.not.exist;
+      expect(result.options).to.have.property('replicaSet');
+      expect(result.options.replicaSet).to.equal('123abc');
+
+      done();
+    });
+  });
+
   describe('validation', function() {
     it('should validate compression options', function(done) {
       parseConnectionString('mongodb://localhost/?zlibCompressionLevel=15', err => {
