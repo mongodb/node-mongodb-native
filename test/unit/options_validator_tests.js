@@ -20,9 +20,12 @@ describe('Options Validation', function() {
     };
 
     const testObject = { a: 1 };
-    const validatedObject = validate(validationSchema, testObject, {
-      validationLevel: testValidationLevel
-    });
+    const validatedObject = validate(
+      validationSchema,
+      testObject,
+      {},
+      { validationLevel: testValidationLevel }
+    );
 
     expect(validatedObject).to.deep.equal({ a: 1 });
   });
@@ -33,9 +36,12 @@ describe('Options Validation', function() {
     };
 
     const testObject = { a: { b: 1 } };
-    const validatedObject = validate(validationSchema, testObject, {
-      validationLevel: testValidationLevel
-    });
+    const validatedObject = validate(
+      validationSchema,
+      testObject,
+      {},
+      { validationLevel: testValidationLevel }
+    );
 
     expect(validatedObject).to.deep.equal(testObject);
   });
@@ -46,16 +52,22 @@ describe('Options Validation', function() {
     };
 
     const testObject1 = { a: 1 };
-    const validatedObject1 = validate(validationSchema, testObject1, {
-      validationLevel: testValidationLevel
-    });
+    const validatedObject1 = validate(
+      validationSchema,
+      testObject1,
+      {},
+      { validationLevel: testValidationLevel }
+    );
 
     expect(validatedObject1).to.deep.equal(testObject1);
 
     const testObject2 = { a: { b: true } };
-    const validatedObject2 = validate(validationSchema, testObject2, {
-      validationLevel: testValidationLevel
-    });
+    const validatedObject2 = validate(
+      validationSchema,
+      testObject2,
+      {},
+      { validationLevel: testValidationLevel }
+    );
 
     expect(validatedObject2).to.deep.equal(testObject2);
   });
@@ -68,9 +80,12 @@ describe('Options Validation', function() {
     const validationSchema = { a: { type: CustomType } };
 
     const testObject = { a: new CustomType() };
-    const validatedObject = validate(validationSchema, testObject, {
-      validationLevel: testValidationLevel
-    });
+    const validatedObject = validate(
+      validationSchema,
+      testObject,
+      {},
+      { validationLevel: testValidationLevel }
+    );
 
     expect(validatedObject).to.deep.equal(testObject);
   });
@@ -81,9 +96,12 @@ describe('Options Validation', function() {
     };
 
     const testObject = { b: 1 };
-    const validatedObject = validate(validationSchema, testObject, {
-      validationLevel: testValidationLevel
-    });
+    const validatedObject = validate(
+      validationSchema,
+      testObject,
+      {},
+      { validationLevel: testValidationLevel }
+    );
 
     expect(validatedObject).to.deep.equal(testObject);
   });
@@ -94,7 +112,7 @@ describe('Options Validation', function() {
     };
 
     const testObject = { b: 1 };
-    const validatedObject = validate(validationSchema, testObject);
+    const validatedObject = validate(validationSchema, testObject, {});
 
     expect(validatedObject).to.deep.equal(testObject);
   });
@@ -105,7 +123,7 @@ describe('Options Validation', function() {
     };
 
     const testObject = { a: 45 };
-    const validatedObject = validate(validationSchema, testObject, { validationLevel: 'none' });
+    const validatedObject = validate(validationSchema, testObject, {}, { validationLevel: 'none' });
 
     expect(validatedObject).to.deep.equal(testObject);
   });
@@ -117,7 +135,7 @@ describe('Options Validation', function() {
     };
 
     const testObject = { a: 45 };
-    const validatedObject = validate(validationSchema, testObject, { validationLevel: 'warn' });
+    const validatedObject = validate(validationSchema, testObject, {}, { validationLevel: 'warn' });
 
     expect(stub).to.have.been.calledOnce;
     expect(stub).to.have.been.calledWith('a should be of type boolean, but is of type number.');
@@ -133,7 +151,12 @@ describe('Options Validation', function() {
 
     const testObject = { a: 45 };
     try {
-      const validatedObject = validate(validationSchema, testObject, { validationLevel: 'error' });
+      const validatedObject = validate(
+        validationSchema,
+        testObject,
+        {},
+        { validationLevel: 'error' }
+      );
       expect(validatedObject).to.deep.equal(testObject);
     } catch (err) {
       expect(err).to.not.be.null;
@@ -148,7 +171,7 @@ describe('Options Validation', function() {
     };
 
     const testObject = { b: 45 };
-    const validatedObject = validate(validationSchema, testObject, { validationLevel: 'warn' });
+    const validatedObject = validate(validationSchema, testObject, {}, { validationLevel: 'warn' });
 
     expect(stub).to.have.been.calledOnce;
     expect(stub).to.have.been.calledWith('required option [a] was not found.');
@@ -163,9 +186,12 @@ describe('Options Validation', function() {
     };
 
     const testObject = { a: true };
-    const validatedObject = validate(validationSchema, testObject, {
-      validationLevel: testValidationLevel
-    });
+    const validatedObject = validate(
+      validationSchema,
+      testObject,
+      {},
+      { validationLevel: testValidationLevel }
+    );
 
     expect(validatedObject).to.deep.equal(testObject);
   });
@@ -178,9 +204,12 @@ describe('Options Validation', function() {
     const testObject = { b: 1 };
 
     try {
-      const validatedObject = validate(validationSchema, testObject, {
-        validationLevel: testValidationLevel
-      });
+      const validatedObject = validate(
+        validationSchema,
+        testObject,
+        {},
+        { validationLevel: testValidationLevel }
+      );
       expect(validatedObject).to.deep.equal(testObject);
     } catch (err) {
       expect(err).to.not.be.null;
@@ -195,9 +224,12 @@ describe('Options Validation', function() {
 
     const testObject = { b: 3 };
 
-    const validatedObject = validate(validationSchema, testObject, {
-      validationLevel: testValidationLevel
-    });
+    const validatedObject = validate(
+      validationSchema,
+      testObject,
+      {},
+      { validationLevel: testValidationLevel }
+    );
     expect(validatedObject.a).to.equal(true);
     expect(validatedObject.b).to.equal(3);
   });
@@ -213,9 +245,12 @@ describe('Options Validation', function() {
 
     const testObject = { a: 3 };
 
-    const validatedObject = validate(validationSchema, testObject, {
-      validationLevel: testValidationLevel
-    });
+    const validatedObject = validate(
+      validationSchema,
+      testObject,
+      {},
+      { validationLevel: testValidationLevel }
+    );
     expect(stub).to.have.been.calledOnce;
     expect(stub).to.have.been.calledWith(
       'option [a] is deprecated and will be removed in a later version.'
@@ -242,6 +277,7 @@ describe('Options Validation', function() {
     const validatedObject = validate(
       validationSchema,
       testObject,
+      {},
       { a: customObject.a, b: customObject.b },
       { validationLevel: testValidationLevel }
     );
@@ -251,6 +287,7 @@ describe('Options Validation', function() {
     const validatedObject2 = validate(
       validationSchema,
       testObject,
+      {},
       { a: customObject.a, b: customObject.b },
       { validationLevel: 'none' }
     );
@@ -271,6 +308,7 @@ describe('Options Validation', function() {
     const validatedObject = validate(
       validationSchema,
       testObject,
+      {},
       { a: customObject.a },
       { validationLevel: testValidationLevel }
     );
@@ -293,6 +331,7 @@ describe('Options Validation', function() {
     const validatedObject = validate(
       validationSchema,
       testObject,
+      {},
       { a: customObject.a },
       { validationLevel: testValidationLevel }
     );
