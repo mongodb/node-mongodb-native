@@ -17,6 +17,7 @@ function getTests() {
 describe('mongodb+srv (spec)', function() {
   it('should parse a default database', function(done) {
     parse('mongodb+srv://test5.test.build.10gen.cc/somedb', (err, result) => {
+      expect(err).to.not.exist;
       expect(result.dbName).to.eql('somedb');
       done();
     });

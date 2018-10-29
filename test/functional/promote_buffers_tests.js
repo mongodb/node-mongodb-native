@@ -1,7 +1,7 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
-var Buffer = require('buffer').Buffer;
+var Buffer = require('safe-buffer').Buffer;
 
 describe('Promote Buffers', function() {
   before(function() {
@@ -27,7 +27,7 @@ describe('Promote Buffers', function() {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteBuffer1').insert(
           {
-            doc: new Buffer(256)
+            doc: Buffer.alloc(256)
           },
           function(err) {
             test.equal(null, err);
@@ -55,34 +55,28 @@ describe('Promote Buffers', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
 
-      MongoClient.connect(
-        configuration.url(),
-        {
-          promoteBuffers: true
-        },
-        function(err, client) {
-          var db = client.db(configuration.db);
+      const client = configuration.newClient({}, { promoteBuffers: true });
+      client.connect(function(err, client) {
+        var db = client.db(configuration.db);
 
-          db.collection('shouldCorrectlyHonorPromoteBuffer2').insert(
-            {
-              doc: new Buffer(256)
-            },
-            function(err) {
+        db.collection('shouldCorrectlyHonorPromoteBuffer2').insert(
+          {
+            doc: Buffer.alloc(256)
+          },
+          function(err) {
+            test.equal(null, err);
+
+            db.collection('shouldCorrectlyHonorPromoteBuffer2').findOne(function(err, doc) {
               test.equal(null, err);
+              test.ok(doc.doc instanceof Buffer);
 
-              db.collection('shouldCorrectlyHonorPromoteBuffer2').findOne(function(err, doc) {
-                test.equal(null, err);
-                test.ok(doc.doc instanceof Buffer);
-
-                client.close();
-                done();
-              });
-            }
-          );
-        }
-      );
+              client.close();
+              done();
+            });
+          }
+        );
+      });
     }
   });
 
@@ -96,37 +90,31 @@ describe('Promote Buffers', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
 
-      MongoClient.connect(
-        configuration.url(),
-        {
-          promoteBuffers: true
-        },
-        function(err, client) {
-          var db = client.db(configuration.db);
+      const client = configuration.newClient({}, { promoteBuffers: true });
+      client.connect(function(err, client) {
+        var db = client.db(configuration.db);
 
-          db.collection('shouldCorrectlyHonorPromoteBuffer3').insert(
-            {
-              doc: new Buffer(256)
-            },
-            function(err) {
-              test.equal(null, err);
+        db.collection('shouldCorrectlyHonorPromoteBuffer3').insert(
+          {
+            doc: Buffer.alloc(256)
+          },
+          function(err) {
+            test.equal(null, err);
 
-              db
-                .collection('shouldCorrectlyHonorPromoteBuffer3')
-                .find()
-                .next(function(err, doc) {
-                  test.equal(null, err);
-                  test.ok(doc.doc instanceof Buffer);
+            db
+              .collection('shouldCorrectlyHonorPromoteBuffer3')
+              .find()
+              .next(function(err, doc) {
+                test.equal(null, err);
+                test.ok(doc.doc instanceof Buffer);
 
-                  client.close();
-                  done();
-                });
-            }
-          );
-        }
-      );
+                client.close();
+                done();
+              });
+          }
+        );
+      });
     }
   });
 
@@ -140,13 +128,13 @@ describe('Promote Buffers', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
 
-      MongoClient.connect(configuration.url(), {}, function(err, client) {
+      const client = configuration.newClient();
+      client.connect(function(err, client) {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteBuffer4').insert(
           {
-            doc: new Buffer(256)
+            doc: Buffer.alloc(256)
           },
           function(err) {
             test.equal(null, err);
@@ -180,13 +168,13 @@ describe('Promote Buffers', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
 
-      MongoClient.connect(configuration.url(), {}, function(err, client) {
+      const client = configuration.newClient();
+      client.connect(function(err, client) {
         var db = client.db(configuration.db);
         db.collection('shouldCorrectlyHonorPromoteBuffer5').insert(
           {
-            doc: new Buffer(256)
+            doc: Buffer.alloc(256)
           },
           function(err) {
             test.equal(null, err);

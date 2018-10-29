@@ -1,0 +1,157 @@
+# When a task that used to pass starts to fail
+# Go through all versions that may have been skipped to detect
+# when the task started failing
+stepback: true
+
+# Mark a failure as a system/bootstrap failure (purple box) rather then a task
+# failure by default.
+# Actual testing tasks are marked with `type: test`
+command_type: system
+
+# Protect ourself against rogue test case, or curl gone wild, that runs forever
+# Good rule of thumb: the averageish length a task takes, times 5
+# That roughly accounts for variable system performance for various buildvariants
+exec_timeout_secs: 1800 # 6 minutes is the longest we'll ever run
+
+# What to do when evergreen hits the timeout (`post:` tasks are run automatically)
+timeout:
+  - command: shell.exec
+    params:
+      script: |
+        ls -la
+
+functions:
+  "fetch source":
+    # Executes git clone and applies the submitted patch, if any
+    - command: git.get_project
+      params:
+        directory: "src"
+    # Applies the submitted patch, if any
+    # Deprecated. Should be removed. But still needed for certain agents (ZAP)
+    - command: git.apply_patch
+    # Make an evergreen exapanstion file with dynamic values
+    - command: shell.exec
+      params:
+        working_dir: "src"
+        script: |
+           # Get the current unique version of this checkout
+           if [ "${is_patch}" = "true" ]; then
+              CURRENT_VERSION=$(git describe)-patch-${version_id}
+           else
+              CURRENT_VERSION=latest
+           fi
+
+           export DRIVERS_TOOLS="$(pwd)/../drivers-tools"
+           export PROJECT_DIRECTORY="$(pwd)"
+           export MONGODB_BINARIES="$DRIVERS_TOOLS/mongodb/bin"
+           export UPLOAD_BUCKET="${project}"
+
+           cat <<EOT > expansion.yml
+           CURRENT_VERSION: "$CURRENT_VERSION"
+           DRIVERS_TOOLS: "$DRIVERS_TOOLS"
+           MONGO_ORCHESTRATION_HOME: "$MONGO_ORCHESTRATION_HOME"
+           MONGODB_BINARIES: "$MONGODB_BINARIES"
+           UPLOAD_BUCKET: "$UPLOAD_BUCKET"
+           PROJECT_DIRECTORY: "$PROJECT_DIRECTORY"
+           PREPARE_SHELL: |
+              set -o errexit
+              set -o xtrace
+              export DRIVERS_TOOLS="$DRIVERS_TOOLS"
+              export MONGO_ORCHESTRATION_HOME="$MONGO_ORCHESTRATION_HOME"
+              export MONGODB_BINARIES="$MONGODB_BINARIES"
+              export UPLOAD_BUCKET="$UPLOAD_BUCKET"
+              export PROJECT_DIRECTORY="$PROJECT_DIRECTORY"
+
+              export TMPDIR="$MONGO_ORCHESTRATION_HOME/db"
+              export PATH="$MONGODB_BINARIES:$PATH"
+              export PROJECT="${project}"
+           EOT
+           # See what we've done
+           cat expansion.yml
+
+    # Load the expansion file to make an evergreen variable with the current unique version
+    - command: expansions.update
+      params:
+        file: src/expansion.yml
+
+  "prepare resources":
+    - command: shell.exec
+      params:
+        script: |
+          ${PREPARE_SHELL}
+          rm -rf $DRIVERS_TOOLS
+          git clone git://github.com/mongodb-labs/drivers-evergreen-tools.git $DRIVERS_TOOLS
+
+  "run tests":
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: "src"
+        script: |
+          ${PREPARE_SHELL}
+          MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} AUTH=${AUTH} SSL=${SSL} MONGODB_URI="${MONGODB_URI}" sh ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+
+  "cleanup":
+    - command: shell.exec
+      params:
+        script: |
+          ${PREPARE_SHELL}
+          rm -rf $DRIVERS_TOOLS || true
+
+  "fix absolute paths":
+    - command: shell.exec
+      params:
+        script: |
+          ${PREPARE_SHELL}
+          for filename in $(find ${DRIVERS_TOOLS} -name \*.json); do
+            perl -p -i -e "s|ABSOLUTE_PATH_REPLACEMENT_TOKEN|${DRIVERS_TOOLS}|g" $filename
+          done
+
+  # "windows fix":
+  #   - command: shell.exec
+  #     params:
+  #       script: |
+  #         ${PREPARE_SHELL}
+  #         for i in $(find ${DRIVERS_TOOLS}/.evergreen ${PROJECT_DIRECTORY}/.evergreen -name \*.sh); do
+  #           cat $i | tr -d '\r' > $i.new
+  #           mv $i.new $i
+  #         done
+  #         # Copy client certificate because symlinks do not work on Windows.
+  #         cp ${DRIVERS_TOOLS}/.evergreen/x509gen/client.pem ${MONGO_ORCHESTRATION_HOME}/lib/client.pem
+
+  "make files executable":
+    - command: shell.exec
+      params:
+        script: |
+          ${PREPARE_SHELL}
+          for i in $(find ${DRIVERS_TOOLS}/.evergreen ${PROJECT_DIRECTORY}/.evergreen -name \*.sh); do
+            chmod +x $i
+          done
+
+  "install dependencies":
+    - command: shell.exec
+      params:
+        working_dir: "src"
+        script: |
+          ${PREPARE_SHELL}
+          NODE_LTS_NAME=${NODE_LTS_NAME} sh ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
+
+  "run atlas tests":
+    - command: shell.exec
+      params:
+        working_dir: "src"
+        silent: true
+        script: |
+          # DO NOT ECHO WITH XTRACE (which PREPARE_SHELL does)
+          NODE_LTS_NAME='${NODE_LTS_NAME}' ATLAS_REPL='${atlas_repl}' ATLAS_SHRD='${atlas_shrd}' ATLAS_FREE='${atlas_free}' ATLAS_TLS11='${atlas_tls11}' ATLAS_TLS12='${atlas_tls12}' sh ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
+
+pre:
+  - func: "fetch source"
+  - func: "prepare resources"
+  # - func: "windows fix"
+  - func: "fix absolute paths"
+  - func: "make files executable"
+  - func: "install dependencies"
+
+post:
+  - func: "cleanup"

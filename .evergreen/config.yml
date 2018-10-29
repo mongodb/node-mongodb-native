@@ -1,0 +1,590 @@
+stepback: true
+command_type: system
+exec_timeout_secs: 1800
+timeout:
+  - command: shell.exec
+    params:
+      script: |
+        ls -la
+functions:
+  fetch source:
+    - command: git.get_project
+      params:
+        directory: src
+    - command: git.apply_patch
+    - command: shell.exec
+      params:
+        working_dir: src
+        script: |
+          # Get the current unique version of this checkout
+          if [ "${is_patch}" = "true" ]; then
+             CURRENT_VERSION=$(git describe)-patch-${version_id}
+          else
+             CURRENT_VERSION=latest
+          fi
+
+          export DRIVERS_TOOLS="$(pwd)/../drivers-tools"
+          export PROJECT_DIRECTORY="$(pwd)"
+          export MONGODB_BINARIES="$DRIVERS_TOOLS/mongodb/bin"
+          export UPLOAD_BUCKET="${project}"
+
+          cat <<EOT > expansion.yml
+          CURRENT_VERSION: "$CURRENT_VERSION"
+          DRIVERS_TOOLS: "$DRIVERS_TOOLS"
+          MONGO_ORCHESTRATION_HOME: "$MONGO_ORCHESTRATION_HOME"
+          MONGODB_BINARIES: "$MONGODB_BINARIES"
+          UPLOAD_BUCKET: "$UPLOAD_BUCKET"
+          PROJECT_DIRECTORY: "$PROJECT_DIRECTORY"
+          PREPARE_SHELL: |
+             set -o errexit
+             set -o xtrace
+             export DRIVERS_TOOLS="$DRIVERS_TOOLS"
+             export MONGO_ORCHESTRATION_HOME="$MONGO_ORCHESTRATION_HOME"
+             export MONGODB_BINARIES="$MONGODB_BINARIES"
+             export UPLOAD_BUCKET="$UPLOAD_BUCKET"
+             export PROJECT_DIRECTORY="$PROJECT_DIRECTORY"
+
+             export TMPDIR="$MONGO_ORCHESTRATION_HOME/db"
+             export PATH="$MONGODB_BINARIES:$PATH"
+             export PROJECT="${project}"
+          EOT
+          # See what we've done
+          cat expansion.yml
+    - command: expansions.update
+      params:
+        file: src/expansion.yml
+  prepare resources:
+    - command: shell.exec
+      params:
+        script: >
+          ${PREPARE_SHELL}
+
+          rm -rf $DRIVERS_TOOLS
+
+          git clone git://github.com/mongodb-labs/drivers-evergreen-tools.git
+          $DRIVERS_TOOLS
+  run tests:
+    - command: shell.exec
+      type: test
+      params:
+        working_dir: src
+        script: >
+          ${PREPARE_SHELL}
+
+          MONGODB_VERSION=${VERSION} TOPOLOGY=${TOPOLOGY} AUTH=${AUTH}
+          SSL=${SSL} MONGODB_URI="${MONGODB_URI}" sh
+          ${PROJECT_DIRECTORY}/.evergreen/run-tests.sh
+  cleanup:
+    - command: shell.exec
+      params:
+        script: |
+          ${PREPARE_SHELL}
+          rm -rf $DRIVERS_TOOLS || true
+  fix absolute paths:
+    - command: shell.exec
+      params:
+        script: |
+          ${PREPARE_SHELL}
+          for filename in $(find ${DRIVERS_TOOLS} -name \*.json); do
+            perl -p -i -e "s|ABSOLUTE_PATH_REPLACEMENT_TOKEN|${DRIVERS_TOOLS}|g" $filename
+          done
+  make files executable:
+    - command: shell.exec
+      params:
+        script: >
+          ${PREPARE_SHELL}
+
+          for i in $(find ${DRIVERS_TOOLS}/.evergreen
+          ${PROJECT_DIRECTORY}/.evergreen -name \*.sh); do
+            chmod +x $i
+          done
+  install dependencies:
+    - command: shell.exec
+      params:
+        working_dir: src
+        script: >
+          ${PREPARE_SHELL}
+
+          NODE_LTS_NAME=${NODE_LTS_NAME} sh
+          ${PROJECT_DIRECTORY}/.evergreen/install-dependencies.sh
+  run atlas tests:
+    - command: shell.exec
+      params:
+        working_dir: src
+        silent: true
+        script: >
+          # DO NOT ECHO WITH XTRACE (which PREPARE_SHELL does)
+
+          NODE_LTS_NAME='${NODE_LTS_NAME}' ATLAS_REPL='${atlas_repl}'
+          ATLAS_SHRD='${atlas_shrd}' ATLAS_FREE='${atlas_free}'
+          ATLAS_TLS11='${atlas_tls11}' ATLAS_TLS12='${atlas_tls12}' sh
+          ${PROJECT_DIRECTORY}/.evergreen/run-atlas-tests.sh
+pre:
+  - func: fetch source
+  - func: prepare resources
+  - func: fix absolute paths
+  - func: make files executable
+  - func: install dependencies
+post:
+  - func: cleanup
+tasks:
+  - name: test-latest-server
+    tags:
+      - latest
+      - server
+    commands:
+      - func: run tests
+        vars:
+          VERSION: latest
+          TOPOLOGY: server
+  - name: test-latest-replica_set
+    tags:
+      - latest
+      - replica_set
+    commands:
+      - func: run tests
+        vars:
+          VERSION: latest
+          TOPOLOGY: replica_set
+  - name: test-latest-sharded_cluster
+    tags:
+      - latest
+      - sharded_cluster
+    commands:
+      - func: run tests
+        vars:
+          VERSION: latest
+          TOPOLOGY: sharded_cluster
+  - name: test-4.0-server
+    tags:
+      - '4.0'
+      - server
+    commands:
+      - func: run tests
+        vars:
+          VERSION: '4.0'
+          TOPOLOGY: server
+  - name: test-4.0-replica_set
+    tags:
+      - '4.0'
+      - replica_set
+    commands:
+      - func: run tests
+        vars:
+          VERSION: '4.0'
+          TOPOLOGY: replica_set
+  - name: test-4.0-sharded_cluster
+    tags:
+      - '4.0'
+      - sharded_cluster
+    commands:
+      - func: run tests
+        vars:
+          VERSION: '4.0'
+          TOPOLOGY: sharded_cluster
+  - name: test-3.6-server
+    tags:
+      - '3.6'
+      - server
+    commands:
+      - func: run tests
+        vars:
+          VERSION: '3.6'
+          TOPOLOGY: server
+  - name: test-3.6-replica_set
+    tags:
+      - '3.6'
+      - replica_set
+    commands:
+      - func: run tests
+        vars:
+          VERSION: '3.6'
+          TOPOLOGY: replica_set
+  - name: test-3.6-sharded_cluster
+    tags:
+      - '3.6'
+      - sharded_cluster
+    commands:
+      - func: run tests
+        vars:
+          VERSION: '3.6'
+          TOPOLOGY: sharded_cluster
+  - name: test-3.4-server
+    tags:
+      - '3.4'
+      - server
+    commands:
+      - func: run tests
+        vars:
+          VERSION: '3.4'
+          TOPOLOGY: server
+  - name: test-3.4-replica_set
+    tags:
+      - '3.4'
+      - replica_set
+    commands:
+      - func: run tests
+        vars:
+          VERSION: '3.4'
+          TOPOLOGY: replica_set
+  - name: test-3.4-sharded_cluster
+    tags:
+      - '3.4'
+      - sharded_cluster
+    commands:
+      - func: run tests
+        vars:
+          VERSION: '3.4'
+          TOPOLOGY: sharded_cluster
+  - name: test-3.2-server
+    tags:
+      - '3.2'
+      - server
+    commands:
+      - func: run tests
+        vars:
+          VERSION: '3.2'
+          TOPOLOGY: server
+  - name: test-3.2-replica_set
+    tags:
+      - '3.2'
+      - replica_set
+    commands:
+      - func: run tests
+        vars:
+          VERSION: '3.2'
+          TOPOLOGY: replica_set
+  - name: test-3.2-sharded_cluster
+    tags:
+      - '3.2'
+      - sharded_cluster
+    commands:
+      - func: run tests
+        vars:
+          VERSION: '3.2'
+          TOPOLOGY: sharded_cluster
+  - name: test-3.0-server
+    tags:
+      - '3.0'
+      - server
+    commands:
+      - func: run tests
+        vars:
+          VERSION: '3.0'
+          TOPOLOGY: server
+  - name: test-3.0-replica_set
+    tags:
+      - '3.0'
+      - replica_set
+    commands:
+      - func: run tests
+        vars:
+          VERSION: '3.0'
+          TOPOLOGY: replica_set
+  - name: test-3.0-sharded_cluster
+    tags:
+      - '3.0'
+      - sharded_cluster
+    commands:
+      - func: run tests
+        vars:
+          VERSION: '3.0'
+          TOPOLOGY: sharded_cluster
+  - name: test-2.6-server
+    tags:
+      - '2.6'
+      - server
+    commands:
+      - func: run tests
+        vars:
+          VERSION: '2.6'
+          TOPOLOGY: server
+  - name: test-2.6-replica_set
+    tags:
+      - '2.6'
+      - replica_set
+    commands:
+      - func: run tests
+        vars:
+          VERSION: '2.6'
+          TOPOLOGY: replica_set
+  - name: test-2.6-sharded_cluster
+    tags:
+      - '2.6'
+      - sharded_cluster
+    commands:
+      - func: run tests
+        vars:
+          VERSION: '2.6'
+          TOPOLOGY: sharded_cluster
+buildvariants:
+  - name: linux-64-amzn-test-carbon
+    display_name: Amazon Linux (Enterprise) Node Carbon
+    run_on: linux-64-amzn-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: &ref_0
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
+      - test-3.0-server
+      - test-3.0-replica_set
+      - test-3.0-sharded_cluster
+      - test-2.6-server
+      - test-2.6-replica_set
+      - test-2.6-sharded_cluster
+  - name: linux-64-amzn-test-boron
+    display_name: Amazon Linux (Enterprise) Node Boron
+    run_on: linux-64-amzn-test
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_0
+  - name: linux-64-amzn-test-argon
+    display_name: Amazon Linux (Enterprise) Node Argon
+    run_on: linux-64-amzn-test
+    expansions:
+      NODE_LTS_NAME: argon
+    tasks: *ref_0
+  - name: ubuntu-14.04-carbon
+    display_name: Ubuntu 14.04 Node Carbon
+    run_on: ubuntu1404-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_0
+  - name: ubuntu-14.04-boron
+    display_name: Ubuntu 14.04 Node Boron
+    run_on: ubuntu1404-test
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_0
+  - name: ubuntu-14.04-argon
+    display_name: Ubuntu 14.04 Node Argon
+    run_on: ubuntu1404-test
+    expansions:
+      NODE_LTS_NAME: argon
+    tasks: *ref_0
+  - name: rhel70-carbon
+    display_name: RHEL 7.0 Node Carbon
+    run_on: rhel70-small
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_0
+  - name: rhel70-boron
+    display_name: RHEL 7.0 Node Boron
+    run_on: rhel70-small
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_0
+  - name: rhel70-argon
+    display_name: RHEL 7.0 Node Argon
+    run_on: rhel70-small
+    expansions:
+      NODE_LTS_NAME: argon
+    tasks: *ref_0
+  - name: debian71-test-carbon
+    display_name: Debian 7.1 Node Carbon
+    run_on: debian71-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_0
+  - name: debian71-test-boron
+    display_name: Debian 7.1 Node Boron
+    run_on: debian71-test
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_0
+  - name: debian71-test-argon
+    display_name: Debian 7.1 Node Argon
+    run_on: debian71-test
+    expansions:
+      NODE_LTS_NAME: argon
+    tasks: *ref_0
+  - name: archlinux-test-carbon
+    display_name: Archlinux Node Carbon
+    run_on: archlinux-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_0
+  - name: archlinux-test-boron
+    display_name: Archlinux Node Boron
+    run_on: archlinux-test
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_0
+  - name: archlinux-test-argon
+    display_name: Archlinux Node Argon
+    run_on: archlinux-test
+    expansions:
+      NODE_LTS_NAME: argon
+    tasks: *ref_0
+  - name: macos-1012-carbon
+    display_name: macOS 10.12 Node Carbon
+    run_on: macos-1012
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_0
+  - name: macos-1012-boron
+    display_name: macOS 10.12 Node Boron
+    run_on: macos-1012
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_0
+  - name: macos-1012-argon
+    display_name: macOS 10.12 Node Argon
+    run_on: macos-1012
+    expansions:
+      NODE_LTS_NAME: argon
+    tasks: *ref_0
+  - name: ubuntu-16.04-carbon
+    display_name: Ubuntu 16.04 Node Carbon
+    run_on: ubuntu1604-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: &ref_1
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+      - test-3.2-server
+      - test-3.2-replica_set
+      - test-3.2-sharded_cluster
+  - name: ubuntu-16.04-boron
+    display_name: Ubuntu 16.04 Node Boron
+    run_on: ubuntu1604-test
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_1
+  - name: ubuntu-16.04-argon
+    display_name: Ubuntu 16.04 Node Argon
+    run_on: ubuntu1604-test
+    expansions:
+      NODE_LTS_NAME: argon
+    tasks: *ref_1
+  - name: suse12-x86-64-test-carbon
+    display_name: SUSE 12 (x86_64) Node Carbon
+    run_on: suse12-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_1
+  - name: suse12-x86-64-test-boron
+    display_name: SUSE 12 (x86_64) Node Boron
+    run_on: suse12-test
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_1
+  - name: suse12-x86-64-test-argon
+    display_name: SUSE 12 (x86_64) Node Argon
+    run_on: suse12-test
+    expansions:
+      NODE_LTS_NAME: argon
+    tasks: *ref_1
+  - name: rhel71-power8-test-carbon
+    display_name: RHEL 7.1 (POWER8) Node Carbon
+    run_on: rhel71-power8-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_1
+  - name: rhel71-power8-test-boron
+    display_name: RHEL 7.1 (POWER8) Node Boron
+    run_on: rhel71-power8-test
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_1
+  - name: rhel71-power8-test-argon
+    display_name: RHEL 7.1 (POWER8) Node Argon
+    run_on: rhel71-power8-test
+    expansions:
+      NODE_LTS_NAME: argon
+    tasks: *ref_1
+  - name: debian81-test-carbon
+    display_name: Debian 8.1 Node Carbon
+    run_on: debian81-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: &ref_2
+      - test-latest-server
+      - test-latest-replica_set
+      - test-latest-sharded_cluster
+      - test-4.0-server
+      - test-4.0-replica_set
+      - test-4.0-sharded_cluster
+      - test-3.6-server
+      - test-3.6-replica_set
+      - test-3.6-sharded_cluster
+      - test-3.4-server
+      - test-3.4-replica_set
+      - test-3.4-sharded_cluster
+  - name: debian81-test-boron
+    display_name: Debian 8.1 Node Boron
+    run_on: debian81-test
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_2
+  - name: suse12-zseries-test-carbon
+    display_name: SUSE 12 (zSeries) Node Carbon
+    run_on: suse12-zseries-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_2
+  - name: suse12-zseries-test-boron
+    display_name: SUSE 12 (zSeries) Node Boron
+    run_on: suse12-zseries-test
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_2
+  - name: ubuntu1604-arm64-small-carbon
+    display_name: Ubuntu 16.04 (ARM64) Node Carbon
+    run_on: ubuntu1604-arm64-small
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_2
+  - name: ubuntu1604-arm64-small-boron
+    display_name: Ubuntu 16.04 (ARM64) Node Boron
+    run_on: ubuntu1604-arm64-small
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_2
+  - name: ubuntu1604-power8-test-carbon
+    display_name: Ubuntu 16.04 (POWER8) Node Carbon
+    run_on: ubuntu1604-power8-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_2
+  - name: ubuntu1604-power8-test-boron
+    display_name: Ubuntu 16.04 (POWER8) Node Boron
+    run_on: ubuntu1604-power8-test
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_2
+  - name: ubuntu1604-zseries-small-carbon
+    display_name: Ubuntu 16.04 (zSeries) Node Carbon
+    run_on: ubuntu1604-zseries-small
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_2
+  - name: ubuntu1604-zseries-small-boron
+    display_name: Ubuntu 16.04 (zSeries) Node Boron
+    run_on: ubuntu1604-zseries-small
+    expansions:
+      NODE_LTS_NAME: boron
+    tasks: *ref_2

@@ -27,10 +27,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
 
     const db = client.db(dbName);
@@ -61,10 +61,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
 
     const db = client.db(dbName);
@@ -104,10 +104,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
 
     const db = client.db(dbName);
@@ -152,10 +152,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
 
     const db = client.db(dbName);
@@ -195,10 +195,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
 
     const db = client.db(dbName);
@@ -238,10 +238,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
 
     const db = client.db(dbName);
@@ -277,10 +277,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
 
     const db = client.db(dbName);
@@ -327,10 +327,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
 
     const db = client.db(dbName);
@@ -417,10 +417,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
 
     const db = client.db(dbName);
@@ -454,10 +454,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
 
     const db = client.db(dbName);
@@ -497,10 +497,10 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 
 (async function() {
-  let client;
+  const client = new MongoClient(url);
 
   try {
-    client = await MongoClient.connect(url);
+    await client.connect();
     console.log("Connected correctly to server");
 
     const db = client.db(dbName);

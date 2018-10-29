@@ -25,7 +25,7 @@ describe('Aggregation', function() {
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
-      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
@@ -117,7 +117,7 @@ describe('Aggregation', function() {
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
-      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
@@ -210,7 +210,7 @@ describe('Aggregation', function() {
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
-      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
@@ -303,7 +303,7 @@ describe('Aggregation', function() {
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
-      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
@@ -388,7 +388,7 @@ describe('Aggregation', function() {
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
-      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
@@ -478,7 +478,7 @@ describe('Aggregation', function() {
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
-      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
@@ -572,7 +572,7 @@ describe('Aggregation', function() {
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
-      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN
@@ -664,7 +664,7 @@ describe('Aggregation', function() {
         databaseName = this.configuration.db;
 
       // LINE var MongoClient = require('mongodb').MongoClient;
-      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // LINE const client = new MongoClient('mongodb://localhost:27017/test');
       // REPLACE this.configuration.writeConcernMax() WITH {w:1}
       // REMOVE-LINE test.
       // BEGIN

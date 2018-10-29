@@ -1,8 +1,6 @@
 'use strict';
 
 const Promise = require('bluebird');
-const mongodb = require('../..');
-const MongoClient = mongodb.MongoClient;
 const path = require('path');
 const fs = require('fs');
 const chai = require('chai');
@@ -100,7 +98,7 @@ describe('Transactions (spec)', function() {
       config.replicasetName
     }`;
 
-    testContext.sharedClient = new MongoClient(testContext.url);
+    testContext.sharedClient = config.newClient(testContext.url);
     return testContext.sharedClient.connect();
   });
 
@@ -123,7 +121,9 @@ describe('Transactions (spec)', function() {
             }
 
             // run the actual test
-            testPromise = testPromise.then(() => runTestSuiteTest(testData, testContext));
+            testPromise = testPromise.then(() =>
+              runTestSuiteTest(this.configuration, testData, testContext)
+            );
 
             if (testData.failPoint) {
               testPromise = testPromise.then(() =>
@@ -180,7 +180,7 @@ function disableFailPoint(failPoint, testContext) {
 }
 
 let displayCommands = false;
-function runTestSuiteTest(testData, context) {
+function runTestSuiteTest(configuration, testData, context) {
   const commandEvents = [];
   const clientOptions = translateClientOptions(
     Object.assign({ monitorCommands: true }, testData.clientOptions)
@@ -190,7 +190,8 @@ function runTestSuiteTest(testData, context) {
   clientOptions.autoReconnect = false;
   clientOptions.haInterval = 100;
 
-  return MongoClient.connect(context.url, clientOptions).then(client => {
+  const client = configuration.newClient(context.url, clientOptions);
+  return client.connect().then(client => {
     context.testClient = client;
     client.on('commandStarted', event => {
       if (event.databaseName === context.dbName || isTransactionCommand(event.commandName)) {

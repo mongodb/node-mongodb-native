@@ -10,7 +10,7 @@ title = "Connection Settings"
 
 # URI Connection Settings
 
-Optional connection settings are settings not covered by the [URI Connection String ](https://docs.mongodb.org/manual/reference/connection-string/). The following options are passed in the options parameter in the MongoClient.connect function.
+Optional connection settings are settings not covered by the [URI Connection String ](https://docs.mongodb.org/manual/reference/connection-string/). The following options are passed in the options parameter when you create a mongo client.
 
 ```js
 const MongoClient = require('mongodb').MongoClient;
@@ -20,11 +20,14 @@ const assert = require('assert');
 const url = 'mongodb://localhost:50000,localhost:50001';
 // Database Name
 const dbName = 'myproject';
-// Use connect method to connect to the Server passing in
-// additional options
-MongoClient.connect(url, {
+
+// create a client, passing in additional options
+const client = new MongoClient(url, {
   poolSize: 10, ssl: true
-}, function(err, client) {
+});
+
+// Use connect method to connect to the server
+client.connect(function(err) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 

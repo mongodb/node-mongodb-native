@@ -29,7 +29,6 @@ describe.skip('Buffering Proxy', function() {
 
     test: function(done) {
       var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient,
         ObjectId = configuration.require.ObjectId,
         ReadPreference = configuration.require.ReadPreference;
 
@@ -179,68 +178,69 @@ describe.skip('Buffering Proxy', function() {
           }
         });
 
-        MongoClient.connect(
+        const client = configuration.newClient(
           'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs',
           {
             socketTimeoutMS: 2000,
             haInterval: 1000
-          },
-          function(err, client) {
-            test.equal(null, err);
-            var db = client.db(configuration.db);
-            var results = [];
-
-            setTimeout(function() {
-              die = true;
-              dieSecondary = true;
-
-              setTimeout(function() {
-                db.collection('test').insertOne({ a: 1 }, function(err) {
-                  test.equal(null, err);
-                  results.push('insertOne');
-                });
-
-                db.command(
-                  { count: 'test', query: {} },
-                  { readPreference: new ReadPreference(ReadPreference.SECONDARY) },
-                  function(err) {
-                    test.equal(null, err);
-                    results.push('count');
-                  }
-                );
-
-                db
-                  .collection('test')
-                  .aggregate([{ $match: {} }])
-                  .toArray(function(err) {
-                    test.equal(null, err);
-                    results.push('aggregate');
-                  });
-
-                db
-                  .collection('test')
-                  .find({})
-                  .setReadPreference(new ReadPreference(ReadPreference.SECONDARY))
-                  .toArray(function(err) {
-                    test.equal(null, err);
-                    results.push('find');
-                  });
-
-                setTimeout(function() {
-                  die = false;
-
-                  setTimeout(function() {
-                    test.deepEqual(['insertOne', 'aggregate'].sort(), results.sort());
-
-                    client.close();
-                    // test.deepEqual(['insertOne', 'aggregate', 'count', 'find'], results);
-                    done();
-                  }, 1000);
-                }, 1000);
-              }, 3000);
-            }, 1000);
           }
         );
+
+        client.connect(function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
+          var results = [];
+
+          setTimeout(function() {
+            die = true;
+            dieSecondary = true;
+
+            setTimeout(function() {
+              db.collection('test').insertOne({ a: 1 }, function(err) {
+                test.equal(null, err);
+                results.push('insertOne');
+              });
+
+              db.command(
+                { count: 'test', query: {} },
+                { readPreference: new ReadPreference(ReadPreference.SECONDARY) },
+                function(err) {
+                  test.equal(null, err);
+                  results.push('count');
+                }
+              );
+
+              db
+                .collection('test')
+                .aggregate([{ $match: {} }])
+                .toArray(function(err) {
+                  test.equal(null, err);
+                  results.push('aggregate');
+                });
+
+              db
+                .collection('test')
+                .find({})
+                .setReadPreference(new ReadPreference(ReadPreference.SECONDARY))
+                .toArray(function(err) {
+                  test.equal(null, err);
+                  results.push('find');
+                });
+
+              setTimeout(function() {
+                die = false;
+
+                setTimeout(function() {
+                  test.deepEqual(['insertOne', 'aggregate'].sort(), results.sort());
+
+                  client.close();
+                  // test.deepEqual(['insertOne', 'aggregate', 'count', 'find'], results);
+                  done();
+                }, 1000);
+              }, 1000);
+            }, 3000);
+          }, 1000);
+        });
       });
     }
   });
@@ -255,7 +255,6 @@ describe.skip('Buffering Proxy', function() {
 
     test: function(done) {
       var configuration = this.configuration,
-        MongoClient = configuration.require.MongoClient,
         ObjectId = configuration.require.ObjectId,
         ReadPreference = configuration.require.ReadPreference;
 
@@ -409,70 +408,71 @@ describe.skip('Buffering Proxy', function() {
           }
         });
 
-        MongoClient.connect(
+        const client = configuration.newClient(
           'mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs',
           {
             socketTimeoutMS: 2000,
             haInterval: 1000
-          },
-          function(err, client) {
-            test.equal(null, err);
-            var db = client.db(configuration.db);
-
-            setTimeout(function() {
-              die = true;
-              diePrimary = true;
-
-              setTimeout(function() {
-                var results = [];
-
-                db.collection('test').insertOne({ a: 1 }, function(err) {
-                  test.equal(null, err);
-                  results.push('insertOne');
-                });
-
-                db.command(
-                  { count: 'test', query: {} },
-                  { readPreference: new ReadPreference(ReadPreference.SECONDARY) },
-                  function(err) {
-                    test.equal(null, err);
-                    results.push('count');
-                  }
-                );
-
-                db
-                  .collection('test')
-                  .aggregate([{ $match: {} }])
-                  .toArray(function(err) {
-                    test.equal(null, err);
-                    results.push('aggregate');
-                  });
-
-                db
-                  .collection('test')
-                  .find({})
-                  .setReadPreference(new ReadPreference(ReadPreference.SECONDARY))
-                  .toArray(function(err) {
-                    test.equal(null, err);
-                    results.push('find');
-                  });
-
-                setTimeout(function() {
-                  die = false;
-
-                  setTimeout(function() {
-                    test.deepEqual(['count', 'find'].sort(), results.sort());
-
-                    client.close();
-
-                    // test.deepEqual(['count', 'find', 'insertOne', 'aggregate'], results);
-                    done();
-                  }, 1500);
-                }, 1000);
-              }, 3000);
-            }, 1000);
           }
         );
+
+        client.connect(function(err, client) {
+          test.equal(null, err);
+          var db = client.db(configuration.db);
+
+          setTimeout(function() {
+            die = true;
+            diePrimary = true;
+
+            setTimeout(function() {
+              var results = [];
+
+              db.collection('test').insertOne({ a: 1 }, function(err) {
+                test.equal(null, err);
+                results.push('insertOne');
+              });
+
+              db.command(
+                { count: 'test', query: {} },
+                { readPreference: new ReadPreference(ReadPreference.SECONDARY) },
+                function(err) {
+                  test.equal(null, err);
+                  results.push('count');
+                }
+              );
+
+              db
+                .collection('test')
+                .aggregate([{ $match: {} }])
+                .toArray(function(err) {
+                  test.equal(null, err);
+                  results.push('aggregate');
+                });
+
+              db
+                .collection('test')
+                .find({})
+                .setReadPreference(new ReadPreference(ReadPreference.SECONDARY))
+                .toArray(function(err) {
+                  test.equal(null, err);
+                  results.push('find');
+                });
+
+              setTimeout(function() {
+                die = false;
+
+                setTimeout(function() {
+                  test.deepEqual(['count', 'find'].sort(), results.sort());
+
+                  client.close();
+
+                  // test.deepEqual(['count', 'find', 'insertOne', 'aggregate'], results);
+                  done();
+                }, 1500);
+              }, 1000);
+            }, 3000);
+          }, 1000);
+        });
       });
     }
   });

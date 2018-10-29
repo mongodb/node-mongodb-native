@@ -269,5 +269,10 @@ module.exports = {
   // informational aliases
   kerberos: SingleEnvironment,
   ldap: SingleEnvironment,
-  sni: SingleEnvironment
+  sni: SingleEnvironment,
+
+  // for compatability with evergreen template
+  server: SingleEnvironment,
+  replica_set: ReplicaSetEnvironment,
+  sharded_cluster: ShardedEnvironment
 };

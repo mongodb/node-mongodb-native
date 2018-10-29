@@ -1,7 +1,6 @@
 'use strict';
 
 const expect = require('chai').expect;
-const MongoClient = require('../..').MongoClient;
 
 describe('URI', function() {
   /**
@@ -19,30 +18,28 @@ describe('URI', function() {
         var self = this;
 
         // Connect using the connection string
-        MongoClient.connect(
-          'mongodb://localhost:27017/integration_tests',
-          {
-            native_parser: false,
-            socketOptions: {
-              connectTimeoutMS: 500
-            }
-          },
-          function(err, client) {
-            var db = client.db(self.configuration.db);
-            expect(err).to.not.exist;
-            expect(client.topology.connections()[0].connectionTimeout).to.equal(500);
-
-            db
-              .collection('mongoclient_test')
-              .update({ a: 1 }, { b: 1 }, { upsert: true }, function(err, result) {
-                expect(err).to.not.exist;
-                expect(result.result.n).to.equal(1);
-
-                client.close();
-                done();
-              });
+        const client = this.configuration.newClient('mongodb://localhost:27017/integration_tests', {
+          native_parser: false,
+          socketOptions: {
+            connectTimeoutMS: 500
           }
-        );
+        });
+
+        client.connect(function(err, client) {
+          var db = client.db(self.configuration.db);
+          expect(err).to.not.exist;
+          expect(client.topology.connections()[0].connectionTimeout).to.equal(500);
+
+          db
+            .collection('mongoclient_test')
+            .update({ a: 1 }, { b: 1 }, { upsert: true }, function(err, result) {
+              expect(err).to.not.exist;
+              expect(result.result.n).to.equal(1);
+
+              client.close();
+              done();
+            });
+        });
       }
     }
   );
@@ -60,7 +57,11 @@ describe('URI', function() {
       var self = this;
 
       // Connect using the connection string
-      MongoClient.connect('mongodb://localhost:27017/integration_tests?w=0', function(err, client) {
+      const client = this.configuration.newClient(
+        'mongodb://localhost:27017/integration_tests?w=0'
+      );
+
+      client.connect(function(err, client) {
         expect(err).to.not.exist;
         var db = client.db(self.configuration.db);
 
@@ -89,18 +90,19 @@ describe('URI', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      if (process.platform !== 'win32') {
-        MongoClient.connect('mongodb://%2Ftmp%2Fmongodb-27017.sock?safe=false', function(
-          err,
-          client
-        ) {
-          expect(err).to.not.exist;
-          client.close();
-          done();
-        });
-      } else {
-        done();
+      if (process.platform === 'win32') {
+        return done();
       }
+
+      const client = this.configuration.newClient(
+        'mongodb://%2Ftmp%2Fmongodb-27017.sock?safe=false'
+      );
+
+      client.connect(function(err, client) {
+        expect(err).to.not.exist;
+        client.close();
+        done();
+      });
     }
   });
 
@@ -111,9 +113,9 @@ describe('URI', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var self = this;
-      MongoClient.connect('mongodb://127.0.0.1:27017/?fsync=true', function(err, client) {
-        var db = client.db(self.configuration.db);
+      const client = this.configuration.newClient('mongodb://127.0.0.1:27017/?fsync=true');
+      client.connect((err, client) => {
+        var db = client.db(this.configuration.db);
         expect(db.writeConcern.fsync).to.be.true;
         client.close();
         done();
@@ -129,34 +131,36 @@ describe('URI', function() {
     // The actual test we wish to run
     test: function(done) {
       var self = this;
+      const configuration = this.configuration;
+      const client = configuration.newClient('mongodb://localhost:27017/integration_tests', {
+        native_parser: true
+      });
 
-      MongoClient.connect(
-        'mongodb://localhost:27017/integration_tests',
-        { native_parser: true },
-        function(err, client) {
+      client.connect(function(err, client) {
+        expect(err).to.not.exist;
+        var user = 'u$ser',
+          pass = '$specialch@rs';
+        var db = client.db(self.configuration.db);
+
+        db.addUser(user, pass, function(err) {
           expect(err).to.not.exist;
-          var user = 'u$ser',
-            pass = '$specialch@rs';
-          var db = client.db(self.configuration.db);
+          var uri =
+            'mongodb://' +
+            encodeURIComponent(user) +
+            ':' +
+            encodeURIComponent(pass) +
+            '@localhost:27017/integration_tests';
 
-          db.addUser(user, pass, function(err) {
+          const aclient = configuration.newClient(uri, { native_parser: true });
+          aclient.connect(function(err, aclient) {
             expect(err).to.not.exist;
-            var uri =
-              'mongodb://' +
-              encodeURIComponent(user) +
-              ':' +
-              encodeURIComponent(pass) +
-              '@localhost:27017/integration_tests';
-            MongoClient.connect(uri, { native_parser: true }, function(err, aclient) {
-              expect(err).to.not.exist;
 
-              client.close();
-              aclient.close();
-              done();
-            });
+            client.close();
+            aclient.close();
+            done();
           });
-        }
-      );
+        });
+      });
     }
   });
 
@@ -168,7 +172,8 @@ describe('URI', function() {
         config.replicasetName
       }`;
 
-      MongoClient.connect(uri, { useNewUrlParser: true }, (err, client) => {
+      const client = this.configuration.newClient(uri, { useNewUrlParser: true });
+      client.connect((err, client) => {
         if (err) console.dir(err);
         expect(err).to.not.exist;
         expect(client).to.exist;
