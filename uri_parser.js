@@ -175,7 +175,7 @@ const BOOLEAN_OPTIONS = new Set([
 ]);
 
 // Known string options, only used to bypass Number coercion in `parseQueryStringItemValue`
-const STRING_OPTIONS = new Set(['authsource']);
+const STRING_OPTIONS = new Set(['authsource', 'replicaset']);
 
 // Supported text representations of auth mechanisms
 // NOTE: this list exists in native already, if it is merged here we should deduplicate
