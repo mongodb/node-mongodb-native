@@ -108,7 +108,7 @@ SSPI.prototype.auth = function(server, connections, db, username, password, opti
   }
 };
 
-var SSIPAuthenticate = function(
+function SSIPAuthenticate(
   self,
   username,
   password,
@@ -118,112 +118,74 @@ var SSIPAuthenticate = function(
   options,
   callback
 ) {
-  // Build Authentication command to send to MongoDB
-  var command = {
-    saslStart: 1,
-    mechanism: 'GSSAPI',
-    payload: '',
-    autoAuthorize: 1
-  };
-
-  // Create authenticator
-  var mongo_auth_process = new MongoAuthProcess(
+  const authProcess = new MongoAuthProcess(
     connection.host,
     connection.port,
     gssapiServiceName,
     options
   );
 
-  // Execute first sasl step
-  server(
-    connection,
-    new Query(self.bson, '$external.$cmd', command, {
+  function authCommand(command, authCb) {
+    const query = new Query(self.bson, '$external.$cmd', command, {
       numberToSkip: 0,
       numberToReturn: 1
-    }),
-    function(err, r) {
+    });
+
+    server(connection, query, authCb);
+  }
+
+  authProcess.init(username, password, err => {
+    if (err) return callback(err, false);
+
+    authProcess.transition('', (err, payload) => {
       if (err) return callback(err, false);
-      var doc = r.result;
 
-      mongo_auth_process.init(username, password, function(err) {
-        if (err) return callback(err);
+      const command = {
+        saslStart: 1,
+        mechanism: 'GSSAPI',
+        payload,
+        autoAuthorize: 1
+      };
 
-        mongo_auth_process.transition(doc.payload, function(err, payload) {
-          if (err) return callback(err);
+      authCommand(command, (err, result) => {
+        if (err) return callback(err, false);
+        const doc = result.result;
 
-          // Perform the next step against mongod
-          var command = {
+        authProcess.transition(doc.payload, (err, payload) => {
+          if (err) return callback(err, false);
+          const command = {
             saslContinue: 1,
             conversationId: doc.conversationId,
-            payload: payload
+            payload
           };
 
-          // Execute the command
-          server(
-            connection,
-            new Query(self.bson, '$external.$cmd', command, {
-              numberToSkip: 0,
-              numberToReturn: 1
-            }),
-            function(err, r) {
+          authCommand(command, (err, result) => {
+            if (err) return callback(err, false);
+            const doc = result.result;
+
+            authProcess.transition(doc.payload, (err, payload) => {
               if (err) return callback(err, false);
-              var doc = r.result;
+              const command = {
+                saslContinue: 1,
+                conversationId: doc.conversationId,
+                payload
+              };
 
-              mongo_auth_process.transition(doc.payload, function(err, payload) {
-                if (err) return callback(err);
+              authCommand(command, (err, response) => {
+                if (err) return callback(err, false);
 
-                // Perform the next step against mongod
-                var command = {
-                  saslContinue: 1,
-                  conversationId: doc.conversationId,
-                  payload: payload
-                };
-
-                // Execute the command
-                server(
-                  connection,
-                  new Query(self.bson, '$external.$cmd', command, {
-                    numberToSkip: 0,
-                    numberToReturn: 1
-                  }),
-                  function(err, r) {
-                    if (err) return callback(err, false);
-                    var doc = r.result;
-
-                    mongo_auth_process.transition(doc.payload, function(err, payload) {
-                      // Perform the next step against mongod
-                      var command = {
-                        saslContinue: 1,
-                        conversationId: doc.conversationId,
-                        payload: payload
-                      };
-
-                      // Execute the command
-                      server(
-                        connection,
-                        new Query(self.bson, '$external.$cmd', command, {
-                          numberToSkip: 0,
-                          numberToReturn: 1
-                        }),
-                        function(err, r) {
-                          if (err) return callback(err, false);
-                          var doc = r.result;
-
-                          if (doc.done) return callback(null, true);
-                          callback(new Error('Authentication failed'), false);
-                        }
-                      );
-                    });
-                  }
-                );
+                authProcess.transition(null, err => {
+                  if (err) return callback(err, null);
+                  callback(null, response);
+                });
               });
-            }
-          );
+            });
+          });
         });
       });
-    }
-  );
-};
+    });
+  });
+}
 
 // Add to store only if it does not exist
 var addAuthSession = function(authStore, session) {
