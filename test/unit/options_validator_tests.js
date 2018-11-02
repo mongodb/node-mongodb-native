@@ -128,6 +128,52 @@ describe('Options Validation', function() {
     expect(validatedObject).to.deep.equal(testObject);
   });
 
+  it('Should set defaults, set overrides, and emit deprecation notices if validationLevel is none', function() {
+    const stub = process.emitWarning
+      ? sinon.stub(process, 'emitWarning')
+      : sinon.stub(console, 'error');
+
+    const validationSchema = {
+      a: { type: 'boolean' },
+      b: { type: 'number', default: 1 },
+      c: { type: 'number', deprecated: true },
+      d: { type: 'number' },
+      e: { type: 'number' }
+    };
+
+    const testObject = { a: 45, c: 3, e: 5 };
+    const validatedObject = validate(
+      validationSchema,
+      testObject,
+      { d: 2 },
+      { e: 0 },
+      { validationLevel: 'none' }
+    );
+
+    expect(stub).to.have.been.calledOnce;
+    expect(stub).to.have.been.calledWith(
+      'option [c] is deprecated and will be removed in a later version.'
+    );
+    expect(validatedObject).to.deep.equal({ a: 45, b: 1, c: 3, d: 2, e: 0 });
+
+    process.emitWarning ? process.emitWarning.restore() : console.error.restore();
+  });
+
+  it('Should check required for all validation levels', function() {
+    const validationSchema = { a: { type: 'boolean', required: true } };
+
+    const testObject = {};
+    expect(() => {
+      validate(validationSchema, testObject, {}, { validationLevel: 'none' });
+    }).to.throw('required option [a] was not found.');
+    expect(() => {
+      validate(validationSchema, testObject, {}, { validationLevel: 'warn' });
+    }).to.throw('required option [a] was not found.');
+    expect(() => {
+      validate(validationSchema, testObject, {}, { validationLevel: 'error' });
+    }).to.throw('required option [a] was not found.');
+  });
+
   it('Should warn if validationLevel is warn', function() {
     const stub = sinon.stub(console, 'warn');
     const validationSchema = {
@@ -162,22 +208,6 @@ describe('Options Validation', function() {
       expect(err).to.not.be.null;
       expect(err.message).to.equal('a should be of type boolean, but is of type number.');
     }
-  });
-
-  it('Should fail validation if required option is not present', function() {
-    const stub = sinon.stub(console, 'warn');
-    const validationSchema = {
-      a: { required: true }
-    };
-
-    const testObject = { b: 45 };
-    const validatedObject = validate(validationSchema, testObject, {}, { validationLevel: 'warn' });
-
-    expect(stub).to.have.been.calledOnce;
-    expect(stub).to.have.been.calledWith('required option [a] was not found.');
-    expect(validatedObject).to.deep.equal(testObject);
-
-    console.warn.restore();
   });
 
   it('Should validate an object with required and type fields', function() {
