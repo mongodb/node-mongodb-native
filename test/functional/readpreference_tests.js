@@ -246,7 +246,7 @@ describe('ReadPreference', function() {
           };
 
           // Perform the map reduce
-          collection.mapReduce(map, reduce, { out: { inline: 1 } }, function(/* err */) {
+          collection.mapReduce(map, reduce, { out: 'inline' }, function(/* err */) {
             // test.equal(null, err);
             client.topology.command = command;
             client.close();
