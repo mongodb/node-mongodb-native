@@ -34,27 +34,29 @@ function relayEvents(listener, emitter, events) {
   events.forEach(eventName => listener.on(eventName, event => emitter.emit(eventName, event)));
 }
 
-// Grab Kerberos values if they exist, otherwise set them to null
-let Kerberos = null;
-let MongoAuthProcess = null;
+function retrieveKerberos() {
+  let kerberos;
 
-try {
-  const kerberos = requireOptional('kerberos');
-  if (kerberos) {
-    Kerberos = kerberos.Kerberos;
-    MongoAuthProcess = kerberos.processes.MongoAuthProcess;
+  try {
+    kerberos = requireOptional('kerberos');
+  } catch (err) {
+    if (err.code === 'MODULE_NOT_FOUND') {
+      throw new Error('The `kerberos` module was not found. Please install it and try again.');
+    }
+
+    throw err;
   }
-} catch (err) {
-  console.warn(err.message);
+
+  return kerberos;
 }
 
 // Throw an error if an attempt to use EJSON is made when it is not installed
 const noEJSONError = function() {
-  throw new Error('The `mongodb-extjson` package was not found. Please install it and try again.');
+  throw new Error('The `mongodb-extjson` module was not found. Please install it and try again.');
 };
 
 // Facilitate loading EJSON optionally
-const retrieveEJSON = function() {
+function retrieveEJSON() {
   let EJSON = null;
   try {
     EJSON = requireOptional('mongodb-extjson');
@@ -69,8 +71,9 @@ const retrieveEJSON = function() {
       BSON: noEJSONError
     };
   }
+
   return EJSON;
-};
+}
 
 /*
  * Checks that collation is supported by server.
@@ -88,8 +91,7 @@ module.exports = {
   uuidV4,
   calculateDurationInMs,
   relayEvents,
-  Kerberos,
-  MongoAuthProcess,
   collationNotSupported,
-  retrieveEJSON
+  retrieveEJSON,
+  retrieveKerberos
 };

@@ -1,10 +1,9 @@
 'use strict';
 
 const f = require('util').format;
-const Kerberos = require('../utils').Kerberos;
-const MongoAuthProcess = require('../utils').MongoAuthProcess;
 const Query = require('../connection/commands').Query;
 const MongoError = require('../error').MongoError;
+const retrieveKerberos = require('../utils').retrieveKerberos;
 
 var AuthSession = function(db, username, password, options) {
   this.db = db;
@@ -44,8 +43,13 @@ var GSSAPI = function(bson) {
  */
 GSSAPI.prototype.auth = function(server, connections, db, username, password, options, callback) {
   var self = this;
-  // We don't have the Kerberos library
-  if (Kerberos == null) return callback(new Error('Kerberos library is not installed'));
+  let kerberos;
+  try {
+    kerberos = retrieveKerberos();
+  } catch (e) {
+    return callback(e, null);
+  }
+
   // TODO: remove this once we fix URI parsing
   var gssapiServiceName = options['gssapiservicename'] || options['gssapiServiceName'] || 'mongodb';
   // Total connections
@@ -63,6 +67,7 @@ GSSAPI.prototype.auth = function(server, connections, db, username, password, op
       // Start Auth process for a connection
       GSSAPIInitialize(
         self,
+        kerberos.processes.MongoAuthProcess,
         db,
         username,
         password,
@@ -115,6 +120,7 @@ GSSAPI.prototype.auth = function(server, connections, db, username, password, op
 // Initialize step
 var GSSAPIInitialize = function(
   self,
+  MongoAuthProcess,
   db,
   username,
   password,

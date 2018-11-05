@@ -1,10 +1,9 @@
 'use strict';
 
 const f = require('util').format;
-const Kerberos = require('../utils').Kerberos;
-const MongoAuthProcess = require('../utils').MongoAuthProcess;
 const Query = require('../connection/commands').Query;
 const MongoError = require('../error').MongoError;
+const retrieveKerberos = require('../utils').retrieveKerberos;
 
 var AuthSession = function(db, username, password, options) {
   this.db = db;
@@ -44,8 +43,13 @@ var SSPI = function(bson) {
  */
 SSPI.prototype.auth = function(server, connections, db, username, password, options, callback) {
   var self = this;
-  // We don't have the Kerberos library
-  if (Kerberos == null) return callback(new Error('Kerberos library is not installed'));
+  let kerberos;
+  try {
+    kerberos = retrieveKerberos();
+  } catch (e) {
+    return callback(e, null);
+  }
+
   var gssapiServiceName = options['gssapiServiceName'] || 'mongodb';
   // Total connections
   var count = connections.length;
@@ -62,6 +66,7 @@ SSPI.prototype.auth = function(server, connections, db, username, password, opti
       // Start Auth process for a connection
       SSIPAuthenticate(
         self,
+        kerberos.processes.MongoAuthProcess,
         username,
         password,
         gssapiServiceName,
@@ -110,6 +115,7 @@ SSPI.prototype.auth = function(server, connections, db, username, password, opti
 
 function SSIPAuthenticate(
   self,
+  MongoAuthProcess,
   username,
   password,
   gssapiServiceName,
