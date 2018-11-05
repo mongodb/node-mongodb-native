@@ -128,6 +128,18 @@ describe('Options Validation', function() {
     expect(validatedObject).to.deep.equal(testObject);
   });
 
+  it('Should error if a null dynamic default is set', function() {
+    const validationSchema = {
+      a: { type: 'boolean' },
+      b: { type: 'boolean' }
+    };
+
+    const testObject = { a: true };
+    expect(() => {
+      validate(validationSchema, testObject, { b: undefined }, { validationLevel: 'none' });
+    }).to.throw('A dynamic default of null or undefined was provided for [b].');
+  });
+
   it('Should set defaults, set overrides, and emit deprecation notices if validationLevel is none', function() {
     const stub = process.emitWarning
       ? sinon.stub(process, 'emitWarning')
