@@ -2893,7 +2893,10 @@ describe('Insert', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
+      var client = configuration.newClient(configuration.writeConcernMax(), {
+        poolSize: 1,
+        optionsValidationLevel: 'error'
+      });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         expect(err).to.be.null;
