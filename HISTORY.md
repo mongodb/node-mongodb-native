@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.1.9"></a>
+## [3.1.9](https://github.com/mongodb/node-mongodb-native/compare/v3.1.8...v3.1.9) (2018-11-06)
+
+
+### Bug Fixes
+
+* **db:** move db constants to other file to avoid circular ref ([#1858](https://github.com/mongodb/node-mongodb-native/issues/1858)) ([239036f](https://github.com/mongodb/node-mongodb-native/commit/239036f))
+* **estimated-document-count:** support options other than maxTimeMs ([36c3c7d](https://github.com/mongodb/node-mongodb-native/commit/36c3c7d))
+
+
+### Features
+
+* **core:** update to mongodb-core v3.1.8 ([80d7c79](https://github.com/mongodb/node-mongodb-native/commit/80d7c79))
+
+
+
 <a name="3.1.8"></a>
 ## [3.1.8](https://github.com/mongodb/node-mongodb-native/compare/v3.1.7...v3.1.8) (2018-10-10)
 
