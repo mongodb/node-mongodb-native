@@ -682,7 +682,9 @@ describe('Collation', function() {
           .then(() => {
             expect(commandResult).to.eql({
               createIndexes: 'test',
-              indexes: [{ name: 'a_1', key: { a: 1 }, collation: { caseLevel: true } }]
+              indexes: [
+                { name: 'a_1', key: { a: 1 }, collation: { caseLevel: true }, unique: false }
+              ]
             });
 
             return client.close();

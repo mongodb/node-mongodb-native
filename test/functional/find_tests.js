@@ -2724,31 +2724,6 @@ describe('Find', function() {
     }
   });
 
-  it('shouldNotMutateUserOptions', {
-    metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
-    },
-
-    // The actual test we wish to run
-    test: function(done) {
-      var configuration = this.configuration;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
-      client.connect(function(err, client) {
-        var db = client.db(configuration.db);
-        var collection = db.collection('shouldNotMutateUserOptions');
-        var options = { raw: 'TEST' };
-        collection.find({}, options, function(error) {
-          test.equal(null, error);
-          test.equal(undefined, options.skip);
-          test.equal(undefined, options.limit);
-          test.equal('TEST', options.raw);
-          client.close();
-          done();
-        });
-      });
-    }
-  });
-
   it(
     'Should correctly execute parallelCollectionScan with single cursor emitting raw buffers and close',
     {
