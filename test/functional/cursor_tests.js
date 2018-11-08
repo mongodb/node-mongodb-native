@@ -2413,8 +2413,8 @@ describe('Cursor', function() {
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
             test.equal(null, err);
 
-            // Create cursor with awaitdata, and timeout after the period specified
-            var cursor = collection.find({}, { tailable: true, awaitdata: true });
+            // Create cursor with awaitData, and timeout after the period specified
+            var cursor = collection.find({}, { tailable: true, awaitData: true });
             // Execute each
             cursor.each(function(err, result) {
               if (result) {
@@ -2423,7 +2423,7 @@ describe('Cursor', function() {
 
               if (err != null) {
                 // Even though cursor is exhausted, should not close session
-                // // unless cursor is manually closed, due to awaitdata / tailable
+                // // unless cursor is manually closed, due to awaitData / tailable
                 cursor.close();
                 client.close();
                 done();
@@ -2459,8 +2459,8 @@ describe('Cursor', function() {
         db.createCollection('should_await_data_no_docs', options, function(err, collection) {
           test.equal(null, err);
 
-          // Create cursor with awaitdata, and timeout after the period specified
-          var cursor = collection.find({}, { tailable: true, awaitdata: true });
+          // Create cursor with awaitData, and timeout after the period specified
+          var cursor = collection.find({}, { tailable: true, awaitData: true });
           var rewind = cursor.rewind;
           var called = false;
           cursor.rewind = function() {
@@ -2506,14 +2506,14 @@ describe('Cursor', function() {
 
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
             test.equal(null, err);
-            // Create cursor with awaitdata, and timeout after the period specified
+            // Create cursor with awaitData, and timeout after the period specified
             var cursor = collection.find({}, {});
             cursor.addCursorFlag('tailable', true);
             cursor.addCursorFlag('awaitData', true);
             cursor.each(function(err) {
               if (err != null) {
                 // Even though cursor is exhausted, should not close session
-                // unless cursor is manually closed, due to awaitdata / tailable
+                // unless cursor is manually closed, due to awaitData / tailable
                 cursor.close();
                 client.close();
                 done();
@@ -2546,7 +2546,7 @@ describe('Cursor', function() {
         db.createCollection('should_not_await_data_when_false', options, function(err, collection) {
           collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
             // should not timeout
-            collection.find({}, {tailable:true, awaitdata:false}).each(function(err, result) {
+            collection.find({}, {tailable:true, awaitData:false}).each(function(err, result) {
               test.ok(err != null);
             });
 
@@ -2586,8 +2586,8 @@ describe('Cursor', function() {
           collection.insert({ a: 1 }, configuration.writeConcernMax(), function(err) {
             test.equal(null, err);
 
-            // Create cursor with awaitdata, and timeout after the period specified
-            var cursor = collection.find({}, { tailable: true, awaitdata: true });
+            // Create cursor with awaitData, and timeout after the period specified
+            var cursor = collection.find({}, { tailable: true, awaitData: true });
             cursor.each(function(err) {
               if (err != null) {
                 // kill cursor b/c cursor is tailable / awaitable
@@ -3878,7 +3878,7 @@ describe('Cursor', function() {
             test.equal(null, err);
 
             var s = new Date();
-            // Create cursor with awaitdata, and timeout after the period specified
+            // Create cursor with awaitData, and timeout after the period specified
             var cursor = collection
               .find({})
               .addCursorFlag('tailable', true)
