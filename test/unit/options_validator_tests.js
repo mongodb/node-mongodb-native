@@ -24,7 +24,7 @@ describe('Options Validation', function() {
       validationSchema,
       testObject,
       {},
-      { validationLevel: testValidationLevel }
+      { optionsValidationLevel: testValidationLevel }
     );
 
     expect(validatedObject).to.deep.equal({ a: 1 });
@@ -40,7 +40,7 @@ describe('Options Validation', function() {
       validationSchema,
       testObject,
       {},
-      { validationLevel: testValidationLevel }
+      { optionsValidationLevel: testValidationLevel }
     );
 
     expect(validatedObject).to.deep.equal(testObject);
@@ -56,7 +56,7 @@ describe('Options Validation', function() {
       validationSchema,
       testObject1,
       {},
-      { validationLevel: testValidationLevel }
+      { optionsValidationLevel: testValidationLevel }
     );
 
     expect(validatedObject1).to.deep.equal(testObject1);
@@ -66,7 +66,7 @@ describe('Options Validation', function() {
       validationSchema,
       testObject2,
       {},
-      { validationLevel: testValidationLevel }
+      { optionsValidationLevel: testValidationLevel }
     );
 
     expect(validatedObject2).to.deep.equal(testObject2);
@@ -84,7 +84,7 @@ describe('Options Validation', function() {
       validationSchema,
       testObject,
       {},
-      { validationLevel: testValidationLevel }
+      { optionsValidationLevel: testValidationLevel }
     );
 
     expect(validatedObject).to.deep.equal(testObject);
@@ -100,13 +100,13 @@ describe('Options Validation', function() {
       validationSchema,
       testObject,
       {},
-      { validationLevel: testValidationLevel }
+      { optionsValidationLevel: testValidationLevel }
     );
 
     expect(validatedObject).to.deep.equal(testObject);
   });
 
-  it('Should use default validationLevel', function() {
+  it('Should use default optionsValidationLevel', function() {
     const validationSchema = {
       a: { type: 'boolean' }
     };
@@ -117,18 +117,23 @@ describe('Options Validation', function() {
     expect(validatedObject).to.deep.equal(testObject);
   });
 
-  it('Should skip validation if validationLevel is none', function() {
+  it('Should skip validation if optionsValidationLevel is none', function() {
     const validationSchema = {
       a: { type: 'boolean' }
     };
 
     const testObject = { a: 45 };
-    const validatedObject = validate(validationSchema, testObject, {}, { validationLevel: 'none' });
+    const validatedObject = validate(
+      validationSchema,
+      testObject,
+      {},
+      { optionsValidationLevel: 'none' }
+    );
 
     expect(validatedObject).to.deep.equal(testObject);
   });
 
-  it('Should set defaults, set overrides, and emit deprecation notices if validationLevel is none', function() {
+  it('Should set defaults, set overrides, and emit deprecation notices if optionsValidationLevel is none', function() {
     const stub = process.emitWarning
       ? sinon.stub(process, 'emitWarning')
       : sinon.stub(console, 'error');
@@ -147,7 +152,7 @@ describe('Options Validation', function() {
       testObject,
       { d: 2 },
       { e: 0 },
-      { validationLevel: 'none' }
+      { optionsValidationLevel: 'none' }
     );
 
     expect(stub).to.have.been.calledOnce;
@@ -164,24 +169,29 @@ describe('Options Validation', function() {
 
     const testObject = {};
     expect(() => {
-      validate(validationSchema, testObject, {}, { validationLevel: 'none' });
+      validate(validationSchema, testObject, {}, { optionsValidationLevel: 'none' });
     }).to.throw('required option [a] was not found.');
     expect(() => {
-      validate(validationSchema, testObject, {}, { validationLevel: 'warn' });
+      validate(validationSchema, testObject, {}, { optionsValidationLevel: 'warn' });
     }).to.throw('required option [a] was not found.');
     expect(() => {
-      validate(validationSchema, testObject, {}, { validationLevel: 'error' });
+      validate(validationSchema, testObject, {}, { optionsValidationLevel: 'error' });
     }).to.throw('required option [a] was not found.');
   });
 
-  it('Should warn if validationLevel is warn', function() {
+  it('Should warn if optionsValidationLevel is warn', function() {
     const stub = sinon.stub(console, 'warn');
     const validationSchema = {
       a: { type: 'boolean' }
     };
 
     const testObject = { a: 45 };
-    const validatedObject = validate(validationSchema, testObject, {}, { validationLevel: 'warn' });
+    const validatedObject = validate(
+      validationSchema,
+      testObject,
+      {},
+      { optionsValidationLevel: 'warn' }
+    );
 
     expect(stub).to.have.been.calledOnce;
     expect(stub).to.have.been.calledWith('a should be of type boolean, but is of type number.');
@@ -190,7 +200,7 @@ describe('Options Validation', function() {
     console.warn.restore();
   });
 
-  it('Should error if validationLevel is error', function() {
+  it('Should error if optionsValidationLevel is error', function() {
     const validationSchema = {
       a: { type: 'boolean' }
     };
@@ -201,7 +211,7 @@ describe('Options Validation', function() {
         validationSchema,
         testObject,
         {},
-        { validationLevel: 'error' }
+        { optionsValidationLevel: 'error' }
       );
       expect(validatedObject).to.deep.equal(testObject);
     } catch (err) {
@@ -220,7 +230,7 @@ describe('Options Validation', function() {
       validationSchema,
       testObject,
       {},
-      { validationLevel: testValidationLevel }
+      { optionsValidationLevel: testValidationLevel }
     );
 
     expect(validatedObject).to.deep.equal(testObject);
@@ -238,7 +248,7 @@ describe('Options Validation', function() {
         validationSchema,
         testObject,
         {},
-        { validationLevel: testValidationLevel }
+        { optionsValidationLevel: testValidationLevel }
       );
       expect(validatedObject).to.deep.equal(testObject);
     } catch (err) {
@@ -258,7 +268,7 @@ describe('Options Validation', function() {
       validationSchema,
       testObject,
       {},
-      { validationLevel: testValidationLevel }
+      { optionsValidationLevel: testValidationLevel }
     );
     expect(validatedObject.a).to.equal(true);
     expect(validatedObject.b).to.equal(3);
@@ -279,7 +289,7 @@ describe('Options Validation', function() {
       validationSchema,
       testObject,
       {},
-      { validationLevel: testValidationLevel }
+      { optionsValidationLevel: testValidationLevel }
     );
     expect(stub).to.have.been.calledOnce;
     expect(stub).to.have.been.calledWith(
@@ -309,7 +319,7 @@ describe('Options Validation', function() {
       testObject,
       {},
       { a: customObject.a, b: customObject.b },
-      { validationLevel: testValidationLevel }
+      { optionsValidationLevel: testValidationLevel }
     );
 
     expect(validatedObject).to.deep.equal({ a: 'custom', b: 'override' });
@@ -319,7 +329,7 @@ describe('Options Validation', function() {
       testObject,
       {},
       { a: customObject.a, b: customObject.b },
-      { validationLevel: 'none' }
+      { optionsValidationLevel: 'none' }
     );
 
     expect(validatedObject2).to.deep.equal({ a: 'custom', b: 'override' });
@@ -340,7 +350,7 @@ describe('Options Validation', function() {
       testObject,
       {},
       { a: customObject.a },
-      { validationLevel: testValidationLevel }
+      { optionsValidationLevel: testValidationLevel }
     );
 
     expect(validatedObject).to.deep.equal({ a: 'custom' });
@@ -363,7 +373,7 @@ describe('Options Validation', function() {
       testObject,
       {},
       { a: customObject.a },
-      { validationLevel: testValidationLevel }
+      { optionsValidationLevel: testValidationLevel }
     );
 
     expect(stub).have.been.calledOnce;
@@ -448,7 +458,7 @@ describe('Options Validation', function() {
   it('Should validate options using OperationBuilder', function() {
     class TestClass {
       constructor() {
-        this.s = { options: { validationLevel: 'error' } };
+        this.s = { options: { optionsValidationLevel: 'error' } };
       }
     }
 
@@ -472,7 +482,7 @@ describe('Options Validation', function() {
   it('Should override options using OperationBuilder', function() {
     class TestClass {
       constructor() {
-        this.s = { options: { validationLevel: 'error' } };
+        this.s = { options: { optionsValidationLevel: 'error' } };
       }
     }
 
@@ -501,7 +511,7 @@ describe('Options Validation', function() {
   it('Should properly validate when no options are provided', function() {
     class TestClass {
       constructor() {
-        this.s = { options: { validationLevel: 'error' } };
+        this.s = { options: { optionsValidationLevel: 'error' } };
       }
     }
 
@@ -528,7 +538,7 @@ describe('Options Validation', function() {
   it('Should fail with an object in the options position', function() {
     class TestClass {
       constructor() {
-        this.s = { options: { validationLevel: 'error' } };
+        this.s = { options: { optionsValidationLevel: 'error' } };
       }
     }
 
@@ -548,7 +558,7 @@ describe('Options Validation', function() {
   it('Should correctly handle a promise', function() {
     class TestClass {
       constructor() {
-        this.s = { options: { validationLevel: 'error' } };
+        this.s = { options: { optionsValidationLevel: 'error' } };
       }
     }
 
@@ -584,7 +594,7 @@ describe('Options Validation', function() {
   it('Should allow a boolean default', function() {
     class TestClass {
       constructor() {
-        this.s = { options: { validationLevel: 'error' } };
+        this.s = { options: { optionsValidationLevel: 'error' } };
       }
     }
 

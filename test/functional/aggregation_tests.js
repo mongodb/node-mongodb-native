@@ -877,6 +877,7 @@ describe('Aggregation', function() {
     test: function(done) {
       var databaseName = this.configuration.db;
       var client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+        optionsValidationLevel: 'error',
         poolSize: 1
       });
 
