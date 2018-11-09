@@ -1870,4 +1870,37 @@ describe('Collection', function() {
       }
     });
   });
+
+  it('should inherit config options from MongoClient', {
+    metadata: { requires: { topology: 'single' } },
+    test: function() {
+      const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+        optionsValidationLevel: 'error',
+        poolSize: 1
+      });
+
+      return client.connect().then(() => {
+        const db = client.db('inherit_test');
+        expect(db.optionsValidationLevel).to.equal('error');
+        const collection = db.collection('inheritTest');
+        expect(collection.optionsValidationLevel).to.equal('error');
+      });
+    }
+  });
+
+  it('should inherit config options from Db', {
+    metadata: { requires: { topology: 'single' } },
+    test: function() {
+      const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+        poolSize: 1
+      });
+
+      return client.connect().then(() => {
+        const db = client.db('inherit_test', { optionsValidationLevel: 'error' });
+        expect(db.optionsValidationLevel).to.equal('error');
+        const collection = db.collection('inheritTest');
+        expect(collection.optionsValidationLevel).to.equal('error');
+      });
+    }
+  });
 });

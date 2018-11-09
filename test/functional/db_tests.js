@@ -1,6 +1,8 @@
 'use strict';
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const chai = require('chai');
+const expect = chai.expect;
 
 describe('Db', function() {
   before(function() {
@@ -684,6 +686,21 @@ describe('Db', function() {
           done();
         });
         items.push(2);
+      });
+    }
+  });
+
+  it('should inherit config options from MongoClient', {
+    metadata: { requires: { topology: 'single' } },
+    test: function() {
+      const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+        optionsValidationLevel: 'error',
+        poolSize: 1
+      });
+
+      return client.connect().then(() => {
+        const db = client.db('inherit_test');
+        expect(db.optionsValidationLevel).to.equal('error');
       });
     }
   });
