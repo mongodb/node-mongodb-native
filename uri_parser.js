@@ -27,7 +27,7 @@ function matchesParentDomain(srvAddress, parentDomain) {
 }
 
 /**
- * Lookup an `mongodb+srv` connection string, combine the parts and reparse it as a normal
+ * Lookup a `mongodb+srv` connection string, combine the parts and reparse it as a normal
  * connection string.
  *
  * @param {string} uri The connection string to parse
@@ -50,8 +50,9 @@ function parseSrvConnectionString(uri, options, callback) {
     return callback(new MongoParseError(`Ports not accepted with '${PROTOCOL_MONGODB_SRV}' URIs`));
   }
 
-  let srvAddress = `_mongodb._tcp.${result.host}`;
-  dns.resolveSrv(srvAddress, (err, addresses) => {
+  // Resolve the SRV record and use the result as the list of hosts to connect to.
+  const lookupAddress = result.host;
+  dns.resolveSrv(`_mongodb._tcp.${lookupAddress}`, (err, addresses) => {
     if (err) return callback(err);
 
     if (addresses.length === 0) {
@@ -66,36 +67,20 @@ function parseSrvConnectionString(uri, options, callback) {
       }
     }
 
-    let base = result.auth ? `mongodb://${result.auth}@` : `mongodb://`;
-    let connectionStrings = addresses.map(
-      (address, i) =>
-        i === 0 ? `${base}${address.name}:${address.port}` : `${address.name}:${address.port}`
-    );
+    // Convert the original URL to a non-SRV URL.
+    result.protocol = 'mongodb';
+    result.host = addresses.map(address => `${address.name}:${address.port}`).join(',');
 
-    let connectionString = `${connectionStrings.join(',')}/`;
-    let connectionStringOptions = [];
-
-    // Add the default database if needed
-    if (result.path) {
-      let defaultDb = result.path.slice(1);
-      if (defaultDb.indexOf('?') !== -1) {
-        defaultDb = defaultDb.slice(0, defaultDb.indexOf('?'));
-      }
-
-      connectionString += defaultDb;
+    // Default to SSL true if it's not specified.
+    if (
+      !('ssl' in options) &&
+      (!result.search || !('ssl' in result.query) || result.query.ssl === null)
+    ) {
+      result.query.ssl = true;
     }
 
-    // Default to SSL true
-    if (!options.ssl && (!result.search || result.query['ssl'] == null)) {
-      connectionStringOptions.push('ssl=true');
-    }
-
-    // Keep original uri options
-    if (result.search) {
-      connectionStringOptions.push(result.search.replace('?', ''));
-    }
-
-    dns.resolveTxt(result.host, (err, record) => {
+    // Resolve TXT record and add options from there if they exist.
+    dns.resolveTxt(lookupAddress, (err, record) => {
       if (err) {
         if (err.code !== 'ENODATA') {
           return callback(err);
@@ -108,23 +93,21 @@ function parseSrvConnectionString(uri, options, callback) {
           return callback(new MongoParseError('Multiple text records not allowed'));
         }
 
-        record = record[0];
-        record = record.length > 1 ? record.join('') : record[0];
-        if (record.indexOf('authSource') === -1 && record.indexOf('replicaSet') === -1) {
+        record = qs.parse(record[0].join(''));
+        if (Object.keys(record).some(key => key !== 'authSource' && key !== 'replicaSet')) {
           return callback(
             new MongoParseError('Text record must only set `authSource` or `replicaSet`')
           );
         }
 
-        connectionStringOptions.push(record);
+        Object.assign(result.query, record);
       }
 
-      // Add any options to the connection string
-      if (connectionStringOptions.length) {
-        connectionString += `?${connectionStringOptions.join('&')}`;
-      }
+      // Set completed options back into the URL object.
+      result.search = qs.stringify(result.query);
 
-      parseConnectionString(connectionString, options, callback);
+      const finalString = URL.format(result);
+      parseConnectionString(finalString, options, callback);
     });
   });
 }
