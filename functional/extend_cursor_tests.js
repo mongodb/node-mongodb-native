@@ -71,8 +71,6 @@ describe('Extend cursor tests', function() {
               query: {}
             });
 
-            console.log(cursor);
-
             // Force a single
             // Logger.setLevel('debug');
             // Set the batch size
