@@ -20,16 +20,19 @@ jobs:
     - stage: standalone
       node_js: 4
       env: MONGODB_VERSION=3.6.x
+    - stage: standalone
+      node_js: 4
+      env: MONGODB_VERSION=4.0.x
 
     - stage: standalone
       node_js: 6
-      env: MONGODB_VERSION=3.6.x
+      env: MONGODB_VERSION=4.0.x
     - stage: standalone
       node_js: 8
-      env: MONGODB_VERSION=3.6.x
+      env: MONGODB_VERSION=4.0.x
     - stage: standalone
       node_js: 10
-      env: MONGODB_VERSION=3.6.x
+      env: MONGODB_VERSION=4.0.x
 
     - stage: replicaset
       node_js: 4
