@@ -263,6 +263,13 @@ function emitSDAMEvent(self, event, description) {
   }
 }
 
+const SERVER_EVENTS = ['serverDescriptionChanged', 'error', 'close', 'timeout', 'parseError'];
+function destroyServer(server, options) {
+  options = options || {};
+  SERVER_EVENTS.forEach(event => server.removeAllListeners(event));
+  server.destroy(options);
+}
+
 /**
  * Initiate server connect
  * @method
@@ -272,11 +279,13 @@ Mongos.prototype.connect = function(options) {
   var self = this;
   // Add any connect level options to the internal state
   this.s.connectOptions = options || {};
+
   // Set connecting state
   stateTransition(this, CONNECTING);
+
   // Create server instances
   var servers = this.s.seedlist.map(function(x) {
-    return new Server(
+    const server = new Server(
       Object.assign({}, self.s.options, x, {
         authProviders: self.authProviders,
         reconnect: false,
@@ -285,17 +294,9 @@ Mongos.prototype.connect = function(options) {
         clientInfo: clone(self.s.clientInfo)
       })
     );
-  });
 
-  const serverDescriptionChangedCallback = event => {
-    self.emit('serverDescriptionChanged', event);
-  };
-
-  servers.forEach(function(server) {
-    server.on('serverDescriptionChanged', serverDescriptionChangedCallback);
-    server.on('destroy', () =>
-      server.removeListener('serverDescriptionChanged', serverDescriptionChangedCallback)
-    );
+    relayEvents(server, self, ['serverDescriptionChanged']);
+    return server;
   });
 
   // Emit the topology opening event
@@ -543,7 +544,6 @@ function reconnectProxies(self, proxies, callback) {
       // Destroyed
       if (self.state === DESTROYED || self.state === UNREFERENCED) {
         moveServerFrom(self.connectingProxies, self.disconnectedProxies, _self);
-        // Return destroy
         return this.destroy();
       }
 
@@ -613,13 +613,11 @@ function reconnectProxies(self, proxies, callback) {
         })
       );
 
-      _server.destroy();
+      destroyServer(_server);
       removeProxyFrom(self.disconnectedProxies, _server);
 
       // Relay the server description change
-      server.on('serverDescriptionChanged', function(event) {
-        self.emit('serverDescriptionChanged', event);
-      });
+      relayEvents(server, self, ['serverDescriptionChanged']);
 
       // Emit opening server event
       self.emit('serverOpening', {
@@ -843,17 +841,17 @@ Mongos.prototype.destroy = function(options) {
   this.s.authenticationContexts = [];
 
   // Destroy all connecting servers
-  proxies.forEach(function(x) {
+  proxies.forEach(function(server) {
     // Emit the sdam event
     self.emit('serverClosed', {
       topologyId: self.id,
-      address: x.name
+      address: server.name
     });
 
-    // Destroy the server
-    x.destroy(options);
+    destroyServer(server, options);
+
     // Move to list of disconnectedProxies
-    moveServerFrom(self.connectedProxies, self.disconnectedProxies, x);
+    moveServerFrom(self.connectedProxies, self.disconnectedProxies, server);
   });
   // Emit the final topology change
   emitTopologyDescriptionChanged(self);
