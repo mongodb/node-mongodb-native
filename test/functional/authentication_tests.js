@@ -9,6 +9,45 @@ describe('Authentication', function() {
     return setupDatabase(this.configuration);
   });
 
+  it('should still work for auth when using new url parser and no database is in url', {
+    metadata: { requires: { topology: ['single'] } },
+    test: function(done) {
+      const configuration = this.configuration;
+      const username = 'testUser';
+      const password = 'pencil';
+      const AUTH_URL = configuration.url(username, password).replace(configuration.db, '');
+
+      const noop = () => undefined;
+      const returnNothing = fn => fn().then(noop);
+      const tap = fn => e => returnNothing(fn).then(() => e, () => e);
+
+      const controllerClient = configuration.newClient();
+
+      controllerClient
+        .connect()
+        .then(() => {
+          const controllerClientCleanup = tap(() => controllerClient.close());
+          const admin = controllerClient.db('admin');
+          return admin
+            .addUser(username, password)
+            .then(() => {
+              const client = configuration.newClient(AUTH_URL, { useNewUrlParser: true });
+
+              const removeUser = tap(() => admin.removeUser(username));
+              const clientCleanup = tap(() => client.close());
+
+              return client
+                .connect()
+                .then(() => undefined)
+                .then(clientCleanup, clientCleanup)
+                .then(removeUser, removeUser);
+            })
+            .then(controllerClientCleanup, controllerClientCleanup);
+        })
+        .then(done, done);
+    }
+  });
+
   /**
    * Fail due to illegal authentication mechanism
    *
