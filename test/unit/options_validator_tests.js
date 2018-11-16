@@ -90,7 +90,9 @@ describe('Options Validation', function() {
     expect(validatedObject).to.deep.equal(testObject);
   });
 
-  it('Should ignore fields not in schema', function() {
+  it('Should warn for fields not in schema', function() {
+    const stub = sinon.stub(console, 'warn');
+
     const validationSchema = {
       a: { type: 'boolean' }
     };
@@ -103,18 +105,30 @@ describe('Options Validation', function() {
       { optionsValidationLevel: testValidationLevel }
     );
 
+    expect(stub).to.have.been.calledOnce;
+    expect(stub).to.have.been.calledWith('provided option [b] is an unknown option');
     expect(validatedObject).to.deep.equal(testObject);
+
+    console.warn.restore();
   });
 
   it('Should use default optionsValidationLevel', function() {
+    const stub = sinon.stub(console, 'warn');
+
     const validationSchema = {
       a: { type: 'boolean' }
     };
 
-    const testObject = { b: 1 };
+    const testObject = { a: 1 };
     const validatedObject = validate(validationSchema, testObject, {});
 
+    expect(stub).to.have.been.calledOnce;
+    expect(stub).to.have.been.calledWith(
+      'option [a] should be of type boolean, but is of type number.'
+    );
     expect(validatedObject).to.deep.equal(testObject);
+
+    console.warn.restore();
   });
 
   it('Should skip validation if optionsValidationLevel is none', function() {
@@ -194,7 +208,9 @@ describe('Options Validation', function() {
     );
 
     expect(stub).to.have.been.calledOnce;
-    expect(stub).to.have.been.calledWith('a should be of type boolean, but is of type number.');
+    expect(stub).to.have.been.calledWith(
+      'option [a] should be of type boolean, but is of type number.'
+    );
     expect(validatedObject).to.deep.equal(testObject);
 
     console.warn.restore();
@@ -216,7 +232,7 @@ describe('Options Validation', function() {
       expect(validatedObject).to.deep.equal(testObject);
     } catch (err) {
       expect(err).to.not.be.null;
-      expect(err.message).to.equal('a should be of type boolean, but is of type number.');
+      expect(err.message).to.equal('option [a] should be of type boolean, but is of type number.');
     }
   });
 
@@ -607,5 +623,26 @@ describe('Options Validation', function() {
     const testClass = new TestClass();
     const testResult = testClass.testOperation();
     expect(testResult).to.deep.equal({ a: false });
+  });
+
+  it('Should warn on unknown option', function() {
+    const stub = sinon.stub(console, 'warn');
+    const validationSchema = {
+      a: { type: 'boolean' }
+    };
+
+    const testObject = { a: true, b: 45 };
+    const validatedObject = validate(
+      validationSchema,
+      testObject,
+      {},
+      { optionsValidationLevel: 'warn' }
+    );
+
+    expect(stub).to.have.been.calledOnce;
+    expect(stub).to.have.been.calledWith('provided option [b] is an unknown option');
+    expect(validatedObject).to.deep.equal(testObject);
+
+    console.warn.restore();
   });
 });
