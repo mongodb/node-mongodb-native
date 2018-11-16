@@ -29,6 +29,38 @@ const skipTests = [
 ];
 
 describe('Connection String', function() {
+  it('should support auth passed in through options', function(done) {
+    const optionsWithUser = {
+      authMechanism: 'SCRAM-SHA-1',
+      auth: { user: 'testing', password: 'llamas' }
+    };
+
+    const optionsWithUsername = {
+      authMechanism: 'SCRAM-SHA-1',
+      auth: { username: 'testing', password: 'llamas' }
+    };
+
+    parseConnectionString('mongodb://localhost', optionsWithUser, (err, result) => {
+      expect(err).to.not.exist;
+      expect(result.auth).to.containSubset({
+        db: 'admin',
+        username: 'testing',
+        password: 'llamas'
+      });
+
+      parseConnectionString('mongodb://localhost', optionsWithUsername, (err, result) => {
+        expect(err).to.not.exist;
+        expect(result.auth).to.containSubset({
+          db: 'admin',
+          username: 'testing',
+          password: 'llamas'
+        });
+
+        done();
+      });
+    });
+  });
+
   it('should provide a default port if one is not provided', function(done) {
     parseConnectionString('mongodb://hostname', function(err, result) {
       expect(err).to.not.exist;
