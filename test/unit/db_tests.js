@@ -4,6 +4,7 @@ const EventEmitter = require('events');
 const expect = require('chai').expect;
 const sinon = require('sinon');
 const ReadPreference = require('mongodb-core').ReadPreference;
+
 class MockTopology extends EventEmitter {
   constructor() {
     super();
@@ -11,6 +12,12 @@ class MockTopology extends EventEmitter {
 
   capabilities() {
     return {};
+  }
+}
+
+class MockClient {
+  constructor() {
+    this.topology = new MockTopology();
   }
 }
 
@@ -40,7 +47,7 @@ describe('Database', function() {
       });
 
       const Db = require('../../lib/db');
-      const db = new Db('fakeDb', new MockTopology(), { readPreference: 'nearest' });
+      const db = new Db('fakeDb', new MockClient(), { readPreference: 'nearest' });
       db.dropDatabase();
     }
   });
