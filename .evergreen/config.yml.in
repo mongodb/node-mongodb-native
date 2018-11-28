@@ -151,7 +151,6 @@ pre:
   # - func: "windows fix"
   - func: "fix absolute paths"
   - func: "make files executable"
-  - func: "install dependencies"
 
 post:
   - func: "cleanup"
