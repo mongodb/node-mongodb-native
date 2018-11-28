@@ -130,6 +130,7 @@ functions:
 
   "install dependencies":
     - command: shell.exec
+      type: setup
       params:
         working_dir: "src"
         script: |
