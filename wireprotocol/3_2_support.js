@@ -372,12 +372,6 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
     return query;
   }
 
-  // optionally decorate query with transaction data
-  const err = decorateWithSessionsData(query.query, options.session, options);
-  if (err) {
-    return err;
-  }
-
   return query;
 };
 
