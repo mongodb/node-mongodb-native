@@ -1,16 +1,17 @@
 'use strict';
 
-var copy = require('../connection/utils').copy,
-  retrieveBSON = require('../connection/utils').retrieveBSON,
-  KillCursor = require('../connection/commands').KillCursor,
-  GetMore = require('../connection/commands').GetMore,
-  Query = require('../connection/commands').Query,
-  f = require('util').format,
-  MongoError = require('../error').MongoError,
-  getReadPreference = require('./shared').getReadPreference;
+const copy = require('../connection/utils').copy;
+const retrieveBSON = require('../connection/utils').retrieveBSON;
+const KillCursor = require('../connection/commands').KillCursor;
+const GetMore = require('../connection/commands').GetMore;
+const Query = require('../connection/commands').Query;
+const f = require('util').format;
+const MongoError = require('../error').MongoError;
+const getReadPreference = require('./shared').getReadPreference;
+const applyCommonQueryOptions = require('./shared').applyCommonQueryOptions;
 
-var BSON = retrieveBSON(),
-  Long = BSON.Long;
+const BSON = retrieveBSON();
+const Long = BSON.Long;
 
 var WireProtocol = function() {};
 
@@ -149,29 +150,7 @@ WireProtocol.prototype.getMore = function(
   };
 
   // Contains any query options
-  var queryOptions = {};
-
-  // If we have a raw query decorate the function
-  if (raw) {
-    queryOptions.raw = raw;
-  }
-
-  // Check if we need to promote longs
-  if (typeof cursorState.promoteLongs === 'boolean') {
-    queryOptions.promoteLongs = cursorState.promoteLongs;
-  }
-
-  if (typeof cursorState.promoteValues === 'boolean') {
-    queryOptions.promoteValues = cursorState.promoteValues;
-  }
-
-  if (typeof cursorState.promoteBuffers === 'boolean') {
-    queryOptions.promoteBuffers = cursorState.promoteBuffers;
-  }
-
-  if (typeof cursorState.session === 'object') {
-    queryOptions.session = cursorState.session;
-  }
+  const queryOptions = applyCommonQueryOptions({}, cursorState);
 
   // Write out the getMore command
   connection.write(getMore, queryOptions, queryCallback);

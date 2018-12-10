@@ -7,9 +7,10 @@ const MongoNetworkError = require('./error').MongoNetworkError;
 const mongoErrorContextSymbol = require('./error').mongoErrorContextSymbol;
 const f = require('util').format;
 const collationNotSupported = require('./utils').collationNotSupported;
+const applyCommonQueryOptions = require('./wireprotocol/shared').applyCommonQueryOptions;
 
-var BSON = retrieveBSON(),
-  Long = BSON.Long;
+const BSON = retrieveBSON();
+const Long = BSON.Long;
 
 /**
  * This is a cursor results callback
@@ -105,7 +106,8 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
     batchSize: options.batchSize || cmd.batchSize || 1000,
     currentLimit: 0,
     // Result field name if not a cursor (contains the array of results)
-    transforms: options.transforms
+    transforms: options.transforms,
+    raw: options.raw || (typeof cmd === 'object' && cmd.raw)
   };
 
   if (typeof options.session === 'object') {
@@ -596,41 +598,6 @@ var nextFunction = function(self, callback) {
   }
 };
 
-function buildFindCommandQueryOptions(cursor) {
-  const queryOptions = {};
-
-  // If we have a raw query decorate the function
-  if (cursor.options.raw || cursor.cmd.raw) {
-    queryOptions.raw = cursor.options.raw || cursor.cmd.raw;
-  }
-
-  // Do we have documentsReturnedIn set on the query
-  if (typeof cursor.query.documentsReturnedIn === 'string') {
-    queryOptions.documentsReturnedIn = cursor.query.documentsReturnedIn;
-  }
-
-  // Add promote Long value if defined
-  if (typeof cursor.cursorState.promoteLongs === 'boolean') {
-    queryOptions.promoteLongs = cursor.cursorState.promoteLongs;
-  }
-
-  // Add promote values if defined
-  if (typeof cursor.cursorState.promoteValues === 'boolean') {
-    queryOptions.promoteValues = cursor.cursorState.promoteValues;
-  }
-
-  // Add promote values if defined
-  if (typeof cursor.cursorState.promoteBuffers === 'boolean') {
-    queryOptions.promoteBuffers = cursor.cursorState.promoteBuffers;
-  }
-
-  if (typeof cursor.cursorState.session === 'object') {
-    queryOptions.session = cursor.cursorState.session;
-  }
-
-  return queryOptions;
-}
-
 function initializeCursor(cursor, callback) {
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected
@@ -722,7 +689,12 @@ function initializeCursor(cursor, callback) {
       );
     }
 
-    const queryOptions = buildFindCommandQueryOptions(cursor);
+    const queryOptions = applyCommonQueryOptions({}, cursor.cursorState);
+    // Do we have documentsReturnedIn set on the query
+    if (typeof cursor.query.documentsReturnedIn === 'string') {
+      queryOptions.documentsReturnedIn = cursor.query.documentsReturnedIn;
+    }
+
     cursor.server.s.pool.write(cursor.query, queryOptions, (err, r) => {
       if (err) return callback(err);
 

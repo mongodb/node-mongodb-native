@@ -9,6 +9,7 @@ const BSON = retrieveBSON();
 const Long = BSON.Long;
 const ReadPreference = require('../topologies/read_preference');
 const TxnState = require('../transactions').TxnState;
+const applyCommonQueryOptions = require('./shared').applyCommonQueryOptions;
 
 const WireProtocol = function() {};
 
@@ -312,33 +313,10 @@ WireProtocol.prototype.getMore = function(
     callback(null, r.documents[0], r.connection);
   }
 
-  // Query options
-  const queryOptions = { command: true };
-
-  // If we have a raw query decorate the function
-  if (raw) {
-    queryOptions.raw = raw;
-  }
-
-  // Add the result field needed
-  queryOptions.documentsReturnedIn = 'nextBatch';
-
-  // Check if we need to promote longs
-  if (typeof cursorState.promoteLongs === 'boolean') {
-    queryOptions.promoteLongs = cursorState.promoteLongs;
-  }
-
-  if (typeof cursorState.promoteValues === 'boolean') {
-    queryOptions.promoteValues = cursorState.promoteValues;
-  }
-
-  if (typeof cursorState.promoteBuffers === 'boolean') {
-    queryOptions.promoteBuffers = cursorState.promoteBuffers;
-  }
-
-  if (typeof cursorState.session === 'object') {
-    queryOptions.session = cursorState.session;
-  }
+  const queryOptions = applyCommonQueryOptions(
+    { command: true, documentsReturnedIn: 'nextBatch' },
+    cursorState
+  );
 
   // Write out the getMore command
   connection.write(query, queryOptions, queryCallback);

@@ -47,9 +47,22 @@ var parseHeader = function(message) {
   };
 };
 
+function applyCommonQueryOptions(queryOptions, cursorState) {
+  if (cursorState.raw) queryOptions.raw = cursorState.raw;
+  if (typeof cursorState.promoteLongs === 'boolean')
+    queryOptions.promoteLongs = cursorState.promoteLongs;
+  if (typeof cursorState.promoteValues === 'boolean')
+    queryOptions.promoteValues = cursorState.promoteValues;
+  if (typeof cursorState.promoteBuffers === 'boolean')
+    queryOptions.promoteBuffers = cursorState.promoteBuffers;
+  if (typeof cursorState.session === 'object') queryOptions.session = cursorState.session;
+  return queryOptions;
+}
+
 module.exports = {
   getReadPreference: getReadPreference,
   MESSAGE_HEADER_SIZE: MESSAGE_HEADER_SIZE,
   opcodes: opcodes,
-  parseHeader: parseHeader
+  parseHeader: parseHeader,
+  applyCommonQueryOptions
 };
