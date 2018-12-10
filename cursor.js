@@ -214,8 +214,6 @@ var handleCallback = function(callback, err, result) {
 Cursor.prototype._getmore = function(callback) {
   if (this.logger.isDebug())
     this.logger.debug(f('schedule getMore call for query [%s]', JSON.stringify(this.query)));
-  // Determine if it's a raw query
-  var raw = this.options.raw || this.cmd.raw;
 
   // Set the current batchSize
   var batchSize = this.cursorState.batchSize;
@@ -235,7 +233,6 @@ Cursor.prototype._getmore = function(callback) {
     this.ns,
     this.cursorState,
     batchSize,
-    raw,
     pool,
     this.options,
     callback

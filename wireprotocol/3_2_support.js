@@ -240,7 +240,6 @@ WireProtocol.prototype.getMore = function(
   ns,
   cursorState,
   batchSize,
-  raw,
   connection,
   options,
   callback
@@ -288,7 +287,7 @@ WireProtocol.prototype.getMore = function(
     }
 
     // Raw, return all the extracted documents
-    if (raw) {
+    if (cursorState.raw) {
       cursorState.documents = r.documents;
       cursorState.cursorId = r.cursorId;
       return callback(null, r.documents);

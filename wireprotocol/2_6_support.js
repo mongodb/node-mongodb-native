@@ -119,7 +119,6 @@ WireProtocol.prototype.getMore = function(
   ns,
   cursorState,
   batchSize,
-  raw,
   connection,
   options,
   callback
