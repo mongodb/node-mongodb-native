@@ -7,7 +7,6 @@ const MongoNetworkError = require('./error').MongoNetworkError;
 const mongoErrorContextSymbol = require('./error').mongoErrorContextSymbol;
 const f = require('util').format;
 const collationNotSupported = require('./utils').collationNotSupported;
-const applyCommonQueryOptions = require('./wireprotocol/shared').applyCommonQueryOptions;
 
 const BSON = retrieveBSON();
 const Long = BSON.Long;
@@ -756,26 +755,14 @@ function initializeCursor(cursor, callback) {
     }
 
     cursor.query = cursor.server.wireProtocolHandler.command(
+      cursor.server.s.pool,
       cursor.bson,
       cursor.ns,
       cursor.cmd,
-      cursor.cursorState,
       cursor.topology,
-      cursor.options
+      cursor.options,
+      queryCallback
     );
-
-    if (cursor.query instanceof MongoError) {
-      return callback(cursor.query);
-    }
-
-    const queryOptions = applyCommonQueryOptions({}, cursor.cursorState);
-
-    // Do we have documentsReturnedIn set on the query
-    if (typeof cursor.query.documentsReturnedIn === 'string') {
-      queryOptions.documentsReturnedIn = cursor.query.documentsReturnedIn;
-    }
-
-    cursor.server.s.pool.write(cursor.query, queryOptions, queryCallback);
   });
 }
 

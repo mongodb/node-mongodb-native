@@ -47,21 +47,24 @@ var parseHeader = function(message) {
   };
 };
 
-function applyCommonQueryOptions(queryOptions, cursorState) {
-  if (cursorState.raw) queryOptions.raw = cursorState.raw;
-  if (typeof cursorState.promoteLongs === 'boolean') {
-    queryOptions.promoteLongs = cursorState.promoteLongs;
+function applyCommonQueryOptions(queryOptions, options) {
+  Object.assign(queryOptions, {
+    raw: typeof options.raw === 'boolean' ? options.raw : false,
+    promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
+    promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
+    promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false,
+    monitoring: typeof options.monitoring === 'boolean' ? options.monitoring : false,
+    fullResult: typeof options.fullResult === 'boolean' ? options.fullResult : false
+  });
+
+  if (typeof options.socketTimeout === 'number') {
+    queryOptions.socketTimeout = options.socketTimeout;
   }
 
-  if (typeof cursorState.promoteValues === 'boolean') {
-    queryOptions.promoteValues = cursorState.promoteValues;
+  if (options.session) {
+    queryOptions.session = options.session;
   }
 
-  if (typeof cursorState.promoteBuffers === 'boolean') {
-    queryOptions.promoteBuffers = cursorState.promoteBuffers;
-  }
-
-  if (typeof cursorState.session === 'object') queryOptions.session = cursorState.session;
   return queryOptions;
 }
 

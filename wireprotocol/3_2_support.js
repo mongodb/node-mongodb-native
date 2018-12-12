@@ -173,10 +173,10 @@ class WireProtocol {
     pool.write(query, queryOptions, callback);
   }
 
-  command(bson, ns, cmd, cursorState, topology, options) {
+  command(pool, bson, ns, cmd, topology, options, callback) {
     options = options || {};
     if (cmd == null) {
-      return new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`);
+      return callback(new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`));
     }
 
     const readPreference = getReadPreference(cmd, options);
@@ -197,7 +197,7 @@ class WireProtocol {
 
     const err = decorateWithSessionsData(finalCmd, options.session, options);
     if (err) {
-      return err;
+      return callback(err);
     }
 
     const query = new Query(bson, `${parts.shift()}.$cmd`, finalCmd, {
@@ -209,7 +209,13 @@ class WireProtocol {
     });
 
     query.slaveOk = readPreference.slaveOk();
-    return query;
+
+    const queryOptions = applyCommonQueryOptions({ command: true }, options);
+    if (typeof query.documentsReturnedIn === 'string') {
+      queryOptions.documentsReturnedIn = query.documentsReturnedIn;
+    }
+
+    pool.write(query, queryOptions, callback);
   }
 }
 

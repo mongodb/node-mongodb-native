@@ -88,13 +88,9 @@ class WireProtocol {
     pool.write(query, queryOptions, callback);
   }
 
-  command(bson, ns, cmd, cursorState, topology, options) {
-    if (cursorState.cursorId != null) {
-      return;
-    }
-
+  command(pool, bson, ns, cmd, topology, options, callback) {
     if (cmd == null) {
-      throw new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`);
+      return callback(new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`));
     }
 
     options = options || {};
@@ -108,10 +104,12 @@ class WireProtocol {
       typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
 
     if (cmd.readConcern && cmd.readConcern.level !== 'local') {
-      throw new MongoError(
-        `server ${JSON.stringify(cmd)} command does not support a readConcern level of ${
-          cmd.readConcern.level
-        }`
+      return callback(
+        new MongoError(
+          `server ${JSON.stringify(cmd)} command does not support a readConcern level of ${
+            cmd.readConcern.level
+          }`
+        )
       );
     }
 
@@ -133,7 +131,13 @@ class WireProtocol {
     });
 
     query.slaveOk = readPreference.slaveOk();
-    return query;
+
+    const queryOptions = applyCommonQueryOptions({ command: true }, options);
+    if (typeof query.documentsReturnedIn === 'string') {
+      queryOptions.documentsReturnedIn = query.documentsReturnedIn;
+    }
+
+    pool.write(query, queryOptions, callback);
   }
 }
 

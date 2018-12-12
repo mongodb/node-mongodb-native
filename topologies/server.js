@@ -755,33 +755,8 @@ Server.prototype.command = function(ns, cmd, options, callback) {
     return callback(new MongoError(`server ${this.name} does not support collation`));
   }
 
-  // Are we executing against a specific topology
-  var topology = options.topology || {};
-  // Create the query object
-  var query = self.wireProtocolHandler.command(self.s.bson, ns, cmd, {}, topology, options);
-  if (query instanceof MongoError) {
-    return callback(query, null);
-  }
-
-  // Set slave OK of the query
-  query.slaveOk = options.readPreference ? options.readPreference.slaveOk() : false;
-
-  // Write options
-  var writeOptions = {
-    raw: typeof options.raw === 'boolean' ? options.raw : false,
-    promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
-    promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
-    promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false,
-    command: true,
-    monitoring: typeof options.monitoring === 'boolean' ? options.monitoring : false,
-    fullResult: typeof options.fullResult === 'boolean' ? options.fullResult : false,
-    requestId: query.requestId,
-    socketTimeout: typeof options.socketTimeout === 'number' ? options.socketTimeout : null,
-    session: options.session || null
-  };
-
-  // Write the operation to the pool
-  self.s.pool.write(query, writeOptions, callback);
+  const topology = options.topology || {};
+  self.wireProtocolHandler.command(self.s.pool, self.s.bson, ns, cmd, topology, options, callback);
 };
 
 /**
