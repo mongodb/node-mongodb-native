@@ -151,20 +151,26 @@ class WireProtocol {
     connection.write(query, queryOptions, queryCallback);
   }
 
-  query(bson, ns, cmd, cursorState, topology, options) {
+  query(pool, bson, ns, cmd, cursorState, topology, options, callback) {
     options = options || {};
     if (cursorState.cursorId != null) {
-      return;
+      return callback();
     }
 
     if (cmd == null) {
-      return new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`);
+      return callback(new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`));
     }
 
     const query = executeFindCommand(bson, ns, cmd, cursorState, topology, options);
     cmd.virtual = false;
     query.documentsReturnedIn = 'firstBatch';
-    return query;
+
+    const queryOptions = applyCommonQueryOptions({}, cursorState);
+    if (typeof query.documentsReturnedIn === 'string') {
+      queryOptions.documentsReturnedIn = query.documentsReturnedIn;
+    }
+
+    pool.write(query, queryOptions, callback);
   }
 
   command(bson, ns, cmd, cursorState, topology, options) {

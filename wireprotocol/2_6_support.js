@@ -74,12 +74,18 @@ class WireProtocol {
     connection.write(getMore, queryOptions, queryCallback);
   }
 
-  query(bson, ns, cmd, cursorState, topology, options) {
+  query(pool, bson, ns, cmd, cursorState, topology, options, callback) {
     if (cursorState.cursorId != null) {
       return;
     }
 
-    return setupClassicFind(bson, ns, cmd, cursorState, topology, options);
+    const query = setupClassicFind(bson, ns, cmd, cursorState, topology, options);
+    const queryOptions = applyCommonQueryOptions({}, cursorState);
+    if (typeof query.documentsReturnedIn === 'string') {
+      queryOptions.documentsReturnedIn = query.documentsReturnedIn;
+    }
+
+    pool.write(query, queryOptions, callback);
   }
 
   command(bson, ns, cmd, cursorState, topology, options) {

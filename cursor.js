@@ -732,36 +732,40 @@ function initializeCursor(cursor, callback) {
       done(result);
     };
 
-    if (cursor.cmd.find != null) {
-      cursor.query = cursor.server.wireProtocolHandler.query(
-        cursor.bson,
-        cursor.ns,
-        cursor.cmd,
-        cursor.cursorState,
-        cursor.topology,
-        cursor.options
-      );
-    } else {
-      cursor.query = cursor.server.wireProtocolHandler.command(
-        cursor.bson,
-        cursor.ns,
-        cursor.cmd,
-        cursor.cursorState,
-        cursor.topology,
-        cursor.options
-      );
-    }
-
-    if (cursor.query instanceof MongoError) {
-      return callback(cursor.query);
-    }
-
     if (cursor.logger.isDebug()) {
       cursor.logger.debug(
         `issue initial query [${JSON.stringify(cursor.cmd)}] with flags [${JSON.stringify(
           cursor.query
         )}]`
       );
+    }
+
+    if (cursor.cmd.find != null) {
+      cursor.server.wireProtocolHandler.query(
+        cursor.server.s.pool,
+        cursor.bson,
+        cursor.ns,
+        cursor.cmd,
+        cursor.cursorState,
+        cursor.topology,
+        cursor.options,
+        queryCallback
+      );
+
+      return;
+    }
+
+    cursor.query = cursor.server.wireProtocolHandler.command(
+      cursor.bson,
+      cursor.ns,
+      cursor.cmd,
+      cursor.cursorState,
+      cursor.topology,
+      cursor.options
+    );
+
+    if (cursor.query instanceof MongoError) {
+      return callback(cursor.query);
     }
 
     const queryOptions = applyCommonQueryOptions({}, cursor.cursorState);
