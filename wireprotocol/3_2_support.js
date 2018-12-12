@@ -151,11 +151,8 @@ class WireProtocol {
     connection.write(query, queryOptions, queryCallback);
   }
 
-  command(bson, ns, cmd, cursorState, topology, options) {
+  query(bson, ns, cmd, cursorState, topology, options) {
     options = options || {};
-    const wireProtocolCommand =
-      typeof options.wireProtocolCommand === 'boolean' ? options.wireProtocolCommand : true;
-
     if (cursorState.cursorId != null) {
       return;
     }
@@ -164,15 +161,48 @@ class WireProtocol {
       return new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`);
     }
 
-    let query;
-    if (cmd.find && wireProtocolCommand) {
-      query = executeFindCommand(bson, ns, cmd, cursorState, topology, options);
-      cmd.virtual = false;
-      query.documentsReturnedIn = 'firstBatch';
-    } else if (cmd) {
-      query = setupCommand(bson, ns, cmd, cursorState, topology, options);
+    const query = executeFindCommand(bson, ns, cmd, cursorState, topology, options);
+    cmd.virtual = false;
+    query.documentsReturnedIn = 'firstBatch';
+    return query;
+  }
+
+  command(bson, ns, cmd, cursorState, topology, options) {
+    options = options || {};
+    if (cmd == null) {
+      return new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`);
     }
 
+    const readPreference = getReadPreference(cmd, options);
+    const parts = ns.split(/\./);
+
+    let finalCmd = Object.assign({}, cmd);
+    const serializeFunctions =
+      typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
+    const ignoreUndefined =
+      typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
+
+    if (topology.type === 'mongos' && readPreference && readPreference.preference !== 'primary') {
+      finalCmd = {
+        $query: finalCmd,
+        $readPreference: readPreference.toJSON()
+      };
+    }
+
+    const err = decorateWithSessionsData(finalCmd, options.session, options);
+    if (err) {
+      return err;
+    }
+
+    const query = new Query(bson, `${parts.shift()}.$cmd`, finalCmd, {
+      numberToSkip: 0,
+      numberToReturn: -1,
+      checkKeys: false,
+      serializeFunctions: serializeFunctions,
+      ignoreUndefined: ignoreUndefined
+    });
+
+    query.slaveOk = readPreference.slaveOk();
     return query;
   }
 }
@@ -420,40 +450,6 @@ function executeFindCommand(bson, ns, cmd, cursorState, topology, options) {
     numberToReturn: 1,
     checkKeys: false,
     returnFieldSelector: null,
-    serializeFunctions: serializeFunctions,
-    ignoreUndefined: ignoreUndefined
-  });
-
-  query.slaveOk = readPreference.slaveOk();
-  return query;
-}
-
-function setupCommand(bson, ns, cmd, cursorState, topology, options) {
-  options = options || {};
-  const readPreference = getReadPreference(cmd, options);
-  const parts = ns.split(/\./);
-
-  let finalCmd = Object.assign({}, cmd);
-  const serializeFunctions =
-    typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
-  const ignoreUndefined =
-    typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
-  if (topology.type === 'mongos' && readPreference && readPreference.preference !== 'primary') {
-    finalCmd = {
-      $query: finalCmd,
-      $readPreference: readPreference.toJSON()
-    };
-  }
-
-  const err = decorateWithSessionsData(finalCmd, options.session, options);
-  if (err) {
-    return err;
-  }
-
-  const query = new Query(bson, `${parts.shift()}.$cmd`, finalCmd, {
-    numberToSkip: 0,
-    numberToReturn: -1,
-    checkKeys: false,
     serializeFunctions: serializeFunctions,
     ignoreUndefined: ignoreUndefined
   });

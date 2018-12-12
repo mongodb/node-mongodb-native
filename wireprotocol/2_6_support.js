@@ -74,6 +74,14 @@ class WireProtocol {
     connection.write(getMore, queryOptions, queryCallback);
   }
 
+  query(bson, ns, cmd, cursorState, topology, options) {
+    if (cursorState.cursorId != null) {
+      return;
+    }
+
+    return setupClassicFind(bson, ns, cmd, cursorState, topology, options);
+  }
+
   command(bson, ns, cmd, cursorState, topology, options) {
     if (cursorState.cursorId != null) {
       return;
@@ -83,11 +91,43 @@ class WireProtocol {
       throw new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`);
     }
 
-    if (cmd.find) {
-      return setupClassicFind(bson, ns, cmd, cursorState, topology, options);
+    options = options || {};
+    const readPreference = getReadPreference(cmd, options);
+    const parts = ns.split(/\./);
+
+    let finalCmd = Object.assign({}, cmd);
+    const serializeFunctions =
+      typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
+    const ignoreUndefined =
+      typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
+
+    if (cmd.readConcern && cmd.readConcern.level !== 'local') {
+      throw new MongoError(
+        `server ${JSON.stringify(cmd)} command does not support a readConcern level of ${
+          cmd.readConcern.level
+        }`
+      );
     }
 
-    return setupCommand(bson, ns, cmd, cursorState, topology, options);
+    if (cmd.readConcern) delete cmd['readConcern'];
+
+    if (topology.type === 'mongos' && readPreference && readPreference.preference !== 'primary') {
+      finalCmd = {
+        $query: finalCmd,
+        $readPreference: readPreference.toJSON()
+      };
+    }
+
+    const query = new Query(bson, `${parts.shift()}.$cmd`, finalCmd, {
+      numberToSkip: 0,
+      numberToReturn: -1,
+      checkKeys: false,
+      serializeFunctions: serializeFunctions,
+      ignoreUndefined: ignoreUndefined
+    });
+
+    query.slaveOk = readPreference.slaveOk();
+    return query;
   }
 }
 
@@ -207,46 +247,6 @@ function setupClassicFind(bson, ns, cmd, cursorState, topology, options) {
   if (typeof cmd.noCursorTimeout === 'boolean') query.noCursorTimeout = cmd.noCursorTimeout;
   if (typeof cmd.awaitData === 'boolean') query.awaitData = cmd.awaitData;
   if (typeof cmd.partial === 'boolean') query.partial = cmd.partial;
-
-  query.slaveOk = readPreference.slaveOk();
-  return query;
-}
-
-function setupCommand(bson, ns, cmd, cursorState, topology, options) {
-  options = options || {};
-  const readPreference = getReadPreference(cmd, options);
-  const parts = ns.split(/\./);
-
-  let finalCmd = Object.assign({}, cmd);
-  const serializeFunctions =
-    typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
-  const ignoreUndefined =
-    typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
-
-  if (cmd.readConcern && cmd.readConcern.level !== 'local') {
-    throw new MongoError(
-      `server ${JSON.stringify(cmd)} command does not support a readConcern level of ${
-        cmd.readConcern.level
-      }`
-    );
-  }
-
-  if (cmd.readConcern) delete cmd['readConcern'];
-
-  if (topology.type === 'mongos' && readPreference && readPreference.preference !== 'primary') {
-    finalCmd = {
-      $query: finalCmd,
-      $readPreference: readPreference.toJSON()
-    };
-  }
-
-  const query = new Query(bson, `${parts.shift()}.$cmd`, finalCmd, {
-    numberToSkip: 0,
-    numberToReturn: -1,
-    checkKeys: false,
-    serializeFunctions: serializeFunctions,
-    ignoreUndefined: ignoreUndefined
-  });
 
   query.slaveOk = readPreference.slaveOk();
   return query;

@@ -638,19 +638,6 @@ function initializeCursor(cursor, callback) {
       return callback(new MongoError(`server ${cursor.server.name} does not support collation`));
     }
 
-    cursor.query = cursor.server.wireProtocolHandler.command(
-      cursor.bson,
-      cursor.ns,
-      cursor.cmd,
-      cursor.cursorState,
-      cursor.topology,
-      cursor.options
-    );
-
-    if (cursor.query instanceof MongoError) {
-      return callback(cursor.query);
-    }
-
     function done() {
       if (
         cursor.cursorState.cursorId &&
@@ -678,21 +665,7 @@ function initializeCursor(cursor, callback) {
       return done();
     }
 
-    if (cursor.logger.isDebug()) {
-      cursor.logger.debug(
-        `issue initial query [${JSON.stringify(cursor.cmd)}] with flags [${JSON.stringify(
-          cursor.query
-        )}]`
-      );
-    }
-
-    const queryOptions = applyCommonQueryOptions({}, cursor.cursorState);
-    // Do we have documentsReturnedIn set on the query
-    if (typeof cursor.query.documentsReturnedIn === 'string') {
-      queryOptions.documentsReturnedIn = cursor.query.documentsReturnedIn;
-    }
-
-    cursor.server.s.pool.write(cursor.query, queryOptions, (err, r) => {
+    const queryCallback = (err, r) => {
       if (err) return callback(err);
 
       const result = r.message;
@@ -757,7 +730,48 @@ function initializeCursor(cursor, callback) {
 
       // Return callback
       done(result);
-    });
+    };
+
+    if (cursor.cmd.find != null) {
+      cursor.query = cursor.server.wireProtocolHandler.query(
+        cursor.bson,
+        cursor.ns,
+        cursor.cmd,
+        cursor.cursorState,
+        cursor.topology,
+        cursor.options
+      );
+    } else {
+      cursor.query = cursor.server.wireProtocolHandler.command(
+        cursor.bson,
+        cursor.ns,
+        cursor.cmd,
+        cursor.cursorState,
+        cursor.topology,
+        cursor.options
+      );
+    }
+
+    if (cursor.query instanceof MongoError) {
+      return callback(cursor.query);
+    }
+
+    if (cursor.logger.isDebug()) {
+      cursor.logger.debug(
+        `issue initial query [${JSON.stringify(cursor.cmd)}] with flags [${JSON.stringify(
+          cursor.query
+        )}]`
+      );
+    }
+
+    const queryOptions = applyCommonQueryOptions({}, cursor.cursorState);
+
+    // Do we have documentsReturnedIn set on the query
+    if (typeof cursor.query.documentsReturnedIn === 'string') {
+      queryOptions.documentsReturnedIn = cursor.query.documentsReturnedIn;
+    }
+
+    cursor.server.s.pool.write(cursor.query, queryOptions, queryCallback);
   });
 }
 
