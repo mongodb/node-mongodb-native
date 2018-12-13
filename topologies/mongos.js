@@ -286,7 +286,7 @@ Mongos.prototype.connect = function(options) {
   // Create server instances
   var servers = this.s.seedlist.map(function(x) {
     const server = new Server(
-      Object.assign({}, self.s.options, x, {
+      Object.assign({}, self.s.options, x, options, {
         authProviders: self.authProviders,
         reconnect: false,
         monitoring: false,

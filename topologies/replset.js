@@ -960,12 +960,14 @@ ReplSet.prototype.connect = function(options) {
   var self = this;
   // Add any connect level options to the internal state
   this.s.connectOptions = options || {};
+
   // Set connecting state
   stateTransition(this, CONNECTING);
+
   // Create server instances
   var servers = this.s.seedlist.map(function(x) {
     return new Server(
-      Object.assign({}, self.s.options, x, {
+      Object.assign({}, self.s.options, x, options, {
         authProviders: self.authProviders,
         reconnect: false,
         monitoring: false,
