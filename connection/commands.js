@@ -46,9 +46,6 @@ var Query = function(bson, ns, query, options) {
   this.ns = ns;
   this.query = query;
 
-  // Ensure empty options
-  this.options = options || {};
-
   // Additional options
   this.numberToSkip = options.numberToSkip || 0;
   this.numberToReturn = options.numberToReturn || 0;

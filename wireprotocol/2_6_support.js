@@ -8,21 +8,23 @@ const MongoError = require('../error').MongoError;
 const getReadPreference = require('./shared').getReadPreference;
 const applyCommonQueryOptions = require('./shared').applyCommonQueryOptions;
 const isMongos = require('./shared').isMongos;
+const databaseNamespace = require('./shared').databaseNamespace;
+const collectionNamespace = require('./shared').collectionNamespace;
 
 const BSON = retrieveBSON();
 const Long = BSON.Long;
 
 class WireProtocol {
   insert(server, ns, ops, options, callback) {
-    executeWrite(server, 'insert', 'documents', ns, ops, options, callback);
+    executeWrite(this, server, 'insert', 'documents', ns, ops, options, callback);
   }
 
   update(server, ns, ops, options, callback) {
-    executeWrite(server, 'update', 'updates', ns, ops, options, callback);
+    executeWrite(this, server, 'update', 'updates', ns, ops, options, callback);
   }
 
   remove(server, ns, ops, options, callback) {
-    executeWrite(server, 'delete', 'deletes', ns, ops, options, callback);
+    executeWrite(this, server, 'delete', 'deletes', ns, ops, options, callback);
   }
 
   killCursor(server, ns, cursorState, callback) {
@@ -102,25 +104,21 @@ class WireProtocol {
     const bson = server.s.bson;
     const pool = server.s.pool;
     const readPreference = getReadPreference(cmd, options);
-    const parts = ns.split(/\./);
 
     let finalCmd = Object.assign({}, cmd);
-    const serializeFunctions =
-      typeof options.serializeFunctions === 'boolean' ? options.serializeFunctions : false;
-    const ignoreUndefined =
-      typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
+    if (finalCmd.readConcern) {
+      if (finalCmd.readConcern.level !== 'local') {
+        return callback(
+          new MongoError(
+            `server ${JSON.stringify(finalCmd)} command does not support a readConcern level of ${
+              finalCmd.readConcern.level
+            }`
+          )
+        );
+      }
 
-    if (cmd.readConcern && cmd.readConcern.level !== 'local') {
-      return callback(
-        new MongoError(
-          `server ${JSON.stringify(cmd)} command does not support a readConcern level of ${
-            cmd.readConcern.level
-          }`
-        )
-      );
+      delete finalCmd['readConcern'];
     }
-
-    if (cmd.readConcern) delete cmd['readConcern'];
 
     if (isMongos(server) && readPreference && readPreference.preference !== 'primary') {
       finalCmd = {
@@ -129,26 +127,27 @@ class WireProtocol {
       };
     }
 
-    const query = new Query(bson, `${parts.shift()}.$cmd`, finalCmd, {
-      numberToSkip: 0,
-      numberToReturn: -1,
-      checkKeys: false,
-      serializeFunctions: serializeFunctions,
-      ignoreUndefined: ignoreUndefined
-    });
+    const commandOptions = Object.assign(
+      {
+        command: true,
+        slaveOk: readPreference.slaveOk(),
+        numberToSkip: 0,
+        numberToReturn: -1,
+        checkKeys: false
+      },
+      options
+    );
 
-    query.slaveOk = readPreference.slaveOk();
-
-    const queryOptions = applyCommonQueryOptions({ command: true }, options);
-    if (typeof query.documentsReturnedIn === 'string') {
-      queryOptions.documentsReturnedIn = query.documentsReturnedIn;
+    try {
+      const query = new Query(bson, `${databaseNamespace(ns)}.$cmd`, finalCmd, commandOptions);
+      pool.write(query, commandOptions, callback);
+    } catch (err) {
+      callback(err);
     }
-
-    pool.write(query, queryOptions, callback);
   }
 }
 
-function executeWrite(server, type, opsField, ns, ops, options, callback) {
+function executeWrite(handler, server, type, opsField, ns, ops, options, callback) {
   if (ops.length === 0) throw new MongoError('insert must contain at least one document');
   if (typeof options === 'function') {
     callback = options;
@@ -156,15 +155,11 @@ function executeWrite(server, type, opsField, ns, ops, options, callback) {
     options = options || {};
   }
 
-  const bson = server.s.bson;
-  const pool = server.s.pool;
-  const p = ns.split('.');
-  const d = p.shift();
   const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
   const writeConcern = options.writeConcern;
 
   const writeCommand = {};
-  writeCommand[type] = p.join('.');
+  writeCommand[type] = collectionNamespace(ns);
   writeCommand[opsField] = ops;
   writeCommand.ordered = ordered;
 
@@ -176,20 +171,15 @@ function executeWrite(server, type, opsField, ns, ops, options, callback) {
     writeCommand.bypassDocumentValidation = options.bypassDocumentValidation;
   }
 
-  const opts = { command: true };
-  if (typeof options.session !== 'undefined') opts.session = options.session;
-  const queryOptions = { checkKeys: false, numberToSkip: 0, numberToReturn: 1 };
-  if (type === 'insert') queryOptions.checkKeys = true;
-  if (typeof options.checkKeys === 'boolean') queryOptions.checkKeys = options.checkKeys;
-  if (options.serializeFunctions) queryOptions.serializeFunctions = options.serializeFunctions;
-  if (options.ignoreUndefined) queryOptions.ignoreUndefined = options.ignoreUndefined;
+  const commandOptions = Object.assign(
+    {
+      checkKeys: type === 'insert',
+      numberToReturn: 1
+    },
+    options
+  );
 
-  try {
-    const cmd = new Query(bson, `${d}.$cmd`, writeCommand, queryOptions);
-    pool.write(cmd, opts, callback);
-  } catch (err) {
-    callback(err);
-  }
+  handler.command(server, ns, writeCommand, commandOptions, callback);
 }
 
 function setupClassicFind(server, ns, cmd, cursorState, options) {

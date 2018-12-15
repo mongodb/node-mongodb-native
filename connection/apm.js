@@ -90,8 +90,7 @@ const extractCommand = command => {
     }
 
     Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
-      if (typeof command.options[key] !== 'undefined')
-        result[LEGACY_FIND_OPTIONS_MAP[key]] = command.options[key];
+      if (typeof command[key] !== 'undefined') result[LEGACY_FIND_OPTIONS_MAP[key]] = command[key];
     });
 
     OP_QUERY_KEYS.forEach(key => {

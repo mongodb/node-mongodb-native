@@ -65,6 +65,10 @@ function applyCommonQueryOptions(queryOptions, options) {
     queryOptions.session = options.session;
   }
 
+  if (typeof options.documentsReturnedIn === 'string') {
+    queryOptions.documentsReturnedIn = options.documentsReturnedIn;
+  }
+
   return queryOptions;
 }
 
@@ -75,11 +79,23 @@ function isMongos(server) {
   return false;
 }
 
+function databaseNamespace(ns) {
+  return ns.split('.')[0];
+}
+function collectionNamespace(ns) {
+  return ns
+    .split('.')
+    .slice(1)
+    .join('.');
+}
+
 module.exports = {
   getReadPreference,
   MESSAGE_HEADER_SIZE,
   opcodes,
   parseHeader,
   applyCommonQueryOptions,
-  isMongos
+  isMongos,
+  databaseNamespace,
+  collectionNamespace
 };
