@@ -27,11 +27,12 @@ describe('WireProtocol', function() {
 
   function testPoolWrite(bypassDocumentValidation, wireProtocol, expected) {
     const pool = sinon.createStubInstance(Pool);
+    const fakeServer = { s: { pool, bson } };
     const ns = 'fake.namespace';
     const ops = [{ a: 1 }, { b: 2 }];
     const options = { bypassDocumentValidation: bypassDocumentValidation };
 
-    wireProtocol.insert(pool, ns, bson, ops, options, () => {});
+    wireProtocol.insert(fakeServer, ns, ops, options, () => {});
 
     if (expected) {
       expect(pool.write.lastCall.args[0])
