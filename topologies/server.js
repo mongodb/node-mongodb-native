@@ -755,8 +755,7 @@ Server.prototype.command = function(ns, cmd, options, callback) {
     return callback(new MongoError(`server ${this.name} does not support collation`));
   }
 
-  const topology = options.topology || {};
-  self.wireProtocolHandler.command(self.s.pool, self.s.bson, ns, cmd, topology, options, callback);
+  self.wireProtocolHandler.command(self, ns, cmd, options, callback);
 };
 
 /**
@@ -787,7 +786,7 @@ Server.prototype.insert = function(ns, ops, options, callback) {
   ops = Array.isArray(ops) ? ops : [ops];
 
   // Execute write
-  return self.wireProtocolHandler.insert(self.s.pool, ns, self.s.bson, ops, options, callback);
+  return self.wireProtocolHandler.insert(self, ns, ops, options, callback);
 };
 
 /**
@@ -822,7 +821,7 @@ Server.prototype.update = function(ns, ops, options, callback) {
   // Setup the docs as an array
   ops = Array.isArray(ops) ? ops : [ops];
   // Execute write
-  return self.wireProtocolHandler.update(self.s.pool, ns, self.s.bson, ops, options, callback);
+  return self.wireProtocolHandler.update(self, ns, ops, options, callback);
 };
 
 /**
@@ -857,7 +856,7 @@ Server.prototype.remove = function(ns, ops, options, callback) {
   // Setup the docs as an array
   ops = Array.isArray(ops) ? ops : [ops];
   // Execute write
-  return self.wireProtocolHandler.remove(self.s.pool, ns, self.s.bson, ops, options, callback);
+  return self.wireProtocolHandler.remove(self, ns, ops, options, callback);
 };
 
 /**

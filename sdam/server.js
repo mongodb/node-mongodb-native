@@ -156,10 +156,8 @@ class Server extends EventEmitter {
       return;
     }
 
-    // Are we executing against a specific topology
-    const topology = options.topology || {};
     // Create the query object
-    const query = this.s.wireProtocolHandler.command(this.s.bson, ns, cmd, {}, topology, options);
+    const query = this.s.wireProtocolHandler.command(this, ns, cmd, {}, options);
     // Set slave OK of the query
     query.slaveOk = options.readPreference ? options.readPreference.slaveOk() : false;
 

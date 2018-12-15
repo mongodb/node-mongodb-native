@@ -7,23 +7,27 @@ const Query = require('../connection/commands').Query;
 const MongoError = require('../error').MongoError;
 const getReadPreference = require('./shared').getReadPreference;
 const applyCommonQueryOptions = require('./shared').applyCommonQueryOptions;
+const isMongos = require('./shared').isMongos;
+
 const BSON = retrieveBSON();
 const Long = BSON.Long;
 
 class WireProtocol {
-  insert(pool, ns, bson, ops, options, callback) {
-    executeWrite(pool, bson, 'insert', 'documents', ns, ops, options, callback);
+  insert(server, ns, ops, options, callback) {
+    executeWrite(server, 'insert', 'documents', ns, ops, options, callback);
   }
 
-  update(pool, ns, bson, ops, options, callback) {
-    executeWrite(pool, bson, 'update', 'updates', ns, ops, options, callback);
+  update(server, ns, ops, options, callback) {
+    executeWrite(server, 'update', 'updates', ns, ops, options, callback);
   }
 
-  remove(pool, ns, bson, ops, options, callback) {
-    executeWrite(pool, bson, 'delete', 'deletes', ns, ops, options, callback);
+  remove(server, ns, ops, options, callback) {
+    executeWrite(server, 'delete', 'deletes', ns, ops, options, callback);
   }
 
-  killCursor(bson, ns, cursorState, pool, callback) {
+  killCursor(server, ns, cursorState, callback) {
+    const bson = server.s.bson;
+    const pool = server.s.pool;
     const cursorId = cursorState.cursorId;
     const killCursor = new KillCursor(bson, ns, [cursorId]);
     const options = {
@@ -48,7 +52,8 @@ class WireProtocol {
     }
   }
 
-  getMore(bson, ns, cursorState, batchSize, connection, options, callback) {
+  getMore(server, ns, cursorState, batchSize, options, callback) {
+    const bson = server.s.bson;
     const getMore = new GetMore(bson, ns, cursorState.cursorId, { numberToReturn: batchSize });
     function queryCallback(err, result) {
       if (err) return callback(err);
@@ -71,29 +76,31 @@ class WireProtocol {
     }
 
     const queryOptions = applyCommonQueryOptions({}, cursorState);
-    connection.write(getMore, queryOptions, queryCallback);
+    server.s.pool.write(getMore, queryOptions, queryCallback);
   }
 
-  query(pool, bson, ns, cmd, cursorState, topology, options, callback) {
+  query(server, ns, cmd, cursorState, options, callback) {
     if (cursorState.cursorId != null) {
       return;
     }
 
-    const query = setupClassicFind(bson, ns, cmd, cursorState, topology, options);
+    const query = setupClassicFind(server, ns, cmd, cursorState, options);
     const queryOptions = applyCommonQueryOptions({}, cursorState);
     if (typeof query.documentsReturnedIn === 'string') {
       queryOptions.documentsReturnedIn = query.documentsReturnedIn;
     }
 
-    pool.write(query, queryOptions, callback);
+    server.s.pool.write(query, queryOptions, callback);
   }
 
-  command(pool, bson, ns, cmd, topology, options, callback) {
+  command(server, ns, cmd, options, callback) {
     if (cmd == null) {
       return callback(new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`));
     }
 
     options = options || {};
+    const bson = server.s.bson;
+    const pool = server.s.pool;
     const readPreference = getReadPreference(cmd, options);
     const parts = ns.split(/\./);
 
@@ -115,7 +122,7 @@ class WireProtocol {
 
     if (cmd.readConcern) delete cmd['readConcern'];
 
-    if (topology.type === 'mongos' && readPreference && readPreference.preference !== 'primary') {
+    if (isMongos(server) && readPreference && readPreference.preference !== 'primary') {
       finalCmd = {
         $query: finalCmd,
         $readPreference: readPreference.toJSON()
@@ -141,7 +148,7 @@ class WireProtocol {
   }
 }
 
-function executeWrite(pool, bson, type, opsField, ns, ops, options, callback) {
+function executeWrite(server, type, opsField, ns, ops, options, callback) {
   if (ops.length === 0) throw new MongoError('insert must contain at least one document');
   if (typeof options === 'function') {
     callback = options;
@@ -149,6 +156,8 @@ function executeWrite(pool, bson, type, opsField, ns, ops, options, callback) {
     options = options || {};
   }
 
+  const bson = server.s.bson;
+  const pool = server.s.pool;
   const p = ns.split('.');
   const d = p.shift();
   const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
@@ -183,8 +192,9 @@ function executeWrite(pool, bson, type, opsField, ns, ops, options, callback) {
   }
 }
 
-function setupClassicFind(bson, ns, cmd, cursorState, topology, options) {
+function setupClassicFind(server, ns, cmd, cursorState, options) {
   options = options || {};
+  const bson = server.s.bson;
   const readPreference = getReadPreference(cmd, options);
   cursorState.batchSize = cmd.batchSize || cursorState.batchSize;
 
@@ -204,7 +214,7 @@ function setupClassicFind(bson, ns, cmd, cursorState, topology, options) {
   const numberToSkip = cursorState.skip || 0;
 
   const findCmd = {};
-  if (topology.type === 'mongos' && readPreference) {
+  if (isMongos(server) && readPreference) {
     findCmd['$readPreference'] = readPreference.toJSON();
   }
 

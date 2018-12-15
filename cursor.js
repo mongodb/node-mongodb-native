@@ -223,16 +223,11 @@ Cursor.prototype._getmore = function(callback) {
     batchSize = this.cursorState.limit - this.cursorState.currentLimit;
   }
 
-  // Default pool
-  var pool = this.server.s.pool;
-
-  // We have a wire protocol handler
   this.server.wireProtocolHandler.getMore(
-    this.bson,
+    this.server,
     this.ns,
     this.cursorState,
     batchSize,
-    pool,
     this.options,
     callback
   );
@@ -344,10 +339,7 @@ Cursor.prototype.kill = function(callback) {
     return;
   }
 
-  // Default pool
-  var pool = this.server.s.pool;
-  // Execute command
-  this.server.wireProtocolHandler.killCursor(this.bson, this.ns, this.cursorState, pool, callback);
+  this.server.wireProtocolHandler.killCursor(this.server, this.ns, this.cursorState, callback);
 };
 
 /**
@@ -741,12 +733,10 @@ function initializeCursor(cursor, callback) {
 
     if (cursor.cmd.find != null) {
       cursor.server.wireProtocolHandler.query(
-        cursor.server.s.pool,
-        cursor.bson,
+        cursor.server,
         cursor.ns,
         cursor.cmd,
         cursor.cursorState,
-        cursor.topology,
         cursor.options,
         queryCallback
       );
@@ -755,11 +745,9 @@ function initializeCursor(cursor, callback) {
     }
 
     cursor.query = cursor.server.wireProtocolHandler.command(
-      cursor.server.s.pool,
-      cursor.bson,
+      cursor.server,
       cursor.ns,
       cursor.cmd,
-      cursor.topology,
       cursor.options,
       queryCallback
     );

@@ -68,10 +68,18 @@ function applyCommonQueryOptions(queryOptions, options) {
   return queryOptions;
 }
 
+function isMongos(server) {
+  if (server.type === 'mongos') return true;
+  if (server.parent && server.parent.type === 'mongos') return true;
+  // NOTE: handle unified topology
+  return false;
+}
+
 module.exports = {
-  getReadPreference: getReadPreference,
-  MESSAGE_HEADER_SIZE: MESSAGE_HEADER_SIZE,
-  opcodes: opcodes,
-  parseHeader: parseHeader,
-  applyCommonQueryOptions
+  getReadPreference,
+  MESSAGE_HEADER_SIZE,
+  opcodes,
+  parseHeader,
+  applyCommonQueryOptions,
+  isMongos
 };

@@ -10,21 +10,24 @@ const Long = BSON.Long;
 const ReadPreference = require('../topologies/read_preference');
 const TxnState = require('../transactions').TxnState;
 const applyCommonQueryOptions = require('./shared').applyCommonQueryOptions;
+const isMongos = require('./shared').isMongos;
 
 class WireProtocol {
-  insert(pool, ns, bson, ops, options, callback) {
-    executeWrite(pool, bson, 'insert', 'documents', ns, ops, options, callback);
+  insert(server, ns, ops, options, callback) {
+    executeWrite(server, 'insert', 'documents', ns, ops, options, callback);
   }
 
-  update(pool, ns, bson, ops, options, callback) {
-    executeWrite(pool, bson, 'update', 'updates', ns, ops, options, callback);
+  update(server, ns, ops, options, callback) {
+    executeWrite(server, 'update', 'updates', ns, ops, options, callback);
   }
 
-  remove(pool, ns, bson, ops, options, callback) {
-    executeWrite(pool, bson, 'delete', 'deletes', ns, ops, options, callback);
+  remove(server, ns, ops, options, callback) {
+    executeWrite(server, 'delete', 'deletes', ns, ops, options, callback);
   }
 
-  killCursor(bson, ns, cursorState, pool, callback) {
+  killCursor(server, ns, cursorState, callback) {
+    const bson = server.s.bson;
+    const pool = server.s.pool;
     const parts = ns.split(/\./);
     const commandns = `${parts.shift()}.$cmd`;
     const cursorId = cursorState.cursorId;
@@ -84,8 +87,10 @@ class WireProtocol {
     if (typeof callback === 'function') callback(null, null);
   }
 
-  getMore(bson, ns, cursorState, batchSize, connection, options, callback) {
+  getMore(server, ns, cursorState, batchSize, options, callback) {
     options = options || {};
+    const bson = server.s.bson;
+    const pool = server.s.pool;
     const parts = ns.split(/\./);
     const commandns = `${parts.shift()}.$cmd`;
     const getMoreCmd = {
@@ -148,10 +153,10 @@ class WireProtocol {
       cursorState
     );
 
-    connection.write(query, queryOptions, queryCallback);
+    pool.write(query, queryOptions, queryCallback);
   }
 
-  query(pool, bson, ns, cmd, cursorState, topology, options, callback) {
+  query(server, ns, cmd, cursorState, options, callback) {
     options = options || {};
     if (cursorState.cursorId != null) {
       return callback();
@@ -161,7 +166,7 @@ class WireProtocol {
       return callback(new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`));
     }
 
-    const query = executeFindCommand(bson, ns, cmd, cursorState, topology, options);
+    const query = executeFindCommand(server, ns, cmd, cursorState, options);
     cmd.virtual = false;
     query.documentsReturnedIn = 'firstBatch';
 
@@ -170,15 +175,17 @@ class WireProtocol {
       queryOptions.documentsReturnedIn = query.documentsReturnedIn;
     }
 
-    pool.write(query, queryOptions, callback);
+    server.s.pool.write(query, queryOptions, callback);
   }
 
-  command(pool, bson, ns, cmd, topology, options, callback) {
+  command(server, ns, cmd, options, callback) {
     options = options || {};
     if (cmd == null) {
       return callback(new MongoError(`command ${JSON.stringify(cmd)} does not return a cursor`));
     }
 
+    const bson = server.s.bson;
+    const pool = server.s.pool;
     const readPreference = getReadPreference(cmd, options);
     const parts = ns.split(/\./);
 
@@ -188,7 +195,7 @@ class WireProtocol {
     const ignoreUndefined =
       typeof options.ignoreUndefined === 'boolean' ? options.ignoreUndefined : false;
 
-    if (topology.type === 'mongos' && readPreference && readPreference.preference !== 'primary') {
+    if (isMongos(server) && readPreference && readPreference.preference !== 'primary') {
       finalCmd = {
         $query: finalCmd,
         $readPreference: readPreference.toJSON()
@@ -287,7 +294,7 @@ function decorateWithSessionsData(command, session, options) {
   }
 }
 
-function executeWrite(pool, bson, type, opsField, ns, ops, options, callback) {
+function executeWrite(server, type, opsField, ns, ops, options, callback) {
   if (ops.length === 0) throw new MongoError('insert must contain at least one document');
   if (typeof options === 'function') {
     callback = options;
@@ -295,6 +302,8 @@ function executeWrite(pool, bson, type, opsField, ns, ops, options, callback) {
     options = options || {};
   }
 
+  const bson = server.s.bson;
+  const pool = server.s.pool;
   const p = ns.split('.');
   const d = p.shift();
   const ordered = typeof options.ordered === 'boolean' ? options.ordered : true;
@@ -344,8 +353,9 @@ function executeWrite(pool, bson, type, opsField, ns, ops, options, callback) {
   }
 }
 
-function executeFindCommand(bson, ns, cmd, cursorState, topology, options) {
+function executeFindCommand(server, ns, cmd, cursorState, options) {
   options = options || {};
+  const bson = server.s.bson;
   const readPreference = getReadPreference(cmd, options);
   cursorState.batchSize = cmd.batchSize || cursorState.batchSize;
 
@@ -440,7 +450,7 @@ function executeFindCommand(bson, ns, cmd, cursorState, topology, options) {
   }
 
   // We have a Mongos topology, check if we need to add a readPreference
-  if (topology.type === 'mongos' && readPreference && readPreference.preference !== 'primary') {
+  if (isMongos(server) && readPreference && readPreference.preference !== 'primary') {
     findCmd = {
       $query: findCmd,
       $readPreference: readPreference.toJSON()
