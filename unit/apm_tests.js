@@ -102,7 +102,9 @@ describe('APM tests', function() {
             $query: {
               testCmd: 1,
               fizz: 'buzz',
-              star: 'trek'
+              star: 'trek',
+              batchSize: 0,
+              skip: 0
             }
           },
           {}
@@ -150,7 +152,9 @@ describe('APM tests', function() {
         .to.have.property('command')
         .that.deep.equals({
           find: coll,
-          filter: query.query.$query
+          filter: query.query.$query,
+          batchSize: 0,
+          skip: 0
         });
     });
   });

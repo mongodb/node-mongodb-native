@@ -62,12 +62,15 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
         // Add event listeners
         server.once('fullsetup', function() {
           // Execute find
-          var cursor = server.cursor('test.test', {
-            find: 'test',
-            query: {},
-            batchSize: 2,
-            readPreference: ReadPreference.secondary
-          });
+          var cursor = server.cursor(
+            'test.test',
+            {
+              find: 'test',
+              query: {},
+              batchSize: 2
+            },
+            { readPreference: ReadPreference.secondary }
+          );
 
           // Execute next
           cursor.next(function(err, d) {
@@ -142,12 +145,15 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
         // Add event listeners
         server.once('fullsetup', function() {
           // Execute find
-          var cursor = server.cursor('test.test', {
-            find: 'test',
-            query: {},
-            batchSize: 2,
-            readPreference: new ReadPreference('nearest', [{ db: 'sf' }])
-          });
+          var cursor = server.cursor(
+            'test.test',
+            {
+              find: 'test',
+              query: {},
+              batchSize: 2
+            },
+            { readPreference: new ReadPreference('nearest', [{ db: 'sf' }]) }
+          );
 
           // Execute next
           cursor.next(function(err, d) {
@@ -214,12 +220,15 @@ describe('Mongos Proxy Read Preference (mocks)', function() {
         // Add event listeners
         server.once('connect', function() {
           // Execute find
-          var cursor = server.cursor('test.test', {
-            find: 'test',
-            query: {},
-            batchSize: 2,
-            readPreference: ReadPreference.secondary
-          });
+          var cursor = server.cursor(
+            'test.test',
+            {
+              find: 'test',
+              query: {},
+              batchSize: 2
+            },
+            { readPreference: ReadPreference.secondary }
+          );
 
           // Execute next
           cursor.next(function(err, d) {
