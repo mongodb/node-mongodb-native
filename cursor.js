@@ -107,7 +107,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
     currentLimit: 0,
     // Result field name if not a cursor (contains the array of results)
     transforms: options.transforms,
-    raw: options.raw || (typeof cmd === 'object' && cmd.raw)
+    raw: options.raw || (cmd && cmd.raw)
   };
 
   if (typeof options.session === 'object') {
