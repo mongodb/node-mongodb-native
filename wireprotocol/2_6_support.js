@@ -52,18 +52,22 @@ class WireProtocol {
     const getMore = new GetMore(bson, ns, cursorState.cursorId, { numberToReturn: batchSize });
     function queryCallback(err, result) {
       if (err) return callback(err);
-      const r = result.message;
+      const response = result.message;
 
       // If we have a timed out query or a cursor that was killed
-      if ((r.responseFlags & (1 << 0)) !== 0) {
-        return callback(new MongoError('cursor does not exist, was killed or timed out'), null);
+      if (response.cursorNotFound) {
+        return callback(new MongoError('Cursor does not exist, was killed, or timed out'), null);
       }
 
-      const cursorId = typeof r.cursorId === 'number' ? Long.fromNumber(r.cursorId) : r.cursorId;
-      cursorState.documents = r.documents;
+      const cursorId =
+        typeof response.cursorId === 'number'
+          ? Long.fromNumber(response.cursorId)
+          : response.cursorId;
+
+      cursorState.documents = response.documents;
       cursorState.cursorId = cursorId;
 
-      callback(null, null, r.connection);
+      callback(null, null, response.connection);
     }
 
     const queryOptions = applyCommonQueryOptions({}, cursorState);

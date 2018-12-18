@@ -22,7 +22,7 @@ var OPTS_EXHAUST = 64;
 var OPTS_PARTIAL = 128;
 
 // Response flags
-var CURSOR_NOT_FOUND = 0;
+var CURSOR_NOT_FOUND = 1;
 var QUERY_FAILURE = 2;
 var SHARD_CONFIG_STALE = 4;
 var AWAIT_CAPABLE = 8;

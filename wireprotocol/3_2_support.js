@@ -46,15 +46,15 @@ class WireProtocol {
         return callback(err);
       }
 
-      const r = result.message;
+      const response = result.message;
 
       // If we have a timed out query, or a cursor that was killed
-      if ((r.responseFlags & (1 << 0)) !== 0) {
+      if (response.cursorNotFounds) {
         if (typeof callback !== 'function') return;
         return callback(new MongoNetworkError('cursor killed or timed out'), null);
       }
 
-      if (!Array.isArray(r.documents) || r.documents.length === 0) {
+      if (!Array.isArray(response.documents) || response.documents.length === 0) {
         if (typeof callback !== 'function') return;
         return callback(
           new MongoError(`invalid killCursors result returned for cursor id ${cursorId}`)
@@ -62,7 +62,7 @@ class WireProtocol {
       }
 
       if (typeof callback === 'function') {
-        callback(null, r.documents[0]);
+        callback(null, response.documents[0]);
       }
     }
 
@@ -112,35 +112,35 @@ class WireProtocol {
 
     function queryCallback(err, result) {
       if (err) return callback(err);
-      const r = result.message;
+      const response = result.message;
 
       // If we have a timed out query or a cursor that was killed
-      if ((r.responseFlags & (1 << 0)) !== 0) {
+      if (response.cursorNotFound) {
         return callback(new MongoNetworkError('cursor killed or timed out'), null);
       }
 
       // Raw, return all the extracted documents
       if (cursorState.raw) {
-        cursorState.documents = r.documents;
-        cursorState.cursorId = r.cursorId;
-        return callback(null, r.documents);
+        cursorState.documents = response.documents;
+        cursorState.cursorId = response.cursorId;
+        return callback(null, response.documents);
       }
 
       // We have an error detected
-      if (r.documents[0].ok === 0) {
-        return callback(new MongoError(r.documents[0]));
+      if (response.documents[0].ok === 0) {
+        return callback(new MongoError(response.documents[0]));
       }
 
       // Ensure we have a Long valid cursor id
       const cursorId =
-        typeof r.documents[0].cursor.id === 'number'
-          ? Long.fromNumber(r.documents[0].cursor.id)
-          : r.documents[0].cursor.id;
+        typeof response.documents[0].cursor.id === 'number'
+          ? Long.fromNumber(response.documents[0].cursor.id)
+          : response.documents[0].cursor.id;
 
-      cursorState.documents = r.documents[0].cursor.nextBatch;
+      cursorState.documents = response.documents[0].cursor.nextBatch;
       cursorState.cursorId = cursorId;
 
-      callback(null, r.documents[0], r.connection);
+      callback(null, response.documents[0], response.connection);
     }
 
     const queryOptions = applyCommonQueryOptions(
