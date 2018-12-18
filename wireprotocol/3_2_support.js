@@ -49,7 +49,7 @@ class WireProtocol {
       const response = result.message;
 
       // If we have a timed out query, or a cursor that was killed
-      if (response.cursorNotFounds) {
+      if (response.cursorNotFound) {
         if (typeof callback !== 'function') return;
         return callback(new MongoNetworkError('cursor killed or timed out'), null);
       }
