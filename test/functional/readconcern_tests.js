@@ -493,7 +493,7 @@ describe('ReadConcern', function() {
     }
   });
 
-  it('Should set majority readConcern aggregate command but ignore due to out', {
+  it('Should set majority readConcern aggregate command from client option but ignore due to out', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
 
     test: function(done) {
@@ -559,72 +559,75 @@ describe('ReadConcern', function() {
     }
   });
 
-  it('Should set majority readConcern option for aggregate command but ignore due to out', {
-    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
+  it(
+    'Should set majority readConcern aggregate command from operation option but ignore due to out',
+    {
+      metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
 
-    test: function(done) {
-      const listener = require('../..').instrument(function(err) {
-        expect(err).to.be.null;
-      });
-
-      // Contains all the apm events
-      const started = [];
-      const succeeded = [];
-      // Get a new instance
-      const configuration = this.configuration;
-      const client = configuration.newClient({ w: 1 }, { poolSize: 1 });
-
-      client.connect(function(err, client) {
-        expect(err).to.be.null;
-
-        const db = client.db(configuration.db);
-
-        // Get a collection
-        const collection = db.collection('readConcernCollectionAggregate1');
-        // Validate readConcern
-
-        // Listen to apm events
-        listener.on('started', function(event) {
-          if (event.commandName === 'aggregate') started.push(event);
-        });
-        listener.on('succeeded', function(event) {
-          if (event.commandName === 'aggregate') succeeded.push(event);
+      test: function(done) {
+        const listener = require('../..').instrument(function(err) {
+          expect(err).to.be.null;
         });
 
-        // Execute find
-        collection
-          .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }], {
-            readConcern: { level: 'majority' }
-          })
-          .toArray(function(err) {
-            expect(err).to.be.null;
-            expect(started.length).to.equal(1);
-            expect(started[0].commandName).to.equal('aggregate');
-            expect(succeeded[0].commandName).to.equal('aggregate');
-            expect(started[0].command.readConcern).to.deep.equal(undefined);
+        // Contains all the apm events
+        const started = [];
+        const succeeded = [];
+        // Get a new instance
+        const configuration = this.configuration;
+        const client = configuration.newClient({ w: 1 }, { poolSize: 1 });
 
-            // Execute find
-            collection
-              .aggregate(
-                [{ $match: {} }],
-                { out: 'readConcernCollectionAggregate2Output' },
-                { readConcern: { level: 'majority' } }
-              )
-              .toArray(function(err) {
-                expect(err).to.be.null;
-                expect(started.length).to.equal(2);
-                expect(started[1].commandName).to.equal('aggregate');
-                expect(succeeded[1].commandName).to.equal('aggregate');
-                expect(started[1].command.readConcern).to.equal(undefined);
+        client.connect(function(err, client) {
+          expect(err).to.be.null;
 
-                listener.uninstrument();
-                client.close();
-                done();
-              });
+          const db = client.db(configuration.db);
+
+          // Get a collection
+          const collection = db.collection('readConcernCollectionAggregate1');
+          // Validate readConcern
+
+          // Listen to apm events
+          listener.on('started', function(event) {
+            if (event.commandName === 'aggregate') started.push(event);
           });
-      });
+          listener.on('succeeded', function(event) {
+            if (event.commandName === 'aggregate') succeeded.push(event);
+          });
+
+          // Execute find
+          collection
+            .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }], {
+              readConcern: { level: 'majority' }
+            })
+            .toArray(function(err) {
+              expect(err).to.be.null;
+              expect(started.length).to.equal(1);
+              expect(started[0].commandName).to.equal('aggregate');
+              expect(succeeded[0].commandName).to.equal('aggregate');
+              expect(started[0].command.readConcern).to.deep.equal(undefined);
+
+              // Execute find
+              collection
+                .aggregate(
+                  [{ $match: {} }],
+                  { out: 'readConcernCollectionAggregate2Output' },
+                  { readConcern: { level: 'majority' } }
+                )
+                .toArray(function(err) {
+                  expect(err).to.be.null;
+                  expect(started.length).to.equal(2);
+                  expect(started[1].commandName).to.equal('aggregate');
+                  expect(succeeded[1].commandName).to.equal('aggregate');
+                  expect(started[1].command.readConcern).to.equal(undefined);
+
+                  listener.uninstrument();
+                  client.close();
+                  done();
+                });
+            });
+        });
+      }
     }
-  });
+  );
 
   it('Should set majority readConcern mapReduce command but be ignored', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
