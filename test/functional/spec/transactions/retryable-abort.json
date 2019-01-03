@@ -691,7 +691,7 @@
       }
     },
     {
-      "description": "abortTransaction succeeds after InterruptedDueToReplStateChange",
+      "description": "abortTransaction succeeds after InterruptedDueToStepDown",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -1613,7 +1613,7 @@
       }
     },
     {
-      "description": "abortTransaction succeeds after WriteConcernError InterruptedDueToReplStateChange",
+      "description": "abortTransaction succeeds after WriteConcernError InterruptedDueToStepDown",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {

@@ -511,7 +511,7 @@ tests:
 
     outcome: *outcome
 
-  - description: readConcern local in startTransaction options
+  - description: readConcern snapshot in startTransaction options
 
     sessionOptions:
       session0:
@@ -637,6 +637,7 @@ tests:
           session: session0
         result:
           deletedCount: 0
+          insertedCount: 1
           insertedIds: {0: 1}
           matchedCount: 0
           modifiedCount: 0
