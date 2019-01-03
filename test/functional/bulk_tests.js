@@ -1513,4 +1513,38 @@ describe('Bulk', function() {
         client.close();
       });
   });
+
+  it('should properly account for array key size in bulk unordered inserts', function(done) {
+    const client = this.configuration.newClient();
+    const documents = new Array(20000).fill('').map(() => ({
+      arr: new Array(19).fill('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+    }));
+
+    client.connect().then(() => {
+      const coll = client.db(this.configuration.db).collection('doesnt_matter');
+
+      coll.insert(documents, { ordered: false }, err => {
+        client.close(() => {
+          done(err);
+        });
+      });
+    });
+  });
+
+  it('should properly account for array key size in bulk ordered inserts', function(done) {
+    const client = this.configuration.newClient();
+    const documents = new Array(20000).fill('').map(() => ({
+      arr: new Array(19).fill('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+    }));
+
+    client.connect().then(() => {
+      const coll = client.db(this.configuration.db).collection('doesnt_matter');
+
+      coll.insert(documents, { ordered: true }, err => {
+        client.close(() => {
+          done(err);
+        });
+      });
+    });
+  });
 });
