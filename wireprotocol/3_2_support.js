@@ -27,6 +27,7 @@ class WireProtocol {
   }
 
   killCursor(server, ns, cursorState, callback) {
+    callback = typeof callback === 'function' ? callback : () => {};
     const cursorId = cursorState.cursorId;
     const killCursorCmd = {
       killCursors: collectionNamespace(ns),
@@ -38,28 +39,21 @@ class WireProtocol {
 
     this.command(server, ns, killCursorCmd, options, (err, result) => {
       if (err) {
-        if (typeof callback !== 'function') return;
         return callback(err);
       }
 
       const response = result.message;
-
-      // If we have a timed out query, or a cursor that was killed
       if (response.cursorNotFound) {
-        if (typeof callback !== 'function') return;
         return callback(new MongoNetworkError('cursor killed or timed out'), null);
       }
 
       if (!Array.isArray(response.documents) || response.documents.length === 0) {
-        if (typeof callback !== 'function') return;
         return callback(
           new MongoError(`invalid killCursors result returned for cursor id ${cursorId}`)
         );
       }
 
-      if (typeof callback === 'function') {
-        callback(null, response.documents[0]);
-      }
+      callback(null, response.documents[0]);
     });
   }
 
