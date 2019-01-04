@@ -107,14 +107,23 @@ describe('Options Validation', function() {
   });
 
   it('Should use default optionsValidationLevel', function() {
+    const stub = sinon.stub(console, 'warn');
+
     const validationSchema = {
       a: { type: 'boolean' }
     };
 
-    const testObject = { b: 1 };
+    const testObject = { a: 1 };
     const validatedObject = validate(validationSchema, testObject, {});
 
+    expect(stub).to.have.been.calledOnce;
+    expect(stub).to.have.been.calledWith(
+      'option [a] should be of type boolean, but is of type number.'
+    );
+
     expect(validatedObject).to.deep.equal(testObject);
+
+    console.warn.restore();
   });
 
   it('Should skip validation if optionsValidationLevel is none', function() {
@@ -194,7 +203,9 @@ describe('Options Validation', function() {
     );
 
     expect(stub).to.have.been.calledOnce;
-    expect(stub).to.have.been.calledWith('a should be of type boolean, but is of type number.');
+    expect(stub).to.have.been.calledWith(
+      'option [a] should be of type boolean, but is of type number.'
+    );
     expect(validatedObject).to.deep.equal(testObject);
 
     console.warn.restore();
@@ -216,7 +227,7 @@ describe('Options Validation', function() {
       expect(validatedObject).to.deep.equal(testObject);
     } catch (err) {
       expect(err).to.not.be.null;
-      expect(err.message).to.equal('a should be of type boolean, but is of type number.');
+      expect(err.message).to.equal('option [a] should be of type boolean, but is of type number.');
     }
   });
 
