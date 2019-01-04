@@ -1514,37 +1514,61 @@ describe('Bulk', function() {
       });
   });
 
-  it('should properly account for array key size in bulk unordered inserts', function(done) {
-    const client = this.configuration.newClient();
+  it.only('should properly account for array key size in bulk unordered inserts', function(done) {
+    const client = this.configuration.newClient({ w: 1 }, { monitorCommands: true });
     const documents = new Array(20000).fill('').map(() => ({
       arr: new Array(19).fill('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
     }));
 
-    client.connect().then(() => {
-      const coll = client.db(this.configuration.db).collection('doesnt_matter');
+    let db;
 
-      coll.insert(documents, { ordered: false }, err => {
-        client.close(() => {
-          done(err);
+    client
+      .connect()
+      // NOTE: Hack to get around unrelated strange error in bulkWrites for right now.
+      .then(() => {
+        db = client.db(this.configuration.db);
+        return db.dropCollection('doesnt_matter').catch(() => {});
+      })
+      .then(() => {
+        return db.createCollection('doesnt_matter');
+      })
+      .then(() => {
+        const coll = db.collection('doesnt_matter');
+
+        coll.insert(documents, { ordered: false }, err => {
+          client.close(() => {
+            done(err);
+          });
         });
       });
-    });
   });
 
-  it('should properly account for array key size in bulk ordered inserts', function(done) {
+  it.only('should properly account for array key size in bulk ordered inserts', function(done) {
     const client = this.configuration.newClient();
     const documents = new Array(20000).fill('').map(() => ({
       arr: new Array(19).fill('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
     }));
 
-    client.connect().then(() => {
-      const coll = client.db(this.configuration.db).collection('doesnt_matter');
+    let db;
 
-      coll.insert(documents, { ordered: true }, err => {
-        client.close(() => {
-          done(err);
+    client
+      .connect()
+      // NOTE: Hack to get around unrelated strange error in bulkWrites for right now.
+      .then(() => {
+        db = client.db(this.configuration.db);
+        return db.dropCollection('doesnt_matter').catch(() => {});
+      })
+      .then(() => {
+        return db.createCollection('doesnt_matter');
+      })
+      .then(() => {
+        const coll = db.collection('doesnt_matter');
+
+        coll.insert(documents, { ordered: false }, err => {
+          client.close(() => {
+            done(err);
+          });
         });
       });
-    });
   });
 });
