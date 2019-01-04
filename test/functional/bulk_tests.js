@@ -1514,7 +1514,7 @@ describe('Bulk', function() {
       });
   });
 
-  it.only('should properly account for array key size in bulk unordered inserts', function(done) {
+  it('should properly account for array key size in bulk unordered inserts', function(done) {
     const client = this.configuration.newClient({ w: 1 }, { monitorCommands: true });
     const documents = new Array(20000).fill('').map(() => ({
       arr: new Array(19).fill('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
@@ -1543,7 +1543,7 @@ describe('Bulk', function() {
       });
   });
 
-  it.only('should properly account for array key size in bulk ordered inserts', function(done) {
+  it('should properly account for array key size in bulk ordered inserts', function(done) {
     const client = this.configuration.newClient();
     const documents = new Array(20000).fill('').map(() => ({
       arr: new Array(19).fill('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
