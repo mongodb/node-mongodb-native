@@ -444,7 +444,56 @@ describe('ReadConcern', function() {
     }
   });
 
-  it('Should set majority readConcern aggregate command but ignore due to out', {
+  it('Should set majority readConcern option for aggregate command', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
+
+    test: function(done) {
+      const listener = require('../..').instrument(function(err) {
+        expect(err).to.be.null;
+      });
+
+      // Contains all the apm events
+      const started = [];
+      const succeeded = [];
+      // Get a new instance
+      const configuration = this.configuration;
+      const client = configuration.newClient({ w: 1 }, { poolSize: 1 });
+
+      client.connect(function(err, client) {
+        expect(err).to.be.null;
+
+        const db = client.db(configuration.db);
+
+        // Get a collection
+        const collection = db.collection('readConcernCollectionAggregate');
+
+        // Listen to apm events
+        listener.on('started', function(event) {
+          if (event.commandName === 'aggregate') started.push(event);
+        });
+        listener.on('succeeded', function(event) {
+          if (event.commandName === 'aggregate') succeeded.push(event);
+        });
+
+        // Execute find
+        collection
+          .aggregate([{ $match: {} }], { readConcern: { level: 'majority' } })
+          .toArray(function(err) {
+            expect(err).to.be.null;
+            expect(started.length).to.equal(1);
+            expect(started[0].commandName).to.equal('aggregate');
+            expect(succeeded[0].commandName).to.equal('aggregate');
+            expect(started[0].command.readConcern).to.deep.equal({ level: 'majority' });
+
+            listener.uninstrument();
+            client.close();
+            done();
+          });
+      });
+    }
+  });
+
+  it('Should set majority readConcern aggregate command from client option but ignore due to out', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
 
     test: function(done) {
@@ -510,6 +559,76 @@ describe('ReadConcern', function() {
     }
   });
 
+  it(
+    'Should set majority readConcern aggregate command from operation option but ignore due to out',
+    {
+      metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
+
+      test: function(done) {
+        const listener = require('../..').instrument(function(err) {
+          expect(err).to.be.null;
+        });
+
+        // Contains all the apm events
+        const started = [];
+        const succeeded = [];
+        // Get a new instance
+        const configuration = this.configuration;
+        const client = configuration.newClient({ w: 1 }, { poolSize: 1 });
+
+        client.connect(function(err, client) {
+          expect(err).to.be.null;
+
+          const db = client.db(configuration.db);
+
+          // Get a collection
+          const collection = db.collection('readConcernCollectionAggregate1');
+          // Validate readConcern
+
+          // Listen to apm events
+          listener.on('started', function(event) {
+            if (event.commandName === 'aggregate') started.push(event);
+          });
+          listener.on('succeeded', function(event) {
+            if (event.commandName === 'aggregate') succeeded.push(event);
+          });
+
+          // Execute find
+          collection
+            .aggregate([{ $match: {} }, { $out: 'readConcernCollectionAggregate1Output' }], {
+              readConcern: { level: 'majority' }
+            })
+            .toArray(function(err) {
+              expect(err).to.be.null;
+              expect(started.length).to.equal(1);
+              expect(started[0].commandName).to.equal('aggregate');
+              expect(succeeded[0].commandName).to.equal('aggregate');
+              expect(started[0].command.readConcern).to.deep.equal(undefined);
+
+              // Execute find
+              collection
+                .aggregate(
+                  [{ $match: {} }],
+                  { out: 'readConcernCollectionAggregate2Output' },
+                  { readConcern: { level: 'majority' } }
+                )
+                .toArray(function(err) {
+                  expect(err).to.be.null;
+                  expect(started.length).to.equal(2);
+                  expect(started[1].commandName).to.equal('aggregate');
+                  expect(succeeded[1].commandName).to.equal('aggregate');
+                  expect(started[1].command.readConcern).to.equal(undefined);
+
+                  listener.uninstrument();
+                  client.close();
+                  done();
+                });
+            });
+        });
+      }
+    }
+  );
+
   it('Should set majority readConcern mapReduce command but be ignored', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
 
@@ -568,6 +687,70 @@ describe('ReadConcern', function() {
               client.close();
               done();
             });
+          }
+        );
+      });
+    }
+  });
+
+  // NOTE: skip until NODE-1804 is resolved
+  it.skip('Should set majority readConcern option for mapReduce command but be ignored', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
+
+    test: function(done) {
+      const listener = require('../..').instrument(function(err) {
+        expect(err).to.be.null;
+      });
+
+      // Contains all the apm events
+      const started = [];
+      const succeeded = [];
+      // Get a new instance
+      const configuration = this.configuration;
+      const client = configuration.newClient({ w: 1 }, { poolSize: 1 });
+
+      client.connect(function(err, client) {
+        expect(err).to.be.null;
+
+        const db = client.db(configuration.db);
+
+        // Get the collection
+        const collection = db.collection('test_map_reduce_read_concern');
+        collection.insert(
+          [{ user_id: 1 }, { user_id: 2 }],
+          configuration.writeConcernMax(),
+          function(err) {
+            expect(err).to.be.null;
+            // String functions
+            const map = 'function() { emit(this.user_id, 1); }';
+            const reduce = 'function(k,vals) { return 1; }';
+
+            // Listen to apm events
+            listener.on('started', function(event) {
+              if (event.commandName === 'mapreduce') started.push(event);
+            });
+            listener.on('succeeded', function(event) {
+              if (event.commandName === 'mapreduce') succeeded.push(event);
+            });
+
+            // Execute mapReduce
+            collection.mapReduce(
+              map,
+              reduce,
+              { out: { replace: 'tempCollection' }, readConcern: { level: 'majority' } },
+              function(err) {
+                expect(err).to.be.null;
+                expect(err).to.be.null;
+                expect(started.length).to.equal(1);
+                expect(started[0].commandName).to.equal('mapreduce');
+                expect(succeeded[0].commandName).to.equal('mapreduce');
+                expect(started[0].command.readConcern).to.deep.equal(undefined);
+
+                listener.uninstrument();
+                client.close();
+                done();
+              }
+            );
           }
         );
       });
@@ -641,6 +824,69 @@ describe('ReadConcern', function() {
     }
   });
 
+  it('Should set majority readConcern option for distinct command', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
+
+    test: function(done) {
+      const listener = require('../..').instrument(function(err) {
+        expect(err).to.be.null;
+      });
+
+      // Contains all the apm events
+      const started = [];
+      const succeeded = [];
+      // Get a new instance
+      const configuration = this.configuration;
+      const client = configuration.newClient({ w: 1 }, { poolSize: 1 });
+
+      client.connect(function(err, client) {
+        expect(err).to.be.null;
+
+        const db = client.db(configuration.db);
+
+        // Get the collection
+        const collection = db.collection('test_distinct_read_concern');
+        // Insert documents to perform distinct against
+        collection.insertMany(
+          [
+            { a: 0, b: { c: 'a' } },
+            { a: 1, b: { c: 'b' } },
+            { a: 1, b: { c: 'c' } },
+            { a: 2, b: { c: 'a' } },
+            { a: 3 },
+            { a: 3 }
+          ],
+          configuration.writeConcernMax(),
+          function(err) {
+            expect(err).to.be.null;
+
+            // Listen to apm events
+            listener.on('started', function(event) {
+              if (event.commandName === 'distinct') started.push(event);
+            });
+            listener.on('succeeded', function(event) {
+              if (event.commandName === 'distinct') succeeded.push(event);
+            });
+
+            // Perform a distinct query against the a field
+            collection.distinct('a', {}, { readConcern: { level: 'majority' } }, function(err) {
+              expect(err).to.be.null;
+              expect(started.length).to.equal(1);
+              expect(succeeded.length).to.equal(1);
+              expect(started[0].commandName).to.equal('distinct');
+              expect(succeeded[0].commandName).to.equal('distinct');
+              expect(started[0].command.readConcern).to.deep.equal({ level: 'majority' });
+
+              listener.uninstrument();
+              client.close();
+              done();
+            });
+          }
+        );
+      });
+    }
+  });
+
   it('Should set majority readConcern count command', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
 
@@ -697,6 +943,69 @@ describe('ReadConcern', function() {
               test.equal('count', started[0].commandName);
               test.equal('count', succeeded[0].commandName);
               test.deepEqual({ level: 'majority' }, started[0].command.readConcern);
+
+              listener.uninstrument();
+              client.close();
+              done();
+            });
+          }
+        );
+      });
+    }
+  });
+
+  it('Should set majority readConcern option for count command', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
+
+    test: function(done) {
+      const listener = require('../..').instrument(function(err) {
+        expect(err).to.be.null;
+      });
+
+      // Contains all the apm events
+      const started = [];
+      const succeeded = [];
+      // Get a new instance
+      const configuration = this.configuration;
+      const client = configuration.newClient({ w: 1 }, { poolSize: 1 });
+
+      client.connect(function(err, client) {
+        expect(err).to.be.null;
+
+        const db = client.db(configuration.db);
+
+        // Get the collection
+        const collection = db.collection('test_count_read_concern');
+        // Insert documents to perform distinct against
+        collection.insertMany(
+          [
+            { a: 0, b: { c: 'a' } },
+            { a: 1, b: { c: 'b' } },
+            { a: 1, b: { c: 'c' } },
+            { a: 2, b: { c: 'a' } },
+            { a: 3 },
+            { a: 3 }
+          ],
+          configuration.writeConcernMax(),
+          function(err) {
+            expect(err).to.be.null;
+
+            // Listen to apm events
+            listener.on('started', function(event) {
+              if (event.commandName === 'count') started.push(event);
+            });
+            listener.on('succeeded', function(event) {
+              if (event.commandName === 'count') succeeded.push(event);
+            });
+
+            // Perform a distinct query against the a field
+            collection.count({ a: 1 }, { readConcern: { level: 'majority' } }, function(err) {
+              expect(err).to.be.null;
+              expect(started.length).to.equal(1);
+              expect(succeeded.length).to.equal(1);
+              expect(started[0].commandName).to.equal('count');
+              expect(succeeded[0].commandName).to.equal('count');
+              expect(started[0].command.readConcern).to.deep.equal({ level: 'majority' });
 
               listener.uninstrument();
               client.close();
@@ -848,6 +1157,72 @@ describe('ReadConcern', function() {
     }
   });
 
+  it('Should set majority readConcern option for parallelCollectionScan command', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0 <=4.1.0' } },
+
+    test: function(done) {
+      const listener = require('../..').instrument(function(err) {
+        expect(err).to.be.null;
+      });
+
+      // Contains all the apm events
+      const started = [];
+      const succeeded = [];
+      // Get a new instance
+      const configuration = this.configuration;
+      const client = configuration.newClient({ w: 1 }, { poolSize: 1 });
+
+      client.connect(function(err, client) {
+        expect(err).to.be.null;
+
+        const db = client.db(configuration.db);
+
+        // Get the collection
+        const collection = db.collection('test_parallel_collection_scan_read_concern');
+        // Insert documents to perform distinct against
+        collection.insertMany(
+          [
+            { a: 0, b: { c: 'a' } },
+            { a: 1, b: { c: 'b' } },
+            { a: 1, b: { c: 'c' } },
+            { a: 2, b: { c: 'a' } },
+            { a: 3 },
+            { a: 3 }
+          ],
+          configuration.writeConcernMax(),
+          function(err) {
+            expect(err).to.be.null;
+
+            // Listen to apm events
+            listener.on('started', function(event) {
+              if (event.commandName === 'parallelCollectionScan') started.push(event);
+            });
+            listener.on('succeeded', function(event) {
+              if (event.commandName === 'parallelCollectionScan') succeeded.push(event);
+            });
+
+            // Execute parallelCollectionScan command
+            collection.parallelCollectionScan(
+              { numCursors: 1, readConcern: { level: 'majority' } },
+              function(err) {
+                expect(err).to.be.null;
+                expect(started.length).to.equal(1);
+                expect(succeeded.length).to.equal(1);
+                expect(started[0].commandName).to.equal('parallelCollectionScan');
+                expect(succeeded[0].commandName).to.equal('parallelCollectionScan');
+                expect(started[0].command.readConcern).to.deep.equal({ level: 'majority' });
+
+                listener.uninstrument();
+                client.close();
+                done();
+              }
+            );
+          }
+        );
+      });
+    }
+  });
+
   it('Should set majority readConcern geoSearch command', {
     metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
 
@@ -913,6 +1288,124 @@ describe('ReadConcern', function() {
               );
             }
           );
+        });
+      });
+    }
+  });
+
+  it('Should set majority readConcern option for geoSearch command', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
+
+    test: function(done) {
+      const listener = require('../..').instrument(function(err) {
+        expect(err).to.be.null;
+      });
+
+      // Contains all the apm events
+      const started = [];
+      const succeeded = [];
+      // Get a new instance
+      const configuration = this.configuration;
+      const client = configuration.newClient({ w: 1 }, { poolSize: 1 });
+
+      client.connect(function(err, client) {
+        expect(err).to.be.null;
+
+        const db = client.db(configuration.db);
+
+        // Get the collection
+        const collection = db.collection('test_geo_search_read_concern');
+
+        // Listen to apm events
+        listener.on('started', function(event) {
+          if (event.commandName === 'geoSearch') started.push(event);
+        });
+        listener.on('succeeded', function(event) {
+          if (event.commandName === 'geoSearch') succeeded.push(event);
+        });
+
+        // Add a location based index
+        collection.ensureIndex({ loc: 'geoHaystack', type: 1 }, { bucketSize: 1 }, function(err) {
+          expect(err).to.be.null;
+          // Save a new location tagged document
+          collection.insertMany(
+            [{ a: 1, loc: [50, 30] }, { a: 1, loc: [30, 50] }],
+            configuration.writeConcernMax(),
+            function(err) {
+              expect(err).to.be.null;
+
+              // Use geoHaystackSearch command to find document
+              collection.geoHaystackSearch(
+                50,
+                50,
+                {
+                  search: { a: 1 },
+                  limit: 1,
+                  maxDistance: 100,
+                  readConcern: { level: 'majority' }
+                },
+                function(err) {
+                  expect(err).to.be.null;
+                  expect(started.length).to.equal(1);
+                  expect(succeeded.length).to.equal(1);
+                  expect(started[0].commandName).to.equal('geoSearch');
+                  expect(succeeded[0].commandName).to.equal('geoSearch');
+                  expect(started[0].command.readConcern).to.deep.equal({ level: 'majority' });
+
+                  listener.uninstrument();
+                  client.close();
+                  done();
+                }
+              );
+            }
+          );
+        });
+      });
+    }
+  });
+
+  it('Should set majority readConcern option for find command', {
+    metadata: { requires: { topology: 'replicaset', mongodb: '>= 3.2.0' } },
+
+    test: function(done) {
+      const listener = require('../..').instrument(function(err) {
+        expect(err).to.be.null;
+      });
+
+      // Contains all the apm events
+      const started = [];
+      const succeeded = [];
+      // Get a new instance
+      const configuration = this.configuration;
+      const client = configuration.newClient({ w: 1 }, { poolSize: 1 });
+
+      client.connect(function(err, client) {
+        expect(err).to.be.null;
+
+        const db = client.db(configuration.db);
+
+        // Get a collection
+        const collection = db.collection('readConcernCollectionFind');
+
+        // Listen to apm events
+        listener.on('started', function(event) {
+          if (event.commandName === 'find') started.push(event);
+        });
+        listener.on('succeeded', function(event) {
+          if (event.commandName === 'find') succeeded.push(event);
+        });
+
+        // Execute find
+        collection.find({}, { readConcern: { level: 'majority' } }).toArray(function(err) {
+          expect(err).to.be.null;
+          expect(started.length).to.equal(1);
+          expect(started[0].commandName).to.equal('find');
+          expect(succeeded[0].commandName).to.equal('find');
+          expect(started[0].command.readConcern).to.deep.equal({ level: 'majority' });
+
+          listener.uninstrument();
+          client.close();
+          done();
         });
       });
     }
