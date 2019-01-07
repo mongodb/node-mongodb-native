@@ -2907,7 +2907,7 @@ describe('Insert', function() {
         } catch (err) {
           expect(err).to.not.be.null;
           expect(err.message).to.equal(
-            'forceServerObjectId should be of type boolean, but is of type number.'
+            'option [forceServerObjectId] should be of type boolean, but is of type number.'
           );
         }
         client.close();

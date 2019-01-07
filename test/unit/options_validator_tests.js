@@ -131,7 +131,10 @@ describe('Options Validation', function() {
     validate(validationSchema, testObject, { optionsValidationLevel: 'warn' });
 
     expect(stub).to.have.been.calledOnce;
-    expect(stub).to.have.been.calledWith('a should be of type boolean, but is of type number.');
+    expect(stub).to.have.been.calledWith(
+      'option [a] should be of type boolean, but is of type number.'
+    );
+    expect(validatedObject).to.deep.equal(testObject);
 
     console.warn.restore();
   });
@@ -146,7 +149,7 @@ describe('Options Validation', function() {
       validate(validationSchema, testObject, { optionsValidationLevel: 'error' });
     } catch (err) {
       expect(err).to.not.be.null;
-      expect(err.message).to.equal('a should be of type boolean, but is of type number.');
+      expect(err.message).to.equal('option [a] should be of type boolean, but is of type number.');
     }
   });
 
