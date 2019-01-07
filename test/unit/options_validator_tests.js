@@ -134,7 +134,6 @@ describe('Options Validation', function() {
     expect(stub).to.have.been.calledWith(
       'option [a] should be of type boolean, but is of type number.'
     );
-    expect(validatedObject).to.deep.equal(testObject);
 
     console.warn.restore();
   });
