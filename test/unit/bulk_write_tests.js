@@ -20,7 +20,7 @@ describe('Bulk Writes', function() {
   });
   afterEach(() => mock.cleanup());
 
-  it('should propagage errors', function(done) {
+  it('should propagate errors', function(done) {
     const client = this.configuration.newClient(`mongodb://${test.server.uri()}/test`);
 
     let close = e => {
