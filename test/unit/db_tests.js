@@ -18,6 +18,9 @@ class MockTopology extends EventEmitter {
 class MockClient {
   constructor() {
     this.topology = new MockTopology();
+    this.s = {
+      promiseLibrary: Promise
+    };
   }
 }
 
