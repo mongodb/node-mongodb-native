@@ -1,3 +1,4 @@
+/* eslint no-unused-vars: 0 */
 'use strict';
 
 const setupDatabase = require('../functional/shared').setupDatabase;
@@ -36,10 +37,18 @@ describe('examples(change-stream):', function() {
       // Start Changestream Example 1
       const collection = db.collection('inventory');
       const changeStream = collection.watch();
-      const next = await changeStream.next();
+      changeStream.on('change', next => {
+        // process next document
+      });
       // End Changestream Example 1
 
+      // Start Changestream Example 1 Alternative
+      const changeStreamIterator = collection.watch();
+      const next = await changeStreamIterator.next();
+      // End Changestream Example 1 Alternative
+
       await changeStream.close();
+      await changeStreamIterator.close();
 
       expect(next)
         .to.have.property('operationType')
@@ -58,10 +67,18 @@ describe('examples(change-stream):', function() {
       // Start Changestream Example 2
       const collection = db.collection('inventory');
       const changeStream = collection.watch({ fullDocument: 'updateLookup' });
-      const next = await changeStream.next();
+      changeStream.on('change', next => {
+        // process next document
+      });
       // End Changestream Example 2
 
+      // Start Changestream Example 2 Alternative
+      const changeStreamIterator = collection.watch({ fullDocument: 'updateLookup' });
+      const next = await changeStreamIterator.next();
+      // End Changestream Example 2 Alternative
+
       await changeStream.close();
+      await changeStreamIterator.close();
 
       expect(next)
         .to.have.property('operationType')
@@ -112,11 +129,19 @@ describe('examples(change-stream):', function() {
         { $addFields: { newField: 'this is an added field!' } }
       ];
       const collection = db.collection('inventory');
-      const changeStream = collection.watch(pipeline);
-      const next = await changeStream.next();
+      const changeStream = collection.watch({ fullDocument: 'updateLookup' });
+      changeStream.on('change', next => {
+        // process next document
+      });
       // End Changestream Example 4
 
+      // Start Changestream Example 4 Alternative
+      const changeStreamIterator = collection.watch(pipeline);
+      const next = await changeStreamIterator.next();
+      // End Changestream Example 4 Alternative
+
       await changeStream.close();
+      await changeStreamIterator.close();
 
       expect(next).to.have.nested.property('fullDocument.username', 'alice');
       expect(next).to.have.property('newField', 'this is an added field!');
