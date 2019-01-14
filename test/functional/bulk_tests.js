@@ -3,6 +3,8 @@ const test = require('./shared').assert,
   setupDatabase = require('./shared').setupDatabase,
   expect = require('chai').expect;
 
+const MongoError = require('../../index').MongoError;
+
 describe('Bulk', function() {
   before(function() {
     return setupDatabase(this.configuration);
@@ -1570,5 +1572,39 @@ describe('Bulk', function() {
           });
         });
       });
+  });
+
+  function testPropagationOfBulkWriteError(bulk) {
+    return bulk.execute().then(
+      err => {
+        expect(err).to.be.an.instanceOf(MongoError);
+      },
+      err => {
+        expect(err).to.be.an.instanceOf(MongoError);
+        expect(err).to.not.be.an.instanceOf(TypeError);
+        expect(err.driver).to.equal(true);
+        expect(err.name).to.equal('MongoError');
+      }
+    );
+  }
+
+  it('should propagate the proper error from executing an empty ordered batch', function() {
+    const client = this.configuration.newClient();
+
+    return client.connect().then(() => {
+      const collection = client.db(this.configuration.db).collection('doesnt_matter');
+
+      return testPropagationOfBulkWriteError(collection.initializeOrderedBulkOp());
+    });
+  });
+
+  it('should propagate the proper error from executing an empty unordered batch', function() {
+    const client = this.configuration.newClient();
+
+    return client.connect().then(() => {
+      const collection = client.db(this.configuration.db).collection('doesnt_matter');
+
+      return testPropagationOfBulkWriteError(collection.initializeUnorderedBulkOp());
+    });
   });
 });
