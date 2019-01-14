@@ -225,7 +225,7 @@ tests:
           - _id: 1
 
   - description: write concern error on commit
-
+    skipReason: "SERVER-37458 Mongos does not yet support writeConcern on commit"
     operations:
       - name: startTransaction
         object: session0

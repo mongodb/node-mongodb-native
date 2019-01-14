@@ -111,10 +111,9 @@ This can occur if the connection pool is too large.
 
 ```js
 const client = new MongoClient('mongodb://localhost:27017/test?maxPoolSize=5000');
-client.connect('mongodb://localhost:27017/test?maxPoolSize=5000',
-  function(err) {
-    // connection
-  });
+client.connect(function(err) {
+	// connection
+});
 ```
 If this operation causes an `ECONNRESET` error, you may have run into
 the file descriptor limit for your Node.js process.

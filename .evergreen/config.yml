@@ -100,6 +100,7 @@ functions:
           done
   install dependencies:
     - command: shell.exec
+      type: setup
       params:
         working_dir: src
         script: >
@@ -124,7 +125,6 @@ pre:
   - func: prepare resources
   - func: fix absolute paths
   - func: make files executable
-  - func: install dependencies
 post:
   - func: cleanup
 tasks:
@@ -133,6 +133,7 @@ tasks:
       - latest
       - server
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: latest
@@ -142,6 +143,7 @@ tasks:
       - latest
       - replica_set
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: latest
@@ -151,6 +153,7 @@ tasks:
       - latest
       - sharded_cluster
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: latest
@@ -160,6 +163,7 @@ tasks:
       - '4.0'
       - server
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: '4.0'
@@ -169,6 +173,7 @@ tasks:
       - '4.0'
       - replica_set
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: '4.0'
@@ -178,6 +183,7 @@ tasks:
       - '4.0'
       - sharded_cluster
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: '4.0'
@@ -187,6 +193,7 @@ tasks:
       - '3.6'
       - server
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.6'
@@ -196,6 +203,7 @@ tasks:
       - '3.6'
       - replica_set
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.6'
@@ -205,6 +213,7 @@ tasks:
       - '3.6'
       - sharded_cluster
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.6'
@@ -214,6 +223,7 @@ tasks:
       - '3.4'
       - server
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.4'
@@ -223,6 +233,7 @@ tasks:
       - '3.4'
       - replica_set
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.4'
@@ -232,6 +243,7 @@ tasks:
       - '3.4'
       - sharded_cluster
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.4'
@@ -241,6 +253,7 @@ tasks:
       - '3.2'
       - server
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.2'
@@ -250,6 +263,7 @@ tasks:
       - '3.2'
       - replica_set
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.2'
@@ -259,6 +273,7 @@ tasks:
       - '3.2'
       - sharded_cluster
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.2'
@@ -268,6 +283,7 @@ tasks:
       - '3.0'
       - server
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.0'
@@ -277,6 +293,7 @@ tasks:
       - '3.0'
       - replica_set
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.0'
@@ -286,6 +303,7 @@ tasks:
       - '3.0'
       - sharded_cluster
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: '3.0'
@@ -295,6 +313,7 @@ tasks:
       - '2.6'
       - server
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: '2.6'
@@ -304,6 +323,7 @@ tasks:
       - '2.6'
       - replica_set
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: '2.6'
@@ -313,6 +333,7 @@ tasks:
       - '2.6'
       - sharded_cluster
     commands:
+      - func: install dependencies
       - func: run tests
         vars:
           VERSION: '2.6'
@@ -325,11 +346,11 @@ tasks:
         vars:
           VERSION: latest
 buildvariants:
-  - name: linux-64-amzn-test-carbon
-    display_name: Amazon Linux (Enterprise) Node Carbon
+  - name: linux-64-amzn-test-dubnium
+    display_name: Amazon Linux (Enterprise) Node Dubnium
     run_on: linux-64-amzn-test
     expansions:
-      NODE_LTS_NAME: carbon
+      NODE_LTS_NAME: dubnium
     tasks: &ref_0
       - test-latest-server
       - test-latest-replica_set
@@ -353,6 +374,12 @@ buildvariants:
       - test-2.6-replica_set
       - test-2.6-sharded_cluster
       - test-atlas-connectivity
+  - name: linux-64-amzn-test-carbon
+    display_name: Amazon Linux (Enterprise) Node Carbon
+    run_on: linux-64-amzn-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_0
   - name: linux-64-amzn-test-boron
     display_name: Amazon Linux (Enterprise) Node Boron
     run_on: linux-64-amzn-test
@@ -364,6 +391,12 @@ buildvariants:
     run_on: linux-64-amzn-test
     expansions:
       NODE_LTS_NAME: argon
+    tasks: *ref_0
+  - name: ubuntu-14.04-dubnium
+    display_name: Ubuntu 14.04 Node Dubnium
+    run_on: ubuntu1404-test
+    expansions:
+      NODE_LTS_NAME: dubnium
     tasks: *ref_0
   - name: ubuntu-14.04-carbon
     display_name: Ubuntu 14.04 Node Carbon
@@ -383,6 +416,12 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_0
+  - name: rhel70-dubnium
+    display_name: RHEL 7.0 Node Dubnium
+    run_on: rhel70-small
+    expansions:
+      NODE_LTS_NAME: dubnium
+    tasks: *ref_0
   - name: rhel70-carbon
     display_name: RHEL 7.0 Node Carbon
     run_on: rhel70-small
@@ -400,6 +439,12 @@ buildvariants:
     run_on: rhel70-small
     expansions:
       NODE_LTS_NAME: argon
+    tasks: *ref_0
+  - name: debian71-test-dubnium
+    display_name: Debian 7.1 Node Dubnium
+    run_on: debian71-test
+    expansions:
+      NODE_LTS_NAME: dubnium
     tasks: *ref_0
   - name: debian71-test-carbon
     display_name: Debian 7.1 Node Carbon
@@ -419,6 +464,12 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_0
+  - name: archlinux-test-dubnium
+    display_name: Archlinux Node Dubnium
+    run_on: archlinux-test
+    expansions:
+      NODE_LTS_NAME: dubnium
+    tasks: *ref_0
   - name: archlinux-test-carbon
     display_name: Archlinux Node Carbon
     run_on: archlinux-test
@@ -436,6 +487,12 @@ buildvariants:
     run_on: archlinux-test
     expansions:
       NODE_LTS_NAME: argon
+    tasks: *ref_0
+  - name: macos-1012-dubnium
+    display_name: macOS 10.12 Node Dubnium
+    run_on: macos-1012
+    expansions:
+      NODE_LTS_NAME: dubnium
     tasks: *ref_0
   - name: macos-1012-carbon
     display_name: macOS 10.12 Node Carbon
@@ -455,11 +512,11 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_0
-  - name: ubuntu-16.04-carbon
-    display_name: Ubuntu 16.04 Node Carbon
+  - name: ubuntu-16.04-dubnium
+    display_name: Ubuntu 16.04 Node Dubnium
     run_on: ubuntu1604-test
     expansions:
-      NODE_LTS_NAME: carbon
+      NODE_LTS_NAME: dubnium
     tasks: &ref_1
       - test-latest-server
       - test-latest-replica_set
@@ -477,6 +534,12 @@ buildvariants:
       - test-3.2-replica_set
       - test-3.2-sharded_cluster
       - test-atlas-connectivity
+  - name: ubuntu-16.04-carbon
+    display_name: Ubuntu 16.04 Node Carbon
+    run_on: ubuntu1604-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_1
   - name: ubuntu-16.04-boron
     display_name: Ubuntu 16.04 Node Boron
     run_on: ubuntu1604-test
@@ -488,6 +551,12 @@ buildvariants:
     run_on: ubuntu1604-test
     expansions:
       NODE_LTS_NAME: argon
+    tasks: *ref_1
+  - name: suse12-x86-64-test-dubnium
+    display_name: SUSE 12 (x86_64) Node Dubnium
+    run_on: suse12-test
+    expansions:
+      NODE_LTS_NAME: dubnium
     tasks: *ref_1
   - name: suse12-x86-64-test-carbon
     display_name: SUSE 12 (x86_64) Node Carbon
@@ -507,6 +576,12 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_1
+  - name: rhel71-power8-test-dubnium
+    display_name: RHEL 7.1 (POWER8) Node Dubnium
+    run_on: rhel71-power8-test
+    expansions:
+      NODE_LTS_NAME: dubnium
+    tasks: *ref_1
   - name: rhel71-power8-test-carbon
     display_name: RHEL 7.1 (POWER8) Node Carbon
     run_on: rhel71-power8-test
@@ -525,11 +600,11 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: argon
     tasks: *ref_1
-  - name: debian81-test-carbon
-    display_name: Debian 8.1 Node Carbon
+  - name: debian81-test-dubnium
+    display_name: Debian 8.1 Node Dubnium
     run_on: debian81-test
     expansions:
-      NODE_LTS_NAME: carbon
+      NODE_LTS_NAME: dubnium
     tasks: &ref_2
       - test-latest-server
       - test-latest-replica_set
@@ -544,11 +619,23 @@ buildvariants:
       - test-3.4-replica_set
       - test-3.4-sharded_cluster
       - test-atlas-connectivity
+  - name: debian81-test-carbon
+    display_name: Debian 8.1 Node Carbon
+    run_on: debian81-test
+    expansions:
+      NODE_LTS_NAME: carbon
+    tasks: *ref_2
   - name: debian81-test-boron
     display_name: Debian 8.1 Node Boron
     run_on: debian81-test
     expansions:
       NODE_LTS_NAME: boron
+    tasks: *ref_2
+  - name: suse12-zseries-test-dubnium
+    display_name: SUSE 12 (zSeries) Node Dubnium
+    run_on: suse12-zseries-test
+    expansions:
+      NODE_LTS_NAME: dubnium
     tasks: *ref_2
   - name: suse12-zseries-test-carbon
     display_name: SUSE 12 (zSeries) Node Carbon
@@ -562,6 +649,12 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: boron
     tasks: *ref_2
+  - name: ubuntu1604-arm64-small-dubnium
+    display_name: Ubuntu 16.04 (ARM64) Node Dubnium
+    run_on: ubuntu1604-arm64-small
+    expansions:
+      NODE_LTS_NAME: dubnium
+    tasks: *ref_2
   - name: ubuntu1604-arm64-small-carbon
     display_name: Ubuntu 16.04 (ARM64) Node Carbon
     run_on: ubuntu1604-arm64-small
@@ -574,6 +667,12 @@ buildvariants:
     expansions:
       NODE_LTS_NAME: boron
     tasks: *ref_2
+  - name: ubuntu1604-power8-test-dubnium
+    display_name: Ubuntu 16.04 (POWER8) Node Dubnium
+    run_on: ubuntu1604-power8-test
+    expansions:
+      NODE_LTS_NAME: dubnium
+    tasks: *ref_2
   - name: ubuntu1604-power8-test-carbon
     display_name: Ubuntu 16.04 (POWER8) Node Carbon
     run_on: ubuntu1604-power8-test
@@ -585,6 +684,12 @@ buildvariants:
     run_on: ubuntu1604-power8-test
     expansions:
       NODE_LTS_NAME: boron
+    tasks: *ref_2
+  - name: ubuntu1604-zseries-small-dubnium
+    display_name: Ubuntu 16.04 (zSeries) Node Dubnium
+    run_on: ubuntu1604-zseries-small
+    expansions:
+      NODE_LTS_NAME: dubnium
     tasks: *ref_2
   - name: ubuntu1604-zseries-small-carbon
     display_name: Ubuntu 16.04 (zSeries) Node Carbon

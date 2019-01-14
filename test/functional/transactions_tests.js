@@ -123,7 +123,7 @@ describe('Transactions (spec)', function() {
         afterEach(() => cleanupAfterSuite(testContext));
 
         testSuite.tests.forEach(testData => {
-          const maybeSkipIt = testData.skipReason ? it.skip : it;
+          const maybeSkipIt = testData.skipReason || testSuite.name === 'pin-mongos' ? it.skip : it;
           maybeSkipIt(testData.description, function() {
             let testPromise = Promise.resolve();
 

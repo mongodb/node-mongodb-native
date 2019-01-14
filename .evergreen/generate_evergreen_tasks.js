@@ -5,7 +5,7 @@ const fs = require('fs');
 const yaml = require('js-yaml');
 
 const MONGODB_VERSIONS = ['latest', '4.0', '3.6', '3.4', '3.2', '3.0', '2.6'];
-const NODE_VERSIONS = ['carbon', 'boron', 'argon'];
+const NODE_VERSIONS = ['dubnium', 'carbon', 'boron', 'argon'];
 const TOPOLOGIES = ['server', 'replica_set', 'sharded_cluster'];
 const OPERATING_SYSTEMS = [
   {
@@ -139,6 +139,9 @@ function makeTask({ mongoVersion, topology }) {
     tags: [mongoVersion, topology],
     commands: [
       {
+        func: 'install dependencies'
+      },
+      {
         func: 'run tests',
         vars: {
           VERSION: mongoVersion,
@@ -174,13 +177,13 @@ const getTaskList = (() => {
   const memo = {};
   return function(mongoVersion) {
     const key = mongoVersion;
-    
+
     if (memo[key]) {
       return memo[key];
     }
 
     const ret = TASKS.filter(task => {
-      const { VERSION } = task.commands[0].vars;
+      const { VERSION } = task.commands[1].vars;
 
       if (VERSION === 'latest') {
         return true;
@@ -209,7 +212,7 @@ OPERATING_SYSTEMS.forEach(
   }
 );
 
-const fileData = yaml.safeLoad(fs.readFileSync(`${__dirname}/_config.template.yml`, 'utf8'))
+const fileData = yaml.safeLoad(fs.readFileSync(`${__dirname}/config.yml.in`, 'utf8'))
 
 fileData.tasks = (fileData.tasks || []).concat(TASKS);
 fileData.buildvariants = (fileData.buildvariants || []).concat(BUILD_VARIANTS);

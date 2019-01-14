@@ -83,6 +83,9 @@ Each YAML file has the following keys:
 
   - ``description``: The name of the test.
 
+  - ``skipReason``: Optional, string describing why this test should be
+    skipped.
+
   - ``clientOptions``: Optional, parameters to pass to MongoClient().
 
   - ``failPoint``: Optional, a server failpoint to enable expressed as the
@@ -140,19 +143,54 @@ Use as integration tests
 ========================
 
 Run a MongoDB replica set with a primary, a secondary, and an arbiter,
-**server version 4.0.0-rc4 or later**. (Including a secondary ensures that
+**server version 4.0.0 or later**. (Including a secondary ensures that
 server selection in a transaction works properly. Including an arbiter helps
 ensure that no new bugs have been introduced related to arbiters.)
+
+A driver that implements support for sharded transactions MUST also run these
+tests against a MongoDB sharded cluster with multiple mongoses and
+**server version 4.1.6 or later**. Including multiple mongoses (and
+initializing the MongoClient with multiple mongos seeds!) ensures that
+mongos transaction pinning works properly.
 
 Load each YAML (or JSON) file using a Canonical Extended JSON parser.
 
 Then for each element in ``tests``:
 
+#. If the``skipReason`` field is present, skip this test completely.
 #. Create a MongoClient and call
    ``client.admin.runCommand({killAllSessions: []})`` to clean up any open
-   transactions from previous test failures. The command will fail with message
-   "operation was interrupted", because it kills its own implicit session. Catch
-   the exception and continue.
+   transactions from previous test failures.
+
+   To workaround `SERVER-38335`_, ensure this command does not send
+   an implicit session, otherwise the command will fail with an
+   "operation was interrupted" error because it kills itself and (on a sharded
+   cluster) future commands may fail with an error similar to:
+   "Encountered error from localhost:27217 during a transaction :: caused by :: operation was interrupted".
+
+   If your driver cannot run this command without an implicit session, then
+   either skip this step and live with the fact that previous test failures
+   may cause later tests to fail or use the `killAllSessionsByPattern` command
+   instead. During each test record all session ids sent to the server and at
+   the end of each test kill all the sessions ids (using a different session):
+
+   .. code:: python
+
+      # Be sure to use a distinct session to avoid "operation was interrupted".
+      session_for_cleanup = client.start_session()
+      recorded_session_uuids = []
+      # Run test case and record session uuids...
+      client.admin.runCommand({
+          'killAllSessionsByPattern': [
+              {'lsid': {'id': uuid}} for uuid in recorded_session_uuids]},
+          session=session_for_cleanup)
+
+   - When testing against a sharded cluster, create a list of MongoClients that
+     are directly connected to each mongos. Run the `killAllSessions`
+     (or `killAllSessionsByPattern`) command on ALL mongoses.
+
+   .. _SERVER-38335: https://jira.mongodb.org/browse/SERVER-38335
+
 #. Create a collection object from the MongoClient, using the ``database_name``
    and ``collection_name`` fields of the YAML file.
 #. Drop the test collection, using writeConcern "majority".
@@ -163,11 +201,18 @@ Then for each element in ``tests``:
    into the test collection, using writeConcern "majority".
 #. If ``failPoint`` is specified, its value is a configureFailPoint command.
    Run the command on the admin database to enable the fail point.
+
+   - When testing against a sharded cluster run this command on ALL mongoses.
+
 #. Create a **new** MongoClient ``client``, with Command Monitoring listeners
    enabled. (Using a new MongoClient for each test ensures a fresh session pool
    that hasn't executed any transactions previously, so the tests can assert
    actual txnNumbers, starting from 1.) Pass this test's ``clientOptions`` if
    present.
+
+   - When testing against a sharded cluster this client MUST be created with
+     multiple (valid) mongos seed addreses.
+
 #. Call ``client.startSession`` twice to create ClientSession objects
    ``session0`` and ``session1``, using the test's "sessionOptions" if they
    are present. Save their lsids so they are available after calling
@@ -225,12 +270,15 @@ Then for each element in ``tests``:
         mode: "off"
     });
 
+   - When testing against a sharded cluster run this command on ALL mongoses.
+
 #. For each element in ``outcome``:
 
    - If ``name`` is "collection", verify that the test collection contains
-     exactly the documents in the ``data`` array. Ensure this find uses
-     Primary read preference even when the MongoClient is configured with
-     another read preference.
+     exactly the documents in the ``data`` array. Ensure this find reads the
+     latest data by using **primary read preference** with
+     **local read concern** even when the MongoClient is configured with
+     another read preference or read concern.
 
 Command-Started Events
 ``````````````````````
@@ -268,3 +316,69 @@ afterClusterTime
 A ``readConcern.afterClusterTime`` value of ``42`` in a command-started event
 is a fake cluster time. Drivers MUST assert that the actual command includes an
 afterClusterTime.
+
+Mongos Pinning Prose Tests
+==========================
+
+The following tests ensure that a ClientSession is properly unpinned after
+a sharded transaction. Initialize these tests with a MongoClient connected
+to multiple mongoses.
+
+These tests use a cursor's address field to track which server an operation
+was run on. If this is not possible in your driver, use command monitoring
+instead.
+
+#. Test that starting a new transaction on a pinned ClientSession unpins the
+   session and normal server selection is performed for the next operation.
+
+   .. code:: python
+
+      @require_server_version(4, 1, 6)
+      @require_mongos_count_at_least(2)
+      def test_unpin_for_next_transaction(self):
+        # Increase localThresholdMS and wait until both nodes are discovered
+        # to avoid false positives.
+        client = MongoClient(mongos_hosts, localThresholdMS=1000)
+        wait_until(lambda: len(client.nodes) > 1)
+        # Create the collection.
+        client.test.test.insert_one({})
+        with client.start_session() as s:
+          # Session is pinned to Mongos.
+          with s.start_transaction():
+            client.test.test.insert_one({}, session=s)
+
+          addresses = set()
+          for _ in range(50):
+            with s.start_transaction():
+              cursor = client.test.test.find({}, session=s)
+              assert next(cursor)
+              addresses.add(cursor.address)
+
+          assert len(addresses) > 1
+
+#. Test non-transaction operations using a pinned ClientSession unpins the
+   session and normal server selection is performed.
+
+   .. code:: python
+
+      @require_server_version(4, 1, 6)
+      @require_mongos_count_at_least(2)
+      def test_unpin_for_non_transaction_operation(self):
+        # Increase localThresholdMS and wait until both nodes are discovered
+        # to avoid false positives.
+        client = MongoClient(mongos_hosts, localThresholdMS=1000)
+        wait_until(lambda: len(client.nodes) > 1)
+        # Create the collection.
+        client.test.test.insert_one({})
+        with client.start_session() as s:
+          # Session is pinned to Mongos.
+          with s.start_transaction():
+            client.test.test.insert_one({}, session=s)
+
+          addresses = set()
+          for _ in range(50):
+            cursor = client.test.test.find({}, session=s)
+            assert next(cursor)
+            addresses.add(cursor.address)
+
+          assert len(addresses) > 1
