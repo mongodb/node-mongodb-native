@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.1.11"></a>
+## [3.1.11](https://github.com/mongodb/node-mongodb-native/compare/v3.1.10...v3.1.11) (2019-01-15)
+
+
+### Bug Fixes
+
+* **bulk:** fix error propagation in empty bulk.execute ([a3adb3f](https://github.com/mongodb/node-mongodb-native/commit/a3adb3f))
+* **bulk:** make sure that any error in bulk write is propagated ([bedc2d2](https://github.com/mongodb/node-mongodb-native/commit/bedc2d2))
+* **bulk:** properly calculate batch size for bulk writes ([aafe71b](https://github.com/mongodb/node-mongodb-native/commit/aafe71b))
+* **operations:** do not call require in a hot path ([ff82ff4](https://github.com/mongodb/node-mongodb-native/commit/ff82ff4))
+
+
+
 <a name="3.1.10"></a>
 ## [3.1.10](https://github.com/mongodb/node-mongodb-native/compare/v3.1.9...v3.1.10) (2018-11-16)
 
