@@ -100,15 +100,31 @@ describe('examples(change-stream):', function() {
       // Start Changestream Example 3
       const collection = db.collection('inventory');
       const changeStream = collection.watch();
-      const change1 = await changeStream.next();
 
-      const resumeAfter = change1._id;
-      changeStream.close();
+      let resumeToken, newChangeStream;
+      changeStream.on('change', next => {
+        resumeToken = next._id;
+        changeStream.close();
 
-      const newChangeStream = collection.watch({ resumeAfter });
-      const change2 = await newChangeStream.next();
+        newChangeStream = collection.watch({ resumeAfter });
+        newChangeStream.on('change', next => {
+          // process next document
+        });
+      });
       // End Changestream Example 3
 
+      // Start Changestream Example 3 Alternative
+      const changeStreamIterator = collection.watch();
+      const change1 = await changeStreamIterator.next();
+
+      const resumeAfter = change1._id;
+      changeStreamIterator.close();
+
+      const newChangeStreamIterator = collection.watch({ resumeAfter });
+      const change2 = await newChangeStreamIterator.next();
+      // End Changestream Example 3 Alternative
+
+      await newChangeStreamIterator.close();
       await newChangeStream.close();
 
       expect(change1).to.have.nested.property('fullDocument.a', 1);
@@ -128,8 +144,9 @@ describe('examples(change-stream):', function() {
         { $match: { 'fullDocument.username': 'alice' } },
         { $addFields: { newField: 'this is an added field!' } }
       ];
+
       const collection = db.collection('inventory');
-      const changeStream = collection.watch({ fullDocument: 'updateLookup' });
+      const changeStream = collection.watch(pipeline);
       changeStream.on('change', next => {
         // process next document
       });
