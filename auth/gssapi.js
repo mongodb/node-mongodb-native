@@ -1,7 +1,6 @@
 'use strict';
 
 const f = require('util').format;
-const Query = require('../connection/commands').Query;
 const MongoError = require('../error').MongoError;
 const retrieveKerberos = require('../utils').retrieveKerberos;
 
@@ -33,7 +32,7 @@ var GSSAPI = function(bson) {
 /**
  * Authenticate
  * @method
- * @param {{Server}|{ReplSet}|{Mongos}} server Topology the authentication method is being called on
+ * @param {function} runCommand A method called to run commands directly on a connection, bypassing any message queue
  * @param {[]Connections} connections Connections to authenticate using this authenticator
  * @param {string} db Name of the database
  * @param {string} username Username
@@ -41,7 +40,15 @@ var GSSAPI = function(bson) {
  * @param {authResultCallback} callback The callback to return the result from the authentication
  * @return {object}
  */
-GSSAPI.prototype.auth = function(server, connections, db, username, password, options, callback) {
+GSSAPI.prototype.auth = function(
+  runCommand,
+  connections,
+  db,
+  username,
+  password,
+  options,
+  callback
+) {
   var self = this;
   let kerberos;
   try {
@@ -73,7 +80,7 @@ GSSAPI.prototype.auth = function(server, connections, db, username, password, op
         password,
         db,
         gssapiServiceName,
-        server,
+        runCommand,
         connection,
         options,
         function(err, r) {
@@ -126,7 +133,7 @@ var GSSAPIInitialize = function(
   password,
   authdb,
   gssapiServiceName,
-  server,
+  runCommand,
   connection,
   options,
   callback
@@ -156,7 +163,7 @@ var GSSAPIInitialize = function(
         username,
         password,
         authdb,
-        server,
+        runCommand,
         connection,
         callback
       );
@@ -174,7 +181,7 @@ var MongoDBGSSAPIFirstStep = function(
   username,
   password,
   authdb,
-  server,
+  runCommand,
   connection,
   callback
 ) {
@@ -187,36 +194,29 @@ var MongoDBGSSAPIFirstStep = function(
   };
 
   // Write the commmand on the connection
-  server(
-    connection,
-    new Query(self.bson, '$external.$cmd', command, {
-      numberToSkip: 0,
-      numberToReturn: 1
-    }),
-    function(err, r) {
+  runCommand(connection, '$external.$cmd', command, (err, r) => {
+    if (err) return callback(err, false);
+    var doc = r.result;
+    // Execute mongodb transition
+    mongo_auth_process.transition(r.result.payload, function(err, payload) {
       if (err) return callback(err, false);
-      var doc = r.result;
-      // Execute mongodb transition
-      mongo_auth_process.transition(r.result.payload, function(err, payload) {
-        if (err) return callback(err, false);
 
-        // MongoDB API Second Step
-        MongoDBGSSAPISecondStep(
-          self,
-          mongo_auth_process,
-          payload,
-          doc,
-          db,
-          username,
-          password,
-          authdb,
-          server,
-          connection,
-          callback
-        );
-      });
-    }
-  );
+      // MongoDB API Second Step
+      MongoDBGSSAPISecondStep(
+        self,
+        mongo_auth_process,
+        payload,
+        doc,
+        db,
+        username,
+        password,
+        authdb,
+        runCommand,
+        connection,
+        callback
+      );
+    });
+  });
 };
 
 //
@@ -230,7 +230,7 @@ var MongoDBGSSAPISecondStep = function(
   username,
   password,
   authdb,
-  server,
+  runCommand,
   connection,
   callback
 ) {
@@ -243,36 +243,29 @@ var MongoDBGSSAPISecondStep = function(
 
   // Execute the command
   // Write the commmand on the connection
-  server(
-    connection,
-    new Query(self.bson, '$external.$cmd', command, {
-      numberToSkip: 0,
-      numberToReturn: 1
-    }),
-    function(err, r) {
+  runCommand(connection, '$external.$cmd', command, (err, r) => {
+    if (err) return callback(err, false);
+    var doc = r.result;
+    // Call next transition for kerberos
+    mongo_auth_process.transition(doc.payload, function(err, payload) {
       if (err) return callback(err, false);
-      var doc = r.result;
-      // Call next transition for kerberos
-      mongo_auth_process.transition(doc.payload, function(err, payload) {
-        if (err) return callback(err, false);
 
-        // Call the last and third step
-        MongoDBGSSAPIThirdStep(
-          self,
-          mongo_auth_process,
-          payload,
-          doc,
-          db,
-          username,
-          password,
-          authdb,
-          server,
-          connection,
-          callback
-        );
-      });
-    }
-  );
+      // Call the last and third step
+      MongoDBGSSAPIThirdStep(
+        self,
+        mongo_auth_process,
+        payload,
+        doc,
+        db,
+        username,
+        password,
+        authdb,
+        runCommand,
+        connection,
+        callback
+      );
+    });
+  });
 };
 
 var MongoDBGSSAPIThirdStep = function(
@@ -284,7 +277,7 @@ var MongoDBGSSAPIThirdStep = function(
   username,
   password,
   authdb,
-  server,
+  runCommand,
   connection,
   callback
 ) {
@@ -296,20 +289,13 @@ var MongoDBGSSAPIThirdStep = function(
   };
 
   // Execute the command
-  server(
-    connection,
-    new Query(self.bson, '$external.$cmd', command, {
-      numberToSkip: 0,
-      numberToReturn: 1
-    }),
-    function(err, r) {
-      if (err) return callback(err, false);
-      mongo_auth_process.transition(null, function(err) {
-        if (err) return callback(err, null);
-        callback(null, r);
-      });
-    }
-  );
+  runCommand(connection, '$external.$cmd', command, (err, r) => {
+    if (err) return callback(err, false);
+    mongo_auth_process.transition(null, function(err) {
+      if (err) return callback(err, null);
+      callback(null, r);
+    });
+  });
 };
 
 // Add to store only if it does not exist
@@ -341,19 +327,19 @@ GSSAPI.prototype.logout = function(dbName) {
 /**
  * Re authenticate pool
  * @method
- * @param {{Server}|{ReplSet}|{Mongos}} server Topology the authentication method is being called on
+ * @param {function} runCommand A method called to run commands directly on a connection, bypassing any message queue
  * @param {[]Connections} connections Connections to authenticate using this authenticator
  * @param {authResultCallback} callback The callback to return the result from the authentication
  * @return {object}
  */
-GSSAPI.prototype.reauthenticate = function(server, connections, callback) {
+GSSAPI.prototype.reauthenticate = function(runCommand, connections, callback) {
   var authStore = this.authStore.slice(0);
   var count = authStore.length;
   if (count === 0) return callback(null, null);
   // Iterate over all the auth details stored
   for (var i = 0; i < authStore.length; i++) {
     this.auth(
-      server,
+      runCommand,
       connections,
       authStore[i].db,
       authStore[i].username,

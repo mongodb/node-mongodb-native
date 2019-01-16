@@ -1,7 +1,6 @@
 'use strict';
 
 const f = require('util').format;
-const Query = require('../connection/commands').Query;
 const MongoError = require('../error').MongoError;
 const retrieveKerberos = require('../utils').retrieveKerberos;
 
@@ -33,7 +32,7 @@ var SSPI = function(bson) {
 /**
  * Authenticate
  * @method
- * @param {{Server}|{ReplSet}|{Mongos}} server Topology the authentication method is being called on
+ * @param {function} runCommand A method called to run commands directly on a connection, bypassing any message queue
  * @param {[]Connections} connections Connections to authenticate using this authenticator
  * @param {string} db Name of the database
  * @param {string} username Username
@@ -41,7 +40,7 @@ var SSPI = function(bson) {
  * @param {authResultCallback} callback The callback to return the result from the authentication
  * @return {object}
  */
-SSPI.prototype.auth = function(server, connections, db, username, password, options, callback) {
+SSPI.prototype.auth = function(runCommand, connections, db, username, password, options, callback) {
   var self = this;
   let kerberos;
   try {
@@ -70,7 +69,7 @@ SSPI.prototype.auth = function(server, connections, db, username, password, opti
         username,
         password,
         gssapiServiceName,
-        server,
+        runCommand,
         connection,
         options,
         function(err, r) {
@@ -119,7 +118,7 @@ function SSIPAuthenticate(
   username,
   password,
   gssapiServiceName,
-  server,
+  runCommand,
   connection,
   options,
   callback
@@ -132,12 +131,7 @@ function SSIPAuthenticate(
   );
 
   function authCommand(command, authCb) {
-    const query = new Query(self.bson, '$external.$cmd', command, {
-      numberToSkip: 0,
-      numberToReturn: 1
-    });
-
-    server(connection, query, authCb);
+    runCommand(connection, '$external.$cmd', command, authCb);
   }
 
   authProcess.init(username, password, err => {
@@ -222,19 +216,19 @@ SSPI.prototype.logout = function(dbName) {
 /**
  * Re authenticate pool
  * @method
- * @param {{Server}|{ReplSet}|{Mongos}} server Topology the authentication method is being called on
+ * @param {function} runCommand A method called to run commands directly on a connection, bypassing any message queue
  * @param {[]Connections} connections Connections to authenticate using this authenticator
  * @param {authResultCallback} callback The callback to return the result from the authentication
  * @return {object}
  */
-SSPI.prototype.reauthenticate = function(server, connections, callback) {
+SSPI.prototype.reauthenticate = function(runCommand, connections, callback) {
   var authStore = this.authStore.slice(0);
   var count = authStore.length;
   if (count === 0) return callback(null, null);
   // Iterate over all the auth details stored
   for (var i = 0; i < authStore.length; i++) {
     this.auth(
-      server,
+      runCommand,
       connections,
       authStore[i].db,
       authStore[i].username,

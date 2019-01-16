@@ -3,7 +3,6 @@
 var f = require('util').format,
   crypto = require('crypto'),
   retrieveBSON = require('../connection/utils').retrieveBSON,
-  Query = require('../connection/commands').Query,
   MongoError = require('../error').MongoError,
   Buffer = require('safe-buffer').Buffer;
 
@@ -138,7 +137,7 @@ function HI(data, salt, iterations, cryptoMethod) {
 /**
  * Authenticate
  * @method
- * @param {{Server}|{ReplSet}|{Mongos}} server Topology the authentication method is being called on
+ * @param {function} runCommand A method called to run commands directly on a connection, bypassing any message queue
  * @param {[]Connections} connections Connections to authenticate using this authenticator
  * @param {string} db Name of the database
  * @param {string} username Username
@@ -146,7 +145,7 @@ function HI(data, salt, iterations, cryptoMethod) {
  * @param {authResultCallback} callback The callback to return the result from the authentication
  * @return {object}
  */
-ScramSHA.prototype.auth = function(server, connections, db, username, password, callback) {
+ScramSHA.prototype.auth = function(runCommand, connections, db, username, password, callback) {
   var self = this;
   // Total connections
   var count = connections.length;
@@ -163,8 +162,7 @@ ScramSHA.prototype.auth = function(server, connections, db, username, password, 
   if (cryptoMethod === 'sha256') {
     mechanism = 'SCRAM-SHA-256';
 
-    let saslprepFn = (server.s && server.s.saslprep) || saslprep;
-
+    let saslprepFn = saslprep;
     if (saslprepFn) {
       processedPassword = saslprepFn(password);
     } else {
@@ -244,117 +242,96 @@ ScramSHA.prototype.auth = function(server, connections, db, username, password, 
     };
 
     // Write the commmand on the connection
-    server(
-      connection,
-      new Query(self.bson, f('%s.$cmd', db), cmd, {
-        numberToSkip: 0,
-        numberToReturn: 1
-      }),
-      function(err, r) {
-        // Do we have an error, handle it
-        if (handleError(err, r) === false) {
-          count = count - 1;
+    runCommand(connection, `${db}.$cmd`, cmd, (err, r) => {
+      // Do we have an error, handle it
+      if (handleError(err, r) === false) {
+        count = count - 1;
 
-          if (count === 0 && numberOfValidConnections > 0) {
-            // Store the auth details
-            addAuthSession(self.authStore, new AuthSession(db, username, password));
-            // Return correct authentication
-            return callback(null, true);
-          } else if (count === 0) {
-            if (errorObject == null)
-              errorObject = new MongoError(f('failed to authenticate using scram'));
-            return callback(errorObject, false);
-          }
-
-          return;
+        if (count === 0 && numberOfValidConnections > 0) {
+          // Store the auth details
+          addAuthSession(self.authStore, new AuthSession(db, username, password));
+          // Return correct authentication
+          return callback(null, true);
+        } else if (count === 0) {
+          if (errorObject == null)
+            errorObject = new MongoError(f('failed to authenticate using scram'));
+          return callback(errorObject, false);
         }
 
-        // Get the dictionary
-        var dict = parsePayload(r.result.payload.value());
-
-        // Unpack dictionary
-        var iterations = parseInt(dict.i, 10);
-        var salt = dict.s;
-        var rnonce = dict.r;
-
-        // Set up start of proof
-        var withoutProof = f('c=biws,r=%s', rnonce);
-        var saltedPassword = HI(
-          processedPassword,
-          Buffer.from(salt, 'base64'),
-          iterations,
-          cryptoMethod
-        );
-
-        if (iterations && iterations < 4096) {
-          const error = new MongoError(`Server returned an invalid iteration count ${iterations}`);
-          return callback(error, false);
-        }
-
-        // Create the client key
-        const clientKey = HMAC(cryptoMethod, saltedPassword, 'Client Key');
-
-        // Create the stored key
-        const storedKey = H(cryptoMethod, clientKey);
-
-        // Create the authentication message
-        const authMessage = [
-          firstBare,
-          r.result.payload.value().toString('base64'),
-          withoutProof
-        ].join(',');
-
-        // Create client signature
-        const clientSignature = HMAC(cryptoMethod, storedKey, authMessage);
-
-        // Create client proof
-        const clientProof = f('p=%s', xor(clientKey, clientSignature));
-
-        // Create client final
-        const clientFinal = [withoutProof, clientProof].join(',');
-
-        // Create continue message
-        const cmd = {
-          saslContinue: 1,
-          conversationId: r.result.conversationId,
-          payload: new Binary(Buffer.from(clientFinal))
-        };
-
-        //
-        // Execute sasl continue
-        // Write the commmand on the connection
-        server(
-          connection,
-          new Query(self.bson, f('%s.$cmd', db), cmd, {
-            numberToSkip: 0,
-            numberToReturn: 1
-          }),
-          function(err, r) {
-            if (r && r.result.done === false) {
-              var cmd = {
-                saslContinue: 1,
-                conversationId: r.result.conversationId,
-                payload: Buffer.alloc(0)
-              };
-
-              // Write the commmand on the connection
-              server(
-                connection,
-                new Query(self.bson, f('%s.$cmd', db), cmd, {
-                  numberToSkip: 0,
-                  numberToReturn: 1
-                }),
-                function(err, r) {
-                  handleEnd(err, r);
-                }
-              );
-            } else {
-              handleEnd(err, r);
-            }
-          }
-        );
+        return;
       }
-    );
+
+      // Get the dictionary
+      var dict = parsePayload(r.result.payload.value());
+
+      // Unpack dictionary
+      var iterations = parseInt(dict.i, 10);
+      var salt = dict.s;
+      var rnonce = dict.r;
+
+      // Set up start of proof
+      var withoutProof = f('c=biws,r=%s', rnonce);
+      var saltedPassword = HI(
+        processedPassword,
+        Buffer.from(salt, 'base64'),
+        iterations,
+        cryptoMethod
+      );
+
+      if (iterations && iterations < 4096) {
+        const error = new MongoError(`Server returned an invalid iteration count ${iterations}`);
+        return callback(error, false);
+      }
+
+      // Create the client key
+      const clientKey = HMAC(cryptoMethod, saltedPassword, 'Client Key');
+
+      // Create the stored key
+      const storedKey = H(cryptoMethod, clientKey);
+
+      // Create the authentication message
+      const authMessage = [
+        firstBare,
+        r.result.payload.value().toString('base64'),
+        withoutProof
+      ].join(',');
+
+      // Create client signature
+      const clientSignature = HMAC(cryptoMethod, storedKey, authMessage);
+
+      // Create client proof
+      const clientProof = f('p=%s', xor(clientKey, clientSignature));
+
+      // Create client final
+      const clientFinal = [withoutProof, clientProof].join(',');
+
+      // Create continue message
+      const cmd = {
+        saslContinue: 1,
+        conversationId: r.result.conversationId,
+        payload: new Binary(Buffer.from(clientFinal))
+      };
+
+      //
+      // Execute sasl continue
+      // Write the commmand on the connection
+      runCommand(connection, `${db}.$cmd`, cmd, (err, r) => {
+        if (r && r.result.done === false) {
+          var cmd = {
+            saslContinue: 1,
+            conversationId: r.result.conversationId,
+            payload: Buffer.alloc(0)
+          };
+
+          // Write the commmand on the connection
+          runCommand(connection, `${db}.$cmd`, cmd, (err, r) => {
+            handleEnd(err, r);
+          });
+        } else {
+          handleEnd(err, r);
+        }
+      });
+    });
   };
 
   var _execute = function(_connection) {
@@ -398,12 +375,12 @@ ScramSHA.prototype.logout = function(dbName) {
 /**
  * Re authenticate pool
  * @method
- * @param {{Server}|{ReplSet}|{Mongos}} server Topology the authentication method is being called on
+ * @param {function} runCommand A method called to run commands directly on a connection, bypassing any message queue
  * @param {[]Connections} connections Connections to authenticate using this authenticator
  * @param {authResultCallback} callback The callback to return the result from the authentication
  * @return {object}
  */
-ScramSHA.prototype.reauthenticate = function(server, connections, callback) {
+ScramSHA.prototype.reauthenticate = function(runCommand, connections, callback) {
   var authStore = this.authStore.slice(0);
   var count = authStore.length;
   // No connections
@@ -411,7 +388,7 @@ ScramSHA.prototype.reauthenticate = function(server, connections, callback) {
   // Iterate over all the auth details stored
   for (var i = 0; i < authStore.length; i++) {
     this.auth(
-      server,
+      runCommand,
       connections,
       authStore[i].db,
       authStore[i].username,

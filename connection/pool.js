@@ -229,27 +229,34 @@ function authenticate(pool, auth, connection, cb) {
   var provider = pool.authProviders[mechanism];
 
   // Authenticate using the provided mechanism
-  provider.auth.apply(provider, [write(pool), [connection], db].concat(auth.slice(2)).concat([cb]));
+  const runCommand = makeCommandWriter(pool);
+  provider.auth.apply(provider, [runCommand, [connection], db].concat(auth.slice(2)).concat([cb]));
 }
 
 // The write function used by the authentication mechanism (bypasses external)
-function write(self) {
-  return function(connection, command, callback) {
+function makeCommandWriter(self) {
+  return function(connection, ns, command, callback) {
     // Get the raw buffer
     // Ensure we stop auth if pool was destroyed
     if (self.state === DESTROYED || self.state === DESTROYING) {
       return callback(new MongoError('pool destroyed'));
     }
 
+    const bson = self.options.bson;
+    const query = new Query(bson, ns, command, {
+      numberToSkip: 0,
+      numberToReturn: 1
+    });
+
     // Set the connection workItem callback
     connection.workItems.push({
       cb: callback,
       command: true,
-      requestId: command.requestId
+      requestId: query.requestId
     });
 
     // Write the buffer out to the connection
-    connection.write(command.toBin());
+    connection.write(query.toBin());
   };
 }
 
@@ -262,7 +269,8 @@ function reauthenticate(pool, connection, cb) {
     var provider = pool.authProviders[providers.pop()];
 
     // Auth provider
-    provider.reauthenticate(write(pool), [connection], function(err) {
+    const runCommand = makeCommandWriter(pool);
+    provider.reauthenticate(runCommand, [connection], function(err) {
       // We got an error return immediately
       if (err) return cb(err);
       // Continue authenticating the connection
@@ -897,25 +905,17 @@ Pool.prototype.logout = function(dbName, callback) {
   var error = null;
 
   // Send logout command over all the connections
+  const runCommand = makeCommandWriter(self);
   for (var i = 0; i < connections.length; i++) {
-    write(self)(
-      connections[i],
-      new Query(
-        this.options.bson,
-        f('%s.$cmd', dbName),
-        { logout: 1 },
-        { numberToSkip: 0, numberToReturn: 1 }
-      ),
-      function(err) {
-        count = count - 1;
-        if (err) error = err;
+    runCommand(connections[i], `${dbName}.$cmd`, { logout: 1 }, err => {
+      count = count - 1;
+      if (err) error = err;
 
-        if (count === 0) {
-          self.loggingout = false;
-          callback(error);
-        }
+      if (count === 0) {
+        self.loggingout = false;
+        callback(error);
       }
-    );
+    });
   }
 };
 
