@@ -39,6 +39,11 @@ jobs:
       env:
         - MONGODB_VERSION=4.0.x
         - MONGODB_ENVIRONMENT=replicaset
+    - stage: sharded
+      node_js: 4
+      env:
+        - MONGODB_VERSION=4.0.x
+        - MONGODB_ENVIRONMENT=sharded
 
   allow_failures:
     - env:
