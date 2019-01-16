@@ -4,6 +4,7 @@ const expect = require('chai').expect;
 const mock = require('mongodb-mock-server');
 const Server = require('../../../lib/topologies/server');
 const MongoWriteConcernError = require('../../../lib/error').MongoWriteConcernError;
+const sinon = require('sinon');
 
 const test = {};
 describe('Pool (unit)', function() {
@@ -41,6 +42,35 @@ describe('Pool (unit)', function() {
         expect(err).to.exist;
         expect(result).to.not.exist;
         expect(err).to.be.instanceOf(MongoWriteConcernError);
+        done();
+      });
+    });
+
+    client.connect();
+  });
+
+  it('should not allow overriding `slaveOk` when connected to a mongos', function(done) {
+    test.server.setMessageHandler(request => {
+      const doc = request.document;
+      if (doc.ismaster) {
+        request.reply(Object.assign({ msg: 'isdbgrid' }, mock.DEFAULT_ISMASTER));
+      } else if (doc.insert) {
+        request.reply({ ok: 1 });
+      }
+    });
+
+    const client = new Server(test.server.address());
+    client.on('error', done);
+    client.once('connect', () => {
+      const poolWrite = sinon.spy(client.s.pool, 'write');
+
+      client.insert('fake.ns', { a: 1 }, { slaveOk: true }, err => {
+        expect(err).to.not.exist;
+
+        const query = poolWrite.getCalls()[0].args[0];
+        expect(query.slaveOk).to.be.false;
+
+        client.s.pool.write.restore();
         done();
       });
     });
