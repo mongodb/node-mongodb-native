@@ -130,13 +130,15 @@ class WireProtocol {
     const commandOptions = Object.assign(
       {
         command: true,
-        slaveOk: readPreference.slaveOk(),
         numberToSkip: 0,
         numberToReturn: -1,
         checkKeys: false
       },
       options
     );
+
+    // This value is not overridable
+    commandOptions.slaveOk = readPreference.slaveOk();
 
     try {
       const query = new Query(bson, `${databaseNamespace(ns)}.$cmd`, finalCmd, commandOptions);
