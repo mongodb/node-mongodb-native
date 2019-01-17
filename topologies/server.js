@@ -8,7 +8,6 @@ var inherits = require('util').inherits,
   debugOptions = require('../connection/utils').debugOptions,
   retrieveBSON = require('../connection/utils').retrieveBSON,
   Pool = require('../connection/pool'),
-  Query = require('../connection/commands').Query,
   MongoError = require('../error').MongoError,
   MongoNetworkError = require('../error').MongoNetworkError,
   TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support'),
@@ -344,16 +343,13 @@ function monitoringProcess(self) {
     // Emit monitoring Process event
     self.emit('monitoring', self);
     // Perform ismaster call
-    // Query options
-    var queryOptions = { numberToSkip: 0, numberToReturn: -1, checkKeys: false, slaveOk: true };
-    // Create a query instance
-    var query = new Query(self.s.bson, 'admin.$cmd', { ismaster: true }, queryOptions);
     // Get start time
     var start = new Date().getTime();
 
     // Execute the ismaster query
-    self.s.pool.write(
-      query,
+    self.command(
+      'admin.$cmd',
+      { ismaster: true },
       {
         socketTimeout:
           typeof self.s.options.connectionTimeout !== 'number'
@@ -361,7 +357,7 @@ function monitoringProcess(self) {
             : self.s.options.connectionTimeout,
         monitoring: true
       },
-      function(err, result) {
+      (err, result) => {
         // Set initial lastIsMasterMS
         self.lastIsMasterMS = new Date().getTime() - start;
         if (self.s.pool.isDestroyed()) return;
@@ -389,29 +385,22 @@ var eventHandler = function(self, event) {
     // Handle connect event
     if (event === 'connect') {
       // Issue an ismaster command at connect
-      // Query options
-      var queryOptions = { numberToSkip: 0, numberToReturn: -1, checkKeys: false, slaveOk: true };
       // Create a query instance
       var compressors =
         self.s.compression && self.s.compression.compressors ? self.s.compression.compressors : [];
-      var query = new Query(
-        self.s.bson,
+      // Get start time
+      var start = new Date().getTime();
+      // Execute the ismaster query
+      self.command(
         'admin.$cmd',
         Object.assign(
           { ismaster: true, client: self.clientInfo, compression: compressors },
           getSaslSupportedMechs(self.s.options)
         ),
-        queryOptions
-      );
-      // Get start time
-      var start = new Date().getTime();
-      // Execute the ismaster query
-      self.s.pool.write(
-        query,
         {
           socketTimeout: self.s.options.connectionTimeout || 2000
         },
-        function(err, result) {
+        (err, result) => {
           // Set initial lastIsMasterMS
           self.lastIsMasterMS = new Date().getTime() - start;
 

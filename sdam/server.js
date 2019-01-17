@@ -4,7 +4,6 @@ const MongoError = require('../error').MongoError;
 const Pool = require('../connection/pool');
 const relayEvents = require('../utils').relayEvents;
 const calculateDurationInMs = require('../utils').calculateDurationInMs;
-const Query = require('../connection/commands').Query;
 const TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support');
 const ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support');
 const BSON = require('../connection/utils').retrieveBSON();
@@ -306,26 +305,17 @@ function extractIsMasterError(err, result) {
 }
 
 function executeServerHandshake(server, callback) {
-  // construct an `ismaster` query
   const compressors =
     server.s.options.compression && server.s.options.compression.compressors
       ? server.s.options.compression.compressors
       : [];
 
-  const queryOptions = { numberToSkip: 0, numberToReturn: -1, checkKeys: false, slaveOk: true };
-  const query = new Query(
-    server.s.bson,
+  server.command(
     'admin.$cmd',
     Object.assign(
       { ismaster: true, client: server.s.clientInfo, compression: compressors },
       saslSupportedMechs(server.s.options)
     ),
-    queryOptions
-  );
-
-  // execute the query
-  server.s.pool.write(
-    query,
     { socketTimeout: server.s.options.connectionTimeout || 2000 },
     callback
   );
