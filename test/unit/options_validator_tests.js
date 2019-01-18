@@ -213,9 +213,7 @@ describe('Options Validation', function() {
     expect(stub).to.have.been.calledWith(
       'option [a] is deprecated and will be removed in a later version.'
     );
-    expect(stub).to.have.been.calledWith(
-      'option alias [b] is deprecated. Use [newOptionC] instead.'
-    );
+    expect(stub).to.have.been.calledWith('option [b] is deprecated. Use [newOptionC] instead.');
 
     process.emitWarning ? process.emitWarning.restore() : console.error.restore();
   });
