@@ -74,7 +74,7 @@ describe('MongoClient Options', function() {
   /**
    * @ignore
    */
-  it('should error on unexpected options', {
+  it.skip('should error on unexpected options', {
     metadata: { requires: { topology: 'single' } },
 
     // The actual test we wish to run
