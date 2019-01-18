@@ -202,16 +202,18 @@ describe('Options Validation', function() {
       : sinon.stub(console, 'error');
 
     const validationSchema = {
-      a: { deprecated: true }
+      a: { deprecated: true },
+      b: { deprecated: 'newOptionC' }
     };
 
-    const testObject = { a: 3 };
+    const testObject = { a: 3, b: 4 };
 
     validate(validationSchema, testObject, { optionsValidationLevel: testValidationLevel });
-    expect(stub).to.have.been.calledOnce;
+    expect(stub).to.have.been.calledTwice;
     expect(stub).to.have.been.calledWith(
       'option [a] is deprecated and will be removed in a later version.'
     );
+    expect(stub).to.have.been.calledWith('option [b] is deprecated. Use [newOptionC] instead.');
 
     process.emitWarning ? process.emitWarning.restore() : console.error.restore();
   });
