@@ -5,27 +5,18 @@ const expect = chai.expect;
 const bson = require('bson');
 const sinon = require('sinon');
 const Pool = require('../../../lib/connection/pool.js');
-const wireProtocol2_6 = require('../../../lib/wireprotocol/2_6_support.js');
-const wireProtocol3_2 = require('../../../lib/wireprotocol/3_2_support.js');
+const wireProtocol = require('../../../lib/wireprotocol');
 
 describe('WireProtocol', function() {
-  it('2.6 should only set bypassDocumentValidation to true if explicitly set by user to true', function() {
-    testPoolWrite(true, new wireProtocol2_6(), true);
+  it('should only set bypassDocumentValidation to true if explicitly set by user to true', function() {
+    testPoolWrite(true, true);
   });
 
-  it('2.6 should not set bypassDocumentValidation to anything if not explicitly set by user to true', function() {
-    testPoolWrite(false, new wireProtocol2_6(), undefined);
+  it('should not set bypassDocumentValidation to anything if not explicitly set by user to true', function() {
+    testPoolWrite(false, undefined);
   });
 
-  it('3.2 should only set bypassDocumentValidation to true if explicitly set by user to true', function() {
-    testPoolWrite(true, new wireProtocol3_2(), true);
-  });
-
-  it('3.2 should not set bypassDocumentValidation to anything if not explicitly set by user to true', function() {
-    testPoolWrite(false, new wireProtocol3_2(), undefined);
-  });
-
-  function testPoolWrite(bypassDocumentValidation, wireProtocol, expected) {
+  function testPoolWrite(bypassDocumentValidation, expected) {
     const pool = sinon.createStubInstance(Pool);
     const fakeServer = { s: { pool, bson } };
     const ns = 'fake.namespace';
