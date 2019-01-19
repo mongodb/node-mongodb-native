@@ -1,7 +1,9 @@
 'use strict';
 
-var ReadPreference = require('../topologies/read_preference'),
-  MongoError = require('../error').MongoError;
+const ReadPreference = require('../topologies/read_preference');
+const MongoError = require('../error').MongoError;
+const ServerType = require('../sdam/server_description').ServerType;
+const TopologyDescription = require('../sdam/topology_description').TopologyDescription;
 
 var MESSAGE_HEADER_SIZE = 16;
 
@@ -72,10 +74,19 @@ function applyCommonQueryOptions(queryOptions, options) {
   return queryOptions;
 }
 
-function isMongos(server) {
-  if (server.type === 'mongos') return true;
-  if (server.parent && server.parent.type === 'mongos') return true;
-  // NOTE: handle unified topology
+function isSharded(topologyOrServer) {
+  if (topologyOrServer.type === 'mongos') return true;
+  if (topologyOrServer.description && topologyOrServer.description.type === ServerType.Mongos) {
+    return true;
+  }
+
+  // NOTE: This is incredibly inefficient, and should be removed once command construction
+  //       happens based on `Server` not `Topology`.
+  if (topologyOrServer.description && topologyOrServer.description instanceof TopologyDescription) {
+    const servers = Array.from(topologyOrServer.description.servers.values());
+    return servers.some(server => server.type === ServerType.Mongos);
+  }
+
   return false;
 }
 
@@ -95,7 +106,7 @@ module.exports = {
   opcodes,
   parseHeader,
   applyCommonQueryOptions,
-  isMongos,
+  isSharded,
   databaseNamespace,
   collectionNamespace
 };

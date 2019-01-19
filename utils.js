@@ -75,6 +75,25 @@ function retrieveEJSON() {
   return EJSON;
 }
 
+/**
+ * A helper function for determining `maxWireVersion` between legacy and new topology
+ * instances
+ *
+ * @private
+ * @param {(Topology|Server)} topologyOrServer
+ */
+function maxWireVersion(topologyOrServer) {
+  if (topologyOrServer.ismaster) {
+    return topologyOrServer.ismaster.maxWireVersion;
+  }
+
+  if (topologyOrServer.description) {
+    return topologyOrServer.description.maxWireVersion;
+  }
+
+  return null;
+}
+
 /*
  * Checks that collation is supported by server.
  *
@@ -84,7 +103,7 @@ function retrieveEJSON() {
  * @return true if server does not support collation
  */
 function collationNotSupported(server, cmd) {
-  return cmd && cmd.collation && server.ismaster && server.ismaster.maxWireVersion < 5;
+  return cmd && cmd.collation && maxWireVersion(server) < 5;
 }
 
 module.exports = {
@@ -93,5 +112,6 @@ module.exports = {
   relayEvents,
   collationNotSupported,
   retrieveEJSON,
-  retrieveKerberos
+  retrieveKerberos,
+  maxWireVersion
 };

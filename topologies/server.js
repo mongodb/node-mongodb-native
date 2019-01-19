@@ -10,8 +10,7 @@ var inherits = require('util').inherits,
   Pool = require('../connection/pool'),
   MongoError = require('../error').MongoError,
   MongoNetworkError = require('../error').MongoNetworkError,
-  TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support'),
-  ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support'),
+  wireProtocol = require('../wireprotocol'),
   BasicCursor = require('../cursor'),
   sdam = require('./shared'),
   createClientInfo = require('./shared').createClientInfo,
@@ -224,9 +223,6 @@ var Server = function(options) {
   this.monitoringProcessId = null;
   // Initial connection
   this.initialConnect = true;
-  // Wire protocol handler, default to oldest known protocol handler
-  // this gets changed when the first ismaster is called.
-  this.wireProtocolHandler = new TwoSixWireProtocolSupport();
   // Default type
   this._type = 'server';
   // Set the client info
@@ -304,16 +300,6 @@ Object.defineProperty(Server.prototype, 'name', {
 
 function isSupportedServer(response) {
   return response && typeof response.maxWireVersion === 'number' && response.maxWireVersion >= 2;
-}
-
-function configureWireProtocolHandler(self, ismaster) {
-  // 3.2 wire protocol handler
-  if (ismaster.maxWireVersion >= 4) {
-    return new ThreeTwoWireProtocolSupport();
-  }
-
-  // default to 2.6 wire protocol handler
-  return new TwoSixWireProtocolSupport();
 }
 
 function disconnectHandler(self, type, ns, cmd, options, callback) {
@@ -451,8 +437,7 @@ var eventHandler = function(self, event) {
           if (self.ismaster.msg === 'isdbgrid') {
             self._type = 'mongos';
           }
-          // Add the correct wire protocol handler
-          self.wireProtocolHandler = configureWireProtocolHandler(self, self.ismaster);
+
           // Have we defined self monitoring
           if (self.s.monitoring) {
             self.monitoringProcessId = setTimeout(
@@ -744,7 +729,7 @@ Server.prototype.command = function(ns, cmd, options, callback) {
     return callback(new MongoError(`server ${this.name} does not support collation`));
   }
 
-  self.wireProtocolHandler.command(self, ns, cmd, options, callback);
+  wireProtocol.command(self, ns, cmd, options, callback);
 };
 
 /**
@@ -775,7 +760,7 @@ Server.prototype.insert = function(ns, ops, options, callback) {
   ops = Array.isArray(ops) ? ops : [ops];
 
   // Execute write
-  return self.wireProtocolHandler.insert(self, ns, ops, options, callback);
+  return wireProtocol.insert(self, ns, ops, options, callback);
 };
 
 /**
@@ -810,7 +795,7 @@ Server.prototype.update = function(ns, ops, options, callback) {
   // Setup the docs as an array
   ops = Array.isArray(ops) ? ops : [ops];
   // Execute write
-  return self.wireProtocolHandler.update(self, ns, ops, options, callback);
+  return wireProtocol.update(self, ns, ops, options, callback);
 };
 
 /**
@@ -845,7 +830,7 @@ Server.prototype.remove = function(ns, ops, options, callback) {
   // Setup the docs as an array
   ops = Array.isArray(ops) ? ops : [ops];
   // Execute write
-  return self.wireProtocolHandler.remove(self, ns, ops, options, callback);
+  return wireProtocol.remove(self, ns, ops, options, callback);
 };
 
 /**

@@ -7,7 +7,7 @@ const MongoNetworkError = require('./error').MongoNetworkError;
 const mongoErrorContextSymbol = require('./error').mongoErrorContextSymbol;
 const f = require('util').format;
 const collationNotSupported = require('./utils').collationNotSupported;
-
+const wireProtocol = require('./wireprotocol');
 const BSON = retrieveBSON();
 const Long = BSON.Long;
 
@@ -223,14 +223,7 @@ Cursor.prototype._getmore = function(callback) {
     batchSize = this.cursorState.limit - this.cursorState.currentLimit;
   }
 
-  this.server.wireProtocolHandler.getMore(
-    this.server,
-    this.ns,
-    this.cursorState,
-    batchSize,
-    this.options,
-    callback
-  );
+  wireProtocol.getMore(this.server, this.ns, this.cursorState, batchSize, this.options, callback);
 };
 
 /**
@@ -339,7 +332,7 @@ Cursor.prototype.kill = function(callback) {
     return;
   }
 
-  this.server.wireProtocolHandler.killCursor(this.server, this.ns, this.cursorState, callback);
+  wireProtocol.killCursors(this.server, this.ns, this.cursorState, callback);
 };
 
 /**
@@ -732,7 +725,7 @@ function initializeCursor(cursor, callback) {
     }
 
     if (cursor.cmd.find != null) {
-      cursor.server.wireProtocolHandler.query(
+      wireProtocol.query(
         cursor.server,
         cursor.ns,
         cursor.cmd,
@@ -744,7 +737,7 @@ function initializeCursor(cursor, callback) {
       return;
     }
 
-    cursor.query = cursor.server.wireProtocolHandler.command(
+    cursor.query = wireProtocol.command(
       cursor.server,
       cursor.ns,
       cursor.cmd,

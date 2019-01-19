@@ -4,8 +4,7 @@ const MongoError = require('../error').MongoError;
 const Pool = require('../connection/pool');
 const relayEvents = require('../utils').relayEvents;
 const calculateDurationInMs = require('../utils').calculateDurationInMs;
-const TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support');
-const ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support');
+const wireProtocol = require('../wireprotocol');
 const BSON = require('../connection/utils').retrieveBSON();
 const createClientInfo = require('../topologies/shared').createClientInfo;
 const Logger = require('../connection/logger');
@@ -155,27 +154,7 @@ class Server extends EventEmitter {
       return;
     }
 
-    // Create the query object
-    const query = this.s.wireProtocolHandler.command(this, ns, cmd, {}, options);
-    // Set slave OK of the query
-    query.slaveOk = options.readPreference ? options.readPreference.slaveOk() : false;
-
-    // write options
-    const writeOptions = {
-      raw: typeof options.raw === 'boolean' ? options.raw : false,
-      promoteLongs: typeof options.promoteLongs === 'boolean' ? options.promoteLongs : true,
-      promoteValues: typeof options.promoteValues === 'boolean' ? options.promoteValues : true,
-      promoteBuffers: typeof options.promoteBuffers === 'boolean' ? options.promoteBuffers : false,
-      command: true,
-      monitoring: typeof options.monitoring === 'boolean' ? options.monitoring : false,
-      fullResult: typeof options.fullResult === 'boolean' ? options.fullResult : false,
-      requestId: query.requestId,
-      socketTimeout: typeof options.socketTimeout === 'number' ? options.socketTimeout : null,
-      session: options.session || null
-    };
-
-    // write the operation to the pool
-    this.s.pool.write(query, writeOptions, callback);
+    wireProtocol.command(this, ns, cmd, options, callback);
   }
 
   /**
@@ -273,7 +252,7 @@ function executeWriteOperation(args, options, callback) {
   }
 
   // Execute write
-  return server.s.wireProtocolHandler[op](server.s.pool, ns, server.s.bson, ops, options, callback);
+  return wireProtocol[op](server, ns, ops, options, callback);
 }
 
 function saslSupportedMechs(options) {
@@ -321,16 +300,6 @@ function executeServerHandshake(server, callback) {
   );
 }
 
-function configureWireProtocolHandler(ismaster) {
-  // 3.2 wire protocol handler
-  if (ismaster.maxWireVersion >= 4) {
-    return new ThreeTwoWireProtocolSupport();
-  }
-
-  // default to 2.6 wire protocol handler
-  return new TwoSixWireProtocolSupport();
-}
-
 function connectEventHandler(server) {
   return function() {
     // log information of received information if in info mode
@@ -369,9 +338,6 @@ function connectEventHandler(server) {
           server.s.pool.options.zlibCompressionLevel = localCompressionInfo.zlibCompressionLevel;
         }
       }
-
-      // configure the wire protocol handler
-      server.s.wireProtocolHandler = configureWireProtocolHandler(isMaster);
 
       // log the connection event if requested
       if (server.s.logger.isInfo()) {
