@@ -519,7 +519,10 @@ describe('Options Validation', function() {
     };
 
     const testObject = { a: true, b: 45 };
-    validate(validationSchema, testObject, { optionsValidationLevel: 'warn', unknownOptionsWarningLevel: 'warn' });
+    validate(validationSchema, testObject, {
+      optionsValidationLevel: 'warn',
+      unknownOptionsWarningLevel: 'warn'
+    });
 
     expect(stub).to.have.been.calledOnce;
     expect(stub).to.have.been.calledWith('provided option [b] is an unknown option');
