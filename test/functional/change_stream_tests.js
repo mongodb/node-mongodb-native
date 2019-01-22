@@ -1679,130 +1679,106 @@ describe('Change Streams', function() {
   });
 
   describe('should properly handle a changeStream event being processed mid-close', function() {
+    let client, coll;
+
+    function write() {
+      return Promise.resolve()
+        .then(() => coll.insertOne({ a: 1 }))
+        .then(() => coll.insertOne({ b: 2 }))
+        .then(() => coll.insertOne({ c: 3 }));
+    }
+
+    beforeEach(function() {
+      client = this.configuration.newClient();
+      return client.connect().then(_client => {
+        client = _client;
+        coll = client.db(this.configuration.db).collection('tester');
+      });
+    });
+
+    afterEach(function() {
+      coll = undefined;
+      if (client) {
+        return client.close().then(() => {
+          client = undefined;
+        });
+      }
+    });
+
     it('when invoked with promises', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
       test: function() {
-        function read(coll) {
+        function read() {
           const changeStream = coll.watch();
           return Promise.resolve()
             .then(() => changeStream.next())
             .then(() => changeStream.next())
             .then(() => {
-              const closeP = Promise.resolve().then(() => changeStream.close());
               const nextP = changeStream.next();
 
-              return closeP.then(() => nextP);
+              return changeStream.close().then(() => nextP);
             });
         }
 
-        function write(coll) {
-          return Promise.resolve()
-            .then(() => coll.insertOne({ a: 1 }))
-            .then(() => coll.insertOne({ b: 2 }))
-            .then(() => coll.insertOne({ c: 3 }));
-        }
-
-        const client = this.configuration.newClient();
-
-        return client.connect().then(() => {
-          const coll = client.db(this.configuration.db).collection('tester');
-
-          return Promise.all([read(coll), write(coll)])
-            .then(
-              () => Promise.reject(new Error('Expected operation to fail with error')),
-              err => expect(err.message).to.equal('ChangeStream is closed')
-            )
-            .then(() => client.close(), err => client.close().then(() => Promise.reject(err)));
-        });
+        return Promise.all([read(), write()]).then(
+          () => Promise.reject(new Error('Expected operation to fail with error')),
+          err => expect(err.message).to.equal('ChangeStream is closed')
+        );
       }
     });
 
     it('when invoked with callbacks', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
       test: function(done) {
-        const client = this.configuration.newClient();
-        let closed = false;
-        const close = err => {
-          if (closed) {
-            return;
-          }
-          closed = true;
-          return client.close(() => done(err));
-        };
-        client.connect(err => {
-          if (err) {
-            return close(err);
-          }
+        const changeStream = coll.watch();
 
-          const coll = client.db(this.configuration.db).collection('tester');
-          const changeStream = coll.watch();
-
+        changeStream.next(() => {
           changeStream.next(() => {
-            changeStream.next(() => {
-              changeStream.next(err => {
-                let _err = null;
-                try {
-                  expect(err.message).to.equal('ChangeStream is closed');
-                } catch (e) {
-                  _err = e;
-                } finally {
-                  close(_err);
-                }
-              });
-              changeStream.close();
+            changeStream.next(err => {
+              let _err = null;
+              try {
+                expect(err.message).to.equal('ChangeStream is closed');
+              } catch (e) {
+                _err = e;
+              } finally {
+                done(_err);
+              }
             });
-          });
-
-          coll.insertOne({ a: 1 }, () => {
-            coll.insertOne({ b: 2 }, () => {
-              coll.insertOne({ c: 3 }, () => {});
-            });
+            changeStream.close();
           });
         });
+
+        write().catch(() => {});
       }
     });
 
     it('when invoked using eventEmitter API', {
       metadata: { requires: { topology: 'replicaset', mongodb: '>=3.5.10' } },
       test: function(done) {
-        const client = this.configuration.newClient();
         let closed = false;
         const close = _err => {
           if (closed) {
             return;
           }
           closed = true;
-          return client.close(() => done(_err));
+          return done(_err);
         };
 
-        client.connect(err => {
-          if (err) {
-            return close(err);
+        const changeStream = coll.watch();
+
+        let counter = 0;
+        changeStream.on('change', () => {
+          counter += 1;
+          if (counter === 2) {
+            changeStream.close();
+            setTimeout(() => close());
+          } else if (counter >= 3) {
+            close(new Error('Should not have received more than 2 events'));
           }
-
-          const coll = client.db(this.configuration.db).collection('tester');
-          const changeStream = coll.watch();
-
-          let counter = 0;
-          changeStream.on('change', () => {
-            counter += 1;
-            if (counter === 2) {
-              changeStream.close();
-              setTimeout(() => close());
-            } else if (counter >= 3) {
-              close(new Error('Should not have received more than 2 events'));
-            }
-          });
-          changeStream.on('error', err => close(err));
-
-          setTimeout(() => {
-            coll.insertOne({ a: 1 }, () => {
-              coll.insertOne({ b: 2 }, () => {
-                coll.insertOne({ c: 3 }, () => {});
-              });
-            });
-          });
         });
+        changeStream.on('error', err => close(err));
+
+        setTimeout(() => write().catch(() => {}));
       }
     });
   });
