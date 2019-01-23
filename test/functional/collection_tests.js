@@ -497,6 +497,34 @@ describe('Collection', function() {
     }
   });
 
+  it('should return invalid collection name error by callback for createCollection', {
+    metadata: {
+      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+    },
+
+    test: function(done) {
+      const client = this.configuration.newClient(this.configuration.writeConcernMax(), {
+        poolSize: 1
+      });
+
+      client.connect((err, client) => {
+        expect(err).to.not.exist;
+
+        const db = client.db('test_crate_collection');
+
+        db.dropDatabase(err => {
+          expect(err).to.not.exist;
+
+          db.createCollection('test/../', err => {
+            expect(err).to.exist;
+            client.close();
+            done();
+          });
+        });
+      });
+    }
+  });
+
   /**
    * @ignore
    */
