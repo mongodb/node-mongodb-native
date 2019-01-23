@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.1.13"></a>
+## [3.1.13](https://github.com/mongodb/node-mongodb-native/compare/v3.1.12...v3.1.13) (2019-01-23)
+
+
+### Bug Fixes
+
+* restore ability to webpack by removing `makeLazyLoader` ([050267d](https://github.com/mongodb/node-mongodb-native/commit/050267d))
+* **bulk:** honor ignoreUndefined in initializeUnorderedBulkOp ([e806be4](https://github.com/mongodb/node-mongodb-native/commit/e806be4))
+* **changeStream:** properly handle changeStream event mid-close ([#1902](https://github.com/mongodb/node-mongodb-native/issues/1902)) ([5ad9fa9](https://github.com/mongodb/node-mongodb-native/commit/5ad9fa9))
+* **db_ops:** ensure we async resolve errors in createCollection ([210c71d](https://github.com/mongodb/node-mongodb-native/commit/210c71d))
+
+
+
 <a name="3.1.12"></a>
 ## [3.1.12](https://github.com/mongodb/node-mongodb-native/compare/v3.1.11...v3.1.12) (2019-01-16)
 
