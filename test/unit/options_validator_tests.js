@@ -525,7 +525,7 @@ describe('Options Validation', function() {
     });
 
     expect(stub).to.have.been.calledOnce;
-    expect(stub).to.have.been.calledWith('provided option [b] is an unknown option');
+    expect(stub).to.have.been.calledWith('option b is not supported');
 
     console.warn.restore();
   });

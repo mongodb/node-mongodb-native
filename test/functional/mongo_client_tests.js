@@ -803,19 +803,23 @@ describe('MongoClient', function() {
     // The actual test we wish to run
     test: function() {
       const configuration = this.configuration;
-      try {
-        configuration.newClient({}, { validateOptions: true, unknownOption: true });
-      } catch (err) {
+      const client = configuration.newClient({}, { validateOptions: true, unknownOption: true });
+      client.connect(err => {
         expect(err).to.not.be.null;
-        expect(err.message).to.equal('provided option [unknownOption] is an unknown option');
-      }
+        expect(err.message).to.equal('option unknownOption is not supported');
+      });
 
       const stub = sinon.stub(console, 'warn');
 
-      configuration.newClient({}, { validateOptions: false, unknownOption: true });
+      const newClient = configuration.newClient(
+        {},
+        { validateOptions: false, unknownOption: true }
+      );
 
-      expect(stub).to.have.been.calledOnce;
-      expect(stub).to.have.been.calledWith('provided option [unknownOption] is an unknown option');
+      newClient.connect(() => {
+        expect(stub).to.have.been.calledOnce;
+        expect(stub).to.have.been.calledWith('option unknownOption is not supported');
+      });
 
       console.warn.restore();
     }
