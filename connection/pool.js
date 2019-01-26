@@ -11,6 +11,7 @@ const f = require('util').format;
 const Query = require('./commands').Query;
 const CommandResult = require('./command_result');
 const MESSAGE_HEADER_SIZE = require('../wireprotocol/shared').MESSAGE_HEADER_SIZE;
+const COMPRESSION_DETAILS_SIZE = require('../wireprotocol/shared').COMPRESSION_DETAILS_SIZE;
 const opcodes = require('../wireprotocol/shared').opcodes;
 const compress = require('../wireprotocol/compression').compress;
 const compressorIDs = require('../wireprotocol/compression').compressorIDs;
@@ -1036,61 +1037,52 @@ Pool.prototype.destroy = function(force) {
 };
 
 // Prepare the buffer that Pool.prototype.write() uses to send to the server
-var serializeCommands = function(self, commands, result, callback) {
-  // Base case when there are no more commands to serialize
-  if (commands.length === 0) return callback(null, result);
-
-  // Pop off the zeroth command and serialize it
-  var thisCommand = commands.shift();
-  var originalCommandBuffer = thisCommand.toBin();
+function serializeCommand(self, command, callback) {
+  const originalCommandBuffer = command.toBin();
 
   // Check whether we and the server have agreed to use a compressor
-  if (self.options.agreedCompressor && !hasUncompressibleCommands(thisCommand)) {
-    // Transform originalCommandBuffer into OP_COMPRESSED
-    var concatenatedOriginalCommandBuffer = Buffer.concat(originalCommandBuffer);
-    var messageToBeCompressed = concatenatedOriginalCommandBuffer.slice(MESSAGE_HEADER_SIZE);
-
-    // Extract information needed for OP_COMPRESSED from the uncompressed message
-    var originalCommandOpCode = concatenatedOriginalCommandBuffer.readInt32LE(12);
-
-    // Compress the message body
-    compress(self, messageToBeCompressed, function(err, compressedMessage) {
-      if (err) return callback(err, null);
-
-      // Create the msgHeader of OP_COMPRESSED
-      var msgHeader = Buffer.alloc(MESSAGE_HEADER_SIZE);
-      msgHeader.writeInt32LE(MESSAGE_HEADER_SIZE + 9 + compressedMessage.length, 0); // messageLength
-      msgHeader.writeInt32LE(thisCommand.requestId, 4); // requestID
-      msgHeader.writeInt32LE(0, 8); // responseTo (zero)
-      msgHeader.writeInt32LE(opcodes.OP_COMPRESSED, 12); // opCode
-
-      // Create the compression details of OP_COMPRESSED
-      var compressionDetails = Buffer.alloc(9);
-      compressionDetails.writeInt32LE(originalCommandOpCode, 0); // originalOpcode
-      compressionDetails.writeInt32LE(messageToBeCompressed.length, 4); // Size of the uncompressed compressedMessage, excluding the MsgHeader
-      compressionDetails.writeUInt8(compressorIDs[self.options.agreedCompressor], 8); // compressorID
-
-      // Push the concatenation of the OP_COMPRESSED message onto results
-      result.push(Buffer.concat([msgHeader, compressionDetails, compressedMessage]));
-
-      // Continue recursing through the commands array
-      serializeCommands(self, commands, result, callback);
-    });
-  } else {
-    // Push the serialization of the command onto results
-    result.push(originalCommandBuffer);
-
-    // Continue recursing through the commands array
-    serializeCommands(self, commands, result, callback);
+  const shouldCompress = !!self.options.agreedCompressor;
+  if (!shouldCompress || !canCompress(command)) {
+    return callback(null, originalCommandBuffer);
   }
-};
+
+  // Transform originalCommandBuffer into OP_COMPRESSED
+  const concatenatedOriginalCommandBuffer = Buffer.concat(originalCommandBuffer);
+  const messageToBeCompressed = concatenatedOriginalCommandBuffer.slice(MESSAGE_HEADER_SIZE);
+
+  // Extract information needed for OP_COMPRESSED from the uncompressed message
+  const originalCommandOpCode = concatenatedOriginalCommandBuffer.readInt32LE(12);
+
+  // Compress the message body
+  compress(self, messageToBeCompressed, function(err, compressedMessage) {
+    if (err) return callback(err, null);
+
+    // Create the msgHeader of OP_COMPRESSED
+    const msgHeader = Buffer.alloc(MESSAGE_HEADER_SIZE);
+    msgHeader.writeInt32LE(
+      MESSAGE_HEADER_SIZE + COMPRESSION_DETAILS_SIZE + compressedMessage.length,
+      0
+    ); // messageLength
+    msgHeader.writeInt32LE(command.requestId, 4); // requestID
+    msgHeader.writeInt32LE(0, 8); // responseTo (zero)
+    msgHeader.writeInt32LE(opcodes.OP_COMPRESSED, 12); // opCode
+
+    // Create the compression details of OP_COMPRESSED
+    const compressionDetails = Buffer.alloc(COMPRESSION_DETAILS_SIZE);
+    compressionDetails.writeInt32LE(originalCommandOpCode, 0); // originalOpcode
+    compressionDetails.writeInt32LE(messageToBeCompressed.length, 4); // Size of the uncompressed compressedMessage, excluding the MsgHeader
+    compressionDetails.writeUInt8(compressorIDs[self.options.agreedCompressor], 8); // compressorID
+
+    return callback(null, [msgHeader, compressionDetails, compressedMessage]);
+  });
+}
 
 /**
  * Write a message to MongoDB
  * @method
  * @return {Connection}
  */
-Pool.prototype.write = function(commands, options, cb) {
+Pool.prototype.write = function(command, options, cb) {
   var self = this;
   // Ensure we have a callback
   if (typeof options === 'function') {
@@ -1170,13 +1162,8 @@ Pool.prototype.write = function(commands, options, cb) {
     operation.socketTimeout = options.socketTimeout;
   }
 
-  // Ensure commands is an array
-  if (!Array.isArray(commands)) {
-    commands = [commands];
-  }
-
   // Get the requestId
-  operation.requestId = commands[commands.length - 1].requestId;
+  operation.requestId = command.requestId;
 
   if (hasSessionSupport(this.topology)) {
     let sessionOptions = {};
@@ -1212,24 +1199,19 @@ Pool.prototype.write = function(commands, options, cb) {
     }
 
     // decorate the commands with session-specific details
-    commands.forEach(command => {
-      if (command instanceof Query) {
-        if (command.query.$query) {
-          Object.assign(command.query.$query, sessionOptions);
-        } else {
-          Object.assign(command.query, sessionOptions);
-        }
+    if (command instanceof Query) {
+      if (command.query.$query) {
+        Object.assign(command.query.$query, sessionOptions);
       } else {
-        Object.assign(command, sessionOptions);
+        Object.assign(command.query, sessionOptions);
       }
-    });
+    } else {
+      Object.assign(command, sessionOptions);
+    }
   }
 
   // If command monitoring is enabled we need to modify the callback here
   if (self.options.monitorCommands) {
-    // NOTE: there is only ever a single command, for some legacy reason I am unaware of we
-    //       treat this as a potential array of commands
-    const command = commands[0];
     this.emit('commandStarted', new apm.CommandStartedEvent(this, command));
 
     operation.started = process.hrtime();
@@ -1258,11 +1240,11 @@ Pool.prototype.write = function(commands, options, cb) {
   }
 
   // Prepare the operation buffer
-  serializeCommands(self, commands, [], function(err, serializedCommands) {
+  serializeCommand(self, command, (err, serializedBuffers) => {
     if (err) throw err;
 
     // Set the operation's buffer to the serialization of the commands
-    operation.buffer = serializedCommands;
+    operation.buffer = serializedBuffers;
 
     // If we have a monitoring operation schedule as the very first operation
     // Otherwise add to back of queue
@@ -1283,11 +1265,10 @@ Pool.prototype.write = function(commands, options, cb) {
 
 // Return whether a command contains an uncompressible command term
 // Will return true if command contains no uncompressible command terms
-var hasUncompressibleCommands = function(command) {
-  return uncompressibleCommands.some(function(cmd) {
-    return command.query.hasOwnProperty(cmd);
-  });
-};
+function canCompress(command) {
+  const commandName = Object.keys(command.query)[0];
+  return uncompressibleCommands.indexOf(commandName) === -1;
+}
 
 // Remove connection method
 function remove(connection, connections) {

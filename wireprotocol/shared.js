@@ -5,7 +5,8 @@ const MongoError = require('../error').MongoError;
 const ServerType = require('../sdam/server_description').ServerType;
 const TopologyDescription = require('../sdam/topology_description').TopologyDescription;
 
-var MESSAGE_HEADER_SIZE = 16;
+const MESSAGE_HEADER_SIZE = 16;
+const COMPRESSION_DETAILS_SIZE = 9; // originalOpcode + uncompressedSize, compressorID
 
 // OPCODE Numbers
 // Defined at https://docs.mongodb.com/manual/reference/mongodb-wire-protocol/#request-opcodes
@@ -103,6 +104,7 @@ function collectionNamespace(ns) {
 module.exports = {
   getReadPreference,
   MESSAGE_HEADER_SIZE,
+  COMPRESSION_DETAILS_SIZE,
   opcodes,
   parseHeader,
   applyCommonQueryOptions,
