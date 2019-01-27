@@ -162,7 +162,7 @@ class Connection extends EventEmitter {
     this.queue = [];
 
     // Internal state
-    this.connection = null;
+    this.socket = null;
     this.writeStream = null;
 
     // Create hash method
@@ -175,14 +175,14 @@ class Connection extends EventEmitter {
   }
 
   setSocketTimeout(value) {
-    if (this.connection) {
-      this.connection.setTimeout(value);
+    if (this.socket) {
+      this.socket.setTimeout(value);
     }
   }
 
   resetSocketTimeout() {
-    if (this.connection) {
-      this.connection.setTimeout(this.socketTimeout);
+    if (this.socket) {
+      this.socket.setTimeout(this.socketTimeout);
     }
   }
 
@@ -237,11 +237,11 @@ class Connection extends EventEmitter {
       }
 
       // clean up existing event handlers
-      this.connection.removeAllListeners('error');
-      this.connection.removeAllListeners('timeout');
-      this.connection.removeAllListeners('close');
-      this.connection.removeAllListeners('data');
-      this.connection = undefined;
+      this.socket.removeAllListeners('error');
+      this.socket.removeAllListeners('timeout');
+      this.socket.removeAllListeners('close');
+      this.socket.removeAllListeners('data');
+      this.socket = undefined;
 
       return doConnect(this, 4, _options, _errorHandler);
     });
@@ -253,12 +253,12 @@ class Connection extends EventEmitter {
    * @return {boolean}
    */
   unref() {
-    if (this.connection == null) {
-      this.once('connect', () => this.connection.unref());
+    if (this.socket == null) {
+      this.once('connect', () => this.socket.unref());
       return;
     }
 
-    this.connection.unref();
+    this.socket.unref();
   }
 
   /**
@@ -266,15 +266,17 @@ class Connection extends EventEmitter {
    * @method
    */
   destroy() {
-    // Set the connections
-    if (connectionAccounting) deleteConnection(this.id);
-    if (this.connection) {
+    if (connectionAccounting) {
+      deleteConnection(this.id);
+    }
+
+    if (this.socket) {
       // Catch posssible exception thrown by node 0.10.x
       try {
-        this.connection.end();
+        this.socket.end();
       } catch (err) {} // eslint-disable-line
-      // Destroy connection
-      this.connection.destroy();
+
+      this.socket.destroy();
     }
 
     this.destroyed = true;
@@ -297,16 +299,16 @@ class Connection extends EventEmitter {
     }
 
     // Double check that the connection is not destroyed
-    if (this.connection.destroyed === false) {
+    if (this.socket.destroyed === false) {
       // Write out the command
       if (!Array.isArray(buffer)) {
-        this.connection.write(buffer, 'binary');
+        this.socket.write(buffer, 'binary');
         return true;
       }
 
       // Iterate over all buffers and write them in order to the socket
       for (let i = 0; i < buffer.length; i++) {
-        this.connection.write(buffer[i], 'binary');
+        this.socket.write(buffer[i], 'binary');
       }
 
       return true;
@@ -341,7 +343,7 @@ class Connection extends EventEmitter {
    */
   isConnected() {
     if (this.destroyed) return false;
-    return !this.connection.destroyed && this.connection.writable;
+    return !this.socket.destroyed && this.socket.writable;
   }
 }
 
@@ -682,7 +684,7 @@ function merge(options1, options2) {
 
 function makeSSLConnection(self, _options) {
   let sslOptions = {
-    socket: self.connection,
+    socket: self.socket,
     rejectUnauthorized: self.rejectUnauthorized
   };
 
@@ -761,16 +763,14 @@ function makeUnsecureConnection(self, family) {
   return connection;
 }
 
-function doConnect(self, family, _options, _errorHandler) {
-  self.connection = self.ssl
-    ? makeSSLConnection(self, _options)
-    : makeUnsecureConnection(self, family);
+function doConnect(conn, family, _options, _errorHandler) {
+  conn.socket = conn.ssl ? makeSSLConnection(conn, _options) : makeUnsecureConnection(conn, family);
 
   // Add handlers for events
-  self.connection.once('error', _errorHandler);
-  self.connection.once('timeout', timeoutHandler(self));
-  self.connection.once('close', closeHandler(self));
-  self.connection.on('data', dataHandler(self));
+  conn.socket.once('error', _errorHandler);
+  conn.socket.once('timeout', timeoutHandler(conn));
+  conn.socket.once('close', closeHandler(conn));
+  conn.socket.on('data', dataHandler(conn));
 }
 
 /**
