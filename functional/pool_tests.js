@@ -71,7 +71,7 @@ describe('Pool tests', function() {
         process.nextTick(() => {
           // Now that we are in next tick, connection should still exist, but there
           // should be no connect listeners
-          expect(connection.connection.listenerCount('connect')).to.equal(0);
+          expect(connection.socket.listenerCount('connect')).to.equal(0);
           expect(connections).to.have.lengthOf(1);
 
           pool.destroy();
@@ -86,7 +86,7 @@ describe('Pool tests', function() {
 
       expect(pool.allConnections()).to.have.lengthOf(1);
       connection = pool.allConnections()[0];
-      expect(connection.connection.listenerCount('connect')).to.equal(1);
+      expect(connection.socket.listenerCount('connect')).to.equal(1);
     }
   });
 

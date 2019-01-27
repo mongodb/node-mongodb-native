@@ -76,16 +76,16 @@ describe('Connection', function() {
     testCase('should connect with no family', {
       config: { host: 'localhost' },
       connect: connection => {
-        expect(connection.connection.remotePort).to.equal(server.port);
-        expect(connection.connection.remoteFamily).to.equal('IPv4');
+        expect(connection.socket.remotePort).to.equal(server.port);
+        expect(connection.socket.remoteFamily).to.equal('IPv4');
       }
     });
 
     testCase('should connect with family=4', {
       config: { host: 'localhost', family: 4 },
       connect: connection => {
-        expect(connection.connection.remotePort).to.equal(server.port);
-        expect(connection.connection.remoteFamily).to.equal('IPv4');
+        expect(connection.socket.remotePort).to.equal(server.port);
+        expect(connection.socket.remoteFamily).to.equal('IPv4');
       }
     });
 
@@ -101,8 +101,8 @@ describe('Connection', function() {
     testCase('should connect with no family', {
       config: { host: 'localhost' },
       connect: connection => {
-        expect(connection.connection.remotePort).to.equal(server.port);
-        expect(connection.connection.remoteFamily).to.equal('IPv6');
+        expect(connection.socket.remotePort).to.equal(server.port);
+        expect(connection.socket.remoteFamily).to.equal('IPv6');
       }
     });
 
@@ -119,8 +119,8 @@ describe('Connection', function() {
     testCase('should connect with family=6', {
       config: { host: 'localhost', family: 6 },
       connect: connection => {
-        expect(connection.connection.remotePort).to.equal(server.port);
-        expect(connection.connection.remoteFamily).to.equal('IPv6');
+        expect(connection.socket.remotePort).to.equal(server.port);
+        expect(connection.socket.remoteFamily).to.equal('IPv6');
       }
     });
   });
