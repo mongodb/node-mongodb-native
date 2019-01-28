@@ -3,6 +3,11 @@
 var f = require('util').format;
 var test = require('./shared').assert;
 var setupDatabase = require('./shared').setupDatabase;
+const expect = require('chai').expect;
+const sinonChai = require('sinon-chai');
+const sinon = require('sinon');
+const chai = require('chai');
+chai.use(sinonChai);
 
 describe('MongoClient', function() {
   before(function() {
@@ -790,6 +795,33 @@ describe('MongoClient', function() {
             done();
           });
       });
+    }
+  });
+
+  it('Should set optionsValidationLevel when validateOptions is set', {
+    metadata: { requires: { topology: ['single'] } },
+    // The actual test we wish to run
+    test: function() {
+      const configuration = this.configuration;
+      const client = configuration.newClient({}, { validateOptions: true, unknownOption: true });
+      client.connect(err => {
+        expect(err).to.not.be.null;
+        expect(err.message).to.equal('option unknownOption is not supported');
+      });
+
+      const stub = sinon.stub(console, 'warn');
+
+      const newClient = configuration.newClient(
+        {},
+        { validateOptions: false, unknownOption: true }
+      );
+
+      newClient.connect(() => {
+        expect(stub).to.have.been.calledOnce;
+        expect(stub).to.have.been.calledWith('option unknownOption is not supported');
+      });
+
+      console.warn.restore();
     }
   });
 });
