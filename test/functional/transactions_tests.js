@@ -196,11 +196,11 @@ function runTestSuiteTest(configuration, testData, context) {
     client.on('commandStarted', event => {
       if (event.databaseName === context.dbName || isTransactionCommand(event.commandName)) {
         commandEvents.push(event);
-      }
 
-      // very useful for debugging
-      if (displayCommands) {
-        console.dir(event, { depth: 5 });
+        // very useful for debugging
+        if (displayCommands) {
+          console.dir(event, { depth: 5 });
+        }
       }
     });
 
