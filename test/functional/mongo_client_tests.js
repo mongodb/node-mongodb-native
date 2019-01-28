@@ -803,6 +803,7 @@ describe('MongoClient', function() {
     // The actual test we wish to run
     test: function() {
       const configuration = this.configuration;
+
       const client = configuration.newClient({}, { validateOptions: true, unknownOption: true });
       client.connect(err => {
         expect(err).to.not.be.null;
@@ -822,6 +823,29 @@ describe('MongoClient', function() {
       });
 
       console.warn.restore();
+    }
+  });
+
+  it('Should warn if invalid readConcern option is provided', {
+    metadata: { requires: { topology: ['single'] } },
+    // The actual test we wish to run
+    test: function(done) {
+      const configuration = this.configuration;
+      const url = `${this.configuration.url()}?readConcern=majority`;
+
+      const stub = sinon.stub(console, 'warn');
+
+      const client = configuration.newClient(url, { useNewUrlParser: true });
+
+      client.connect((err, client) => {
+        expect(stub).to.have.been.calledOnce;
+        expect(stub).to.have.been.calledWith(
+          'option [readConcern] should be of type object, but is of type string.'
+        );
+        console.warn.restore();
+        client.close();
+        done();
+      });
     }
   });
 });
