@@ -3,14 +3,14 @@ const net = require('net');
 const tls = require('tls');
 const Connection = require('./connection');
 
-function connect(messageHandler, options, callback) {
+function connect(options, callback) {
   if (options.family !== void 0) {
     makeConnection(options.family, options, (err, socket) => {
       if (err) {
         return callback(err, socket); // in the error case, `socket` is the originating error event
       }
 
-      callback(null, new Connection(messageHandler, socket, options));
+      callback(null, new Connection(socket, options));
     });
 
     return;
@@ -29,13 +29,13 @@ function connect(messageHandler, options, callback) {
           return callback(err, ipv4Socket); // in the error case, `ipv4Socket` is the originating error event
         }
 
-        callback(null, new Connection(messageHandler, ipv4Socket, options));
+        callback(null, new Connection(ipv4Socket, options));
       });
 
       return;
     }
 
-    callback(null, new Connection(messageHandler, ipv6Socket, options));
+    callback(null, new Connection(ipv6Socket, options));
   });
 }
 

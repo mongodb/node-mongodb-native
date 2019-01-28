@@ -161,6 +161,7 @@ var Pool = function(topology, options) {
 
   // event handlers
   this.connectionFailureHandler = connectionFailureHandlerV2(this);
+  this.messageHandler = messageHandler(this);
 };
 
 inherits(Pool, EventEmitter);
@@ -425,7 +426,7 @@ function attemptReconnect(self) {
     }
 
     self.connectingConnections++;
-    connect(messageHandler(self), self.options, (err, connection) => {
+    connect(self.options, (err, connection) => {
       self.connectingConnections--;
 
       if (err) {
@@ -459,6 +460,7 @@ function attemptReconnect(self) {
       connection.on('close', connectionFailureHandler(self, 'close'));
       connection.on('timeout', connectionFailureHandler(self, 'timeout'));
       connection.on('parseError', connectionFailureHandler(self, 'parseError'));
+      connection.on('message', self.messageHandler);
 
       reauthenticate(self, this, function() {
         self.retriesLeft = self.options.reconnectTries;
@@ -744,7 +746,7 @@ Pool.prototype.connect = function(credentials) {
   stateTransition(this, CONNECTING);
 
   self.connectingConnections++;
-  connect(messageHandler(self), this.options, (err, connection) => {
+  connect(self.options, (err, connection) => {
     self.connectingConnections--;
 
     if (err) {
@@ -762,6 +764,7 @@ Pool.prototype.connect = function(credentials) {
     connection.once('error', connectionFailureHandler(self, 'error'));
     connection.once('timeout', connectionFailureHandler(self, 'timeout'));
     connection.once('parseError', connectionFailureHandler(self, 'parseError'));
+    connection.on('message', self.messageHandler);
 
     // If we are in a topology, delegate the auth to it
     // This is to avoid issues where we would auth against an
@@ -954,7 +957,7 @@ Pool.prototype.unref = function() {
 };
 
 // Events
-var events = ['error', 'close', 'timeout', 'parseError', 'connect'];
+var events = ['error', 'close', 'timeout', 'parseError', 'connect', 'message'];
 
 // Destroy the connections
 function destroy(self, connections) {
@@ -1314,7 +1317,7 @@ function _createConnection(self) {
   }
 
   self.connectingConnections++;
-  connect(messageHandler(self), self.options, (err, connection) => {
+  connect(self.options, (err, connection) => {
     self.connectingConnections--;
 
     if (err) {
@@ -1334,6 +1337,7 @@ function _createConnection(self) {
     connection.once('error', connectionFailureHandler(self, 'error'));
     connection.once('timeout', connectionFailureHandler(self, 'timeout'));
     connection.once('parseError', connectionFailureHandler(self, 'parseError'));
+    connection.on('message', self.messageHandler);
 
     reauthenticate(self, connection, err => {
       if (self.state === DESTROYED || self.state === DESTROYING) {

@@ -49,12 +49,12 @@ let connections = {};
  * @fires Connection#error
  * @fires Connection#timeout
  * @fires Connection#parseError
+ * @fires Connection#message
  */
 class Connection extends EventEmitter {
   /**
    * Creates a new Connection instance
    *
-   * @param {function} messageHandler A function called each time a complete message is received off the wire
    * @param {string} options.host The server host
    * @param {number} options.port The server port
    * @param {number} [options.family=null] IP version for DNS lookup, passed down to Node's [`dns.lookup()` function](https://nodejs.org/api/dns.html#dns_dns_lookup_hostname_options_callback). If set to `6`, will only look for ipv6 addresses.
@@ -76,7 +76,7 @@ class Connection extends EventEmitter {
    * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
    * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
    */
-  constructor(messageHandler, socket, options) {
+  constructor(socket, options) {
     super();
 
     options = options || {};
@@ -89,7 +89,6 @@ class Connection extends EventEmitter {
     this.logger = Logger('Connection', options);
     this.bson = options.bson;
     this.tag = options.tag;
-    this.messageHandler = messageHandler;
     this.maxBsonMessageSize = options.maxBsonMessageSize || 1024 * 1024 * 16 * 4;
 
     this.port = options.port || 27017;
@@ -358,7 +357,8 @@ function processMessage(conn, message) {
   const msgHeader = parseHeader(message);
   if (msgHeader.opCode !== OP_COMPRESSED) {
     const ResponseConstructor = msgHeader.opCode === OP_MSG ? BinMsg : Response;
-    conn.messageHandler(
+    conn.emit(
+      'message',
       new ResponseConstructor(
         conn.bson,
         message,
@@ -399,7 +399,8 @@ function processMessage(conn, message) {
     }
 
     const ResponseConstructor = msgHeader.opCode === OP_MSG ? BinMsg : Response;
-    conn.messageHandler(
+    conn.emit(
+      'message',
       new ResponseConstructor(
         conn.bson,
         message,
@@ -625,6 +626,13 @@ function dataHandler(conn) {
  * The driver experienced an invalid message, all pool connections closed
  *
  * @event Connection#parseError
+ * @type {Connection}
+ */
+
+/**
+ * An event emitted each time the connection receives a parsed message from the wire
+ *
+ * @event Connection#message
  * @type {Connection}
  */
 
