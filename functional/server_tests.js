@@ -668,7 +668,7 @@ describe('Server tests', function() {
           setTimeout(function() {
             expect(server.s.pool.availableConnections.length).to.be.above(0);
             expect(server.s.pool.inUseConnections.length).to.equal(0);
-            expect(server.s.pool.connectingConnections.length).to.equal(0);
+            expect(server.s.pool.connectingConnections).to.equal(0);
 
             server.destroy();
             done();
