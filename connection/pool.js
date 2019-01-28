@@ -160,8 +160,23 @@ var Pool = function(topology, options) {
   this.connectionIndex = 0;
 
   // event handlers
-  this.connectionFailureHandler = connectionFailureHandlerV2(this);
-  this.messageHandler = messageHandler(this);
+  const self = this;
+  this._messageHandler = messageHandler(this);
+  this._connectionCloseHandler = function(err) {
+    connectionFailureHandler(self, 'close', err, this);
+  };
+
+  this._connectionErrorHandler = function(err) {
+    connectionFailureHandler(self, 'error', err, this);
+  };
+
+  this._connectionTimeoutHandler = function(err) {
+    connectionFailureHandler(self, 'timeout', err, this);
+  };
+
+  this._connectionParseErrorHandler = function(err) {
+    connectionFailureHandler(self, 'parseError', err, this);
+  };
 };
 
 inherits(Pool, EventEmitter);
@@ -299,119 +314,59 @@ function reauthenticate(pool, connection, cb) {
   authenticateAgainstProvider(pool, connection, Object.keys(pool.authProviders), cb);
 }
 
-function connectionFailureHandler(self, event) {
-  return function(err) {
-    if (this._connectionFailHandled) return;
-    this._connectionFailHandled = true;
-    // Destroy the connection
-    this.destroy();
+function connectionFailureHandler(pool, event, err, conn) {
+  if (conn) {
+    if (conn._connectionFailHandled) return;
+    conn._connectionFailHandled = true;
+    conn.destroy();
 
     // Remove the connection
-    removeConnection(self, this);
+    removeConnection(pool, conn);
 
     // Flush all work Items on this connection
-    while (this.workItems.length > 0) {
-      var workItem = this.workItems.shift();
+    while (conn.workItems.length > 0) {
+      const workItem = conn.workItems.shift();
       if (workItem.cb) workItem.cb(err);
     }
+  }
 
-    // Did we catch a timeout, increment the numberOfConsecutiveTimeouts
-    if (event === 'timeout') {
-      self.numberOfConsecutiveTimeouts = self.numberOfConsecutiveTimeouts + 1;
+  // Did we catch a timeout, increment the numberOfConsecutiveTimeouts
+  if (event === 'timeout') {
+    pool.numberOfConsecutiveTimeouts = pool.numberOfConsecutiveTimeouts + 1;
 
-      // Have we timed out more than reconnectTries in a row ?
-      // Force close the pool as we are trying to connect to tcp sink hole
-      if (self.numberOfConsecutiveTimeouts > self.options.reconnectTries) {
-        self.numberOfConsecutiveTimeouts = 0;
-        // Destroy all connections and pool
-        self.destroy(true);
-        // Emit close event
-        return self.emit('close', self);
-      }
+    // Have we timed out more than reconnectTries in a row ?
+    // Force close the pool as we are trying to connect to tcp sink hole
+    if (pool.numberOfConsecutiveTimeouts > pool.options.reconnectTries) {
+      pool.numberOfConsecutiveTimeouts = 0;
+      // Destroy all connections and pool
+      pool.destroy(true);
+      // Emit close event
+      return pool.emit('close', pool);
+    }
+  }
+
+  // No more socket available propegate the event
+  if (pool.socketCount() === 0) {
+    if (pool.state !== DESTROYED && pool.state !== DESTROYING) {
+      stateTransition(pool, DISCONNECTED);
     }
 
-    // No more socket available propegate the event
-    if (self.socketCount() === 0) {
-      if (self.state !== DESTROYED && self.state !== DESTROYING) {
-        stateTransition(self, DISCONNECTED);
-      }
+    // Do not emit error events, they are always close events
+    // do not trigger the low level error handler in node
+    event = event === 'error' ? 'close' : event;
+    pool.emit(event, err);
+  }
 
-      // Do not emit error events, they are always close events
-      // do not trigger the low level error handler in node
-      event = event === 'error' ? 'close' : event;
-      self.emit(event, err);
-    }
+  // Start reconnection attempts
+  if (!pool.reconnectId && pool.options.reconnect) {
+    pool.reconnectId = setTimeout(attemptReconnect(pool), pool.options.reconnectInterval);
+  }
 
-    // Start reconnection attempts
-    if (!self.reconnectId && self.options.reconnect) {
-      self.reconnectId = setTimeout(attemptReconnect(self), self.options.reconnectInterval);
-    }
-
-    // Do we need to do anything to maintain the minimum pool size
-    const totalConnections = totalConnectionCount(self);
-    if (totalConnections < self.minSize) {
-      _createConnection(self);
-    }
-  };
-}
-
-function connectionFailureHandlerV2(pool) {
-  return function(err, event) {
-    /*
-    // NOTE: this is connection specific, refactor
-    if (this._connectionFailHandled) return;
-    this._connectionFailHandled = true;
-    // Destroy the connection
-    this.destroy();
-
-    // Remove the connection
-    removeConnection(pool, this);
-
-    // Flush all work Items on this connection
-    while (this.workItems.length > 0) {
-      var workItem = this.workItems.shift();
-      if (workItem.cb) workItem.cb(err);
-    }
-    */
-
-    // Did we catch a timeout, increment the numberOfConsecutiveTimeouts
-    if (event === 'timeout') {
-      pool.numberOfConsecutiveTimeouts = pool.numberOfConsecutiveTimeouts + 1;
-
-      // Have we timed out more than reconnectTries in a row ?
-      // Force close the pool as we are trying to connect to tcp sink hole
-      if (pool.numberOfConsecutiveTimeouts > pool.options.reconnectTries) {
-        pool.numberOfConsecutiveTimeouts = 0;
-        // Destroy all connections and pool
-        pool.destroy(true);
-        // Emit close event
-        return pool.emit('close', pool);
-      }
-    }
-
-    // No more socket available propegate the event
-    if (pool.socketCount() === 0) {
-      if (pool.state !== DESTROYED && pool.state !== DESTROYING) {
-        stateTransition(pool, DISCONNECTED);
-      }
-
-      // Do not emit error events, they are always close events
-      // do not trigger the low level error handler in node
-      event = event === 'error' ? 'close' : event;
-      pool.emit(event, err);
-    }
-
-    // Start reconnection attempts
-    if (!pool.reconnectId && pool.options.reconnect) {
-      pool.reconnectId = setTimeout(attemptReconnect(pool), pool.options.reconnectInterval);
-    }
-
-    // Do we need to do anything to maintain the minimum pool size
-    const totalConnections = totalConnectionCount(pool);
-    if (totalConnections < pool.minSize) {
-      _createConnection(pool);
-    }
-  };
+  // Do we need to do anything to maintain the minimum pool size
+  const totalConnections = totalConnectionCount(pool);
+  if (totalConnections < pool.minSize) {
+    _createConnection(pool);
+  }
 }
 
 function attemptReconnect(self) {
@@ -456,11 +411,11 @@ function attemptReconnect(self) {
 
       self.reconnectId = null;
       handlers.forEach(event => connection.removeAllListeners(event));
-      connection.on('error', connectionFailureHandler(self, 'error'));
-      connection.on('close', connectionFailureHandler(self, 'close'));
-      connection.on('timeout', connectionFailureHandler(self, 'timeout'));
-      connection.on('parseError', connectionFailureHandler(self, 'parseError'));
-      connection.on('message', self.messageHandler);
+      connection.on('error', self._connectionErrorHandler);
+      connection.on('close', self._connectionCloseHandler);
+      connection.on('timeout', self._connectionTimeoutHandler);
+      connection.on('parseError', self._connectionParseErrorHandler);
+      connection.on('message', self._messageHandler);
 
       reauthenticate(self, this, function() {
         self.retriesLeft = self.options.reconnectTries;
@@ -751,7 +706,7 @@ Pool.prototype.connect = function(credentials) {
 
     if (err) {
       // NOTE: when `err` exists, `connection` is actually the originating event name
-      self.connectionFailureHandler(err, connection);
+      connectionFailureHandler(self, connection, err);
       return;
     }
 
@@ -760,11 +715,11 @@ Pool.prototype.connect = function(credentials) {
     }
 
     // attach event handlers
-    connection.once('close', connectionFailureHandler(self, 'close'));
-    connection.once('error', connectionFailureHandler(self, 'error'));
-    connection.once('timeout', connectionFailureHandler(self, 'timeout'));
-    connection.once('parseError', connectionFailureHandler(self, 'parseError'));
-    connection.on('message', self.messageHandler);
+    connection.on('error', self._connectionErrorHandler);
+    connection.on('close', self._connectionCloseHandler);
+    connection.on('timeout', self._connectionTimeoutHandler);
+    connection.on('parseError', self._connectionParseErrorHandler);
+    connection.on('message', self._messageHandler);
 
     // If we are in a topology, delegate the auth to it
     // This is to avoid issues where we would auth against an
@@ -1333,11 +1288,11 @@ function _createConnection(self) {
       return connection.destroy();
     }
 
-    connection.once('close', connectionFailureHandler(self, 'close'));
-    connection.once('error', connectionFailureHandler(self, 'error'));
-    connection.once('timeout', connectionFailureHandler(self, 'timeout'));
-    connection.once('parseError', connectionFailureHandler(self, 'parseError'));
-    connection.on('message', self.messageHandler);
+    connection.on('error', self._connectionErrorHandler);
+    connection.on('close', self._connectionCloseHandler);
+    connection.on('timeout', self._connectionTimeoutHandler);
+    connection.on('parseError', self._connectionParseErrorHandler);
+    connection.on('message', self._messageHandler);
 
     reauthenticate(self, connection, err => {
       if (self.state === DESTROYED || self.state === DESTROYING) {
