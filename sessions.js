@@ -300,10 +300,19 @@ function endTransaction(session, commandName, callback) {
   const command = { [commandName]: 1 };
 
   // apply a writeConcern if specified
+  let writeConcern;
   if (session.transaction.options.writeConcern) {
-    Object.assign(command, { writeConcern: session.transaction.options.writeConcern });
+    writeConcern = Object.assign({}, session.transaction.options.writeConcern);
   } else if (session.clientOptions && session.clientOptions.w) {
-    Object.assign(command, { writeConcern: { w: session.clientOptions.w } });
+    writeConcern = { w: session.clientOptions.w };
+  }
+
+  if (txnState === TxnState.TRANSACTION_COMMITTED) {
+    writeConcern = Object.assign({ wtimeout: 10000 }, writeConcern, { w: 'majority' });
+  }
+
+  if (writeConcern) {
+    Object.assign(command, { writeConcern });
   }
 
   function commandHandler(e, r) {
@@ -342,6 +351,13 @@ function endTransaction(session, commandName, callback) {
   // send the command
   session.topology.command('admin.$cmd', command, { session }, (err, reply) => {
     if (err && isRetryableError(err)) {
+      // SPEC-1185: apply majority write concern when retrying commitTransaction
+      if (command.commitTransaction) {
+        command.writeConcern = Object.assign({ wtimeout: 10000 }, command.writeConcern, {
+          w: 'majority'
+        });
+      }
+
       return session.topology.command('admin.$cmd', command, { session }, (_err, _reply) =>
         commandHandler(transactionError(_err), _reply)
       );
