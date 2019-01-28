@@ -2,7 +2,6 @@
 
 const inherits = require('util').inherits;
 const EventEmitter = require('events').EventEmitter;
-const Connection = require('./connection');
 const MongoError = require('../error').MongoError;
 const MongoNetworkError = require('../error').MongoNetworkError;
 const MongoWriteConcernError = require('../error').MongoWriteConcernError;
@@ -21,6 +20,7 @@ const resolveClusterTime = require('../topologies/shared').resolveClusterTime;
 const apm = require('./apm');
 const defaultAuthProviders = require('../auth/defaultAuthProviders').defaultAuthProviders;
 const Buffer = require('safe-buffer').Buffer;
+const connect = require('./connect');
 
 var DISCONNECTED = 'disconnected';
 var CONNECTING = 'connecting';
@@ -137,7 +137,7 @@ var Pool = function(topology, options) {
   // Connections
   this.availableConnections = [];
   this.inUseConnections = [];
-  this.connectingConnections = [];
+  this.connectingConnections = 0;
   // Currently executing
   this.executing = false;
   // Operation work queue
@@ -158,6 +158,9 @@ var Pool = function(topology, options) {
   this.numberOfConsecutiveTimeouts = 0;
   // Current pool Index
   this.connectionIndex = 0;
+
+  // event handlers
+  this.connectionFailureHandler = connectionFailureHandlerV2(this);
 };
 
 inherits(Pool, EventEmitter);
@@ -344,13 +347,68 @@ function connectionFailureHandler(self, event) {
     }
 
     // Do we need to do anything to maintain the minimum pool size
-    const totalConnections =
-      self.availableConnections.length +
-      self.connectingConnections.length +
-      self.inUseConnections.length;
-
+    const totalConnections = totalConnectionCount(self);
     if (totalConnections < self.minSize) {
       _createConnection(self);
+    }
+  };
+}
+
+function connectionFailureHandlerV2(pool) {
+  return function(err, event) {
+    /*
+    // NOTE: this is connection specific, refactor
+    if (this._connectionFailHandled) return;
+    this._connectionFailHandled = true;
+    // Destroy the connection
+    this.destroy();
+
+    // Remove the connection
+    removeConnection(pool, this);
+
+    // Flush all work Items on this connection
+    while (this.workItems.length > 0) {
+      var workItem = this.workItems.shift();
+      if (workItem.cb) workItem.cb(err);
+    }
+    */
+
+    // Did we catch a timeout, increment the numberOfConsecutiveTimeouts
+    if (event === 'timeout') {
+      pool.numberOfConsecutiveTimeouts = pool.numberOfConsecutiveTimeouts + 1;
+
+      // Have we timed out more than reconnectTries in a row ?
+      // Force close the pool as we are trying to connect to tcp sink hole
+      if (pool.numberOfConsecutiveTimeouts > pool.options.reconnectTries) {
+        pool.numberOfConsecutiveTimeouts = 0;
+        // Destroy all connections and pool
+        pool.destroy(true);
+        // Emit close event
+        return pool.emit('close', pool);
+      }
+    }
+
+    // No more socket available propegate the event
+    if (pool.socketCount() === 0) {
+      if (pool.state !== DESTROYED && pool.state !== DESTROYING) {
+        stateTransition(pool, DISCONNECTED);
+      }
+
+      // Do not emit error events, they are always close events
+      // do not trigger the low level error handler in node
+      event = event === 'error' ? 'close' : event;
+      pool.emit(event, err);
+    }
+
+    // Start reconnection attempts
+    if (!pool.reconnectId && pool.options.reconnect) {
+      pool.reconnectId = setTimeout(attemptReconnect(pool), pool.options.reconnectInterval);
+    }
+
+    // Do we need to do anything to maintain the minimum pool size
+    const totalConnections = totalConnectionCount(pool);
+    if (totalConnections < pool.minSize) {
+      _createConnection(pool);
     }
   };
 }
@@ -366,20 +424,14 @@ function attemptReconnect(self) {
       return;
     }
 
-    // If we have failure schedule a retry
-    function _connectionFailureHandler(self) {
-      return function() {
-        if (this._connectionFailHandled) return;
-        this._connectionFailHandled = true;
-        // Destroy the connection
-        this.destroy();
-        // Count down the number of reconnects
+    self.connectingConnections++;
+    connect(messageHandler(self), self.options, (err, connection) => {
+      self.connectingConnections--;
+
+      if (err) {
         self.retriesLeft = self.retriesLeft - 1;
-        // How many retries are left
         if (self.retriesLeft <= 0) {
-          // Destroy the instance
           self.destroy();
-          // Emit close event
           self.emit(
             'reconnectFailed',
             new MongoNetworkError(
@@ -393,61 +445,29 @@ function attemptReconnect(self) {
         } else {
           self.reconnectId = setTimeout(attemptReconnect(self), self.options.reconnectInterval);
         }
-      };
-    }
 
-    // Got a connect handler
-    function _connectHandler(self) {
-      return function() {
-        // Assign
-        var connection = this;
+        return;
+      }
 
-        // Pool destroyed stop the connection
-        if (self.state === DESTROYED || self.state === DESTROYING) {
-          return connection.destroy();
-        }
+      if (self.state === DESTROYED || self.state === DESTROYING) {
+        return connection.destroy();
+      }
 
-        // Clear out all handlers
-        handlers.forEach(function(event) {
-          connection.removeAllListeners(event);
-        });
+      self.reconnectId = null;
+      handlers.forEach(event => connection.removeAllListeners(event));
+      connection.on('error', connectionFailureHandler(self, 'error'));
+      connection.on('close', connectionFailureHandler(self, 'close'));
+      connection.on('timeout', connectionFailureHandler(self, 'timeout'));
+      connection.on('parseError', connectionFailureHandler(self, 'parseError'));
 
-        // Reset reconnect id
-        self.reconnectId = null;
-
-        // Apply pool connection handlers
-        connection.on('error', connectionFailureHandler(self, 'error'));
-        connection.on('close', connectionFailureHandler(self, 'close'));
-        connection.on('timeout', connectionFailureHandler(self, 'timeout'));
-        connection.on('parseError', connectionFailureHandler(self, 'parseError'));
-
-        // Apply any auth to the connection
-        reauthenticate(self, this, function() {
-          // Reset retries
-          self.retriesLeft = self.options.reconnectTries;
-          // Push to available connections
-          self.availableConnections.push(connection);
-          // Set the reconnectConnection to null
-          self.reconnectConnection = null;
-          // Emit reconnect event
-          self.emit('reconnect', self);
-          // Trigger execute to start everything up again
-          _execute(self)();
-        });
-      };
-    }
-
-    // Create a connection
-    self.reconnectConnection = new Connection(messageHandler(self), self.options);
-    // Add handlers
-    self.reconnectConnection.on('close', _connectionFailureHandler(self, 'close'));
-    self.reconnectConnection.on('error', _connectionFailureHandler(self, 'error'));
-    self.reconnectConnection.on('timeout', _connectionFailureHandler(self, 'timeout'));
-    self.reconnectConnection.on('parseError', _connectionFailureHandler(self, 'parseError'));
-    // On connection
-    self.reconnectConnection.on('connect', _connectHandler(self));
-    // Attempt connection
-    self.reconnectConnection.connect();
+      reauthenticate(self, this, function() {
+        self.retriesLeft = self.options.reconnectTries;
+        self.availableConnections.push(connection);
+        self.reconnectConnection = null;
+        self.emit('reconnect', self);
+        _execute(self)();
+      });
+    });
   };
 }
 
@@ -640,13 +660,19 @@ Pool.prototype.socketCount = function() {
   // + this.connectingConnections.length;
 };
 
+function totalConnectionCount(pool) {
+  return (
+    pool.availableConnections.length + pool.inUseConnections.length + pool.connectingConnections
+  );
+}
+
 /**
  * Return all pool connections
  * @method
  * @return {Connection[]} The pool connections
  */
 Pool.prototype.allConnections = function() {
-  return this.availableConnections.concat(this.inUseConnections).concat(this.connectingConnections);
+  return this.availableConnections.concat(this.inUseConnections);
 };
 
 /**
@@ -714,85 +740,71 @@ Pool.prototype.connect = function(credentials) {
     throw new MongoError('connection in unlawful state ' + this.state);
   }
 
-  var self = this;
-  // Transition to connecting state
+  const self = this;
   stateTransition(this, CONNECTING);
-  // Create a connection
-  var connection = new Connection(messageHandler(self), this.options);
-  // Add to list of connections
-  this.connectingConnections.push(connection);
-  // Add listeners to the connection
-  connection.once('connect', function(connection) {
-    if (self.state === DESTROYED || self.state === DESTROYING) return self.destroy();
+
+  self.connectingConnections++;
+  connect(messageHandler(self), this.options, (err, connection) => {
+    self.connectingConnections--;
+
+    if (err) {
+      // NOTE: when `err` exists, `connection` is actually the originating event name
+      self.connectionFailureHandler(err, connection);
+      return;
+    }
+
+    if (self.state === DESTROYED || self.state === DESTROYING) {
+      return self.destroy();
+    }
+
+    // attach event handlers
+    connection.once('close', connectionFailureHandler(self, 'close'));
+    connection.once('error', connectionFailureHandler(self, 'error'));
+    connection.once('timeout', connectionFailureHandler(self, 'timeout'));
+    connection.once('parseError', connectionFailureHandler(self, 'parseError'));
 
     // If we are in a topology, delegate the auth to it
     // This is to avoid issues where we would auth against an
     // arbiter
     if (self.options.inTopology) {
-      // Set connected mode
       stateTransition(self, CONNECTED);
-
-      // Move the active connection
-      moveConnectionBetween(connection, self.connectingConnections, self.availableConnections);
-
-      // Emit the connect event
+      self.availableConnections.push(connection);
       return self.emit('connect', self);
     }
 
-    // Apply any store credentials
     reauthenticate(self, connection, function(err) {
-      if (self.state === DESTROYED || self.state === DESTROYING) return self.destroy();
+      if (self.state === DESTROYED || self.state === DESTROYING) {
+        return self.destroy();
+      }
 
-      // We have an error emit it
       if (err) {
-        // Destroy the pool
         self.destroy();
-        // Emit the error
         return self.emit('error', err);
       }
 
-      // Authenticate
       authenticate(self, credentials, connection, function(err) {
-        if (self.state === DESTROYED || self.state === DESTROYING) return self.destroy();
+        if (self.state === DESTROYED || self.state === DESTROYING) {
+          return self.destroy();
+        }
 
-        // We have an error emit it
         if (err) {
-          // Destroy the pool
           self.destroy();
-          // Emit the error
           return self.emit('error', err);
         }
-        // Set connected mode
+
         stateTransition(self, CONNECTED);
+        self.availableConnections.push(connection);
 
-        // Move the active connection
-        moveConnectionBetween(connection, self.connectingConnections, self.availableConnections);
-
-        // if we have a minPoolSize, create a connection
         if (self.minSize) {
-          for (let i = 0; i < self.minSize; i++) _createConnection(self);
+          for (let i = 0; i < self.minSize; i++) {
+            _createConnection(self);
+          }
         }
 
-        // Emit the connect event
         self.emit('connect', self);
       });
     });
   });
-
-  // Add error handlers
-  connection.once('error', connectionFailureHandler(this, 'error'));
-  connection.once('close', connectionFailureHandler(this, 'close'));
-  connection.once('timeout', connectionFailureHandler(this, 'timeout'));
-  connection.once('parseError', connectionFailureHandler(this, 'parseError'));
-
-  try {
-    connection.connect();
-  } catch (err) {
-    // SSL or something threw on connect
-    process.nextTick(function() {
-      self.emit('error', err);
-    });
-  }
 };
 
 /**
@@ -821,7 +833,7 @@ Pool.prototype.auth = function(credentials, callback) {
     // Allow nothing else to use the connections while we authenticate them
     self.availableConnections = [];
     self.inUseConnections = [];
-    self.connectingConnections = [];
+    self.connectingConnections = 0;
 
     var connectionsCount = connections.length;
     var error = null;
@@ -934,9 +946,8 @@ Pool.prototype.logout = function(dbName, callback) {
  */
 Pool.prototype.unref = function() {
   // Get all the known connections
-  var connections = this.availableConnections
-    .concat(this.inUseConnections)
-    .concat(this.connectingConnections);
+  var connections = this.availableConnections.concat(this.inUseConnections);
+
   connections.forEach(function(c) {
     c.unref();
   });
@@ -961,7 +972,7 @@ function destroy(self, connections) {
   self.inUseConnections = [];
   self.availableConnections = [];
   self.nonAuthenticatedConnections = [];
-  self.connectingConnections = [];
+  self.connectingConnections = 0;
 
   // Set state to destroyed
   stateTransition(self, DESTROYED);
@@ -983,8 +994,7 @@ Pool.prototype.destroy = function(force) {
     // Get all the known connections
     var connections = self.availableConnections
       .concat(self.inUseConnections)
-      .concat(self.nonAuthenticatedConnections)
-      .concat(self.connectingConnections);
+      .concat(self.nonAuthenticatedConnections);
 
     // Flush any remaining work items with
     // an error
@@ -1018,8 +1028,7 @@ Pool.prototype.destroy = function(force) {
       // Get all the known connections
       var connections = self.availableConnections
         .concat(self.inUseConnections)
-        .concat(self.nonAuthenticatedConnections)
-        .concat(self.connectingConnections);
+        .concat(self.nonAuthenticatedConnections);
 
       // Check if we have any in flight operations
       for (var i = 0; i < connections.length; i++) {
@@ -1295,94 +1304,63 @@ function remove(connection, connections) {
 function removeConnection(self, connection) {
   if (remove(connection, self.availableConnections)) return;
   if (remove(connection, self.inUseConnections)) return;
-  if (remove(connection, self.connectingConnections)) return;
   if (remove(connection, self.nonAuthenticatedConnections)) return;
 }
 
-// All event handlers
-var handlers = ['close', 'message', 'error', 'timeout', 'parseError', 'connect'];
-
+const handlers = ['close', 'message', 'error', 'timeout', 'parseError', 'connect'];
 function _createConnection(self) {
   if (self.state === DESTROYED || self.state === DESTROYING) {
     return;
   }
-  var connection = new Connection(messageHandler(self), self.options);
 
-  // Push the connection
-  self.connectingConnections.push(connection);
+  self.connectingConnections++;
+  connect(messageHandler(self), self.options, (err, connection) => {
+    self.connectingConnections--;
 
-  // Handle any errors
-  var tempErrorHandler = function(_connection) {
-    return function() {
-      // Destroy the connection
-      _connection.destroy();
-      // Remove the connection from the connectingConnections list
-      removeConnection(self, _connection);
-      // Start reconnection attempts
+    if (err) {
       if (!self.reconnectId && self.options.reconnect) {
         self.reconnectId = setTimeout(attemptReconnect(self), self.options.reconnectInterval);
       }
-    };
-  };
 
-  // Handle successful connection
-  var tempConnectHandler = function(_connection) {
-    return function() {
-      // Destroyed state return
+      return;
+    }
+
+    if (self.state === DESTROYED || self.state === DESTROYING) {
+      removeConnection(self, connection);
+      return connection.destroy();
+    }
+
+    connection.once('close', connectionFailureHandler(self, 'close'));
+    connection.once('error', connectionFailureHandler(self, 'error'));
+    connection.once('timeout', connectionFailureHandler(self, 'timeout'));
+    connection.once('parseError', connectionFailureHandler(self, 'parseError'));
+
+    reauthenticate(self, connection, err => {
       if (self.state === DESTROYED || self.state === DESTROYING) {
-        // Remove the connection from the list
-        removeConnection(self, _connection);
-        return _connection.destroy();
+        return connection.destroy();
       }
 
-      // Destroy all event emitters
-      handlers.forEach(function(e) {
-        _connection.removeAllListeners(e);
-      });
+      // Remove the connection from the connectingConnections list
+      removeConnection(self, connection);
 
-      // Add the final handlers
-      _connection.once('close', connectionFailureHandler(self, 'close'));
-      _connection.once('error', connectionFailureHandler(self, 'error'));
-      _connection.once('timeout', connectionFailureHandler(self, 'timeout'));
-      _connection.once('parseError', connectionFailureHandler(self, 'parseError'));
+      // Handle error
+      if (err) {
+        return connection.destroy();
+      }
 
-      // Signal
-      reauthenticate(self, _connection, function(err) {
-        if (self.state === DESTROYED || self.state === DESTROYING) {
-          return _connection.destroy();
-        }
-        // Remove the connection from the connectingConnections list
-        removeConnection(self, _connection);
-
-        // Handle error
-        if (err) {
-          return _connection.destroy();
-        }
-
-        // If we are c at the moment
-        // Do not automatially put in available connections
-        // As we need to apply the credentials first
-        if (self.authenticating) {
-          self.nonAuthenticatedConnections.push(_connection);
-        } else {
-          // Push to available
-          self.availableConnections.push(_connection);
-          // Execute any work waiting
-          _execute(self)();
-        }
-      });
-    };
-  };
-
-  // Add all handlers
-  connection.once('close', tempErrorHandler(connection));
-  connection.once('error', tempErrorHandler(connection));
-  connection.once('timeout', tempErrorHandler(connection));
-  connection.once('parseError', tempErrorHandler(connection));
-  connection.once('connect', tempConnectHandler(connection));
-
-  // Start connection
-  connection.connect();
+      // If we are c at the moment
+      // Do not automatially put in available connections
+      // As we need to apply the credentials first
+      if (self.authenticating) {
+        self.nonAuthenticatedConnections.push(connection);
+      } else {
+        // Push to available
+        self.availableConnections.push(connection);
+        // Execute any work waiting
+        _execute(self)();
+      }
+    });
+  });
 }
 
 function flushMonitoringOperations(queue) {
@@ -1419,7 +1397,7 @@ function _execute(self) {
       // New pool connections are in progress, wait them to finish
       // before executing any more operation to ensure distribution of
       // operations
-      if (self.connectingConnections.length > 0) {
+      if (self.connectingConnections > 0) {
         return;
       }
 
@@ -1427,10 +1405,7 @@ function _execute(self) {
       // eslint-disable-next-line
       while (true) {
         // Total availble connections
-        var totalConnections =
-          self.availableConnections.length +
-          self.connectingConnections.length +
-          self.inUseConnections.length;
+        const totalConnections = totalConnectionCount(self);
 
         // No available connections available, flush any monitoring ops
         if (self.availableConnections.length === 0) {

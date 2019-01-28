@@ -1,8 +1,6 @@
 'use strict';
 
 const EventEmitter = require('events').EventEmitter;
-const net = require('net');
-const tls = require('tls');
 const crypto = require('crypto');
 const debugOptions = require('./utils').debugOptions;
 const parseHeader = require('../wireprotocol/shared').parseHeader;
@@ -78,7 +76,7 @@ class Connection extends EventEmitter {
    * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
    * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
    */
-  constructor(messageHandler, options) {
+  constructor(messageHandler, socket, options) {
     super();
 
     options = options || {};
@@ -94,6 +92,21 @@ class Connection extends EventEmitter {
     this.messageHandler = messageHandler;
     this.maxBsonMessageSize = options.maxBsonMessageSize || 1024 * 1024 * 16 * 4;
 
+    this.port = options.port || 27017;
+    this.host = options.host || 'localhost';
+    this.socketTimeout = typeof options.socketTimeout === 'number' ? options.socketTimeout : 360000;
+
+    // These values are inspected directly in tests, but maybe not necessary to keep around
+    this.keepAlive = typeof options.keepAlive === 'boolean' ? options.keepAlive : true;
+    this.keepAliveInitialDelay =
+      typeof options.keepAliveInitialDelay === 'number' ? options.keepAliveInitialDelay : 300000;
+    this.socketTimeout = typeof options.socketTimeout === 'number' ? options.socketTimeout : 360000;
+    this.connectionTimeout =
+      typeof options.connectionTimeout === 'number' ? options.connectionTimeout : 30000;
+    if (this.keepAliveInitialDelay > this.socketTimeout) {
+      this.keepAliveInitialDelay = Math.round(this.socketTimeout / 2);
+    }
+
     // Debug information
     if (this.logger.isDebug()) {
       this.logger.debug(
@@ -101,53 +114,6 @@ class Connection extends EventEmitter {
           debugOptions(DEBUG_FIELDS, options)
         )}]`
       );
-    }
-
-    // Default options
-    this.port = options.port || 27017;
-    this.host = options.host || 'localhost';
-    this.family = typeof options.family === 'number' ? options.family : void 0;
-    this.keepAlive = typeof options.keepAlive === 'boolean' ? options.keepAlive : true;
-    this.keepAliveInitialDelay =
-      typeof options.keepAliveInitialDelay === 'number' ? options.keepAliveInitialDelay : 300000;
-    this.noDelay = typeof options.noDelay === 'boolean' ? options.noDelay : true;
-    this.connectionTimeout =
-      typeof options.connectionTimeout === 'number' ? options.connectionTimeout : 30000;
-    this.socketTimeout = typeof options.socketTimeout === 'number' ? options.socketTimeout : 360000;
-
-    // Is the keepAliveInitialDelay > socketTimeout set it to half of socketTimeout
-    if (this.keepAliveInitialDelay > this.socketTimeout) {
-      this.keepAliveInitialDelay = Math.round(this.socketTimeout / 2);
-    }
-
-    this.destroyed = false;
-    this.domainSocket = this.host.indexOf('/') !== -1;
-    this.singleBufferSerializtion =
-      typeof options.singleBufferSerializtion === 'boolean'
-        ? options.singleBufferSerializtion
-        : true;
-    this.serializationFunction = this.singleBufferSerializtion ? 'toBinUnified' : 'toBin';
-
-    // SSL options
-    this.ca = options.ca || null;
-    this.crl = options.crl || null;
-    this.cert = options.cert || null;
-    this.key = options.key || null;
-    this.passphrase = options.passphrase || null;
-    this.ciphers = options.ciphers || null;
-    this.ecdhCurve = options.ecdhCurve || null;
-    this.ssl = typeof options.ssl === 'boolean' ? options.ssl : false;
-    this.rejectUnauthorized =
-      typeof options.rejectUnauthorized === 'boolean' ? options.rejectUnauthorized : true;
-    this.checkServerIdentity =
-      typeof options.checkServerIdentity === 'boolean' ||
-      typeof options.checkServerIdentity === 'function'
-        ? options.checkServerIdentity
-        : true;
-
-    // If ssl not enabled
-    if (!this.ssl) {
-      this.rejectUnauthorized = false;
     }
 
     // Response options
@@ -162,8 +128,8 @@ class Connection extends EventEmitter {
     this.queue = [];
 
     // Internal state
-    this.socket = null;
     this.writeStream = null;
+    this.destroyed = false;
 
     // Create hash method
     const hash = crypto.createHash('sha1');
@@ -172,6 +138,17 @@ class Connection extends EventEmitter {
 
     // All operations in flight on the connection
     this.workItems = [];
+
+    // setup socket
+    this.socket = socket;
+    this.socket.once('error', errorHandler(this));
+    this.socket.once('timeout', timeoutHandler(this));
+    this.socket.once('close', closeHandler(this));
+    this.socket.on('data', dataHandler(this));
+
+    if (connectionAccounting) {
+      addConnection(this.id, this);
+    }
   }
 
   setSocketTimeout(value) {
@@ -206,45 +183,6 @@ class Connection extends EventEmitter {
 
   get address() {
     return `${this.host}:${this.port}`;
-  }
-
-  /**
-   * Connect
-   * @method
-   */
-  connect(_options) {
-    _options = _options || {};
-    // Set the connections
-    if (connectionAccounting) addConnection(this.id, this);
-    // Check if we are overriding the promoteLongs
-    if (typeof _options.promoteLongs === 'boolean') {
-      this.responseOptions.promoteLongs = _options.promoteLongs;
-      this.responseOptions.promoteValues = _options.promoteValues;
-      this.responseOptions.promoteBuffers = _options.promoteBuffers;
-    }
-
-    const _errorHandler = errorHandler(this);
-
-    if (this.family !== void 0) {
-      return doConnect(this, this.family, _options, _errorHandler);
-    }
-
-    return doConnect(this, 6, _options, err => {
-      if (this.logger.isDebug()) {
-        this.logger.debug(
-          `connection ${this.id} for [${this.address}] errored out with [${JSON.stringify(err)}]`
-        );
-      }
-
-      // clean up existing event handlers
-      this.socket.removeAllListeners('error');
-      this.socket.removeAllListeners('timeout');
-      this.socket.removeAllListeners('close');
-      this.socket.removeAllListeners('data');
-      this.socket = undefined;
-
-      return doConnect(this, 4, _options, _errorHandler);
-    });
   }
 
   /**
@@ -653,124 +591,6 @@ function dataHandler(conn) {
       }
     }
   };
-}
-
-// List of socket level valid ssl options
-const LEGAL_SSL_SOCKET_OPTIONS = [
-  'pfx',
-  'key',
-  'passphrase',
-  'cert',
-  'ca',
-  'ciphers',
-  'NPNProtocols',
-  'ALPNProtocols',
-  'servername',
-  'ecdhCurve',
-  'secureProtocol',
-  'secureContext',
-  'session',
-  'minDHSize'
-];
-
-function merge(options1, options2) {
-  // Merge in any allowed ssl options
-  for (const name in options2) {
-    if (options2[name] != null && LEGAL_SSL_SOCKET_OPTIONS.indexOf(name) !== -1) {
-      options1[name] = options2[name];
-    }
-  }
-}
-
-function makeSSLConnection(conn, _options) {
-  let sslOptions = {
-    socket: conn.socket,
-    rejectUnauthorized: conn.rejectUnauthorized
-  };
-
-  // Merge in options
-  merge(sslOptions, conn.options);
-  merge(sslOptions, _options);
-
-  // Set options for ssl
-  if (conn.ca) sslOptions.ca = conn.ca;
-  if (conn.crl) sslOptions.crl = conn.crl;
-  if (conn.cert) sslOptions.cert = conn.cert;
-  if (conn.key) sslOptions.key = conn.key;
-  if (conn.passphrase) sslOptions.passphrase = conn.passphrase;
-
-  // Override checkServerIdentity behavior
-  if (conn.checkServerIdentity === false) {
-    // Skip the identiy check by retuning undefined as per node documents
-    // https://nodejs.org/api/tls.html#tls_tls_connect_options_callback
-    sslOptions.checkServerIdentity = function() {
-      return undefined;
-    };
-  } else if (typeof conn.checkServerIdentity === 'function') {
-    sslOptions.checkServerIdentity = conn.checkServerIdentity;
-  }
-
-  // Set default sni servername to be the same as host
-  if (sslOptions.servername == null) {
-    sslOptions.servername = conn.host;
-  }
-
-  // Attempt SSL connection
-  const connection = tls.connect(conn.port, conn.host, sslOptions, () => {
-    // Error on auth or skip
-    if (connection.authorizationError && conn.rejectUnauthorized) {
-      return conn.emit('error', connection.authorizationError, conn, { ssl: true });
-    }
-
-    // Set socket timeout instead of connection timeout
-    connection.setTimeout(conn.socketTimeout);
-    // We are done emit connect
-    conn.emit('connect', conn);
-  });
-
-  // Set the options for the connection
-  connection.setKeepAlive(conn.keepAlive, conn.keepAliveInitialDelay);
-  connection.setTimeout(conn.connectionTimeout);
-  connection.setNoDelay(conn.noDelay);
-
-  return connection;
-}
-
-function makeUnsecureConnection(conn, family) {
-  // Create new connection instance
-  let connection_options;
-  if (conn.domainSocket) {
-    connection_options = { path: conn.host };
-  } else {
-    connection_options = { port: conn.port, host: conn.host };
-    connection_options.family = family;
-  }
-
-  const connection = net.createConnection(connection_options);
-
-  // Set the options for the connection
-  connection.setKeepAlive(conn.keepAlive, conn.keepAliveInitialDelay);
-  connection.setTimeout(conn.connectionTimeout);
-  connection.setNoDelay(conn.noDelay);
-
-  connection.once('connect', () => {
-    // Set socket timeout instead of connection timeout
-    connection.setTimeout(conn.socketTimeout);
-    // Emit connect event
-    conn.emit('connect', conn);
-  });
-
-  return connection;
-}
-
-function doConnect(conn, family, _options, _errorHandler) {
-  conn.socket = conn.ssl ? makeSSLConnection(conn, _options) : makeUnsecureConnection(conn, family);
-
-  // Add handlers for events
-  conn.socket.once('error', _errorHandler);
-  conn.socket.once('timeout', timeoutHandler(conn));
-  conn.socket.once('close', closeHandler(conn));
-  conn.socket.on('data', dataHandler(conn));
 }
 
 /**
