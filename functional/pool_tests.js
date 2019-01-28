@@ -52,41 +52,26 @@ describe('Pool tests', function() {
 
   it('Should only listen on connect once', {
     metadata: { requires: { topology: 'single' } },
-
     test: function(done) {
-      // Attempt to connect
-      var pool = new Pool(null, {
+      const pool = new Pool(null, {
         host: this.configuration.host,
         port: this.configuration.port,
         bson: new Bson(),
         messageHandler: function() {}
       });
 
-      let connection;
-
-      // Add event listeners
       pool.on('connect', function() {
-        var connections = pool.allConnections();
-
         process.nextTick(() => {
-          // Now that we are in next tick, connection should still exist, but there
-          // should be no connect listeners
-          expect(connection.socket.listenerCount('connect')).to.equal(0);
+          const connections = pool.allConnections();
           expect(connections).to.have.lengthOf(1);
+          expect(connections[0].socket.listenerCount('connect')).to.equal(0);
 
           pool.destroy();
           done();
         });
       });
 
-      expect(pool.allConnections()).to.have.lengthOf(0);
-
-      // Start connection
       pool.connect();
-
-      expect(pool.allConnections()).to.have.lengthOf(1);
-      connection = pool.allConnections()[0];
-      expect(connection.socket.listenerCount('connect')).to.equal(1);
     }
   });
 
@@ -153,86 +138,17 @@ describe('Pool tests', function() {
 
       // Add event listeners
       pool.on('connect', function() {
-        for (var i = 0; i < 10; i++) {
-          var query = new Query(
-            new Bson(),
-            'system.$cmd',
-            { ismaster: true },
-            { numberToSkip: 0, numberToReturn: 1 }
-          );
-          pool.write(query, messageHandler);
+        for (var i = 0; i < 10; ++i) {
+          for (var j = 0; j < 10; ++j) {
+            const query = new Query(
+              new Bson(),
+              'system.$cmd',
+              { ismaster: true },
+              { numberToSkip: 0, numberToReturn: 1 }
+            );
 
-          query = new Query(
-            new Bson(),
-            'system.$cmd',
-            { ismaster: true },
-            { numberToSkip: 0, numberToReturn: 1 }
-          );
-          pool.write(query, messageHandler);
-
-          query = new Query(
-            new Bson(),
-            'system.$cmd',
-            { ismaster: true },
-            { numberToSkip: 0, numberToReturn: 1 }
-          );
-          pool.write(query, messageHandler);
-
-          query = new Query(
-            new Bson(),
-            'system.$cmd',
-            { ismaster: true },
-            { numberToSkip: 0, numberToReturn: 1 }
-          );
-          pool.write(query, messageHandler);
-
-          query = new Query(
-            new Bson(),
-            'system.$cmd',
-            { ismaster: true },
-            { numberToSkip: 0, numberToReturn: 1 }
-          );
-          pool.write(query, messageHandler);
-
-          query = new Query(
-            new Bson(),
-            'system.$cmd',
-            { ismaster: true },
-            { numberToSkip: 0, numberToReturn: 1 }
-          );
-          pool.write(query, messageHandler);
-
-          query = new Query(
-            new Bson(),
-            'system.$cmd',
-            { ismaster: true },
-            { numberToSkip: 0, numberToReturn: 1 }
-          );
-          pool.write(query, messageHandler);
-
-          query = new Query(
-            new Bson(),
-            'system.$cmd',
-            { ismaster: true },
-            { numberToSkip: 0, numberToReturn: 1 }
-          );
-          pool.write(query, messageHandler);
-
-          query = new Query(
-            new Bson(),
-            'system.$cmd',
-            { ismaster: true },
-            { numberToSkip: 0, numberToReturn: 1 }
-          );
-          pool.write(query, messageHandler);
-
-          query = new Query(
-            new Bson(),
-            'system.$cmd',
-            { ismaster: true },
-            { numberToSkip: 0, numberToReturn: 1 }
-          );
-          pool.write(query, messageHandler);
+            pool.write(query, messageHandler);
+          }
         }
       });
 
@@ -1136,7 +1052,7 @@ describe('Pool tests', function() {
     }
   });
 
-  it('should correctly exit _execute loop when single avialable connection is destroyed', {
+  it('should correctly exit _execute loop when single available connection is destroyed', {
     metadata: { requires: { topology: 'single' } },
 
     test: function(done) {
@@ -1169,7 +1085,7 @@ describe('Pool tests', function() {
 
           // Mark available connection as broken
           var con = pool.availableConnections[0];
-          pool.availableConnections[0].destroyed = true;
+          con.destroyed = true;
 
           // Execute ismaster should not cause cpu to start spinning
           query = new Query(
