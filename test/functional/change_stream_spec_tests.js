@@ -46,6 +46,7 @@ describe('Change Stream Spec', function() {
           const configuration = this.configuration;
           return Promise.all(ALL_DBS.map(db => gc.db(db).dropDatabase()))
             .then(() => gc.db(sDB).createCollection(sColl))
+            .then(() => gc.db(specData.database2_name).createCollection(specData.collection2_name))
             .then(() => configuration.newClient({}, { monitorCommands: true }).connect())
             .then(client => {
               ctx = { gc, client };
@@ -214,8 +215,22 @@ describe('Change Stream Spec', function() {
     const target = client.db(op.database).collection(op.collection);
     const command = op.name;
     const args = [];
-    if (op.arguments && op.arguments.document) {
-      args.push(op.arguments.document);
+    if (op.arguments) {
+      if (op.arguments.document) {
+        args.push(op.arguments.document);
+      }
+      if (op.arguments.filter) {
+        args.push(op.arguments.filter);
+      }
+      if (op.arguments.update) {
+        args.push(op.arguments.update);
+      }
+      if (op.arguments.replacement) {
+        args.push(op.arguments.replacement);
+      }
+      if (op.arguments.to) {
+        args.push(op.arguments.to);
+      }
     }
     return () => target[command].apply(target, args);
   }
