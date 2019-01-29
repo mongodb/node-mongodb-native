@@ -94,6 +94,42 @@ describe('Aggregation', function() {
     }
   });
 
+  it('should correctly execute db.aggregate() with $currentOp', {
+    metadata: {
+      requires: {
+        mongodb: '>=3.6.0',
+        topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
+      }
+    },
+
+    test: function(done) {
+      const client = this.configuration.newClient({ w: 1 }, { poolSize: 1 });
+
+      client.connect(function(err, client) {
+        expect(err).to.be.null;
+
+        // get admin db for $currentOp
+        const db = client.db('admin');
+
+        db.aggregate([{ $currentOp: {} }], (err, cursor) => {
+          expect(err).to.be.null;
+
+          cursor.toArray((err, result) => {
+            expect(err).to.be.null;
+
+            expect(result[0].command.aggregate).to.equal(1);
+            expect(result[0].command.pipeline).to.eql([{ $currentOp: {} }]);
+            expect(result[0].command.cursor).to.deep.equal({});
+            expect(result[0].command['$db']).to.equal('admin');
+
+            client.close();
+            done();
+          });
+        });
+      });
+    }
+  });
+
   /**
    * Correctly call the aggregation framework using a pipeline expressed as an argument list.
    *
