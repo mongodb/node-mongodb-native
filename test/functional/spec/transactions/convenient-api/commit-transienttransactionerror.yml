@@ -22,16 +22,17 @@ tests:
       -
         name: withTransaction
         object: session0
-        callback: &callback
-          operations:
-            -
-              name: insertOne
-              object: collection
-              arguments:
-                session: session0
-                document: { _id: 1 }
-              result:
-                insertedId: 1
+        arguments: &arguments
+          callback:
+            operations:
+              -
+                name: insertOne
+                object: collection
+                arguments:
+                  session: session0
+                  document: { _id: 1 }
+                result:
+                  insertedId: 1
     expectations: &expectations
       -
         command_started_event:
@@ -141,7 +142,7 @@ tests:
       -
         name: withTransaction
         object: session0
-        callback: *callback
+        arguments: *arguments
     expectations: *expectations
     outcome: *outcome
   -
@@ -157,7 +158,7 @@ tests:
       -
         name: withTransaction
         object: session0
-        callback: *callback
+        arguments: *arguments
     expectations: *expectations
     outcome: *outcome
   -
@@ -173,6 +174,6 @@ tests:
       -
         name: withTransaction
         object: session0
-        callback: *callback
+        arguments: *arguments
     expectations: *expectations
     outcome: *outcome

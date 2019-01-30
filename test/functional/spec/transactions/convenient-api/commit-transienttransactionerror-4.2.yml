@@ -24,17 +24,18 @@ tests:
       -
         name: withTransaction
         object: session0
-        callback: &callback
-          operations:
-            -
-              name: insertOne
-              object: collection
-              arguments:
-                session: session0
-                document: { _id: 1 }
-              result:
-                insertedId: 1
-    expectations: &expectations
+        arguments:
+          callback:
+            operations:
+              -
+                name: insertOne
+                object: collection
+                arguments:
+                  session: session0
+                  document: { _id: 1 }
+                result:
+                  insertedId: 1
+    expectations:
       -
         command_started_event:
           command:

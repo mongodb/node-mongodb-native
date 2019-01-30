@@ -6,14 +6,13 @@ data: []
 tests:
   -
     description: commitTransaction is not retried after WriteConcernFailed timeout error
-    skipReason: SPEC-1197 Drivers should not retry commit after wtimeout error
     failPoint:
       configureFailPoint: failCommand
       mode: { times: 1 }
       data:
           failCommands: ["commitTransaction"]
           # Do not specify closeConnection: false, since that would conflict
-          # with writeConcernError (likely a server bug)
+          # with writeConcernError (see: SERVER-39292)
           writeConcernError:
             code: 64
             codeName: WriteConcernFailed
@@ -23,20 +22,22 @@ tests:
       -
         name: withTransaction
         object: session0
-        callback: &callback
-          operations:
-            -
-              name: insertOne
-              object: collection
-              arguments:
-                session: session0
-                document: { _id: 1 }
-              result:
-                insertedId: 1
+        arguments: &arguments
+          callback:
+            operations:
+              -
+                name: insertOne
+                object: collection
+                arguments:
+                  session: session0
+                  document: { _id: 1 }
+                result:
+                  insertedId: 1
         result:
           errorCodeName: WriteConcernFailed
           # Per transactions spec, drivers add UnknownTransactionCommitResult
-          # label for WriteConcernFailed errors
+          # label for WriteConcernFailed errors; however, neither the driver
+          # nor withTransaction() will retry the commit in this case.
           errorLabelsContain: ["UnknownTransactionCommitResult"]
           errorLabelsOmit: ["TransientTransactionError"]
     expectations:
@@ -75,36 +76,27 @@ tests:
         data:
           - { _id: 1 }
   -
-    # This test configures the fail point to return a contrived error that
-    # is WriteConcernFailed but omits the errInfo field that would identify it
-    # as a wtimeout error. This tests that drivers do not assume that all
+    # This test configures the fail point to return an error with the
+    # WriteConcernFailed code but without errInfo that would identify it as a
+    # wtimeout error. This tests that drivers do not assume that all
     # WriteConcernFailed errors are due to a replication timeout.
     description: commitTransaction is retried after WriteConcernFailed non-timeout error
-    skipReason: SPEC-1185 Drivers should use majority write concern when retrying commitTransaction
     failPoint:
       configureFailPoint: failCommand
       mode: { times: 2 }
       data:
           failCommands: ["commitTransaction"]
-          closeConnection: false
+          # Do not specify closeConnection: false, since that would conflict
+          # with writeConcernError (see: SERVER-39292)
           writeConcernError:
             code: 64
             codeName: WriteConcernFailed
-            errmsg: "waiting for replication did not time out"
+            errmsg: "multiple errors reported"
     operations:
       -
         name: withTransaction
         object: session0
-        callback:
-          operations:
-            -
-              name: insertOne
-              object: collection
-              arguments:
-                session: session0
-                document: { _id: 1 }
-              result:
-                insertedId: 1
+        arguments: *arguments
     expectations:
       -
         command_started_event:
@@ -143,7 +135,7 @@ tests:
             txnNumber: { $numberLong: "1" }
             autocommit: false
             # commitTransaction applies w:majority on retries (SPEC-1185)
-            writeConcern: { w: majority }
+            writeConcern: { w: majority, wtimeout: 10000 }
             # omitted fields
             readConcern: ~
             startTransaction: ~
@@ -157,7 +149,7 @@ tests:
             txnNumber: { $numberLong: "1" }
             autocommit: false
             # commitTransaction applies w:majority on retries (SPEC-1185)
-            writeConcern: { w: majority }
+            writeConcern: { w: majority, wtimeout: 10000 }
             # omitted fields
             readConcern: ~
             startTransaction: ~
@@ -182,7 +174,7 @@ tests:
       -
         name: withTransaction
         object: session0
-        callback: *callback
+        arguments: *arguments
         result:
           errorCodeName: UnknownReplWriteConcern
           errorLabelsOmit: ["TransientTransactionError", "UnknownTransactionCommitResult"]
@@ -232,7 +224,7 @@ tests:
       -
         name: withTransaction
         object: session0
-        callback: *callback
+        arguments: *arguments
         result:
           errorCodeName: UnsatisfiableWriteConcern
           errorLabelsOmit: ["TransientTransactionError", "UnknownTransactionCommitResult"]

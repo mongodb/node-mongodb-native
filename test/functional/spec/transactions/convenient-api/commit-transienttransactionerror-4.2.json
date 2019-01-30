@@ -23,22 +23,24 @@
         {
           "name": "withTransaction",
           "object": "session0",
-          "callback": {
-            "operations": [
-              {
-                "name": "insertOne",
-                "object": "collection",
-                "arguments": {
-                  "session": "session0",
-                  "document": {
-                    "_id": 1
+          "arguments": {
+            "callback": {
+              "operations": [
+                {
+                  "name": "insertOne",
+                  "object": "collection",
+                  "arguments": {
+                    "session": "session0",
+                    "document": {
+                      "_id": 1
+                    }
+                  },
+                  "result": {
+                    "insertedId": 1
                   }
-                },
-                "result": {
-                  "insertedId": 1
                 }
-              }
-            ]
+              ]
+            }
           }
         }
       ],

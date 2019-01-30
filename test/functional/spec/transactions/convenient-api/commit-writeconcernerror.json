@@ -5,7 +5,6 @@
   "tests": [
     {
       "description": "commitTransaction is not retried after WriteConcernFailed timeout error",
-      "skipReason": "SPEC-1197 Drivers should not retry commit after wtimeout error",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -29,22 +28,24 @@
         {
           "name": "withTransaction",
           "object": "session0",
-          "callback": {
-            "operations": [
-              {
-                "name": "insertOne",
-                "object": "collection",
-                "arguments": {
-                  "session": "session0",
-                  "document": {
-                    "_id": 1
+          "arguments": {
+            "callback": {
+              "operations": [
+                {
+                  "name": "insertOne",
+                  "object": "collection",
+                  "arguments": {
+                    "session": "session0",
+                    "document": {
+                      "_id": 1
+                    }
+                  },
+                  "result": {
+                    "insertedId": 1
                   }
-                },
-                "result": {
-                  "insertedId": 1
                 }
-              }
-            ]
+              ]
+            }
           },
           "result": {
             "errorCodeName": "WriteConcernFailed",
@@ -111,7 +112,6 @@
     },
     {
       "description": "commitTransaction is retried after WriteConcernFailed non-timeout error",
-      "skipReason": "SPEC-1185 Drivers should use majority write concern when retrying commitTransaction",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -121,11 +121,10 @@
           "failCommands": [
             "commitTransaction"
           ],
-          "closeConnection": false,
           "writeConcernError": {
             "code": 64,
             "codeName": "WriteConcernFailed",
-            "errmsg": "waiting for replication did not time out"
+            "errmsg": "multiple errors reported"
           }
         }
       },
@@ -133,22 +132,24 @@
         {
           "name": "withTransaction",
           "object": "session0",
-          "callback": {
-            "operations": [
-              {
-                "name": "insertOne",
-                "object": "collection",
-                "arguments": {
-                  "session": "session0",
-                  "document": {
-                    "_id": 1
+          "arguments": {
+            "callback": {
+              "operations": [
+                {
+                  "name": "insertOne",
+                  "object": "collection",
+                  "arguments": {
+                    "session": "session0",
+                    "document": {
+                      "_id": 1
+                    }
+                  },
+                  "result": {
+                    "insertedId": 1
                   }
-                },
-                "result": {
-                  "insertedId": 1
                 }
-              }
-            ]
+              ]
+            }
           }
         }
       ],
@@ -203,7 +204,8 @@
               },
               "autocommit": false,
               "writeConcern": {
-                "w": "majority"
+                "w": "majority",
+                "wtimeout": 10000
               },
               "readConcern": null,
               "startTransaction": null
@@ -222,7 +224,8 @@
               },
               "autocommit": false,
               "writeConcern": {
-                "w": "majority"
+                "w": "majority",
+                "wtimeout": 10000
               },
               "readConcern": null,
               "startTransaction": null
@@ -264,22 +267,24 @@
         {
           "name": "withTransaction",
           "object": "session0",
-          "callback": {
-            "operations": [
-              {
-                "name": "insertOne",
-                "object": "collection",
-                "arguments": {
-                  "session": "session0",
-                  "document": {
-                    "_id": 1
+          "arguments": {
+            "callback": {
+              "operations": [
+                {
+                  "name": "insertOne",
+                  "object": "collection",
+                  "arguments": {
+                    "session": "session0",
+                    "document": {
+                      "_id": 1
+                    }
+                  },
+                  "result": {
+                    "insertedId": 1
                   }
-                },
-                "result": {
-                  "insertedId": 1
                 }
-              }
-            ]
+              ]
+            }
           },
           "result": {
             "errorCodeName": "UnknownReplWriteConcern",
@@ -364,22 +369,24 @@
         {
           "name": "withTransaction",
           "object": "session0",
-          "callback": {
-            "operations": [
-              {
-                "name": "insertOne",
-                "object": "collection",
-                "arguments": {
-                  "session": "session0",
-                  "document": {
-                    "_id": 1
+          "arguments": {
+            "callback": {
+              "operations": [
+                {
+                  "name": "insertOne",
+                  "object": "collection",
+                  "arguments": {
+                    "session": "session0",
+                    "document": {
+                      "_id": 1
+                    }
+                  },
+                  "result": {
+                    "insertedId": 1
                   }
-                },
-                "result": {
-                  "insertedId": 1
                 }
-              }
-            ]
+              ]
+            }
           },
           "result": {
             "errorCodeName": "UnsatisfiableWriteConcern",
