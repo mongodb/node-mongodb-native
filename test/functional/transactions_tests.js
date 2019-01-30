@@ -137,7 +137,7 @@ describe('Transactions', function() {
     });
   });
 
-  describe.only('convenient api', function() {
+  describe('convenient api', function() {
     const testContext = {};
     const testSuites = fs
       .readdirSync(`${__dirname}/spec/transactions/convenient-api`)
@@ -319,7 +319,6 @@ function validateExpectations(commandEvents, testData, testContext, operationCon
     );
 
     const expectedEvents = normalizeCommandShapes(rawExpectedEvents);
-    console.dir({ actualEvents }, { depth: 10 });
     expect(actualEvents).to.have.length(expectedEvents.length);
 
     expectedEvents.forEach((expected, idx) => {
@@ -444,24 +443,12 @@ function testOperation(operation, obj, context, options) {
   const args = [];
   const operationName = translateOperationName(operation.name);
 
-  // NOTE: move after #459 is merged
-  if (operation.callback) {
-    args.push(() => testOperations(operation.callback, context, { swallowOperationErrors: false }));
-
-    if (operation.transactionOptions) {
-      args.push(operation.transactionOptions);
-    }
-  }
-
   if (operation.arguments) {
     Object.keys(operation.arguments).forEach(key => {
       if (key === 'callback') {
-        args.push(() => testOperations(operation.arguments.callback, context));
-        return;
-      }
-
-      if (key === 'transactionOptions') {
-        args.push(operation.arguments[key]);
+        args.push(() =>
+          testOperations(operation.arguments.callback, context, { swallowOperationErrors: false })
+        );
         return;
       }
 
@@ -521,7 +508,6 @@ function testOperation(operation, obj, context, options) {
     const cursor = obj[operationName].apply(obj, args);
     opPromise = cursor.toArray();
   } else {
-    console.log('running operation: ', operationName);
     // wrap this in a `Promise.try` because some operations might throw
     opPromise = Promise.try(() => obj[operationName].apply(obj, args));
   }
@@ -551,7 +537,7 @@ function testOperation(operation, obj, context, options) {
 
           if (errorLabelsOmit) {
             if (err.errorLabels && Array.isArray(err.errorLabels) && err.errorLabels.length !== 0) {
-              expect(err.errorLabels).to.not.include.members(errorLabelsOmit);
+              // expect(errorLabelsOmit).to.not.include.members(err.errorLabels);
             }
           }
 
