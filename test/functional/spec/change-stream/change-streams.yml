@@ -20,13 +20,13 @@ tests:
           document:
             x: 1
     expectations:
-      - 
+      -
         command_started_event:
           command:
             aggregate: *collection_name
             cursor: {}
             pipeline:
-              - 
+              -
                 $changeStream:
                   fullDocument: default
           command_name: aggregate
@@ -297,3 +297,162 @@ tests:
           fullDocument:
             z:
               $numberInt: "3"
+  -
+    description: Test insert, update, replace, and delete event types
+    minServerVersion: "3.6.0"
+    target: collection
+    topology:
+      - replicaset
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: insertOne
+        arguments:
+          document:
+            x: 1
+      -
+        database: *database_name
+        collection: *collection_name
+        name: updateOne
+        arguments:
+          filter:
+            x: 1
+          update:
+            $set:
+              x: 2
+      -
+        database: *database_name
+        collection: *collection_name
+        name: replaceOne
+        arguments:
+          filter:
+            x: 2
+          replacement:
+            x: 3
+      -
+        database: *database_name
+        collection: *collection_name
+        name: deleteOne
+        arguments:
+          filter:
+            x: 3
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream:
+                  fullDocument: default
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          operationType: insert
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "1"
+        -
+          operationType: update
+          ns:
+            db: *database_name
+            coll: *collection_name
+          updateDescription:
+            updatedFields:
+              x:
+                $numberInt: "2"
+        -
+          operationType: replace
+          ns:
+            db: *database_name
+            coll: *collection_name
+          fullDocument:
+            x:
+              $numberInt: "3"
+        -
+          operationType: delete
+          ns:
+            db: *database_name
+            coll: *collection_name
+  -
+    description: Test rename and invalidate event types
+    minServerVersion: "4.0.1"
+    target: collection
+    topology:
+      - replicaset
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: rename
+        arguments:
+          to: *collection2_name
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream:
+                  fullDocument: default
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          operationType: rename
+          ns:
+            db: *database_name
+            coll: *collection_name
+          to:
+            db: *database_name
+            coll: *collection2_name
+        -
+          operationType: invalidate
+  -
+    description: Test drop and invalidate event types
+    minServerVersion: "4.0.1"
+    target: collection
+    topology:
+      - replicaset
+    changeStreamPipeline: []
+    changeStreamOptions: {}
+    operations:
+      -
+        database: *database_name
+        collection: *collection_name
+        name: drop
+    expectations:
+      -
+        command_started_event:
+          command:
+            aggregate: *collection_name
+            cursor: {}
+            pipeline:
+              -
+                $changeStream:
+                  fullDocument: default
+          command_name: aggregate
+          database_name: *database_name
+    result:
+      success:
+        -
+          operationType: drop
+          ns:
+            db: *database_name
+            coll: *collection_name
+        -
+          operationType: invalidate

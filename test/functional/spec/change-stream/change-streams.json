@@ -440,6 +440,241 @@
           }
         ]
       }
+    },
+    {
+      "description": "Test insert, update, replace, and delete event types",
+      "minServerVersion": "3.6.0",
+      "target": "collection",
+      "topology": [
+        "replicaset"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "insertOne",
+          "arguments": {
+            "document": {
+              "x": 1
+            }
+          }
+        },
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "updateOne",
+          "arguments": {
+            "filter": {
+              "x": 1
+            },
+            "update": {
+              "$set": {
+                "x": 2
+              }
+            }
+          }
+        },
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "replaceOne",
+          "arguments": {
+            "filter": {
+              "x": 2
+            },
+            "replacement": {
+              "x": 3
+            }
+          }
+        },
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "deleteOne",
+          "arguments": {
+            "filter": {
+              "x": 3
+            }
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {
+                    "fullDocument": "default"
+                  }
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "operationType": "insert",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "1"
+              }
+            }
+          },
+          {
+            "operationType": "update",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "updateDescription": {
+              "updatedFields": {
+                "x": {
+                  "$numberInt": "2"
+                }
+              }
+            }
+          },
+          {
+            "operationType": "replace",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "fullDocument": {
+              "x": {
+                "$numberInt": "3"
+              }
+            }
+          },
+          {
+            "operationType": "delete",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "Test rename and invalidate event types",
+      "minServerVersion": "4.0.1",
+      "target": "collection",
+      "topology": [
+        "replicaset"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "rename",
+          "arguments": {
+            "to": "test2"
+          }
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {
+                    "fullDocument": "default"
+                  }
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "operationType": "rename",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            },
+            "to": {
+              "db": "change-stream-tests",
+              "coll": "test2"
+            }
+          },
+          {
+            "operationType": "invalidate"
+          }
+        ]
+      }
+    },
+    {
+      "description": "Test drop and invalidate event types",
+      "minServerVersion": "4.0.1",
+      "target": "collection",
+      "topology": [
+        "replicaset"
+      ],
+      "changeStreamPipeline": [],
+      "changeStreamOptions": {},
+      "operations": [
+        {
+          "database": "change-stream-tests",
+          "collection": "test",
+          "name": "drop"
+        }
+      ],
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "aggregate": "test",
+              "cursor": {},
+              "pipeline": [
+                {
+                  "$changeStream": {
+                    "fullDocument": "default"
+                  }
+                }
+              ]
+            },
+            "command_name": "aggregate",
+            "database_name": "change-stream-tests"
+          }
+        }
+      ],
+      "result": {
+        "success": [
+          {
+            "operationType": "drop",
+            "ns": {
+              "db": "change-stream-tests",
+              "coll": "test"
+            }
+          },
+          {
+            "operationType": "invalidate"
+          }
+        ]
+      }
     }
   ]
 }
