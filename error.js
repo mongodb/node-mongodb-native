@@ -42,6 +42,10 @@ class MongoError extends Error {
   static create(options) {
     return new MongoError(options);
   }
+
+  hasErrorLabel(label) {
+    return this.errorLabels && this.errorLabels.indexOf(label) !== -1;
+  }
 }
 
 /**
