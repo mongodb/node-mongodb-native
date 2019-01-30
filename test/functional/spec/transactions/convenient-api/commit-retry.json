@@ -5,7 +5,6 @@
   "tests": [
     {
       "description": "commitTransaction succeeds after multiple connection errors",
-      "skipReason": "SPEC-1185 Drivers should use majority write concern when retrying commitTransaction",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -22,22 +21,24 @@
         {
           "name": "withTransaction",
           "object": "session0",
-          "callback": {
-            "operations": [
-              {
-                "name": "insertOne",
-                "object": "collection",
-                "arguments": {
-                  "session": "session0",
-                  "document": {
-                    "_id": 1
+          "arguments": {
+            "callback": {
+              "operations": [
+                {
+                  "name": "insertOne",
+                  "object": "collection",
+                  "arguments": {
+                    "session": "session0",
+                    "document": {
+                      "_id": 1
+                    }
+                  },
+                  "result": {
+                    "insertedId": 1
                   }
-                },
-                "result": {
-                  "insertedId": 1
                 }
-              }
-            ]
+              ]
+            }
           }
         }
       ],
@@ -92,7 +93,8 @@
               },
               "autocommit": false,
               "writeConcern": {
-                "w": "majority"
+                "w": "majority",
+                "wtimeout": 10000
               },
               "readConcern": null,
               "startTransaction": null
@@ -111,7 +113,8 @@
               },
               "autocommit": false,
               "writeConcern": {
-                "w": "majority"
+                "w": "majority",
+                "wtimeout": 10000
               },
               "readConcern": null,
               "startTransaction": null
@@ -133,7 +136,6 @@
     },
     {
       "description": "commitTransaction retry only overwrites write concern w option",
-      "skipReason": "SPEC-1185 Drivers should use majority write concern when retrying commitTransaction",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
@@ -150,28 +152,30 @@
         {
           "name": "withTransaction",
           "object": "session0",
-          "callback": {
-            "operations": [
-              {
-                "name": "insertOne",
-                "object": "collection",
-                "arguments": {
-                  "session": "session0",
-                  "document": {
-                    "_id": 1
+          "arguments": {
+            "callback": {
+              "operations": [
+                {
+                  "name": "insertOne",
+                  "object": "collection",
+                  "arguments": {
+                    "session": "session0",
+                    "document": {
+                      "_id": 1
+                    }
+                  },
+                  "result": {
+                    "insertedId": 1
                   }
-                },
-                "result": {
-                  "insertedId": 1
                 }
+              ]
+            },
+            "options": {
+              "writeConcern": {
+                "w": 2,
+                "j": true,
+                "wtimeout": 5000
               }
-            ]
-          },
-          "transactionOptions": {
-            "writeConcern": {
-              "w": 2,
-              "j": true,
-              "wtimeout": 5000
             }
           }
         }
@@ -293,22 +297,24 @@
         {
           "name": "withTransaction",
           "object": "session0",
-          "callback": {
-            "operations": [
-              {
-                "name": "insertOne",
-                "object": "collection",
-                "arguments": {
-                  "session": "session0",
-                  "document": {
-                    "_id": 1
+          "arguments": {
+            "callback": {
+              "operations": [
+                {
+                  "name": "insertOne",
+                  "object": "collection",
+                  "arguments": {
+                    "session": "session0",
+                    "document": {
+                      "_id": 1
+                    }
+                  },
+                  "result": {
+                    "insertedId": 1
                   }
-                },
-                "result": {
-                  "insertedId": 1
                 }
-              }
-            ]
+              ]
+            }
           }
         }
       ],
@@ -362,9 +368,12 @@
                 "$numberLong": "1"
               },
               "autocommit": false,
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              },
               "readConcern": null,
-              "startTransaction": null,
-              "writeConcern": null
+              "startTransaction": null
             },
             "command_name": "commitTransaction",
             "database_name": "admin"
@@ -379,9 +388,12 @@
                 "$numberLong": "1"
               },
               "autocommit": false,
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              },
               "readConcern": null,
-              "startTransaction": null,
-              "writeConcern": null
+              "startTransaction": null
             },
             "command_name": "commitTransaction",
             "database_name": "admin"

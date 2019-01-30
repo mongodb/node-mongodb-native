@@ -6,7 +6,6 @@ data: []
 tests:
   -
     description: commitTransaction succeeds after multiple connection errors
-    skipReason: SPEC-1185 Drivers should use majority write concern when retrying commitTransaction
     failPoint:
       configureFailPoint: failCommand
       mode: { times: 2 }
@@ -17,16 +16,17 @@ tests:
       -
         name: withTransaction
         object: session0
-        callback:
-          operations:
-            -
-              name: insertOne
-              object: collection
-              arguments:
-                session: session0
-                document: { _id: 1 }
-              result:
-                insertedId: 1
+        arguments:
+          callback:
+            operations:
+              -
+                name: insertOne
+                object: collection
+                arguments:
+                  session: session0
+                  document: { _id: 1 }
+                result:
+                  insertedId: 1
     expectations:
       -
         command_started_event:
@@ -65,7 +65,7 @@ tests:
             txnNumber: { $numberLong: "1" }
             autocommit: false
             # commitTransaction applies w:majority on retries (SPEC-1185)
-            writeConcern: { w: majority }
+            writeConcern: { w: majority, wtimeout: 10000 }
             # omitted fields
             readConcern: ~
             startTransaction: ~
@@ -79,7 +79,7 @@ tests:
             txnNumber: { $numberLong: "1" }
             autocommit: false
             # commitTransaction applies w:majority on retries (SPEC-1185)
-            writeConcern: { w: majority }
+            writeConcern: { w: majority, wtimeout: 10000 }
             # omitted fields
             readConcern: ~
             startTransaction: ~
@@ -91,7 +91,6 @@ tests:
           - { _id: 1 }
   -
     description: commitTransaction retry only overwrites write concern w option
-    skipReason: SPEC-1185 Drivers should use majority write concern when retrying commitTransaction
     failPoint:
       configureFailPoint: failCommand
       mode: { times: 2 }
@@ -102,18 +101,19 @@ tests:
       -
         name: withTransaction
         object: session0
-        callback:
-          operations:
-            -
-              name: insertOne
-              object: collection
-              arguments:
-                session: session0
-                document: { _id: 1 }
-              result:
-                insertedId: 1
-        transactionOptions:
-          writeConcern: { w: 2, j: true, wtimeout: 5000 }
+        arguments:
+          callback:
+            operations:
+              -
+                name: insertOne
+                object: collection
+                arguments:
+                  session: session0
+                  document: { _id: 1 }
+                result:
+                  insertedId: 1
+          options:
+            writeConcern: { w: 2, j: true, wtimeout: 5000 }
     expectations:
       -
         command_started_event:
@@ -189,16 +189,17 @@ tests:
       -
         name: withTransaction
         object: session0
-        callback:
-          operations:
-            -
-              name: insertOne
-              object: collection
-              arguments:
-                session: session0
-                document: { _id: 1 }
-              result:
-                insertedId: 1
+        arguments:
+          callback:
+            operations:
+              -
+                name: insertOne
+                object: collection
+                arguments:
+                  session: session0
+                  document: { _id: 1 }
+                result:
+                  insertedId: 1
     expectations:
       -
         command_started_event:
@@ -236,10 +237,11 @@ tests:
             lsid: session0
             txnNumber: { $numberLong: "1" }
             autocommit: false
+            # commitTransaction applies w:majority on retries (SPEC-1185)
+            writeConcern: { w: majority, wtimeout: 10000 }
             # omitted fields
             readConcern: ~
             startTransaction: ~
-            writeConcern: ~
           command_name: commitTransaction
           database_name: admin
       -
@@ -249,10 +251,11 @@ tests:
             lsid: session0
             txnNumber: { $numberLong: "1" }
             autocommit: false
+            # commitTransaction applies w:majority on retries (SPEC-1185)
+            writeConcern: { w: majority, wtimeout: 10000 }
             # omitted fields
             readConcern: ~
             startTransaction: ~
-            writeConcern: ~
           command_name: commitTransaction
           database_name: admin
     outcome: &outcome

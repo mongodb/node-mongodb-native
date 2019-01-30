@@ -11,19 +11,20 @@ tests:
       -
         name: withTransaction
         object: session0
-        callback:
-          operations:
-            -
-              name: insertOne
-              object: collection
-              arguments:
-                session: session0
-                document: { _id: 1 }
-              result:
-                insertedId: 1
-            -
-              name: abortTransaction
-              object: session0
+        arguments:
+          callback:
+            operations:
+              -
+                name: insertOne
+                object: collection
+                arguments:
+                  session: session0
+                  document: { _id: 1 }
+                result:
+                  insertedId: 1
+              -
+                name: abortTransaction
+                object: session0
     expectations:
       -
         command_started_event:
@@ -64,11 +65,12 @@ tests:
       -
         name: withTransaction
         object: session0
-        callback:
-          operations:
-            -
-              name: abortTransaction
-              object: session0
+        arguments:
+          callback:
+            operations:
+              -
+                name: abortTransaction
+                object: session0
     expectations: []
     outcome:
       collection:
@@ -80,27 +82,28 @@ tests:
       -
         name: withTransaction
         object: session0
-        callback:
-          operations:
-            -
-              name: insertOne
-              object: collection
-              arguments:
-                session: session0
-                document: { _id: 1 }
-              result:
-                insertedId: 1
-            -
-              name: abortTransaction
-              object: session0
-            -
-              name: insertOne
-              object: collection
-              arguments:
-                session: session0
-                document: { _id: 2 }
-              result:
-                insertedId: 2
+        arguments:
+          callback:
+            operations:
+              -
+                name: insertOne
+                object: collection
+                arguments:
+                  session: session0
+                  document: { _id: 1 }
+                result:
+                  insertedId: 1
+              -
+                name: abortTransaction
+                object: session0
+              -
+                name: insertOne
+                object: collection
+                arguments:
+                  session: session0
+                  document: { _id: 2 }
+                result:
+                  insertedId: 2
     expectations:
       -
         command_started_event:

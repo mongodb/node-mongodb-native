@@ -11,27 +11,28 @@ tests:
       -
         name: withTransaction
         object: session0
-        callback:
-          operations:
-            -
-              name: insertOne
-              object: collection
-              arguments:
-                session: session0
-                document: { _id: 1 }
-              result:
-                insertedId: 1
-            -
-              name: insertOne
-              object: collection
-              arguments:
-                session: session0
-                document: { _id: 2 }
-              result:
-                insertedId: 2
-            -
-              name: commitTransaction
-              object: session0
+        arguments:
+          callback:
+            operations:
+              -
+                name: insertOne
+                object: collection
+                arguments:
+                  session: session0
+                  document: { _id: 1 }
+                result:
+                  insertedId: 1
+              -
+                name: insertOne
+                object: collection
+                arguments:
+                  session: session0
+                  document: { _id: 2 }
+                result:
+                  insertedId: 2
+              -
+                name: commitTransaction
+                object: session0
     expectations:
       -
         command_started_event:
@@ -90,35 +91,36 @@ tests:
       -
         name: withTransaction
         object: session0
-        callback:
-          operations:
-            -
-              name: insertOne
-              object: collection
-              arguments:
-                session: session0
-                document: { _id: 1 }
-              result:
-                insertedId: 1
-            -
-              name: insertOne
-              object: collection
-              arguments:
-                session: session0
-                document: { _id: 2 }
-              result:
-                insertedId: 2
-            -
-              name: commitTransaction
-              object: session0
-            -
-              name: insertOne
-              object: collection
-              arguments:
-                session: session0
-                document: { _id: 3 }
-              result:
-                insertedId: 3
+        arguments:
+          callback:
+            operations:
+              -
+                name: insertOne
+                object: collection
+                arguments:
+                  session: session0
+                  document: { _id: 1 }
+                result:
+                  insertedId: 1
+              -
+                name: insertOne
+                object: collection
+                arguments:
+                  session: session0
+                  document: { _id: 2 }
+                result:
+                  insertedId: 2
+              -
+                name: commitTransaction
+                object: session0
+              -
+                name: insertOne
+                object: collection
+                arguments:
+                  session: session0
+                  document: { _id: 3 }
+                result:
+                  insertedId: 3
     expectations:
       -
         command_started_event:
