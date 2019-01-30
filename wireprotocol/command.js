@@ -1,6 +1,7 @@
 'use strict';
 
 const Query = require('../connection/commands').Query;
+const Msg = require('../connection/msg').Msg;
 const retrieveBSON = require('../connection/utils').retrieveBSON;
 const MongoError = require('../error').MongoError;
 const getReadPreference = require('./shared').getReadPreference;
@@ -48,12 +49,28 @@ function command(server, ns, cmd, options, callback) {
   // This value is not overridable
   commandOptions.slaveOk = readPreference.slaveOk();
 
+  const cmdNs = `${databaseNamespace(ns)}.$cmd`;
+  const message = supportsOpMsg(server)
+    ? new Msg(bson, cmdNs, finalCmd, commandOptions)
+    : new Query(bson, cmdNs, finalCmd, commandOptions);
+
   try {
-    const query = new Query(bson, `${databaseNamespace(ns)}.$cmd`, finalCmd, commandOptions);
-    pool.write(query, commandOptions, callback);
+    pool.write(message, commandOptions, callback);
   } catch (err) {
     callback(err);
   }
+}
+
+function supportsOpMsg(topologyOrServer) {
+  const description = topologyOrServer.ismaster
+    ? topologyOrServer.ismaster
+    : topologyOrServer.description;
+
+  if (description == null) {
+    return false;
+  }
+
+  return description.maxWireVersion >= 6 && description.__nodejs_mock_server__ == null;
 }
 
 function isTransactionCommand(command) {

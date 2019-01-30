@@ -9,6 +9,7 @@ const MongoWriteConcernError = require('../error').MongoWriteConcernError;
 const Logger = require('./logger');
 const f = require('util').format;
 const Query = require('./commands').Query;
+const Msg = require('./msg').Msg;
 const CommandResult = require('./command_result');
 const MESSAGE_HEADER_SIZE = require('../wireprotocol/shared').MESSAGE_HEADER_SIZE;
 const COMPRESSION_DETAILS_SIZE = require('../wireprotocol/shared').COMPRESSION_DETAILS_SIZE;
@@ -1273,7 +1274,8 @@ Pool.prototype.write = function(command, options, cb) {
 // Return whether a command contains an uncompressible command term
 // Will return true if command contains no uncompressible command terms
 function canCompress(command) {
-  const commandName = Object.keys(command.query)[0];
+  const commandDoc = command instanceof Msg ? command.command : command.query;
+  const commandName = Object.keys(commandDoc)[0];
   return uncompressibleCommands.indexOf(commandName) === -1;
 }
 

@@ -28,6 +28,7 @@
 // };
 
 const opcodes = require('../wireprotocol/shared').opcodes;
+const databaseNamespace = require('../wireprotocol/shared').databaseNamespace;
 
 // Incrementing request id
 let _requestId = 0;
@@ -38,13 +39,15 @@ const OPTS_MORE_TO_COME = 2;
 const OPTS_EXHAUST_ALLOWED = 1 >> 16;
 
 class Msg {
-  constructor(bson, query, options) {
+  constructor(bson, ns, command, options) {
     // Basic options needed to be passed in
-    if (query == null) throw new Error('query must be specified for query');
+    if (command == null) throw new Error('query must be specified for query');
 
     // Basic options
     this.bson = bson;
-    this.query = Array.isArray(query) ? query : [query];
+    this.ns = ns;
+    this.command = command;
+    this.command.$db = databaseNamespace(ns);
 
     // Ensure empty options
     this.options = options || {};
@@ -91,24 +94,21 @@ class Msg {
 
     let totalLength = header.length;
 
-    for (let i = 0; i < this.query.length; ++i) {
-      const query = this.query[i];
+    const command = this.command;
+    const nameArgumentPair = validSegmentListNamePairs(command);
+    if (nameArgumentPair) {
+      // TODO: Add support for payload type 1
+      const argument = nameArgumentPair.argument;
 
-      const nameArgumentPair = getValidSegmentListNamePairs(query);
-      if (nameArgumentPair) {
-        // TODO: Add support for payload type 1
-        const argument = nameArgumentPair.argument;
+      // Add initial type 0 segment with arguments pulled up
+      const clonedQuery = Object.assign({}, command);
+      delete clonedQuery[argument];
+      totalLength += this.makeDocumentSegment(buffers, clonedQuery);
 
-        // Add initial type 0 segment with arguments pulled up
-        const clonedQuery = Object.assign({}, query);
-        delete clonedQuery[argument];
-        totalLength += this.makeDocumentSegment(buffers, clonedQuery);
-
-        // Create type 1 query
-        totalLength += this.makeSequenceSegment(buffers, argument, query[argument]);
-      } else {
-        totalLength += this.makeDocumentSegment(buffers, query);
-      }
+      // Create type 1 query
+      totalLength += this.makeSequenceSegment(buffers, argument, command[argument]);
+    } else {
+      totalLength += this.makeDocumentSegment(buffers, command);
     }
 
     writeInt32ListToUint8Buffer(header, [totalLength, this.requestId, 0, opcodes.OP_MSG, flags]);
@@ -183,6 +183,7 @@ class BinMsg {
     this.requestId = msgHeader.requestId;
     this.responseTo = msgHeader.responseTo;
     this.opCode = msgHeader.opCode;
+    this.fromCompressed = msgHeader.fromCompressed;
 
     // Read response flags
     this.responseFlags = msgBody.readInt32LE(0);
@@ -266,7 +267,7 @@ const VALID_NAME_ARGUMENT_MAPS = {
   delete: 'deletes'
 };
 
-function getValidSegmentListNamePairs(query) {
+function validSegmentListNamePairs(query) {
   for (let name in VALID_NAME_ARGUMENT_MAPS) {
     if (name in query) {
       const argument = VALID_NAME_ARGUMENT_MAPS[name];

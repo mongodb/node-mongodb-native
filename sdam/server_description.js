@@ -31,7 +31,8 @@ const ISMASTER_FIELDS = [
   'setVersion',
   'electionId',
   'primary',
-  'logicalSessionTimeoutMinutes'
+  'logicalSessionTimeoutMinutes',
+  '__nodejs_mock_server__'
 ];
 
 /**
