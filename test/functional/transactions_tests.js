@@ -75,73 +75,136 @@ function translateClientOptions(options) {
 }
 
 // Main test runner
-describe('Transactions (spec)', function() {
-  const testContext = {
-    dbName: 'transaction-tests',
-    collectionName: 'test'
-  };
+describe('Transactions', function() {
+  describe('spec tests', function() {
+    const testContext = {};
+    const testSuites = fs
+      .readdirSync(`${__dirname}/spec/transactions`)
+      .filter(x => x.indexOf('.json') !== -1)
+      .map(x =>
+        Object.assign(JSON.parse(fs.readFileSync(`${__dirname}/spec/transactions/${x}`)), {
+          name: path.basename(x, '.json')
+        })
+      );
 
-  const testSuites = fs
-    .readdirSync(`${__dirname}/spec/transactions`)
-    .filter(x => x.indexOf('.json') !== -1)
-    .map(x =>
-      Object.assign(JSON.parse(fs.readFileSync(`${__dirname}/spec/transactions/${x}`)), {
-        name: path.basename(x, '.json')
-      })
-    );
+    after(() => testContext.sharedClient.close());
+    before(function() {
+      // create a shared client for admin tasks
+      const config = this.configuration;
+      testContext.url = `mongodb://${config.host}:${config.port}/?replicaSet=${
+        config.replicasetName
+      }`;
 
-  after(() => testContext.sharedClient.close());
-  before(function() {
-    // create a shared client for admin tasks
-    const config = this.configuration;
-    testContext.url = `mongodb://${config.host}:${config.port}/${testContext.dbName}?replicaSet=${
-      config.replicasetName
-    }`;
+      testContext.sharedClient = config.newClient(testContext.url);
+      return testContext.sharedClient.connect();
+    });
 
-    testContext.sharedClient = config.newClient(testContext.url);
-    return testContext.sharedClient.connect();
+    testSuites.forEach(testSuite => {
+      describe(testSuite.name, {
+        metadata: { requires: { topology: ['replicaset', 'mongos'], mongodb: '>=3.7.x' } },
+        test: function() {
+          beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
+          afterEach(() => cleanupAfterSuite(testContext));
+
+          testSuite.tests.forEach(testData => {
+            const maybeSkipIt =
+              testData.skipReason || testSuite.name === 'pin-mongos' ? it.skip : it;
+            maybeSkipIt(testData.description, function() {
+              let testPromise = Promise.resolve();
+
+              if (testData.failPoint) {
+                testPromise = testPromise.then(() =>
+                  enableFailPoint(testData.failPoint, testContext)
+                );
+              }
+
+              // run the actual test
+              testPromise = testPromise.then(() =>
+                runTestSuiteTest(this.configuration, testData, testContext)
+              );
+
+              if (testData.failPoint) {
+                testPromise = testPromise.then(() =>
+                  disableFailPoint(testData.failPoint, testContext)
+                );
+              }
+
+              return testPromise;
+            });
+          });
+        }
+      });
+    });
   });
 
-  testSuites.forEach(testSuite => {
-    describe(testSuite.name, {
-      metadata: { requires: { topology: ['replicaset', 'mongos'], mongodb: '>=3.7.x' } },
-      test: function() {
-        beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
-        afterEach(() => cleanupAfterSuite(testContext));
+  describe.only('convenient api', function() {
+    const testContext = {};
+    const testSuites = fs
+      .readdirSync(`${__dirname}/spec/transactions/convenient-api`)
+      .filter(x => x.indexOf('.json') !== -1)
+      .map(x =>
+        Object.assign(
+          JSON.parse(fs.readFileSync(`${__dirname}/spec/transactions/convenient-api/${x}`)),
+          { name: path.basename(x, '.json') }
+        )
+      );
 
-        testSuite.tests.forEach(testData => {
-          const maybeSkipIt = testData.skipReason || testSuite.name === 'pin-mongos' ? it.skip : it;
-          maybeSkipIt(testData.description, function() {
-            let testPromise = Promise.resolve();
+    after(() => testContext.sharedClient.close());
+    before(function() {
+      // create a shared client for admin tasks
+      const config = this.configuration;
+      testContext.url = `mongodb://${config.host}:${config.port}/?replicaSet=${
+        config.replicasetName
+      }`;
 
-            if (testData.failPoint) {
+      testContext.sharedClient = config.newClient(testContext.url);
+      return testContext.sharedClient.connect();
+    });
+
+    testSuites.forEach(testSuite => {
+      describe(testSuite.name, {
+        metadata: { requires: { topology: ['replicaset', 'mongos'], mongodb: '>=4.0.x' } },
+        test: function() {
+          beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
+          afterEach(() => cleanupAfterSuite(testContext));
+
+          testSuite.tests.forEach(testData => {
+            const maybeSkipIt = testData.skipReason ? it.skip : it;
+            maybeSkipIt(testData.description, function() {
+              let testPromise = Promise.resolve();
+
+              if (testData.failPoint) {
+                testPromise = testPromise.then(() =>
+                  enableFailPoint(testData.failPoint, testContext)
+                );
+              }
+
+              // run the actual test
               testPromise = testPromise.then(() =>
-                enableFailPoint(testData.failPoint, testContext)
+                runTestSuiteTest(this.configuration, testData, testContext)
               );
-            }
 
-            // run the actual test
-            testPromise = testPromise.then(() =>
-              runTestSuiteTest(this.configuration, testData, testContext)
-            );
+              if (testData.failPoint) {
+                testPromise = testPromise.then(() =>
+                  disableFailPoint(testData.failPoint, testContext)
+                );
+              }
 
-            if (testData.failPoint) {
-              testPromise = testPromise.then(() =>
-                disableFailPoint(testData.failPoint, testContext)
-              );
-            }
-
-            return testPromise;
+              return testPromise;
+            });
           });
-        });
-      }
+        }
+      });
     });
   });
 });
 
 // Test runner helpers
 function prepareDatabaseForSuite(suite, context) {
-  const db = context.sharedClient.db();
+  context.dbName = suite.database_name;
+  context.collectionName = suite.collection_name;
+
+  const db = context.sharedClient.db(context.dbName);
   const coll = db.collection(context.collectionName);
 
   return db
@@ -207,7 +270,7 @@ function runTestSuiteTest(configuration, testData, context) {
     const sessionOptions = Object.assign({}, testData.transactionOptions);
 
     testData.sessionOptions = testData.sessionOptions || {};
-    const database = client.db();
+    const database = client.db(context.dbName);
     const session0 = client.startSession(
       Object.assign({}, sessionOptions, testData.sessionOptions.session0)
     );
@@ -222,7 +285,7 @@ function runTestSuiteTest(configuration, testData, context) {
 
     let testPromise = Promise.resolve();
     return testPromise
-      .then(() => testOperations(client, testData, operationContext))
+      .then(() => testOperations(testData, operationContext))
       .catch(err => {
         // If the driver throws an exception / returns an error while executing this series
         // of operations, store the error message.
@@ -256,6 +319,7 @@ function validateExpectations(commandEvents, testData, testContext, operationCon
     );
 
     const expectedEvents = normalizeCommandShapes(rawExpectedEvents);
+    console.dir({ actualEvents }, { depth: 10 });
     expect(actualEvents).to.have.length(expectedEvents.length);
 
     expectedEvents.forEach((expected, idx) => {
@@ -298,7 +362,7 @@ function validateExpectations(commandEvents, testData, testContext, operationCon
     if (testData.outcome.collection) {
       // use the client without transactions to verify
       return testContext.sharedClient
-        .db()
+        .db(testContext.dbName)
         .collection(testContext.collectionName)
         .find({})
         .toArray()
@@ -371,14 +435,36 @@ function translateOperationName(operationName) {
  * @param {Object} operation the operation definition from the spec test
  * @param {Object} obj the object to call the operation on
  * @param {Object} context a context object containing sessions used for the test
+ * @param {Object} [options] Optional settings
+ * @param {Boolean} [options.swallowOperationErrors] Generally we want to observe operation errors, validate them against our expectations, and then swallow them. In cases like `withTransaction` we want to use the same `testOperations` to build the lambda, and in those cases it is not desireable to swallow the errors, since we need to test this behavior.
  */
-function testOperation(operation, obj, context) {
+function testOperation(operation, obj, context, options) {
+  options = options || { swallowOperationErrors: true };
   const opOptions = {};
   const args = [];
   const operationName = translateOperationName(operation.name);
 
+  // NOTE: move after #459 is merged
+  if (operation.callback) {
+    args.push(() => testOperations(operation.callback, context, { swallowOperationErrors: false }));
+
+    if (operation.transactionOptions) {
+      args.push(operation.transactionOptions);
+    }
+  }
+
   if (operation.arguments) {
     Object.keys(operation.arguments).forEach(key => {
+      if (key === 'callback') {
+        args.push(() => testOperations(operation.arguments.callback, context));
+        return;
+      }
+
+      if (key === 'transactionOptions') {
+        args.push(operation.arguments[key]);
+        return;
+      }
+
       if (['filter', 'fieldName', 'document', 'documents', 'pipeline'].indexOf(key) !== -1) {
         return args.unshift(operation.arguments[key]);
       }
@@ -435,6 +521,7 @@ function testOperation(operation, obj, context) {
     const cursor = obj[operationName].apply(obj, args);
     opPromise = cursor.toArray();
   } else {
+    console.log('running operation: ', operationName);
     // wrap this in a `Promise.try` because some operations might throw
     opPromise = Promise.try(() => obj[operationName].apply(obj, args));
   }
@@ -475,6 +562,10 @@ function testOperation(operation, obj, context) {
           if (errorCodeName) {
             expect(err.codeName).to.equal(errorCodeName);
           }
+
+          if (!options.swallowOperationErrors) {
+            throw err;
+          }
         });
     }
 
@@ -500,7 +591,8 @@ function convertCollectionOptions(options) {
   return result;
 }
 
-function testOperations(client, testData, operationContext) {
+function testOperations(testData, operationContext, options) {
+  options = options || { swallowOperationErrors: true };
   return testData.operations.reduce((combined, operation) => {
     return combined.then(() => {
       if (operation.object === 'collection') {
@@ -513,7 +605,12 @@ function testOperations(client, testData, operationContext) {
         );
       }
 
-      return testOperation(operation, operationContext[operation.object], operationContext);
+      return testOperation(
+        operation,
+        operationContext[operation.object],
+        operationContext,
+        options
+      );
     });
   }, Promise.resolve());
 }
