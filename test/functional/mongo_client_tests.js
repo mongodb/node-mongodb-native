@@ -7,6 +7,7 @@ const expect = require('chai').expect;
 const sinonChai = require('sinon-chai');
 const sinon = require('sinon');
 const chai = require('chai');
+const sandbox = require('sinon').createSandbox();
 chai.use(sinonChai);
 
 describe('MongoClient', function() {
@@ -739,105 +740,111 @@ describe('MongoClient', function() {
     }
   });
 
-  [
-    {
-      description:
-        'Should handle duplicate options (readPreference and readpreference) from uri with old parser',
-      uri: 'readPreference=secondary&readpreference=primary',
-      useNewUrlParser: false,
-      expectedReadPreference: 'secondary'
-    },
-    {
-      description:
-        'Should handle duplicate options (readPreference and readpreference) from uri with new parser',
-      uri: 'readPreference=primary&readpreference=secondary',
-      useNewUrlParser: true,
-      expectedReadPreference: 'secondary'
-    },
-    {
-      description:
-        'Should handle duplicate options (readpreference and readPreference) from uri with old parser',
-      uri: 'readpreference=secondary&readPreference=primary',
-      useNewUrlParser: false,
-      expectedReadPreference: 'primary'
-    },
-    {
-      description:
-        'Should handle duplicate options (readpreference and readPreference) from uri with new parser',
-      uri: 'readpreference=primary&readPreference=secondary',
-      useNewUrlParser: true,
-      expectedReadPreference: 'secondary'
-    },
-    {
-      description:
-        'Should handle duplicate options (readPreference and readPreference) from uri with old parser',
-      uri: 'readPreference=secondary&readPreference=primary',
-      useNewUrlParser: false,
-      expectedReadPreference: 'primary'
-    },
-    {
-      description:
-        'Should handle duplicate options (readPreference and readPreference) from uri with new parser',
-      uri: 'readPreference=primary&readPreference=secondary',
-      useNewUrlParser: true,
-      expectedReadPreference: 'secondary'
-    },
-    {
-      description:
-        'Should handle duplicate options (readpreference and readpreference) from uri with old parser',
-      uri: 'readpreference=primary&readpreference=secondary',
-      useNewUrlParser: false,
-      expectedReadPreference: 'primary'
-    },
-    {
-      description:
-        'Should handle duplicate options (readpreference and readpreference) from uri with new parser',
-      uri: 'readpreference=primary&readpreference=secondary',
-      useNewUrlParser: true,
-      expectedReadPreference: 'secondary'
-    },
-    {
-      description: 'Should handle duplicate identical options from uri with new parser',
-      uri: 'readpreference=secondary&readpreference=secondary',
-      useNewUrlParser: true,
-      expectedReadPreference: 'secondary'
-    },
-    {
-      description: 'Should handle three duplicate options from uri with new parser',
-      uri: 'readPreference=primary&readpreference=secondary&readPreference=secondaryPreferred',
-      useNewUrlParser: true,
-      expectedReadPreference: 'secondaryPreferred'
-    }
-  ].forEach(test => {
-    it(test.description, function(done) {
-      const configuration = this.configuration;
-      const url = `${configuration.url()}?${test.uri}`;
-      const client = configuration.newClient(url, { useNewUrlParser: test.useNewUrlParser });
-      let stub;
+  describe('Duplicate options in connection string', function() {
+    beforeEach(() => {
+      sandbox.stub(console, 'warn');
+    });
 
-      if (test.useNewUrlParser) {
-        stub = sinon.stub(console, 'warn');
+    afterEach(() => {
+      sandbox.restore();
+    });
+
+    [
+      {
+        description:
+          'Should handle duplicate options (readPreference and readpreference) from uri with old parser',
+        uri: 'readPreference=secondary&readpreference=primary',
+        useNewUrlParser: false,
+        expectedReadPreference: 'secondary'
+      },
+      {
+        description:
+          'Should handle duplicate options (readPreference and readpreference) from uri with new parser',
+        uri: 'readPreference=primary&readpreference=secondary',
+        useNewUrlParser: true,
+        expectedReadPreference: 'secondary'
+      },
+      {
+        description:
+          'Should handle duplicate options (readpreference and readPreference) from uri with old parser',
+        uri: 'readpreference=secondary&readPreference=primary',
+        useNewUrlParser: false,
+        expectedReadPreference: 'primary'
+      },
+      {
+        description:
+          'Should handle duplicate options (readpreference and readPreference) from uri with new parser',
+        uri: 'readpreference=primary&readPreference=secondary',
+        useNewUrlParser: true,
+        expectedReadPreference: 'secondary'
+      },
+      {
+        description:
+          'Should handle duplicate options (readPreference and readPreference) from uri with old parser',
+        uri: 'readPreference=secondary&readPreference=primary',
+        useNewUrlParser: false,
+        expectedReadPreference: 'primary'
+      },
+      {
+        description:
+          'Should handle duplicate options (readPreference and readPreference) from uri with new parser',
+        uri: 'readPreference=primary&readPreference=secondary',
+        useNewUrlParser: true,
+        expectedReadPreference: 'secondary'
+      },
+      {
+        description:
+          'Should handle duplicate options (readpreference and readpreference) from uri with old parser',
+        uri: 'readpreference=primary&readpreference=secondary',
+        useNewUrlParser: false,
+        expectedReadPreference: 'primary'
+      },
+      {
+        description:
+          'Should handle duplicate options (readpreference and readpreference) from uri with new parser',
+        uri: 'readpreference=primary&readpreference=secondary',
+        useNewUrlParser: true,
+        expectedReadPreference: 'secondary'
+      },
+      {
+        description: 'Should handle duplicate identical options from uri with new parser',
+        uri: 'readpreference=secondary&readpreference=secondary',
+        useNewUrlParser: true,
+        expectedReadPreference: 'secondary'
+      },
+      {
+        description: 'Should handle three duplicate options from uri with new parser',
+        uri: 'readPreference=primary&readpreference=secondary&readPreference=secondaryPreferred',
+        useNewUrlParser: true,
+        expectedReadPreference: 'secondaryPreferred'
       }
+    ].forEach(test => {
+      it(test.description, function(done) {
+        const configuration = this.configuration;
+        const url = `${configuration.url()}?${test.uri}`;
+        const client = configuration.newClient(url, { useNewUrlParser: test.useNewUrlParser });
 
-      client.connect(function(err, client) {
-        expect(err).to.be.null;
-        const db = client.db(configuration.db);
-        expect(db.s.readPreference.mode).to.equal(test.expectedReadPreference);
-        expect(db.s.options.readpreference).to.not.exist;
+        client.connect(function(err, client) {
+          expect(err).to.be.null;
+          const db = client.db(configuration.db);
+          expect(db.s.readPreference.mode).to.equal(test.expectedReadPreference);
+          expect(db.s.options.readpreference).to.not.exist;
 
-        if (test.useNewUrlParser) {
-          expect(stub).to.have.been.calledOnce;
-          expect(stub).to.have.been.calledWith(
-            `Multiple values were provided for readpreference. The last value [${
-              test.expectedReadPreference
-            }] will be used.`
-          );
+          if (test.useNewUrlParser) {
+            sandbox.assert.calledOnce(console.warn);
+            sinon.assert.calledWith(
+              console.warn,
+              `Multiple values were provided for readpreference. The last value [${
+                test.expectedReadPreference
+              }] will be used.`
+            );
 
-          console.warn.restore();
-        }
+            console.warn.restore();
+          }
 
-        client.close();
-        done();
+          client.close();
+          done();
+        });
       });
     });
   });
