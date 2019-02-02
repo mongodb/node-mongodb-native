@@ -74,130 +74,92 @@ function translateClientOptions(options) {
   return options;
 }
 
+function gatherTestSuites(specPath) {
+  return fs
+    .readdirSync(specPath)
+    .filter(x => x.indexOf('.json') !== -1)
+    .map(x =>
+      Object.assign(JSON.parse(fs.readFileSync(`${specPath}/${x}`)), {
+        name: path.basename(x, '.json')
+      })
+    );
+}
+
+class TransactionsTestContext {
+  constructor() {
+    this.url = null;
+    this.sharedClient = null;
+  }
+
+  setup(config) {
+    this.url = `mongodb://${config.host}:${config.port}/?replicaSet=${config.replicasetName}`;
+
+    this.sharedClient = config.newClient(this.url);
+    return this.sharedClient.connect();
+  }
+
+  teardown() {
+    return this.sharedClient.close();
+  }
+}
+
 // Main test runner
 describe('Transactions', function() {
-  describe('spec tests', function() {
-    const testContext = {};
-    const testSuites = fs
-      .readdirSync(`${__dirname}/spec/transactions`)
-      .filter(x => x.indexOf('.json') !== -1)
-      .map(x =>
-        Object.assign(JSON.parse(fs.readFileSync(`${__dirname}/spec/transactions/${x}`)), {
-          name: path.basename(x, '.json')
-        })
-      );
+  const testContext = new TransactionsTestContext();
 
-    after(() => testContext.sharedClient.close());
-    before(function() {
-      // create a shared client for admin tasks
-      const config = this.configuration;
-      testContext.url = `mongodb://${config.host}:${config.port}/?replicaSet=${
-        config.replicasetName
-      }`;
-
-      testContext.sharedClient = config.newClient(testContext.url);
-      return testContext.sharedClient.connect();
-    });
-
-    testSuites.forEach(testSuite => {
-      describe(testSuite.name, {
-        metadata: { requires: { topology: ['replicaset', 'mongos'], mongodb: '>=3.7.x' } },
-        test: function() {
-          beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
-          afterEach(() => cleanupAfterSuite(testContext));
-
-          testSuite.tests.forEach(testData => {
-            const maybeSkipIt =
-              testData.skipReason || testSuite.name === 'pin-mongos' ? it.skip : it;
-            maybeSkipIt(testData.description, function() {
-              let testPromise = Promise.resolve();
-
-              if (testData.failPoint) {
-                testPromise = testPromise.then(() =>
-                  enableFailPoint(testData.failPoint, testContext)
-                );
-              }
-
-              // run the actual test
-              testPromise = testPromise.then(() =>
-                runTestSuiteTest(this.configuration, testData, testContext)
-              );
-
-              if (testData.failPoint) {
-                testPromise = testPromise.then(() =>
-                  disableFailPoint(testData.failPoint, testContext)
-                );
-              }
-
-              return testPromise;
-            });
-          });
-        }
+  [
+    { name: 'spec tests', specPath: `${__dirname}/spec/transactions` },
+    { name: 'convenient api', specPath: `${__dirname}/spec/transactions/convenient-api` }
+  ].forEach(suiteSpec => {
+    describe(suiteSpec.name, function() {
+      const testSuites = gatherTestSuites(suiteSpec.specPath);
+      after(() => testContext.teardown());
+      before(function() {
+        return testContext.setup(this.configuration);
       });
-    });
-  });
 
-  describe('convenient api', function() {
-    const testContext = {};
-    const testSuites = fs
-      .readdirSync(`${__dirname}/spec/transactions/convenient-api`)
-      .filter(x => x.indexOf('.json') !== -1)
-      .map(x =>
-        Object.assign(
-          JSON.parse(fs.readFileSync(`${__dirname}/spec/transactions/convenient-api/${x}`)),
-          { name: path.basename(x, '.json') }
-        )
-      );
-
-    after(() => testContext.sharedClient.close());
-    before(function() {
-      // create a shared client for admin tasks
-      const config = this.configuration;
-      testContext.url = `mongodb://${config.host}:${config.port}/?replicaSet=${
-        config.replicasetName
-      }`;
-
-      testContext.sharedClient = config.newClient(testContext.url);
-      return testContext.sharedClient.connect();
-    });
-
-    testSuites.forEach(testSuite => {
-      describe(testSuite.name, {
-        metadata: { requires: { topology: ['replicaset', 'mongos'], mongodb: '>=4.0.x' } },
-        test: function() {
-          beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
-          afterEach(() => cleanupAfterSuite(testContext));
-
-          testSuite.tests.forEach(testData => {
-            const maybeSkipIt = testData.skipReason ? it.skip : it;
-            maybeSkipIt(testData.description, function() {
-              let testPromise = Promise.resolve();
-
-              if (testData.failPoint) {
-                testPromise = testPromise.then(() =>
-                  enableFailPoint(testData.failPoint, testContext)
-                );
-              }
-
-              // run the actual test
-              testPromise = testPromise.then(() =>
-                runTestSuiteTest(this.configuration, testData, testContext)
-              );
-
-              if (testData.failPoint) {
-                testPromise = testPromise.then(() =>
-                  disableFailPoint(testData.failPoint, testContext)
-                );
-              }
-
-              return testPromise;
-            });
-          });
-        }
-      });
+      generateTestSuiteTests(testSuites, testContext);
     });
   });
 });
+
+function generateTestSuiteTests(testSuites, testContext) {
+  testSuites.forEach(testSuite => {
+    describe(testSuite.name, {
+      metadata: { requires: { topology: ['replicaset', 'mongos'], mongodb: '>=3.7.x' } },
+      test: function() {
+        beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
+        afterEach(() => cleanupAfterSuite(testContext));
+
+        testSuite.tests.forEach(testData => {
+          const maybeSkipIt = testData.skipReason || testSuite.name === 'pin-mongos' ? it.skip : it;
+          maybeSkipIt(testData.description, function() {
+            let testPromise = Promise.resolve();
+
+            if (testData.failPoint) {
+              testPromise = testPromise.then(() =>
+                enableFailPoint(testData.failPoint, testContext)
+              );
+            }
+
+            // run the actual test
+            testPromise = testPromise.then(() =>
+              runTestSuiteTest(this.configuration, testData, testContext)
+            );
+
+            if (testData.failPoint) {
+              testPromise = testPromise.then(() =>
+                disableFailPoint(testData.failPoint, testContext)
+              );
+            }
+
+            return testPromise;
+          });
+        });
+      }
+    });
+  });
+}
 
 // Test runner helpers
 function prepareDatabaseForSuite(suite, context) {
