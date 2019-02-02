@@ -328,20 +328,27 @@ class ClientSession extends EventEmitter {
           return maybeRetryOrThrow(err);
         });
     }
-
-    return retryTransaction();
   }
 }
 
+const WRITE_CONCERN_FAILED_CODE = 64;
+const UNSATISFIABLE_WRITE_CONCERN_CODE = 100;
+const UNKNOWN_REPL_WRITE_CONCERN_CODE = 79;
+const NON_DETERMINISTIC_WRITE_CONCERN_ERRORS = [
+  'CannotSatisfyWriteConcern',
+  'UnknownReplWriteConcern',
+  'UnsatisfiableWriteConcern'
+];
+
 function isWriteConcernTimeoutError(err) {
-  return err.code === 64 && !!(err.errInfo && err.errInfo.wtimeout === true);
+  return err.code === WRITE_CONCERN_FAILED_CODE && !!(err.errInfo && err.errInfo.wtimeout === true);
 }
 
 function isUnknownTransactionCommitResult(err) {
   return (
-    ['CannotSatisfyWriteConcern', 'UnknownReplWriteConcern', 'UnsatisfiableWriteConcern'].indexOf(
-      err.codeName
-    ) === -1
+    NON_DETERMINISTIC_WRITE_CONCERN_ERRORS.indexOf(err.codeName) === -1 &&
+    err.code !== UNSATISFIABLE_WRITE_CONCERN_CODE &&
+    err.code !== UNKNOWN_REPL_WRITE_CONCERN_CODE
   );
 }
 
