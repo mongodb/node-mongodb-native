@@ -537,7 +537,7 @@ function testOperation(operation, obj, context, options) {
 
           if (errorLabelsOmit) {
             if (err.errorLabels && Array.isArray(err.errorLabels) && err.errorLabels.length !== 0) {
-              // expect(errorLabelsOmit).to.not.include.members(err.errorLabels);
+              expect(errorLabelsOmit).to.not.include.members(err.errorLabels);
             }
           }
 
