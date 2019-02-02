@@ -265,10 +265,11 @@ class ClientSession extends EventEmitter {
    */
   withTransaction(fn, options) {
     const startTime = Date.now();
-    return retryTransaction(this, startTime, fn, options);
+    return attemptTransaction(this, startTime, fn, options);
   }
 }
 
+const MAX_WITH_TRANSACTION_TIMEOUT = 120000;
 const WRITE_CONCERN_FAILED_CODE = 64;
 const UNSATISFIABLE_WRITE_CONCERN_CODE = 100;
 const UNKNOWN_REPL_WRITE_CONCERN_CODE = 79;
@@ -277,6 +278,10 @@ const NON_DETERMINISTIC_WRITE_CONCERN_ERRORS = [
   'UnknownReplWriteConcern',
   'UnsatisfiableWriteConcern'
 ];
+
+function hasNotTimedOut(startTime, max) {
+  return Date.now() - startTime < max;
+}
 
 function isWriteConcernTimeoutError(err) {
   return err.code === WRITE_CONCERN_FAILED_CODE && !!(err.errInfo && err.errInfo.wtimeout === true);
@@ -290,54 +295,55 @@ function isUnknownTransactionCommitResult(err) {
   );
 }
 
-function retryCommit(session, startTime, fn, options) {
+function attemptTransactionCommit(session, startTime, fn, options) {
   return session.commitTransaction().catch(err => {
     if (
       !isWriteConcernTimeoutError(err) &&
       (err instanceof MongoError && err.hasErrorLabel('UnknownTransactionCommitResult')) &&
-      Date.now() - startTime < 120000
+      hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT)
     ) {
-      return retryCommit(session, startTime, fn, options);
+      return attemptTransactionCommit(session, startTime, fn, options);
     }
 
     if (
       err instanceof MongoError &&
       err.hasErrorLabel('TransientTransactionError') &&
-      Date.now() - startTime < 120000
+      hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT)
     ) {
-      return retryTransaction(session, startTime, fn, options);
+      return attemptTransaction(session, startTime, fn, options);
     }
 
     throw err;
   });
 }
 
-function retryTransaction(session, startTime, fn, options) {
+function userExplicitlyEndedTransaction(session) {
+  return (
+    [TxnState.NO_TRANSACTION, TxnState.TRANSACTION_COMMITTED, TxnState.TRANSACTION_ABORTED].indexOf(
+      session.transaction.state
+    ) !== -1
+  );
+}
+
+function attemptTransaction(session, startTime, fn, options) {
   session.startTransaction(options);
 
   return fn(session)
     .then(() => {
-      if (
-        [
-          TxnState.NO_TRANSACTION,
-          TxnState.TRANSACTION_COMMITTED,
-          TxnState.TRANSACTION_ABORTED
-        ].indexOf(session.transaction.state) !== -1
-      ) {
-        // Assume user provided function intentionally ended the transaction
+      if (userExplicitlyEndedTransaction(session)) {
         return;
       }
 
-      return retryCommit(session, startTime, fn, options);
+      return attemptTransactionCommit(session, startTime, fn, options);
     })
     .catch(err => {
       function maybeRetryOrThrow(err) {
         if (
           err instanceof MongoError &&
           err.hasErrorLabel('TransientTransactionError') &&
-          Date.now() - startTime < 120000
+          hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT)
         ) {
-          return retryTransaction(session, startTime, fn, options);
+          return attemptTransaction(session, startTime, fn, options);
         }
 
         throw err;
