@@ -264,70 +264,8 @@ class ClientSession extends EventEmitter {
    * @param {TransactionOptions} [options] Optional settings for the transaction
    */
   withTransaction(fn, options) {
-    const self = this;
     const startTime = Date.now();
-
-    function retryCommit() {
-      return self.commitTransaction().catch(err => {
-        if (
-          !isWriteConcernTimeoutError(err) &&
-          (err instanceof MongoError && err.hasErrorLabel('UnknownTransactionCommitResult')) &&
-          Date.now() - startTime < 120000
-        ) {
-          return retryCommit();
-        }
-
-        if (
-          err instanceof MongoError &&
-          err.hasErrorLabel('TransientTransactionError') &&
-          Date.now() - startTime < 120000
-        ) {
-          return retryTransaction();
-        }
-
-        throw err;
-      });
-    }
-
-    function retryTransaction() {
-      self.startTransaction(options);
-
-      // TODO: should we support callbacks?
-      return fn(self)
-        .then(() => {
-          if (
-            [
-              TxnState.NO_TRANSACTION,
-              TxnState.TRANSACTION_COMMITTED,
-              TxnState.TRANSACTION_ABORTED
-            ].indexOf(self.transaction.state) !== -1
-          ) {
-            // Assume user provided function intentionally ended the transaction
-            return;
-          }
-
-          return retryCommit();
-        })
-        .catch(err => {
-          function maybeRetryOrThrow(err) {
-            if (
-              err instanceof MongoError &&
-              err.hasErrorLabel('TransientTransactionError') &&
-              Date.now() - startTime < 120000
-            ) {
-              return retryTransaction();
-            }
-
-            throw err;
-          }
-
-          if (self.transaction.isActive) {
-            return self.abortTransaction().then(() => maybeRetryOrThrow(err));
-          }
-
-          return maybeRetryOrThrow(err);
-        });
-    }
+    return retryTransaction(this, startTime, fn, options);
   }
 }
 
@@ -350,6 +288,67 @@ function isUnknownTransactionCommitResult(err) {
     err.code !== UNSATISFIABLE_WRITE_CONCERN_CODE &&
     err.code !== UNKNOWN_REPL_WRITE_CONCERN_CODE
   );
+}
+
+function retryCommit(session, startTime, fn, options) {
+  return session.commitTransaction().catch(err => {
+    if (
+      !isWriteConcernTimeoutError(err) &&
+      (err instanceof MongoError && err.hasErrorLabel('UnknownTransactionCommitResult')) &&
+      Date.now() - startTime < 120000
+    ) {
+      return retryCommit(session, startTime, fn, options);
+    }
+
+    if (
+      err instanceof MongoError &&
+      err.hasErrorLabel('TransientTransactionError') &&
+      Date.now() - startTime < 120000
+    ) {
+      return retryTransaction(session, startTime, fn, options);
+    }
+
+    throw err;
+  });
+}
+
+function retryTransaction(session, startTime, fn, options) {
+  session.startTransaction(options);
+
+  return fn(session)
+    .then(() => {
+      if (
+        [
+          TxnState.NO_TRANSACTION,
+          TxnState.TRANSACTION_COMMITTED,
+          TxnState.TRANSACTION_ABORTED
+        ].indexOf(session.transaction.state) !== -1
+      ) {
+        // Assume user provided function intentionally ended the transaction
+        return;
+      }
+
+      return retryCommit(session, startTime, fn, options);
+    })
+    .catch(err => {
+      function maybeRetryOrThrow(err) {
+        if (
+          err instanceof MongoError &&
+          err.hasErrorLabel('TransientTransactionError') &&
+          Date.now() - startTime < 120000
+        ) {
+          return retryTransaction(session, startTime, fn, options);
+        }
+
+        throw err;
+      }
+
+      if (session.transaction.isActive) {
+        return session.abortTransaction().then(() => maybeRetryOrThrow(err));
+      }
+
+      return maybeRetryOrThrow(err);
+    });
 }
 
 function endTransaction(session, commandName, callback) {
