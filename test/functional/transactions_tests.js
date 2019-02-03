@@ -300,7 +300,7 @@ function validateExpectations(commandEvents, testData, testContext, operationCon
       return testContext.sharedClient
         .db()
         .collection(testContext.collectionName)
-        .find({})
+        .find({}, { readPreference: 'primary', readConcern: { level: 'local' } })
         .toArray()
         .then(docs => {
           expect(docs).to.eql(testData.outcome.collection.data);
