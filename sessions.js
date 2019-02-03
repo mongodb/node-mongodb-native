@@ -11,6 +11,7 @@ const MongoNetworkError = require('./error').MongoNetworkError;
 const MongoWriteConcernError = require('./error').MongoWriteConcernError;
 const Transaction = require('./transactions').Transaction;
 const TxnState = require('./transactions').TxnState;
+const isPromiseLike = require('./utils').isPromiseLike;
 
 function assertAlive(session, callback) {
   if (session.serverSession == null) {
@@ -328,7 +329,19 @@ function userExplicitlyEndedTransaction(session) {
 function attemptTransaction(session, startTime, fn, options) {
   session.startTransaction(options);
 
-  return fn(session)
+  let promise;
+  try {
+    promise = fn(session);
+  } catch (err) {
+    promise = Promise.reject(err);
+  }
+
+  if (!isPromiseLike(promise)) {
+    session.abortTransaction();
+    throw new TypeError('Function provided to `withTransaction` must return a Promise');
+  }
+
+  return promise
     .then(() => {
       if (userExplicitlyEndedTransaction(session)) {
         return;

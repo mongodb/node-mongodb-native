@@ -106,6 +106,16 @@ function collationNotSupported(server, cmd) {
   return cmd && cmd.collation && maxWireVersion(server) < 5;
 }
 
+/**
+ * Checks if a given value is a Promise
+ *
+ * @param {*} maybePromise
+ * @return true if the provided value is a Promise
+ */
+function isPromiseLike(maybePromise) {
+  return maybePromise && typeof maybePromise.then === 'function';
+}
+
 module.exports = {
   uuidV4,
   calculateDurationInMs,
@@ -113,5 +123,6 @@ module.exports = {
   collationNotSupported,
   retrieveEJSON,
   retrieveKerberos,
-  maxWireVersion
+  maxWireVersion,
+  isPromiseLike
 };
