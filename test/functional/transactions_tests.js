@@ -6,6 +6,8 @@ const fs = require('fs');
 const chai = require('chai');
 const expect = chai.expect;
 const EJSON = require('mongodb-extjson');
+const core = require('mongodb-core');
+const sessions = core.Sessions;
 
 // mlaunch init --replicaset --arbiter  --name rs --hostname localhost --port 31000 --setParameter enableTestCommands=1 --binarypath /Users/mbroadst/Downloads/mongodb-osx-x86_64-enterprise-4.1.0-158-g3d62f3c/bin
 
@@ -109,7 +111,10 @@ describe('Transactions', function() {
 
   [
     { name: 'spec tests', specPath: `${__dirname}/spec/transactions` },
-    { name: 'convenient api', specPath: `${__dirname}/spec/transactions/convenient-api` }
+    {
+      name: 'withTransaction spec tests',
+      specPath: `${__dirname}/spec/transactions/convenient-api`
+    }
   ].forEach(suiteSpec => {
     describe(suiteSpec.name, function() {
       const testSuites = gatherTestSuites(suiteSpec.specPath);
@@ -119,6 +124,28 @@ describe('Transactions', function() {
       });
 
       generateTestSuiteTests(testSuites, testContext);
+    });
+  });
+
+  describe('withTransaction', function() {
+    let session;
+    beforeEach(() => {
+      const topology = new core.Server();
+      const sessionPool = new sessions.ServerSessionPool(topology);
+      session = new sessions.ClientSession(topology, sessionPool);
+    });
+
+    it('should provide a useful error if a Promise is not returned', {
+      metadata: { requires: { topology: ['replicaset', 'mongos'], mongodb: '>=4.0.x' } },
+      test: function() {
+        function fnThatDoesntReturnPromise() {
+          return false;
+        }
+
+        expect(() => session.withTransaction(fnThatDoesntReturnPromise)).to.throw(
+          /must return a Promise/
+        );
+      }
     });
   });
 });
