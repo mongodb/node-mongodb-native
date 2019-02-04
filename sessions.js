@@ -274,11 +274,11 @@ const MAX_WITH_TRANSACTION_TIMEOUT = 120000;
 const WRITE_CONCERN_FAILED_CODE = 64;
 const UNSATISFIABLE_WRITE_CONCERN_CODE = 100;
 const UNKNOWN_REPL_WRITE_CONCERN_CODE = 79;
-const NON_DETERMINISTIC_WRITE_CONCERN_ERRORS = [
+const NON_DETERMINISTIC_WRITE_CONCERN_ERRORS = new Set([
   'CannotSatisfyWriteConcern',
   'UnknownReplWriteConcern',
   'UnsatisfiableWriteConcern'
-];
+]);
 
 function hasNotTimedOut(startTime, max) {
   return Date.now() - startTime < max;
@@ -290,7 +290,7 @@ function isWriteConcernTimeoutError(err) {
 
 function isUnknownTransactionCommitResult(err) {
   return (
-    NON_DETERMINISTIC_WRITE_CONCERN_ERRORS.indexOf(err.codeName) === -1 &&
+    !NON_DETERMINISTIC_WRITE_CONCERN_ERRORS.has(err.codeName) &&
     err.code !== UNSATISFIABLE_WRITE_CONCERN_CODE &&
     err.code !== UNKNOWN_REPL_WRITE_CONCERN_CODE
   );
@@ -318,12 +318,14 @@ function attemptTransactionCommit(session, startTime, fn, options) {
   });
 }
 
+const USER_EXPLICIT_TXN_END_STATES = new Set([
+  TxnState.NO_TRANSACTION,
+  TxnState.TRANSACTION_COMMITTED,
+  TxnState.TRANSACTION_ABORTED
+]);
+
 function userExplicitlyEndedTransaction(session) {
-  return (
-    [TxnState.NO_TRANSACTION, TxnState.TRANSACTION_COMMITTED, TxnState.TRANSACTION_ABORTED].indexOf(
-      session.transaction.state
-    ) !== -1
-  );
+  return USER_EXPLICIT_TXN_END_STATES.has(session.transaction.state);
 }
 
 function attemptTransaction(session, startTime, fn, options) {
