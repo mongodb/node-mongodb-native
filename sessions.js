@@ -298,20 +298,14 @@ function isUnknownTransactionCommitResult(err) {
 
 function attemptTransactionCommit(session, startTime, fn, options) {
   return session.commitTransaction().catch(err => {
-    if (
-      !isWriteConcernTimeoutError(err) &&
-      (err instanceof MongoError && err.hasErrorLabel('UnknownTransactionCommitResult')) &&
-      hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT)
-    ) {
-      return attemptTransactionCommit(session, startTime, fn, options);
-    }
+    if (err instanceof MongoError && hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT)) {
+      if (err.hasErrorLabel('UnknownTransactionCommitResult') && !isWriteConcernTimeoutError(err)) {
+        return attemptTransactionCommit(session, startTime, fn, options);
+      }
 
-    if (
-      err instanceof MongoError &&
-      err.hasErrorLabel('TransientTransactionError') &&
-      hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT)
-    ) {
-      return attemptTransaction(session, startTime, fn, options);
+      if (err.hasErrorLabel('TransientTransactionError')) {
+        return attemptTransaction(session, startTime, fn, options);
+      }
     }
 
     throw err;
