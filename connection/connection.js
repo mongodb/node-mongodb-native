@@ -54,25 +54,17 @@ class Connection extends EventEmitter {
   /**
    * Creates a new Connection instance
    *
-   * @param {string} options.host The server host
-   * @param {number} options.port The server port
-   * @param {number} [options.family=null] IP version for DNS lookup, passed down to Node's [`dns.lookup()` function](https://nodejs.org/api/dns.html#dns_dns_lookup_hostname_options_callback). If set to `6`, will only look for ipv6 addresses.
+   * @param {Socket} socket The socket this connection wraps
+   * @param {Object} [options] Optional settings
+   * @param {string} [options.host] The host the socket is connected to
+   * @param {number} [options.port] The port used for the socket connection
    * @param {boolean} [options.keepAlive=true] TCP Connection keep alive enabled
    * @param {number} [options.keepAliveInitialDelay=300000] Initial delay before TCP keep alive enabled
-   * @param {boolean} [options.noDelay=true] TCP Connection no delay
    * @param {number} [options.connectionTimeout=30000] TCP Connection timeout setting
    * @param {number} [options.socketTimeout=360000] TCP Socket timeout setting
-   * @param {boolean} [options.ssl=false] Use SSL for connection
-   * @param {boolean|function} [options.checkServerIdentity=true] Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.
-   * @param {Buffer} [options.ca] SSL Certificate store binary buffer
-   * @param {Buffer} [options.crl] SSL Certificate revocation store binary buffer
-   * @param {Buffer} [options.cert] SSL Certificate binary buffer
-   * @param {Buffer} [options.key] SSL Key file binary buffer
-   * @param {string} [options.passphrase] SSL Certificate pass phrase
-   * @param {boolean} [options.rejectUnauthorized=true] Reject unauthorized server certificates
-   * @param {boolean} [options.promoteLongs=true] Convert Long values from the db into Numbers if they fit into 53 bits
-   * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
-   * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
+   * @param {boolean} [options.promoteLongs] Convert Long values from the db into Numbers if they fit into 53 bits
+   * @param {boolean} [options.promoteValues] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
+   * @param {boolean} [options.promoteBuffers] Promotes Binary BSON values to native Node Buffers.
    */
   constructor(socket, options) {
     super();
