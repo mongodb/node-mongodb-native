@@ -99,7 +99,6 @@ class Connection extends EventEmitter {
     this.keepAlive = typeof options.keepAlive === 'boolean' ? options.keepAlive : true;
     this.keepAliveInitialDelay =
       typeof options.keepAliveInitialDelay === 'number' ? options.keepAliveInitialDelay : 300000;
-    this.socketTimeout = typeof options.socketTimeout === 'number' ? options.socketTimeout : 360000;
     this.connectionTimeout =
       typeof options.connectionTimeout === 'number' ? options.connectionTimeout : 30000;
     if (this.keepAliveInitialDelay > this.socketTimeout) {
