@@ -25,7 +25,6 @@ const DEBUG_FIELDS = [
   'noDelay',
   'connectionTimeout',
   'socketTimeout',
-  'singleBufferSerializtion',
   'ssl',
   'ca',
   'crl',
@@ -63,7 +62,6 @@ class Connection extends EventEmitter {
    * @param {boolean} [options.noDelay=true] TCP Connection no delay
    * @param {number} [options.connectionTimeout=30000] TCP Connection timeout setting
    * @param {number} [options.socketTimeout=360000] TCP Socket timeout setting
-   * @param {boolean} [options.singleBufferSerializtion=true] Serialize into single buffer, trade of peak memory for serialization speed
    * @param {boolean} [options.ssl=false] Use SSL for connection
    * @param {boolean|function} [options.checkServerIdentity=true] Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.
    * @param {Buffer} [options.ca] SSL Certificate store binary buffer

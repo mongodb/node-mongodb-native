@@ -69,7 +69,6 @@ var debugFields = [
   'connectionTimeout',
   'checkServerIdentity',
   'socketTimeout',
-  'singleBufferSerializtion',
   'ssl',
   'ca',
   'crl',
