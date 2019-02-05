@@ -385,6 +385,10 @@ function attemptReconnect(self) {
       self.connectingConnections--;
 
       if (err) {
+        if (self.logger.isDebug()) {
+          self.logger.debug(`connection attempt failed with error [${JSON.stringify(err)}]`);
+        }
+
         self.retriesLeft = self.retriesLeft - 1;
         if (self.retriesLeft <= 0) {
           self.destroy();
@@ -705,6 +709,10 @@ Pool.prototype.connect = function(credentials) {
     self.connectingConnections--;
 
     if (err) {
+      if (self.logger.isDebug()) {
+        self.logger.debug(`connection attempt failed with error [${JSON.stringify(err)}]`);
+      }
+
       // NOTE: when `err` exists, `connection` is actually the originating event name
       connectionFailureHandler(self, connection, err);
       return;
@@ -1276,6 +1284,10 @@ function _createConnection(self) {
     self.connectingConnections--;
 
     if (err) {
+      if (self.logger.isDebug()) {
+        self.logger.debug(`connection attempt failed with error [${JSON.stringify(err)}]`);
+      }
+
       if (!self.reconnectId && self.options.reconnect) {
         self.reconnectId = setTimeout(attemptReconnect(self), self.options.reconnectInterval);
       }
