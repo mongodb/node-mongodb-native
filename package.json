@@ -51,6 +51,7 @@
     "url": "https://github.com/mongodb/node-mongodb-native/issues"
   },
   "scripts": {
+    "atlas": "node ./test/atlas_connectivity_tests.js",
     "test": "npm run lint && mongodb-test-runner -t 60000 test/unit test/functional",
     "coverage": "istanbul cover mongodb-test-runner -- -t 60000  test/unit test/functional",
     "lint": "eslint lib test",

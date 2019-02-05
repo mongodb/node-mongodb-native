@@ -158,6 +158,19 @@ MONGODB_VERSIONS.forEach(mongoVersion => {
   });
 });
 
+TASKS.push({
+  name: 'test-atlas-connectivity',
+  tags: ['atlas-connect'],
+  commands: [
+    {
+      func: 'run atlas tests',
+      vars: {
+        VERSION: 'latest'
+      }
+    }
+  ]
+})
+
 const BUILD_VARIANTS = [];
 
 const getTaskList = (() => {
