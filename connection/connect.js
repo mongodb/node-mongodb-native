@@ -53,7 +53,8 @@ const LEGAL_SSL_SOCKET_OPTIONS = [
   'secureProtocol',
   'secureContext',
   'session',
-  'minDHSize'
+  'minDHSize',
+  'crl'
 ];
 
 function parseConnectOptions(family, options) {
@@ -81,12 +82,6 @@ function parseSslOptions(family, options) {
       result[name] = options[name];
     }
   }
-  // Set options for ssl
-  if (options.ca) result.ca = options.ca;
-  if (options.crl) result.crl = options.crl;
-  if (options.cert) result.cert = options.cert;
-  if (options.key) result.key = options.key;
-  if (options.passphrase) result.passphrase = options.passphrase;
 
   // Override checkServerIdentity behavior
   if (options.checkServerIdentity === false) {
