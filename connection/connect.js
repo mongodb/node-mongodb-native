@@ -7,7 +7,7 @@ function connect(options, callback) {
   if (options.family !== void 0) {
     makeConnection(options.family, options, (err, socket) => {
       if (err) {
-        return callback(err, socket); // in the error case, `socket` is the originating error event
+        return callback(err, socket); // in the error case, `socket` is the originating error event name
       }
 
       callback(null, new Connection(socket, options));
@@ -18,15 +18,9 @@ function connect(options, callback) {
 
   return makeConnection(6, options, (err, ipv6Socket) => {
     if (err) {
-      // if (this.logger.isDebug()) {
-      //   this.logger.debug(
-      //     `connection ${this.id} for [${this.address}] errored out with [${JSON.stringify(err)}]`
-      //   );
-      // }
-
       makeConnection(4, options, (err, ipv4Socket) => {
         if (err) {
-          return callback(err, ipv4Socket); // in the error case, `ipv4Socket` is the originating error event
+          return callback(err, ipv4Socket); // in the error case, `ipv4Socket` is the originating error event name
         }
 
         callback(null, new Connection(ipv4Socket, options));
@@ -54,7 +48,8 @@ const LEGAL_SSL_SOCKET_OPTIONS = [
   'secureContext',
   'session',
   'minDHSize',
-  'crl'
+  'crl',
+  'rejectUnauthorized'
 ];
 
 function parseConnectOptions(family, options) {
@@ -97,10 +92,6 @@ function parseSslOptions(family, options) {
   // Set default sni servername to be the same as host
   if (result.servername == null) {
     result.servername = result.host;
-  }
-
-  if (typeof options.rejectUnauthorized === 'boolean') {
-    result.rejectUnauthorized = options.rejectUnauthorized;
   }
 
   return result;
