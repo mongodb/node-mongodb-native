@@ -338,6 +338,13 @@ tasks:
         vars:
           VERSION: '2.6'
           TOPOLOGY: sharded_cluster
+  - name: test-atlas-connectivity
+    tags:
+      - atlas-connect
+    commands:
+      - func: run atlas tests
+        vars:
+          VERSION: latest
 buildvariants:
   - name: linux-64-amzn-test-dubnium
     display_name: Amazon Linux (Enterprise) Node Dubnium
@@ -366,6 +373,7 @@ buildvariants:
       - test-2.6-server
       - test-2.6-replica_set
       - test-2.6-sharded_cluster
+      - test-atlas-connectivity
   - name: linux-64-amzn-test-carbon
     display_name: Amazon Linux (Enterprise) Node Carbon
     run_on: linux-64-amzn-test
@@ -525,6 +533,7 @@ buildvariants:
       - test-3.2-server
       - test-3.2-replica_set
       - test-3.2-sharded_cluster
+      - test-atlas-connectivity
   - name: ubuntu-16.04-carbon
     display_name: Ubuntu 16.04 Node Carbon
     run_on: ubuntu1604-test
@@ -609,6 +618,7 @@ buildvariants:
       - test-3.4-server
       - test-3.4-replica_set
       - test-3.4-sharded_cluster
+      - test-atlas-connectivity
   - name: debian81-test-carbon
     display_name: Debian 8.1 Node Carbon
     run_on: debian81-test
