@@ -1237,7 +1237,9 @@ describe('Pool tests', function() {
         server
           .addMessageHandler('getnonce', req => req.reply({ ok: 1, result: { nonce: 'testing' } }))
           .addMessageHandler('authenticate', req => req.reply({ ok: 1 }))
-          .addMessageHandler('ismaster', req => setTimeout(() => req.reply({ ok: 1 }), 10000));
+          .addMessageHandler('ismaster', req =>
+            setTimeout(() => req.reply(Object.assign({ ok: 1 }, mock.DEFAULT_ISMASTER)), 10000)
+          );
 
         var pool = new Pool(
           null,

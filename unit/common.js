@@ -23,6 +23,7 @@ class ReplSetFixture {
         this.arbiterServer = servers[2];
 
         this.defaultFields = Object.assign({}, ismaster, {
+          __nodejs_mock_server__: true,
           setName: 'rs',
           setVersion: 1,
           electionId: this.electionIds[0],

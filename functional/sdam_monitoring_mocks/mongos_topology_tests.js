@@ -22,17 +22,9 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       var currentStep = 0;
 
       // Default message fields
-      var defaultFields = {
-        ismaster: true,
-        msg: 'isdbgrid',
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 3,
-        minWireVersion: 0,
-        ok: 1
-      };
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
+        msg: 'isdbgrid'
+      });
 
       // Primary server states
       var serverIsMaster = [Object.assign({}, defaultFields)];
@@ -231,17 +223,9 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       var mongos2 = null;
 
       // Default message fields
-      var defaultFields = {
-        ismaster: true,
-        msg: 'isdbgrid',
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 3,
-        minWireVersion: 0,
-        ok: 1
-      };
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
+        msg: 'isdbgrid'
+      });
 
       // Primary server states
       var serverIsMaster = [Object.assign({}, defaultFields)];
@@ -431,17 +415,9 @@ describe.skip('Mongos SDAM Monitoring (mocks)', function() {
       var currentStep = 0;
 
       // Default message fields
-      var defaultFields = {
-        ismaster: true,
-        msg: 'isdbgrid',
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 3,
-        minWireVersion: 0,
-        ok: 1
-      };
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
+        msg: 'isdbgrid'
+      });
 
       // Primary server states
       var serverIsMaster = [Object.assign({}, defaultFields)];

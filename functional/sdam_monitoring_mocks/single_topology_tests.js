@@ -21,16 +21,7 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       var server = null;
 
       // Default message fields
-      var defaultFields = {
-        ismaster: true,
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 3,
-        minWireVersion: 0,
-        ok: 1
-      };
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER);
 
       // Primary server states
       var serverIsMaster = [Object.assign({}, defaultFields)];
@@ -167,17 +158,9 @@ describe.skip('Single SDAM Monitoring (mocks)', function() {
       var server = null;
 
       // Default message fields
-      var defaultFields = {
-        ismaster: true,
-        maxBsonObjectSize: 16777216,
-        maxMessageSizeBytes: 48000000,
-        maxWriteBatchSize: 1000,
-        localTime: new Date(),
-        maxWireVersion: 3,
-        minWireVersion: 0,
-        ok: 1,
+      var defaultFields = Object.assign({}, mock.DEFAULT_ISMASTER, {
         hosts: ['a:27017', 'b:27017'] // <-- this makes it an RSPrimary
-      };
+      });
 
       // Primary server states
       var serverIsMaster = [Object.assign({}, defaultFields)];
