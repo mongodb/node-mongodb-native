@@ -17,7 +17,6 @@
     "official"
   ],
   "dependencies": {
-    "mongodb-core": "3.1.11",
     "safe-buffer": "^5.1.2"
   },
   "devDependencies": {
@@ -34,7 +33,7 @@
     "lodash.camelcase": "^4.3.0",
     "mocha-sinon": "^2.1.0",
     "mongodb-extjson": "^2.1.1",
-    "mongodb-mock-server": "^1.0.0",
+    "mongodb-mock-server": "^1.0.1",
     "mongodb-test-runner": "^1.1.18",
     "prettier": "~1.12.0",
     "semver": "^5.5.0",
