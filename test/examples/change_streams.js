@@ -103,10 +103,10 @@ describe('examples(change-stream):', function() {
 
       let newChangeStream;
       changeStream.on('change', next => {
-        const resumeAfter = next._id;
+        const resumeToken = changeStreamIterator.resumeToken;
         changeStream.close();
 
-        newChangeStream = collection.watch({ resumeAfter });
+        newChangeStream = collection.watch({ resumeAfter: resumeToken });
         newChangeStream.on('change', next => {
           // process next document
         });
@@ -117,10 +117,10 @@ describe('examples(change-stream):', function() {
       const changeStreamIterator = collection.watch();
       const change1 = await changeStreamIterator.next();
 
-      const resumeAfter = change1._id;
+      const resumeToken = changeStreamIterator.resumeToken;
       changeStreamIterator.close();
 
-      const newChangeStreamIterator = collection.watch({ resumeAfter });
+      const newChangeStreamIterator = collection.watch({ resumeAfter: resumeToken });
       const change2 = await newChangeStreamIterator.next();
       // End Changestream Example 3 Alternative
 
