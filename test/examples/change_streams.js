@@ -101,9 +101,9 @@ describe('examples(change-stream):', function() {
       const collection = db.collection('inventory');
       const changeStream = collection.watch();
 
-      let resumeToken, newChangeStream;
+      let newChangeStream;
       changeStream.on('change', next => {
-        resumeToken = next._id;
+        const resumeAfter = next._id;
         changeStream.close();
 
         newChangeStream = collection.watch({ resumeAfter });
