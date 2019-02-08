@@ -2,6 +2,7 @@
 const path = require('path');
 const fs = require('fs');
 const Topology = require('../../../lib/sdam/topology');
+const Server = require('../../../lib/sdam/server');
 const ServerDescription = require('../../../lib/sdam/server_description').ServerDescription;
 const ServerType = require('../../../lib/sdam/server_description').ServerType;
 const ServerSelectors = require('../../../lib/sdam/server_selectors');
@@ -9,6 +10,7 @@ const MongoTimeoutError = require('../../../lib/error').MongoTimeoutError;
 const ReadPreference = require('../../../lib/topologies/read_preference');
 const EJSON = require('mongodb-extjson');
 
+const sinon = require('sinon');
 const chai = require('chai');
 const expect = chai.expect;
 chai.use(require('chai-subset'));
@@ -47,8 +49,16 @@ function collectSelectionTests(specDir) {
 }
 
 describe('Server Selection (spec)', function() {
-  const specTests = collectSelectionTests(selectionSpecDir);
+  let serverConnect;
+  before(() => {
+    serverConnect = sinon.stub(Server.prototype, 'connect');
+  });
 
+  after(() => {
+    serverConnect.restore();
+  });
+
+  const specTests = collectSelectionTests(selectionSpecDir);
   Object.keys(specTests).forEach(topologyType => {
     describe(topologyType, function() {
       Object.keys(specTests[topologyType]).forEach(subType => {
@@ -103,8 +113,16 @@ function collectStalenessTests(specDir) {
 }
 
 describe('Max Staleness (spec)', function() {
-  const specTests = collectStalenessTests(maxStalenessDir);
+  let serverConnect;
+  before(() => {
+    serverConnect = sinon.stub(Server.prototype, 'connect');
+  });
 
+  after(() => {
+    serverConnect.restore();
+  });
+
+  const specTests = collectStalenessTests(maxStalenessDir);
   Object.keys(specTests).forEach(specTestName => {
     describe(specTestName, () => {
       specTests[specTestName].forEach(testData => {
@@ -196,7 +214,7 @@ function readPreferenceFromDefinition(definition) {
   return new ReadPreference(mode, tags, options);
 }
 
-function executeServerSelectionTest(testDefinition, options, done) {
+function executeServerSelectionTest(testDefinition, options, testDone) {
   const topologyDescription = testDefinition.topology_description;
   const seedData = topologyDescription.servers.reduce(
     (result, seed) => {
@@ -213,6 +231,10 @@ function executeServerSelectionTest(testDefinition, options, done) {
 
   const topology = new Topology(seedData.seedlist, topologyOptions);
   topology.connect();
+
+  function done(err) {
+    topology.close(() => testDone(err));
+  }
 
   // Update topologies with server descriptions.
   topologyDescription.servers.forEach(server => {

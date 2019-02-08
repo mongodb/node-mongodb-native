@@ -4,10 +4,12 @@ const path = require('path');
 const chai = require('chai');
 const expect = chai.expect;
 const Topology = require('../../../lib/sdam/topology');
+const Server = require('../../../lib/sdam/server');
 const ServerDescription = require('../../../lib/sdam/server_description').ServerDescription;
 const monitoring = require('../../../lib/sdam/monitoring');
 const parse = require('../../../lib/uri_parser');
 chai.use(require('chai-subset'));
+const sinon = require('sinon');
 
 const specDir = path.join(__dirname, '..', 'spec', 'server-discovery-and-monitoring');
 function collectTests() {
@@ -31,8 +33,16 @@ function collectTests() {
 }
 
 describe('Server Discovery and Monitoring (spec)', function() {
-  const specTests = collectTests();
+  let serverConnect;
+  before(() => {
+    serverConnect = sinon.stub(Server.prototype, 'connect');
+  });
 
+  after(() => {
+    serverConnect.restore();
+  });
+
+  const specTests = collectTests();
   Object.keys(specTests).forEach(specTestName => {
     describe(specTestName, () => {
       specTests[specTestName].forEach(testData => {
@@ -222,6 +232,6 @@ function executeSDAMTest(testData, done) {
       });
     });
 
-    done();
+    topology.close(done);
   });
 }
