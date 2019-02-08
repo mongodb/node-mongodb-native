@@ -103,7 +103,7 @@ describe('examples(change-stream):', function() {
 
       let newChangeStream;
       changeStream.on('change', next => {
-        const resumeToken = changeStreamIterator.resumeToken;
+        const resumeToken = changeStream.resumeToken;
         changeStream.close();
 
         newChangeStream = collection.watch({ resumeAfter: resumeToken });
