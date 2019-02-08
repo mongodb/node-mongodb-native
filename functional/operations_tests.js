@@ -5,12 +5,14 @@ const f = require('util').format;
 const mock = require('mongodb-mock-server');
 const ConnectionSpy = require('./shared').ConnectionSpy;
 const Connection = require('../../../lib/connection/connection');
+const setupDatabase = require('./shared').setupDatabase;
 
 const test = {};
 describe('Operation tests', function() {
-  beforeEach(() => {
+  beforeEach(function() {
     test.spy = new ConnectionSpy();
     Connection.enableConnectionAccounting(test.spy);
+    return setupDatabase(this.configuration);
   });
 
   afterEach(() => {
