@@ -102,7 +102,7 @@ describe('examples.aggregaton:', function() {
   });
 
   it('supports $lookup, $filter, $match', {
-    metadata: { requires: { mongodb: '>=2.8.0', topology: ['single'] } },
+    metadata: { requires: { mongodb: '>=3.2.0', topology: ['single'] } },
     test: async function() {
       // Start aggregate example 4
       await collection
