@@ -1,4 +1,5 @@
 'use strict';
+const Query = require('../connection/commands').Query;
 const KillCursor = require('../connection/commands').KillCursor;
 const GetMore = require('../connection/commands').GetMore;
 const calculateDurationInMs = require('../utils').calculateDurationInMs;
@@ -75,40 +76,41 @@ const extractCommand = command => {
     };
   }
 
-  if (command.query && command.query.$query) {
-    let result;
-    if (command.ns === 'admin.$cmd') {
-      // upconvert legacy command
-      result = Object.assign({}, command.query.$query);
-    } else {
-      // upconvert legacy find command
-      result = { find: collectionName(command) };
-      Object.keys(LEGACY_FIND_QUERY_MAP).forEach(key => {
-        if (typeof command.query[key] !== 'undefined')
-          result[LEGACY_FIND_QUERY_MAP[key]] = command.query[key];
-      });
-    }
-
-    Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
-      if (typeof command[key] !== 'undefined') result[LEGACY_FIND_OPTIONS_MAP[key]] = command[key];
-    });
-
-    OP_QUERY_KEYS.forEach(key => {
-      if (command[key]) result[key] = command[key];
-    });
-
-    if (typeof command.pre32Limit !== 'undefined') {
-      result.limit = command.pre32Limit;
-    }
-
-    if (command.query.$explain) {
-      return { explain: result };
-    }
-
-    return result;
+  command = command instanceof Query ? command.query : command.command;
+  if (command.$query == null) {
+    return command;
   }
 
-  return command.query ? command.query : command;
+  let result;
+  if (command.ns === 'admin.$cmd') {
+    // upconvert legacy command
+    result = Object.assign({}, command.query.$query);
+  } else {
+    // upconvert legacy find command
+    result = { find: collectionName(command) };
+    Object.keys(LEGACY_FIND_QUERY_MAP).forEach(key => {
+      if (typeof command.query[key] !== 'undefined')
+        result[LEGACY_FIND_QUERY_MAP[key]] = command.query[key];
+    });
+  }
+
+  Object.keys(LEGACY_FIND_OPTIONS_MAP).forEach(key => {
+    if (typeof command[key] !== 'undefined') result[LEGACY_FIND_OPTIONS_MAP[key]] = command[key];
+  });
+
+  OP_QUERY_KEYS.forEach(key => {
+    if (command[key]) result[key] = command[key];
+  });
+
+  if (typeof command.pre32Limit !== 'undefined') {
+    result.limit = command.pre32Limit;
+  }
+
+  if (command.query.$explain) {
+    return { explain: result };
+  }
+
+  return result;
 };
 
 const extractReply = (command, reply) => {
