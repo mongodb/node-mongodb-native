@@ -55,7 +55,8 @@ describe('examples(transactions):', function() {
       async function updateEmployeeInfo(client, session) {
         session.startTransaction({
           readConcern: { level: 'snapshot' },
-          writeConcern: { w: 'majority' }
+          writeConcern: { w: 'majority' },
+          readPreference: 'primary'
         });
 
         const employeesCollection = client.db('hr').collection('employees');
@@ -114,7 +115,8 @@ describe('examples(transactions):', function() {
       async function updateEmployeeInfo(client, session) {
         session.startTransaction({
           readConcern: { level: 'snapshot' },
-          writeConcern: { w: 'majority' }
+          writeConcern: { w: 'majority' },
+          readPreference: 'primary'
         });
 
         const employeesCollection = client.db('hr').collection('employees');
@@ -186,7 +188,8 @@ describe('examples(transactions):', function() {
       async function updateEmployeeInfo(client, session) {
         session.startTransaction({
           readConcern: { level: 'snapshot' },
-          writeConcern: { w: 'majority' }
+          writeConcern: { w: 'majority' },
+          readPreference: 'primary'
         });
 
         const employeesCollection = client.db('hr').collection('employees');
