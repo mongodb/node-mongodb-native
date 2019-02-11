@@ -37,13 +37,6 @@ function getMore(server, ns, cursorState, batchSize, options, callback) {
       return;
     }
 
-    // Raw, return all the extracted documents
-    if (cursorState.raw) {
-      cursorState.documents = response.documents;
-      cursorState.cursorId = response.cursorId;
-      return callback(null, response.documents);
-    }
-
     // We have an error detected
     if (response.documents[0].ok === 0) {
       return callback(new MongoError(response.documents[0]));
