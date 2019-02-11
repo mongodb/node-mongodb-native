@@ -700,7 +700,8 @@ function initializeCursor(cursor, callback) {
       }
 
       // Otherwise fall back to regular find path
-      cursor.cursorState.cursorId = result.cursorId;
+      const cursorId = result.cursorId || 0;
+      cursor.cursorState.cursorId = Long.fromNumber(cursorId);
       cursor.cursorState.documents = result.documents;
       cursor.cursorState.lastCursorId = result.cursorId;
 
