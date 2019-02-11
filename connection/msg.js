@@ -209,6 +209,7 @@ class BinMsg {
     this.index = 4;
     // Allow the return of raw documents instead of parsing
     const raw = options.raw || false;
+    const documentsReturnedIn = options.documentsReturnedIn || null;
     const promoteLongs =
       typeof options.promoteLongs === 'boolean' ? options.promoteLongs : this.opts.promoteLongs;
     const promoteValues =
@@ -236,6 +237,14 @@ class BinMsg {
 
         this.index += bsonSize;
       }
+    }
+
+    // TODO: This is special-cased in the OP_RESPONSE code, but should probably
+    //       be moved into Cursor logic.
+    if (this.documents.length === 1 && documentsReturnedIn != null && raw) {
+      _options.fieldsAsRaw = { [documentsReturnedIn]: true };
+      const doc = this.bson.deserialize(this.documents[0], _options);
+      this.documents = [doc];
     }
 
     this.parsed = true;
