@@ -2,7 +2,6 @@
 
 const setupDatabase = require('../functional/shared').setupDatabase;
 const MongoClient = require('../../lib/mongo_client');
-const ReadPreference = require('mongodb-core').ReadPreference;
 
 describe('examples(transactions):', function() {
   let client;
@@ -57,7 +56,7 @@ describe('examples(transactions):', function() {
         session.startTransaction({
           readConcern: { level: 'snapshot' },
           writeConcern: { w: 'majority' },
-          readPreference: new ReadPreference('primary')
+          readPreference: 'primary'
         });
 
         const employeesCollection = client.db('hr').collection('employees');
@@ -117,7 +116,7 @@ describe('examples(transactions):', function() {
         session.startTransaction({
           readConcern: { level: 'snapshot' },
           writeConcern: { w: 'majority' },
-          readPreference: new ReadPreference('primary')
+          readPreference: 'primary'
         });
 
         const employeesCollection = client.db('hr').collection('employees');
@@ -190,7 +189,7 @@ describe('examples(transactions):', function() {
         session.startTransaction({
           readConcern: { level: 'snapshot' },
           writeConcern: { w: 'majority' },
-          readPreference: new ReadPreference('primary')
+          readPreference: 'primary'
         });
 
         const employeesCollection = client.db('hr').collection('employees');
