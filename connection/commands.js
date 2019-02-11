@@ -3,7 +3,6 @@
 var retrieveBSON = require('./utils').retrieveBSON;
 var BSON = retrieveBSON();
 var Long = BSON.Long;
-const MongoError = require('../error').MongoError;
 const Buffer = require('safe-buffer').Buffer;
 
 // Incrementing request id
@@ -464,53 +463,6 @@ Response.prototype.parse = function(options) {
   this.index = 20;
 
   //
-  // Single document and documentsReturnedIn set
-  //
-  if (this.numberReturned === 1 && documentsReturnedIn != null && raw) {
-    // Calculate the bson size
-    bsonSize =
-      this.data[this.index] |
-      (this.data[this.index + 1] << 8) |
-      (this.data[this.index + 2] << 16) |
-      (this.data[this.index + 3] << 24);
-    // Slice out the buffer containing the command result document
-    var document = this.data.slice(this.index, this.index + bsonSize);
-    // Set up field we wish to keep as raw
-    var fieldsAsRaw = {};
-    fieldsAsRaw[documentsReturnedIn] = true;
-    _options.fieldsAsRaw = fieldsAsRaw;
-
-    // Deserialize but keep the array of documents in non-parsed form
-    var doc = this.bson.deserialize(document, _options);
-
-    if (doc instanceof Error) {
-      throw doc;
-    }
-
-    if (doc.errmsg) {
-      throw new MongoError(doc.errmsg);
-    }
-
-    if (!doc.cursor) {
-      throw new MongoError('Cursor not found');
-    }
-
-    // Get the documents
-    this.documents = doc.cursor[documentsReturnedIn];
-    this.numberReturned = this.documents.length;
-    // Ensure we have a Long valie cursor id
-    this.cursorId =
-      typeof doc.cursor.id === 'number' ? Long.fromNumber(doc.cursor.id) : doc.cursor.id;
-
-    // Adjust the index
-    this.index = this.index + bsonSize;
-
-    // Set as parsed
-    this.parsed = true;
-    return;
-  }
-
-  //
   // Parse Body
   //
   for (var i = 0; i < this.numberReturned; i++) {
@@ -532,6 +484,15 @@ Response.prototype.parse = function(options) {
 
     // Adjust the index
     this.index = this.index + bsonSize;
+  }
+
+  if (this.documents.length === 1 && documentsReturnedIn != null && raw) {
+    const fieldsAsRaw = {};
+    fieldsAsRaw[documentsReturnedIn] = true;
+    _options.fieldsAsRaw = fieldsAsRaw;
+
+    const doc = this.bson.deserialize(this.documents[0], _options);
+    this.documents = [doc];
   }
 
   // Set parsed

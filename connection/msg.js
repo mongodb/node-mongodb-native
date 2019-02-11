@@ -239,10 +239,11 @@ class BinMsg {
       }
     }
 
-    // TODO: This is special-cased in the OP_RESPONSE code, but should probably
-    //       be moved into Cursor logic.
     if (this.documents.length === 1 && documentsReturnedIn != null && raw) {
-      _options.fieldsAsRaw = { [documentsReturnedIn]: true };
+      const fieldsAsRaw = {};
+      fieldsAsRaw[documentsReturnedIn] = true;
+      _options.fieldsAsRaw = fieldsAsRaw;
+
       const doc = this.bson.deserialize(this.documents[0], _options);
       this.documents = [doc];
     }

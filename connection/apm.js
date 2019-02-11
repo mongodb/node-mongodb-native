@@ -1,5 +1,4 @@
 'use strict';
-// const Query = require('../connection/commands').Query;
 const Msg = require('../connection/msg').Msg;
 const KillCursor = require('../connection/commands').KillCursor;
 const GetMore = require('../connection/commands').GetMore;
