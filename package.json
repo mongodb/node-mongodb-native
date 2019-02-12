@@ -17,7 +17,7 @@
     "official"
   ],
   "dependencies": {
-    "mongodb-core": "3.1.11",
+    "mongodb-core": "mongodb-js/mongodb-core#master",
     "safe-buffer": "^5.1.2"
   },
   "devDependencies": {
