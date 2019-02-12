@@ -36,7 +36,7 @@ let _requestId = 0;
 // Msg Flags
 const OPTS_CHECKSUM_PRESENT = 1;
 const OPTS_MORE_TO_COME = 2;
-const OPTS_EXHAUST_ALLOWED = 1 >> 16;
+const OPTS_EXHAUST_ALLOWED = 1 << 16;
 
 class Msg {
   constructor(bson, ns, command, options) {
@@ -93,26 +93,14 @@ class Msg {
     buffers.push(header);
 
     let totalLength = header.length;
-
     const command = this.command;
-    const nameArgumentPair = validSegmentListNamePairs(command);
-    if (nameArgumentPair) {
-      // TODO: Add support for payload type 1
-      const argument = nameArgumentPair.argument;
+    totalLength += this.makeDocumentSegment(buffers, command);
 
-      // Add initial type 0 segment with arguments pulled up
-      const clonedQuery = Object.assign({}, command);
-      delete clonedQuery[argument];
-      totalLength += this.makeDocumentSegment(buffers, clonedQuery);
-
-      // Create type 1 query
-      totalLength += this.makeSequenceSegment(buffers, argument, command[argument]);
-    } else {
-      totalLength += this.makeDocumentSegment(buffers, command);
-    }
-
-    writeInt32ListToUint8Buffer(header, [totalLength, this.requestId, 0, opcodes.OP_MSG, flags]);
-
+    header.writeInt32LE(totalLength, 0); // messageLength
+    header.writeInt32LE(this.requestId, 4); // requestID
+    header.writeInt32LE(0, 8); // responseTo
+    header.writeInt32LE(opcodes.OP_MSG, 12); // opCode
+    header.writeUInt32LE(flags, 16); // flags
     return buffers;
   }
 
@@ -121,39 +109,10 @@ class Msg {
     payloadTypeBuffer[0] = 0;
 
     const documentBuffer = this.serializeBson(document);
-
     buffers.push(payloadTypeBuffer);
     buffers.push(documentBuffer);
 
     return payloadTypeBuffer.length + documentBuffer.length;
-  }
-
-  makeSequenceSegment(buffers, argument, documents) {
-    const metaBuffer = new Buffer(
-      1 + // payloadType,
-      4 + // Size of sequence
-      argument.length + // Argument length
-        1 //C string null terminator
-    );
-
-    let segmentLength = metaBuffer.length - 1;
-
-    buffers.push(metaBuffer);
-    documents.forEach(document => {
-      const documentBuffer = this.serializeBson(document);
-      segmentLength += documentBuffer.length;
-      buffers.push(documentBuffer);
-    });
-
-    metaBuffer[0] = 1 & 0x1;
-    metaBuffer[1] = segmentLength & 0xff;
-    metaBuffer[2] = (segmentLength >> 8) & 0xff;
-    metaBuffer[3] = (segmentLength >> 16) & 0xff;
-    metaBuffer[4] = (segmentLength >> 24) & 0xff;
-    metaBuffer.write(argument, 5, 'utf8');
-    metaBuffer[metaBuffer.length - 1] = 0;
-
-    return segmentLength + 1;
   }
 
   serializeBson(document) {
@@ -187,9 +146,9 @@ class BinMsg {
 
     // Read response flags
     this.responseFlags = msgBody.readInt32LE(0);
-    this.checksumPresent = (this.responseFlags & Msg.flags.CHECKSUM_PRESENT) !== 0;
-    this.moreToCome = (this.responseFlags & Msg.flags.MORE_TO_COME) !== 0;
-    this.exhaustAllowed = (this.responseFlags & Msg.flags.EXHAUST_ALLOWED) !== 0;
+    this.checksumPresent = (this.responseFlags & OPTS_CHECKSUM_PRESENT) !== 0;
+    this.moreToCome = (this.responseFlags & OPTS_MORE_TO_COME) !== 0;
+    this.exhaustAllowed = (this.responseFlags & OPTS_EXHAUST_ALLOWED) !== 0;
     this.promoteLongs = typeof opts.promoteLongs === 'boolean' ? opts.promoteLongs : true;
     this.promoteValues = typeof opts.promoteValues === 'boolean' ? opts.promoteValues : true;
     this.promoteBuffers = typeof opts.promoteBuffers === 'boolean' ? opts.promoteBuffers : false;
@@ -250,44 +209,6 @@ class BinMsg {
 
     this.parsed = true;
   }
-}
-
-Msg.flags = {
-  CHECKSUM_PRESENT: 1,
-  MORE_TO_COME: 2,
-  EXHAUST_ALLOWED: 1 << 16
-};
-
-function writeInt32ListToUint8Buffer(buffer, int32List, start) {
-  let index = start || 0;
-  int32List.forEach(int32 => {
-    buffer[index] = int32 & 0xff;
-    buffer[index + 1] = (int32 >> 8) & 0xff;
-    buffer[index + 2] = (int32 >> 16) & 0xff;
-    buffer[index + 3] = (int32 >> 24) & 0xff;
-    index += 4;
-  });
-
-  return index;
-}
-
-const VALID_NAME_ARGUMENT_MAPS = {
-  insert: 'documents',
-  update: 'updates',
-  delete: 'deletes'
-};
-
-function validSegmentListNamePairs(query) {
-  for (let name in VALID_NAME_ARGUMENT_MAPS) {
-    if (name in query) {
-      const argument = VALID_NAME_ARGUMENT_MAPS[name];
-      if (query[argument] && query[argument].length > 1) {
-        return { name, argument };
-      }
-    }
-  }
-
-  return false;
 }
 
 module.exports = { Msg, BinMsg };
