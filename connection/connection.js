@@ -16,6 +16,8 @@ const MESSAGE_HEADER_SIZE = require('../wireprotocol/shared').MESSAGE_HEADER_SIZ
 const Buffer = require('safe-buffer').Buffer;
 
 let _id = 0;
+
+const DEFAULT_MAX_BSON_MESSAGE_SIZE = 1024 * 1024 * 16 * 4;
 const DEBUG_FIELDS = [
   'host',
   'port',
@@ -79,7 +81,7 @@ class Connection extends EventEmitter {
     this.logger = Logger('Connection', options);
     this.bson = options.bson;
     this.tag = options.tag;
-    this.maxBsonMessageSize = options.maxBsonMessageSize || 1024 * 1024 * 16 * 4;
+    this.maxBsonMessageSize = options.maxBsonMessageSize || DEFAULT_MAX_BSON_MESSAGE_SIZE;
 
     this.port = options.port || 27017;
     this.host = options.host || 'localhost';
