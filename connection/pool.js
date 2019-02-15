@@ -160,22 +160,26 @@ var Pool = function(topology, options) {
   this.connectionIndex = 0;
 
   // event handlers
-  const self = this;
+  const pool = this;
   this._messageHandler = messageHandler(this);
   this._connectionCloseHandler = function(err) {
-    connectionFailureHandler(self, 'close', err, this);
+    const connection = this;
+    connectionFailureHandler(pool, 'close', err, connection);
   };
 
   this._connectionErrorHandler = function(err) {
-    connectionFailureHandler(self, 'error', err, this);
+    const connection = this;
+    connectionFailureHandler(pool, 'error', err, connection);
   };
 
   this._connectionTimeoutHandler = function(err) {
-    connectionFailureHandler(self, 'timeout', err, this);
+    const connection = this;
+    connectionFailureHandler(pool, 'timeout', err, connection);
   };
 
   this._connectionParseErrorHandler = function(err) {
-    connectionFailureHandler(self, 'parseError', err, this);
+    const connection = this;
+    connectionFailureHandler(pool, 'parseError', err, connection);
   };
 };
 
