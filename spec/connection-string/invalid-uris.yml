@@ -231,7 +231,7 @@ tests:
         hosts: ~
         auth: ~
         options: ~
- -
+    -
         description: "Username with password containing an unescaped percent sign"
         uri: "mongodb://alice%foo:bar@127.0.0.1"
         valid: false

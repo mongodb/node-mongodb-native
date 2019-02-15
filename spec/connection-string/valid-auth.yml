@@ -189,6 +189,22 @@ tests:
         options:
             authmechanism: "MONGODB-CR"
     -
+        description: "Subdelimiters in user/pass don't need escaping (MONGODB-CR)"
+        uri: "mongodb://!$&'()*+,;=:!$&'()*+,;=@127.0.0.1/admin?authMechanism=MONGODB-CR"
+        valid: true
+        warning: false
+        hosts:
+            -
+                type: "ipv4"
+                host: "127.0.0.1"
+                port: ~
+        auth:
+            username: "!$&'()*+,;="
+            password: "!$&'()*+,;="
+            db: "admin"
+        options:
+            authmechanism: "MONGODB-CR"
+    -
         description: "Escaped username (MONGODB-X509)"
         uri: "mongodb://CN%3DmyName%2COU%3DmyOrgUnit%2CO%3DmyOrg%2CL%3DmyLocality%2CST%3DmyState%2CC%3DmyCountry@localhost/?authMechanism=MONGODB-X509"
         valid: true
