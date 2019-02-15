@@ -1207,15 +1207,18 @@ Pool.prototype.write = function(command, options, cb) {
     }
 
     // decorate the commands with session-specific details
+    let commandDocument = command;
     if (command instanceof Query) {
-      if (command.query.$query) {
-        Object.assign(command.query.$query, sessionOptions);
-      } else {
-        Object.assign(command.query, sessionOptions);
-      }
-    } else {
-      Object.assign(command, sessionOptions);
+      commandDocument = command.query;
+    } else if (command instanceof Msg) {
+      commandDocument = command.command;
     }
+
+    if (commandDocument.$query) {
+      commandDocument = commandDocument.$query;
+    }
+
+    Object.assign(commandDocument, sessionOptions);
   }
 
   // If command monitoring is enabled we need to modify the callback here
