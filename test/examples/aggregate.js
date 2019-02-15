@@ -1,4 +1,5 @@
 'use strict';
+/* eslint-disable no-unused-vars */
 
 const setupDatabase = require('../functional/shared').setupDatabase;
 const MongoClient = require('../../lib/mongo_client');
@@ -26,9 +27,10 @@ describe('examples.aggregaton:', function() {
     metadata: { requires: { mongodb: '>=2.8.0', topology: ['single'] } },
     test: async function() {
       // Start aggregate example 1
-      await collection
-        .aggregate([{ $match: { 'items.fruit': 'banana' } }, { $sort: { date: 1 } }])
-        .toArray();
+      const cursor = collection.aggregate([
+        { $match: { 'items.fruit': 'banana' } },
+        { $sort: { date: 1 } }
+      ]);
       // End aggregate example 1
     }
   });
@@ -37,34 +39,32 @@ describe('examples.aggregaton:', function() {
     metadata: { requires: { mongodb: '>=2.8.0', topology: ['single'] } },
     test: async function() {
       // Start aggregate example 2
-      await collection
-        .aggregate([
-          {
-            $unwind: '$items'
-          },
-          {
-            $match: {
-              'items.fruit': 'banana'
-            }
-          },
-          {
-            $group: {
-              _id: { day: { $dayOfWeek: '$date' } },
-              count: { $sum: '$items.quantity' }
-            }
-          },
-          {
-            $project: {
-              dayOfWeek: '$_id.day',
-              numberSold: '$count',
-              _id: 0
-            }
-          },
-          {
-            $sort: { numberSold: 1 }
+      const cursor = collection.aggregate([
+        {
+          $unwind: '$items'
+        },
+        {
+          $match: {
+            'items.fruit': 'banana'
           }
-        ])
-        .toArray();
+        },
+        {
+          $group: {
+            _id: { day: { $dayOfWeek: '$date' } },
+            count: { $sum: '$items.quantity' }
+          }
+        },
+        {
+          $project: {
+            dayOfWeek: '$_id.day',
+            numberSold: '$count',
+            _id: 0
+          }
+        },
+        {
+          $sort: { numberSold: 1 }
+        }
+      ]);
       // End aggregate example 2
     }
   });
@@ -73,30 +73,28 @@ describe('examples.aggregaton:', function() {
     metadata: { requires: { mongodb: '>=2.8.0', topology: ['single'] } },
     test: async function() {
       // Start aggregate example 3
-      await collection
-        .aggregate([
-          {
-            $unwind: '$items'
-          },
-          {
-            $group: {
-              _id: { day: { $dayOfWeek: '$date' } },
-              items_sold: { $sum: '$items.quantity' },
-              revenue: { $sum: { $multiply: ['$items.quantity', '$items.price'] } }
-            }
-          },
-          {
-            $project: {
-              day: '$_id.day',
-              revenue: 1,
-              items_sold: 1,
-              discount: {
-                $cond: { if: { $lte: ['$revenue', 250] }, then: 25, else: 0 }
-              }
+      const cursor = collection.aggregate([
+        {
+          $unwind: '$items'
+        },
+        {
+          $group: {
+            _id: { day: { $dayOfWeek: '$date' } },
+            items_sold: { $sum: '$items.quantity' },
+            revenue: { $sum: { $multiply: ['$items.quantity', '$items.price'] } }
+          }
+        },
+        {
+          $project: {
+            day: '$_id.day',
+            revenue: 1,
+            items_sold: 1,
+            discount: {
+              $cond: { if: { $lte: ['$revenue', 250] }, then: 25, else: 0 }
             }
           }
-        ])
-        .toArray();
+        }
+      ]);
       // End aggregate example 3
     }
   });
@@ -105,35 +103,33 @@ describe('examples.aggregaton:', function() {
     metadata: { requires: { mongodb: '>=3.6.0', topology: ['single'] } },
     test: async function() {
       // Start aggregate example 4
-      await collection
-        .aggregate([
-          {
-            $lookup: {
-              from: 'air_airlines',
-              let: { constituents: '$airlines' },
-              pipeline: [
-                {
-                  $match: { $expr: { $in: ['$name', '$$constituents'] } }
-                }
-              ],
-              as: 'airlines'
-            }
-          },
-          {
-            $project: {
-              _id: 0,
-              name: 1,
-              airlines: {
-                $filter: {
-                  input: '$airlines',
-                  as: 'airline',
-                  cond: { $eq: ['$$airline.country', 'Canada'] }
-                }
+      const cursor = collection.aggregate([
+        {
+          $lookup: {
+            from: 'air_airlines',
+            let: { constituents: '$airlines' },
+            pipeline: [
+              {
+                $match: { $expr: { $in: ['$name', '$$constituents'] } }
+              }
+            ],
+            as: 'airlines'
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            name: 1,
+            airlines: {
+              $filter: {
+                input: '$airlines',
+                as: 'airline',
+                cond: { $eq: ['$$airline.country', 'Canada'] }
               }
             }
           }
-        ])
-        .toArray();
+        }
+      ]);
       // End aggregate example 4
     }
   });
