@@ -7,7 +7,8 @@ function connect(options, callback) {
   if (options.family !== void 0) {
     makeConnection(options.family, options, (err, socket) => {
       if (err) {
-        return callback(err, socket); // in the error case, `socket` is the originating error event name
+        callback(err, socket); // in the error case, `socket` is the originating error event name
+        return;
       }
 
       callback(null, new Connection(socket, options));
@@ -20,7 +21,8 @@ function connect(options, callback) {
     if (err) {
       makeConnection(4, options, (err, ipv4Socket) => {
         if (err) {
-          return callback(err, ipv4Socket); // in the error case, `ipv4Socket` is the originating error event name
+          callback(err, ipv4Socket); // in the error case, `ipv4Socket` is the originating error event name
+          return;
         }
 
         callback(null, new Connection(ipv4Socket, options));
