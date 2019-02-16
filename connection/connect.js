@@ -5,8 +5,14 @@ const Connection = require('./connection');
 const Query = require('./commands').Query;
 const createClientInfo = require('../topologies/shared').createClientInfo;
 const MongoError = require('../error').MongoError;
+const defaultAuthProviders = require('../auth/defaultAuthProviders').defaultAuthProviders;
+let AUTH_PROVIDERS;
 
 function connect(options, callback) {
+  if (AUTH_PROVIDERS == null) {
+    AUTH_PROVIDERS = defaultAuthProviders(options.bson);
+  }
+
   if (options.family !== void 0) {
     makeConnection(options.family, options, (err, socket) => {
       if (err) {
@@ -132,6 +138,14 @@ function performInitialHandshake(conn, options, callback) {
     //       relocated, or at very least restructured.
     conn.ismaster = ismaster;
     conn.lastIsMasterMS = new Date().getTime() - start;
+
+    const credentials = options.credentials;
+    if (credentials) {
+      credentials.resolveAuthMechanism(ismaster);
+      authenticate(conn, credentials, callback);
+      return;
+    }
+
     callback(null, conn);
   });
 }
@@ -260,6 +274,7 @@ function makeConnection(family, options, callback) {
 
 const CONNECTION_ERROR_EVENTS = ['error', 'close', 'timeout', 'parseError'];
 function runCommand(conn, ns, command, options, callback) {
+  if (typeof options === 'function') (callback = options), (options = {});
   const socketTimeout = typeof options.socketTimeout === 'number' ? options.socketTimeout : 360000;
   const bson = conn.options.bson;
   const query = new Query(bson, ns, command, {
@@ -291,6 +306,20 @@ function runCommand(conn, ns, command, options, callback) {
   CONNECTION_ERROR_EVENTS.forEach(eventName => conn.once(eventName, errorHandler));
   conn.on('message', messageHandler);
   conn.write(query.toBin());
+}
+
+function authenticate(conn, credentials, callback) {
+  const mechanism = credentials.mechanism;
+  if (!AUTH_PROVIDERS[mechanism]) {
+    callback(new MongoError(`authMechanism '${mechanism}' not supported`));
+    return;
+  }
+
+  const provider = AUTH_PROVIDERS[mechanism];
+  provider.auth(runCommand, [conn], credentials, () => {
+    console.log('authed through provider!');
+    callback(null, conn);
+  });
 }
 
 module.exports = connect;
