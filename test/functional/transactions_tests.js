@@ -128,16 +128,20 @@ describe('Transactions', function() {
   });
 
   describe('withTransaction', function() {
-    let session;
+    let session, sessionPool;
     beforeEach(() => {
       const topology = new core.Server();
-      const sessionPool = new sessions.ServerSessionPool(topology);
+      sessionPool = new sessions.ServerSessionPool(topology);
       session = new sessions.ClientSession(topology, sessionPool);
+    });
+
+    afterEach(() => {
+      sessionPool.endAllPooledSessions();
     });
 
     it('should provide a useful error if a Promise is not returned', {
       metadata: { requires: { topology: ['replicaset', 'mongos'], mongodb: '>=4.0.x' } },
-      test: function() {
+      test: function(done) {
         function fnThatDoesntReturnPromise() {
           return false;
         }
@@ -145,6 +149,8 @@ describe('Transactions', function() {
         expect(() => session.withTransaction(fnThatDoesntReturnPromise)).to.throw(
           /must return a Promise/
         );
+
+        session.endSession(done);
       }
     });
   });
