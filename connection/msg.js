@@ -49,6 +49,10 @@ class Msg {
     this.command = command;
     this.command.$db = databaseNamespace(ns);
 
+    if (options.readPreference) {
+      this.command.$readPreference = options.readPreference.toJSON();
+    }
+
     // Ensure empty options
     this.options = options || {};
 
