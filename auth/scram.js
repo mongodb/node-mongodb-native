@@ -121,8 +121,8 @@ class ScramSHA extends AuthProvider {
       return err;
     }
 
-    if (r.result['$err'] || r.result['errmsg']) {
-      return r.result;
+    if (r.$err || r.errmsg) {
+      return r;
     }
   }
 
@@ -177,7 +177,7 @@ class ScramSHA extends AuthProvider {
         return callback(tmpError, null);
       }
 
-      const dict = parsePayload(r.result.payload.value());
+      const dict = parsePayload(r.payload.value());
       const iterations = parseInt(dict.i, 10);
       const salt = dict.s;
       const rnonce = dict.r;
@@ -198,29 +198,25 @@ class ScramSHA extends AuthProvider {
 
       const clientKey = HMAC(cryptoMethod, saltedPassword, 'Client Key');
       const storedKey = H(cryptoMethod, clientKey);
-      const authMessage = [
-        firstBare,
-        r.result.payload.value().toString('base64'),
-        withoutProof
-      ].join(',');
+      const authMessage = [firstBare, r.payload.value().toString('base64'), withoutProof].join(',');
 
       const clientSignature = HMAC(cryptoMethod, storedKey, authMessage);
       const clientProof = `p=${xor(clientKey, clientSignature)}`;
       const clientFinal = [withoutProof, clientProof].join(',');
       const saslContinueCmd = {
         saslContinue: 1,
-        conversationId: r.result.conversationId,
+        conversationId: r.conversationId,
         payload: new Binary(Buffer.from(clientFinal))
       };
 
       sendAuthCommand(connection, `${db}.$cmd`, saslContinueCmd, (err, r) => {
-        if (!r || r.result.done !== false) {
+        if (!r || r.done !== false) {
           return callback(err, r);
         }
 
         const retrySaslContinueCmd = {
           saslContinue: 1,
-          conversationId: r.result.conversationId,
+          conversationId: r.conversationId,
           payload: Buffer.alloc(0)
         };
 

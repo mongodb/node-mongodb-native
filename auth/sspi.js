@@ -90,9 +90,8 @@ function SSIPAuthenticate(
         autoAuthorize: 1
       };
 
-      authCommand(command, (err, result) => {
+      authCommand(command, (err, doc) => {
         if (err) return callback(err, false);
-        const doc = result.result;
 
         authProcess.transition(doc.payload, (err, payload) => {
           if (err) return callback(err, false);
@@ -102,9 +101,8 @@ function SSIPAuthenticate(
             payload
           };
 
-          authCommand(command, (err, result) => {
+          authCommand(command, (err, doc) => {
             if (err) return callback(err, false);
-            const doc = result.result;
 
             authProcess.transition(doc.payload, (err, payload) => {
               if (err) return callback(err, false);

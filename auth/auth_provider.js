@@ -42,10 +42,8 @@ class AuthProvider {
         // If we have an error
         if (err) {
           errorObject = err;
-        } else if (r.result && r.result['$err']) {
-          errorObject = r.result;
-        } else if (r.result && r.result['errmsg']) {
-          errorObject = r.result;
+        } else if (r && (r.$err || r.errmsg)) {
+          errorObject = r;
         } else {
           numberOfValidConnections = numberOfValidConnections + 1;
         }

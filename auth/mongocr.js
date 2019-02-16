@@ -24,7 +24,7 @@ class MongoCR extends AuthProvider {
 
       // Get nonce
       if (err == null) {
-        nonce = r.result.nonce;
+        nonce = r.nonce;
         // Use node md5 generator
         let md5 = crypto.createHash('md5');
         // Generate keys used for authentication

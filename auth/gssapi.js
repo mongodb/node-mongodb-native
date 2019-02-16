@@ -128,11 +128,10 @@ var MongoDBGSSAPIFirstStep = function(
   };
 
   // Write the commmand on the connection
-  sendAuthCommand(connection, '$external.$cmd', command, (err, r) => {
+  sendAuthCommand(connection, '$external.$cmd', command, (err, doc) => {
     if (err) return callback(err, false);
-    var doc = r.result;
     // Execute mongodb transition
-    mongo_auth_process.transition(r.result.payload, function(err, payload) {
+    mongo_auth_process.transition(doc.payload, function(err, payload) {
       if (err) return callback(err, false);
 
       // MongoDB API Second Step
@@ -177,9 +176,8 @@ var MongoDBGSSAPISecondStep = function(
 
   // Execute the command
   // Write the commmand on the connection
-  sendAuthCommand(connection, '$external.$cmd', command, (err, r) => {
+  sendAuthCommand(connection, '$external.$cmd', command, (err, doc) => {
     if (err) return callback(err, false);
-    var doc = r.result;
     // Call next transition for kerberos
     mongo_auth_process.transition(doc.payload, function(err, payload) {
       if (err) return callback(err, false);

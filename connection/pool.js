@@ -284,9 +284,14 @@ function makeCommandWriter(self) {
       numberToReturn: 1
     });
 
+    function wrappedCallback(err, r) {
+      if (err) return callback(err);
+      callback(null, r.result);
+    }
+
     // Set the connection workItem callback
     connection.workItems.push({
-      cb: callback,
+      cb: wrappedCallback,
       command: true,
       requestId: query.requestId
     });
