@@ -2,6 +2,9 @@
 const net = require('net');
 const tls = require('tls');
 const Connection = require('./connection');
+const Query = require('./commands').Query;
+const createClientInfo = require('../topologies/shared').createClientInfo;
+const MongoError = require('../error').MongoError;
 
 function connect(options, callback) {
   if (options.family !== void 0) {
@@ -11,7 +14,7 @@ function connect(options, callback) {
         return;
       }
 
-      callback(null, new Connection(socket, options));
+      performInitialHandshake(new Connection(socket, options), options, callback);
     });
 
     return;
@@ -25,13 +28,106 @@ function connect(options, callback) {
           return;
         }
 
-        callback(null, new Connection(ipv4Socket, options));
+        performInitialHandshake(new Connection(ipv4Socket, options), options, callback);
       });
 
       return;
     }
 
-    callback(null, new Connection(ipv6Socket, options));
+    performInitialHandshake(new Connection(ipv6Socket, options), options, callback);
+  });
+}
+
+function isSupportedServer(ismaster) {
+  return ismaster && typeof ismaster.maxWireVersion === 'number' && ismaster.maxWireVersion >= 2;
+}
+
+function getSaslSupportedMechs(options) {
+  if (!(options && options.credentials)) {
+    return {};
+  }
+
+  const credentials = options.credentials;
+  const authMechanism = credentials.mechanism;
+  const authSource = credentials.source || options.dbName || 'admin';
+  const user = credentials.username || options.user;
+
+  if (typeof authMechanism === 'string' && authMechanism.toUpperCase() !== 'DEFAULT') {
+    return {};
+  }
+
+  if (!user) {
+    return {};
+  }
+
+  return { saslSupportedMechs: `${authSource}.${user}` };
+}
+
+function performInitialHandshake(conn, options, callback) {
+  let compressors = [];
+  if (options.compression && options.compression.compressors) {
+    compressors = options.compression.compressors;
+  }
+
+  const handshakeDoc = Object.assign(
+    {
+      ismaster: true,
+      client: createClientInfo(options),
+      compression: compressors
+    },
+    getSaslSupportedMechs(options)
+  );
+
+  const start = new Date().getTime();
+  runCommand(conn, 'admin.$cmd', handshakeDoc, options, (err, ismaster) => {
+    if (err) {
+      callback(err, null);
+      return;
+    }
+
+    if (ismaster.ok === 0) {
+      callback(new MongoError(ismaster), null);
+      return;
+    }
+
+    if (!isSupportedServer(ismaster)) {
+      const latestSupportedVersion = '2.6';
+      const message =
+        'Server at ' +
+        options.host +
+        ':' +
+        options.port +
+        ' reports wire version ' +
+        (ismaster.maxWireVersion || 0) +
+        ', but this version of Node.js Driver requires at least 2 (MongoDB' +
+        latestSupportedVersion +
+        ').';
+
+      callback(new MongoError(message), null);
+      return;
+    }
+
+    // resolve compression
+    if (ismaster.compression) {
+      const agreedCompressors = compressors.filter(
+        compressor => ismaster.compression.indexOf(compressor) !== -1
+      );
+
+      if (agreedCompressors.length) {
+        conn.agreedCompressor = agreedCompressors[0];
+      }
+
+      if (options.compression && options.compression.zlibCompressionLevel) {
+        conn.zlibCompressionLevel = options.compression.zlibCompressionLevel;
+      }
+    }
+
+    // NOTE: This is metadata attached to the connection while porting away from
+    //       handshake being done in the `Server` class. Likely, it should be
+    //       relocated, or at very least restructured.
+    conn.ismaster = ismaster;
+    conn.lastIsMasterMS = new Date().getTime() - start;
+    callback(null, conn);
   });
 }
 
@@ -155,6 +251,41 @@ function makeConnection(family, options, callback) {
   socket.once('timeout', errorHandler('timeout'));
   socket.once('parseError', errorHandler('parseError'));
   socket.once('connect', connectHandler);
+}
+
+const CONNECTION_ERROR_EVENTS = ['error', 'close', 'timeout', 'parseError'];
+function runCommand(conn, ns, command, options, callback) {
+  const socketTimeout = typeof options.socketTimeout === 'number' ? options.socketTimeout : 360000;
+  const bson = conn.options.bson;
+  const query = new Query(bson, ns, command, {
+    numberToSkip: 0,
+    numberToReturn: 1
+  });
+
+  function errorHandler(err) {
+    conn.resetSocketTimeout();
+    CONNECTION_ERROR_EVENTS.forEach(eventName => conn.removeListener(eventName, errorHandler));
+    conn.removeListener('message', messageHandler);
+    callback(err, null);
+  }
+
+  function messageHandler(msg) {
+    if (msg.responseTo !== query.requestId) {
+      return;
+    }
+
+    conn.resetSocketTimeout();
+    CONNECTION_ERROR_EVENTS.forEach(eventName => conn.removeListener(eventName, errorHandler));
+    conn.removeListener('message', messageHandler);
+
+    msg.parse({ promoteValues: true });
+    callback(null, msg.documents[0]);
+  }
+
+  conn.setSocketTimeout(socketTimeout);
+  CONNECTION_ERROR_EVENTS.forEach(eventName => conn.once(eventName, errorHandler));
+  conn.on('message', messageHandler);
+  conn.write(query.toBin());
 }
 
 module.exports = connect;

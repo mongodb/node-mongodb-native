@@ -717,8 +717,10 @@ Pool.prototype.connect = function(credentials) {
         self.logger.debug(`connection attempt failed with error [${JSON.stringify(err)}]`);
       }
 
-      // NOTE: when `err` exists, `connection` is actually the originating event name
-      connectionFailureHandler(self, connection, err);
+      if (self.state === CONNECTING) {
+        self.emit('error', err);
+      }
+
       return;
     }
 
@@ -739,7 +741,7 @@ Pool.prototype.connect = function(credentials) {
     if (self.options.inTopology) {
       stateTransition(self, CONNECTED);
       self.availableConnections.push(connection);
-      return self.emit('connect', self);
+      return self.emit('connect', self, connection);
     }
 
     reauthenticate(self, connection, function(err) {
@@ -771,7 +773,7 @@ Pool.prototype.connect = function(credentials) {
           }
         }
 
-        self.emit('connect', self);
+        self.emit('connect', self, connection);
       });
     });
   });

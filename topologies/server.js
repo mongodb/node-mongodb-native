@@ -21,38 +21,6 @@ var inherits = require('util').inherits,
 
 const collationNotSupported = require('../utils').collationNotSupported;
 
-function getSaslSupportedMechs(options) {
-  if (!(options && options.credentials)) {
-    return {};
-  }
-
-  const credentials = options.credentials;
-
-  const authMechanism = credentials.mechanism;
-  const authSource = credentials.source || options.dbName || 'admin';
-  const user = credentials.username || options.user;
-
-  if (typeof authMechanism === 'string' && authMechanism.toUpperCase() !== 'DEFAULT') {
-    return {};
-  }
-
-  if (!user) {
-    return {};
-  }
-
-  return { saslSupportedMechs: `${authSource}.${user}` };
-}
-
-function extractIsMasterError(err, result) {
-  if (err) {
-    return err;
-  }
-
-  if (result && result.result && result.result.ok === 0) {
-    return new MongoError(result.result);
-  }
-}
-
 // Used for filtering out fields for loggin
 var debugFields = [
   'reconnect',
@@ -278,10 +246,6 @@ Object.defineProperty(Server.prototype, 'name', {
   }
 });
 
-function isSupportedServer(response) {
-  return response && typeof response.maxWireVersion === 'number' && response.maxWireVersion >= 2;
-}
-
 function disconnectHandler(self, type, ns, cmd, options, callback) {
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected
@@ -339,7 +303,7 @@ function monitoringProcess(self) {
 }
 
 var eventHandler = function(self, event) {
-  return function(err) {
+  return function(err, conn) {
     // Log information of received information if in info mode
     if (self.s.logger.isInfo()) {
       var object = err instanceof MongoError ? JSON.stringify(err) : {};
@@ -350,118 +314,67 @@ var eventHandler = function(self, event) {
 
     // Handle connect event
     if (event === 'connect') {
-      // Issue an ismaster command at connect
-      // Create a query instance
-      var compressors =
-        self.s.compression && self.s.compression.compressors ? self.s.compression.compressors : [];
-      // Get start time
-      var start = new Date().getTime();
-      // Execute the ismaster query
-      self.command(
-        'admin.$cmd',
-        Object.assign(
-          { ismaster: true, client: self.clientInfo, compression: compressors },
-          getSaslSupportedMechs(self.s.options)
-        ),
-        {
-          socketTimeout: self.s.options.connectionTimeout || 2000
-        },
-        (err, result) => {
-          // Set initial lastIsMasterMS
-          self.lastIsMasterMS = new Date().getTime() - start;
+      self.initialConnect = false;
+      self.ismaster = conn.ismaster;
+      self.lastIsMasterMS = conn.lastIsMasterMS;
+      if (conn.agreedCompressor) {
+        self.s.pool.options.agreedCompressor = conn.agreedCompressor;
+      }
 
-          const serverError = extractIsMasterError(err, result);
+      if (conn.zlibCompressionLevel) {
+        self.s.pool.options.zlibCompressionLevel = conn.zlibCompressionLevel;
+      }
 
-          if (serverError) {
-            self.destroy();
-            return self.emit('error', serverError);
-          }
+      if (conn.ismaster.$clusterTime) {
+        const $clusterTime = conn.ismaster.$clusterTime;
+        self.clusterTime = $clusterTime;
+      }
 
-          if (!isSupportedServer(result.result)) {
-            self.destroy();
-            const latestSupportedVersion = '2.6';
-            const message =
-              'Server at ' +
-              self.s.options.host +
-              ':' +
-              self.s.options.port +
-              ' reports wire version ' +
-              (result.result.maxWireVersion || 0) +
-              ', but this version of Node.js Driver requires at least 2 (MongoDB' +
-              latestSupportedVersion +
-              ').';
-            return self.emit('error', new MongoError(message), self);
-          }
+      // It's a proxy change the type so
+      // the wireprotocol will send $readPreference
+      if (self.ismaster.msg === 'isdbgrid') {
+        self._type = 'mongos';
+      }
 
-          // Determine whether the server is instructing us to use a compressor
-          if (result.result && result.result.compression) {
-            for (var i = 0; i < self.s.compression.compressors.length; i++) {
-              if (result.result.compression.indexOf(self.s.compression.compressors[i]) > -1) {
-                self.s.pool.options.agreedCompressor = self.s.compression.compressors[i];
-                break;
-              }
+      // Have we defined self monitoring
+      if (self.s.monitoring) {
+        self.monitoringProcessId = setTimeout(monitoringProcess(self), self.s.monitoringInterval);
+      }
+
+      // Emit server description changed if something listening
+      sdam.emitServerDescriptionChanged(self, {
+        address: self.name,
+        arbiters: [],
+        hosts: [],
+        passives: [],
+        type: sdam.getTopologyType(self)
+      });
+
+      if (!self.s.inTopology) {
+        // Emit topology description changed if something listening
+        sdam.emitTopologyDescriptionChanged(self, {
+          topologyType: 'Single',
+          servers: [
+            {
+              address: self.name,
+              arbiters: [],
+              hosts: [],
+              passives: [],
+              type: sdam.getTopologyType(self)
             }
+          ]
+        });
+      }
 
-            if (self.s.compression.zlibCompressionLevel) {
-              self.s.pool.options.zlibCompressionLevel = self.s.compression.zlibCompressionLevel;
-            }
-          }
+      // Log the ismaster if available
+      if (self.s.logger.isInfo()) {
+        self.s.logger.info(
+          f('server %s connected with ismaster [%s]', self.name, JSON.stringify(self.ismaster))
+        );
+      }
 
-          // Ensure no error emitted after initial connect when reconnecting
-          self.initialConnect = false;
-          // Save the ismaster
-          self.ismaster = result.result;
-
-          // It's a proxy change the type so
-          // the wireprotocol will send $readPreference
-          if (self.ismaster.msg === 'isdbgrid') {
-            self._type = 'mongos';
-          }
-
-          // Have we defined self monitoring
-          if (self.s.monitoring) {
-            self.monitoringProcessId = setTimeout(
-              monitoringProcess(self),
-              self.s.monitoringInterval
-            );
-          }
-
-          // Emit server description changed if something listening
-          sdam.emitServerDescriptionChanged(self, {
-            address: self.name,
-            arbiters: [],
-            hosts: [],
-            passives: [],
-            type: sdam.getTopologyType(self)
-          });
-
-          if (!self.s.inTopology) {
-            // Emit topology description changed if something listening
-            sdam.emitTopologyDescriptionChanged(self, {
-              topologyType: 'Single',
-              servers: [
-                {
-                  address: self.name,
-                  arbiters: [],
-                  hosts: [],
-                  passives: [],
-                  type: sdam.getTopologyType(self)
-                }
-              ]
-            });
-          }
-
-          // Log the ismaster if available
-          if (self.s.logger.isInfo()) {
-            self.s.logger.info(
-              f('server %s connected with ismaster [%s]', self.name, JSON.stringify(self.ismaster))
-            );
-          }
-
-          // Emit connect
-          self.emit('connect', self);
-        }
-      );
+      // Emit connect
+      self.emit('connect', self);
     } else if (
       event === 'error' ||
       event === 'parseError' ||

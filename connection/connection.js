@@ -428,29 +428,14 @@ function dataHandler(conn) {
           data = data.slice(remainingBytesToRead);
 
           // Emit current complete message
-          try {
-            const emitBuffer = conn.buffer;
-            // Reset state of buffer
-            conn.buffer = null;
-            conn.sizeOfMessage = 0;
-            conn.bytesRead = 0;
-            conn.stubBuffer = null;
+          const emitBuffer = conn.buffer;
+          // Reset state of buffer
+          conn.buffer = null;
+          conn.sizeOfMessage = 0;
+          conn.bytesRead = 0;
+          conn.stubBuffer = null;
 
-            processMessage(conn, emitBuffer);
-          } catch (err) {
-            const errorObject = {
-              err: 'socketHandler',
-              trace: err,
-              bin: conn.buffer,
-              parseState: {
-                sizeOfMessage: conn.sizeOfMessage,
-                bytesRead: conn.bytesRead,
-                stubBuffer: conn.stubBuffer
-              }
-            };
-            // We got a parse Error fire it off then keep going
-            conn.emit('parseError', errorObject, conn);
-          }
+          processMessage(conn, emitBuffer);
         }
       } else {
         // Stub buffer is kept in case we don't get enough bytes to determine the
@@ -523,20 +508,16 @@ function dataHandler(conn) {
               sizeOfMessage < conn.maxBsonMessageSize &&
               sizeOfMessage === data.length
             ) {
-              try {
-                const emitBuffer = data;
-                // Reset state of buffer
-                conn.buffer = null;
-                conn.sizeOfMessage = 0;
-                conn.bytesRead = 0;
-                conn.stubBuffer = null;
-                // Exit parsing loop
-                data = Buffer.alloc(0);
-                // Emit the message
-                processMessage(conn, emitBuffer);
-              } catch (err) {
-                conn.emit('parseError', err, conn);
-              }
+              const emitBuffer = data;
+              // Reset state of buffer
+              conn.buffer = null;
+              conn.sizeOfMessage = 0;
+              conn.bytesRead = 0;
+              conn.stubBuffer = null;
+              // Exit parsing loop
+              data = Buffer.alloc(0);
+              // Emit the message
+              processMessage(conn, emitBuffer);
             } else if (sizeOfMessage <= 4 || sizeOfMessage > conn.maxBsonMessageSize) {
               const errorObject = {
                 err: 'socketHandler',
