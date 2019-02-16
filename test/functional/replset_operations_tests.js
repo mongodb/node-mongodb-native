@@ -264,7 +264,7 @@ describe('ReplSet (Operations)', function() {
 
               expect(result.nInserted).to.equal(2);
               expect(result.nMatched).to.equal(0);
-              expect(result.nUpserted).to.equal(1);
+              expect(result.nUpserted).to.equal(0);
               expect(result.nRemoved).to.equal(0);
               expect(result.nModified).to.satisfy(nModified => {
                 return nModified == null || nModified === 0;
