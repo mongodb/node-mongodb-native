@@ -1546,6 +1546,7 @@ describe('Change Streams', function() {
       const OPERATION_TIME = new Timestamp(4, 1501511802);
 
       const makeIsMaster = server => ({
+        __nodejs_mock_server__: true,
         ismaster: true,
         secondary: false,
         me: server.uri(),
