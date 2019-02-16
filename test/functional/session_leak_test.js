@@ -12,11 +12,11 @@ function getSessionLeakMetadata(currentTest) {
   return (currentTest.metadata && currentTest.metadata.sessions) || {};
 }
 
-function dumpSessionInfo(sessions) {
-  console.log('ACTIVE SESSIONS:');
+function dumpSessionInfo(which, sessions) {
+  console.log(which);
   sessions.forEach(session => {
-    console.log(`id: ${JSON.stringify(session.id)}`);
-    console.log(session.stack);
+    console.log(` >> ${JSON.stringify(session.id)}`);
+    console.log(session.trace);
   });
 }
 
@@ -80,7 +80,7 @@ afterEach('Session Leak After Each - ensure no leaks', function() {
 
   try {
     if (activeSessionsBeforeClose.size) {
-      dumpSessionInfo(activeSessionsBeforeClose);
+      dumpSessionInfo('active sessions before `close`', activeSessionsBeforeClose);
     }
 
     expect(
@@ -89,7 +89,7 @@ afterEach('Session Leak After Each - ensure no leaks', function() {
     ).to.equal(0);
 
     if (activeSessions.size) {
-      dumpSessionInfo(activeSessions);
+      dumpSessionInfo('active sessions', activeSessions);
     }
 
     expect(
@@ -98,7 +98,7 @@ afterEach('Session Leak After Each - ensure no leaks', function() {
     ).to.equal(0);
 
     if (pooledSessions.size) {
-      dumpSessionInfo(pooledSessions);
+      dumpSessionInfo('pooled sessions', pooledSessions);
     }
 
     expect(
