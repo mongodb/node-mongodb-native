@@ -48,7 +48,4 @@ jobs:
   allow_failures:
     - env:
         - MONGODB_VERSION=4.0.x
-        - MONGODB_ENVIRONMENT=replicaset
-    - env:
-        - MONGODB_VERSION=4.0.x
         - MONGODB_ENVIRONMENT=sharded
