@@ -18,10 +18,7 @@ const SessionMixins = require('./shared').SessionMixins;
 const isRetryableWritesSupported = require('./shared').isRetryableWritesSupported;
 const relayEvents = require('../utils').relayEvents;
 const isRetryableError = require('../error').isRetryableError;
-
-const defaultAuthProviders = require('../auth/defaultAuthProviders').defaultAuthProviders;
-
-var BSON = retrieveBSON();
+const BSON = retrieveBSON();
 
 //
 // States
@@ -190,9 +187,7 @@ var ReplSet = function(seedlist, options) {
     // Are we running in debug mode
     debug: typeof options.debug === 'boolean' ? options.debug : false,
     // Client info
-    clientInfo: createClientInfo(options),
-    // Authentication context
-    authenticationContexts: []
+    clientInfo: createClientInfo(options)
   };
 
   // Add handler for topology change
@@ -216,9 +211,6 @@ var ReplSet = function(seedlist, options) {
     );
   }
 
-  // All the authProviders
-  this.authProviders = options.authProviders || defaultAuthProviders(this.s.bson);
-
   // Add forwarding of events from state handler
   var types = ['joined', 'left'];
   types.forEach(function(x) {
@@ -237,8 +229,6 @@ var ReplSet = function(seedlist, options) {
   // Disconnected state
   this.state = DISCONNECTED;
   this.haTimeoutId = null;
-  // Are we authenticating
-  this.authenticating = false;
   // Last ismaster
   this.ismaster = null;
   // Contains the intervalId
@@ -300,50 +290,40 @@ function connectNewServers(self, servers, callback) {
         return this.destroy({ force: true });
       }
 
-      if (event === 'connect' && !self.authenticating) {
+      if (event === 'connect') {
         // Destroyed
         if (self.state === DESTROYED || self.state === UNREFERENCED) {
           return _self.destroy({ force: true });
         }
 
-        // Do we have authentication contexts that need to be applied
-        applyAuthenticationContexts(self, _self, function() {
-          // Destroy the instance
-          if (self.state === DESTROYED || self.state === UNREFERENCED) {
-            return _self.destroy({ force: true });
+        // Update the state
+        var result = self.s.replicaSetState.update(_self);
+        // Update the state with the new server
+        if (result) {
+          // Primary lastIsMaster store it
+          if (_self.lastIsMaster() && _self.lastIsMaster().ismaster) {
+            self.ismaster = _self.lastIsMaster();
           }
 
-          // Update the state
-          var result = self.s.replicaSetState.update(_self);
-          // Update the state with the new server
-          if (result) {
-            // Primary lastIsMaster store it
-            if (_self.lastIsMaster() && _self.lastIsMaster().ismaster) {
-              self.ismaster = _self.lastIsMaster();
-            }
-
-            // Remove the handlers
-            for (var i = 0; i < handlers.length; i++) {
-              _self.removeAllListeners(handlers[i]);
-            }
-
-            // Add stable state handlers
-            _self.on('error', handleEvent(self, 'error'));
-            _self.on('close', handleEvent(self, 'close'));
-            _self.on('timeout', handleEvent(self, 'timeout'));
-            _self.on('parseError', handleEvent(self, 'parseError'));
-
-            // Enalbe the monitoring of the new server
-            monitorServer(_self.lastIsMaster().me, self, {});
-
-            // Rexecute any stalled operation
-            rexecuteOperations(self);
-          } else {
-            _self.destroy({ force: true });
+          // Remove the handlers
+          for (let i = 0; i < handlers.length; i++) {
+            _self.removeAllListeners(handlers[i]);
           }
-        });
-      } else if (event === 'connect' && self.authenticating) {
-        this.destroy({ force: true });
+
+          // Add stable state handlers
+          _self.on('error', handleEvent(self, 'error'));
+          _self.on('close', handleEvent(self, 'close'));
+          _self.on('timeout', handleEvent(self, 'timeout'));
+          _self.on('parseError', handleEvent(self, 'parseError'));
+
+          // Enalbe the monitoring of the new server
+          monitorServer(_self.lastIsMaster().me, self, {});
+
+          // Rexecute any stalled operation
+          rexecuteOperations(self);
+        } else {
+          _self.destroy({ force: true });
+        }
       } else if (event === 'error') {
         error = err;
       }
@@ -374,7 +354,6 @@ function connectNewServers(self, servers, callback) {
         Object.assign({}, self.s.options, {
           host: _server.split(':')[0],
           port: parseInt(_server.split(':')[1], 10),
-          authProviders: self.authProviders,
           reconnect: false,
           monitoring: false,
           parent: self,
@@ -725,34 +704,6 @@ function handleEvent(self, event) {
   };
 }
 
-function applyAuthenticationContexts(self, server, callback) {
-  if (self.s.authenticationContexts.length === 0) {
-    return callback();
-  }
-
-  // Do not apply any auth contexts if it's an arbiter
-  if (server.lastIsMaster() && server.lastIsMaster().arbiterOnly) {
-    return callback();
-  }
-
-  // Copy contexts to ensure no modificiation in the middle of
-  // auth process.
-  var authCredentials = self.s.authenticationContexts.slice(0);
-
-  // Apply one of the contexts
-  function applyAuth(authCredentials, server, callback) {
-    if (authCredentials.length === 0) return callback();
-    // Get credentials
-    const credentials = authCredentials.shift();
-
-    // Attempt authentication
-    server.auth(credentials, () => applyAuth(authCredentials, server, callback));
-  }
-
-  // Apply all auth contexts
-  applyAuth(authCredentials, server, callback);
-}
-
 function shouldTriggerConnect(self) {
   const isConnecting = self.state === CONNECTING;
   const hasPrimary = self.s.replicaSetState.hasPrimary();
@@ -791,67 +742,59 @@ function handleInitialConnectEvent(self, event) {
 
     // Check the type of server
     if (event === 'connect') {
-      // Do we have authentication contexts that need to be applied
-      applyAuthenticationContexts(self, _this, function() {
-        // Destroy the instance
-        if (self.state === DESTROYED || self.state === UNREFERENCED) {
-          return _this.destroy({ force: true });
+      // Update the state
+      var result = self.s.replicaSetState.update(_this);
+      if (result === true) {
+        // Primary lastIsMaster store it
+        if (_this.lastIsMaster() && _this.lastIsMaster().ismaster) {
+          self.ismaster = _this.lastIsMaster();
         }
 
-        // Update the state
-        var result = self.s.replicaSetState.update(_this);
-        if (result === true) {
-          // Primary lastIsMaster store it
-          if (_this.lastIsMaster() && _this.lastIsMaster().ismaster) {
-            self.ismaster = _this.lastIsMaster();
-          }
-
-          // Debug log
-          if (self.s.logger.isDebug()) {
-            self.s.logger.debug(
-              f(
-                'handleInitialConnectEvent %s from server %s in replset with id %s has state [%s]',
-                event,
-                _this.name,
-                self.id,
-                JSON.stringify(self.s.replicaSetState.set)
-              )
-            );
-          }
-
-          // Remove the handlers
-          for (var i = 0; i < handlers.length; i++) {
-            _this.removeAllListeners(handlers[i]);
-          }
-
-          // Add stable state handlers
-          _this.on('error', handleEvent(self, 'error'));
-          _this.on('close', handleEvent(self, 'close'));
-          _this.on('timeout', handleEvent(self, 'timeout'));
-          _this.on('parseError', handleEvent(self, 'parseError'));
-
-          // Do we have a primary or primaryAndSecondary
-          if (shouldTriggerConnect(self)) {
-            // We are connected
-            self.state = CONNECTED;
-
-            // Set initial connect state
-            self.initialConnectState.connect = true;
-            // Emit connect event
-            process.nextTick(function() {
-              self.emit('connect', self);
-            });
-
-            topologyMonitor(self, {});
-          }
-        } else if (result instanceof MongoError) {
-          _this.destroy({ force: true });
-          self.destroy({ force: true });
-          return self.emit('error', result);
-        } else {
-          _this.destroy({ force: true });
+        // Debug log
+        if (self.s.logger.isDebug()) {
+          self.s.logger.debug(
+            f(
+              'handleInitialConnectEvent %s from server %s in replset with id %s has state [%s]',
+              event,
+              _this.name,
+              self.id,
+              JSON.stringify(self.s.replicaSetState.set)
+            )
+          );
         }
-      });
+
+        // Remove the handlers
+        for (let i = 0; i < handlers.length; i++) {
+          _this.removeAllListeners(handlers[i]);
+        }
+
+        // Add stable state handlers
+        _this.on('error', handleEvent(self, 'error'));
+        _this.on('close', handleEvent(self, 'close'));
+        _this.on('timeout', handleEvent(self, 'timeout'));
+        _this.on('parseError', handleEvent(self, 'parseError'));
+
+        // Do we have a primary or primaryAndSecondary
+        if (shouldTriggerConnect(self)) {
+          // We are connected
+          self.state = CONNECTED;
+
+          // Set initial connect state
+          self.initialConnectState.connect = true;
+          // Emit connect event
+          process.nextTick(function() {
+            self.emit('connect', self);
+          });
+
+          topologyMonitor(self, {});
+        }
+      } else if (result instanceof MongoError) {
+        _this.destroy({ force: true });
+        self.destroy({ force: true });
+        return self.emit('error', result);
+      } else {
+        _this.destroy({ force: true });
+      }
     } else {
       // Emit failure to connect
       self.emit('failed', this);
@@ -946,8 +889,6 @@ function emitSDAMEvent(self, event, description) {
 
 /**
  * Initiate server connect
- * @method
- * @param {MongoCredentials} [options.credentials=null] Auth credentials
  */
 ReplSet.prototype.connect = function(options) {
   var self = this;
@@ -961,7 +902,6 @@ ReplSet.prototype.connect = function(options) {
   var servers = this.s.seedlist.map(function(x) {
     return new Server(
       Object.assign({}, self.s.options, x, options, {
-        authProviders: self.authProviders,
         reconnect: false,
         monitoring: false,
         parent: self,
@@ -994,6 +934,16 @@ ReplSet.prototype.connect = function(options) {
 };
 
 /**
+ * Authenticate the topology.
+ * @method
+ * @param {MongoCredentials} credentials The credentials for authentication we are using
+ * @param {authResultCallback} callback A callback function
+ */
+ReplSet.prototype.auth = function(credentials, callback) {
+  callback(null, null);
+};
+
+/**
  * Destroy the server connection
  * @param {boolean} [options.force=false] Force destroy the pool
  * @method
@@ -1006,8 +956,6 @@ ReplSet.prototype.destroy = function(options) {
   if (this.haTimeoutId) clearTimeout(this.haTimeoutId);
   // Destroy the replicaset
   this.s.replicaSetState.destroy(options);
-  // Clear out authentication contexts
-  this.s.authenticationContexts = [];
 
   // Destroy all connecting servers
   this.s.connectingServers.forEach(function(x) {
@@ -1085,10 +1033,6 @@ ReplSet.prototype.connections = function() {
  */
 ReplSet.prototype.isConnected = function(options) {
   options = options || {};
-
-  // If we are authenticating signal not connected
-  // To avoid interleaving of operations
-  if (this.authenticating) return false;
 
   // If we specified a read preference check if we are connected to something
   // than can satisfy this
@@ -1374,175 +1318,6 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
 
   // Execute the command
   server.command(ns, cmd, options, cb);
-};
-
-/**
- * Authenticate the topology.
- * @method
- * @param {MongoCredentials} credentials The credentials for authentication we are using
- * @param {authResultCallback} callback A callback function
- */
-ReplSet.prototype.auth = function(credentials, callback) {
-  const mechanism = credentials.mechanism;
-  const source = credentials.source;
-
-  // If we don't have the mechanism fail
-  if (this.authProviders[mechanism] == null && mechanism !== 'default') {
-    return callback(new MongoError(f('auth provider %s does not exist', mechanism)));
-  }
-
-  // Are we already authenticating, throw
-  if (this.authenticating) {
-    return callback(new MongoError('authentication or logout allready in process'));
-  }
-
-  // Topology is not connected, save the call in the provided store to be
-  // Executed at some point when the handler deems it's reconnected
-  if (!this.isConnected() && this.s.disconnectHandler != null) {
-    if (!this.s.replicaSetState.hasPrimary() && !this.s.options.secondaryOnlyConnectionAllowed) {
-      return this.s.disconnectHandler.add('auth', source, [credentials, callback], {}, callback);
-    } else if (
-      !this.s.replicaSetState.hasSecondary() &&
-      this.s.options.secondaryOnlyConnectionAllowed
-    ) {
-      return this.s.disconnectHandler.add('auth', source, [credentials, callback], {}, callback);
-    }
-  }
-
-  // Get all the servers
-  const servers = this.s.replicaSetState.allServers();
-
-  // Get total count
-  let count = servers.length;
-
-  // No servers return
-  if (count === 0) {
-    this.authenticating = false;
-    return callback(null, true);
-  }
-
-  // Save current context index
-  const currentContextIndex = this.s.authenticationContexts.length;
-
-  // All errors
-  const errors = [];
-
-  // Set to authenticating
-  this.authenticating = true;
-
-  // Store the auth context and return the last index
-  this.s.authenticationContexts.push(credentials);
-
-  // Authenticate
-  const auth = server => {
-    const handleEnd = err => {
-      count = count - 1;
-      // Save all the errors
-      if (err) {
-        errors.push({ name: server.name, err: err });
-      }
-      // We are done
-      if (count === 0) {
-        // Auth is done
-        this.authenticating = false;
-
-        // Return the auth error
-        if (errors.length) {
-          // Remove the entry from the stored authentication contexts
-          this.s.authenticationContexts.splice(currentContextIndex, 0);
-          // Return error
-          return callback(
-            new MongoError({
-              message: 'authentication fail',
-              errors
-            }),
-            false
-          );
-        }
-
-        // Successfully authenticated session
-        callback(null, this);
-      }
-    };
-
-    if (!server.lastIsMaster().arbiterOnly) {
-      // Execute the auth only against non arbiter servers
-      server.auth(credentials, handleEnd);
-    } else {
-      // If we are authenticating against an arbiter just ignore it
-      handleEnd(null);
-    }
-  };
-
-  // Authenticate against all servers
-  while (servers.length > 0) {
-    auth(servers.shift());
-  }
-};
-
-/**
- * Logout from a database
- * @method
- * @param {string} db The db we are logging out from
- * @param {authResultCallback} callback A callback function
- */
-ReplSet.prototype.logout = function(dbName, callback) {
-  var self = this;
-  // Are we authenticating or logging out, throw
-  if (this.authenticating) {
-    throw new MongoError('authentication or logout allready in process');
-  }
-
-  // Ensure no new members are processed while logging out
-  this.authenticating = true;
-
-  // Remove from all auth providers (avoid any reaplication of the auth details)
-  var providers = Object.keys(this.authProviders);
-  for (var i = 0; i < providers.length; i++) {
-    this.authProviders[providers[i]].logout(dbName);
-  }
-
-  // Clear out any contexts associated with the db
-  self.s.authenticationContexts = self.s.authenticationContexts.filter(function(credentials) {
-    return credentials.source !== dbName;
-  });
-
-  // Now logout all the servers
-  var servers = this.s.replicaSetState.allServers();
-  var count = servers.length;
-  if (count === 0) return callback();
-  var errors = [];
-
-  function logoutServer(_server, cb) {
-    _server.logout(dbName, function(err) {
-      if (err) errors.push({ name: _server.name, err: err });
-      cb();
-    });
-  }
-
-  // Execute logout on all server instances
-  for (i = 0; i < servers.length; i++) {
-    logoutServer(servers[i], function() {
-      count = count - 1;
-
-      if (count === 0) {
-        // Do not block new operations
-        self.authenticating = false;
-        // If we have one or more errors
-        if (errors.length)
-          return callback(
-            new MongoError({
-              message: f('logout failed against db %s', dbName),
-              errors: errors
-            }),
-            false
-          );
-
-        // No errors
-        callback();
-      }
-    });
-  }
 };
 
 /**

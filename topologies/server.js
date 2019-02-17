@@ -456,8 +456,6 @@ var eventHandler = function(self, event) {
 
 /**
  * Initiate server connect
- * @method
- * @param {MongoCredentials} [options.credentials] MongoCredentials object for auth
  */
 Server.prototype.connect = function(options) {
   var self = this;
@@ -497,8 +495,17 @@ Server.prototype.connect = function(options) {
     address: self.name
   });
 
-  // Connect with optional auth settings
-  self.s.pool.connect(options.credentials);
+  self.s.pool.connect();
+};
+
+/**
+ * Authenticate the topology.
+ * @method
+ * @param {MongoCredentials} credentials The credentials for authentication we are using
+ * @param {authResultCallback} callback A callback function
+ */
+Server.prototype.auth = function(credentials, callback) {
+  callback(null, null);
 };
 
 /**
@@ -746,39 +753,6 @@ Server.prototype.cursor = function(ns, cmd, options) {
 
   // Return the cursor
   return new FinalCursor(this.s.bson, ns, cmd, options, topology, this.s.options);
-};
-
-/**
- * Logout from a database
- * @method
- * @param {string} db The db we are logging out from
- * @param {authResultCallback} callback A callback function
- */
-Server.prototype.logout = function(dbName, callback) {
-  this.s.pool.logout(dbName, callback);
-};
-
-/**
- * Authenticate using a specified mechanism
- * @method
- * @param {MongoCredentials} credentials Authentication credentials for login
- * @param {authResultCallback} callback A callback function
- */
-Server.prototype.auth = function(credentials, callback) {
-  credentials.resolveAuthMechanism(this.ismaster);
-
-  // If we are not connected or have a disconnectHandler specified
-  if (disconnectHandler(this, 'auth', credentials.source, [credentials, callback], {}, callback)) {
-    return;
-  }
-
-  // Do not authenticate if we are an arbiter
-  if (this.lastIsMaster() && this.lastIsMaster().arbiterOnly) {
-    return callback(null, true);
-  }
-
-  // Apply the arguments to the pool
-  this.s.pool.auth(credentials, callback);
 };
 
 /**
