@@ -41,9 +41,9 @@ class AuthProvider {
 
         // If we have an error
         if (err) {
-          errorObject = err;
+          errorObject = new MongoError(err);
         } else if (r && (r.$err || r.errmsg)) {
-          errorObject = r;
+          errorObject = new MongoError(r);
         } else {
           numberOfValidConnections = numberOfValidConnections + 1;
         }

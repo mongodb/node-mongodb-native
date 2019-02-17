@@ -122,7 +122,7 @@ class ScramSHA extends AuthProvider {
     }
 
     if (r.$err || r.errmsg) {
-      return r;
+      return new MongoError(r);
     }
   }
 
