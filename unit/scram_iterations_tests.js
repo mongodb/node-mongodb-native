@@ -48,23 +48,19 @@ describe('SCRAM Iterations Tests', function() {
       }
     });
 
-    const client = new Server(test.server.address());
-    client.on('error', done);
-    client.once('connect', server => {
-      server.auth(credentials, (err, result) => {
-        let testErr;
-        try {
-          expect(err).to.not.be.null;
-          expect(err)
-            .to.have.property('message')
-            .that.matches(/Server returned an invalid iteration count/);
-          expect(result).to.be.false;
-        } catch (e) {
-          testErr = e;
-        }
-        client.destroy();
-        done(testErr);
-      });
+    const client = new Server(Object.assign({}, test.server.address(), { credentials }));
+    client.on('error', err => {
+      let testErr;
+      try {
+        expect(err).to.not.be.null;
+        expect(err)
+          .to.have.property('message')
+          .that.matches(/Server returned an invalid iteration count/);
+      } catch (e) {
+        testErr = e;
+      }
+      client.destroy();
+      done(testErr);
     });
 
     client.connect();

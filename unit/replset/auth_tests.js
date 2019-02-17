@@ -29,6 +29,7 @@ describe('Auth (ReplSet)', function() {
 
     let finish = err => {
       finish = () => {};
+      replSet.destroy({ force: true });
       done(err);
     };
 
@@ -58,12 +59,12 @@ describe('Auth (ReplSet)', function() {
         connectionTimeout: 3000,
         disconnectHandler: mockDisconnectHandler,
         secondaryOnlyConnectionAllowed: true,
-        size: 1
+        size: 1,
+        credentials
       }
     );
 
     replSet.once('error', finish);
-    replSet.once('connect', () => replSet.auth(credentials, () => {}));
     replSet.connect({
       readPreference: new ReadPreference('primary'),
       checkServerIdentity: true,
