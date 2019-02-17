@@ -316,8 +316,8 @@ function authenticate(conn, credentials, callback) {
   }
 
   const provider = AUTH_PROVIDERS[mechanism];
-  provider.auth(runCommand, [conn], credentials, () => {
-    console.log('authed through provider!');
+  provider.auth(runCommand, [conn], credentials, err => {
+    if (err) return callback(err);
     callback(null, conn);
   });
 }
