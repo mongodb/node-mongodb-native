@@ -145,8 +145,6 @@ var Pool = function(topology, options) {
   // Contains the reconnect connection
   this.reconnectConnection = null;
 
-  // Are we currently authenticating
-  this.authenticating = false;
   // Number of consecutive timeouts caught
   this.numberOfConsecutiveTimeouts = 0;
   // Current pool Index
@@ -373,6 +371,10 @@ function messageHandler(self) {
       }
     }
 
+    if (workItem && workItem.monitoring) {
+      moveConnectionBetween(connection, self.inUseConnections, self.availableConnections);
+    }
+
     // Reset timeout counter
     self.numberOfConsecutiveTimeouts = 0;
 
@@ -523,11 +525,6 @@ Pool.prototype.isConnected = function() {
   // Check if we have any connected connections
   for (var i = 0; i < connections.length; i++) {
     if (connections[i].isConnected()) return true;
-  }
-
-  // Might be authenticating, but we are still connected
-  if (connections.length === 0 && this.authenticating) {
-    return true;
   }
 
   // Not connected
@@ -1070,179 +1067,158 @@ function _execute(self) {
     // Set pool as executing
     self.executing = true;
 
-    // Wait for auth to clear before continuing
-    function waitForAuth(cb) {
-      if (!self.authenticating) return cb();
-      // Wait for a milisecond and try again
-      setTimeout(function() {
-        waitForAuth(cb);
-      }, 1);
+    // New pool connections are in progress, wait them to finish
+    // before executing any more operation to ensure distribution of
+    // operations
+    if (self.connectingConnections > 0) {
+      self.executing = false;
+      return;
     }
 
-    // Block on any auth in process
-    waitForAuth(function() {
-      // New pool connections are in progress, wait them to finish
-      // before executing any more operation to ensure distribution of
-      // operations
-      if (self.connectingConnections > 0) {
-        return;
+    // As long as we have available connections
+    // eslint-disable-next-line
+    while (true) {
+      // Total availble connections
+      const totalConnections = totalConnectionCount(self);
+
+      // No available connections available, flush any monitoring ops
+      if (self.availableConnections.length === 0) {
+        // Flush any monitoring operations
+        flushMonitoringOperations(self.queue);
+        break;
       }
 
-      // As long as we have available connections
-      // eslint-disable-next-line
-      while (true) {
-        // Total availble connections
-        const totalConnections = totalConnectionCount(self);
+      // No queue break
+      if (self.queue.length === 0) {
+        break;
+      }
 
-        // No available connections available, flush any monitoring ops
-        if (self.availableConnections.length === 0) {
-          // Flush any monitoring operations
-          flushMonitoringOperations(self.queue);
-          break;
-        }
+      var connection = null;
+      const connections = self.availableConnections.filter(conn => conn.workItems.length === 0);
 
-        // No queue break
-        if (self.queue.length === 0) {
-          break;
-        }
+      // console.log({ totalConnections, connectionsLength: connections.length });
 
-        // Get a connection
-        var connection = null;
+      // No connection found that has no work on it, just pick one for pipelining
+      if (connections.length === 0) {
+        connection =
+          self.availableConnections[self.connectionIndex++ % self.availableConnections.length];
+      } else {
+        connection = connections[self.connectionIndex++ % connections.length];
+      }
 
-        // Locate all connections that have no work
-        var connections = [];
-        // Get a list of all connections
-        for (var i = 0; i < self.availableConnections.length; i++) {
-          if (self.availableConnections[i].workItems.length === 0) {
-            connections.push(self.availableConnections[i]);
-          }
-        }
+      // Is the connection connected
+      if (!connection.isConnected()) {
+        // Remove the disconnected connection
+        removeConnection(self, connection);
+        // Flush any monitoring operations in the queue, failing fast
+        flushMonitoringOperations(self.queue);
+        break;
+      }
 
-        // No connection found that has no work on it, just pick one for pipelining
-        if (connections.length === 0) {
-          connection =
-            self.availableConnections[self.connectionIndex++ % self.availableConnections.length];
-        } else {
-          connection = connections[self.connectionIndex++ % connections.length];
-        }
+      // Get the next work item
+      var workItem = self.queue.shift();
 
-        // Is the connection connected
-        if (!connection.isConnected()) {
-          // Remove the disconnected connection
-          removeConnection(self, connection);
-          // Flush any monitoring operations in the queue, failing fast
-          flushMonitoringOperations(self.queue);
-          return;
-        }
+      // If we are monitoring we need to use a connection that is not
+      // running another operation to avoid socket timeout changes
+      // affecting an existing operation
+      if (workItem.monitoring) {
+        var foundValidConnection = false;
 
-        // Get the next work item
-        var workItem = self.queue.shift();
-
-        // If we are monitoring we need to use a connection that is not
-        // running another operation to avoid socket timeout changes
-        // affecting an existing operation
-        if (workItem.monitoring) {
-          var foundValidConnection = false;
-
-          for (i = 0; i < self.availableConnections.length; i++) {
-            // If the connection is connected
-            // And there are no pending workItems on it
-            // Then we can safely use it for monitoring.
-            if (
-              self.availableConnections[i].isConnected() &&
-              self.availableConnections[i].workItems.length === 0
-            ) {
-              foundValidConnection = true;
-              connection = self.availableConnections[i];
-              break;
-            }
-          }
-
-          // No safe connection found, attempt to grow the connections
-          // if possible and break from the loop
-          if (!foundValidConnection) {
-            // Put workItem back on the queue
-            self.queue.unshift(workItem);
-
-            // Attempt to grow the pool if it's not yet maxsize
-            if (totalConnections < self.options.size && self.queue.length > 0) {
-              // Create a new connection
-              _createConnection(self);
-            }
-
-            // Re-execute the operation
-            setTimeout(function() {
-              _execute(self)();
-            }, 10);
-
+        for (let i = 0; i < self.availableConnections.length; i++) {
+          // If the connection is connected
+          // And there are no pending workItems on it
+          // Then we can safely use it for monitoring.
+          if (
+            self.availableConnections[i].isConnected() &&
+            self.availableConnections[i].workItems.length === 0
+          ) {
+            foundValidConnection = true;
+            connection = self.availableConnections[i];
             break;
           }
         }
 
-        // Don't execute operation until we have a full pool
-        if (totalConnections < self.options.size) {
-          // Connection has work items, then put it back on the queue
-          // and create a new connection
-          if (connection.workItems.length > 0) {
-            // Lets put the workItem back on the list
-            self.queue.unshift(workItem);
+        // No safe connection found, attempt to grow the connections
+        // if possible and break from the loop
+        if (!foundValidConnection) {
+          // Put workItem back on the queue
+          self.queue.unshift(workItem);
+
+          // Attempt to grow the pool if it's not yet maxsize
+          if (totalConnections < self.options.size && self.queue.length > 0) {
             // Create a new connection
             _createConnection(self);
-            // Break from the loop
-            break;
           }
+
+          // Re-execute the operation
+          setTimeout(function() {
+            _execute(self)();
+          }, 10);
+
+          break;
         }
-
-        // Get actual binary commands
-        var buffer = workItem.buffer;
-
-        // If we are monitoring take the connection of the availableConnections
-        if (workItem.monitoring) {
-          moveConnectionBetween(connection, self.availableConnections, self.inUseConnections);
-        }
-
-        // Track the executing commands on the mongo server
-        // as long as there is an expected response
-        if (!workItem.noResponse) {
-          connection.workItems.push(workItem);
-        }
-
-        // We have a custom socketTimeout
-        if (!workItem.immediateRelease && typeof workItem.socketTimeout === 'number') {
-          connection.setSocketTimeout(workItem.socketTimeout);
-        }
-
-        // Capture if write was successful
-        var writeSuccessful = true;
-
-        // Put operation on the wire
-        if (Array.isArray(buffer)) {
-          for (i = 0; i < buffer.length; i++) {
-            writeSuccessful = connection.write(buffer[i]);
-          }
-        } else {
-          writeSuccessful = connection.write(buffer);
-        }
-
-        // if the command is designated noResponse, call the callback immeditely
-        if (workItem.noResponse && typeof workItem.cb === 'function') {
-          workItem.cb(null, null);
-        }
-
-        if (writeSuccessful === false) {
-          // If write not successful put back on queue
-          self.queue.unshift(workItem);
-          // Remove the disconnected connection
-          removeConnection(self, connection);
-          // Flush any monitoring operations in the queue, failing fast
-          flushMonitoringOperations(self.queue);
-          return;
-        }
-
-        // in all other cases release the connection for reuses
-        moveConnectionBetween(connection, self.inUseConnections, self.availableConnections);
       }
-    });
+
+      // Don't execute operation until we have a full pool
+      if (totalConnections < self.options.size) {
+        // Connection has work items, then put it back on the queue
+        // and create a new connection
+        if (connection.workItems.length > 0) {
+          // Lets put the workItem back on the list
+          self.queue.unshift(workItem);
+          // Create a new connection
+          _createConnection(self);
+          // Break from the loop
+          break;
+        }
+      }
+
+      // Get actual binary commands
+      var buffer = workItem.buffer;
+
+      // If we are monitoring take the connection of the availableConnections
+      if (workItem.monitoring) {
+        moveConnectionBetween(connection, self.availableConnections, self.inUseConnections);
+      }
+
+      // Track the executing commands on the mongo server
+      // as long as there is an expected response
+      if (!workItem.noResponse) {
+        connection.workItems.push(workItem);
+      }
+
+      // We have a custom socketTimeout
+      if (!workItem.immediateRelease && typeof workItem.socketTimeout === 'number') {
+        connection.setSocketTimeout(workItem.socketTimeout);
+      }
+
+      // Capture if write was successful
+      var writeSuccessful = true;
+
+      // Put operation on the wire
+      if (Array.isArray(buffer)) {
+        for (let i = 0; i < buffer.length; i++) {
+          writeSuccessful = connection.write(buffer[i]);
+        }
+      } else {
+        writeSuccessful = connection.write(buffer);
+      }
+
+      // if the command is designated noResponse, call the callback immeditely
+      if (workItem.noResponse && typeof workItem.cb === 'function') {
+        workItem.cb(null, null);
+      }
+
+      if (writeSuccessful === false) {
+        // If write not successful put back on queue
+        self.queue.unshift(workItem);
+        // Remove the disconnected connection
+        removeConnection(self, connection);
+        // Flush any monitoring operations in the queue, failing fast
+        flushMonitoringOperations(self.queue);
+        break;
+      }
+    }
 
     self.executing = false;
   };
