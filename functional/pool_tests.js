@@ -7,7 +7,6 @@ var expect = require('chai').expect,
   Connection = require('../../../lib/connection/connection'),
   Query = require('../../../lib/connection/commands').Query,
   Bson = require('bson'),
-  co = require('co'),
   mock = require('mongodb-mock-server'),
   ConnectionSpy = require('./shared').ConnectionSpy;
 
@@ -1140,65 +1139,6 @@ describe('Pool tests', function() {
       });
 
       pool.connect();
-    }
-  });
-
-  it('should remove all connections from further use during reauthentication of a pool', {
-    metadata: { requires: { topology: 'single' } },
-
-    test: function(done) {
-      co(function*() {
-        const server = yield mock.createServer();
-
-        server
-          .addMessageHandler('getnonce', req => req.reply({ ok: 1, result: { nonce: 'testing' } }))
-          .addMessageHandler('authenticate', req => req.reply({ ok: 1 }))
-          .addMessageHandler('ismaster', req =>
-            setTimeout(() => req.reply(Object.assign({ ok: 1 }, mock.DEFAULT_ISMASTER)), 10000)
-          );
-
-        var pool = new Pool(
-          null,
-          Object.assign({}, server.address(), { bson: new Bson(), size: 10 })
-        );
-
-        var query = new Query(
-          new Bson(),
-          'system.$cmd',
-          { ismaster: true },
-          { numberToSkip: 0, numberToReturn: 1 }
-        );
-
-        pool.on('connect', function() {
-          pool.write(query, { monitoring: true }, function() {});
-
-          setTimeout(function() {
-            const credentials = new MongoCredentials({
-              mechanism: 'mongocr',
-              source: 'test',
-              username: 'admin',
-              password: 'admin'
-            });
-            pool.auth(credentials, function(err) {
-              expect(err).to.not.exist;
-
-              // ensure that there are no duplicates in the available connection queue
-              var availableIds = pool.availableConnections.map(conn => conn.id);
-              availableIds.forEach(function(id, pos, arr) {
-                expect(arr.indexOf(id)).to.equal(pos);
-              });
-
-              expect(pool.availableConnections).to.have.length(1);
-              expect(pool.inUseConnections).to.have.length(0);
-
-              pool.destroy(true);
-              done();
-            });
-          }, 500);
-        });
-
-        pool.connect();
-      });
     }
   });
 });
