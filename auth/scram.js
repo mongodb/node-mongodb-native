@@ -143,7 +143,11 @@ class ScramSHA extends AuthProvider {
 
       processedPassword = saslprep ? saslprep(password) : password;
     } else {
-      processedPassword = passwordDigest(username, password);
+      try {
+        processedPassword = passwordDigest(username, password);
+      } catch (e) {
+        return callback(e);
+      }
     }
 
     // Clean up the user
