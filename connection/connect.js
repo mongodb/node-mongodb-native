@@ -92,6 +92,7 @@ function performInitialHandshake(conn, options, callback) {
 
     if (!isSupportedServer(ismaster)) {
       const latestSupportedVersion = '2.6';
+      const latestSupportedMaxWireVersion = 2;
       const message =
         'Server at ' +
         options.host +
@@ -99,7 +100,9 @@ function performInitialHandshake(conn, options, callback) {
         options.port +
         ' reports wire version ' +
         (ismaster.maxWireVersion || 0) +
-        ', but this version of Node.js Driver requires at least 2 (MongoDB' +
+        ', but this version of Node.js Driver requires at least ' +
+        latestSupportedMaxWireVersion +
+        ' (MongoDB' +
         latestSupportedVersion +
         ').';
 
