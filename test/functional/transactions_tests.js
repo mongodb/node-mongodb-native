@@ -158,8 +158,12 @@ describe('Transactions', function() {
 
 function generateTestSuiteTests(testSuites, testContext) {
   testSuites.forEach(testSuite => {
+    const minServerVersion = testSuite.minServerVersion
+      ? `>=${testSuite.minServerVersion}`
+      : '>=3.7.x';
+
     describe(testSuite.name, {
-      metadata: { requires: { topology: ['replicaset', 'mongos'], mongodb: '>=3.7.x' } },
+      metadata: { requires: { topology: ['replicaset', 'mongos'], mongodb: minServerVersion } },
       test: function() {
         beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
         afterEach(() => cleanupAfterSuite(testContext));
