@@ -48,6 +48,8 @@ function getSaslSupportedMechs(options) {
   }
 
   const credentials = options.credentials;
+
+  // TODO: revisit whether or not items like `options.user` and `options.dbName` should be checked here
   const authMechanism = credentials.mechanism;
   const authSource = credentials.source || options.dbName || 'admin';
   const user = credentials.username || options.user;
