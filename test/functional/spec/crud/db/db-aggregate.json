@@ -1,0 +1,149 @@
+{
+  "database_name": "admin",
+  "data": [],
+  "minServerVersion": "3.6",
+  "tests": [
+    {
+      "description": "Aggregate with $currentOp",
+      "operation": {
+        "name": "aggregate",
+        "object": "database",
+        "arguments": {
+          "pipeline": [
+            {
+              "$currentOp": {
+                "allUsers": false,
+                "idleConnections": false
+              }
+            },
+            {
+              "$match": {
+                "command.aggregate": {
+                  "$eq": 1
+                }
+              }
+            },
+            {
+              "$project": {
+                "command": 1
+              }
+            },
+            {
+              "$project": {
+                "command.lsid": 0
+              }
+            }
+          ]
+        }
+      },
+      "outcome": {
+        "result": [
+          {
+            "command": {
+              "aggregate": 1,
+              "pipeline": [
+                {
+                  "$currentOp": {
+                    "allUsers": false,
+                    "idleConnections": false
+                  }
+                },
+                {
+                  "$match": {
+                    "command.aggregate": {
+                      "$eq": 1
+                    }
+                  }
+                },
+                {
+                  "$project": {
+                    "command": 1
+                  }
+                },
+                {
+                  "$project": {
+                    "command.lsid": 0
+                  }
+                }
+              ],
+              "cursor": {},
+              "$db": "admin"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "description": "Aggregate with $currentOp and allowDiskUse",
+      "operation": {
+        "name": "aggregate",
+        "object": "database",
+        "arguments": {
+          "pipeline": [
+            {
+              "$currentOp": {
+                "allUsers": true,
+                "idleConnections": true
+              }
+            },
+            {
+              "$match": {
+                "command.aggregate": {
+                  "$eq": 1
+                }
+              }
+            },
+            {
+              "$project": {
+                "command": 1
+              }
+            },
+            {
+              "$project": {
+                "command.lsid": 0
+              }
+            }
+          ],
+          "allowDiskUse": true
+        }
+      },
+      "outcome": {
+        "result": [
+          {
+            "command": {
+              "aggregate": 1,
+              "pipeline": [
+                {
+                  "$currentOp": {
+                    "allUsers": true,
+                    "idleConnections": true
+                  }
+                },
+                {
+                  "$match": {
+                    "command.aggregate": {
+                      "$eq": 1
+                    }
+                  }
+                },
+                {
+                  "$project": {
+                    "command": 1
+                  }
+                },
+                {
+                  "$project": {
+                    "command.lsid": 0
+                  }
+                }
+              ],
+              "allowDiskUse": true,
+              "cursor": {},
+              "$db": "admin"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
