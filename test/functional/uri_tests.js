@@ -1,6 +1,8 @@
 'use strict';
 
 const expect = require('chai').expect;
+const sinon = require('sinon');
+const ReplSet = require('../../lib/topologies/replset');
 
 describe('URI', function() {
   /**
@@ -180,6 +182,24 @@ describe('URI', function() {
         expect(client.s.options.replicaSet).to.exist.and.equal(config.replicasetName);
         done();
       });
+    }
+  });
+
+  it('should generate valid credentials with X509 and the new parser', {
+    metadata: { requires: { topology: 'single' } },
+    test: function(done) {
+      function validateConnect(options /*, callback */) {
+        expect(options).to.have.property('credentials');
+        expect(options.credentials.mechanism).to.eql('x509');
+
+        connectStub.restore();
+        done();
+      }
+
+      const connectStub = sinon.stub(ReplSet.prototype, 'connect').callsFake(validateConnect);
+      const uri = 'mongodb://some-hostname/test?ssl=true&authMechanism=MONGODB-X509&replicaSet=rs0';
+      const client = this.configuration.newClient(uri, { useNewUrlParser: true });
+      client.connect();
     }
   });
 });
