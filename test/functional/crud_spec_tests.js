@@ -2,8 +2,9 @@
 
 const fs = require('fs');
 const path = require('path');
-const test = require('./shared').assert;
-const expect = require('chai').expect;
+const chai = require('chai');
+const expect = chai.expect;
+chai.use(require('chai-subset'));
 
 function findScenarios(type) {
   return fs
@@ -126,6 +127,55 @@ describe('CRUD spec', function() {
     });
   });
 
+  function assertWriteExpectations(collection, outcome) {
+    return function(result) {
+      Object.keys(outcome.result).forEach(resultName => {
+        expect(result).to.have.property(resultName);
+        if (resultName === 'upsertedId') {
+          expect(result[resultName]._id).to.containSubset(outcome.result[resultName]);
+        } else {
+          expect(result[resultName]).to.containSubset(outcome.result[resultName]);
+        }
+      });
+
+      if (collection && outcome.collection && outcome.collection.data) {
+        return collection
+          .find({})
+          .toArray()
+          .then(results => {
+            expect(results).to.containSubset(outcome.collection.data);
+          });
+      }
+    };
+  }
+
+  function assertReadExpectations(db, collection, outcome) {
+    return function(result) {
+      if (outcome.result && !outcome.collection) {
+        expect(result).to.containSubset(outcome.result);
+      }
+
+      if (collection && outcome.collection) {
+        if (outcome.collection.name) {
+          return db
+            .collection(outcome.collection.name)
+            .find({})
+            .toArray()
+            .then(collectionResults => {
+              expect(collectionResults).to.containSubset(outcome.result);
+            });
+        }
+
+        return collection
+          .find({})
+          .toArray()
+          .then(results => {
+            expect(results).to.containSubset(outcome.collection.data);
+          });
+      }
+    };
+  }
+
   function executeAggregateTest(scenarioTest, db, collection) {
     const options = {};
     if (scenarioTest.operation.arguments.collation) {
@@ -136,20 +186,7 @@ describe('CRUD spec', function() {
     return collection
       .aggregate(pipeline, options)
       .toArray()
-      .then(results => {
-        if (scenarioTest.outcome.collection) {
-          return db
-            .collection(scenarioTest.outcome.collection.name)
-            .find({})
-            .toArray()
-            .then(collectionResults =>
-              test.deepEqual(collectionResults, scenarioTest.outcome.result)
-            );
-        }
-
-        test.deepEqual(results, scenarioTest.outcome.result);
-        return Promise.resolve();
-      });
+      .then(assertReadExpectations(db, collection, scenarioTest.outcome));
   }
 
   function executeCountTest(scenarioTest, db, collection) {
@@ -160,7 +197,7 @@ describe('CRUD spec', function() {
 
     return collection
       .count(filter, options)
-      .then(result => test.equal(result, scenarioTest.outcome.result));
+      .then(assertReadExpectations(db, collection, scenarioTest.outcome));
   }
 
   function executeCountDocumentsTest(scenarioTest, db, collection) {
@@ -171,7 +208,7 @@ describe('CRUD spec', function() {
 
     return collection
       .countDocuments(filter, options)
-      .then(result => test.equal(result, scenarioTest.outcome.result));
+      .then(assertReadExpectations(db, collection, scenarioTest.outcome));
   }
 
   function executeEstimatedDocumentCountTest(scenarioTest, db, collection) {
@@ -181,7 +218,7 @@ describe('CRUD spec', function() {
 
     return collection
       .estimatedDocumentCount(options)
-      .then(result => test.equal(result, scenarioTest.outcome.result));
+      .then(assertReadExpectations(db, collection, scenarioTest.outcome));
   }
 
   function executeDistinctTest(scenarioTest, db, collection) {
@@ -194,7 +231,7 @@ describe('CRUD spec', function() {
 
     return collection
       .distinct(fieldName, filter, options)
-      .then(result => test.deepEqual(result, scenarioTest.outcome.result));
+      .then(assertReadExpectations(db, collection, scenarioTest.outcome));
   }
 
   function executeFindTest(scenarioTest, db, collection) {
@@ -206,7 +243,7 @@ describe('CRUD spec', function() {
     return collection
       .find(filter, options)
       .toArray()
-      .then(results => test.deepEqual(results, scenarioTest.outcome.result));
+      .then(assertReadExpectations(db, collection, scenarioTest.outcome));
   }
 
   function executeDeleteTest(scenarioTest, db, collection) {
@@ -216,18 +253,9 @@ describe('CRUD spec', function() {
     const options = Object.assign({}, args);
     delete options.filter;
 
-    return collection[scenarioTest.operation.name](filter, options).then(result => {
-      Object.keys(scenarioTest.outcome.result).forEach(resultName =>
-        test.equal(result[resultName], scenarioTest.outcome.result[resultName])
-      );
-
-      if (scenarioTest.outcome.collection) {
-        return collection
-          .find({})
-          .toArray()
-          .then(results => test.deepEqual(results, scenarioTest.outcome.collection.data));
-      }
-    });
+    return collection[scenarioTest.operation.name](filter, options).then(
+      assertWriteExpectations(collection, scenarioTest.outcome)
+    );
   }
 
   function executeInsertTest(scenarioTest, db, collection) {
@@ -237,18 +265,9 @@ describe('CRUD spec', function() {
     delete options.document;
     delete options.documents;
 
-    return collection[scenarioTest.operation.name](documents, options).then(result => {
-      Object.keys(scenarioTest.outcome.result).forEach(resultName =>
-        test.deepEqual(result[resultName], scenarioTest.outcome.result[resultName])
-      );
-
-      if (scenarioTest.outcome.collection) {
-        return collection
-          .find({})
-          .toArray()
-          .then(results => test.deepEqual(results, scenarioTest.outcome.collection.data));
-      }
-    });
+    return collection[scenarioTest.operation.name](documents, options).then(
+      assertWriteExpectations(collection, scenarioTest.outcome)
+    );
   }
 
   function executeBulkTest(scenarioTest, db, collection) {
@@ -262,13 +281,7 @@ describe('CRUD spec', function() {
 
     return collection
       .bulkWrite(operations, options)
-      .then(result =>
-        Object.keys(scenarioTest.outcome.result).forEach(resultName =>
-          test.deepEqual(result[resultName], scenarioTest.outcome.result[resultName])
-        )
-      )
-      .then(() => collection.find({}).toArray())
-      .then(results => test.deepEqual(results, scenarioTest.outcome.collection.data));
+      .then(assertWriteExpectations(collection, scenarioTest.outcome));
   }
 
   function executeReplaceTest(scenarioTest, db, collection) {
@@ -281,22 +294,9 @@ describe('CRUD spec', function() {
     const opName = scenarioTest.operation.name;
 
     // Get the results
-    return collection[opName](filter, replacement, options).then(result => {
-      Object.keys(scenarioTest.outcome.result).forEach(resultName => {
-        if (resultName === 'upsertedId') {
-          test.equal(result[resultName]._id, scenarioTest.outcome.result[resultName]);
-        } else {
-          test.equal(result[resultName], scenarioTest.outcome.result[resultName]);
-        }
-      });
-
-      if (scenarioTest.outcome.collection) {
-        return collection
-          .find({})
-          .toArray()
-          .then(results => test.deepEqual(results, scenarioTest.outcome.collection.data));
-      }
-    });
+    return collection[opName](filter, replacement, options).then(
+      assertWriteExpectations(collection, scenarioTest.outcome)
+    );
   }
 
   function executeUpdateTest(scenarioTest, db, collection) {
@@ -307,22 +307,9 @@ describe('CRUD spec', function() {
     delete options.filter;
     delete options.update;
 
-    return collection[scenarioTest.operation.name](filter, update, options).then(result => {
-      Object.keys(scenarioTest.outcome.result).forEach(resultName => {
-        if (resultName === 'upsertedId') {
-          test.equal(result[resultName]._id, scenarioTest.outcome.result[resultName]);
-        } else {
-          test.equal(result[resultName], scenarioTest.outcome.result[resultName]);
-        }
-      });
-
-      if (scenarioTest.outcome.collection) {
-        return collection
-          .find({})
-          .toArray()
-          .then(results => test.deepEqual(results, scenarioTest.outcome.collection.data));
-      }
-    });
+    return collection[scenarioTest.operation.name](filter, update, options).then(
+      assertWriteExpectations(collection, scenarioTest.outcome)
+    );
   }
 
   function executeFindOneTest(scenarioTest, db, collection) {
@@ -345,18 +332,7 @@ describe('CRUD spec', function() {
         ? collection[opName](filter, options)
         : collection[opName](filter, second, options);
 
-    return findPromise.then(result => {
-      if (scenarioTest.outcome.result) {
-        test.deepEqual(result.value, scenarioTest.outcome.result);
-      }
-
-      if (scenarioTest.outcome.collection) {
-        return collection
-          .find({})
-          .toArray()
-          .then(results => test.deepEqual(results, scenarioTest.outcome.collection.data));
-      }
-    });
+    return findPromise.then(assertReadExpectations(db, collection, scenarioTest.outcome));
   }
 
   function executeDbAggregateTest(scenarioTest, db) {
@@ -369,10 +345,7 @@ describe('CRUD spec', function() {
     return db
       .aggregate(pipeline, options)
       .toArray()
-      .then(results => {
-        expect(results).to.deep.equal(scenarioTest.outcome.result);
-        return Promise.resolve();
-      });
+      .then(assertReadExpectations(db, null, scenarioTest.outcome));
   }
 
   function executeScenario(scenario, scenarioTest, configuration, context) {
