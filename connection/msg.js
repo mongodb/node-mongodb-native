@@ -29,6 +29,7 @@
 
 const opcodes = require('../wireprotocol/shared').opcodes;
 const databaseNamespace = require('../wireprotocol/shared').databaseNamespace;
+const ReadPreference = require('../topologies/read_preference');
 
 // Incrementing request id
 let _requestId = 0;
@@ -49,7 +50,7 @@ class Msg {
     this.command = command;
     this.command.$db = databaseNamespace(ns);
 
-    if (options.readPreference) {
+    if (options.readPreference && options.readPreference.mode !== ReadPreference.PRIMARY) {
       this.command.$readPreference = options.readPreference.toJSON();
     }
 
