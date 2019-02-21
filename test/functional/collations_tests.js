@@ -166,7 +166,7 @@ describe('Collation', function() {
   });
 
   it('Successfully pass through collation to group command', {
-    metadata: { requires: { generators: true, topology: 'single' } },
+    metadata: { requires: { generators: true, topology: 'single', mongodb: '<=4.1.0' } },
 
     test: function() {
       const configuration = this.configuration;
