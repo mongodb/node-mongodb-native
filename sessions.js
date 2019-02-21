@@ -271,7 +271,6 @@ class ClientSession extends EventEmitter {
 }
 
 const MAX_WITH_TRANSACTION_TIMEOUT = 120000;
-const WRITE_CONCERN_FAILED_CODE = 64;
 const UNSATISFIABLE_WRITE_CONCERN_CODE = 100;
 const UNKNOWN_REPL_WRITE_CONCERN_CODE = 79;
 const NON_DETERMINISTIC_WRITE_CONCERN_ERRORS = new Set([
@@ -282,10 +281,6 @@ const NON_DETERMINISTIC_WRITE_CONCERN_ERRORS = new Set([
 
 function hasNotTimedOut(startTime, max) {
   return Date.now() - startTime < max;
-}
-
-function isWriteConcernTimeoutError(err) {
-  return err.code === WRITE_CONCERN_FAILED_CODE && !!(err.errInfo && err.errInfo.wtimeout === true);
 }
 
 function isUnknownTransactionCommitResult(err) {
@@ -299,7 +294,7 @@ function isUnknownTransactionCommitResult(err) {
 function attemptTransactionCommit(session, startTime, fn, options) {
   return session.commitTransaction().catch(err => {
     if (err instanceof MongoError && hasNotTimedOut(startTime, MAX_WITH_TRANSACTION_TIMEOUT)) {
-      if (err.hasErrorLabel('UnknownTransactionCommitResult') && !isWriteConcernTimeoutError(err)) {
+      if (err.hasErrorLabel('UnknownTransactionCommitResult')) {
         return attemptTransactionCommit(session, startTime, fn, options);
       }
 
