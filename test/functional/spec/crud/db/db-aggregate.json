@@ -13,7 +13,8 @@
             {
               "$currentOp": {
                 "allUsers": false,
-                "idleConnections": false
+                "idleConnections": false,
+                "localOps": true
               }
             },
             {
@@ -83,7 +84,8 @@
             {
               "$currentOp": {
                 "allUsers": true,
-                "idleConnections": true
+                "idleConnections": true,
+                "localOps": true
               }
             },
             {
