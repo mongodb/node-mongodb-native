@@ -165,7 +165,7 @@ describe('SCRAM-SHA-256 auth', function() {
       test.sandbox.spy(ScramSHA256.prototype, 'auth');
 
       return withClient(this.configuration.newClient({}, options), () => {
-        expect(ScramSHA256.prototype.auth.calledOnce).to.equal(true);
+        expect(ScramSHA256.prototype.auth.called).to.equal(true);
       });
     }
   });
