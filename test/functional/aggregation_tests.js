@@ -106,21 +106,20 @@ describe('Aggregation', function() {
       const client = this.configuration.newClient({ w: 1 }, { poolSize: 1 });
 
       client.connect(function(err, client) {
-        expect(err).to.be.null;
+        expect(err).to.not.exist;
 
-        // get admin db for $currentOp
         const db = client.db('admin');
-
         db.aggregate([{ $currentOp: {} }], (err, cursor) => {
-          expect(err).to.be.null;
+          expect(err).to.not.exist;
 
           cursor.toArray((err, result) => {
-            expect(err).to.be.null;
+            expect(err).to.not.exist;
 
-            expect(result[0].command.aggregate).to.equal(1);
-            expect(result[0].command.pipeline).to.eql([{ $currentOp: {} }]);
-            expect(result[0].command.cursor).to.deep.equal({});
-            expect(result[0].command['$db']).to.equal('admin');
+            const aggregateOperation = result.filter(op => op.command && op.command.aggregate)[0];
+            expect(aggregateOperation.command.aggregate).to.equal(1);
+            expect(aggregateOperation.command.pipeline).to.eql([{ $currentOp: {} }]);
+            expect(aggregateOperation.command.cursor).to.deep.equal({});
+            expect(aggregateOperation.command['$db']).to.equal('admin');
 
             client.close();
             done();
