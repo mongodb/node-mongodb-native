@@ -18,11 +18,11 @@ tests:
           failCommands: ["commitTransaction"]
           errorCode: 24 # LockTimeout
           closeConnection: false
-    operations:
+    operations: &operations
       -
         name: withTransaction
         object: session0
-        arguments: &arguments
+        arguments:
           callback:
             operations:
               -
@@ -138,11 +138,7 @@ tests:
           failCommands: ["commitTransaction"]
           errorCode: 112 # WriteConflict
           closeConnection: false
-    operations:
-      -
-        name: withTransaction
-        object: session0
-        arguments: *arguments
+    operations: *operations
     expectations: *expectations
     outcome: *outcome
   -
@@ -154,11 +150,7 @@ tests:
           failCommands: ["commitTransaction"]
           errorCode: 246 # SnapshotUnavailable
           closeConnection: false
-    operations:
-      -
-        name: withTransaction
-        object: session0
-        arguments: *arguments
+    operations: *operations
     expectations: *expectations
     outcome: *outcome
   -
@@ -170,10 +162,6 @@ tests:
           failCommands: ["commitTransaction"]
           errorCode: 251 # NoSuchTransaction
           closeConnection: false
-    operations:
-      -
-        name: withTransaction
-        object: session0
-        arguments: *arguments
+    operations: *operations
     expectations: *expectations
     outcome: *outcome

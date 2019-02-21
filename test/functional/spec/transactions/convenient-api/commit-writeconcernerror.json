@@ -4,11 +4,11 @@
   "data": [],
   "tests": [
     {
-      "description": "commitTransaction is not retried after WriteConcernFailed timeout error",
+      "description": "commitTransaction is retried after WriteConcernFailed timeout error",
       "failPoint": {
         "configureFailPoint": "failCommand",
         "mode": {
-          "times": 1
+          "times": 2
         },
         "data": {
           "failCommands": [
@@ -46,15 +46,6 @@
                 }
               ]
             }
-          },
-          "result": {
-            "errorCodeName": "WriteConcernFailed",
-            "errorLabelsContain": [
-              "UnknownTransactionCommitResult"
-            ],
-            "errorLabelsOmit": [
-              "TransientTransactionError"
-            ]
           }
         }
       ],
@@ -94,6 +85,46 @@
               "readConcern": null,
               "startTransaction": null,
               "writeConcern": null
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "autocommit": false,
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              },
+              "readConcern": null,
+              "startTransaction": null
+            },
+            "command_name": "commitTransaction",
+            "database_name": "admin"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "commitTransaction": 1,
+              "lsid": "session0",
+              "txnNumber": {
+                "$numberLong": "1"
+              },
+              "autocommit": false,
+              "writeConcern": {
+                "w": "majority",
+                "wtimeout": 10000
+              },
+              "readConcern": null,
+              "startTransaction": null
             },
             "command_name": "commitTransaction",
             "database_name": "admin"

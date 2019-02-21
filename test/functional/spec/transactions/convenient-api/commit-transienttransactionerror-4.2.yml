@@ -127,7 +127,7 @@ tests:
             writeConcern: ~
           command_name: commitTransaction
           database_name: admin
-    outcome: &outcome
+    outcome:
       collection:
         data:
           - { _id: 1 }

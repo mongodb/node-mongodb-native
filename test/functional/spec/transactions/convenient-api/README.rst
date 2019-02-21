@@ -66,10 +66,6 @@ Each YAML file has the following keys:
     - ``arguments`` (optional): Names and values of arguments to pass to the
       operation.
 
-    - ``error`` (optional): If ``true``, the test should expect the operation
-      to emit an error or exception. If ``false`` or omitted, drivers MUST
-      assert that no error occurred.
-
     - ``result`` (optional): The return value from the operation. This will
       correspond to an operation's result object as defined in the CRUD
       specification. If the operation is expected to return an error, the
