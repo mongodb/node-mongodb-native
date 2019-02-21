@@ -5,10 +5,10 @@ data: []
 
 tests:
   -
-    description: commitTransaction is not retried after WriteConcernFailed timeout error
+    description: commitTransaction is retried after WriteConcernFailed timeout error
     failPoint:
       configureFailPoint: failCommand
-      mode: { times: 1 }
+      mode: { times: 2 }
       data:
           failCommands: ["commitTransaction"]
           # Do not specify closeConnection: false, since that would conflict
@@ -19,10 +19,10 @@ tests:
             errmsg: "waiting for replication timed out"
             errInfo: { wtimeout: true }
     operations:
-      -
+      - &operation
         name: withTransaction
         object: session0
-        arguments: &arguments
+        arguments:
           callback:
             operations:
               -
@@ -33,14 +33,7 @@ tests:
                   document: { _id: 1 }
                 result:
                   insertedId: 1
-        result:
-          errorCodeName: WriteConcernFailed
-          # Per transactions spec, drivers add UnknownTransactionCommitResult
-          # label for WriteConcernFailed errors; however, neither the driver
-          # nor withTransaction() will retry the commit in this case.
-          errorLabelsContain: ["UnknownTransactionCommitResult"]
-          errorLabelsOmit: ["TransientTransactionError"]
-    expectations:
+    expectations: &expectations_with_retries
       -
         command_started_event:
           command:
@@ -68,6 +61,34 @@ tests:
             readConcern: ~
             startTransaction: ~
             writeConcern: ~
+          command_name: commitTransaction
+          database_name: admin
+      -
+        command_started_event:
+          command:
+            commitTransaction: 1
+            lsid: session0
+            txnNumber: { $numberLong: "1" }
+            autocommit: false
+            # commitTransaction applies w:majority on retries (SPEC-1185)
+            writeConcern: { w: majority, wtimeout: 10000 }
+            # omitted fields
+            readConcern: ~
+            startTransaction: ~
+          command_name: commitTransaction
+          database_name: admin
+      -
+        command_started_event:
+          command:
+            commitTransaction: 1
+            lsid: session0
+            txnNumber: { $numberLong: "1" }
+            autocommit: false
+            # commitTransaction applies w:majority on retries (SPEC-1185)
+            writeConcern: { w: majority, wtimeout: 10000 }
+            # omitted fields
+            readConcern: ~
+            startTransaction: ~
           command_name: commitTransaction
           database_name: admin
     # The write operation is still applied despite the write concern error
@@ -93,72 +114,9 @@ tests:
             codeName: WriteConcernFailed
             errmsg: "multiple errors reported"
     operations:
-      -
-        name: withTransaction
-        object: session0
-        arguments: *arguments
-    expectations:
-      -
-        command_started_event:
-          command:
-            insert: *collection_name
-            documents:
-              - { _id: 1 }
-            ordered: true
-            lsid: session0
-            txnNumber: { $numberLong: "1" }
-            startTransaction: true
-            autocommit: false
-            # omitted fields
-            readConcern: ~
-            writeConcern: ~
-          command_name: insert
-          database_name: *database_name
-      -
-        command_started_event:
-          command:
-            commitTransaction: 1
-            lsid: session0
-            txnNumber: { $numberLong: "1" }
-            autocommit: false
-            # omitted fields
-            readConcern: ~
-            startTransaction: ~
-            writeConcern: ~
-          command_name: commitTransaction
-          database_name: admin
-      -
-        command_started_event:
-          command:
-            commitTransaction: 1
-            lsid: session0
-            txnNumber: { $numberLong: "1" }
-            autocommit: false
-            # commitTransaction applies w:majority on retries (SPEC-1185)
-            writeConcern: { w: majority, wtimeout: 10000 }
-            # omitted fields
-            readConcern: ~
-            startTransaction: ~
-          command_name: commitTransaction
-          database_name: admin
-      -
-        command_started_event:
-          command:
-            commitTransaction: 1
-            lsid: session0
-            txnNumber: { $numberLong: "1" }
-            autocommit: false
-            # commitTransaction applies w:majority on retries (SPEC-1185)
-            writeConcern: { w: majority, wtimeout: 10000 }
-            # omitted fields
-            readConcern: ~
-            startTransaction: ~
-          command_name: commitTransaction
-          database_name: admin
-    outcome:
-      collection:
-        data:
-          - { _id: 1 }
+      - *operation
+    expectations: *expectations_with_retries
+    outcome: *outcome
   -
     description: commitTransaction is not retried after UnknownReplWriteConcern error
     failPoint:
@@ -171,14 +129,11 @@ tests:
             codeName: UnknownReplWriteConcern
             errmsg: "No write concern mode named 'foo' found in replica set configuration"
     operations:
-      -
-        name: withTransaction
-        object: session0
-        arguments: *arguments
+      - <<: *operation
         result:
           errorCodeName: UnknownReplWriteConcern
           errorLabelsOmit: ["TransientTransactionError", "UnknownTransactionCommitResult"]
-    expectations:
+    expectations: &expectations_without_retries
       -
         command_started_event:
           command:
@@ -208,7 +163,9 @@ tests:
             writeConcern: ~
           command_name: commitTransaction
           database_name: admin
+    # failCommand with writeConcernError still applies the write operation(s)
     outcome: *outcome
+
   -
     description: commitTransaction is not retried after UnsatisfiableWriteConcern error
     failPoint:
@@ -221,41 +178,10 @@ tests:
             codeName: UnsatisfiableWriteConcern
             errmsg: "Not enough data-bearing nodes"
     operations:
-      -
-        name: withTransaction
-        object: session0
-        arguments: *arguments
+      - <<: *operation
         result:
           errorCodeName: UnsatisfiableWriteConcern
           errorLabelsOmit: ["TransientTransactionError", "UnknownTransactionCommitResult"]
-    expectations:
-      -
-        command_started_event:
-          command:
-            insert: *collection_name
-            documents:
-              - { _id: 1 }
-            ordered: true
-            lsid: session0
-            txnNumber: { $numberLong: "1" }
-            startTransaction: true
-            autocommit: false
-            # omitted fields
-            readConcern: ~
-            writeConcern: ~
-          command_name: insert
-          database_name: *database_name
-      -
-        command_started_event:
-          command:
-            commitTransaction: 1
-            lsid: session0
-            txnNumber: { $numberLong: "1" }
-            autocommit: false
-            # omitted fields
-            readConcern: ~
-            startTransaction: ~
-            writeConcern: ~
-          command_name: commitTransaction
-          database_name: admin
+    expectations: *expectations_without_retries
+    # failCommand with writeConcernError still applies the write operation(s)
     outcome: *outcome

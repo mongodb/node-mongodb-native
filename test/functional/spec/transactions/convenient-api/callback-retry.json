@@ -207,7 +207,6 @@
                     }
                   },
                   "result": {
-                    "errorCodeName": "DuplicateKey",
                     "errorLabelsOmit": [
                       "TransientTransactionError",
                       "UnknownTransactionCommitResult"
@@ -218,7 +217,6 @@
             }
           },
           "result": {
-            "errorCodeName": "DuplicateKey",
             "errorLabelsOmit": [
               "TransientTransactionError",
               "UnknownTransactionCommitResult"
