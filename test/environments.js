@@ -197,6 +197,10 @@ class ShardedEnvironment extends EnvironmentBase {
       return x;
     });
 
+    this.proxies = proxyNodes.map(proxy => {
+      return { host: proxy.bind_ip, port: proxy.port };
+    });
+
     Promise.all([
       this.manager.addShard(nodes1, { replSet: 'rs1' }),
       this.manager.addShard(nodes2, { replSet: 'rs2' })
