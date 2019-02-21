@@ -174,12 +174,14 @@ class ShardedEnvironment extends EnvironmentBase {
       {
         bind_ip: 'localhost',
         port: 51000,
-        configdb: 'localhost:35000,localhost:35001,localhost:35002'
+        configdb: 'localhost:35000,localhost:35001,localhost:35002',
+        setParameter: ['enableTestCommands=1']
       },
       {
         bind_ip: 'localhost',
         port: 51001,
-        configdb: 'localhost:35000,localhost:35001,localhost:35002'
+        configdb: 'localhost:35000,localhost:35001,localhost:35002',
+        setParameter: ['enableTestCommands=1']
       }
     ];
 
