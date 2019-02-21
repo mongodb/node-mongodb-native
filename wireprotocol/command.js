@@ -22,9 +22,15 @@ function command(server, ns, cmd, options, callback) {
   const bson = server.s.bson;
   const pool = server.s.pool;
   const readPreference = getReadPreference(cmd, options);
+  const shouldUseOpMsg = supportsOpMsg(server);
 
   let finalCmd = Object.assign({}, cmd);
-  if (isSharded(server) && readPreference && readPreference.preference !== 'primary') {
+  if (
+    isSharded(server) &&
+    shouldUseOpMsg &&
+    readPreference &&
+    readPreference.preference !== 'primary'
+  ) {
     finalCmd = {
       $query: finalCmd,
       $readPreference: readPreference.toJSON()
@@ -50,7 +56,7 @@ function command(server, ns, cmd, options, callback) {
   commandOptions.slaveOk = readPreference.slaveOk();
 
   const cmdNs = `${databaseNamespace(ns)}.$cmd`;
-  const message = supportsOpMsg(server)
+  const message = shouldUseOpMsg
     ? new Msg(bson, cmdNs, finalCmd, commandOptions)
     : new Query(bson, cmdNs, finalCmd, commandOptions);
 
