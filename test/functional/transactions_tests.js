@@ -106,15 +106,23 @@ class TransactionsTestContext {
   }
 
   setup(config) {
-    this.url = config.url();
-
-    this.sharedClient = config.newClient(this.url);
     if (config.options.proxies) {
+      const mainProxy = config.options.proxies[0];
+      this.url = `mongodb://${mainProxy.host}:${mainProxy.port}/`;
+
       this.failPointClients = config.options.proxies.map(proxy =>
         config.newClient(`mongodb://${proxy.host}:${proxy.port}/`)
       );
+    } else {
+      this.url = config.url();
     }
+
+    this.sharedClient = this.newClient(config);
     return this.runForAllClients(client => client.connect());
+  }
+
+  newClient(config, clientOptions) {
+    return config.newClient(this.url, clientOptions);
   }
 
   teardown() {
@@ -298,7 +306,7 @@ function runTestSuiteTest(configuration, testData, context) {
 
   clientOptions.minSize = 5;
 
-  const client = configuration.newClient(context.url, clientOptions);
+  const client = context.newClient(configuration, clientOptions);
   return client.connect().then(client => {
     context.testClient = client;
     client.on('commandStarted', event => {
