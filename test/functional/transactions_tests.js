@@ -234,7 +234,7 @@ function generateTestSuiteTests(testSuites, testContext, config) {
               );
             }
 
-            return testPromise;
+            return testPromise.then(() => validateOutcome(testData, testContext));
           });
         });
       }
@@ -343,6 +343,23 @@ function runTestSuiteTest(configuration, testData, context) {
   });
 }
 
+function validateOutcome(testData, testContext) {
+  if (testData.outcome) {
+    if (testData.outcome.collection) {
+      // use the client without transactions to verify
+      return testContext.sharedClient
+        .db(testContext.dbName)
+        .collection(testContext.collectionName)
+        .find({}, { readPreference: 'primary', readConcern: { level: 'local' } })
+        .toArray()
+        .then(docs => {
+          expect(docs).to.eql(testData.outcome.collection.data);
+        });
+    }
+  }
+  return Promise.resolve();
+}
+
 function validateExpectations(commandEvents, testData, testContext, operationContext) {
   const session0 = operationContext.session0;
   const session1 = operationContext.session1;
@@ -398,20 +415,6 @@ function validateExpectations(commandEvents, testData, testContext, operationCon
       // compare the command
       expect(actualCommand).to.containSubset(expectedCommand);
     });
-  }
-
-  if (testData.outcome) {
-    if (testData.outcome.collection) {
-      // use the client without transactions to verify
-      return testContext.sharedClient
-        .db(testContext.dbName)
-        .collection(testContext.collectionName)
-        .find({}, { readPreference: 'primary', readConcern: { level: 'local' } })
-        .toArray()
-        .then(docs => {
-          expect(docs).to.eql(testData.outcome.collection.data);
-        });
-    }
   }
 }
 
