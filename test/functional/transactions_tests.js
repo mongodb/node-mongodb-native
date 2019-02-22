@@ -91,17 +91,49 @@ class TransactionsTestContext {
   constructor() {
     this.url = null;
     this.sharedClient = null;
+    this.failPointClients = [];
+  }
+
+  runForAllClients(fn) {
+    const allClients = [this.sharedClient].concat(this.failPointClients);
+    return Promise.all(allClients.map(fn));
+  }
+
+  runFailPointCmd(fn) {
+    return this.failPointClients.length
+      ? Promise.all(this.failPointClients.map(fn))
+      : fn(this.sharedClient);
   }
 
   setup(config) {
-    this.url = `mongodb://${config.host}:${config.port}/?replicaSet=${config.replicasetName}`;
+    this.url = config.url();
 
     this.sharedClient = config.newClient(this.url);
-    return this.sharedClient.connect();
+    if (config.options.proxies) {
+      this.failPointClients = config.options.proxies.map(proxy =>
+        config.newClient(`mongodb://${proxy.host}:${proxy.port}/`)
+      );
+    }
+    return this.runForAllClients(client => client.connect());
   }
 
   teardown() {
-    return this.sharedClient.close();
+    return this.runForAllClients(client => client.close());
+  }
+
+  enableFailPoint(failPoint) {
+    return this.runFailPointCmd(client => {
+      return client.db(this.dbName).executeDbAdminCommand(failPoint);
+    });
+  }
+
+  disableFailPoint(failPoint) {
+    return this.runFailPointCmd(client => {
+      return client.db(this.dbName).executeDbAdminCommand({
+        configureFailPoint: failPoint.configureFailPoint,
+        mode: 'off'
+      });
+    });
   }
 }
 
@@ -123,7 +155,7 @@ describe('Transactions', function() {
         return testContext.setup(this.configuration);
       });
 
-      generateTestSuiteTests(testSuites, testContext);
+      generateTopologyTests(testSuites, testContext);
     });
   });
 
@@ -140,7 +172,7 @@ describe('Transactions', function() {
     });
 
     it('should provide a useful error if a Promise is not returned', {
-      metadata: { requires: { topology: ['replicaset', 'mongos'], mongodb: '>=4.0.x' } },
+      metadata: { requires: { topology: ['replicaset', 'sharded'], mongodb: '>=4.1.5' } },
       test: function(done) {
         function fnThatDoesntReturnPromise() {
           return false;
@@ -156,14 +188,28 @@ describe('Transactions', function() {
   });
 });
 
-function generateTestSuiteTests(testSuites, testContext) {
+function generateTopologyTests(testSuites, testContext) {
+  [
+    { topology: 'replicaset', minServerVersion: '>=3.7.x' },
+    { topology: 'sharded', minServerVersion: '>=4.1.5' }
+  ].forEach(config => generateTestSuiteTests(testSuites, testContext, config));
+}
+
+function generateTestSuiteTests(testSuites, testContext, config) {
   testSuites.forEach(testSuite => {
     const minServerVersion = testSuite.minServerVersion
       ? `>=${testSuite.minServerVersion}`
       : '>=3.7.x';
 
+    const metadata = {
+      requires: {
+        topology: [config.topology],
+        mongodb: minServerVersion
+      }
+    };
+
     describe(testSuite.name, {
-      metadata: { requires: { topology: ['replicaset', 'mongos'], mongodb: minServerVersion } },
+      metadata,
       test: function() {
         beforeEach(() => prepareDatabaseForSuite(testSuite, testContext));
         afterEach(() => cleanupAfterSuite(testContext));
@@ -174,9 +220,7 @@ function generateTestSuiteTests(testSuites, testContext) {
             let testPromise = Promise.resolve();
 
             if (testData.failPoint) {
-              testPromise = testPromise.then(() =>
-                enableFailPoint(testData.failPoint, testContext)
-              );
+              testPromise = testPromise.then(() => testContext.enableFailPoint(testData.failPoint));
             }
 
             // run the actual test
@@ -186,7 +230,7 @@ function generateTestSuiteTests(testSuites, testContext) {
 
             if (testData.failPoint) {
               testPromise = testPromise.then(() =>
-                disableFailPoint(testData.failPoint, testContext)
+                testContext.disableFailPoint(testData.failPoint)
               );
             }
 
@@ -228,17 +272,6 @@ function cleanupAfterSuite(context) {
       delete context.testClient;
     });
   }
-}
-
-function enableFailPoint(failPoint, testContext) {
-  return testContext.sharedClient.db(testContext.dbName).executeDbAdminCommand(failPoint);
-}
-
-function disableFailPoint(failPoint, testContext) {
-  return testContext.sharedClient.db(testContext.dbName).executeDbAdminCommand({
-    configureFailPoint: failPoint.configureFailPoint,
-    mode: 'off'
-  });
 }
 
 function parseSessionOptions(options) {
