@@ -27,7 +27,7 @@ function command(server, ns, cmd, options, callback) {
   let finalCmd = Object.assign({}, cmd);
   if (
     isSharded(server) &&
-    shouldUseOpMsg &&
+    !shouldUseOpMsg &&
     readPreference &&
     readPreference.preference !== 'primary'
   ) {
