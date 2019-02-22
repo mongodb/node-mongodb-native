@@ -778,6 +778,10 @@ Server.prototype.connections = function() {
 
 /**
  * Selects a server
+ * @method
+ * @param {function} selector Unused
+ * @param {ReadPreference} [options.readPreference] Unused
+ * @param {ClientSession} [options.session] Unused
  * @return {Server}
  */
 Server.prototype.selectServer = function(selector, options, callback) {

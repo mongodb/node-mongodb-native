@@ -464,7 +464,14 @@ function connectProxies(self, servers) {
   }
 }
 
-function pickProxy(self) {
+function pickProxy(self, session) {
+  // TODO: Destructure :)
+  const transaction = session && session.transaction;
+
+  if (transaction && transaction.server) {
+    return transaction.server;
+  }
+
   // Get the currently connected Proxies
   var connectedProxies = self.connectedProxies.slice(0);
 
@@ -488,15 +495,22 @@ function pickProxy(self) {
     }
   });
 
+  let proxy;
+
   // We have no connectedProxies pick first of the connected ones
   if (connectedProxies.length === 0) {
-    return self.connectedProxies[0];
+    proxy = self.connectedProxies[0];
+  } else {
+    // Get proxy
+    proxy = connectedProxies[self.index % connectedProxies.length];
+    // Update the index
+    self.index = (self.index + 1) % connectedProxies.length;
   }
 
-  // Get proxy
-  var proxy = connectedProxies[self.index % connectedProxies.length];
-  // Update the index
-  self.index = (self.index + 1) % connectedProxies.length;
+  if (transaction) {
+    transaction.pinServer(proxy);
+  }
+
   // Return the proxy
   return proxy;
 }
@@ -846,7 +860,7 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
   options = options || {};
 
   // Pick a server
-  let server = pickProxy(self);
+  let server = pickProxy(self, options.session);
   // No server found error out
   if (!server) return callback(new MongoError('no mongos proxy available'));
 
@@ -866,7 +880,7 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
     }
 
     // Pick another server
-    server = pickProxy(self);
+    server = pickProxy(self, options.session);
 
     // No server found error out with original error
     if (!server || !isRetryableWritesSupported(server)) {
@@ -1007,7 +1021,7 @@ Mongos.prototype.command = function(ns, cmd, options, callback) {
   var self = this;
 
   // Pick a proxy
-  var server = pickProxy(self);
+  var server = pickProxy(self, options.session);
 
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected
@@ -1087,7 +1101,8 @@ Mongos.prototype.cursor = function(ns, cmd, options) {
  *
  * @method
  * @param {function} selector Unused
- * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @param {ReadPreference} [options.readPreference] Unused
+ * @param {ClientSession} [options.session] Specify a session if it is being used
  * @param {function} callback
  */
 Mongos.prototype.selectServer = function(selector, options, callback) {
@@ -1097,7 +1112,7 @@ Mongos.prototype.selectServer = function(selector, options, callback) {
     (callback = options), (options = selector), (selector = undefined);
   options = options || {};
 
-  const server = pickProxy(this);
+  const server = pickProxy(this, options.session);
   if (this.s.debug) this.emit('pickedServer', null, server);
   callback(null, server);
 };

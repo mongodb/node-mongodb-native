@@ -1074,6 +1074,7 @@ ReplSet.prototype.isDestroyed = function() {
  * @method
  * @param {function} selector Unused
  * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @param {ClientSession} [options.session] Unused
  * @param {function} callback
  */
 ReplSet.prototype.selectServer = function(selector, options, callback) {

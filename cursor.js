@@ -606,7 +606,16 @@ function initializeCursor(cursor, callback) {
     }
   }
 
-  return cursor.topology.selectServer(cursor.options, (err, server) => {
+  // Very explicitly choose what is passed to selectServer
+  const serverSelectOptions = {};
+  if (cursor.cursorState.session) {
+    serverSelectOptions.session = cursor.cursorState.session;
+  }
+  if (cursor.options.readPreference) {
+    serverSelectOptions.readPreference = cursor.options.readPreference;
+  }
+
+  return cursor.topology.selectServer(serverSelectOptions, (err, server) => {
     if (err) {
       const disconnectHandler = cursor.disconnectHandler;
       if (disconnectHandler != null) {
