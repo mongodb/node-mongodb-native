@@ -101,6 +101,13 @@ class Transaction {
 
     if (options.readConcern) this.options.readConcern = options.readConcern;
     if (options.readPreference) this.options.readPreference = options.readPreference;
+
+    // TODO: This isn't technically necessary
+    this._pinnedServer = undefined;
+  }
+
+  get server() {
+    return this._pinnedServer;
   }
 
   /**
@@ -122,12 +129,25 @@ class Transaction {
     const nextStates = stateMachine[this.state];
     if (nextStates && nextStates.indexOf(nextState) !== -1) {
       this.state = nextState;
+      if (this.state === TxnState.NO_TRANSACTION) {
+        this.unpinServer();
+      }
       return;
     }
 
     throw new MongoError(
       `Attempted illegal state transition from [${this.state}] to [${nextState}]`
     );
+  }
+
+  pinServer(server) {
+    if (this.isActive) {
+      this._pinnedServer = server;
+    }
+  }
+
+  unpinServer() {
+    this._pinnedServer = undefined;
   }
 }
 
