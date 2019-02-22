@@ -854,26 +854,29 @@ Mongos.prototype.isDestroyed = function() {
 // Operations
 //
 
-// Execute write operation
-var executeWriteOperation = function(self, op, ns, ops, options, callback) {
+function executeWriteOperation(args, options, callback) {
   if (typeof options === 'function') (callback = options), (options = {});
   options = options || {};
+
+  // TODO: once we drop Node 4, use destructuring either here or in arguments.
+  const self = args.self;
+  const op = args.op;
+  const ns = args.ns;
+  const ops = args.ops;
 
   // Pick a server
   let server = pickProxy(self, options.session);
   // No server found error out
   if (!server) return callback(new MongoError('no mongos proxy available'));
 
-  if (!options.retryWrites || !options.session || !isRetryableWritesSupported(self)) {
-    // Execute the command
-    return server[op](ns, ops, options, callback);
-  }
+  const willRetryWrite =
+    !args.retrying &&
+    !!options.retryWrites &&
+    options.session &&
+    isRetryableWritesSupported(self) &&
+    !options.session.inTransaction();
 
-  // increment and assign txnNumber
-  options.willRetryWrite = true;
-  options.session.incrementTransactionNumber();
-
-  server[op](ns, ops, options, (err, result) => {
+  const handler = (err, result) => {
     if (!err) return callback(null, result);
     if (!isRetryableError(err)) {
       return callback(err);
@@ -883,14 +886,27 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
     server = pickProxy(self, options.session);
 
     // No server found error out with original error
-    if (!server || !isRetryableWritesSupported(server)) {
+    if (!server || !willRetryWrite) {
       return callback(err);
     }
 
-    // rerun the operation
-    server[op](ns, ops, options, callback);
-  });
-};
+    const newArgs = Object.assign({}, args, { retrying: true });
+    return executeWriteOperation(newArgs, options, callback);
+  };
+
+  if (callback.operationId) {
+    handler.operationId = callback.operationId;
+  }
+
+  // increment and assign txnNumber
+  if (willRetryWrite) {
+    options.session.incrementTransactionNumber();
+    options.willRetryWrite = willRetryWrite;
+  }
+
+  // rerun the operation
+  server[op](ns, ops, options, handler);
+}
 
 /**
  * Insert one or more documents
@@ -923,7 +939,7 @@ Mongos.prototype.insert = function(ns, ops, options, callback) {
   }
 
   // Execute write operation
-  executeWriteOperation(this, 'insert', ns, ops, options, callback);
+  executeWriteOperation({ self: this, op: 'insert', ns, ops }, options, callback);
 };
 
 /**
@@ -957,7 +973,7 @@ Mongos.prototype.update = function(ns, ops, options, callback) {
   }
 
   // Execute write operation
-  executeWriteOperation(this, 'update', ns, ops, options, callback);
+  executeWriteOperation({ self: this, op: 'update', ns, ops }, options, callback);
 };
 
 /**
@@ -991,7 +1007,7 @@ Mongos.prototype.remove = function(ns, ops, options, callback) {
   }
 
   // Execute write operation
-  executeWriteOperation(this, 'remove', ns, ops, options, callback);
+  executeWriteOperation({ self: this, op: 'remove', ns, ops }, options, callback);
 };
 
 const RETRYABLE_WRITE_OPERATIONS = ['findAndModify', 'insert', 'update', 'delete'];
