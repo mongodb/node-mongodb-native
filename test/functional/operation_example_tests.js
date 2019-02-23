@@ -2827,7 +2827,7 @@ describe('Operation Examples', function() {
    */
   it('shouldCorrectlyIndexAndForceReindexOnCollection', {
     metadata: {
-      requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }
+      requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }
     },
 
     // The actual test we wish to run
