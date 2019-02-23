@@ -60,10 +60,24 @@ function command(server, ns, cmd, options, callback) {
     ? new Msg(bson, cmdNs, finalCmd, commandOptions)
     : new Query(bson, cmdNs, finalCmd, commandOptions);
 
+  const commandResponseHandler = function(err) {
+    if (
+      options.session &&
+      options.session.transaction &&
+      err &&
+      err instanceof MongoError &&
+      err.hasErrorLabel('TransientTransactionError')
+    ) {
+      options.session.transaction.unpinServer();
+    }
+
+    return callback.apply(null, arguments);
+  };
+
   try {
-    pool.write(message, commandOptions, callback);
+    pool.write(message, commandOptions, commandResponseHandler);
   } catch (err) {
-    callback(err);
+    callback(commandResponseHandler);
   }
 }
 

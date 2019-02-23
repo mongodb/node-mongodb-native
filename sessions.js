@@ -452,6 +452,9 @@ function endTransaction(session, commandName, callback) {
 
         if (isUnknownTransactionCommitResult(e)) {
           e.errorLabels.push('UnknownTransactionCommitResult');
+
+          // Per Mongos Pinning, must unpin session
+          session.transaction.unpinServer();
         }
       }
     } else {

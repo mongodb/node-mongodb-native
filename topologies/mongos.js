@@ -507,7 +507,7 @@ function pickProxy(self, session) {
     self.index = (self.index + 1) % connectedProxies.length;
   }
 
-  if (transaction) {
+  if (transaction && transaction.isActive) {
     transaction.pinServer(proxy);
   }
 

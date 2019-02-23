@@ -129,7 +129,7 @@ class Transaction {
     const nextStates = stateMachine[this.state];
     if (nextStates && nextStates.indexOf(nextState) !== -1) {
       this.state = nextState;
-      if (this.state === TxnState.NO_TRANSACTION) {
+      if (this.state === TxnState.NO_TRANSACTION || this.state === TxnState.STARTING_TRANSACTION) {
         this.unpinServer();
       }
       return;
