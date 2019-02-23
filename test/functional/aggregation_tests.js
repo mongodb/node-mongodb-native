@@ -97,7 +97,7 @@ describe('Aggregation', function() {
   it('should correctly execute db.aggregate() with $currentOp', {
     metadata: {
       requires: {
-        mongodb: '>=3.6.0',
+        mongodb: '>=4.0.0',
         topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
       }
     },
