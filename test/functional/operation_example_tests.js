@@ -87,7 +87,8 @@ describe('Operation Examples', function() {
                   _id: { tags: '$tags' },
                   authors: { $addToSet: '$author' }
                 }
-              }
+              },
+              { $sort: { _id: -1 } }
             ],
             function(err, cursor) {
               test.equal(null, err);
@@ -190,8 +191,8 @@ describe('Operation Examples', function() {
           cursor.toArray(function(err, docs) {
             test.equal(null, err);
             test.equal(2, docs.length);
-            done();
             client.close();
+            done();
           });
         });
       });

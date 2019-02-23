@@ -71,7 +71,8 @@ describe('Aggregation', function() {
                   _id: { tags: '$tags' },
                   authors: { $addToSet: '$author' }
                 }
-              }
+              },
+              { $sort: { _id: -1 } }
             ],
             function(err, cursor) {
               expect(err).to.be.null;
@@ -190,19 +191,22 @@ describe('Aggregation', function() {
           // Execute aggregate, notice the pipeline is expressed as function call parameters
           // instead of an Array.
           collection.aggregate(
-            {
-              $project: {
-                author: 1,
-                tags: 1
-              }
-            },
-            { $unwind: '$tags' },
-            {
-              $group: {
-                _id: { tags: '$tags' },
-                authors: { $addToSet: '$author' }
-              }
-            },
+            [
+              {
+                $project: {
+                  author: 1,
+                  tags: 1
+                }
+              },
+              { $unwind: '$tags' },
+              {
+                $group: {
+                  _id: { tags: '$tags' },
+                  authors: { $addToSet: '$author' }
+                }
+              },
+              { $sort: { _id: -1 } }
+            ],
             function(err, cursor) {
               expect(err).to.be.null;
 
@@ -283,19 +287,22 @@ describe('Aggregation', function() {
           // Execute aggregate, notice the pipeline is expressed as function call parameters
           // instead of an Array.
           collection.aggregate(
-            {
-              $project: {
-                author: 1,
-                tags: 1
-              }
-            },
-            { $unwind: '$tags' },
-            {
-              $group: {
-                _id: { tags: '$tags' },
-                authors: { $addToSet: '$author' }
-              }
-            },
+            [
+              {
+                $project: {
+                  author: 1,
+                  tags: 1
+                }
+              },
+              { $unwind: '$tags' },
+              {
+                $group: {
+                  _id: { tags: '$tags' },
+                  authors: { $addToSet: '$author' }
+                }
+              },
+              { $sort: { _id: -1 } }
+            ],
             function(err, cursor) {
               expect(err).to.be.null;
 
@@ -561,7 +568,8 @@ describe('Aggregation', function() {
                   _id: { tags: '$tags' },
                   authors: { $addToSet: '$author' }
                 }
-              }
+              },
+              { $sort: { _id: -1 } }
             ],
             {
               cursor: { batchSize: 1 }
@@ -747,7 +755,8 @@ describe('Aggregation', function() {
                   _id: { tags: '$tags' },
                   authors: { $addToSet: '$author' }
                 }
-              }
+              },
+              { $sort: { _id: -1 } }
             ],
             {
               allowDiskUse: true
@@ -1105,7 +1114,8 @@ describe('Aggregation', function() {
                     _id: { tags: '$tags' },
                     authors: { $addToSet: '$author' }
                   }
-                }
+                },
+                { $sort: { _id: -1 } }
               ],
               {
                 cursor: { batchSize: 1 },
