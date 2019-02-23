@@ -200,14 +200,18 @@ function generateTopologyTests(testSuites, testContext) {
   [
     { topology: 'replicaset', minServerVersion: '>=3.7.x' },
     { topology: 'sharded', minServerVersion: '>=4.1.5' }
-  ].forEach(config => generateTestSuiteTests(testSuites, testContext, config));
+  ].forEach(config => {
+    describe(config.topology, function() {
+      generateTestSuiteTests(testSuites, testContext, config);
+    });
+  });
 }
 
 function generateTestSuiteTests(testSuites, testContext, config) {
   testSuites.forEach(testSuite => {
     const minServerVersion = testSuite.minServerVersion
       ? `>=${testSuite.minServerVersion}`
-      : '>=3.7.x';
+      : config.minServerVersion;
 
     const metadata = {
       requires: {
