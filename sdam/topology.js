@@ -137,7 +137,8 @@ class Topology extends EventEmitter {
       // Active client sessions
       sessions: [],
       // Promise library
-      promiseLibrary: options.promiseLibrary || Promise
+      promiseLibrary: options.promiseLibrary || Promise,
+      credentials: options.credentialss
     };
 
     // amend options for server instance creation
@@ -198,7 +199,7 @@ class Topology extends EventEmitter {
 
     // otherwise, wait for a server to properly connect based on user provided read preference,
     // or primary.
-    const readPreference = options.readPreference || ReadPreference.primary;
+    const readPreference = resolveReadPreference(options);
     this.selectServer(readPreferenceServerSelector(readPreference), (err, server) => {
       if (err) {
         if (typeof callback === 'function') {
@@ -391,6 +392,15 @@ class Topology extends EventEmitter {
     );
   }
 
+  auth(credentials, callback) {
+    if (typeof credentials === 'function') (callback = credentials), (credentials = null);
+    if (typeof callback === 'function') callback(null, true);
+  }
+
+  logout(callback) {
+    if (typeof callback === 'function') callback(null, true);
+  }
+
   // Basic operation support. Eventually this should be moved into command construction
   // during the command refactor.
 
@@ -463,7 +473,10 @@ class Topology extends EventEmitter {
       (callback = options), (options = {}), (options = options || {});
     }
 
-    const readPreference = options.readPreference ? options.readPreference : ReadPreference.primary;
+    // TODO: type resolution should happen elsewhere
+    const readPreference = resolveReadPreference(options);
+    options = Object.assign(options, { readPreference });
+
     this.selectServer(readPreferenceServerSelector(readPreference), (err, server) => {
       if (err) {
         callback(err, null);
@@ -686,6 +699,11 @@ function selectServers(topology, selector, timeout, start, callback) {
       // successful iteration, clear the check timer
       clearTimeout(iterationTimer);
 
+      if (topology.description.error) {
+        callback(topology.description.error, null);
+        return;
+      }
+
       // topology description has changed due to monitoring, reattempt server selection
       selectServers(topology, selector, timeout, start, callback);
     };
@@ -779,8 +797,6 @@ function serverErrorEventHandler(server, topology) {
       new monitoring.ServerClosedEvent(topology.s.id, server.description.address)
     );
 
-    topology.emit('error', err);
-
     if (err instanceof MongoParseError) {
       resetServerState(server, err, { clearPool: true });
       return;
@@ -843,7 +859,7 @@ function executeWriteOperation(args, options, callback) {
 }
 
 /**
- * Resets the internal state of this server to `Unknown`.
+ * Resets the internal state of this server to `Unknown` by simulating an empty ismaster
  *
  * @private
  * @param {Server} server
@@ -857,7 +873,7 @@ function resetServerState(server, error, options) {
   function resetState() {
     server.emit(
       'descriptionReceived',
-      new ServerDescription(server.description.address, null, error)
+      new ServerDescription(server.description.address, null, { error })
     );
   }
 
@@ -867,6 +883,19 @@ function resetServerState(server, error, options) {
   }
 
   resetState();
+}
+
+function resolveReadPreference(options) {
+  let readPreference = options.readPreference || new ReadPreference('primary');
+  if (typeof readPreference === 'string') {
+    readPreference = new ReadPreference(readPreference);
+  }
+
+  if (!(readPreference instanceof ReadPreference)) {
+    throw new MongoError('read preference must be a ReadPreference instance');
+  }
+
+  return readPreference;
 }
 
 /**

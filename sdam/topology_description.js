@@ -7,7 +7,6 @@ const ReadPreference = require('../topologies/read_preference');
 const MIN_SUPPORTED_SERVER_VERSION = '2.6';
 const MIN_SUPPORTED_WIRE_VERSION = 2;
 const MAX_SUPPORTED_WIRE_VERSION = 5;
-const DEFAULT_HEARTBEAT_FREQUENCY_MS = 10000;
 
 // An enumeration of topology types we know about
 const TopologyType = {
@@ -29,7 +28,15 @@ class TopologyDescription {
    * @param {number} maxSetVersion
    * @param {ObjectId} maxElectionId
    */
-  constructor(topologyType, serverDescriptions, setName, maxSetVersion, maxElectionId, options) {
+  constructor(
+    topologyType,
+    serverDescriptions,
+    setName,
+    maxSetVersion,
+    maxElectionId,
+    options,
+    error
+  ) {
     options = options || {};
 
     // TODO: consider assigning all these values to a temporary value `s` which
@@ -47,6 +54,7 @@ class TopologyDescription {
     this.heartbeatFrequencyMS = options.heartbeatFrequencyMS || 0;
     this.localThresholdMS = options.localThresholdMS || 0;
     this.options = options;
+    this.error = error;
 
     // determine server compatibility
     for (const serverDescription of this.servers.values()) {
@@ -109,6 +117,7 @@ class TopologyDescription {
     let setName = this.setName;
     let maxSetVersion = this.maxSetVersion;
     let maxElectionId = this.maxElectionId;
+    let error = serverDescription.error || null;
 
     const serverType = serverDescription.type;
     let serverDescriptions = new Map(this.servers);
@@ -124,7 +133,8 @@ class TopologyDescription {
         setName,
         maxSetVersion,
         maxElectionId,
-        this.options
+        this.options,
+        error
       );
     }
 
@@ -204,7 +214,8 @@ class TopologyDescription {
       setName,
       maxSetVersion,
       maxElectionId,
-      this.options
+      this.options,
+      error
     );
   }
 

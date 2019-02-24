@@ -1117,8 +1117,6 @@ function _execute(self) {
       var connection = null;
       const connections = self.availableConnections.filter(conn => conn.workItems.length === 0);
 
-      // console.log({ totalConnections, connectionsLength: connections.length });
-
       // No connection found that has no work on it, just pick one for pipelining
       if (connections.length === 0) {
         connection =

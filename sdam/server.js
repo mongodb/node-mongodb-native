@@ -13,6 +13,35 @@ const monitorServer = require('./monitoring').monitorServer;
 const MongoParseError = require('../error').MongoParseError;
 const MongoNetworkError = require('../error').MongoNetworkError;
 const collationNotSupported = require('../utils').collationNotSupported;
+const debugOptions = require('../connection/utils').debugOptions;
+
+// Used for filtering out fields for logging
+const DEBUG_FIELDS = [
+  'reconnect',
+  'reconnectTries',
+  'reconnectInterval',
+  'emitError',
+  'cursorFactory',
+  'host',
+  'port',
+  'size',
+  'keepAlive',
+  'keepAliveInitialDelay',
+  'noDelay',
+  'connectionTimeout',
+  'checkServerIdentity',
+  'socketTimeout',
+  'ssl',
+  'ca',
+  'crl',
+  'cert',
+  'key',
+  'rejectUnauthorized',
+  'promoteLongs',
+  'promoteValues',
+  'promoteBuffers',
+  'servername'
+];
 
 const STATE_DISCONNECTED = 0;
 const STATE_CONNECTING = 1;
@@ -67,8 +96,6 @@ class Server extends EventEmitter {
 
   /**
    * Initiate server connect
-   *
-   * @param {Array} [options.auth] Array of auth options to apply on connect
    */
   connect(options) {
     options = options || {};
@@ -189,7 +216,11 @@ class Server extends EventEmitter {
     // Debug log
     if (this.s.logger.isDebug()) {
       this.s.logger.debug(
-        `executing command [${JSON.stringify({ ns, cmd, options })}] against ${this.name}`
+        `executing command [${JSON.stringify({
+          ns,
+          cmd,
+          options: debugOptions(DEBUG_FIELDS, options)
+        })}] against ${this.name}`
       );
     }
 

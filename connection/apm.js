@@ -147,6 +147,9 @@ const extractReply = (command, reply) => {
     };
   }
 
+  // in the event of a `noResponse` command, just return
+  if (reply === null) return reply;
+
   return reply.result;
 };
 
