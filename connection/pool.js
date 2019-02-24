@@ -742,6 +742,27 @@ Pool.prototype.destroy = function(force) {
   checkStatus();
 };
 
+/**
+ * Reset all connections of this pool
+ *
+ * @param {function} [callback]
+ */
+Pool.prototype.reset = function(callback) {
+  // this.destroy(true, err => {
+  //   if (err && typeof callback === 'function') {
+  //     callback(err, null);
+  //     return;
+  //   }
+
+  //   stateTransition(this, DISCONNECTED);
+  //   this.connect();
+
+  //   if (typeof callback === 'function') callback(null, null);
+  // });
+
+  if (typeof callback === 'function') callback();
+};
+
 // Prepare the buffer that Pool.prototype.write() uses to send to the server
 function serializeCommand(self, command, callback) {
   const originalCommandBuffer = command.toBin();

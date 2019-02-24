@@ -22,6 +22,10 @@ const WRITABLE_SERVER_TYPES = new Set([
 const ISMASTER_FIELDS = [
   'minWireVersion',
   'maxWireVersion',
+  'maxBsonObjectSize',
+  'maxMessageSizeBytes',
+  'maxWriteBatchSize',
+  'compression',
   'me',
   'hosts',
   'passives',
@@ -32,6 +36,7 @@ const ISMASTER_FIELDS = [
   'electionId',
   'primary',
   'logicalSessionTimeoutMinutes',
+  'saslSupportedMechs',
   '__nodejs_mock_server__'
 ];
 
@@ -63,7 +68,7 @@ class ServerDescription {
     );
 
     this.address = address;
-    this.error = null;
+    this.error = options.error || null;
     this.roundTripTime = options.roundTripTime || 0;
     this.lastUpdateTime = Date.now();
     this.lastWriteDate = ismaster.lastWrite ? ismaster.lastWrite.lastWriteDate : null;
@@ -76,6 +81,7 @@ class ServerDescription {
     });
 
     // normalize case for hosts
+    if (this.me) this.me = this.me.toLowerCase();
     this.hosts = this.hosts.map(host => host.toLowerCase());
     this.passives = this.passives.map(host => host.toLowerCase());
     this.arbiters = this.arbiters.map(host => host.toLowerCase());

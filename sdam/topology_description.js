@@ -7,6 +7,7 @@ const ReadPreference = require('../topologies/read_preference');
 const MIN_SUPPORTED_SERVER_VERSION = '2.6';
 const MIN_SUPPORTED_WIRE_VERSION = 2;
 const MAX_SUPPORTED_WIRE_VERSION = 5;
+const DEFAULT_HEARTBEAT_FREQUENCY_MS = 10000;
 
 // An enumeration of topology types we know about
 const TopologyType = {
@@ -49,6 +50,8 @@ class TopologyDescription {
 
     // determine server compatibility
     for (const serverDescription of this.servers.values()) {
+      if (serverDescription.type === ServerType.Unknown) continue;
+
       if (serverDescription.minWireVersion > MAX_SUPPORTED_WIRE_VERSION) {
         this.compatible = false;
         this.compatibilityError = `Server at ${serverDescription.address} requires wire version ${

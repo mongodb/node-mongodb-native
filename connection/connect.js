@@ -108,7 +108,7 @@ function performInitialHandshake(conn, options, callback) {
         options.port +
         ' reports wire version ' +
         (ismaster.maxWireVersion || 0) +
-        ', but this version of Node.js Driver requires at least ' +
+        ', but this version of the Node.js Driver requires at least ' +
         latestSupportedMaxWireVersion +
         ' (MongoDB' +
         latestSupportedVersion +

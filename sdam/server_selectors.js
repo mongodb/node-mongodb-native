@@ -8,13 +8,24 @@ const MongoError = require('../error').MongoError;
 const IDLE_WRITE_PERIOD = 10000;
 const SMALLEST_MAX_STALENESS_SECONDS = 90;
 
+/**
+ * Returns a server selector that selects for writable servers
+ */
 function writableServerSelector() {
   return function(topologyDescription, servers) {
     return latencyWindowReducer(topologyDescription, servers.filter(s => s.isWritable));
   };
 }
 
-// reducers
+/**
+ * Reduces the passed in array of servers by the rules of the "Max Staleness" specification
+ * found here: https://github.com/mongodb/specifications/blob/master/source/max-staleness/max-staleness.rst
+ *
+ * @param {ReadPreference} readPreference The read preference providing max staleness guidance
+ * @param {topologyDescription} topologyDescription The topology description
+ * @param {ServerDescription[]} servers The list of server descriptions to be reduced
+ * @return {ServerDescription[]} The list of servers that satisfy the requirements of max staleness
+ */
 function maxStalenessReducer(readPreference, topologyDescription, servers) {
   if (readPreference.maxStalenessSeconds == null || readPreference.maxStalenessSeconds < 0) {
     return servers;
@@ -24,7 +35,7 @@ function maxStalenessReducer(readPreference, topologyDescription, servers) {
   const maxStalenessVariance =
     (topologyDescription.heartbeatFrequencyMS + IDLE_WRITE_PERIOD) / 1000;
   if (maxStaleness < maxStalenessVariance) {
-    throw MongoError(`maxStalenessSeconds must be at least ${maxStalenessVariance} seconds`);
+    throw new MongoError(`maxStalenessSeconds must be at least ${maxStalenessVariance} seconds`);
   }
 
   if (maxStaleness < SMALLEST_MAX_STALENESS_SECONDS) {
@@ -61,6 +72,12 @@ function maxStalenessReducer(readPreference, topologyDescription, servers) {
   return servers;
 }
 
+/**
+ * Determines whether a server's tags match a given set of tags
+ *
+ * @param {String[]} tagSet The requested tag set to match
+ * @param {String[]} serverTags The server's tags
+ */
 function tagSetMatch(tagSet, serverTags) {
   const keys = Object.keys(tagSet);
   const serverTagKeys = Object.keys(serverTags);
@@ -74,6 +91,13 @@ function tagSetMatch(tagSet, serverTags) {
   return true;
 }
 
+/**
+ * Reduces a set of server descriptions based on tags requested by the read preference
+ *
+ * @param {ReadPreference} readPreference The read preference providing the requested tags
+ * @param {ServerDescription[]} servers The list of server descriptions to reduce
+ * @return {ServerDescription[]} The list of servers matching the requested tags
+ */
 function tagSetReducer(readPreference, servers) {
   if (
     readPreference.tags == null ||
@@ -97,6 +121,15 @@ function tagSetReducer(readPreference, servers) {
   return [];
 }
 
+/**
+ * Reduces a list of servers to ensure they fall within an acceptable latency window. This is
+ * further specified in the "Server Selection" specification, found here:
+ * https://github.com/mongodb/specifications/blob/master/source/server-selection/server-selection.rst
+ *
+ * @param {topologyDescription} topologyDescription The topology description
+ * @param {ServerDescription[]} servers The list of servers to reduce
+ * @returns {ServerDescription[]} The servers which fall within an acceptable latency window
+ */
 function latencyWindowReducer(topologyDescription, servers) {
   const low = servers.reduce(
     (min, server) => (min === -1 ? server.roundTripTime : Math.min(server.roundTripTime, min)),
@@ -128,6 +161,11 @@ function knownFilter(server) {
   return server.type !== ServerType.Unknown;
 }
 
+/**
+ * Returns a function which selects servers based on a provided read preference
+ *
+ * @param {ReadPreference} readPreference The read preference to select with
+ */
 function readPreferenceServerSelector(readPreference) {
   if (!readPreference.isValid()) {
     throw new TypeError('Invalid read preference specified');

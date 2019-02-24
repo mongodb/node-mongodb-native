@@ -1,6 +1,7 @@
 'use strict';
 
 const ServerDescription = require('./server_description').ServerDescription;
+const ServerType = require('./server_description').ServerType;
 const calculateDurationInMs = require('../utils').calculateDurationInMs;
 
 /**
@@ -122,13 +123,24 @@ class ServerHeartbeatFailedEvent {
  *
  * @param {Server} server The server to monitor
  */
-function monitorServer(server) {
+function monitorServer(server, options) {
+  options = options || {};
+  const heartbeatFrequencyMS = options.heartbeatFrequencyMS || 10000;
+
+  if (options.initial === true) {
+    server.s.monitorId = setTimeout(() => monitorServer(server), heartbeatFrequencyMS);
+    return;
+  }
+
   // executes a single check of a server
   const checkServer = callback => {
     let start = process.hrtime();
 
     // emit a signal indicating we have started the heartbeat
     server.emit('serverHeartbeatStarted', new ServerHeartbeatStartedEvent(server.name));
+
+    // NOTE: legacy monitoring event
+    process.nextTick(() => server.emit('monitoring', server));
 
     server.command(
       'admin.$cmd',
@@ -137,7 +149,7 @@ function monitorServer(server) {
         monitoring: true,
         socketTimeout: server.s.options.connectionTimeout || 2000
       },
-      function(err, result) {
+      (err, result) => {
         let duration = calculateDurationInMs(start);
 
         if (err) {
@@ -167,10 +179,7 @@ function monitorServer(server) {
     server.emit('descriptionReceived', new ServerDescription(server.description.address, isMaster));
 
     // schedule the next monitoring process
-    server.s.monitorId = setTimeout(
-      () => monitorServer(server),
-      server.s.options.heartbeatFrequencyMS
-    );
+    server.s.monitorId = setTimeout(() => monitorServer(server), heartbeatFrequencyMS);
   };
 
   // run the actual monitoring loop
@@ -184,21 +193,28 @@ function monitorServer(server) {
     // According to the SDAM specification's "Network error during server check" section, if
     // an ismaster call fails we reset the server's pool. If a server was once connected,
     // change its type to `Unknown` only after retrying once.
-
-    // TODO: we need to reset the pool here
-
-    return checkServer((err, isMaster) => {
-      if (err) {
-        server.s.monitoring = false;
-
-        // revert to `Unknown` by emitting a default description with no isMaster
-        server.emit('descriptionReceived', new ServerDescription(server.description.address));
-
-        // do not reschedule monitoring in this case
+    server.s.pool.reset(() => {
+      if (server.description.type === ServerType.Unknown) {
         return;
       }
 
-      successHandler(isMaster);
+      // otherwise re-attempt monitoring once
+      checkServer((error, isMaster) => {
+        if (error) {
+          server.s.monitoring = false;
+
+          // we revert to an `Unknown` by emitting a default description with no isMaster
+          server.emit(
+            'descriptionReceived',
+            new ServerDescription(server.description.address, null, { error })
+          );
+
+          // we do not reschedule monitoring in this case
+          return;
+        }
+
+        successHandler(isMaster);
+      });
     });
   });
 }

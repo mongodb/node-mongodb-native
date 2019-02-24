@@ -3,7 +3,6 @@ const EventEmitter = require('events');
 const MongoError = require('../error').MongoError;
 const Pool = require('../connection/pool');
 const relayEvents = require('../utils').relayEvents;
-const calculateDurationInMs = require('../utils').calculateDurationInMs;
 const wireProtocol = require('../wireprotocol');
 const BSON = require('../connection/utils').retrieveBSON();
 const createClientInfo = require('../topologies/shared').createClientInfo;
@@ -11,6 +10,13 @@ const Logger = require('../connection/logger');
 const ServerDescription = require('./server_description').ServerDescription;
 const ReadPreference = require('../topologies/read_preference');
 const monitorServer = require('./monitoring').monitorServer;
+const MongoParseError = require('../error').MongoParseError;
+const MongoNetworkError = require('../error').MongoNetworkError;
+const collationNotSupported = require('../utils').collationNotSupported;
+
+const STATE_DISCONNECTED = 0;
+const STATE_CONNECTING = 1;
+const STATE_CONNECTED = 2;
 
 /**
  *
@@ -41,8 +47,13 @@ class Server extends EventEmitter {
       clientInfo: createClientInfo(options),
       // state variable to determine if there is an active server check in progress
       monitoring: false,
+      // the implementation of the monitoring method
+      monitorFunction: options.monitorFunction || monitorServer,
       // the connection pool
-      pool: null
+      pool: null,
+      // the server state
+      state: STATE_DISCONNECTED,
+      credentials: options.credentials
     };
   }
 
@@ -68,20 +79,34 @@ class Server extends EventEmitter {
     }
 
     // create a pool
-    this.s.pool = new Pool(this, Object.assign(this.s.options, options, { bson: this.s.bson }));
+    const addressParts = this.description.address.split(':');
+    const poolOptions = Object.assign(
+      { host: addressParts[0], port: parseInt(addressParts[1], 10) },
+      this.s.options,
+      options,
+      { bson: this.s.bson }
+    );
 
-    // Set up listeners
+    // NOTE: this should only be the case if we are connecting to a single server
+    poolOptions.reconnect = true;
+
+    this.s.pool = new Pool(this, poolOptions);
+
+    // setup listeners
     this.s.pool.on('connect', connectEventHandler(this));
-    this.s.pool.on('close', closeEventHandler(this));
+    this.s.pool.on('close', errorEventHandler(this));
+    this.s.pool.on('error', errorEventHandler(this));
+    this.s.pool.on('parseError', parseErrorEventHandler(this));
 
-    // this.s.pool.on('error', errorEventHandler(this));
+    // it is unclear whether consumers should even know about these events
     // this.s.pool.on('timeout', timeoutEventHandler(this));
-    // this.s.pool.on('parseError', errorEventHandler(this));
     // this.s.pool.on('reconnect', reconnectEventHandler(this));
     // this.s.pool.on('reconnectFailed', errorEventHandler(this));
 
     // relay all command monitoring events
     relayEvents(this.s.pool, this, ['commandStarted', 'commandSucceeded', 'commandFailed']);
+
+    this.s.state = STATE_CONNECTING;
 
     // If auth settings have been provided, use them
     if (options.auth) {
@@ -95,24 +120,44 @@ class Server extends EventEmitter {
   /**
    * Destroy the server connection
    *
-   * @param {Boolean} [options.emitClose=false] Emit close event on destroy
-   * @param {Boolean} [options.emitDestroy=false] Emit destroy event on destroy
    * @param {Boolean} [options.force=false] Force destroy the pool
    */
-  destroy(callback) {
-    if (typeof callback === 'function') {
-      callback(null, null);
+  destroy(options, callback) {
+    if (typeof options === 'function') (callback = options), (options = {});
+    options = Object.assign({}, { force: false }, options);
+
+    if (!this.s.pool) {
+      this.s.state = STATE_DISCONNECTED;
+      if (typeof callback === 'function') {
+        callback(null, null);
+      }
+
+      return;
     }
+
+    ['close', 'error', 'timeout', 'parseError', 'connect'].forEach(event => {
+      this.s.pool.removeAllListeners(event);
+    });
+
+    if (this.s.monitorId) {
+      clearTimeout(this.s.monitorId);
+    }
+
+    this.s.pool.destroy(options.force, err => {
+      this.s.state = STATE_DISCONNECTED;
+      callback(err);
+    });
   }
 
   /**
    * Immediately schedule monitoring of this server. If there already an attempt being made
    * this will be a no-op.
    */
-  monitor() {
-    if (this.s.monitoring) return;
+  monitor(options) {
+    options = options || {};
+    if (this.s.state !== STATE_CONNECTED || this.s.monitoring) return;
     if (this.s.monitorId) clearTimeout(this.s.monitorId);
-    monitorServer(this);
+    this.s.monitorFunction(this, options);
   }
 
   /**
@@ -148,8 +193,8 @@ class Server extends EventEmitter {
       );
     }
 
-    // Check if we have collation support
-    if (this.description.maxWireVersion < 5 && cmd.collation) {
+    // error if collation not supported
+    if (collationNotSupported(this, cmd)) {
       callback(new MongoError(`server ${this.name} does not support collation`));
       return;
     }
@@ -245,122 +290,62 @@ function executeWriteOperation(args, options, callback) {
     return;
   }
 
-  // Check if we have collation support
-  if (server.description.maxWireVersion < 5 && options.collation) {
+  if (collationNotSupported(server, options)) {
     callback(new MongoError(`server ${this.name} does not support collation`));
     return;
   }
 
-  // Execute write
   return wireProtocol[op](server, ns, ops, options, callback);
 }
 
-function saslSupportedMechs(options) {
-  if (!options) {
-    return {};
-  }
-
-  const authArray = options.auth || [];
-  const authMechanism = authArray[0] || options.authMechanism;
-  const authSource = authArray[1] || options.authSource || options.dbName || 'admin';
-  const user = authArray[2] || options.user;
-
-  if (typeof authMechanism === 'string' && authMechanism.toUpperCase() !== 'DEFAULT') {
-    return {};
-  }
-
-  if (!user) {
-    return {};
-  }
-
-  return { saslSupportedMechs: `${authSource}.${user}` };
-}
-
-function extractIsMasterError(err, result) {
-  if (err) return err;
-  if (result && result.result && result.result.ok === 0) {
-    return new MongoError(result.result);
-  }
-}
-
-function executeServerHandshake(server, callback) {
-  const compressors =
-    server.s.options.compression && server.s.options.compression.compressors
-      ? server.s.options.compression.compressors
-      : [];
-
-  server.command(
-    'admin.$cmd',
-    Object.assign(
-      { ismaster: true, client: server.s.clientInfo, compression: compressors },
-      saslSupportedMechs(server.s.options)
-    ),
-    { socketTimeout: server.s.options.connectionTimeout || 2000 },
-    callback
-  );
-}
-
 function connectEventHandler(server) {
-  return function() {
-    // log information of received information if in info mode
-    // if (server.s.logger.isInfo()) {
-    //   var object = err instanceof MongoError ? JSON.stringify(err) : {};
-    //   server.s.logger.info(`server ${server.name} fired event ${event} out with message ${object}`);
-    // }
+  return function(pool, conn) {
+    const ismaster = conn.ismaster;
+    server.s.lastIsMasterMS = conn.lastIsMasterMS;
+    if (conn.agreedCompressor) {
+      server.s.pool.options.agreedCompressor = conn.agreedCompressor;
+    }
 
-    // begin initial server handshake
-    const start = process.hrtime();
-    executeServerHandshake(server, (err, response) => {
-      // Set initial lastIsMasterMS - is this needed?
-      server.s.lastIsMasterMS = calculateDurationInMs(start);
+    if (conn.zlibCompressionLevel) {
+      server.s.pool.options.zlibCompressionLevel = conn.zlibCompressionLevel;
+    }
 
-      const serverError = extractIsMasterError(err, response);
-      if (serverError) {
-        server.emit('error', serverError);
-        return;
-      }
+    if (conn.ismaster.$clusterTime) {
+      const $clusterTime = conn.ismaster.$clusterTime;
+      server.s.sclusterTime = $clusterTime;
+    }
 
-      // extract the ismaster from the server response
-      const isMaster = response.result;
-
-      // compression negotation
-      if (isMaster && isMaster.compression) {
-        const localCompressionInfo = server.s.options.compression;
-        const localCompressors = localCompressionInfo.compressors;
-        for (var i = 0; i < localCompressors.length; i++) {
-          if (isMaster.compression.indexOf(localCompressors[i]) > -1) {
-            server.s.pool.options.agreedCompressor = localCompressors[i];
-            break;
-          }
-        }
-
-        if (localCompressionInfo.zlibCompressionLevel) {
-          server.s.pool.options.zlibCompressionLevel = localCompressionInfo.zlibCompressionLevel;
-        }
-      }
-
-      // log the connection event if requested
-      if (server.s.logger.isInfo()) {
-        server.s.logger.info(
-          `server ${server.name} connected with ismaster [${JSON.stringify(isMaster)}]`
-        );
-      }
-
-      // emit an event indicating that our description has changed
-      server.emit(
-        'descriptionReceived',
-        new ServerDescription(server.description.address, isMaster)
+    // log the connection event if requested
+    if (server.s.logger.isInfo()) {
+      server.s.logger.info(
+        `server ${server.name} connected with ismaster [${JSON.stringify(ismaster)}]`
       );
+    }
 
-      // emit a connect event
-      server.emit('connect', isMaster);
-    });
+    // emit an event indicating that our description has changed
+    server.emit('descriptionReceived', new ServerDescription(server.description.address, ismaster));
+
+    // we are connected and handshaked (guaranteed by the pool)
+    server.s.state = STATE_CONNECTED;
+    server.emit('connect', server);
   };
 }
 
-function closeEventHandler(server) {
-  return function() {
+function errorEventHandler(server) {
+  return function(err) {
+    if (err) {
+      server.s.state = STATE_DISCONNECTED;
+      server.emit('error', new MongoNetworkError(err));
+    }
+
     server.emit('close');
+  };
+}
+
+function parseErrorEventHandler(server) {
+  return function(err) {
+    server.s.state = STATE_DISCONNECTED;
+    server.emit('error', new MongoParseError(err));
   };
 }
 
