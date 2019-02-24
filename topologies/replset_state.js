@@ -287,6 +287,34 @@ ReplSetState.prototype.update = function(server) {
   // Is this a mongos
   //
   if (ismaster && ismaster.msg === 'isdbgrid') {
+    if (this.primary && this.primary.name === serverName) {
+      this.primary = null;
+      this.topologyType = TopologyType.ReplicaSetNoPrimary;
+    }
+
+    return false;
+  }
+
+  // A RSGhost instance
+  if (ismaster.isreplicaset) {
+    self.set[serverName] = {
+      type: ServerType.RSGhost,
+      setVersion: null,
+      electionId: null,
+      setName: ismaster.setName
+    };
+
+    if (this.primary && this.primary.name === serverName) {
+      this.primary = null;
+    }
+
+    // Set the topology
+    this.topologyType = this.primary
+      ? TopologyType.ReplicaSetWithPrimary
+      : TopologyType.ReplicaSetNoPrimary;
+    if (ismaster.setName) this.setName = ismaster.setName;
+
+    // Set the topology
     return false;
   }
 
@@ -305,30 +333,12 @@ ReplSetState.prototype.update = function(server) {
       electionId: null,
       setName: ismaster.setName
     };
-    // Set the topology
-    this.topologyType = this.primary
-      ? TopologyType.ReplicaSetWithPrimary
-      : TopologyType.ReplicaSetNoPrimary;
-    if (ismaster.setName) this.setName = ismaster.setName;
-    return false;
-  }
-
-  // A RSGhost instance
-  if (ismaster.isreplicaset) {
-    self.set[serverName] = {
-      type: ServerType.RSGhost,
-      setVersion: null,
-      electionId: null,
-      setName: null
-    };
 
     // Set the topology
     this.topologyType = this.primary
       ? TopologyType.ReplicaSetWithPrimary
       : TopologyType.ReplicaSetNoPrimary;
     if (ismaster.setName) this.setName = ismaster.setName;
-
-    // Set the topology
     return false;
   }
 
