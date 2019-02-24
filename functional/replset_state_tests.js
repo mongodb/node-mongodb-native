@@ -116,7 +116,7 @@ function executePhase(phase, state, callback) {
       expect(state.set[name]).to.exist;
       for (var n in outcome.servers[name]) {
         if (outcome.servers[name][n]) {
-          expect(outcome.servers[name][n]).to.eql(state.set[name][n]);
+          expect(state.set[name][n]).to.eql(outcome.servers[name][n]);
         }
       }
     } catch (e) {
@@ -125,7 +125,7 @@ function executePhase(phase, state, callback) {
   }
 
   // // Check the topology type
-  expect(outcome.topologyType).to.equal(state.topologyType);
-  expect(outcome.setName).to.equal(state.setName);
+  expect(state.topologyType).to.equal(outcome.topologyType);
+  expect(state.setName).to.equal(outcome.setName);
   callback(null, null);
 }
