@@ -156,7 +156,7 @@ function normalizeServerDescription(serverDescription) {
   return serverDescription;
 }
 
-function executeSDAMTest(testData, done) {
+function executeSDAMTest(testData, testDone) {
   parse(testData.uri, (err, parsedUri) => {
     if (err) return done(err);
 
@@ -182,7 +182,21 @@ function executeSDAMTest(testData, done) {
     // connect the topology
     topology.connect(testData.uri);
 
+    function done(err) {
+      topology.close(e => testDone(e || err));
+    }
+
+    const incompatabilityHandler = err => {
+      if (err.message.match(/but this version of the driver/)) return;
+      throw err;
+    };
+
     testData.phases.forEach(phase => {
+      const incompatibilityExpected = phase.outcome ? !phase.outcome.comptabile : false;
+      if (incompatibilityExpected) {
+        topology.on('error', incompatabilityHandler);
+      }
+
       // simulate each ismaster response
       phase.responses.forEach(response =>
         topology.serverUpdateHandler(new ServerDescription(response[0], response[1]))
@@ -227,9 +241,17 @@ function executeSDAMTest(testData, done) {
           return;
         }
 
+        if (key === 'compatible' || key === 'setName') {
+          expect(topology.description[key]).to.equal(outcomeValue);
+          return;
+        }
+
         expect(description).to.include.keys(translatedKey);
         expect(description[translatedKey]).to.eql(outcomeValue);
       });
+
+      // remove error handler
+      topology.removeListener('error', incompatabilityHandler);
     });
 
     topology.close(done);

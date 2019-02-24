@@ -226,14 +226,15 @@ function executeServerSelectionTest(testDefinition, options, testDone) {
   );
 
   const topologyOptions = {
-    heartbeatFrequencyMS: testDefinition.heartbeatFrequencyMS
+    heartbeatFrequencyMS: testDefinition.heartbeatFrequencyMS,
+    monitorFunction: () => {}
   };
 
   const topology = new Topology(seedData.seedlist, topologyOptions);
   topology.connect();
 
   function done(err) {
-    topology.close(() => testDone(err));
+    topology.close(e => testDone(e || err));
   }
 
   // Update topologies with server descriptions.
@@ -270,7 +271,7 @@ function executeServerSelectionTest(testDefinition, options, testDone) {
   }
 
   // default to serverSelectionTimeoutMS of `0` for unit tests
-  topology.selectServer(selector, { serverSelectionTimeoutMS: 0 }, (err, server) => {
+  topology.selectServer(selector, { serverSelectionTimeoutMS: 100 }, (err, server) => {
     // are we expecting an error?
     if (testDefinition.error) {
       if (!err) {

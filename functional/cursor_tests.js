@@ -421,6 +421,13 @@ describe('Cursor tests', function() {
     },
 
     test: function(done) {
+      const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // This test tries to inspect the connection pool directly on the topology, which
+        // will no longer work with the new Topology type. The test should be reworked.
+        return this.skip();
+      }
+
       const server = this.configuration.newTopology();
       var ns = f('%s.cursor4', this.configuration.db);
       // Add event listeners

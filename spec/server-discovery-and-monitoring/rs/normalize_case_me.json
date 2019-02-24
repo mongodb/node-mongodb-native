@@ -1,6 +1,6 @@
 {
-  "description": "setVersion is ignored if there is no electionId",
-  "uri": "mongodb://a/?replicaSet=rs",
+  "description": "Replica set mixed case normalization",
+  "uri": "mongodb://A/?replicaSet=rs",
   "phases": [
     {
       "responses": [
@@ -9,12 +9,17 @@
           {
             "ok": 1,
             "ismaster": true,
-            "hosts": [
-              "a:27017",
-              "b:27017"
-            ],
             "setName": "rs",
-            "setVersion": 2,
+            "me": "A:27017",
+            "hosts": [
+              "A:27017"
+            ],
+            "passives": [
+              "B:27017"
+            ],
+            "arbiters": [
+              "C:27017"
+            ],
             "minWireVersion": 0,
             "maxWireVersion": 6
           }
@@ -24,20 +29,20 @@
         "servers": {
           "a:27017": {
             "type": "RSPrimary",
-            "setName": "rs",
-            "setVersion": 2,
-            "electionId": null
+            "setName": "rs"
           },
           "b:27017": {
             "type": "Unknown",
-            "setName": null,
-            "electionId": null
+            "setName": null
+          },
+          "c:27017": {
+            "type": "Unknown",
+            "setName": null
           }
         },
         "topologyType": "ReplicaSetWithPrimary",
         "logicalSessionTimeoutMinutes": null,
-        "setName": "rs",
-        "maxSetVersion": 2
+        "setName": "rs"
       }
     },
     {
@@ -46,13 +51,19 @@
           "b:27017",
           {
             "ok": 1,
-            "ismaster": true,
-            "hosts": [
-              "a:27017",
-              "b:27017"
-            ],
+            "ismaster": false,
+            "secondary": true,
             "setName": "rs",
-            "setVersion": 1,
+            "me": "B:27017",
+            "hosts": [
+              "A:27017"
+            ],
+            "passives": [
+              "B:27017"
+            ],
+            "arbiters": [
+              "C:27017"
+            ],
             "minWireVersion": 0,
             "maxWireVersion": 6
           }
@@ -61,21 +72,21 @@
       "outcome": {
         "servers": {
           "a:27017": {
-            "type": "Unknown",
-            "setName": null,
-            "electionId": null
+            "type": "RSPrimary",
+            "setName": "rs"
           },
           "b:27017": {
-            "type": "RSPrimary",
-            "setName": "rs",
-            "setVersion": 1,
-            "electionId": null
+            "type": "RSSecondary",
+            "setName": "rs"
+          },
+          "c:27017": {
+            "type": "Unknown",
+            "setName": null
           }
         },
         "topologyType": "ReplicaSetWithPrimary",
         "logicalSessionTimeoutMinutes": null,
-        "setName": "rs",
-        "maxSetVersion": 2
+        "setName": "rs"
       }
     }
   ]

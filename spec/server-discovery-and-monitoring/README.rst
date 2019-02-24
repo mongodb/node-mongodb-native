@@ -9,14 +9,8 @@ Server Discovery And Monitoring Spec.
 Version
 -------
 
-Files in the "specifications" repository have no version scheme.
-They are not tied to a MongoDB server version,
-and it is our intention that each specification moves from "draft" to "final"
-with no further versions; it is superseded by a future spec, not revised.
-
-However, implementers must have stable sets of tests to target.
-As test files evolve they will be occasionally tagged like
-"server-discovery-tests-2014-09-10", until the spec is final.
+Files in the "specifications" repository have no version scheme. They are not
+tied to a MongoDB server version.
 
 Format
 ------
@@ -51,6 +45,8 @@ processing the responses in the phases so far. It has the following keys:
 - servers: An object whose keys are addresses like "a:27017", and whose values
   are "server" objects.
 - logicalSessionTimeoutMinutes: null or an integer.
+- maxSetVersion: absent or an integer.
+- maxElectionId: absent or a BSON ObjectId.
 - compatible: absent or a bool.
 
 A "server" object represents a correct ServerDescription within the client's

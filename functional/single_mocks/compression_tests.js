@@ -70,7 +70,6 @@ describe('Single Compression (mocks)', function() {
 
           server.setMessageHandler(request => {
             var doc = request.document;
-
             if (currentStep === 0) {
               expect(request.response.documents[0].compression).to.have.members(['snappy', 'zlib']);
               expect(server.isCompressed).to.be.false;

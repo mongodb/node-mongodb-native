@@ -59,7 +59,11 @@
         },
         "topologyType": "ReplicaSetWithPrimary",
         "logicalSessionTimeoutMinutes": null,
-        "setName": "rs"
+        "setName": "rs",
+        "maxSetVersion": 1,
+        "maxElectionId": {
+          "$oid": "000000000000000000000002"
+        }
       }
     },
     {
@@ -84,7 +88,11 @@
         },
         "topologyType": "ReplicaSetNoPrimary",
         "logicalSessionTimeoutMinutes": null,
-        "setName": "rs"
+        "setName": "rs",
+        "maxSetVersion": 1,
+        "maxElectionId": {
+          "$oid": "000000000000000000000002"
+        }
       }
     },
     {
@@ -123,7 +131,11 @@
         },
         "topologyType": "ReplicaSetNoPrimary",
         "logicalSessionTimeoutMinutes": null,
-        "setName": "rs"
+        "setName": "rs",
+        "maxSetVersion": 1,
+        "maxElectionId": {
+          "$oid": "000000000000000000000002"
+        }
       }
     },
     {
@@ -165,7 +177,11 @@
         },
         "topologyType": "ReplicaSetWithPrimary",
         "logicalSessionTimeoutMinutes": null,
-        "setName": "rs"
+        "setName": "rs",
+        "maxSetVersion": 1,
+        "maxElectionId": {
+          "$oid": "000000000000000000000003"
+        }
       }
     },
     {
@@ -203,7 +219,11 @@
         },
         "topologyType": "ReplicaSetWithPrimary",
         "logicalSessionTimeoutMinutes": null,
-        "setName": "rs"
+        "setName": "rs",
+        "maxSetVersion": 1,
+        "maxElectionId": {
+          "$oid": "000000000000000000000003"
+        }
       }
     }
   ]

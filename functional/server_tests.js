@@ -506,8 +506,13 @@ describe('Server tests', function() {
     },
 
     test: function(done) {
-      var ReadPreference = this.configuration.require.ReadPreference;
       const config = this.configuration;
+      if (config.usingUnifiedTopology()) {
+        // The new SDAM layer always reconnects, so this test is no longer relevant
+        return this.skip();
+      }
+
+      var ReadPreference = this.configuration.require.ReadPreference;
       var server = config.newTopology({
         host: this.configuration.host,
         port: this.configuration.port,
@@ -976,6 +981,11 @@ describe('Server tests', function() {
 
       test: function(done) {
         const config = this.configuration;
+        if (config.usingUnifiedTopology()) {
+          // Disabled for inspection of properties only relevant to legacy topology
+          return this.skip();
+        }
+
         var server = config.newTopology({
           host: this.configuration.host,
           port: this.configuration.port,
@@ -1034,7 +1044,7 @@ describe('Server tests', function() {
           let err;
           try {
             expect(error).to.be.an.instanceOf(Error);
-            expect(error.message).to.have.string('but this version of Node.js Driver requires');
+            expect(error.message).to.match(/but this version of the Node.js Driver requires/)
           } catch (e) {
             err = e;
           }

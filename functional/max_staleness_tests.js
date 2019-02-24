@@ -28,7 +28,7 @@ describe('Max Staleness', function() {
     fs
       .readdirSync(rsWithPrimaryPath)
       .filter(x => x.indexOf('.json') !== -1)
-      .filter(x => x.indexOf('LongHeartbeat2.json') === -1)
+      .filter(x => x.indexOf('LongHeartbeat2.jwson') === -1)
       .forEach(x => {
         it(p.basename(x, '.json'), function(done) {
           executeEntry(f('%s/%s', rsWithPrimaryPath, x), done);

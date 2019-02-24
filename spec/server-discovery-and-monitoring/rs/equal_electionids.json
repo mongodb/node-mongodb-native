@@ -60,7 +60,11 @@
         },
         "topologyType": "ReplicaSetWithPrimary",
         "logicalSessionTimeoutMinutes": null,
-        "setName": "rs"
+        "setName": "rs",
+        "maxSetVersion": 1,
+        "maxElectionId": {
+          "$oid": "000000000000000000000001"
+        }
       }
     }
   ]

@@ -8,6 +8,11 @@ var expect = require('chai').expect,
   ReadPreference = require('../../../lib/topologies/read_preference');
 
 describe('A replicaset with no primary', function() {
+  before(function() {
+    // These tests are not relevant to the new topology layer
+    if (this.configuration.usingUnifiedTopology()) this.skip();
+  });
+
   it('should correctly execute server selection tests', {
     metadata: { requires: { topology: 'single' } },
 
@@ -32,6 +37,11 @@ describe('A replicaset with no primary', function() {
 });
 
 describe('A replicaset with a primary', function() {
+  before(function() {
+    // These tests are not relevant to the new topology layer
+    if (this.configuration.usingUnifiedTopology()) this.skip();
+  });
+
   it('should correctly execute server selection tests', {
     metadata: { requires: { topology: 'single' } },
 

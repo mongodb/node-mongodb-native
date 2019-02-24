@@ -4,6 +4,13 @@ var expect = require('chai').expect,
   mock = require('mongodb-mock-server');
 
 describe('Single Timeout (mocks)', function() {
+  before(function() {
+    if (this.configuration.usingUnifiedTopology()) {
+      // The new SDAM layer always reconnects, so these tests are no longer relevant.
+      return this.skip();
+    }
+  });
+
   afterEach(() => mock.cleanup());
 
   it('Should correctly timeout socket operation and then correctly re-execute', {
