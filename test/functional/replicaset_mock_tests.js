@@ -151,7 +151,12 @@ describe('ReplSet (mocks)', function() {
     },
 
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
+
       const client = configuration.newClient(
         `mongodb://${test.mongos1.uri()},${test.mongos2.uri()}/test?socketTimeoutMS=120000&connectTimeoutMS=15000`
       );

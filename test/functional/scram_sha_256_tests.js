@@ -3,10 +3,8 @@
 const expect = require('chai').expect;
 const sinon = require('sinon');
 const ScramSHA256 = require('mongodb-core').ScramSHA256;
-const MongoError = require('mongodb-core').MongoError;
 const setupDatabase = require('./shared').setupDatabase;
 const withClient = require('./shared').withClient;
-const MongoClient = require('../../lib/mongo_client');
 
 describe('SCRAM-SHA-256 auth', function() {
   const test = {};
@@ -107,7 +105,7 @@ describe('SCRAM-SHA-256 auth', function() {
             password
           )}authMechanism=${mechanism}`;
 
-          const client = new MongoClient(url);
+          const client = this.configuration.newClient(url);
 
           return withClient(client, client => {
             return client.db(this.configuration.db).stats();
@@ -140,7 +138,7 @@ describe('SCRAM-SHA-256 auth', function() {
         const password = encodeURIComponent(user.password);
         const url = makeConnectionString(this.configuration, username, password);
 
-        const client = new MongoClient(url);
+        const client = this.configuration.newClient(url);
 
         return withClient(client, client => {
           return client.db(this.configuration.db).stats();
@@ -187,7 +185,7 @@ describe('SCRAM-SHA-256 auth', function() {
       return withClient(
         this.configuration.newClient({}, options),
         () => Promise.reject(new Error('This request should have failed to authenticate')),
-        err => expect(err).to.not.be.null
+        err => expect(err).to.match(/Authentication failed/)
       );
     }
   });
@@ -219,7 +217,7 @@ describe('SCRAM-SHA-256 auth', function() {
         withClient(
           this.configuration.newClient({}, options),
           () => Promise.reject(new Error('This request should have failed to authenticate')),
-          err => expect(err).to.be.an.instanceof(MongoError)
+          err => expect(err).to.match(/Authentication failed/)
         );
 
       return Promise.all([getErrorMsg(noUsernameOptions), getErrorMsg(badPasswordOptions)]);

@@ -55,7 +55,7 @@ describe('ReadPreference', function() {
    * @ignore
    */
   it('Should correctly apply collection level read Preference to group', {
-    metadata: { requires: { mongodb: '>=2.6.0', topology: ['single', 'ssl'] } },
+    metadata: { requires: { mongodb: '>=2.6.0,<=4.1.1', topology: ['single', 'ssl'] } },
 
     // The actual test we wish to run
     test: function(done) {

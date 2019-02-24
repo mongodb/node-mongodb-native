@@ -1,7 +1,6 @@
 'use strict';
 
 const setupDatabase = require('../functional/shared').setupDatabase;
-const MongoClient = require('../../lib/mongo_client');
 
 describe('examples.runCommand:', function() {
   let client;
@@ -12,7 +11,7 @@ describe('examples.runCommand:', function() {
   });
 
   beforeEach(async function() {
-    client = await MongoClient.connect(this.configuration.url());
+    client = await this.configuration.newClient().connect();
     db = client.db(this.configuration.db);
 
     // Done to ensure existence of collection

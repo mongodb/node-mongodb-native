@@ -18,7 +18,13 @@ describe('MongoClient', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // the new topology is far more resilient in these scenarios, making very difficult
+        // to reproduce the issues tested here.
+        return this.skip();
+      }
+
       const client = configuration.newClient({}, { bufferMaxEntries: 0, sslValidate: false });
 
       client.connect(function(err, client) {
@@ -58,7 +64,13 @@ describe('MongoClient', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // the new topology is far more resilient in these scenarios, making very difficult
+        // to reproduce the issues tested here.
+        return this.skip();
+      }
+
       const client = configuration.newClient({}, { bufferMaxEntries: 0, sslValidate: false });
 
       client.connect(function(err, client) {
@@ -157,7 +169,12 @@ describe('MongoClient', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
+
       const client = configuration.newClient(
         {},
         {
@@ -195,7 +212,12 @@ describe('MongoClient', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
+
       var url = configuration.url().replace('rs_name=rs', 'rs_name=rs1');
       const client = configuration.newClient(url, {
         replSet: {
@@ -245,7 +267,12 @@ describe('MongoClient', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
+
       const client = configuration.newClient(
         {},
         {
@@ -291,7 +318,12 @@ describe('MongoClient', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
+      const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
+
       var url = configuration.url();
       url =
         url.indexOf('?') !== -1
@@ -686,9 +718,13 @@ describe('MongoClient', function() {
 
     // The actual test we wish to run
     test: function(done) {
-      var configuration = this.configuration;
-      var uri = f('%s?socketTimeoutMS=120000&connectTimeoutMS=15000', configuration.url());
+      const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // skipped for direct legacy variable inspection
+        return this.skip();
+      }
 
+      var uri = f('%s?socketTimeoutMS=120000&connectTimeoutMS=15000', configuration.url());
       const client = configuration.newClient(uri);
       client.connect(function(err, client) {
         test.equal(null, err);

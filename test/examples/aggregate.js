@@ -2,7 +2,6 @@
 /* eslint-disable no-unused-vars */
 
 const setupDatabase = require('../functional/shared').setupDatabase;
-const MongoClient = require('../../lib/mongo_client');
 
 describe('examples.aggregaton:', function() {
   let client;
@@ -13,7 +12,7 @@ describe('examples.aggregaton:', function() {
   });
 
   beforeEach(async function() {
-    client = await MongoClient.connect(this.configuration.url());
+    client = await this.configuration.newClient().connect();
     collection = client.db(this.configuration.db).collection('aggregateExample');
   });
 

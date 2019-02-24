@@ -122,6 +122,11 @@ describe('Decimal128', function() {
       var Domain = require('domain');
       var domainInstance = Domain.create();
       var configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // The unified topology does not use a store
+        return this.skip();
+      }
+
       var client = configuration.newClient(
         { w: 0 },
         { poolSize: 1, auto_reconnect: true, domainsEnabled: true, bufferMaxEntries: 0 }
@@ -161,6 +166,11 @@ describe('Decimal128', function() {
       var Domain = require('domain');
       var domainInstance = Domain.create();
       var configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // The unified topology does not use a store
+        return this.skip();
+      }
+
       var client = configuration.newClient(
         { w: 1 },
         { poolSize: 1, auto_reconnect: true, domainsEnabled: true, bufferMaxEntries: 0 }

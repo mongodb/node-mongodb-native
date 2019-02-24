@@ -1061,6 +1061,14 @@ describe('Indexes', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // The new topology type has loose concepts of 'closing' and 'opening' a client. It will
+        // simply attempt here to retry the connection and reconnect, so this is a bad test for
+        // the driver in that configuration.
+
+        return this.skip();
+      }
+
       var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);

@@ -4,16 +4,24 @@ const f = require('util').format;
 const url = require('url');
 const qs = require('querystring');
 class NativeConfiguration extends ConfigurationBase {
-  constructor(options) {
-    super(options);
+  constructor(environment) {
+    super(environment);
 
     this.type = 'native';
-    this.topology = options.topology || this.defaultTopology;
-    this.replicasetName = options.replicasetName || 'rs';
+    this.topology = environment.topology || this.defaultTopology;
+    this.environment = environment;
+
+    if (environment.setName) {
+      this.replicasetName = environment.setName || 'rs';
+    }
   }
 
   defaultTopology(serverHost, serverPort, serverOpts, _mongo) {
     return new _mongo.Server(serverHost, serverPort, serverOpts || {});
+  }
+
+  usingUnifiedTopology() {
+    return !!process.env.MONGODB_UNIFIED_TOPOLOGY;
   }
 
   start(callback) {
@@ -50,11 +58,20 @@ class NativeConfiguration extends ConfigurationBase {
   newClient(dbOptions, serverOptions) {
     // support MongoClient contructor form (url, options) for `newClient`
     if (typeof dbOptions === 'string') {
-      return new this.mongo.MongoClient(dbOptions, serverOptions);
+      return new this.mongo.MongoClient(
+        dbOptions,
+        this.usingUnifiedTopology()
+          ? Object.assign(
+              { useUnifiedTopology: true, serverSelectionTimeoutMS: 1000 },
+              serverOptions
+            )
+          : serverOptions
+      );
     }
 
     dbOptions = dbOptions || {};
     serverOptions = Object.assign({}, { haInterval: 100 }, serverOptions);
+    if (this.usingUnifiedTopology()) serverOptions.useUnifiedTopology = true;
 
     // Override implementation
     if (this.options.newDbInstance) {

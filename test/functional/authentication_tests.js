@@ -148,9 +148,8 @@ describe('Authentication', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
-      var client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
 
+      const client = configuration.newClient(configuration.writeConcernMax(), { poolSize: 1 });
       client.connect(function(err, client) {
         var db = client.db(configuration.db);
         var collection = db.collection(
@@ -162,7 +161,11 @@ describe('Authentication', function() {
           adminDb.addUser('admin', 'admin', configuration.writeConcernMax(), function(err) {
             test.equal(null, err);
 
-            MongoClient.connect('mongodb://admin:admin@localhost:27017/admin', function(err) {
+            const validationClient = configuration.newClient(
+              'mongodb://admin:admin@localhost:27017/admin'
+            );
+
+            validationClient.connect(function(err) {
               test.equal(null, err);
 
               adminDb.validateCollection(
@@ -195,7 +198,6 @@ describe('Authentication', function() {
     // The actual test we wish to run
     test: function(done) {
       var configuration = this.configuration;
-      var MongoClient = configuration.require.MongoClient;
       var client = configuration.newClient({ w: 1 }, { poolSize: 1 });
 
       // DOC_LINE var client = new MongoClient(new Server('localhost', 27017));
@@ -219,7 +221,7 @@ describe('Authentication', function() {
             test.ok(result != null);
             client.close();
 
-            client = new MongoClient('mongodb://admin15:admin15@localhost:27017/admin');
+            client = configuration.newClient('mongodb://admin15:admin15@localhost:27017/admin');
             client.once('authenticated', function() {
               done();
             });

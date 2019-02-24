@@ -1,7 +1,6 @@
 'use strict';
 
 const setupDatabase = require('../functional/shared').setupDatabase;
-const MongoClient = require('../../lib/mongo_client');
 
 describe('examples(project-fields-from-query):', function() {
   let client;
@@ -12,7 +11,7 @@ describe('examples(project-fields-from-query):', function() {
   });
 
   beforeEach(async function() {
-    client = await MongoClient.connect(this.configuration.url());
+    client = await this.configuration.newClient().connect();
     collection = client.db(this.configuration.db).collection('arrayFilterUpdateExample');
   });
 

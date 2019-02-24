@@ -101,9 +101,9 @@ var delay = function(timeout) {
 };
 
 module.exports = {
-  connectToDb: connectToDb,
-  setupDatabase: setupDatabase,
-  assert: assert,
-  delay: delay,
+  connectToDb,
+  setupDatabase,
+  assert,
+  delay,
   withClient
 };
