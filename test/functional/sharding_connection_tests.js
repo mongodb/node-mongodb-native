@@ -17,9 +17,12 @@ describe('Sharding (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // disable for inspection of legacy properties
+        return this.skip();
+      }
 
       const url = `${configuration.url()}?w=1&readPreference=secondaryPreferred&readPreferenceTags=sf%3A1`;
-
       const client = configuration.newClient(url, { haInterval: 500, useNewUrlParser: true });
 
       client.connect(err => {
@@ -81,6 +84,10 @@ describe('Sharding (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // disable for inspection of legacy properties
+        return this.skip();
+      }
 
       const url = `${configuration.url()}?w=1&readPreference=secondaryPreferred&readPreferenceTags=sf%3A1`;
 
@@ -123,6 +130,11 @@ describe('Sharding (Connection)', function() {
     // The actual test we wish to run
     test: function(done) {
       const configuration = this.configuration;
+      if (configuration.usingUnifiedTopology()) {
+        // disable for inspection of legacy properties
+        return this.skip();
+      }
+
       const url = `${configuration.url()}?w=1&readPreference=secondaryPreferred&readPreferenceTags=sf%3A1`;
 
       const client = configuration.newClient(url, { useNewUrlParser: true, reconnectTries: 10 });

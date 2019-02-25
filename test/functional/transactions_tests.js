@@ -96,7 +96,7 @@ class TransactionsTestContext {
   setup(config) {
     this.url = `mongodb://${config.host}:${config.port}/?replicaSet=${config.replicasetName}`;
 
-    this.sharedClient = config.newClient(this.url, { serverSelectionTimeoutMS: 10000 });
+    this.sharedClient = config.newClient(this.url);
     return this.sharedClient.connect();
   }
 
@@ -546,6 +546,7 @@ function testOperation(operation, obj, context, options) {
           const errorLabelsOmit = result.errorLabelsOmit;
 
           if (errorLabelsContain) {
+            expect(err).to.have.property('errorLabels');
             expect(err.errorLabels).to.include.members(errorLabelsContain);
           }
 
