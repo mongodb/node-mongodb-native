@@ -77,7 +77,7 @@ function command(server, ns, cmd, options, callback) {
   try {
     pool.write(message, commandOptions, commandResponseHandler);
   } catch (err) {
-    callback(commandResponseHandler);
+    commandResponseHandler(err);
   }
 }
 
