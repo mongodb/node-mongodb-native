@@ -61,10 +61,7 @@ class NativeConfiguration extends ConfigurationBase {
       return new this.mongo.MongoClient(
         dbOptions,
         this.usingUnifiedTopology()
-          ? Object.assign(
-              { useUnifiedTopology: true, serverSelectionTimeoutMS: 1000 },
-              serverOptions
-            )
+          ? Object.assign({ useUnifiedTopology: true }, serverOptions)
           : serverOptions
       );
     }
