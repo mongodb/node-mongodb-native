@@ -34,6 +34,7 @@ class TopologyDescription {
     setName,
     maxSetVersion,
     maxElectionId,
+    commonWireVersion,
     options,
     error
   ) {
@@ -55,6 +56,7 @@ class TopologyDescription {
     this.localThresholdMS = options.localThresholdMS || 0;
     this.options = options;
     this.error = error;
+    this.commonWireVersion = commonWireVersion || null;
 
     // determine server compatibility
     for (const serverDescription of this.servers.values()) {
@@ -90,19 +92,6 @@ class TopologyDescription {
   }
 
   /**
-   * @returns The minimum reported wire version of all known servers
-   */
-  get commonWireVersion() {
-    return Array.from(this.servers.values())
-      .filter(server => server.type !== ServerType.Unknown)
-      .reduce(
-        (min, server) =>
-          min == null ? server.maxWireVersion : Math.min(min, server.maxWireVersion),
-        null
-      );
-  }
-
-  /**
    * Returns a copy of this description updated with a given ServerDescription
    *
    * @param {ServerDescription} serverDescription
@@ -117,10 +106,20 @@ class TopologyDescription {
     let setName = this.setName;
     let maxSetVersion = this.maxSetVersion;
     let maxElectionId = this.maxElectionId;
+    let commonWireVersion = this.commonWireVersion;
     let error = serverDescription.error || null;
 
     const serverType = serverDescription.type;
     let serverDescriptions = new Map(this.servers);
+
+    // update common wire version
+    if (serverDescription.maxWireVersion !== 0) {
+      if (commonWireVersion == null) {
+        commonWireVersion = serverDescription.maxWireVersion;
+      } else {
+        commonWireVersion = Math.min(commonWireVersion, serverDescription.maxWireVersion);
+      }
+    }
 
     // update the actual server description
     serverDescriptions.set(address, serverDescription);
@@ -133,6 +132,7 @@ class TopologyDescription {
         setName,
         maxSetVersion,
         maxElectionId,
+        commonWireVersion,
         this.options,
         error
       );
@@ -214,6 +214,7 @@ class TopologyDescription {
       setName,
       maxSetVersion,
       maxElectionId,
+      commonWireVersion,
       this.options,
       error
     );
