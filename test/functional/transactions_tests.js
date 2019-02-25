@@ -96,7 +96,7 @@ class TransactionsTestContext {
   setup(config) {
     this.url = `mongodb://${config.host}:${config.port}/?replicaSet=${config.replicasetName}`;
 
-    this.sharedClient = config.newClient(this.url);
+    this.sharedClient = config.newClient(this.url, { serverSelectionTimeoutMS: 10000 });
     return this.sharedClient.connect();
   }
 
@@ -241,6 +241,17 @@ function disableFailPoint(failPoint, testContext) {
   });
 }
 
+function parseSessionOptions(options) {
+  const result = Object.assign({}, options);
+  if (result.defaultTransactionOptions && result.defaultTransactionOptions.readPreference) {
+    result.defaultTransactionOptions.readPreference = normalizeReadPreference(
+      result.defaultTransactionOptions.readPreference.mode
+    );
+  }
+
+  return result;
+}
+
 let displayCommands = false;
 function runTestSuiteTest(configuration, testData, context) {
   const commandEvents = [];
@@ -271,10 +282,10 @@ function runTestSuiteTest(configuration, testData, context) {
     testData.sessionOptions = testData.sessionOptions || {};
     const database = client.db(context.dbName);
     const session0 = client.startSession(
-      Object.assign({}, sessionOptions, testData.sessionOptions.session0)
+      Object.assign({}, sessionOptions, parseSessionOptions(testData.sessionOptions.session0))
     );
     const session1 = client.startSession(
-      Object.assign({}, sessionOptions, testData.sessionOptions.session1)
+      Object.assign({}, sessionOptions, parseSessionOptions(testData.sessionOptions.session1))
     );
 
     // enable to see useful APM debug information at the time of actual test run
@@ -428,6 +439,10 @@ function translateOperationName(operationName) {
   return operationName;
 }
 
+function normalizeReadPreference(mode) {
+  return mode.charAt(0).toLowerCase() + mode.substr(1);
+}
+
 /**
  *
  * @param {Object} operation the operation definition from the spec test
@@ -472,14 +487,14 @@ function testOperation(operation, obj, context, options) {
       if (key === 'options') {
         Object.assign(opOptions, operation.arguments[key]);
         if (opOptions.readPreference) {
-          opOptions.readPreference = opOptions.readPreference.mode.toLowerCase();
+          opOptions.readPreference = normalizeReadPreference(opOptions.readPreference.mode);
         }
 
         return;
       }
 
       if (key === 'readPreference') {
-        opOptions[key] = operation.arguments[key].mode.toLowerCase();
+        opOptions[key] = normalizeReadPreference(operation.arguments[key].mode);
         return;
       }
 
@@ -567,7 +582,7 @@ function convertCollectionOptions(options) {
   const result = {};
   Object.keys(options).forEach(key => {
     if (key === 'readPreference') {
-      result[key] = options[key].mode.toLowerCase();
+      result[key] = normalizeReadPreference(options[key].mode);
     } else {
       result[key] = options[key];
     }
