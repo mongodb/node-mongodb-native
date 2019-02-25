@@ -23,6 +23,7 @@ function command(server, ns, cmd, options, callback) {
   const pool = server.s.pool;
   const readPreference = getReadPreference(cmd, options);
   const shouldUseOpMsg = supportsOpMsg(server);
+  const session = options.session;
 
   let finalCmd = Object.assign({}, cmd);
   if (
@@ -37,7 +38,7 @@ function command(server, ns, cmd, options, callback) {
     };
   }
 
-  const err = decorateWithSessionsData(finalCmd, options.session, options);
+  const err = decorateWithSessionsData(finalCmd, session, options);
   if (err) {
     return callback(err);
   }
@@ -60,19 +61,16 @@ function command(server, ns, cmd, options, callback) {
     ? new Msg(bson, cmdNs, finalCmd, commandOptions)
     : new Query(bson, cmdNs, finalCmd, commandOptions);
 
-  const commandResponseHandler = function(err) {
-    if (
-      options.session &&
-      options.session.transaction &&
-      err &&
-      err instanceof MongoError &&
-      err.hasErrorLabel('TransientTransactionError')
-    ) {
-      options.session.transaction.unpinServer();
-    }
+  const inTransaction = session && (session.inTransaction() || isTransactionCommand(finalCmd));
+  const commandResponseHandler = inTransaction
+    ? function(err) {
+        if (err && err instanceof MongoError && err.hasErrorLabel('TransientTransactionError')) {
+          session.transaction.unpinServer();
+        }
 
-    return callback.apply(null, arguments);
-  };
+        return callback.apply(null, arguments);
+      }
+    : callback;
 
   try {
     pool.write(message, commandOptions, commandResponseHandler);
