@@ -1,6 +1,7 @@
 'use strict';
 const EventEmitter = require('events');
 const ServerDescription = require('./server_description').ServerDescription;
+const ServerType = require('./server_description').ServerType;
 const TopologyDescription = require('./topology_description').TopologyDescription;
 const TopologyType = require('./topology_description').TopologyType;
 const monitoring = require('./monitoring');
@@ -19,7 +20,6 @@ const createCompressionInfo = require('../topologies/shared').createCompressionI
 const isRetryableError = require('../error').isRetryableError;
 const MongoParseError = require('../error').MongoParseError;
 const ClientSession = require('../sessions').ClientSession;
-const ServerType = require('./server_description').ServerType;
 const createClientInfo = require('../topologies/shared').createClientInfo;
 const MongoError = require('../error').MongoError;
 const resolveClusterTime = require('../topologies/shared').resolveClusterTime;
@@ -122,6 +122,7 @@ class Topology extends EventEmitter {
         options.replicaSet,
         null,
         null,
+        null,
         options
       ),
       serverSelectionTimeoutMS: options.serverSelectionTimeoutMS,
@@ -201,7 +202,10 @@ class Topology extends EventEmitter {
 
     // otherwise, wait for a server to properly connect based on user provided read preference,
     // or primary.
-    const readPreference = resolveReadPreference(options);
+
+    translateReadPreference(options);
+    const readPreference = options.readPreference || ReadPreference.primary;
+
     this.selectServer(readPreferenceServerSelector(readPreference), (err, server) => {
       if (err) {
         if (typeof callback === 'function') {
@@ -486,9 +490,8 @@ class Topology extends EventEmitter {
       (callback = options), (options = {}), (options = options || {});
     }
 
-    // TODO: type resolution should happen elsewhere
-    const readPreference = resolveReadPreference(options);
-    options = Object.assign(options, { readPreference });
+    translateReadPreference(options);
+    const readPreference = options.readPreference || ReadPreference.primary;
 
     this.selectServer(readPreferenceServerSelector(readPreference), (err, server) => {
       if (err) {
@@ -548,6 +551,7 @@ class Topology extends EventEmitter {
     options = options || {};
     const topology = options.topology || this;
     const CursorClass = options.cursorFactory || this.s.Cursor;
+    translateReadPreference(options);
 
     return new CursorClass(this.s.bson, ns, cmd, options, topology, this.s.options);
   }
@@ -577,7 +581,10 @@ class Topology extends EventEmitter {
   lastIsMaster() {
     const serverDescriptions = Array.from(this.description.servers.values());
     if (serverDescriptions.length === 0) return {};
-    return serverDescriptions.filter(sd => sd.type !== ServerType.Unknown)[0] || {};
+
+    const sd = serverDescriptions.filter(sd => sd.type !== ServerType.Unknown)[0];
+    const result = sd || { maxWireVersion: this.description.commonWireVersion };
+    return result;
   }
 
   get logicalSessionTimeoutMinutes() {
@@ -911,17 +918,26 @@ function resetServerState(server, error, options) {
   resetState();
 }
 
-function resolveReadPreference(options) {
-  let readPreference = options.readPreference || new ReadPreference('primary');
-  if (typeof readPreference === 'string') {
-    readPreference = new ReadPreference(readPreference);
+function translateReadPreference(options) {
+  if (options.readPreference == null) {
+    return;
   }
 
-  if (!(readPreference instanceof ReadPreference)) {
-    throw new MongoError('read preference must be a ReadPreference instance');
+  let r = options.readPreference;
+  if (typeof r === 'string') {
+    options.readPreference = new ReadPreference(r);
+  } else if (r && !(r instanceof ReadPreference) && typeof r === 'object') {
+    const mode = r.mode || r.preference;
+    if (mode && typeof mode === 'string') {
+      options.readPreference = new ReadPreference(mode, r.tags, {
+        maxStalenessSeconds: r.maxStalenessSeconds
+      });
+    }
+  } else if (!(r instanceof ReadPreference)) {
+    throw new TypeError('Invalid read preference: ' + r);
   }
 
-  return readPreference;
+  return options;
 }
 
 /**

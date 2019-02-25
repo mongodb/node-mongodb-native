@@ -375,7 +375,6 @@ function connectEventHandler(server) {
 function errorEventHandler(server) {
   return function(err) {
     if (err) {
-      server.s.state = STATE_DISCONNECTED;
       server.emit('error', new MongoNetworkError(err));
     }
 

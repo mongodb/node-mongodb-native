@@ -194,10 +194,6 @@ function monitorServer(server, options) {
     // an ismaster call fails we reset the server's pool. If a server was once connected,
     // change its type to `Unknown` only after retrying once.
     server.s.pool.reset(() => {
-      if (server.description.type === ServerType.Unknown) {
-        return;
-      }
-
       // otherwise re-attempt monitoring once
       checkServer((error, isMaster) => {
         if (error) {
