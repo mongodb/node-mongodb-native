@@ -1,7 +1,6 @@
 'use strict';
 
 const ServerDescription = require('./server_description').ServerDescription;
-const ServerType = require('./server_description').ServerType;
 const calculateDurationInMs = require('../utils').calculateDurationInMs;
 
 /**
