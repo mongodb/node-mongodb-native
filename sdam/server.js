@@ -60,7 +60,7 @@ class Server extends EventEmitter {
    * @param {ServerDescription} description
    * @param {Object} options
    */
-  constructor(description, options) {
+  constructor(description, options, topology) {
     super();
 
     this.s = {
@@ -82,7 +82,8 @@ class Server extends EventEmitter {
       pool: null,
       // the server state
       state: STATE_DISCONNECTED,
-      credentials: options.credentials
+      credentials: options.credentials,
+      topology
     };
   }
 
@@ -281,6 +282,15 @@ class Server extends EventEmitter {
     executeWriteOperation({ server: this, op: 'remove', ns, ops }, options, callback);
   }
 }
+
+Object.defineProperty(Server.prototype, 'clusterTime', {
+  get: function() {
+    return this.s.topology.clusterTime;
+  },
+  set: function(clusterTime) {
+    this.s.topology.clusterTime = clusterTime;
+  }
+});
 
 function basicWriteValidations(server) {
   if (!server.s.pool) {

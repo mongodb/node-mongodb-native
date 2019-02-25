@@ -37,7 +37,8 @@ const ISMASTER_FIELDS = [
   'primary',
   'logicalSessionTimeoutMinutes',
   'saslSupportedMechs',
-  '__nodejs_mock_server__'
+  '__nodejs_mock_server__',
+  '$clusterTime'
 ];
 
 /**

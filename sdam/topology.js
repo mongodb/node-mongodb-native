@@ -22,6 +22,7 @@ const ClientSession = require('../sessions').ClientSession;
 const ServerType = require('./server_description').ServerType;
 const createClientInfo = require('../topologies/shared').createClientInfo;
 const MongoError = require('../error').MongoError;
+const resolveClusterTime = require('../topologies/shared').resolveClusterTime;
 
 // Global state
 let globalTopologyCounter = 0;
@@ -31,7 +32,7 @@ const TOPOLOGY_DEFAULTS = {
   localThresholdMS: 15,
   serverSelectionTimeoutMS: 10000,
   heartbeatFrequencyMS: 30000,
-  minHeartbeatIntervalMS: 500
+  minHeartbeatFrequencyMS: 500
 };
 
 // events that we relay to the `Topology`
@@ -138,7 +139,8 @@ class Topology extends EventEmitter {
       sessions: [],
       // Promise library
       promiseLibrary: options.promiseLibrary || Promise,
-      credentials: options.credentialss
+      credentials: options.credentials,
+      clusterTime: null
     };
 
     // amend options for server instance creation
@@ -382,6 +384,17 @@ class Topology extends EventEmitter {
     // update server list from updated descriptions
     updateServers(this, serverDescription);
 
+    // Driver Sessions Spec: "Whenever a driver receives a cluster time from
+    // a server it MUST compare it to the current highest seen cluster time
+    // for the deployment. If the new cluster time is higher than the
+    // highest seen cluster time it MUST become the new highest seen cluster
+    // time. Two cluster times are compared using only the BsonTimestamp
+    // value of the clusterTime embedded field."
+    const clusterTime = serverDescription.$clusterTime;
+    if (clusterTime) {
+      resolveClusterTime(this, clusterTime);
+    }
+
     this.emit(
       'topologyDescriptionChanged',
       new monitoring.TopologyDescriptionChangedEvent(
@@ -576,6 +589,16 @@ class Topology extends EventEmitter {
   }
 }
 
+Object.defineProperty(Topology.prototype, 'clusterTime', {
+  enumerable: true,
+  get: function() {
+    return this.s.clusterTime;
+  },
+  set: function(clusterTime) {
+    this.s.clusterTime = clusterTime;
+  }
+});
+
 // legacy aliases
 Topology.prototype.destroy = deprecate(
   Topology.prototype.close,
@@ -690,10 +713,13 @@ function selectServers(topology, selector, timeout, start, callback) {
   }
 
   const retrySelection = () => {
-    // ensure all server monitors attempt monitoring immediately
-    topology.s.servers.forEach(server =>
-      server.monitor({ heartbeatFrequencyMS: topology.description.heartbeatFrequencyMS })
-    );
+    // ensure all server monitors attempt monitoring soon
+    topology.s.servers.forEach(server => {
+      setTimeout(
+        () => server.monitor({ heartbeatFrequencyMS: topology.description.heartbeatFrequencyMS }),
+        TOPOLOGY_DEFAULTS.minHeartbeatFrequencyMS
+      );
+    });
 
     const descriptionChangedHandler = () => {
       // successful iteration, clear the check timer
@@ -725,7 +751,7 @@ function createAndConnectServer(topology, serverDescription) {
     new monitoring.ServerOpeningEvent(topology.s.id, serverDescription.address)
   );
 
-  const server = new Server(serverDescription, topology.s.options);
+  const server = new Server(serverDescription, topology.s.options, topology);
   relayEvents(server, topology, SERVER_RELAY_EVENTS);
 
   server.once('connect', serverConnectEventHandler(server, topology));
@@ -751,11 +777,11 @@ function connectServers(topology, serverDescriptions) {
   }, new Map());
 }
 
-function updateServers(topology, currentServerDescription) {
+function updateServers(topology, incomingServerDescription) {
   // update the internal server's description
-  if (topology.s.servers.has(currentServerDescription.address)) {
-    const server = topology.s.servers.get(currentServerDescription.address);
-    server.s.description = currentServerDescription;
+  if (topology.s.servers.has(incomingServerDescription.address)) {
+    const server = topology.s.servers.get(incomingServerDescription.address);
+    server.s.description = incomingServerDescription;
   }
 
   // add new servers for all descriptions we currently don't know about locally

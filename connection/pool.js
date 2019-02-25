@@ -31,6 +31,10 @@ var _id = 0;
 
 function hasSessionSupport(topology) {
   if (topology == null) return false;
+  if (topology.description) {
+    return topology.description.maxWireVersion >= 6;
+  }
+
   return topology.ismaster == null ? false : topology.ismaster.maxWireVersion >= 6;
 }
 
