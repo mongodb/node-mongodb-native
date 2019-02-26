@@ -308,8 +308,6 @@ function runTestSuiteTest(configuration, testData, context) {
   clientOptions.autoReconnect = false;
   clientOptions.haInterval = 100;
 
-  clientOptions.minSize = 5;
-
   const client = context.newClient(configuration, clientOptions);
   return client.connect().then(client => {
     context.testClient = client;
