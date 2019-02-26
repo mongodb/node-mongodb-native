@@ -474,6 +474,9 @@ function endTransaction(session, commandName, callback) {
     if (err && isRetryableError(err)) {
       // SPEC-1185: apply majority write concern when retrying commitTransaction
       if (command.commitTransaction) {
+        // Per Mongos Pinning, must unpin session
+        session.transaction.unpinServer();
+  
         command.writeConcern = Object.assign({ wtimeout: 10000 }, command.writeConcern, {
           w: 'majority'
         });

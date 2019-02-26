@@ -469,7 +469,11 @@ function pickProxy(self, session) {
   const transaction = session && session.transaction;
 
   if (transaction && transaction.server) {
-    return transaction.server;
+    if (transaction.server.isConnected()) {
+      return transaction.server;
+    } else {
+      transaction.unpinServer();
+    }
   }
 
   // Get the currently connected Proxies
@@ -507,7 +511,7 @@ function pickProxy(self, session) {
     self.index = (self.index + 1) % connectedProxies.length;
   }
 
-  if (transaction && transaction.isActive) {
+  if (transaction && transaction.isActive && proxy && proxy.isConnected()) {
     transaction.pinServer(proxy);
   }
 
@@ -878,7 +882,7 @@ function executeWriteOperation(args, options, callback) {
 
   const handler = (err, result) => {
     if (!err) return callback(null, result);
-    if (!isRetryableError(err)) {
+    if (!isRetryableError(err) || !willRetryWrite) {
       return callback(err);
     }
 
@@ -886,7 +890,7 @@ function executeWriteOperation(args, options, callback) {
     server = pickProxy(self, options.session);
 
     // No server found error out with original error
-    if (!server || !willRetryWrite) {
+    if (!server) {
       return callback(err);
     }
 

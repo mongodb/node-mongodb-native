@@ -64,7 +64,12 @@ function command(server, ns, cmd, options, callback) {
   const inTransaction = session && (session.inTransaction() || isTransactionCommand(finalCmd));
   const commandResponseHandler = inTransaction
     ? function(err) {
-        if (err && err instanceof MongoError && err.hasErrorLabel('TransientTransactionError')) {
+        if (
+          !cmd.commitTransaction &&
+          err &&
+          err instanceof MongoError &&
+          err.hasErrorLabel('TransientTransactionError')
+        ) {
           session.transaction.unpinServer();
         }
 
